@@ -1,4 +1,4 @@
-# according to version 2.4.4 (pylint --list-msgs)
+# according to version 2.5.3 (pylint --list-msgs)
 checks_by_id = {
     "C0102": {
         "msg_id": "C0102",
@@ -452,7 +452,7 @@ checks_by_id = {
         "msg_id": "E0116",
         "msg_sym": "continue-in-finally",
         "msg_text": "'continue' not supported inside 'finally' clause",
-        "msg_xpln": "Emitted when the `continue` keyword is found inside a finally clause, which is a SyntaxError.",
+        "msg_xpln": "Emitted when the `continue` keyword is found inside a finally clause, which is a SyntaxError. This message can't be emitted when using Python >= 3.8.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -591,6 +591,76 @@ checks_by_id = {
         "msg_xpln": "Used when a __len__ method returns something which is not a non-negative integer",
         "tho_xpln": "",
         "usage": "warning",
+    },
+    "E0304": {
+        "msg_id": "E0304",
+        "msg_sym": "invalid-bool-returned",
+        "msg_text": "__bool__ does not return bool",
+        "msg_xpln": "Used when a __bool__ method returns something which is not a bool",
+        "usage": "warning",
+    },
+    "E0305": {
+        "msg_id": "E0305",
+        "msg_sym": "invalid-index-returned",
+        "msg_text": "__index__ does not return int",
+        "msg_xpln": "Used when an __index__ method returns something which is not an integer",
+        "usage": "warning",
+    },
+    "E0306": {
+        "msg_id": "E0306",
+        "msg_sym": "invalid-repr-returned",
+        "msg_text": "__repr__ does not return str",
+        "msg_xpln": "Used when a __repr__ method returns something which is not a string",
+        "usage": "advanced",
+    },
+    "E0307": {
+        "msg_id": "E0307",
+        "msg_sym": "invalid-str-returned",
+        "msg_text": "__str__ does not return str",
+        "msg_xpln": "Used when a __str__ method returns something which is not a string",
+        "usage": "advanced",
+    },
+    "E0308": {
+        "msg_id": "E0308",
+        "msg_sym": "invalid-bytes-returned",
+        "msg_text": "__bytes__ does not return bytes",
+        "msg_xpln": "Used when a __bytes__ method returns something which is not bytes",
+        "usage": "advanced",
+    },
+    "E0309": {
+        "msg_id": "E0309",
+        "msg_sym": "invalid-hash-returned",
+        "msg_text": "__hash__ does not return int",
+        "msg_xpln": "Used when a __hash__ method returns something which is not an integer",
+        "usage": "advanced",
+    },
+    "E0310": {
+        "msg_id": "E0310",
+        "msg_sym": "invalid-length-hint-returned",
+        "msg_text": "__length_hint__ does not return non-negative integer",
+        "msg_xpln": "Used when a __length_hint__ method returns something which is not a non- negative integer",
+        "usage": "advanced",
+    },
+    "E0311": {
+        "msg_id": "E0311",
+        "msg_sym": "invalid-format-returned",
+        "msg_text": "__format__ does not return str",
+        "msg_xpln": "Used when a __format__ method returns something which is not a string",
+        "usage": "advanced",
+    },
+    "E0312": {
+        "msg_id": "E0312",
+        "msg_sym": "invalid-getnewargs-returned",
+        "msg_text": "__getnewargs__ does not return a tuple",
+        "msg_xpln": "Used when a __getnewargs__ method returns something which is not a tuple",
+        "usage": "advanced",
+    },
+    "E0313": {
+        "msg_id": "E0313",
+        "msg_sym": "invalid-getnewargs-ex-returned",
+        "msg_text": "__getnewargs_ex__ does not return a tuple containing (tuple, dict)",
+        "msg_xpln": "Used when a __getnewargs_ex__ method returns something which is not of the form tuple(tuple, dict)",
+        "usage": "advanced",
     },
     "E0401": {
         "msg_id": "E0401",
@@ -1013,6 +1083,7 @@ checks_by_id = {
         "msg_sym": "bad-string-format-type",
         "msg_text": "Argument %r does not match format type %r",
         "msg_xpln": "Used when a type required by format string is not suitable for actual argument type",
+        "usage": "warning",
     },
     "E1310": {
         "msg_id": "E1310",
@@ -1659,18 +1730,28 @@ checks_by_id = {
         "msg_sym": "missing-parentheses-for-call-in-test",
         "msg_text": "Using a conditional statement with potentially wrong function or method call due to missing parentheses",
         "msg_xpln": "Emitted when a conditional statement (If or ternary if) seems to wrongly call a function due to missing parentheses",
+        "usage": "warning",
     },
     "W0127": {
         "msg_id": "W0127",
         "msg_sym": "self-assigning-variable",
         "msg_text": "Assigning the same variable %r to itself",
         "msg_xpln": "Emitted when we detect that a variable is assigned to itself",
+        "usage": "warning",
     },
     "W0128": {
         "msg_id": "W0128",
         "msg_sym": "redeclared-assigned-name",
         "msg_text": "Redeclared variable %r in assignment",
         "msg_xpln": "Emitted when we detect that a variable was redeclared in the same assignment.",
+        "usage": "warning",
+    },
+    "W0129": {
+        "msg_id": "W0129",
+        "msg_sym": "assert-on-string-literal",
+        "msg_text": "Assert statement has a string literal as its first argument. The assert will %s fail.",
+        "msg_xpln": "Used when an assert statement has a string literal as its first argument, which will cause the assert to always pass.",
+        "usage": "warning",
     },
     "W0143": {
         "msg_id": "W0143",
@@ -1780,7 +1861,7 @@ checks_by_id = {
         "msg_id": "W0236",
         "msg_sym": "invalid-overridden-method",
         "msg_text": "Method %r was expected to be %r, found it instead as %r",
-        "msg_xpln": "Used when we detect that a method was overridden as a property or the other way around, which could result in potential bugs at runtime.",
+        "msg_xpln": "Used when we detect that a method was overridden in a way that does not match its base class which could result in potential bugs at runtime.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -2045,6 +2126,7 @@ checks_by_id = {
         "msg_sym": "wrong-exception-operation",
         "msg_text": "Invalid exception operation. %s",
         "msg_xpln": "Used when an operation is done against an exception, but the operation is not valid for the exception in question. Usually emitted when having binary operations between exceptions in except handlers.",
+        "usage": "advanced",
     },
     "W1113": {
         "msg_id": "W1113",
@@ -2062,27 +2144,41 @@ checks_by_id = {
         "tho_xpln": "",
         "usage": "warning",
     },
+    "W1115": {
+        "msg_id": "W1115",
+        "msg_sym": "non-str-assignment-to-dunder-name",
+        "msg_text": "Non-string value assigned to __name__",
+        "msg_xpln": "Emitted when a non-string vaue is assigned to __name__",
+        "usage": "advanced",
+    },
+    "W1116": {
+        "msg_id": "W1116",
+        "msg_sym": "isinstance-second-argument-not-valid-type",
+        "msg_text": "Second argument of isinstance is not a type",
+        "msg_xpln": "Emitted when the second argument of an isinstance call is not a type.",
+        "usage": "warning",
+    },
     "W1201": {
         "msg_id": "W1201",
         "msg_sym": "logging-not-lazy",
-        "msg_text": "Specify string format arguments as logging function parameters",
-        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(format_string % (format_args...))". Such calls should leave string interpolation to the logging method itself and be written "logging.<logging method>(format_string, format_args...)" so that the program may avoid incurring the cost of the interpolation in those cases in which no message will be logged. For more, see http://www.python.org/dev/peps/pep-0282/.',
+        "msg_text": "Use %s formatting in logging functions",
+        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(format_string % (format_args...))". Use another type of string formatting instead. You can use % formatting but leave interpolation to the logging function by passing the parameters as arguments. If logging-fstring- interpolation is disabled then you can use fstring formatting. If logging- format-interpolation is disabled then you can use str.format.',
         "tho_xpln": "",
         "usage": "enhancement",
     },
     "W1202": {
         "msg_id": "W1202",
         "msg_sym": "logging-format-interpolation",
-        "msg_text": "Use %s formatting in logging functions%s",
-        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(<string formatting>)". with invalid string formatting. Use another way for format the string instead.',
+        "msg_text": "Use %s formatting in logging functions",
+        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(format_string.format(format_args...))". Use another type of string formatting instead. You can use % formatting but leave interpolation to the logging function by passing the parameters as arguments. If logging-fstring- interpolation is disabled then you can use fstring formatting. If logging- not-lazy is disabled then you can use % formatting as normal.',
         "tho_xpln": "",
         "usage": "enhancement",
     },
     "W1203": {
         "msg_id": "W1203",
         "msg_sym": "logging-fstring-interpolation",
-        "msg_text": "Use % formatting in logging functions and pass the % parameters as arguments",
-        "msg_xpln": 'Used when a logging statement has a call form of "logging.method(f"..."))". Such calls should use % formatting instead, but leave interpolation to the logging function by passing the parameters as arguments.',
+        "msg_text": "Use %s formatting in logging functions",
+        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(f"...")".Use another type of string formatting instead. You can use % formatting but leave interpolation to the logging function by passing the parameters as arguments. If logging-format-interpolation is disabled then you can use str.format. If logging-not-lazy is disabled then you can use % formatting as normal.',
         "tho_xpln": "",
         "usage": "style",
     },
@@ -2158,6 +2254,13 @@ checks_by_id = {
         "tho_xpln": "",
         "usage": "warning",
     },
+    "W1309": {
+        "msg_id": "W1309",
+        "msg_sym": "f-string-without-interpolation",
+        "msg_text": "Using an f-string that does not have any interpolated variables",
+        "msg_xpln": "Used when we detect an f-string that does not use any interpolation variables, in which case it can be either a normal string or a bug in the code.",
+        "usage": "warning",
+    },
     "W1401": {
         "msg_id": "W1401",
         "msg_sym": "anomalous-backslash-in-string",
@@ -2181,6 +2284,20 @@ checks_by_id = {
         "msg_xpln": "String literals are implicitly concatenated in a literal iterable definition : maybe a comma is missing ?",
         "tho_xpln": "",
         "usage": "warning",
+    },
+    "W1404": {
+        "msg_id": "W1404",
+        "msg_sym": "implicit-str-concat",
+        "msg_text": "Implicit string concatenation found in %s",
+        "msg_xpln": "String literals are implicitly concatenated in a literal iterable definition : maybe a comma is missing ?",
+        "usage": "warning",
+    },
+    "W1405": {
+        "msg_id": "W1405",
+        "msg_sym": "inconsistent-quotes",
+        "msg_text": "Quote delimiter %s is inconsistent with the rest of the file",
+        "msg_xpln": "Quote delimiters are not used consistently throughout a module (with allowances made for avoiding unnecessary escaping).",
+        "usage": "style",
     },
     "W1501": {
         "msg_id": "W1501",
@@ -2242,7 +2359,7 @@ checks_by_id = {
         "msg_id": "W1510",
         "msg_sym": "subprocess-run-check",
         "msg_text": "Using subprocess.run without explicitly set `check` is not recommended.",
-        "msg_xpln": "The check parameter should always be used with explicitly set `check` keyword to make clear what the error-handling behavior is.https://docs.python.org/3/library/subprocess.html#subprocess.runs",
+        "msg_xpln": "The check parameter should always be used with explicitly set `check` keyword to make clear what the error-handling behavior is.https://docs.python.org/3/library/subprocess.html#subprocess.run",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -2418,7 +2535,7 @@ checks_by_id = {
         "msg_id": "W1622",
         "msg_sym": "next-method-called",
         "msg_text": "Called a next() method on an object",
-        "msg_xpln": "Used when an object's next() method is called (Python 3 uses the next() built- in function)",
+        "msg_xpln": "Used when an object's next() method is called (Python 3 uses the next() built-in function)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2738,8 +2855,10 @@ checks_by_id = {
 
 
 if __name__ == "__main__":
-    # for updating messages dictionary
+    # for updating messages
     import subprocess
+
+    print(subprocess.check_output(["pylint", "--version"], universal_newlines=True))
 
     lines = (
         subprocess.check_output(["pylint", "--list-msgs"], universal_newlines=True)
@@ -2775,6 +2894,7 @@ if __name__ == "__main__":
                 "msg_sym": msg_sym,
                 "msg_text": msg_text,
                 "msg_xpln": msg_xpln,
+                "usage": "new",
             }
             print("New:", (msg_id, msg_sym, msg_text, msg_xpln))
         else:
