@@ -44,7 +44,7 @@ checks_by_id = {
         "msg_id": "C0114",
         "msg_sym": "missing-module-docstring",
         "msg_text": "Missing module docstring",
-        "msg_xpln": "Used when a module has no docstring. Empty modules do not require a docstring.",
+        "msg_xpln": "Used when a module has no docstring.Empty modules do not require a docstring.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -52,7 +52,7 @@ checks_by_id = {
         "msg_id": "C0115",
         "msg_sym": "missing-class-docstring",
         "msg_text": "Missing class docstring",
-        "msg_xpln": "Used when a class has no docstring. Even an empty class must have a docstring.",
+        "msg_xpln": "Used when a class has no docstring.Even an empty class must have a docstring.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -60,7 +60,7 @@ checks_by_id = {
         "msg_id": "C0116",
         "msg_sym": "missing-function-docstring",
         "msg_text": "Missing function or method docstring",
-        "msg_xpln": "Used when a function or method has no docstring. Some special methods like __init__ do not require a docstring.",
+        "msg_xpln": "Used when a function or method has no docstring.Some special methods like __init__ do not require a docstring.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -300,7 +300,7 @@ checks_by_id = {
         "msg_id": "C0415",
         "msg_sym": "import-outside-toplevel",
         "msg_text": "Import outside toplevel (%s)",
-        "msg_xpln": "Used when an import statement is used anywhere other than the module toplevel.Move this import to the top of the file.",
+        "msg_xpln": "Used when an import statement is used anywhere other than the module toplevel. Move this import to the top of the file.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -308,7 +308,7 @@ checks_by_id = {
         "msg_id": "C1801",
         "msg_sym": "len-as-condition",
         "msg_text": "Do not use `len(SEQUENCE)` without comparison to determine if a sequence is empty",
-        "msg_xpln": "Used when Pylint detects that len(sequence) is being used without explicitcomparison inside a condition to determine if a sequence is empty. Instead ofcoercing the length to a boolean, either rely on the fact that empty sequencesare false or compare the length against a scalar.",
+        "msg_xpln": "Used when Pylint detects that len(sequence) is being used without explicit comparison inside a condition to determine if a sequence is empty. Instead of coercing the length to a boolean, either rely on the fact that empty sequences are false or compare the length against a scalar.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -747,7 +747,7 @@ checks_by_id = {
     "E1111": {
         "msg_id": "E1111",
         "msg_sym": "assignment-from-no-return",
-        "msg_text": "Assigning to function call which doesn't return",
+        "msg_text": "Assigning result of a function call, where the function has no return",
         "msg_xpln": "Used when an assignment is done on a function call but the inferred function doesn't return anything.",
         "tho_xpln": "",
         "usage": "warning",
@@ -811,7 +811,7 @@ checks_by_id = {
     "E1128": {
         "msg_id": "E1128",
         "msg_sym": "assignment-from-none",
-        "msg_text": "Assigning to function call which only returns None",
+        "msg_text": "Assigning result of a function call, where the function returns None",
         "msg_xpln": "Used when an assignment is done on a function call but the inferred function returns nothing but None.",
         "tho_xpln": "",
         "usage": "typing",
@@ -876,7 +876,7 @@ checks_by_id = {
         "msg_id": "E1136",
         "msg_sym": "unsubscriptable-object",
         "msg_text": "Value '%s' is unsubscriptable",
-        "msg_xpln": "Emitted when a subscripted value doesn't support subscription (i.e. doesn't define __getitem__ method).",
+        "msg_xpln": "Emitted when a subscripted value doesn't support subscription (i.e. doesn't define __getitem__ method or __class_getitem__ for a class).",
         "tho_xpln": "",
         "usage": "typing",
     },
@@ -1008,6 +1008,12 @@ checks_by_id = {
         "tho_xpln": "",
         "usage": "warning",
     },
+    "E1307": {
+        "msg_id": "E1307",
+        "msg_sym": "bad-string-format-type",
+        "msg_text": "Argument %r does not match format type %r",
+        "msg_xpln": "Used when a type required by format string is not suitable for actual argument type",
+    },
     "E1310": {
         "msg_id": "E1310",
         "msg_sym": "bad-str-strip-call",
@@ -1036,7 +1042,7 @@ checks_by_id = {
         "msg_id": "E1602",
         "msg_sym": "parameter-unpacking",
         "msg_text": "Parameter unpacking specified",
-        "msg_xpln": "Used when parameter unpacking is specified for a function (Python 3 doesn't allow it)",
+        "msg_xpln": "Used when parameter unpacking is specified for a function(Python 3 doesn't allow it)",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -1068,7 +1074,7 @@ checks_by_id = {
         "msg_id": "E1700",
         "msg_sym": "yield-inside-async-function",
         "msg_text": "Yield inside async function",
-        "msg_xpln": "Used when an `yield` or `yield from` statement is found inside an async function.",
+        "msg_xpln": "Used when an `yield` or `yield from` statement is found inside an async function. This message can't be emitted when using Python < 3.5.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1076,7 +1082,7 @@ checks_by_id = {
         "msg_id": "E1701",
         "msg_sym": "not-async-context-manager",
         "msg_text": "Async context manager '%s' doesn't implement __aenter__ and __aexit__.",
-        "msg_xpln": "Used when an async context manager is used with an object that does not implement the async context management protocol.",
+        "msg_xpln": "Used when an async context manager is used with an object that does not implement the async context management protocol. This message can't be emitted when using Python < 3.5.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1172,7 +1178,7 @@ checks_by_id = {
         "msg_id": "I0022",
         "msg_sym": "deprecated-pragma",
         "msg_text": 'Pragma "%s" is deprecated, use "%s" instead',
-        "msg_xpln": "Some inline pylint options have been renamed or reworked, only the most recent form should be used.",
+        "msg_xpln": "Some inline pylint options have been renamed or reworked, only the most recent form should be used. NOTE:skip-all is only available with pylint >= 0.26",
         "tho_xpln": "",
         "usage": "style",
     },
@@ -1484,7 +1490,7 @@ checks_by_id = {
         "msg_id": "R1718",
         "msg_sym": "consider-using-set-comprehension",
         "msg_text": "Consider using a set comprehension",
-        "msg_xpln": "Although there is nothing syntactically wrong with this code, it is hard to read and can be simplified to a set comprehension. Also it is faster since you don't need to create another transient list",
+        "msg_xpln": "Although there is nothing syntactically wrong with this code, it is hard to read and can be simplified to a set comprehension.Also it is faster since you don't need to create another transient list",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1492,7 +1498,7 @@ checks_by_id = {
         "msg_id": "R1719",
         "msg_sym": "simplifiable-if-expression",
         "msg_text": "The if expression can be replaced with %s",
-        "msg_xpln": "Used when an if expression can be replaced with 'bool(test)'",
+        "msg_xpln": "Used when an if expression can be replaced with 'bool(test)'.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1556,7 +1562,7 @@ checks_by_id = {
         "msg_id": "W0104",
         "msg_sym": "pointless-statement",
         "msg_text": "Statement seems to have no effect",
-        "msg_xpln": "Used when a statement doesn't have any effect.",
+        "msg_xpln": "Used when a statement doesn't have (or at least seems to) any effect.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1644,9 +1650,27 @@ checks_by_id = {
         "msg_id": "W0125",
         "msg_sym": "using-constant-test",
         "msg_text": "Using a conditional statement with a constant value",
-        "msg_xpln": "Emitted when a conditional statement (if or ternary if) uses a constant value for its test. This might not be what the user intended to do.",
+        "msg_xpln": "Emitted when a conditional statement (If or ternary if) uses a constant value for its test. This might not be what the user intended to do.",
         "tho_xpln": "",
         "usage": "warning",
+    },
+    "W0126": {
+        "msg_id": "W0126",
+        "msg_sym": "missing-parentheses-for-call-in-test",
+        "msg_text": "Using a conditional statement with potentially wrong function or method call due to missing parentheses",
+        "msg_xpln": "Emitted when a conditional statement (If or ternary if) seems to wrongly call a function due to missing parentheses",
+    },
+    "W0127": {
+        "msg_id": "W0127",
+        "msg_sym": "self-assigning-variable",
+        "msg_text": "Assigning the same variable %r to itself",
+        "msg_xpln": "Emitted when we detect that a variable is assigned to itself",
+    },
+    "W0128": {
+        "msg_id": "W0128",
+        "msg_sym": "redeclared-assigned-name",
+        "msg_text": "Redeclared variable %r in assignment",
+        "msg_xpln": "Emitted when we detect that a variable was redeclared in the same assignment.",
     },
     "W0143": {
         "msg_id": "W0143",
@@ -1812,7 +1836,7 @@ checks_by_id = {
         "msg_id": "W0406",
         "msg_sym": "import-self",
         "msg_text": "Module import itself",
-        "msg_xpln": "This usually happens when you give your script the same as name a library module you are trying to import. This won't work, because your module will shadow the library module.",
+        "msg_xpln": "Used when a module is importing itself.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1860,7 +1884,7 @@ checks_by_id = {
         "msg_id": "W0603",
         "msg_sym": "global-statement",
         "msg_text": "Using the global statement",
-        "msg_xpln": 'Used when you use the "global" statement to update a global variable. Pylint just tries to discourage this usage. That doesn\'t mean you cannot use it !',
+        "msg_xpln": 'Used when you use the "global" statement to update a global variable. Pylint just try to discourage this usage. That doesn\'t mean you cannot use it !',
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -2016,6 +2040,12 @@ checks_by_id = {
         "tho_xpln": "",
         "usage": "warning",
     },
+    "W0716": {
+        "msg_id": "W0716",
+        "msg_sym": "wrong-exception-operation",
+        "msg_text": "Invalid exception operation. %s",
+        "msg_xpln": "Used when an operation is done against an exception, but the operation is not valid for the exception in question. Usually emitted when having binary operations between exceptions in except handlers.",
+    },
     "W1113": {
         "msg_id": "W1113",
         "msg_sym": "keyword-arg-before-vararg",
@@ -2043,7 +2073,7 @@ checks_by_id = {
     "W1202": {
         "msg_id": "W1202",
         "msg_sym": "logging-format-interpolation",
-        "msg_text": "Use % formatting in logging functions and pass the % parameters as arguments",
+        "msg_text": "Use %s formatting in logging functions%s",
         "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging method>(<string formatting>)". with invalid string formatting. Use another way for format the string instead.',
         "tho_xpln": "",
         "usage": "enhancement",
@@ -2076,7 +2106,7 @@ checks_by_id = {
         "msg_id": "W1302",
         "msg_sym": "bad-format-string",
         "msg_text": "Invalid format string",
-        "msg_xpln": "Used when a PEP 3101 format string is invalid. This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string is invalid.",
         "tho_xpln": "Used when a PEP 3101 format string is invalid.",
         "usage": "warning",
     },
@@ -2084,7 +2114,7 @@ checks_by_id = {
         "msg_id": "W1303",
         "msg_sym": "missing-format-argument-key",
         "msg_text": "Missing keyword argument %r for format string",
-        "msg_xpln": "Used when a PEP 3101 format string that uses named fields doesn't receive one or more required keywords. This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string that uses named fields doesn't receive one or more required keywords.",
         "tho_xpln": "Used when a PEP 3101 format string that uses named fields doesn't receive one or more required keywords.",
         "usage": "warning",
     },
@@ -2092,7 +2122,7 @@ checks_by_id = {
         "msg_id": "W1304",
         "msg_sym": "unused-format-string-argument",
         "msg_text": "Unused format argument %r",
-        "msg_xpln": "Used when a PEP 3101 format string that uses named fields is used with an argument that is not required by the format string. This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string that uses named fields is used with an argument that is not required by the format string.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2100,7 +2130,7 @@ checks_by_id = {
         "msg_id": "W1305",
         "msg_sym": "format-combined-specification",
         "msg_text": "Format string contains both automatic field numbering and manual field specification",
-        "msg_xpln": "Used when a PEP 3101 format string contains both automatic field numbering (e.g. '{}') and manual field specification (e.g. '{0}'). This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string contains both automatic field numbering (e.g. '{}') and manual field specification (e.g. '{0}').",
         "tho_xpln": "Used when a PEP 3101 format string contains both automatic field numbering (e.g. '{}') and manual field specification (e.g. '{0}').",
         "usage": "warning",
     },
@@ -2108,7 +2138,7 @@ checks_by_id = {
         "msg_id": "W1306",
         "msg_sym": "missing-format-attribute",
         "msg_text": "Missing format attribute %r in format specifier %r",
-        "msg_xpln": "Used when a PEP 3101 format string uses an attribute specifier ({0.length}), but the argument passed for formatting doesn't have that attribute. This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string uses an attribute specifier ({0.length}), but the argument passed for formatting doesn't have that attribute.",
         "tho_xpln": "Used when a PEP 3101 format string uses an attribute specifier ({0.length}), but the argument passed for formatting doesn't have that attribute.",
         "usage": "warning",
     },
@@ -2116,7 +2146,7 @@ checks_by_id = {
         "msg_id": "W1307",
         "msg_sym": "invalid-format-index",
         "msg_text": "Using invalid lookup key %r in format specifier %r",
-        "msg_xpln": "Used when a PEP 3101 format string uses a lookup specifier ({a[1]}), but the argument passed for formatting doesn't contain or doesn't have that key as an attribute. This message can't be emitted when using Python < 2.7.",
+        "msg_xpln": "Used when a PEP 3101 format string uses a lookup specifier ({a[1]}), but the argument passed for formatting doesn't contain or doesn't have that key as an attribute.",
         "tho_xpln": "Used when a PEP 3101 format string uses a lookup specifier ({a[1]}), but the argument passed for formatting doesn't contain or doesn't have that key as an attribute.",
         "usage": "warning",
     },
@@ -2156,7 +2186,7 @@ checks_by_id = {
         "msg_id": "W1501",
         "msg_sym": "bad-open-mode",
         "msg_text": '"%s" is not a valid mode for open.',
-        "msg_xpln": "Python supports: r, w, a[, x] modes with b, +, and U (only with r) options. See http://docs.python.org/3/library/functions.html#open",
+        "msg_xpln": "Python supports: r, w, a[, x] modes with b, +, and U (only with r) options. See http://docs.python.org/2/library/functions.html#open",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2710,7 +2740,12 @@ checks_by_id = {
 if __name__ == "__main__":
     # for updating messages dictionary
     import subprocess
-    lines = subprocess.check_output(["pylint", "--list-msgs"], universal_newlines=True).strip().splitlines()
+
+    lines = (
+        subprocess.check_output(["pylint", "--list-msgs"], universal_newlines=True)
+        .strip()
+        .splitlines()
+    )
     i = 0
     while i < len(lines):
         header = lines[i]
@@ -2736,11 +2771,10 @@ if __name__ == "__main__":
 
         if msg_id not in checks_by_id:
             checks_by_id[msg_id] = {
-                "msg_id" : msg_id,
-                "msg_sym" : msg_sym,
-                "msg_text" : msg_text,
-                "msg_xpln" : msg_xpln
-
+                "msg_id": msg_id,
+                "msg_sym": msg_sym,
+                "msg_text": msg_text,
+                "msg_xpln": msg_xpln,
             }
             print("New:", (msg_id, msg_sym, msg_text, msg_xpln))
         else:
@@ -2748,7 +2782,4 @@ if __name__ == "__main__":
             checks_by_id[msg_id]["msg_text"] = msg_text
             checks_by_id[msg_id]["msg_xpln"] = msg_xpln
 
-
-
-
-
+    print(dict(sorted(checks_by_id.items())))
