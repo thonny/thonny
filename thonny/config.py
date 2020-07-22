@@ -145,7 +145,6 @@ class ConfigurationManager:
         section, option = self._parse_name(name)
         name = section + "." + option
         self._defaults[name] = primary_default_value
-        return
 
         if name in self._defaults_overrides_str:
             if isinstance(primary_default_value, str):
