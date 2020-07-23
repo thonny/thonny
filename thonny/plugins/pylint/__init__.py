@@ -4,7 +4,7 @@ import subprocess
 
 from thonny import get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
-from thonny.plugins.pylint.messages import all_messages
+from thonny.plugins.pylint.messages import checks_by_id
 from thonny.running import get_interpreter_for_subprocess
 
 
@@ -14,12 +14,12 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
     def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {
-            key for key in all_checks_by_symbol if all_checks_by_symbol[key]["usage"] == "warning"
+            checks_by_id[key]["msg_sym"] for key in checks_by_id if checks_by_id[key]["usage"] == "warning"
         }
 
         if "bad-python3-import" in relevant_symbols:
             # https://github.com/PyCQA/pylint/issues/2453
-            # TODO: allow if this is fixed in current version
+            # TODO: allow if this is fixed in minimum version
             relevant_symbols.remove("bad-python3-import")
 
         # remove user-disabled checks
@@ -85,7 +85,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                     logging.error("Can't parse Pylint line: " + line)
                     continue
                 else:
-                    check = all_checks_by_symbol[atts["symbol"]]
+                    check = checks_by_id[atts["msg_id"]]
                     if check.get("tho_xpln"):
                         explanation = check["tho_xpln"]
                     else:
@@ -118,9 +118,6 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                     warnings.append(atts)
 
         self.completion_handler(self, warnings)
-
-
-all_checks_by_symbol = {c["msg_sym"]: c for c in all_messages}
 
 
 def load_plugin():
