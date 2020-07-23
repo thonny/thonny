@@ -125,7 +125,7 @@ def configure_text(text):
 
 
 def print_tree(node, level=0):
-    python_tree = jedi_utils.import_python_tree()
+    from parso.python import tree as python_tree
     indent = "  " * level
     # if (isinstance(node, python_tree.PythonNode) and node.type == "sim"
     if node.type in ("simple_stmt",) or isinstance(node, python_tree.Flow):
@@ -154,7 +154,7 @@ def add_tags(text):
 
     def tag_tree(node):
         nonlocal last_line, last_col
-        python_tree = jedi_utils.import_python_tree()
+        from parso.python import tree as python_tree
 
         if node.type == "simple_stmt" or isinstance(node, (python_tree.Flow, python_tree.Scope)):
 

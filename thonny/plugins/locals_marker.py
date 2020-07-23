@@ -11,7 +11,8 @@ class LocalsHighlighter:
         self._update_scheduled = False
 
     def get_positions(self):
-        tree = jedi_utils.import_python_tree()
+        from parso.python import tree
+        from jedi import parser_utils
 
         locs = []
 
@@ -60,7 +61,7 @@ class LocalsHighlighter:
         source = self.text.get("1.0", "end")
         module = jedi_utils.parse_source(source)
         for child in module.children:
-            if isinstance(child, tree.BaseNode) and jedi_utils.is_scope(child):
+            if isinstance(child, tree.BaseNode) and parser_utils.is_scope(child):
                 process_scope(child)
 
         loc_pos = set(
@@ -103,10 +104,6 @@ class LocalsHighlighter:
 def update_highlighting(event):
     if not get_workbench().ready:
         # don't slow down loading process
-        return
-
-    if jedi_utils.get_version_tuple() < (0, 9):
-        logging.warning("Jedi version is too old. Disabling locals marker")
         return
 
     assert isinstance(event.widget, tk.Text)

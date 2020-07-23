@@ -73,7 +73,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         )
 
     def _get_def_from_function_params(self, func_node, name):
-        params = jedi_utils.get_params(func_node)
+        params = func_node.get_params()
         for param in params:
             if param.children[0].value == name.value:
                 return param.children[0]
@@ -107,6 +107,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         )
 
     def _find_definition(self, scope, name):
+        from jedi import parser_utils
 
         # if the name is the name of a function definition
         if isinstance(scope, tree.Function):
@@ -130,13 +131,13 @@ class VariablesHighlighter(BaseNameHighlighter):
             if (
                 isinstance(c, tree.Function)
                 and c.children[1].value == name.value
-                and not isinstance(jedi_utils.get_parent_scope(c), tree.Class)
+                and not isinstance(parser_utils.get_parent_scope(c), tree.Class)
             ):
                 return c.children[1]
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
                     if self._is_global_stmt_with_name(x, name.value):
-                        return self._find_definition(jedi_utils.get_parent_scope(scope), name)
+                        return self._find_definition(parser_utils.get_parent_scope(scope), name)
                     if isinstance(x, tree.Name) and x.is_definition() and x.value == name.value:
                         return x
                     def_candidate = self._find_def_in_simple_node(x, name)
@@ -144,7 +145,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                         return def_candidate
 
         if not isinstance(scope, tree.Module):
-            return self._find_definition(jedi_utils.get_parent_scope(scope), name)
+            return self._find_definition(parser_utils.get_parent_scope(scope), name)
 
         # if name itself is the left side of an assignment statement, then the name is the definition
         if name.is_definition():
@@ -169,13 +170,15 @@ class VariablesHighlighter(BaseNameHighlighter):
         return ()
 
     def _find_usages(self, name, stmt):
+        from jedi import parser_utils
+
         # check if stmt is dot qualified, disregard these
         dot_names = self._get_dot_names(stmt)
         if len(dot_names) > 1 and dot_names[1].value == name.value:
             return set()
 
         # search for definition
-        definition = self._find_definition(jedi_utils.get_parent_scope(name), name)
+        definition = self._find_definition(parser_utils.get_parent_scope(name), name)
 
         searched_scopes = set()
 
@@ -186,7 +189,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         def find_usages_in_node(node, global_encountered=False):
             names = []
             if isinstance(node, tree.BaseNode):
-                if jedi_utils.is_scope(node):
+                if parser_utils.is_scope(node):
                     global_encountered = False
                     if node in searched_scopes:
                         return names
@@ -203,10 +206,10 @@ class VariablesHighlighter(BaseNameHighlighter):
                     sub_result = find_usages_in_node(c, global_encountered=global_encountered)
 
                     if sub_result is None:
-                        if not jedi_utils.is_scope(node):
+                        if not parser_utils.is_scope(node):
                             return (
                                 None
-                                if definition and node != jedi_utils.get_parent_scope(definition)
+                                if definition and node != parser_utils.get_parent_scope(definition)
                                 else [definition]
                             )
                         else:
@@ -218,7 +221,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                 if definition and definition != node:
                     if self._is_name_function_definition(node):
                         if isinstance(
-                            jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(node)),
+                            parser_utils.get_parent_scope(parser_utils.get_parent_scope(node)),
                             tree.Class,
                         ):
                             return []
@@ -229,13 +232,13 @@ class VariablesHighlighter(BaseNameHighlighter):
                         and not global_encountered
                         and (
                             is_function_definition
-                            or jedi_utils.get_parent_scope(node)
-                            != jedi_utils.get_parent_scope(definition)
+                            or parser_utils.get_parent_scope(node)
+                            != parser_utils.get_parent_scope(definition)
                         )
                     ):
                         return None
                     if self._is_name_function_definition(definition) and isinstance(
-                        jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition)),
+                        parser_utils.get_parent_scope(parser_utils.get_parent_scope(definition)),
                         tree.Class,
                     ):
                         return None
@@ -244,11 +247,11 @@ class VariablesHighlighter(BaseNameHighlighter):
 
         if definition:
             if self._is_name_function_definition(definition):
-                scope = jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition))
+                scope = parser_utils.get_parent_scope(parser_utils.get_parent_scope(definition))
             else:
-                scope = jedi_utils.get_parent_scope(definition)
+                scope = parser_utils.get_parent_scope(definition)
         else:
-            scope = jedi_utils.get_parent_scope(name)
+            scope = parser_utils.get_parent_scope(name)
 
         usages = find_usages_in_node(scope)
         return usages
@@ -262,7 +265,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         if isinstance(stmt, tree.Name):
             name = stmt
         elif isinstance(stmt, tree.BaseNode):
-            name = jedi_utils.get_name_of_position(stmt, pos)
+            name = stmt.get_name_of_position(pos)
 
         if not name:
             return set()
@@ -319,14 +322,10 @@ def update_highlighting(event):
         # don't slow down loading process
         return
 
-    if jedi_utils.get_version_tuple() < (0, 9):
-        logging.warning("Jedi version is too old. Disabling name highlighter")
-        return
-
     global tree
     if not tree:
         # using lazy importing to speed up Thonny loading
-        tree = jedi_utils.import_python_tree()
+        from parso.python import tree
 
     assert isinstance(event.widget, tk.Text)
     text = event.widget
