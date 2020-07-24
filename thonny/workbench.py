@@ -1833,7 +1833,6 @@ class Workbench(tk.Tk):
 
         button = ttk.Button(
             group_frame,
-            command=handler,
             image=image_spec,
             style="Toolbutton",
             state=tk.NORMAL,
@@ -1842,6 +1841,17 @@ class Workbench(tk.Tk):
             pad=(10, 0) if self.in_simple_mode() else None,
             width=button_width,
         )
+
+        def toolbar_handler(*args):
+            handler(*args)
+            self._update_toolbar()
+            if self.focus_get() == button:
+                # previously selected widget would be better candidate, but this is
+                # better than button
+                self._editor_notebook.focus_set()
+
+        button.configure(command=toolbar_handler)
+
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
         tooltip_text = command_label
