@@ -62,7 +62,7 @@ class ConfigurationDialog(CommonDialog):
     def _ok(self, event=None):
         for _, title, page in self._page_records:
             try:
-                if not page.apply():
+                if page.apply() is False:
                     return
             except Exception:
                 get_workbench().report_exception("Error when applying options in " + title)
