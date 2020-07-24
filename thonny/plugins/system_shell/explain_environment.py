@@ -27,7 +27,7 @@ def equivalent_realpath(p):
             if os.path.dirname(link) == pdir:
                 return link
             return p
-        except:
+        except Exception:
             return p
     else:
         return os.path.realpath(p)
@@ -84,7 +84,7 @@ def can_use_ansi_codes():
         ver = platform.win32_ver()
         try:
             return int(ver[0]) >= 10
-        except:
+        except Exception:
             warnings.warn("Can't determine Windows version %s" % (ver,))
             return False
     else:

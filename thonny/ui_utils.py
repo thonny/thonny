@@ -13,9 +13,10 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
-from _tkinter import TclError
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
+
+from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
@@ -1253,25 +1254,63 @@ def get_widget_offset_from_toplevel(widget):
     return x, y
 
 
-def create_string_var(value, modification_listener=None):
+class EnhancedVar(tk.Variable):
+    def __init__(self, master=None, value=None, name=None, modification_listener=None):
+        if master is not None and not isinstance(master, (tk.Widget, tk.Wm)):
+            raise TypeError("First positional argument 'master' must be None, Widget or Wm")
+
+        super().__init__(master=master, value=value, name=name)
+        self.modified = False
+        self.modification_listener = modification_listener
+        self.trace_add("write", self._on_write)
+
+    def _on_write(self, *args):
+        self.modified = True
+        if self.modification_listener:
+            try:
+                self.modification_listener()
+            except Exception:
+                # Otherwise whole process will be brought down
+                # because for some reason Tk tries to call non-existing method
+                # on variable
+                get_workbench().report_exception()
+
+
+class EnhancedStringVar(EnhancedVar, tk.StringVar):
+    pass
+
+
+class EnhancedIntVar(EnhancedVar, tk.IntVar):
+    pass
+
+
+class EnhancedBooleanVar(EnhancedVar, tk.BooleanVar):
+    pass
+
+
+class EnhancedDoubleVar(EnhancedVar, tk.DoubleVar):
+    pass
+
+
+def create_string_var(value, modification_listener=None) -> EnhancedStringVar:
     """Creates a tk.StringVar with "modified" attribute
     showing whether the variable has been modified after creation"""
-    return _create_var(tk.StringVar, value, modification_listener)
+    return EnhancedStringVar(tk.StringVar, value, modification_listener)
 
 
-def create_int_var(value, modification_listener=None):
+def create_int_var(value, modification_listener=None) -> EnhancedIntVar:
     """See create_string_var"""
-    return _create_var(tk.IntVar, value, modification_listener)
+    return EnhancedIntVar(tk.IntVar, value, modification_listener)
 
 
-def create_double_var(value, modification_listener=None):
+def create_double_var(value, modification_listener=None) -> EnhancedDoubleVar:
     """See create_string_var"""
-    return _create_var(tk.DoubleVar, value, modification_listener)
+    return EnhancedDoubleVar(tk.DoubleVar, value, modification_listener)
 
 
-def create_boolean_var(value, modification_listener=None):
+def create_boolean_var(value, modification_listener=None) -> EnhancedBooleanVar:
     """See create_string_var"""
-    return _create_var(tk.BooleanVar, value, modification_listener)
+    return EnhancedBooleanVar(tk.BooleanVar, value, modification_listener)
 
 
 def _create_var(class_, value, modification_listener):
@@ -1811,7 +1850,9 @@ class SubprocessDialog(CommonDialog):
                 # try gently first
                 try:
                     if running_on_windows():
-                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                        os.kill(
+                            self._proc.pid, signal.CTRL_BREAK_EVENT  # pylint: disable=no-member
+                        )
                     else:
                         os.kill(self._proc.pid, signal.SIGINT)
 
@@ -2108,7 +2149,7 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
 
     try:
         dlg.grab_set()
-    except:
+    except TclError:
         pass
 
     dlg.lift()
@@ -2190,13 +2231,13 @@ class MenuEx(tk.Menu):
                 else:
                     self.entryconfigure(i, state=tk.NORMAL)
 
-    def add(self, kind, cnf={}, **kw):
+    def add(self, itemType, cnf={}, **kw):
         cnf = cnf or kw
         tester = cnf.get("tester")
         if "tester" in cnf:
             del cnf["tester"]
 
-        super().add(kind, cnf)
+        super().add(itemType, cnf)
 
         itemdata = self.entryconfigure(self.index("end"))
         labeldata = itemdata.get("label")
@@ -2311,8 +2352,8 @@ def tr_btn(s):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    closa = ClosableNotebook(root)
-    closa.add(ttk.Button(closa, text="B1"), text="B1")
-    closa.add(ttk.Button(closa, text="B2"), text="B2")
-    closa.grid()
+    var = EnhancedIntVar(value=2)
+    print(var.get())
+    var.set(3)
+    print(repr(var.get()))
     root.mainloop()

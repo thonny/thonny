@@ -113,7 +113,8 @@ class ESPFlashingDialog(CommonDialogEx):
                 + "Install it via 'Tools => Manage plug-ins'\n"
                 + "or using your OP-system package manager.",
             )
-            return self._close()
+            self._close()
+            return
 
         self.main_frame.columnconfigure(2, weight=1)
 
@@ -147,7 +148,7 @@ class ESPFlashingDialog(CommonDialogEx):
         browse_button.grid(row=2, column=3, sticky="we", padx=(0, epadx), pady=(ipady, 0))
 
         # FLASH_MODE
-        self._flashmode = tkinter.StringVar(None, "keep")
+        self._flashmode = tk.StringVar(None, "keep")
         flashmode_group = LabelFrame(self.main_frame, text="Flash mode", padx=10, pady=10)
         flashmode_group.grid(
             row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady * 2, 0)

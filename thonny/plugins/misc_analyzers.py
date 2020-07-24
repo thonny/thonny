@@ -232,7 +232,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
         # TODO: current dir may be different
         main_file_dir = os.path.dirname(main_file_path)
         if not os.path.isdir(main_file_dir):
-            return []
+            return
 
         library_modules = known_stdlib_modules | self._get_3rd_party_modules()
 

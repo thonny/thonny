@@ -14,6 +14,7 @@
 .DS_Store
 __pycache__
 dist
+venv
 packaging/linux/build
 build
 resources_build

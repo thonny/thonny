@@ -11,8 +11,8 @@ class LocalsHighlighter:
         self._update_scheduled = False
 
     def get_positions(self):
-        from parso.python import tree
         from jedi import parser_utils
+        from parso.python import tree
 
         locs = []
 

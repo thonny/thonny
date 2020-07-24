@@ -136,7 +136,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         if path == "":
             if running_on_windows():
                 # list of drives, can't cd
-                return self.focus_into(path)
+                self.focus_into(path)
+                return
             else:
                 path = "/"
 

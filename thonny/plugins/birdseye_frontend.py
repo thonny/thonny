@@ -39,7 +39,7 @@ def close_server():
     if _server_process is not None:
         try:
             _server_process.kill()
-        except:
+        except Exception:
             pass
 
 

@@ -26,7 +26,6 @@ from time import sleep
 from tkinter import messagebox, ttk
 
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
-from thonny.code import get_current_breakpoints, get_saved_current_script_filename, is_remote_path
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -44,6 +43,11 @@ from thonny.common import (
     path_startswith,
     serialize_message,
     update_system_path,
+)
+from thonny.editors import (
+    get_current_breakpoints,
+    get_saved_current_script_filename,
+    is_remote_path,
 )
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 from thonny.terminal import run_in_terminal
@@ -220,13 +224,13 @@ class Runner:
 
     def send_command(self, cmd: CommandToBackend) -> None:
         if self._proxy is None:
-            return
+            return None
 
         if self._publishing_events:
             # allow all event handlers to complete before sending the commands
             # issued by first event handlers
             self._postpone_command(cmd)
-            return
+            return None
 
         # First sanity check
         if (
@@ -240,7 +244,7 @@ class Runner:
             logging.warning(
                 "RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state())
             )
-            return
+            return None
 
         # Attach extra info
         if "debug" in cmd.name.lower():
@@ -256,10 +260,10 @@ class Runner:
         response = self._proxy.send_command(cmd)
 
         if response == "discard":
-            return
+            return None
         elif response == "postpone":
             self._postpone_command(cmd)
-            return
+            return None
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
@@ -274,6 +278,8 @@ class Runner:
             dlg = BlockingDialog(get_workbench(), cmd)
             show_dialog(dlg)
             return dlg.response
+        else:
+            return None
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
         # in case of InlineCommands, discard older same type command
@@ -407,7 +413,7 @@ class Runner:
 
     def _cmd_interrupt_with_shortcut(self, event=None):
         if not self._cmd_interrupt_enabled():
-            return
+            return None
 
         if not running_on_mac_os():  # on Mac Ctrl+C is not used for Copy.
             # Disable Ctrl+C interrupt in editor and shell, when some text is selected
@@ -416,7 +422,7 @@ class Runner:
             if isinstance(widget, tk.Text):
                 if len(widget.tag_ranges("sel")) > 0:
                     # this test is reliable, unlike selection_get below
-                    return
+                    return None
             elif isinstance(widget, (tk.Listbox, ttk.Entry, tk.Entry, tk.Spinbox)):
                 try:
                     selection = widget.selection_get()
@@ -428,7 +434,7 @@ class Runner:
                         # ie. there may be no selection in Thonny actually.
                         # In other words, Ctrl+C interrupt may be dropped without reason
                         # when given inside the widgets listed above.
-                        return
+                        return None
                 except Exception:
                     # widget either doesn't have selection_get or it
                     # gave error (can happen without selection on Ubuntu)
@@ -712,7 +718,7 @@ class BackendProxy:
         """Read next message from the queue or None if queue is empty"""
         raise NotImplementedError()
 
-    def run_script_in_terminal(self, script_path, interactive, keep_open):
+    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
         raise NotImplementedError()
 
     def get_sys_path(self):
@@ -780,7 +786,7 @@ class SubprocessProxy(BackendProxy):
         self._usersitepackages = None
         self._gui_update_loop_id = None
         self._in_venv = None
-        self._cwd = self._get_initial_cwd()
+        self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none
         self._start_background_process(clean=clean)
 
     def _get_initial_cwd(self):
@@ -864,7 +870,7 @@ class SubprocessProxy(BackendProxy):
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
         method_name = "_cmd_" + cmd.name
         if hasattr(self, method_name):
-            return getattr(self, method_name)(cmd)
+            getattr(self, method_name)(cmd)
 
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
             self._clear_environment()
@@ -897,7 +903,7 @@ class SubprocessProxy(BackendProxy):
         if self._proc is not None and self._proc.poll() is None:
             if running_on_windows():
                 try:
-                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
                 except Exception:
                     logging.exception("Could not interrupt backend process")
             else:
@@ -1220,8 +1226,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
             args.append("--upgrade")
 
         try:
-            # pylint: disable=unused-variable
-            import ensurepip  # @UnusedImport
+            import ensurepip
         except ImportError:
             args.append("--without-pip")
 

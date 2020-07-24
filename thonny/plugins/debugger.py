@@ -8,12 +8,22 @@ import ast
 import logging
 import os.path
 import tkinter as tk
-from _tkinter import TclError
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
 
-from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, running, ui_utils
+from _tkinter import TclError
+
+from thonny import (
+    ast_utils,
+    editors,
+    get_runner,
+    get_workbench,
+    memory,
+    misc_utils,
+    running,
+    ui_utils,
+)
 from thonny.codeview import CodeView, SyntaxText, get_syntax_options_for_tag
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
@@ -63,11 +73,11 @@ class Debugger:
         return None
 
     def get_effective_breakpoints(self, command):
-        result = code.get_current_breakpoints()
+        result = editors.get_current_breakpoints()
 
         if command == "run_to_cursor":
             bp = self.get_run_to_cursor_breakpoint()
-            if bp != None:
+            if bp is not None:
                 filename, lineno = bp
                 result.setdefault(filename, set())
                 result[filename].add(lineno)
@@ -800,6 +810,9 @@ class BaseExpressionBox:
         lines = content.splitlines()
         self.text["height"] = len(lines)
         self.text["width"] = max(map(len, lines))
+
+    def _set_position_make_visible(self, rel_x, rel_y):
+        raise NotImplementedError()
 
 
 class PlacedExpressionBox(BaseExpressionBox, tk.Text):

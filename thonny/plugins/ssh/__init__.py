@@ -1,49 +1,15 @@
 import collections
-import io
-import logging
 import os
-import platform
-import queue
-import re
 import shlex
-import subprocess
-import sys
-import textwrap
-import threading
-import time
-import traceback
 from logging import debug
-from queue import Queue
-from textwrap import dedent
 from threading import Thread
-from time import sleep
-from tkinter import messagebox, ttk
 from typing import Optional
 
 import thonny
-from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
-from thonny.common import (
-    BackendEvent,
-    CommandToBackend,
-    EOFCommand,
-    InlineCommand,
-    InlineResponse,
-    InterruptCommand,
-    MessageFromBackend,
-    ToplevelCommand,
-    ToplevelResponse,
-)
-from thonny.config_ui import ConfigurationPage
-from thonny.misc_utils import TimeHelper, find_volumes_by_name
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
-from thonny.running import BackendProxy, SubprocessProxy
-from thonny.ui_utils import (
-    SubprocessDialog,
-    askopenfilename,
-    create_string_var,
-    create_url_label,
-    show_dialog,
-)
+from thonny import get_runner, get_shell, get_workbench
+from thonny.common import CommandToBackend, InlineCommand, ToplevelCommand
+from thonny.plugins.backend_config_page import BaseSshProxyConfigPage
+from thonny.running import SubprocessProxy
 
 
 class SshProxy(SubprocessProxy):
@@ -82,7 +48,7 @@ class SshProxy(SubprocessProxy):
             elif cmd.name == "connect":
                 self._connect()
             elif cmd.name == "launch":
-                self._execute_backend
+                self._execute_backend()
 
     def _connect(self):
         pass
@@ -138,7 +104,7 @@ class SshProxy(SubprocessProxy):
 
         # Don't remain waiting
         self._starting = True
-        self._thread_commands.append(InlineCommand("launch"), cmd_line=cmd_line_str)
+        self._thread_commands.append(InlineCommand("launch", cmd_line=cmd_line_str))
 
     def _connect_in_background(self, cmd_line_str):
         try:

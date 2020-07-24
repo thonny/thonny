@@ -126,6 +126,7 @@ def configure_text(text):
 
 def print_tree(node, level=0):
     from parso.python import tree as python_tree
+
     indent = "  " * level
     # if (isinstance(node, python_tree.PythonNode) and node.type == "sim"
     if node.type in ("simple_stmt",) or isinstance(node, python_tree.Flow):

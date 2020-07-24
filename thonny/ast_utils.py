@@ -19,8 +19,8 @@ def extract_text_range(source, text_range):
     return "".join(lines)
 
 
-def find_expression(node, text_range):
-    for node in ast.walk(node):
+def find_expression(start_node, text_range):
+    for node in ast.walk(start_node):
         if (
             isinstance(node, ast.expr)
             and node.lineno == text_range.lineno
@@ -29,6 +29,8 @@ def find_expression(node, text_range):
             and node.end_col_offset == text_range.end_col_offset
         ):
             return node
+
+    return None
 
 
 def parse_source(source: bytes, filename="<unknown>", mode="exec", fallback_to_one_char=False):

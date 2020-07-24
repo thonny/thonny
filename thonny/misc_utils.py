@@ -237,7 +237,7 @@ def parse_cmd_line(s):
 def levenshtein_distance(s1, s2):
     # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
     if len(s1) < len(s2):
-        return levenshtein_distance(s2, s1)
+        return levenshtein_distance(s2, s1)  # pylint: disable=arguments-out-of-order
 
     # len(s1) >= len(s2)
     if len(s2) == 0:
@@ -286,15 +286,15 @@ def levenshtein_damerau_distance(s1, s2, maxDistance):
     #  match a, change e->i change i->e => aie
     #  Damarau-Levenshtein has a cost of 1
     #  match a, transpose ei to ie => aie
-    transpositionRow = None
-    prevRow = None
+    transpositionRow = []
+    prevRow = []
 
     #  build first leven matrix row
     #  The first row represents transformation from an empty string
     #  to the shorter string making it static [0-n]
     #  since this row is static we can set it as
     #  curRow and start computation at the second row or index 1
-    curRow = [x for x in range(0, l1 + 1)]
+    curRow = list(range(0, l1 + 1))
 
     # use second length to loop through all the rows being built
     # we start at row one
@@ -384,7 +384,7 @@ class TimeHelper:
 
 def copy_to_clipboard(data):
     if running_on_windows():
-        return _copy_to_windows_clipboard(data)
+        _copy_to_windows_clipboard(data)
     elif running_on_mac_os():
         command = ["pbcopy"]
     else:

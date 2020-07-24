@@ -43,3 +43,5 @@ def get_language_code_by_name(name):
     for code in LANGUAGES_DICT:
         if LANGUAGES_DICT[code] == name:
             return code
+
+    raise RuntimeError("Unknown language name '%s'" % name)

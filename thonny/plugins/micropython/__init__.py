@@ -332,12 +332,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
     def is_modified(self):
         return (
-            self._port_desc_variable.modified  # pylint: disable=no-member
+            self._port_desc_variable.modified
             or self.webrepl_selected()
-            and self._webrepl_password_var.modified  # pylint: disable=no-member
+            and self._webrepl_password_var.modified
             or self.webrepl_selected()
             and self._webrepl_url_var.modified
-        )  # pylint: disable=no-member
+        )
 
     def webrepl_selected(self):
         return self.get_selected_port_name() == "webrepl"
@@ -373,7 +373,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
 
-    def _get_usb_driver_url(self):
+    def _get_usb_driver_url(self) -> Optional[str]:
         return None
 
     def _has_flashing_dialog(self):

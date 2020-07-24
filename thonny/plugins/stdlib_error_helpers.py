@@ -500,7 +500,7 @@ class AttributeErrorHelper(ErrorHelper):
         elif self.type_name == "dict":
             goal = "number of entries"
         else:
-            return
+            return None
 
         return Suggestion(
             "wrong-attribute-instead-of-len",

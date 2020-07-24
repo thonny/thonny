@@ -535,7 +535,7 @@ def get_windows_network_locations():
                     "size": None,
                     "time": None,
                 }
-            except:
+            except Exception:
                 logging.getLogger("thonny").error(
                     "Can't get target from %s", lnk_path, exc_info=True
                 )

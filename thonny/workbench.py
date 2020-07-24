@@ -17,9 +17,7 @@ import tkinter.font as tk_font
 import traceback
 from threading import Thread
 from tkinter import messagebox, ttk
-from typing import Set  # pylint: disable=unused-import
-from typing import Tuple  # pylint: disable=unused-import
-from typing import Any, Callable, Dict, List, Sequence, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
 import thonny
@@ -33,10 +31,10 @@ from thonny import (
     running,
     ui_utils,
 )
-from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
+from thonny.editors import EditorNotebook
 from thonny.misc_utils import (
     copy_to_clipboard,
     running_on_linux,
@@ -56,9 +54,6 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
-
-from typing import Optional  # pylint: disable=unused-import; pylint: disable=unused-import
-
 
 SERVER_SUCCESS = "OK"
 SIMPLE_MODE_VIEWS = ["ShellView"]
@@ -1568,7 +1563,7 @@ class Workbench(tk.Tk):
             # TODO: handle the case, when view is maximized
             view = self._view_records[view_id]["instance"]
             if view.hidden:
-                return
+                return True
 
             if hasattr(view, "before_hide") and view.before_hide() == False:
                 return False
@@ -1579,7 +1574,7 @@ class Workbench(tk.Tk):
             self.event_generate("HideView", view=view, view_id=view_id)
             view.hidden = True
 
-        return None
+        return True
 
     def event_generate(self, sequence: str, event: Optional[Record] = None, **kwargs) -> None:
         """Uses custom event handling when sequence doesn't start with <.
@@ -1629,6 +1624,7 @@ class Workbench(tk.Tk):
             self._event_handlers[sequence].add(func)
 
     def unbind(self, sequence: str, func=None) -> None:
+        # pylint: disable=arguments-differ
         if sequence.startswith("<"):
             tk.Tk.unbind(self, sequence, funcid=func)
         else:

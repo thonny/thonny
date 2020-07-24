@@ -101,7 +101,7 @@ logger = logging.getLogger("thonny.micropython.backend")
 
 def debug(msg):
     return
-    print(msg, file=sys.stderr)
+    # print(msg, file=sys.stderr)
 
 
 class MicroPythonBareMetalBackend(MicroPythonBackend):
@@ -261,7 +261,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         bdata = cdata.encode(ENCODING)
 
         with self._writing_lock:
-            self.write(bdata)
+            self._write(bdata)
             # Try to consume the echo
 
             try:
@@ -644,10 +644,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         else:
             return super()._cmd_get_dirs_child_data(cmd)
 
-        data = self._get_dirs_child_data_generic(cmd["paths"])
-        dir_separator = "/"
-        return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
-
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
         if mount_path is None:
@@ -991,7 +987,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--clean", type=lambda s: True if s == "True" else False)
+    parser.add_argument("--clean", type=lambda s: s == "True")
     parser.add_argument("--port", type=str)
     parser.add_argument("--url", type=str)
     parser.add_argument("--password", type=str)

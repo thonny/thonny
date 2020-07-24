@@ -159,11 +159,11 @@ class FlashingDialog(CommonDialog):
             and 400000 < asset["size"] < 800000
         ]
         if len(candidates) == 0:
-            return self._close_with_error(
+            self._close_with_error(
                 "Could not find the right hex file from the release info (%s)" % LATEST_RELEASE_URL
             )
         elif len(candidates) > 1:
-            return self._close_with_error(
+            self._close_with_error(
                 "Found several possible hex files from the release info (%s)" % LATEST_RELEASE_URL
             )
         else:

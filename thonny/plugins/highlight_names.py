@@ -325,7 +325,7 @@ def update_highlighting(event):
     global tree
     if not tree:
         # using lazy importing to speed up Thonny loading
-        from parso.python import tree
+        from parso.python import tree  # pylint: disable=redefined-outer-name
 
     assert isinstance(event.widget, tk.Text)
     text = event.widget

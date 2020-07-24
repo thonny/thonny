@@ -5,8 +5,9 @@ import os.path
 import re
 import tkinter as tk
 import traceback
-from _tkinter import TclError
 from tkinter import ttk
+
+from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import PythonText, get_syntax_options_for_tag
@@ -602,7 +603,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                     self._io_cursor_offset = 0
                 else:
                     # offset becomes closer to 0
-                    self._io_cursor_offset + overwrite_len
+                    self._io_cursor_offset += overwrite_len
 
             elif self._io_cursor_offset > 0:
                 # insert spaces before actual data
@@ -679,14 +680,14 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
         if len(ints) != 1:
-            logging.warn("bad CSI cursor positioning: %s", marker)
+            logging.warning("bad CSI cursor positioning: %s", marker)
             # do nothing
             return
 
         try:
             delta = int(ints[0])
         except ValueError:
-            logging.warn("bad CSI cursor positioning: %s", marker)
+            logging.warning("bad CSI cursor positioning: %s", marker)
             return
 
         if marker.endswith("D"):
@@ -1889,8 +1890,8 @@ class PlotterCanvas(tk.Canvas):
         if not segments_by_color:
             return
 
-        range_start = 9999999999
-        range_end = -9999999999
+        range_start = 9_999_999_999
+        range_end = -9_999_999_999
 
         # if new block is using 3/4 of the width,
         # then don't consider old block's values anymore

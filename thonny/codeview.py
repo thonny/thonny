@@ -236,9 +236,7 @@ class CodeView(tktextext.EnhancedTextFrame):
 
         assert self._first_line_number is not None
 
-        self._syntax_theme_change_binding = get_workbench().bind(
-            "SyntaxThemeChanged", self._reload_theme_options, True
-        )
+        get_workbench().bind("SyntaxThemeChanged", self._reload_theme_options, True)
         self._original_newlines = os.linesep
         self._reload_theme_options()
         self._gutter.bind("<Double-Button-1>", self._toggle_breakpoint, True)

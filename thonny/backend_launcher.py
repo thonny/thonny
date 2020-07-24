@@ -32,7 +32,7 @@ if __name__ == "__main__":
             + "Choose another interpreter from Tools => Options => Interpreter",
             file=sys.stderr,
         )
-        exit()
+        sys.exit()
 
     import logging
     import os.path

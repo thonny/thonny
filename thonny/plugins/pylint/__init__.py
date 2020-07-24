@@ -14,7 +14,9 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
     def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {
-            checks_by_id[key]["msg_sym"] for key in checks_by_id if checks_by_id[key]["usage"] == "warning"
+            checks_by_id[key]["msg_sym"]
+            for key in checks_by_id
+            if checks_by_id[key]["usage"] == "warning"
         }
 
         if "bad-python3-import" in relevant_symbols:

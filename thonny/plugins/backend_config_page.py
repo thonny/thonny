@@ -10,6 +10,9 @@ class BackendDetailsConfigPage(ConfigurationPage):
     def should_restart(self):
         raise NotImplementedError()
 
+    def _on_change(self):
+        pass
+
     def _add_text_field(self, label_text, variable_name, row, show=None):
         entry_label = ttk.Label(self, text=label_text)
         entry_label.grid(row=row, column=0, sticky="w")

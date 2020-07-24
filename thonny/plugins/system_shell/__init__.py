@@ -4,8 +4,8 @@ import platform
 import sys
 
 from thonny import get_runner, get_workbench, terminal
-from thonny.code import get_saved_current_script_filename
 from thonny.common import get_augmented_system_path, get_exe_dirs
+from thonny.editors import get_saved_current_script_filename
 from thonny.running import get_environment_overrides_for_python_subprocess
 
 

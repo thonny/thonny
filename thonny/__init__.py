@@ -107,6 +107,7 @@ def get_ipc_file_path():
     for name in ("LOGNAME", "USER", "LNAME", "USERNAME"):
         if name in os.environ:
             username = os.environ.get(name)
+            break
     else:
         username = os.path.basename(os.path.expanduser("~"))
 
@@ -157,7 +158,7 @@ def launch():
     _prepare_thonny_user_dir()
 
     if not _check_welcome():
-        return
+        return 0
 
     if _should_delegate():
         try:
@@ -231,7 +232,7 @@ def _prepare_thonny_user_dir():
 def _should_delegate():
     if not os.path.exists(get_ipc_file_path()):
         # no previous instance
-        return
+        return False
 
     from thonny.config import try_load_configuration
 

@@ -216,7 +216,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _cmd_Run(self, cmd):
         self._connection.close()
         self._report_time("befconn")
-        args = cmd.args[:]
+        args = cmd.args
         if cmd.source and args[0] == "-c":
             if len(args) > 1:
                 self._send_error_message(

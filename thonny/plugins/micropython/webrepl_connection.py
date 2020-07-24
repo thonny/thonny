@@ -88,7 +88,7 @@ class WebReplConnection(MicroPythonConnection):
                 break
 
             self.num_bytes_received += len(data)
-            self._make_output_available.put(data, block=False)
+            self._make_output_available(data, block=False)
 
     async def _ws_keep_writing(self):
         import asyncio

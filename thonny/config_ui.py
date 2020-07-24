@@ -9,7 +9,7 @@ from thonny.ui_utils import CommonDialog, ems_to_pixels
 class ConfigurationDialog(CommonDialog):
     last_shown_tab_index = 0
 
-    def __init__(self, master, page_records):
+    def __init__(self, master, page_records_with_order):
         super().__init__(master)
         width = ems_to_pixels(53)
         height = ems_to_pixels(43)
@@ -33,7 +33,9 @@ class ConfigurationDialog(CommonDialog):
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 
         self._page_records = []
-        for key, title, page_class, order in sorted(page_records, key=lambda r: (r[3], r[0])):
+        for key, title, page_class, _ in sorted(
+            page_records_with_order, key=lambda r: (r[3], r[0])
+        ):
             try:
                 spacer = ttk.Frame(self)
                 spacer.rowconfigure(0, weight=1)
@@ -57,9 +59,9 @@ class ConfigurationDialog(CommonDialog):
                 self._notebook.select(tab)
 
     def _ok(self, event=None):
-        for key, title, page in self._page_records:
+        for _, title, page in self._page_records:
             try:
-                if page.apply() == False:
+                if not page.apply():
                     return
             except Exception:
                 get_workbench().report_exception("Error when applying options in " + title)
@@ -67,7 +69,7 @@ class ConfigurationDialog(CommonDialog):
         self.destroy()
 
     def _cancel(self, event=None):
-        for key, title, page in self._page_records:
+        for _, title, page in self._page_records:
             try:
                 page.cancel()
             except Exception:

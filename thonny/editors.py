@@ -4,9 +4,10 @@ import os.path
 import sys
 import tkinter as tk
 import traceback
-from _tkinter import TclError
 from logging import exception
 from tkinter import messagebox, ttk
+
+from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
@@ -164,7 +165,6 @@ class Editor(ttk.Frame):
                 "This file seems to have problems with encoding.\n\n"
                 + "Make sure it is in UTF-8 or contains proper encoding hint.",
             )
-            return False
 
         self.update_appearance()
 
@@ -692,7 +692,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_open_file(self):
         node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to open from?")
         if not node:
-            return None
+            return
 
         if node == "local":
             initialdir = get_workbench().get_local_cwd()
@@ -706,7 +706,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             assert node == "remote"
             target_path = ask_backend_path(self.winfo_toplevel(), "open")
             if not target_path:
-                return None
+                return
 
             path = make_remote_path(target_path)
 
@@ -979,11 +979,11 @@ def get_current_breakpoints():
 def get_saved_current_script_filename(force=True):
     editor = get_workbench().get_editor_notebook().get_current_editor()
     if not editor:
-        return
+        return None
 
     filename = editor.get_filename(force)
     if not filename:
-        return
+        return None
 
     if editor.is_modified():
         filename = editor.save_file()

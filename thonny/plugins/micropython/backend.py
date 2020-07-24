@@ -39,11 +39,12 @@ import logging
 import os
 import re
 import sys
+import textwrap
 import threading
 import time
 import traceback
 from queue import Empty, Queue
-from textwrap import dedent, indent
+from textwrap import dedent
 from threading import Lock
 
 from thonny.common import (
@@ -95,7 +96,7 @@ logger = logging.getLogger("thonny.micropython.backend")
 
 def debug(msg):
     return
-    print(msg, file=sys.stderr)
+    # print(msg, file=sys.stderr)
 
 
 class MicroPythonBackend:
@@ -192,7 +193,7 @@ class MicroPythonBackend:
                 mgmt_marker=MGMT_VALUE_START.decode(ENCODING),
             )
             + "\n"
-            + indent(self._get_custom_helpers(), "    ")
+            + textwrap.indent(self._get_custom_helpers(), "    ")
         )
 
     def _get_custom_helpers(self):
@@ -312,7 +313,7 @@ class MicroPythonBackend:
             self._local_cwd = cmd["local_cwd"]
 
         def create_error_response(**kw):
-            if not "error" in kw:
+            if "error" not in kw:
                 kw["error"] = traceback.format_exc()
 
             if isinstance(cmd, ToplevelCommand):
@@ -415,6 +416,7 @@ class MicroPythonBackend:
             ]
         else:
             self._execute_with_consumer(script, self._send_output)
+            return b"", b""
 
     def _execute_with_consumer(self, script, output_consumer):
         """Ensures prompt and submits the script.
@@ -567,7 +569,7 @@ class MicroPythonBackend:
 
     def _cmd_delete(self, cmd):
         assert cmd.paths
-        self._delete_sorted_paths(sorted(cmd.paths, key=lambda x: len(x), reverse=True))
+        self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
 
     def _delete_sorted_paths(self, paths):
         self._execute_without_output(
@@ -638,6 +640,8 @@ class MicroPythonBackend:
             assert written_bytes is None or written_bytes == item["size"]
             completed_files_size += item["size"]
 
+        return {}
+
     def _cmd_upload(self, cmd):
         completed_files_size = 0
         # TODO: also deal with empty directories
@@ -686,6 +690,8 @@ class MicroPythonBackend:
             assert written_bytes is None or written_bytes == item["size"]
 
             completed_files_size += item["size"]
+
+        return {}
 
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
@@ -795,8 +801,8 @@ class MicroPythonBackend:
                 if "." in prefix:
                     obj, prefix = prefix.rsplit(".", 1)
                     names = self._evaluate(
-                        "dir({}) if '{}' in locals() or '{}' in globals() else []".format(
-                            obj, obj, obj
+                        "dir({obj}) if '{obj}' in locals() or '{obj}' in globals() else []".format(
+                            obj=obj
                         )
                     )
                 else:
@@ -890,7 +896,7 @@ class MicroPythonBackend:
                 continue
 
             print("DUMPING", indent, object_expr, name)
-            self._send_text_to_shell("  * " + name + " : " + typ, "stdout")
+            print("  * " + name + " : " + typ)
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
                 fp.write(indent + "def " + name + "():\n")

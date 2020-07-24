@@ -23,8 +23,9 @@ import warnings
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 
-import __main__  # @UnresolvedImport
 import _ast
+
+import __main__  # @UnresolvedImport
 import thonny
 from thonny.common import path_startswith  # TODO: try to get rid of this
 from thonny.common import (
@@ -373,7 +374,7 @@ class VM:
             raise KeyboardInterrupt("Execution interrupted")
 
         if os.name == "nt":
-            signal.signal(signal.SIGBREAK, signal_handler)  # @UndefinedVariable
+            signal.signal(signal.SIGBREAK, signal_handler)  # pylint: disable=no-member
         else:
             signal.signal(signal.SIGINT, signal_handler)
 
@@ -547,8 +548,8 @@ class VM:
                     "location": dist.location,
                     "version": dist.version,
                 }
-                for dist in pkg_resources.working_set
-            }  # pylint: disable=not-an-iterable
+                for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
+            }
 
             return InlineResponse(
                 "get_active_distributions",

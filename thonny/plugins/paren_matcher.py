@@ -1,6 +1,6 @@
 import io
 import time
-import token
+import token as token_module
 
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
@@ -8,7 +8,14 @@ from thonny.shell import ShellText
 
 _OPENERS = {")": "(", "]": "[", "}": "{"}
 
-TOKTYPES = {token.LPAR, token.RPAR, token.LBRACE, token.RBRACE, token.LSQB, token.RSQB}
+TOKTYPES = {
+    token_module.LPAR,
+    token_module.RPAR,
+    token_module.LBRACE,
+    token_module.RBRACE,
+    token_module.LSQB,
+    token_module.RSQB,
+}
 
 BLANK_LINE_REGEX_STR = r"\n\s*\r?\n"
 BLANK_LINE_REGEX_STR = r"^\s*$"

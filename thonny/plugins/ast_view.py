@@ -78,7 +78,7 @@ class AstView(ui_utils.TreeFrame):
         def _format(key, node, parent_id):
 
             if isinstance(node, ast.AST):
-                fields = [(key, val) for key, val in ast.iter_fields(node)]
+                fields = list(ast.iter_fields(node))
 
                 value_label = node.__class__.__name__
 
@@ -164,7 +164,7 @@ def _find_closest_containing_node(tree, text_range):
 def pretty(node, key="/", level=0):
     """Used for exporting ASTView content"""
     if isinstance(node, ast.AST):
-        fields = [(key, val) for key, val in ast.iter_fields(node)]
+        fields = list(ast.iter_fields(node))
         value_label = node.__class__.__name__
         if isinstance(node, ast.Call):
             # Try to make 3.4 AST-s more similar to 3.5

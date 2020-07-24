@@ -57,9 +57,13 @@ disable=locally-disabled,
 	   trailing-newlines,
        ungrouped-imports,
        wrong-import-order,
+       check-imports-order,
        unused-argument,
        no-self-use,
        no-else-return,
+       no-else-break,
+       no-else-continue,
+       no-else-raise,
        len-as-condition,
        bad-continuation,
        missing-docstring,
@@ -98,6 +102,14 @@ disable=locally-disabled,
        simplifiable-if-statement,
        cyclic-import, # gives many false alarms
        unused-import, # typing imports seem to cause this
+       import-outside-toplevel, # it's OK
+       import-error, # some imports are done in a conditional path
+       unnecessary-pass,
+       subprocess-run-check,
+       assignment-from-none, # mypy is more precise about this
+       redefined-outer-name, # many false positives, trips on valid uses, mypy would be more precise
+
+
        
 
 
@@ -201,7 +213,7 @@ dummy-variables-rgx=^_|^dummy
 
 # List of additional names supposed to be defined in builtins. Remember that
 # you should avoid to define new builtins when possible.
-additional-builtins=
+additional-builtins=_
 
 # List of strings which can identify a callback function by name. A callback
 # name must start or end with one of those strings.

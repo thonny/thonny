@@ -667,15 +667,18 @@ class BaseFileBrowser(ttk.Frame):
         name = askstring("File name", "Provide filename", initialvalue="")
 
         if not name:
-            return
+            return None
 
         path = self.join(parent_path, name)
 
         if name in self._cached_child_data[parent_path]:
             # TODO: ignore case in windows
             messagebox.showerror("Error", "The file '" + path + "' already exists")
+            return self.create_new_file()
         else:
             self.open_file(path)
+
+        return path
 
     def delete(self):
         selection = self.get_selection_info(True)
@@ -811,13 +814,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
     def perform_delete(self, paths, description):
         # Deprecated. moving to trash should be used instead
         raise NotImplementedError()
-        """
-        for path in sorted(paths, key=len, reverse=True):
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-            else:
-                os.remove(path)
-        """
 
     def perform_move_to_trash(self, paths, description):
         # TODO: do it with subprocess dialog
@@ -948,6 +944,8 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             self.focus_into(path)
         else:
             self.request_new_focus(path)
+
+        return True
 
     def request_new_focus(self, path):
         # Overridden in active browser
@@ -1143,9 +1141,9 @@ class NodeChoiceDialog(CommonDialog):
 
     def on_return(self, event=None):
         if self.focus_get() == self.local_button:
-            return self.on_local(event)
+            self.on_local(event)
         elif self.focus_get() == self.remote_button:
-            return self.on_remote(event)
+            self.on_remote(event)
 
     def on_down(self, event=None):
         if self.focus_get() == self.local_button:
