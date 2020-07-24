@@ -8,6 +8,7 @@ from tkinter import ttk
 
 import thonny
 from thonny import get_workbench, ui_utils
+from thonny.languages import tr
 from thonny.misc_utils import get_python_version_string
 from thonny.ui_utils import CommonDialog
 
@@ -23,7 +24,7 @@ class AboutDialog(CommonDialog):
         main_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
 
-        self.title(_("About Thonny"))
+        self.title(tr("About Thonny"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.protocol("WM_DELETE_WINDOW", self._ok)
 
@@ -75,7 +76,7 @@ class AboutDialog(CommonDialog):
 
         credits_label = ttk.Label(
             main_frame,
-            text=_(
+            text=tr(
                 "Made in\n"
                 + "University of Tartu, Estonia,\n"
                 + "with the help from\n"
@@ -146,18 +147,18 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "changelog",
         "help",
-        _("Version history"),
+        tr("Version history"),
         lambda: open_url("https://github.com/thonny/thonny/blob/master/CHANGELOG.rst"),
         group=60,
     )
     get_workbench().add_command(
         "issues",
         "help",
-        _("Report problems"),
+        tr("Report problems"),
         lambda: open_url("https://github.com/thonny/thonny/issues/new"),
         group=60,
     )
-    get_workbench().add_command("about", "help", _("About Thonny"), open_about, group=61)
+    get_workbench().add_command("about", "help", tr("About Thonny"), open_about, group=61)
 
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)

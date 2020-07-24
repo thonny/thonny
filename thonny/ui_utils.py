@@ -20,7 +20,7 @@ from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
-from thonny.languages import get_button_padding
+from thonny.languages import get_button_padding, tr
 from thonny.misc_utils import (
     running_on_linux,
     running_on_mac_os,
@@ -363,9 +363,9 @@ class ClosableNotebook(ttk.Notebook):
 
     def create_tab_menu(self):
         menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
-        menu.add_command(label=_("Close"), command=self._close_tab_from_menu)
-        menu.add_command(label=_("Close others"), command=self._close_other_tabs)
-        menu.add_command(label=_("Close all"), command=self.close_tabs)
+        menu.add_command(label=tr("Close"), command=self._close_tab_from_menu)
+        menu.add_command(label=tr("Close others"), command=self._close_other_tabs)
+        menu.add_command(label=tr("Close all"), command=self.close_tabs)
         return menu
 
     def _letf_btn_press(self, event):
@@ -1295,42 +1295,22 @@ class EnhancedDoubleVar(EnhancedVar, tk.DoubleVar):
 def create_string_var(value, modification_listener=None) -> EnhancedStringVar:
     """Creates a tk.StringVar with "modified" attribute
     showing whether the variable has been modified after creation"""
-    return EnhancedStringVar(tk.StringVar, value, modification_listener)
+    return EnhancedStringVar(None, value, None, modification_listener)
 
 
 def create_int_var(value, modification_listener=None) -> EnhancedIntVar:
     """See create_string_var"""
-    return EnhancedIntVar(tk.IntVar, value, modification_listener)
+    return EnhancedIntVar(None, value, None, modification_listener)
 
 
 def create_double_var(value, modification_listener=None) -> EnhancedDoubleVar:
     """See create_string_var"""
-    return EnhancedDoubleVar(tk.DoubleVar, value, modification_listener)
+    return EnhancedDoubleVar(None, value, None, modification_listener)
 
 
 def create_boolean_var(value, modification_listener=None) -> EnhancedBooleanVar:
     """See create_string_var"""
-    return EnhancedBooleanVar(tk.BooleanVar, value, modification_listener)
-
-
-def _create_var(class_, value, modification_listener):
-    var = class_(value=value)
-    var.modified = False
-
-    def on_write(*args):
-        var.modified = True
-        if modification_listener:
-            try:
-                modification_listener()
-            except Exception:
-                # Otherwise whole process will be brought down
-                # because for some reason Tk tries to call non-existing method
-                # on variable
-                get_workbench().report_exception()
-
-    # TODO: https://bugs.python.org/issue22115 (deprecation warning)
-    var.trace("w", on_write)
-    return var
+    return EnhancedBooleanVar(None, value, None, modification_listener)
 
 
 def shift_is_pressed(event_state):
@@ -1551,10 +1531,10 @@ class FileCopyDialog(CommonDialog):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.title(_("Copying"))
+        self.title(tr("Copying"))
 
         if description is None:
-            description = _("Copying\n  %s\nto\n  %s") % (source, destination)
+            description = tr("Copying\n  %s\nto\n  %s") % (source, destination)
 
         label = ttk.Label(main_frame, text=description)
         label.grid(row=0, column=0, columnspan=2, sticky="nw", padx=15, pady=15)
@@ -1562,7 +1542,7 @@ class FileCopyDialog(CommonDialog):
         self._bar = ttk.Progressbar(main_frame, maximum=os.path.getsize(source), length=200)
         self._bar.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
 
-        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
+        self._cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
         self._cancel_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
         self._bar.focus_set()
 
@@ -1691,11 +1671,11 @@ class LongTextDialog(CommonDialog):
         self._text.text.see("1.0")
 
         copy_button = ttk.Button(
-            main_frame, command=self._copy, text=_("Copy to clipboard"), width=20
+            main_frame, command=self._copy, text=tr("Copy to clipboard"), width=20
         )
         copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
 
-        close_button = ttk.Button(main_frame, command=self._close, text=_("Close"))
+        close_button = ttk.Button(main_frame, command=self._close, text=tr("Close"))
         close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0, 20))
 
         main_frame.columnconfigure(0, weight=1)
@@ -1764,7 +1744,7 @@ class SubprocessDialog(CommonDialog):
         if long_description is not None:
             self.text.direct_insert("1.0", long_description + "\n\n")
 
-        self.button = ttk.Button(main_frame, text=_("Cancel"), command=self._close)
+        self.button = ttk.Button(main_frame, text=tr("Cancel"), command=self._close)
         self.button.grid(row=1, column=0, pady=(0, 15))
 
         main_frame.rowconfigure(0, weight=1)
@@ -1817,7 +1797,7 @@ class SubprocessDialog(CommonDialog):
             if self.returncode == None:
                 self.after(200, poll_output_events)
             else:
-                self.button["text"] = _("OK")
+                self.button["text"] = tr("OK")
                 self.button.focus_set()
                 if self.returncode != 0:
                     self.text.direct_insert(
@@ -1843,8 +1823,8 @@ class SubprocessDialog(CommonDialog):
     def _close(self, event=None):
         if self._proc.poll() is None:
             if messagebox.askyesno(
-                _("Cancel the process?"),
-                _("The process is still running.\nAre you sure you want to cancel?"),
+                tr("Cancel the process?"),
+                tr("The process is still running.\nAre you sure you want to cancel?"),
                 parent=None if running_on_mac_os() else self,
             ):
                 # try gently first
@@ -2253,13 +2233,13 @@ class TextMenu(MenuEx):
         self.add_extra_items()
 
     def add_basic_items(self):
-        self.add_command(label=_("Cut"), command=self.on_cut, tester=self.can_cut)
-        self.add_command(label=_("Copy"), command=self.on_copy, tester=self.can_copy)
-        self.add_command(label=_("Paste"), command=self.on_paste, tester=self.can_paste)
+        self.add_command(label=tr("Cut"), command=self.on_cut, tester=self.can_cut)
+        self.add_command(label=tr("Copy"), command=self.on_copy, tester=self.can_copy)
+        self.add_command(label=tr("Paste"), command=self.on_paste, tester=self.can_paste)
 
     def add_extra_items(self):
         self.add_separator()
-        self.add_command(label=_("Select All"), command=self.on_select_all)
+        self.add_command(label=tr("Select All"), command=self.on_select_all)
 
     def on_cut(self):
         self.text.event_generate("<<Cut>>")

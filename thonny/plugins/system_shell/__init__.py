@@ -6,6 +6,7 @@ import sys
 from thonny import get_runner, get_workbench, terminal
 from thonny.common import get_augmented_system_path, get_exe_dirs
 from thonny.editors import get_saved_current_script_filename
+from thonny.languages import tr
 from thonny.running import get_environment_overrides_for_python_subprocess
 
 
@@ -52,7 +53,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "OpenSystemShell",
         "tools",
-        _("Open system shell..."),
+        tr("Open system shell..."),
         _open_system_shell,
         group=80,
         image="terminal",

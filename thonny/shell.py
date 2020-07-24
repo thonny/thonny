@@ -18,6 +18,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
 )
+from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
 from thonny.running import EDITOR_CONTENT_TOKEN
 from thonny.tktextext import TextFrame, TweakableText, index2line
@@ -76,7 +77,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().add_command(
             "clear_shell",
             "edit",
-            _("Clear shell"),
+            tr("Clear shell"),
             self.clear_shell,
             default_sequence=_CLEAR_SHELL_DEFAULT_SEQ,
             group=200,
@@ -131,7 +132,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().add_command(
             "toggle_plotter",
             "view",
-            _("Plotter"),
+            tr("Plotter"),
             self.toggle_plotter,
             can_toggle,
             flag_name="view.show_plotter",
@@ -256,7 +257,7 @@ class ShellMenu(TextMenu):
 
     def add_extra_items(self):
         self.add_separator()
-        self.add_command(label=_("Clear"), command=self.text._clear_shell)
+        self.add_command(label=tr("Clear"), command=self.text._clear_shell)
 
         def toggle_from_menu():
             # I don't like that Tk menu toggles checbutton variable
@@ -269,7 +270,7 @@ class ShellMenu(TextMenu):
             self.view.toggle_plotter()
 
         self.add_checkbutton(
-            label=_("Show Plotter"),
+            label=tr("Show Plotter"),
             command=toggle_from_menu,
             variable=self.view.plotter_visibility_var,
         )
@@ -1551,7 +1552,7 @@ class SqueezedTextDialog(CommonDialog):
 
         explanation_label = ttk.Label(
             mainframe,
-            text=_(
+            text=tr(
                 "For performance reasons, Shell avoids showing "
                 + "very long lines in full (see Tools => Options => Shell).\n"
                 + "Here you can interact with the original text fragment."
@@ -1562,7 +1563,7 @@ class SqueezedTextDialog(CommonDialog):
         self._wrap_var = tk.BooleanVar(False)
         self.wrap_checkbox = ttk.Checkbutton(
             mainframe,
-            text=_("Wrap text (may be slow)"),
+            text=tr("Wrap text (may be slow)"),
             variable=self._wrap_var,
             onvalue=True,
             offvalue=False,
@@ -1604,7 +1605,7 @@ class SqueezedTextDialog(CommonDialog):
 
         self.bind("<Escape>", self._on_close, True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        self.title(_("Squeezed text (%d characters)") % len(self.content))
+        self.title(tr("Squeezed text (%d characters)") % len(self.content))
 
     def _on_wrap_changed(self):
         if self._wrap_var.get():
@@ -1773,9 +1774,9 @@ class PlotterCanvas(tk.Canvas):
         self.delete("info")
         if segment_count == 0:
             info_text = (
-                _("Plotter visualizes series of\n" + "numbers printed to the Shell.")
+                tr("Plotter visualizes series of\n" + "numbers printed to the Shell.")
                 + "\n\n"
-                + _("See Help for details.")
+                + tr("See Help for details.")
             )
 
             self.create_text_with_background(

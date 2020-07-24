@@ -3,6 +3,7 @@
 
 from thonny import get_workbench
 from thonny.common import DebuggerResponse
+from thonny.languages import tr
 from thonny.tktextext import TextFrame
 
 
@@ -35,4 +36,4 @@ class EventsView(TextFrame):
 
 def load_plugin() -> None:
     if get_workbench().get_option("general.debug_mode"):
-        get_workbench().add_view(EventsView, _("Events"), "se")
+        get_workbench().add_view(EventsView, tr("Events"), "se")

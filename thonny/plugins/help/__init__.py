@@ -6,6 +6,7 @@ from tkinter import ttk
 import thonny
 from thonny import get_workbench, tktextext, ui_utils
 from thonny.config import try_load_configuration
+from thonny.languages import tr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
 
@@ -60,7 +61,7 @@ class HelpView(TextFrame):
             rst_source = fp.read()
 
         if not filename.endswith("index.rst"):
-            rst_source = "`" + _("Home") + " <index.rst>`_\n\n" + rst_source
+            rst_source = "`" + tr("Home") + " <index.rst>`_\n\n" + rst_source
 
         self.text.append_rst(rst_source)
 
@@ -70,5 +71,5 @@ def open_help():
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(HelpView, _("Help"), "ne")
-    get_workbench().add_command("help_contents", "help", _("Help contents"), open_help, group=30)
+    get_workbench().add_view(HelpView, tr("Help"), "ne")
+    get_workbench().add_command("help_contents", "help", tr("Help contents"), open_help, group=30)

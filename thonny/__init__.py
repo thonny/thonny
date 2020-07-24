@@ -1,4 +1,3 @@
-import logging
 import os.path
 import platform
 import sys
@@ -138,7 +137,6 @@ def _check_welcome():
 
 
 def launch():
-    import gettext
     import runpy
 
     if sys.executable.endswith("thonny.exe"):
@@ -154,7 +152,6 @@ def launch():
     except ImportError:
         pass
 
-    gettext.install("thonny", "locale")
     _prepare_thonny_user_dir()
 
     if not _check_welcome():

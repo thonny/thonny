@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.ui_utils import CommonDialog, select_sequence
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -53,13 +54,13 @@ class FindDialog(CommonDialog):
             )
         )
 
-        self.title(_("Find & Replace"))
+        self.title(tr("Find & Replace"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master)
         self.protocol("WM_DELETE_WINDOW", self._ok)
 
         # Find text label
-        self.find_label = ttk.Label(main_frame, text=_("Find:"))
+        self.find_label = ttk.Label(main_frame, text=tr("Find:"))
         self.find_label.grid(column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0))
 
         # Find text field
@@ -70,7 +71,7 @@ class FindDialog(CommonDialog):
             self.find_entry.insert(0, FindDialog.last_searched_word)
 
         # Replace text label
-        self.replace_label = ttk.Label(main_frame, text=_("Replace with:"))
+        self.replace_label = ttk.Label(main_frame, text=tr("Replace with:"))
         self.replace_label.grid(column=0, row=1, sticky="w", padx=(padx, 0))
 
         # Replace text field
@@ -88,18 +89,18 @@ class FindDialog(CommonDialog):
         # Case checkbox
         self.case_var = tk.IntVar()
         self.case_checkbutton = ttk.Checkbutton(
-            main_frame, text=_("Case sensitive"), variable=self.case_var
+            main_frame, text=tr("Case sensitive"), variable=self.case_var
         )
         self.case_checkbutton.grid(column=0, row=3, padx=(padx, 0), pady=(0, pady))
 
         # Direction radiobuttons
         self.direction_var = tk.IntVar()
         self.up_radiobutton = ttk.Radiobutton(
-            main_frame, text=_("Up"), variable=self.direction_var, value=1
+            main_frame, text=tr("Up"), variable=self.direction_var, value=1
         )
         self.up_radiobutton.grid(column=1, row=3, pady=(0, pady))
         self.down_radiobutton = ttk.Radiobutton(
-            main_frame, text=_("Down"), variable=self.direction_var, value=2
+            main_frame, text=tr("Down"), variable=self.direction_var, value=2
         )
         self.down_radiobutton.grid(column=2, row=3, pady=(0, pady))
         self.down_radiobutton.invoke()
@@ -108,7 +109,7 @@ class FindDialog(CommonDialog):
         button_width = 17
         self.find_button = ttk.Button(
             main_frame,
-            text=_("Find"),
+            text=tr("Find"),
             width=button_width,
             command=self._perform_find,
             default="active",
@@ -118,7 +119,7 @@ class FindDialog(CommonDialog):
 
         # Replace button - replaces the current occurrence, if it exists
         self.replace_button = ttk.Button(
-            main_frame, text=_("Replace"), width=button_width, command=self._perform_replace
+            main_frame, text=tr("Replace"), width=button_width, command=self._perform_replace
         )
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_button.config(state="disabled")
@@ -126,7 +127,7 @@ class FindDialog(CommonDialog):
         # Replace + find button - replaces the current occurence and goes to next
         self.replace_and_find_button = ttk.Button(
             main_frame,
-            text=_("Replace+Find"),
+            text=tr("Replace+Find"),
             width=button_width,
             command=self._perform_replace_and_find,
         )  # TODO - text to resources
@@ -135,7 +136,10 @@ class FindDialog(CommonDialog):
 
         # Replace all button - replaces all occurrences
         self.replace_all_button = ttk.Button(
-            main_frame, text=_("Replace all"), width=button_width, command=self._perform_replace_all
+            main_frame,
+            text=tr("Replace all"),
+            width=button_width,
+            command=self._perform_replace_all,
         )  # TODO - text to resources
         self.replace_all_button.grid(
             column=3, row=3, sticky=tk.W + tk.E, padx=(0, padx), pady=(0, pady)
@@ -229,7 +233,7 @@ class FindDialog(CommonDialog):
 
         tofind = self.find_entry.get()
         if len(tofind) == 0:
-            self.infotext_label_var.set(_("Enter string to be replaced."))
+            self.infotext_label_var.set(tr("Enter string to be replaced."))
             return
 
         toreplace = self.replace_entry.get()
@@ -313,7 +317,7 @@ class FindDialog(CommonDialog):
         )  # performs the search and sets the start index of the found string
         if len(wordstart) == 0:
             self.infotext_label_var.set(
-                _("The specified text was not found!")
+                tr("The specified text was not found!")
             )  # TODO - better text, also move it to the texts resources list
             self.replace_and_find_button.config(state="disabled")
             self.replace_button.config(state="disabled")
@@ -409,7 +413,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "OpenFindDialog",
         "edit",
-        _("Find & Replace"),
+        tr("Find & Replace"),
         cmd_open_find_dialog,
         default_sequence=select_sequence("<Control-f>", "<Command-f>"),
         extra_sequences=["<Control-Greek_phi>"],

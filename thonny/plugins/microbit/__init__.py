@@ -5,6 +5,7 @@ from time import sleep
 from tkinter import messagebox, ttk
 
 from thonny import get_workbench, ui_utils
+from thonny.languages import tr
 from thonny.misc_utils import find_volume_by_name
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
@@ -49,9 +50,9 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
     def _get_flashing_frame(self):
         frame = super()._get_flashing_frame()
         self._flashing_label.configure(
-            text=_("Make sure MicroPython has been installed to your micro:bit.")
+            text=tr("Make sure MicroPython has been installed to your micro:bit.")
             + "\n("
-            + _("Don't forget that main.py only works without embedded main script.")
+            + tr("Don't forget that main.py only works without embedded main script.")
             + ")"
         )
         return frame
@@ -62,11 +63,11 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
     def _open_flashing_dialog(self):
         mount_path = find_volume_by_name(
             "MICROBIT",
-            not_found_msg=_("Could not find disk '%s'.")
+            not_found_msg=tr("Could not find disk '%s'.")
             + "\n"
-            + _("Make sure you have micro:bit plugged in!")
+            + tr("Make sure you have micro:bit plugged in!")
             + "\n\n"
-            + _("Do you want to continue and locate the disk yourself?"),
+            + tr("Do you want to continue and locate the disk yourself?"),
         )
         if mount_path is None:
             return
@@ -94,20 +95,20 @@ class FlashingDialog(CommonDialog):
 
         main_frame.columnconfigure(1, weight=1)
 
-        self.title(_("Install latest MicroPython to BBC micro:bit"))
+        self.title(tr("Install latest MicroPython to BBC micro:bit"))
 
-        target_caption_label = ttk.Label(main_frame, text=_("micro:bit location:"))
+        target_caption_label = ttk.Label(main_frame, text=tr("micro:bit location:"))
         target_caption_label.grid(row=0, column=0, padx=15, pady=(15, 0), sticky="w")
         target_label = ttk.Label(main_frame, text=self._target_dir)
         target_label.grid(row=0, column=1, padx=15, pady=(15, 0), sticky="w", columnspan=2)
 
-        version_caption_label = ttk.Label(main_frame, text=_("Version to be installed:"))
+        version_caption_label = ttk.Label(main_frame, text=tr("Version to be installed:"))
         version_caption_label.grid(row=1, column=0, sticky="w", padx=15, pady=(0, 15))
-        self._version_label = ttk.Label(main_frame, text=_("please wait") + " ...")
+        self._version_label = ttk.Label(main_frame, text=tr("please wait") + " ...")
         self._version_label.grid(row=1, column=1, columnspan=2, padx=15, pady=(0, 15), sticky="w")
 
         self._state_label = ttk.Label(
-            main_frame, text=_("NB! All files on micro:bit will be deleted!")
+            main_frame, text=tr("NB! All files on micro:bit will be deleted!")
         )
         self._state_label.grid(row=2, column=0, columnspan=3, sticky="w", padx=15, pady=(0, 15))
 
@@ -115,11 +116,11 @@ class FlashingDialog(CommonDialog):
         self._progress_bar.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=15, pady=0)
 
         self._install_button = ttk.Button(
-            main_frame, text=_("Install"), command=self._start_installing
+            main_frame, text=tr("Install"), command=self._start_installing
         )
         self._install_button.grid(row=4, column=0, columnspan=2, sticky="ne", padx=0, pady=15)
 
-        self._close_button = ttk.Button(main_frame, text=_("Cancel"), command=self._close)
+        self._close_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._close)
         self._close_button.grid(row=4, column=2, sticky="ne", padx=15, pady=15)
         self._progress_bar.focus_set()
 
@@ -149,7 +150,7 @@ class FlashingDialog(CommonDialog):
             self._release_info["tag_name"] + " (" + self._release_info["published_at"][:10] + ")"
         )
         self._version_label.configure(text=version_str)
-        # self._install_button.configure(text=_("Install") + " " + version_str)
+        # self._install_button.configure(text=tr("Install") + " " + version_str)
 
         candidates = [
             asset
@@ -190,12 +191,14 @@ class FlashingDialog(CommonDialog):
         if self._state == "installing":
             self._progress_bar.configure(value=self._bytes_copied)
             self._old_bytes_copied = self._bytes_copied
-            self._state_label.configure(text=_("Installing ..."))
+            self._state_label.configure(text=tr("Installing ..."))
 
         if self._state == "done":
             self._progress_bar.configure(value=0)
-            self._state_label.configure(text=_("Done!") + " " + _("You can now close this dialog."))
-            self._close_button.configure(text=_("Close"))
+            self._state_label.configure(
+                text=tr("Done!") + " " + tr("You can now close this dialog.")
+            )
+            self._close_button.configure(text=tr("Close"))
 
         if self._state != "done":
             self.after(200, self._update_state)

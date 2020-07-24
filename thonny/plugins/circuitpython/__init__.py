@@ -5,6 +5,7 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
@@ -44,5 +45,5 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
 
 def load_plugin():
     add_micropython_backend(
-        "CircuitPython", CircuitPythonProxy, _("CircuitPython (generic)"), CircuitPythonConfigPage
+        "CircuitPython", CircuitPythonProxy, tr("CircuitPython (generic)"), CircuitPythonConfigPage
     )

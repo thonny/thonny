@@ -4,6 +4,7 @@ import subprocess
 from tkinter import messagebox
 
 from thonny import THONNY_USER_DIR, get_runner, get_workbench, running
+from thonny.languages import tr
 
 _server_started = False
 _server_process = None
@@ -50,7 +51,7 @@ def debug_with_birdseye():
         import birdseye  # @UnusedImport
     except ImportError:
         if messagebox.askyesno(
-            _("About Birdseye"),
+            tr("About Birdseye"),
             _(
                 "Birdseye is a Python debugger which needs to be installed separately.\n\n"
                 + "Do you want to open the help page and learn more?"
@@ -78,7 +79,7 @@ def load_plugin():
     get_workbench().add_command(
         "birdseye",
         "run",
-        _("Debug current script (birdseye)"),
+        tr("Debug current script (birdseye)"),
         debug_with_birdseye,
         caption="birdseye",
         tester=_start_debug_enabled,

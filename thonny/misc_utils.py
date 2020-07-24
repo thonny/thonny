@@ -8,6 +8,8 @@ import sys
 import time
 from typing import Optional, Sequence, Tuple
 
+from thonny.languages import tr
+
 
 def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
     # Deleting the folder on Windows is not so easy task
@@ -116,10 +118,10 @@ def find_volume_by_name(
 
     # Can't translate in the header as _ may not be available at import time
     if not_found_msg is None:
-        not_found_msg = _("Could not find disk '%s'. Do you want to locate it yourself?")
+        not_found_msg = tr("Could not find disk '%s'. Do you want to locate it yourself?")
 
     if found_several_msg is None:
-        found_several_msg = _("Found several '%s' disks. Do you want to choose one yourself?")
+        found_several_msg = tr("Found several '%s' disks. Do you want to choose one yourself?")
 
     volumes = find_volumes_by_name(volume_name)
     if len(volumes) == 1:
@@ -135,7 +137,7 @@ def find_volume_by_name(
 
         from thonny.ui_utils import askdirectory
 
-        if askyesno(_("Can't find suitable disk"), msg):
+        if askyesno(tr("Can't find suitable disk"), msg):
             path = askdirectory(master=tk._default_root)
             if path:
                 return path

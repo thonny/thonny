@@ -6,6 +6,7 @@ from tkinter import ttk
 import thonny.memory
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
+from thonny.languages import tr
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import ems_to_pixels
@@ -106,10 +107,10 @@ class ObjectInspector(ttk.Frame):
         self.title_label.bind("<Configure>", configure, True)
 
         self.back_button = create_navigation_link(
-            1, "nav-backward", self.navigate_back, _("Previous object"), (5, 0)
+            1, "nav-backward", self.navigate_back, tr("Previous object"), (5, 0)
         )
         self.forward_button = create_navigation_link(
-            2, "nav-forward", self.navigate_forward, _("Next object")
+            2, "nav-forward", self.navigate_forward, tr("Next object")
         )
         self.back_links = []
         self.forward_links = []
@@ -671,4 +672,4 @@ class AttributesFrame(thonny.memory.VariablesFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(ObjectInspector, _("Object inspector"), "se")
+    get_workbench().add_view(ObjectInspector, tr("Object inspector"), "se")

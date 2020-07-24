@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.ui_utils import select_sequence
 
 
@@ -17,7 +18,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "undo",
         "edit",
-        _("Undo"),
+        tr("Undo"),
         create_edit_command_handler("<<Undo>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-z>", "<Command-z>"),
@@ -29,7 +30,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "redo",
         "edit",
-        _("Redo"),
+        tr("Redo"),
         create_edit_command_handler("<<Redo>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-y>", "<Command-y>"),
@@ -45,7 +46,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Cut",
         "edit",
-        _("Cut"),
+        tr("Cut"),
         create_edit_command_handler("<<Cut>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-x>", "<Command-x>"),
@@ -57,7 +58,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Copy",
         "edit",
-        _("Copy"),
+        tr("Copy"),
         create_edit_command_handler("<<Copy>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-c>", "<Command-c>"),
@@ -69,7 +70,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Paste",
         "edit",
-        _("Paste"),
+        tr("Paste"),
         create_edit_command_handler("<<Paste>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-v>", "<Command-v>"),
@@ -81,7 +82,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "SelectAll",
         "edit",
-        _("Select all"),
+        tr("Select all"),
         create_edit_command_handler("<<SelectAll>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-a>", "<Command-a>"),

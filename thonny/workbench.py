@@ -2,7 +2,6 @@
 
 import ast
 import collections
-import gettext
 import importlib
 import logging
 import os.path
@@ -35,6 +34,7 @@ from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
 from thonny.editors import EditorNotebook
+from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
     running_on_linux,
@@ -149,7 +149,9 @@ class Workbench(tk.Tk):
 
         self._init_theming()
         self._init_window()
-        self.add_view(ShellView, _("Shell"), "s", visible_by_default=True, default_position_key="A")
+        self.add_view(
+            ShellView, tr("Shell"), "s", visible_by_default=True, default_position_key="A"
+        )
         assistance.init()
         self._runner = Runner()
         self._load_plugins()
@@ -246,15 +248,7 @@ class Workbench(tk.Tk):
 
     def _init_language(self) -> None:
         """Initialize language."""
-        language_code = self.get_option("general.language")
-        if language_code in languages.LANGUAGES_DICT:
-            path = os.path.join(os.path.dirname(__file__), "locale")
-            try:
-                language = gettext.translation("thonny", path, [language_code])
-                language.install()
-            except Exception:
-                traceback.print_exc()
-                self.report_exception("Can't load language " + language_code)
+        languages.set_language(self.get_option("general.language"))
 
     def _get_logging_level(self) -> int:
         if self.in_debug_mode():
@@ -361,12 +355,12 @@ class Workbench(tk.Tk):
         )  # type: Dict[Tuple[str, str], MenuItem] # key is pair (menu_name, command_label)
 
         # create standard menus in correct order
-        self.get_menu("file", _("File"))
-        self.get_menu("edit", _("Edit"))
-        self.get_menu("view", _("View"))
-        self.get_menu("run", _("Run"))
-        self.get_menu("tools", _("Tools"))
-        self.get_menu("help", _("Help"))
+        self.get_menu("file", tr("File"))
+        self.get_menu("edit", tr("Edit"))
+        self.get_menu("view", tr("View"))
+        self.get_menu("run", tr("Run"))
+        self.get_menu("tools", tr("Tools"))
+        self.get_menu("help", tr("Help"))
 
     def _load_plugins(self) -> None:
         # built-in plugins
@@ -517,7 +511,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "SameAsFrontend",
             running.SameAsFrontendCPythonProxy,
-            _("The same interpreter which runs Thonny (default)"),
+            tr("The same interpreter which runs Thonny (default)"),
             running_config_page.SameAsFrontEndConfigurationPage,
             "1",
         )
@@ -525,7 +519,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "CustomCPython",
             running.CustomCPythonProxy,
-            _("Alternative Python 3 interpreter or virtual environment"),
+            tr("Alternative Python 3 interpreter or virtual environment"),
             running_config_page.CustomCPythonConfigurationPage,
             "2",
         )
@@ -533,7 +527,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "PrivateVenv",
             running.PrivateVenvCPythonProxy,
-            _("A special virtual environment (deprecated)"),
+            tr("A special virtual environment (deprecated)"),
             running_config_page.PrivateVenvConfigurationPage,
             "z",
         )
@@ -617,7 +611,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "exit",
             "file",
-            _("Exit"),
+            tr("Exit"),
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
             extra_sequences=["<Alt-F4>"]
@@ -627,14 +621,14 @@ class Workbench(tk.Tk):
             else [],
         )
 
-        self.add_command("show_options", "tools", _("Options..."), self.show_options, group=180)
+        self.add_command("show_options", "tools", tr("Options..."), self.show_options, group=180)
         self.createcommand("::tk::mac::ShowPreferences", self.show_options)
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
         self.add_command(
             "increase_font_size",
             "view",
-            _("Increase font size"),
+            tr("Increase font size"),
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
             extra_sequences=["<Control-KP_Add>"],
@@ -644,7 +638,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "decrease_font_size",
             "view",
-            _("Decrease font size"),
+            tr("Decrease font size"),
             lambda: self._change_font_size(-1),
             default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
             extra_sequences=["<Control-KP_Subtract>"],
@@ -656,7 +650,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_editor",
             "view",
-            _("Focus editor"),
+            tr("Focus editor"),
             self._cmd_focus_editor,
             default_sequence=select_sequence("<Alt-e>", "<Command-Alt-e>"),
             group=70,
@@ -665,7 +659,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_shell",
             "view",
-            _("Focus shell"),
+            tr("Focus shell"),
             self._cmd_focus_shell,
             default_sequence=select_sequence("<Alt-s>", "<Command-Alt-s>"),
             group=70,
@@ -676,7 +670,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                _("Maximize view"),
+                tr("Maximize view"),
                 self._cmd_toggle_maximize_view,
                 flag_name="view.maximize_view",
                 default_sequence=None,
@@ -688,7 +682,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                _("Full screen"),
+                tr("Full screen"),
                 self._cmd_toggle_full_screen,
                 flag_name="view.full_screen",
                 default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
@@ -699,8 +693,8 @@ class Workbench(tk.Tk):
             self.add_command(
                 "font",
                 "tools",
-                _("Change font size"),
-                caption=_("Zoom"),
+                tr("Change font size"),
+                caption=tr("Zoom"),
                 handler=self._toggle_font_size,
                 image="zoom",
                 include_in_toolbar=True,
@@ -709,10 +703,10 @@ class Workbench(tk.Tk):
             self.add_command(
                 "quit",
                 "help",
-                _("Exit Thonny"),
+                tr("Exit Thonny"),
                 self._on_close,
                 image="quit",
-                caption=_("Quit"),
+                caption=tr("Quit"),
                 include_in_toolbar=True,
                 group=101,
             )
@@ -1105,7 +1099,7 @@ class Workbench(tk.Tk):
         images: Dict[str, str] = {},
     ) -> None:
         if name in self._ui_themes:
-            warn(_("Overwriting theme '%s'") % name)
+            warn(tr("Overwriting theme '%s'") % name)
 
         self._ui_themes[name] = (parent, settings, images)
 
@@ -1113,7 +1107,7 @@ class Workbench(tk.Tk):
         self, name: str, parent: Optional[str], settings: FlexibleSyntaxThemeSettings
     ) -> None:
         if name in self._syntax_themes:
-            warn(_("Overwriting theme '%s'") % name)
+            warn(tr("Overwriting theme '%s'") % name)
 
         self._syntax_themes[name] = (parent, settings)
 
@@ -1272,7 +1266,7 @@ class Workbench(tk.Tk):
         col = 1000
         self._toolbar.columnconfigure(col, weight=1)
 
-        label = ttk.Label(frame, text=_("Program arguments:"))
+        label = ttk.Label(frame, text=tr("Program arguments:"))
         label.grid(row=0, column=0, sticky="nse", padx=5)
 
         self.program_arguments_box = ttk.Combobox(
@@ -1301,7 +1295,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "viewargs",
             "view",
-            _("Program arguments"),
+            tr("Program arguments"),
             toggle,
             flag_name="view.show_program_arguments",
             group=11,
@@ -1315,7 +1309,7 @@ class Workbench(tk.Tk):
 
         label = ttk.Label(
             self._toolbar,
-            text=_("Switch to\nregular\nmode"),
+            text=tr("Switch to\nregular\nmode"),
             justify="right",
             font="SmallLinkFont",
             style="Url.TLabel",
@@ -1326,7 +1320,7 @@ class Workbench(tk.Tk):
         def on_click(event):
             self.set_option("general.ui_mode", "regular")
             tk.messagebox.showinfo(
-                _("Regular mode"),
+                tr("Regular mode"),
                 _(
                     "Configuration has been updated. "
                     + "Restart Thonny to start working in regular mode.\n\n"
@@ -2131,7 +2125,7 @@ class Workbench(tk.Tk):
             self.after(50, self._poll_ipc_requests)
 
     def _on_close(self) -> None:
-        if not self.get_editor_notebook().check_allow_closing():
+        if self._editor_notebook and not self._editor_notebook.check_allow_closing():
             return
 
         self._closing = True

@@ -2,6 +2,7 @@ import tkinter as tk
 
 from thonny import get_workbench
 from thonny.common import TextRange
+from thonny.languages import tr
 from thonny.ui_utils import select_sequence
 
 BLOCK_COMMENT_PREFIX = "# "
@@ -120,7 +121,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "indent",
         "edit",
-        _("Indent selected lines"),
+        tr("Indent selected lines"),
         _cmd_indent_selection,
         tester=_writable_text_is_focused,
         accelerator="Tab",
@@ -130,7 +131,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "dedent",
         "edit",
-        _("Dedent selected lines"),
+        tr("Dedent selected lines"),
         _cmd_dedent_selection,
         tester=_writable_text_is_focused,
         accelerator="Shift+Tab",
@@ -140,7 +141,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "toggle_comment",
         "edit",
-        _("Toggle comment"),
+        tr("Toggle comment"),
         _cmd_toggle_selection_comment,
         default_sequence=select_sequence("<Control-Key-3>", "<Command-Key-3>"),
         tester=_writable_text_is_focused,
@@ -150,7 +151,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "comment_selection",
         "edit",
-        _("Comment out"),
+        tr("Comment out"),
         _cmd_comment_selection,
         default_sequence="<Alt-Key-3>",
         tester=_writable_text_is_focused,
@@ -160,7 +161,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "uncomment_selection",
         "edit",
-        _("Uncomment"),
+        tr("Uncomment"),
         _cmd_uncomment_selection,
         default_sequence="<Alt-Key-4>",
         tester=_writable_text_is_focused,

@@ -49,6 +49,7 @@ from thonny.editors import (
     get_saved_current_script_filename,
     is_remote_path,
 )
+from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
@@ -111,8 +112,8 @@ class Runner:
     def _init_commands(self) -> None:
         global RUN_COMMAND_CAPTION, RUN_COMMAND_LABEL
 
-        RUN_COMMAND_LABEL = _("Run current script")
-        RUN_COMMAND_CAPTION = _("Run")
+        RUN_COMMAND_LABEL = tr("Run current script")
+        RUN_COMMAND_CAPTION = tr("Run")
 
         get_workbench().set_default("run.run_in_terminal_python_repl", False)
         get_workbench().set_default("run.run_in_terminal_keep_open", True)
@@ -142,7 +143,7 @@ class Runner:
         get_workbench().add_command(
             "run_current_script_in_terminal",
             "run",
-            _("Run current script in terminal"),
+            tr("Run current script in terminal"),
             caption="RunT",
             handler=self._cmd_run_current_script_in_terminal,
             default_sequence="<Control-t>",
@@ -155,8 +156,8 @@ class Runner:
         get_workbench().add_command(
             "restart",
             "run",
-            _("Stop/Restart backend"),
-            caption=_("Stop"),
+            tr("Stop/Restart backend"),
+            caption=tr("Stop"),
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
             group=100,
@@ -167,7 +168,7 @@ class Runner:
         get_workbench().add_command(
             "interrupt",
             "run",
-            _("Interrupt execution"),
+            tr("Interrupt execution"),
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
             default_sequence=INTERRUPT_SEQUENCE,
@@ -180,7 +181,7 @@ class Runner:
         get_workbench().add_command(
             "ctrld",
             "run",
-            _("Send EOF / Soft reboot"),
+            tr("Send EOF / Soft reboot"),
             self.ctrld,
             self.ctrld_enabled,
             group=100,
@@ -191,7 +192,7 @@ class Runner:
         get_workbench().add_command(
             "disconnect",
             "run",
-            _("Disconnect"),
+            tr("Disconnect"),
             self.disconnect,
             self.disconnect_enabled,
             group=100,
@@ -1533,7 +1534,7 @@ def generate_command_id():
 class BlockingDialog(CommonDialogEx):
     def __init__(self, master, cmd, mode="indeterminate"):
         super().__init__(master)
-        self.title(_("Working..."))
+        self.title(tr("Working..."))
         self.response = None
         self._sent_interrupt = False
         self._mode = mode
@@ -1549,7 +1550,9 @@ class BlockingDialog(CommonDialogEx):
         self._progress_bar.grid(row=1, column=0, padx=10, sticky="new")
         self._progress_bar.start()
 
-        self._cancel_button = ttk.Button(self.main_frame, text=_("Cancel"), command=self._on_cancel)
+        self._cancel_button = ttk.Button(
+            self.main_frame, text=tr("Cancel"), command=self._on_cancel
+        )
         self._cancel_button.grid(row=2, column=0, padx=10, pady=10)
 
         self._start_time = time.time()
@@ -1582,7 +1585,7 @@ class BlockingDialog(CommonDialogEx):
     def _send_interrupt(self):
         self._sent_interrupt = True
         self._description_label.configure(text="Cancelling...")
-        self._cancel_button.configure(text=_("Close"))
+        self._cancel_button.configure(text=tr("Close"))
         get_runner()._cmd_interrupt()
 
     def on_close(self, event=None):

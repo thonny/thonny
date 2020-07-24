@@ -7,6 +7,7 @@ from tkinter import messagebox
 from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.common import InlineCommand, normpath_with_actual_case
+from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
 from thonny.running import construct_cd_command
 from thonny.ui_utils import lookup_style_option
@@ -197,14 +198,14 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                         source_paths=selection["paths"],
                         target_dir=target_dir,
                         blocking=True,
-                        description=_("Uploading %s to %s")
+                        description=tr("Uploading %s to %s")
                         % (selection["description"], target_dir),
                     )
                 )
                 check_upload_download_response("upload", response)
                 self.master.remote_files.refresh_tree()
 
-        self.menu.add_command(label=_("Upload to %s") % target_dir_desc, command=upload)
+        self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=upload)
 
     def add_middle_menu_items(self, context):
         self.check_add_upload_command()
@@ -243,13 +244,13 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                     source_paths=selection["paths"],
                     target_dir=target_dir,
                     blocking=True,
-                    description=_("Downloading %s to %s") % (selection["description"], target_dir),
+                    description=tr("Downloading %s to %s") % (selection["description"], target_dir),
                 )
             )
             check_upload_download_response("download", response)
             self.master.local_files.refresh_tree()
 
-        self.menu.add_command(label=_("Download to %s") % target_dir, command=download)
+        self.menu.add_command(label=tr("Download to %s") % target_dir, command=download)
 
     def add_middle_menu_items(self, context):
         self.add_download_command()
@@ -289,4 +290,4 @@ def load_plugin() -> None:
         "file.last_browser_folder", normpath_with_actual_case(os.path.expanduser("~"))
     )
 
-    get_workbench().add_view(FilesView, _("Files"), "nw")
+    get_workbench().add_view(FilesView, tr("Files"), "nw")

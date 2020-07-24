@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from thonny import get_runner, get_workbench
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 from thonny.ui_utils import create_string_var
 
 
@@ -52,7 +53,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo_variable = create_string_var(current_backend_desc)
 
         label = ttk.Label(
-            self, text=_("Which interpreter or device should Thonny use for running your code?")
+            self, text=tr("Which interpreter or device should Thonny use for running your code?")
         )
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
@@ -71,7 +72,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
         self._combo.state(["!disabled", "readonly"])
 
-        self.labelframe = ttk.LabelFrame(self, text=" " + _("Details") + " ")
+        self.labelframe = ttk.LabelFrame(self, text=" " + tr("Details") + " ")
         self.labelframe.grid(row=2, column=0, sticky="nsew")
         self.labelframe.columnconfigure(0, weight=1)
         self.labelframe.rowconfigure(0, weight=1)
@@ -171,8 +172,8 @@ def load_plugin() -> None:
         get_workbench().show_options("interpreter")
 
     get_workbench().add_configuration_page(
-        "interpreter", _("Interpreter"), BackendConfigurationPage, 20
+        "interpreter", tr("Interpreter"), BackendConfigurationPage, 20
     )
     get_workbench().add_command(
-        "select_interpreter", "run", _("Select interpreter") + "...", select_device, group=1
+        "select_interpreter", "run", tr("Select interpreter") + "...", select_device, group=1
     )

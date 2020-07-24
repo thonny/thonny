@@ -6,6 +6,7 @@ from tkinter import ttk
 
 from thonny import THONNY_USER_DIR, codeview, get_workbench, ui_utils
 from thonny.base_file_browser import BaseLocalFileBrowser
+from thonny.languages import tr
 from thonny.plugins.coloring import SyntaxColorer
 from thonny.ui_utils import CommonDialog, lookup_style_option
 
@@ -361,5 +362,5 @@ def load_plugin() -> None:
     get_workbench().set_default("tools.replayer_last_browser_folder", None)
     if get_workbench().get_ui_mode() == "expert":
         get_workbench().add_command(
-            "open_replayer", "tools", _("Open replayer..."), open_replayer, group=110
+            "open_replayer", "tools", tr("Open replayer..."), open_replayer, group=110
         )

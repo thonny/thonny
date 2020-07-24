@@ -28,6 +28,7 @@ from thonny.common import (
     ToplevelResponse,
 )
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 from thonny.misc_utils import TimeHelper, find_volumes_by_name
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
 from thonny.running import BackendProxy, SubprocessProxy
@@ -178,11 +179,11 @@ class BareMetalMicroPythonProxy(SubprocessProxy):
 
     def get_node_label(self):
         if "CircuitPython" in self._welcome_text:
-            return _("CircuitPython device")
+            return tr("CircuitPython device")
         elif "micro:bit" in self._welcome_text.lower():
             return "micro:bit"
         else:
-            return _("MicroPython device")
+            return tr("MicroPython device")
 
     def get_exe_dirs(self):
         return []
@@ -194,12 +195,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
         intro_text = (
-            _("Connect your device to the computer and select corresponding port below")
+            tr("Connect your device to the computer and select corresponding port below")
             + "\n"
             + "("
-            + _('look for your device name, "USB Serial" or "UART"')
+            + tr('look for your device name, "USB Serial" or "UART"')
             + ").\n"
-            + _("If you can't find it, you may need to install proper USB driver first.")
+            + tr("If you can't find it, you may need to install proper USB driver first.")
         )
         if self.allow_webrepl:
             intro_text = (
@@ -224,7 +225,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else _("Port"))
+        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else tr("Port"))
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -233,7 +234,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             else p.description + " (" + p.device + ")": p.device
             for p in list_serial_ports()
         }
-        self._ports_by_desc["< " + _("Try to detect port automatically") + " >"] = "auto"
+        self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:
@@ -302,10 +303,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             return self._flashing_frame
 
         self._flashing_frame = ttk.Frame(self)
-        self._flashing_label = ttk.Label(self._flashing_frame, text=_("Firmware"))
+        self._flashing_label = ttk.Label(self._flashing_frame, text=tr("Firmware"))
         self._flashing_label.grid(row=1, column=0, sticky="w", pady=(10, 0))
 
-        button_caption = _("Open the dialog for installing or upgrading MicroPython on your device")
+        button_caption = tr(
+            "Open the dialog for installing or upgrading MicroPython on your device"
+        )
         self._flashing_button = ttk.Button(
             self._flashing_frame,
             text=button_caption,
@@ -629,14 +632,14 @@ def load_plugin():
     add_micropython_backend(
         "GenericMicroPython",
         GenericBareMetalMicroPythonProxy,
-        _("MicroPython (generic)"),
+        tr("MicroPython (generic)"),
         GenericBareMetalMicroPythonConfigPage,
     )
 
     add_micropython_backend(
         "LocalMicroPython",
         LocalMicroPythonProxy,
-        _("MicroPython (local)"),
+        tr("MicroPython (local)"),
         LocalMicroPythonConfigPage,
         bare_metal=False,
     )
@@ -645,7 +648,7 @@ def load_plugin():
     add_micropython_backend(
         "SshMicroPython",
         SshMicroPythonProxy,
-        _("MicroPython (SSH)"),
+        tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
     )

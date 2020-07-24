@@ -6,6 +6,7 @@ from tkinter import ttk
 from thonny import get_workbench, tktextext, ui_utils
 from thonny.codeview import CodeView
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 from thonny.shell import BaseShellText
 from thonny.ui_utils import create_string_var, scrollbar_style
 
@@ -36,7 +37,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             self._original_syntax_theme, modification_listener=self._update_appearance
         )
 
-        ttk.Label(self, text=_("UI theme")).grid(
+        ttk.Label(self, text=tr("UI theme")).grid(
             row=1, column=1, sticky="w", pady=(0, 10), padx=(0, 5)
         )
         self._ui_theme_combo = ttk.Combobox(
@@ -49,7 +50,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._ui_theme_combo.grid(row=1, column=2, sticky="nwe", pady=(0, 5))
 
-        ttk.Label(self, text=_("Syntax theme")).grid(
+        ttk.Label(self, text=tr("Syntax theme")).grid(
             row=2, column=1, sticky="w", pady=(0, 10), padx=(0, 5)
         )
         self._syntax_theme_combo = ttk.Combobox(
@@ -81,7 +82,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             self._original_io_size, modification_listener=self._update_appearance
         )
 
-        ttk.Label(self, text=_("Editor font")).grid(
+        ttk.Label(self, text=tr("Editor font")).grid(
             row=1, column=3, sticky="w", pady=(0, 5), padx=(25, 5)
         )
         editor_family_combo = ttk.Combobox(
@@ -104,7 +105,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         editor_size_combo.grid(row=1, column=5, sticky="nwe", pady=(0, 5), padx=(5, 0))
 
-        ttk.Label(self, text=_("IO font")).grid(
+        ttk.Label(self, text=tr("IO font")).grid(
             row=2, column=3, sticky="w", pady=(0, 5), padx=(25, 5)
         )
         io_family_combo = ttk.Combobox(
@@ -129,7 +130,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         io_size_combo.grid(row=2, column=5, sticky="nwe", pady=(0, 5), padx=(5, 0))
 
     def _init_previews(self):
-        ttk.Label(self, text=_("Preview")).grid(
+        ttk.Label(self, text=tr("Preview")).grid(
             row=20, column=1, sticky="w", pady=(5, 2), columnspan=5
         )
         self._preview_codeview = CodeView(
@@ -141,16 +142,16 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                 """
             def foo(bar):
                 if bar is None: # """
-                + _("This is a comment")
+                + tr("This is a comment")
                 + """
                     print('"""
-                + _("The answer is")
+                + tr("The answer is")
                 + """', 33)
 
             """
-                + _("unclosed_string")
+                + tr("unclosed_string")
                 + ''' = "'''
-                + _("blah, blah")
+                + tr("blah, blah")
                 + "\n"
             ).strip()
         )
@@ -173,7 +174,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
         ttk.Label(
             self,
-            text=_("NB! Some style elements change only after restarting Thonny!"),
+            text=tr("NB! Some style elements change only after restarting Thonny!"),
             font="BoldTkDefaultFont",
         ).grid(row=40, column=1, columnspan=5, sticky="w", pady=(5, 0))
 
@@ -212,7 +213,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         text._insert_prompt()
         text.direct_insert("end", "%Run demo.py\n", ("magic", "before_io"))
         text.tag_add("before_io", "1.0", "1.0 lineend")
-        text.direct_insert("end", _("Enter an integer") + ": ", ("io", "stdout"))
+        text.direct_insert("end", tr("Enter an integer") + ": ", ("io", "stdout"))
         text.direct_insert("end", "2.5\n", ("io", "stdin"))
         text.direct_insert(
             "end", "ValueError: invalid literal for int() with base 10: '2.5'\n", ("io", "stderr")
@@ -225,5 +226,5 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page(
-        "theme", _("Theme & Font"), ThemeAndFontConfigurationPage, 40
+        "theme", tr("Theme & Font"), ThemeAndFontConfigurationPage, 40
     )

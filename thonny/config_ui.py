@@ -3,6 +3,7 @@ import traceback
 from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
+from thonny.languages import tr
 from thonny.ui_utils import CommonDialog, ems_to_pixels
 
 
@@ -14,7 +15,7 @@ class ConfigurationDialog(CommonDialog):
         width = ems_to_pixels(53)
         height = ems_to_pixels(43)
         self.geometry("%dx%d" % (width, height))
-        self.title(_("Thonny options"))
+        self.title(tr("Thonny options"))
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -27,8 +28,8 @@ class ConfigurationDialog(CommonDialog):
         self._notebook = ttk.Notebook(main_frame)
         self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
 
-        self._ok_button = ttk.Button(main_frame, text=_("OK"), command=self._ok, default="active")
-        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
+        self._ok_button = ttk.Button(main_frame, text=tr("OK"), command=self._ok, default="active")
+        self._cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
         self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 

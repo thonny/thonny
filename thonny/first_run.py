@@ -59,7 +59,7 @@ class FirstRunWindow(tk.Tk):
         pady = 7
         label = ttk.Label(self.main_frame, text=label_text)
         label.grid(row=row, column=2, sticky="sw", pady=(pady, 0))
-
+        assert isinstance(variable, tk.Variable)
         combobox = ttk.Combobox(
             self.main_frame,
             exportselection=False,

@@ -7,6 +7,7 @@ import traceback
 
 from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
+from thonny.languages import tr
 
 
 class AstView(ui_utils.TreeFrame):
@@ -206,4 +207,4 @@ def pretty(node, key="/", level=0):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(AstView, _("Program tree"), "s")
+    get_workbench().add_view(AstView, tr("Program tree"), "s")

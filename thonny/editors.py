@@ -19,6 +19,7 @@ from thonny.common import (
     is_same_path,
     normpath_with_actual_case,
 )
+from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
@@ -193,7 +194,7 @@ class Editor(ttk.Frame):
         self.update_title()
         response = get_runner().send_command(
             InlineCommand(
-                "read_file", path=target_filename, blocking=True, description=_("Loading") + "..."
+                "read_file", path=target_filename, blocking=True, description=tr("Loading") + "..."
             )
         )
 
@@ -280,7 +281,7 @@ class Editor(ttk.Frame):
                     content_bytes=content_bytes,
                     editor_id=id(self),
                     blocking=True,
-                    description=_("Saving") + "...",
+                    description=tr("Saving") + "...",
                 )
             )
 
@@ -493,9 +494,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "new_file",
             "file",
-            _("New"),
+            tr("New"),
             self._cmd_new_file,
-            caption=_("New"),
+            caption=tr("New"),
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             extra_sequences=["<Control-Greek_nu>"],
             group=10,
@@ -506,9 +507,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "open_file",
             "file",
-            _("Open..."),
+            tr("Open..."),
             self._cmd_open_file,
-            caption=_("Load"),
+            caption=tr("Load"),
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             extra_sequences=["<Control-Greek_omicron>"],
             group=10,
@@ -517,7 +518,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
-            "recents", "file", _("Recent files"), group=10, submenu=self._recent_menu
+            "recents", "file", tr("Recent files"), group=10, submenu=self._recent_menu
         )
 
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -528,7 +529,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_file",
             "file",
-            _("Close"),
+            tr("Close"),
             self._cmd_close_file,
             default_sequence=select_sequence("<Control-w>", "<Command-w>"),
             extra_sequences=["<Control-Greek_finalsmallsigma>"],
@@ -539,7 +540,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_files",
             "file",
-            _("Close all"),
+            tr("Close all"),
             self.close_tabs,
             tester=lambda: self.get_current_editor() is not None,
             default_sequence=select_sequence("<Control-W>", "<Command-Alt-w>"),
@@ -549,9 +550,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file",
             "file",
-            _("Save"),
+            tr("Save"),
             self._cmd_save_file,
-            caption=_("Save"),
+            caption=tr("Save"),
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             extra_sequences=["<Control-Greek_sigma>"],
             tester=self._cmd_save_file_enabled,
@@ -563,9 +564,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_all_files",
             "file",
-            _("Save All files"),
+            tr("Save All files"),
             self._cmd_save_all_files,
-            caption=_("Save All files"),
+            caption=tr("Save All files"),
             default_sequence=select_sequence("<Control-Alt-s>", "<Command-Alt-s>"),
             tester=self._cmd_save_all_files_enabled,
             group=10,
@@ -574,7 +575,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file_as",
             "file",
-            _("Save as..."),
+            tr("Save as..."),
             self._cmd_save_file_as,
             default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
             extra_sequences=["<Control-Greek_SIGMA>"],
@@ -585,7 +586,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_copy",
             "file",
-            _("Save copy..."),
+            tr("Save copy..."),
             self._cmd_save_copy,
             tester=lambda: self.get_current_editor() is not None,
             group=10,
@@ -594,7 +595,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "rename_file",
             "file",
-            _("Rename..."),
+            tr("Rename..."),
             self._cmd_rename_file,
             tester=self._cmd_rename_file_enabled,
             group=10,

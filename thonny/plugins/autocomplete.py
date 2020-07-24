@@ -4,6 +4,7 @@ from tkinter import messagebox
 from thonny import get_runner, get_workbench
 from thonny.codeview import CodeViewText
 from thonny.common import InlineCommand
+from thonny.languages import tr
 from thonny.shell import ShellText
 
 # TODO: adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
@@ -313,7 +314,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "autocomplete",
         "edit",
-        _("Auto-complete"),
+        tr("Auto-complete"),
         handle_autocomplete_request,
         default_sequence="<Control-space>"
         # TODO: tester

@@ -7,6 +7,7 @@ from _tkinter import TclError
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
+from thonny.languages import tr
 from thonny.memory import MAX_REPR_LENGTH_IN_GRID, MemoryFrame, format_object_id, parse_object_id
 from thonny.misc_utils import shorten_repr
 
@@ -33,7 +34,7 @@ class HeapView(MemoryFrame):
         info_icon = get_workbench().get_image("information")
         self.info_label = ttk.Label(
             get_workbench().get_toolbar(),
-            text=_("Heap mode is on.\nClose Heap view to turn it off."),
+            text=tr("Heap mode is on.\nClose Heap view to turn it off."),
             image=info_icon,
             compound="left",
             background="#F4FFBA",
@@ -81,4 +82,4 @@ class HeapView(MemoryFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(HeapView, _("Heap"), "e")
+    get_workbench().add_view(HeapView, tr("Heap"), "e")

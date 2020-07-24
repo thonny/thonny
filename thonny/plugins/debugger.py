@@ -26,6 +26,7 @@ from thonny import (
 )
 from thonny.codeview import CodeView, SyntaxText, get_syntax_options_for_tag
 from thonny.common import DebuggerCommand, InlineCommand
+from thonny.languages import tr
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import running_on_mac_os, running_on_rpi, shorten_repr
 from thonny.tktextext import TextFrame
@@ -139,14 +140,14 @@ class Debugger:
             menu = tk.Menu(get_workbench())
             menu.add(
                 "command",
-                label=_("Run to cursor"),
+                label=tr("Run to cursor"),
                 command=lambda: self.check_issue_command("run_to_cursor"),
             )
             menu.add("separator")
             menu.add("command", label="Copy", command=create_edit_command_handler("<<Copy>>"))
             menu.add(
                 "command",
-                label=_("Select all"),
+                label=tr("Select all"),
                 command=create_edit_command_handler("<<SelectAll>>"),
             )
             self._editor_context_menu = menu
@@ -965,8 +966,8 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
 
     def _on_close(self):
         showinfo(
-            _("Can't close yet"),
-            _('Use "Stop" command if you want to cancel debugging'),
+            tr("Can't close yet"),
+            tr('Use "Stop" command if you want to cancel debugging'),
             parent=None if running_on_mac_os() else self,
         )
 
@@ -1264,7 +1265,7 @@ def run_preferred_debug_command():
 def load_plugin() -> None:
 
     global RESUME_COMMAND_CAPTION
-    RESUME_COMMAND_CAPTION = _("Resume")
+    RESUME_COMMAND_CAPTION = tr("Resume")
 
     if get_workbench().in_simple_mode():
         get_workbench().set_default("debugger.frames_in_separate_windows", False)
@@ -1280,7 +1281,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "runresume",
         "run",
-        _("Run / resume"),
+        tr("Run / resume"),
         _run_or_resume,
         caption=running.RUN_COMMAND_CAPTION,
         tester=_run_or_resume_enabled,
@@ -1295,9 +1296,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_preferred",
         "run",
-        _("Debug current script"),
+        tr("Debug current script"),
         run_preferred_debug_command,
-        caption=_("Debug"),
+        caption=tr("Debug"),
         tester=_start_debug_enabled,
         group=10,
         image="debug-current-script",
@@ -1308,7 +1309,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_nicer",
         "run",
-        _("Debug current script (nicer)"),
+        tr("Debug current script (nicer)"),
         lambda: _request_debug("Debug"),
         caption="Debug (nicer)",
         tester=_start_debug_enabled,
@@ -1320,7 +1321,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_faster",
         "run",
-        _("Debug current script (faster)"),
+        tr("Debug current script (faster)"),
         lambda: _request_debug("FastDebug"),
         caption="Debug (faster)",
         tester=_start_debug_enabled,
@@ -1331,9 +1332,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_over",
         "run",
-        _("Step over"),
+        tr("Step over"),
         lambda: _issue_debugger_command("step_over"),
-        caption=_("Over"),
+        caption=tr("Over"),
         tester=lambda: _debugger_command_enabled("step_over"),
         default_sequence="<F6>",
         group=30,
@@ -1344,9 +1345,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_into",
         "run",
-        _("Step into"),
+        tr("Step into"),
         lambda: _issue_debugger_command("step_into"),
-        caption=_("Into"),
+        caption=tr("Into"),
         tester=lambda: _debugger_command_enabled("step_into"),
         default_sequence="<F7>",
         group=30,
@@ -1357,9 +1358,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_out",
         "run",
-        _("Step out"),
+        tr("Step out"),
         lambda: _issue_debugger_command("step_out"),
-        caption=_("Out"),
+        caption=tr("Out"),
         tester=lambda: _debugger_command_enabled("step_out"),
         group=30,
         image="step-out",
@@ -1382,7 +1383,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "run_to_cursor",
         "run",
-        _("Run to cursor"),
+        tr("Run to cursor"),
         lambda: _issue_debugger_command("run_to_cursor"),
         tester=lambda: _debugger_command_enabled("run_to_cursor"),
         default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
@@ -1394,16 +1395,16 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_back",
         "run",
-        _("Step back"),
+        tr("Step back"),
         lambda: _issue_debugger_command("step_back"),
-        caption=_("Back"),
+        caption=tr("Back"),
         tester=lambda: _debugger_command_enabled("step_back"),
         default_sequence=select_sequence("<Control-b>", "<Command-b>"),
         group=30,
     )
 
-    get_workbench().add_view(StackView, _("Stack"), "se")
-    get_workbench().add_view(ExceptionView, _("Exception"), "s")
+    get_workbench().add_view(StackView, tr("Stack"), "se")
+    get_workbench().add_view(ExceptionView, tr("Exception"), "s")
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
     get_workbench().bind("debugger_return_response", _handle_debugger_return, True)

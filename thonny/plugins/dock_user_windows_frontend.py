@@ -1,6 +1,7 @@
 import os
 
 from thonny import get_workbench
+from thonny.languages import tr
 
 _OPTION_NAME = "run.dock_user_windows"
 
@@ -24,7 +25,7 @@ def load_plugin():
     get_workbench().add_command(
         "toggle_dock_user_windows",
         "run",
-        _("Dock user windows"),
+        tr("Dock user windows"),
         toggle_variable,
         flag_name=_OPTION_NAME,
         group=40,

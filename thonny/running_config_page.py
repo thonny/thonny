@@ -5,6 +5,7 @@ from tkinter import messagebox, ttk
 
 from thonny import get_workbench, running, ui_utils
 from thonny.common import normpath_with_actual_case
+from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import WINDOWS_EXE, get_interpreter_for_subprocess
@@ -25,8 +26,8 @@ class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
         text = (
-            _("This virtual environment is automatically maintained by Thonny.\n")
-            + _("Location: ")
+            tr("This virtual environment is automatically maintained by Thonny.\n")
+            + tr("Location: ")
             + running.get_private_venv_path()
         )
 
@@ -45,7 +46,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             get_workbench().get_option("CustomInterpreter.path")
         )
 
-        entry_label = ttk.Label(self, text=_("Known interpreters"))
+        entry_label = ttk.Label(self, text=tr("Known interpreters"))
         entry_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         self._entry = ttk.Combobox(
@@ -58,18 +59,18 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._entry.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
         self._entry.state(["!disabled", "readonly"])
 
-        another_label = ttk.Label(self, text=_("Your interpreter isn't in the list?"))
+        another_label = ttk.Label(self, text=tr("Your interpreter isn't in the list?"))
         another_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
 
         ttk.Style().configure("Centered.TButton", justify="center")
         self._select_button = ttk.Button(
             self,
             style="Centered.TButton",
-            text=_("Locate another")
+            text=tr("Locate another")
             + " "
-            + ("python.exe ..." if running_on_windows() else _("python executable") + " ...")
+            + ("python.exe ..." if running_on_windows() else tr("python executable") + " ...")
             + "\n"
-            + _("NB! Thonny only supports Python 3.5 and later"),
+            + tr("NB! Thonny only supports Python 3.5 and later"),
             command=self._select_executable,
         )
 
@@ -78,10 +79,10 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._venv_button = ttk.Button(
             self,
             style="Centered.TButton",
-            text=_("Create new virtual environment")
+            text=tr("Create new virtual environment")
             + " ...\n"
             + "("
-            + _("Select existing or create a new empty directory")
+            + tr("Select existing or create a new empty directory")
             + ")",
             command=self._create_venv,
         )
@@ -96,8 +97,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         options = {"master": self}
         if running_on_windows():
             options["filetypes"] = [
-                (_("Python interpreters"), "python.exe"),
-                (_("all files"), ".*"),
+                (tr("Python interpreters"), "python.exe"),
+                (tr("all files"), ".*"),
             ]
 
         filename = askopenfilename(**options)
@@ -111,15 +112,15 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             path = askdirectory(
                 master=self,
                 initialdir=path,
-                title=_("Select empty directory for new virtual environment"),
+                title=tr("Select empty directory for new virtual environment"),
             )
             if not path:
                 return
 
             if os.listdir(path):
                 messagebox.showerror(
-                    _("Bad directory"),
-                    _("Selected directory is not empty.\nSelect another or cancel."),
+                    tr("Bad directory"),
+                    tr("Selected directory is not empty.\nSelect another or cancel."),
                 )
             else:
                 break
@@ -133,7 +134,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             stderr=subprocess.STDOUT,
             universal_newlines=True,
         )
-        dlg = SubprocessDialog(self, proc, _("Creating virtual environment"))
+        dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"))
         ui_utils.show_dialog(dlg)
 
         if running_on_windows():

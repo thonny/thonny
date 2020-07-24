@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.ui_utils import SafeScrollbar
 
 
@@ -134,4 +135,4 @@ class OutlineView(ttk.Frame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(OutlineView, _("Outline"), "ne")
+    get_workbench().add_view(OutlineView, tr("Outline"), "ne")

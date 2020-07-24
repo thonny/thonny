@@ -1,6 +1,7 @@
 import os
 
 from thonny import get_workbench
+from thonny.languages import tr
 
 _OPTION_NAME = "run.pgzero_mode"
 
@@ -23,7 +24,7 @@ def load_plugin():
     get_workbench().add_command(
         "toggle_pgzero_mode",
         "run",
-        _("Pygame Zero mode"),
+        tr("Pygame Zero mode"),
         toggle_variable,
         flag_name=_OPTION_NAME,
         group=40,

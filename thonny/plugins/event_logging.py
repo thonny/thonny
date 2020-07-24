@@ -4,6 +4,7 @@ import tkinter as tk
 from datetime import datetime
 
 from thonny import THONNY_USER_DIR, get_workbench
+from thonny.languages import tr
 from thonny.shell import ShellView
 from thonny.ui_utils import asksaveasfilename
 from thonny.workbench import WorkbenchEvent
@@ -201,7 +202,7 @@ def load_plugin() -> None:
 
     if get_workbench().get_option("general.event_logging"):
         get_workbench().add_command(
-            "export_usage_logs", "tools", _("Export usage logs..."), export, group=110
+            "export_usage_logs", "tools", tr("Export usage logs..."), export, group=110
         )
 
         filename = _generate_timestamp_file_name("txt")

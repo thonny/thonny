@@ -19,6 +19,7 @@ from typing import Iterable
 import thonny
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import ToplevelResponse, read_source
+from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
 from thonny.running import CPythonProxy
 from thonny.ui_utils import CommonDialog, scrollbar_style
@@ -963,4 +964,4 @@ def init():
     get_workbench().set_default("assistance.open_assistant_on_errors", True)
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
     get_workbench().set_default("assistance.disabled_checks", [])
-    get_workbench().add_view(AssistantView, _("Assistant"), "se", visible_by_default=False)
+    get_workbench().add_view(AssistantView, tr("Assistant"), "se", visible_by_default=False)

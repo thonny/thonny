@@ -6,6 +6,7 @@ from tkinter.simpledialog import askstring
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_child_data
+from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
@@ -259,7 +260,7 @@ class BaseFileBrowser(ttk.Frame):
         elif len(nodes) == 1:
             description = "'" + self.tree.set(nodes[0], "name") + "'"
         else:
-            description = _("%d items") % len(nodes)
+            description = tr("%d items") % len(nodes)
 
         paths = [self.tree.set(node, "path") for node in nodes]
         kinds = [self.tree.set(node, "kind") for node in nodes]
@@ -578,11 +579,11 @@ class BaseFileBrowser(ttk.Frame):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
 
-        self.menu.add_command(label=_("Refresh"), command=self.cmd_refresh_tree)
+        self.menu.add_command(label=tr("Refresh"), command=self.cmd_refresh_tree)
 
         if selected_kind == "dir":
             self.menu.add_command(
-                label=_("Focus into"), command=lambda: self.request_focus_into(selected_path)
+                label=tr("Focus into"), command=lambda: self.request_focus_into(selected_path)
             )
         else:
             "TODO: add open command"
@@ -593,20 +594,20 @@ class BaseFileBrowser(ttk.Frame):
     def add_middle_menu_items(self, context):
         if self.supports_trash():
             if running_on_windows():
-                trash_label = _("Move to Recycle Bin")
+                trash_label = tr("Move to Recycle Bin")
             else:
-                trash_label = _("Move to Trash")
+                trash_label = tr("Move to Trash")
             self.menu.add_command(label=trash_label, command=self.move_to_trash)
         else:
-            self.menu.add_command(label=_("Delete"), command=self.delete)
+            self.menu.add_command(label=tr("Delete"), command=self.delete)
 
         if self.supports_directories():
-            self.menu.add_command(label=_("New directory") + "...", command=self.mkdir)
+            self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
 
     def add_last_menu_items(self, context):
-        self.menu.add_command(label=_("Properties"), command=self.show_properties)
+        self.menu.add_command(label=tr("Properties"), command=self.show_properties)
         if context == "button":
-            self.menu.add_command(label=_("Storage space"), command=self.show_fs_info)
+            self.menu.add_command(label=tr("Storage space"), command=self.show_fs_info)
 
     def show_properties(self):
         node_id = self.get_selected_node()
@@ -616,16 +617,16 @@ class BaseFileBrowser(ttk.Frame):
 
         values = self.tree.set(node_id)
 
-        text = _("Path") + ":\n    " + values["path"] + "\n\n"
+        text = tr("Path") + ":\n    " + values["path"] + "\n\n"
         if values["kind"] == "dir":
-            title = _("Directory properties")
+            title = tr("Directory properties")
         else:
-            title = _("File properties")
+            title = tr("File properties")
             size_fmt_str = sizeof_fmt(int(values["size"]))
-            bytes_str = str(values["size"]) + " " + _("bytes")
+            bytes_str = str(values["size"]) + " " + tr("bytes")
 
             text += (
-                _("Size")
+                tr("Size")
                 + ":\n    "
                 + (
                     bytes_str
@@ -636,7 +637,7 @@ class BaseFileBrowser(ttk.Frame):
             )
 
         if values["time"].strip():
-            text += _("Modified") + ":\n    " + values["time"] + "\n\n"
+            text += tr("Modified") + ":\n    " + values["time"] + "\n\n"
 
         messagebox.showinfo(title, text.strip())
 
@@ -693,7 +694,7 @@ class BaseFileBrowser(ttk.Frame):
         if not messagebox.askyesno("Are you sure?", confirmation):
             return
 
-        self.perform_delete(selection["paths"], _("Deleting %s") % selection["description"])
+        self.perform_delete(selection["paths"], tr("Deleting %s") % selection["description"])
         self.refresh_tree()
 
     def move_to_trash(self):
@@ -715,7 +716,7 @@ class BaseFileBrowser(ttk.Frame):
             return
 
         self.perform_move_to_trash(
-            selection["paths"], _("Moving %s to %s") % (selection["description"], trash)
+            selection["paths"], tr("Moving %s to %s") % (selection["description"], trash)
         )
         self.refresh_tree()
 
@@ -1039,11 +1040,11 @@ class BackendFileDialog(CommonDialog):
         if node_id is not None:
             node_kind = tree.set(node_id, "kind")
             if node_kind != "file":
-                messagebox.showerror(_("Error"), _("You need to select a file!"))
+                messagebox.showerror(tr("Error"), tr("You need to select a file!"))
                 return
             elif self.kind == "save":
                 if not messagebox.askyesno(
-                    _("Overwrite?"), _("Do you want to overwrite '%s' ?") % name
+                    tr("Overwrite?"), tr("Do you want to overwrite '%s' ?") % name
                 ):
                     return
 
@@ -1188,6 +1189,6 @@ def get_local_files_root_text():
 
     if not _LOCAL_FILES_ROOT_TEXT:
         # translation can't be done in module load time
-        _LOCAL_FILES_ROOT_TEXT = _("This computer")
+        _LOCAL_FILES_ROOT_TEXT = tr("This computer")
 
     return _LOCAL_FILES_ROOT_TEXT

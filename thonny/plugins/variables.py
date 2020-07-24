@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
 from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
+from thonny.languages import tr
 from thonny.memory import VariablesFrame
 
 
@@ -16,7 +16,7 @@ class VariablesView(VariablesFrame):
         self.back_button = ttk.Button(
             self.tree,
             style="Centered.TButton",
-            text=_("Back to\ncurrent frame"),
+            text=tr("Back to\ncurrent frame"),
             command=self._handle_back_button,
             width=15,
         )
@@ -135,4 +135,4 @@ class VariablesView(VariablesFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(VariablesView, _("Variables"), "ne", default_position_key="AAA")
+    get_workbench().add_view(VariablesView, tr("Variables"), "ne", default_position_key="AAA")

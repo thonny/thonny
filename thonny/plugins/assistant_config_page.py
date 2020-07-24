@@ -2,6 +2,7 @@ from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
 
@@ -13,7 +14,7 @@ class AssistantConfigPage(ConfigurationPage):
         ui_utils.create_url_label(
             self,
             "https://github.com/thonny/thonny/wiki/Friendly-traceback",
-            text=_("Friendly traceback level"),
+            text=tr("Friendly traceback level"),
         ).grid(row=1, column=0, sticky="w")
 
         self.add_combobox(
@@ -27,27 +28,27 @@ class AssistantConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "assistance.open_assistant_on_errors",
-            _("Open Assistant automatically when program crashes with an exception"),
+            tr("Open Assistant automatically when program crashes with an exception"),
             row=2,
             columnspan=2,
         )
 
         self.add_checkbox(
             "assistance.open_assistant_on_warnings",
-            _("Open Assistant automatically when it has warnings for your code"),
+            tr("Open Assistant automatically when it has warnings for your code"),
             row=3,
             columnspan=2,
         )
 
         if get_workbench().get_option("assistance.use_pylint", "missing") != "missing":
             self.add_checkbox(
-                "assistance.use_pylint", _("Perform selected Pylint checks"), row=4, columnspan=2
+                "assistance.use_pylint", tr("Perform selected Pylint checks"), row=4, columnspan=2
             )
 
         if get_workbench().get_option("assistance.use_mypy", "missing") != "missing":
-            self.add_checkbox("assistance.use_mypy", _("Perform MyPy checks"), row=5, columnspan=2)
+            self.add_checkbox("assistance.use_mypy", tr("Perform MyPy checks"), row=5, columnspan=2)
 
-        disabled_checks_label = ttk.Label(self, text=_("Disabled checks (one id per line)"))
+        disabled_checks_label = ttk.Label(self, text=tr("Disabled checks (one id per line)"))
         disabled_checks_label.grid(row=8, sticky="nw", pady=(10, 0), columnspan=2)
 
         self.disabled_checks_box = TextFrame(
@@ -85,4 +86,4 @@ class AssistantConfigPage(ConfigurationPage):
 
 def load_plugin():
     get_workbench().set_default("assistance.friendly_traceback_level", 0)
-    get_workbench().add_configuration_page("assistant", _("Assistant"), AssistantConfigPage, 80)
+    get_workbench().add_configuration_page("assistant", tr("Assistant"), AssistantConfigPage, 80)

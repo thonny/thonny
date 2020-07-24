@@ -1,6 +1,7 @@
 import os.path
 
 from thonny import THONNY_USER_DIR, get_workbench, ui_utils
+from thonny.languages import tr
 from thonny.tktextext import EnhancedText, TextFrame
 from thonny.ui_utils import TextMenu
 
@@ -59,4 +60,4 @@ class NotesView(TextFrame):
 
 
 def load_plugin():
-    get_workbench().add_view(NotesView, _("Notes"), "ne", default_position_key="zz")
+    get_workbench().add_view(NotesView, tr("Notes"), "ne", default_position_key="zz")

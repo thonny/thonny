@@ -3,6 +3,7 @@ import platform
 import subprocess
 
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.ui_utils import select_sequence
 
 
@@ -78,7 +79,7 @@ def load_plugin():
     get_workbench().add_command(
         "printcurrent",
         "file",
-        _("Print..."),
+        tr("Print..."),
         print_current_script,
         can_print_current_script,
         default_sequence=select_sequence("<Control-p>", "<Command-p>"),

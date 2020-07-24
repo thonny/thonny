@@ -4,6 +4,7 @@ from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 
 
 class ShellConfigurationPage(ConfigurationPage):
@@ -13,9 +14,9 @@ class ShellConfigurationPage(ConfigurationPage):
 
         self.add_checkbox(
             "shell.tty_mode",
-            _("Terminal emulation")
+            tr("Terminal emulation")
             + " ("
-            + _("supports basic ANSI-colors and styles")
+            + tr("supports basic ANSI-colors and styles")
             + ", \\a, \\r, \\b)",
             10,
             0,
@@ -26,10 +27,10 @@ class ShellConfigurationPage(ConfigurationPage):
         max_lines_var = get_workbench().get_variable("shell.max_lines")
         max_lines_label = ttk.Label(
             self,
-            text=_(
-                _("Maximum number of lines to keep.")
+            text=tr(
+                tr("Maximum number of lines to keep.")
                 + "\n"
-                + _("NB! Large values may cause poor performance!")
+                + tr("NB! Large values may cause poor performance!")
             ),
         )
         max_lines_label.grid(row=20, column=0, sticky=tk.W)
@@ -44,7 +45,9 @@ class ShellConfigurationPage(ConfigurationPage):
         max_lines_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
         squeeze_var = get_workbench().get_variable("shell.squeeze_threshold")
-        squeeze_label = ttk.Label(self, text=_("Maximum length of line fragments before squeezing"))
+        squeeze_label = ttk.Label(
+            self, text=tr("Maximum length of line fragments before squeezing")
+        )
         squeeze_label.grid(row=22, column=0, sticky="w")
         squeeze_combo = ttk.Combobox(
             self,
@@ -58,7 +61,7 @@ class ShellConfigurationPage(ConfigurationPage):
 
         self.add_checkbox(
             "shell.auto_inspect_values",
-            _("Open evaluated values in Object inspector"),
+            tr("Open evaluated values in Object inspector"),
             30,
             0,
             columnspan=2,
@@ -67,4 +70,4 @@ class ShellConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("shell", _("Shell"), ShellConfigurationPage, 70)
+    get_workbench().add_configuration_page("shell", tr("Shell"), ShellConfigurationPage, 70)
