@@ -49,14 +49,7 @@ def running_on_rpi() -> bool:
 
 def list_volumes(skip_letters=set()) -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
-    if os.name == "posix":
-        # 'posix' means we're on Linux or OSX (Mac).
-        # Call the unix "mount" command to list the mounted volumes.
-        mount_output = subprocess.check_output("mount").splitlines()
-        return [x.split()[2].decode("utf-8") for x in mount_output]
-
-    elif os.name == "nt":
-        # 'nt' means we're on Windows.
+    if sys.platform == "win32":
         import ctypes
 
         #
@@ -79,8 +72,10 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
         finally:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
     else:
-        # No support for unknown operating systems.
-        raise NotImplementedError('OS "{}" not supported.'.format(os.name))
+        # 'posix' means we're on Linux or OSX (Mac).
+        # Call the unix "mount" command to list the mounted volumes.
+        mount_output = subprocess.check_output("mount").splitlines()
+        return [x.split()[2].decode("utf-8") for x in mount_output]
 
 
 def get_win_volume_name(path: str) -> str:
@@ -90,14 +85,24 @@ def get_win_volume_name(path: str) -> str:
     the given disk/device.
     Code from http://stackoverflow.com/a/12056414
     """
-    import ctypes
+    if sys.platform == "win32":
+        import ctypes
 
-    vol_name_buf = ctypes.create_unicode_buffer(1024)
-    ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
-        ctypes.c_wchar_p(path), vol_name_buf, ctypes.sizeof(vol_name_buf), None, None, None, None, 0
-    )
-    assert isinstance(vol_name_buf.value, str)
-    return vol_name_buf.value
+        vol_name_buf = ctypes.create_unicode_buffer(1024)
+        ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
+            ctypes.c_wchar_p(path),
+            vol_name_buf,
+            ctypes.sizeof(vol_name_buf),
+            None,
+            None,
+            None,
+            None,
+            0,
+        )
+        assert isinstance(vol_name_buf.value, str)
+        return vol_name_buf.value
+    else:
+        raise RuntimeError("Only meant for Windows")
 
 
 def find_volumes_by_name(volume_name: str, skip_letters={"A"}) -> Sequence[str]:

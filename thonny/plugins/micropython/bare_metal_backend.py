@@ -25,7 +25,7 @@ from thonny.plugins.micropython.backend import (
     ends_overlap,
     linux_dirname_basename,
 )
-from thonny.plugins.micropython.connection import ConnectionFailedException
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -274,7 +274,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         if echo != bdata:
             # because of autoreload? timing problems? interruption?
             # Leave it.
-            logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
+            logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
             self._connection.unread(echo)
 
     def _submit_code(self, script):
@@ -319,7 +319,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _execute_with_consumer(self, script, output_consumer):
         """Expected output after submitting the command and reading the confirmation is following:
-        
+
             stdout
             EOT
             stderr
@@ -349,7 +349,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             self._forward_output_until_active_prompt(output_consumer, "stdout")
 
     def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
-        """Used for finding initial prompt or forwarding problematic output 
+        """Used for finding initial prompt or forwarding problematic output
         in case of parse errors"""
         while True:
             terminator = self._forward_output_until_eot_or_active_propmt(
@@ -362,24 +362,24 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 output_consumer(terminator, "stdout")
 
     def _forward_output_until_eot_or_active_propmt(self, output_consumer, stream_name="stdout"):
-        """Meant for incrementally forwarding stdout from user statements, 
-        scripts and soft-reboots. Also used for forwarding side-effect output from 
+        """Meant for incrementally forwarding stdout from user statements,
+        scripts and soft-reboots. Also used for forwarding side-effect output from
         expression evaluations and for capturing help("modules") output.
         In these cases it is expected to arrive to an EOT.
-        
+
         Also used for initial prompt searching or for recovering from a protocol error.
         In this case it must work until active normal prompt or first raw prompt.
-        
+
         The code may have been submitted in any of the REPL modes or
         automatically via (soft-)reset.
-        
-        NB! The processing may end in normal mode even if the command was started 
+
+        NB! The processing may end in normal mode even if the command was started
         in raw mode (eg. when user presses reset during processing in some devices)!
-        
-        The processing may also end in FIRST_RAW_REPL, when it was started in 
-        normal REPL and Ctrl+A was issued during processing (ie. before Ctrl+C in 
+
+        The processing may also end in FIRST_RAW_REPL, when it was started in
+        normal REPL and Ctrl+A was issued during processing (ie. before Ctrl+C in
         this example):
-        
+
             6
             7
             8
@@ -393,27 +393,27 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             >>>
             raw REPL; CTRL-B to exit
             >
-        
+
         (Preceding output does not contain EOT)
         Note that this Ctrl+A may have been issued even before Thonny connected to
         the device.
 
         Note that interrupt does not affect the structure of the output -- it is
         presented just like any other exception.
-        
+
         The method returns pair of captured output (or b"" if not requested)
         and EOT, RAW_PROMPT or NORMAL_PROMPT, depending on which terminator ended the processing.
-        
+
         The terminating EOT may be either the first EOT from normal raw-REPL
         output or the starting EOT from Thonny expression (or, in principle, even
-        the second raw-REPL EOT or terminating Thonny expression EOT) 
+        the second raw-REPL EOT or terminating Thonny expression EOT)
         -- the caller will do the interpretation.
-        
+
         Because ot the special role of EOT and NORMAL_PROMT, we assume user code
         will not output these. If it does, processing will break.
         TODO: Experiment with this!
-        
-        Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
+
+        Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties,
         because it becomes impossible to say whether we are at prompt and output
         is from another thread or the main thread is still running.
         For now I'm ignoring these problems and assume all output comes from the main thread.
@@ -997,6 +997,7 @@ if __name__ == "__main__":
 
     port = None if args.port == "None" else args.port
     try:
+        connection: MicroPythonConnection
         if port is None:
             # remain busy
             while True:
