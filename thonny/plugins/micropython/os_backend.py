@@ -388,7 +388,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.host:
-        vm = MicroPythonSshBackend(
+        backend = MicroPythonSshBackend(
             args.host,
             args.user,
             args.password,
@@ -397,4 +397,4 @@ if __name__ == "__main__":
             args.api_stubs_path,
         )
     else:
-        vm = MicroPythonLocalBackend(args.executable, api_stubs_path=args.api_stubs_path)
+        backend = MicroPythonLocalBackend(args.executable, api_stubs_path=args.api_stubs_path)

@@ -1,6 +1,6 @@
 import os
 
-from thonny.backend import get_vm
+from thonny.backend import get_backend
 from thonny.common import BackendEvent
 
 _last_pos = (None, None)
@@ -12,10 +12,10 @@ def on_configure(event):
     global _last_pos, _notification_is_sent
     pos = event.x, event.y
     if pos != _last_pos:
-        get_vm().set_option(_LAST_POS_SETTING, pos)
+        get_backend().set_option(_LAST_POS_SETTING, pos)
 
     if not _notification_is_sent:
-        get_vm().send_message(BackendEvent("UserWindowAppeared"))
+        get_backend().send_message(BackendEvent("UserWindowAppeared"))
         _notification_is_sent = True
 
 
@@ -31,7 +31,7 @@ def patch_tkinter(module):
 
         try:
             # move window to the same place it was previously
-            last_pos = get_vm().get_option(_LAST_POS_SETTING)
+            last_pos = get_backend().get_option(_LAST_POS_SETTING)
             if isinstance(last_pos, tuple):
                 self.geometry("+%d+%d" % last_pos)
 
@@ -52,13 +52,13 @@ def patch_turtle(module):
     # Turtle needs more tweaking because it later overrides the position set in the Tk constructor
     turtle_config = getattr(module, "_CFG", None)
     if isinstance(turtle_config, dict):
-        last_pos = get_vm().get_option(_LAST_POS_SETTING)
+        last_pos = get_backend().get_option(_LAST_POS_SETTING)
         if isinstance(last_pos, tuple):
             turtle_config["leftright"], turtle_config["topbottom"] = last_pos
 
 
 def load_plugin():
     if os.environ.get("DOCK_USER_WINDOWS", "False").lower() == "true":
-        vm = get_vm()
-        vm.add_import_handler("tkinter", patch_tkinter)
-        vm.add_import_handler("turtle", patch_turtle)
+        backend = get_backend()
+        backend.add_import_handler("tkinter", patch_tkinter)
+        backend.add_import_handler("turtle", patch_turtle)

@@ -2,7 +2,7 @@ import ast
 import os
 import sys
 
-from thonny.backend import VM, get_vm
+from thonny.backend import CPythonBackend, get_backend
 
 
 def augment_ast(root):
@@ -75,7 +75,7 @@ def patched_editor_autocomplete(self, cmd):
     cmd["source"] = prefix + cmd["source"]
     cmd["row"] = cmd["row"] + 1
 
-    result = get_vm()._original_editor_autocomplete(cmd)
+    result = get_backend()._original_editor_autocomplete(cmd)
     result["row"] = result["row"] - 1
     result["source"] = result["source"][len(prefix) :]
 
@@ -86,6 +86,6 @@ def load_plugin():
     if os.environ.get("PGZERO_MODE", "False").lower() == "false":
         return
 
-    get_vm().add_ast_postprocessor(augment_ast)
-    VM._original_editor_autocomplete = VM._cmd_editor_autocomplete
-    VM._cmd_editor_autocomplete = patched_editor_autocomplete
+    get_backend().add_ast_postprocessor(augment_ast)
+    CPythonBackend._original_editor_autocomplete = CPythonBackend._cmd_editor_autocomplete
+    CPythonBackend._cmd_editor_autocomplete = patched_editor_autocomplete

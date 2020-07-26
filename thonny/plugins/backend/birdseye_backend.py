@@ -1,12 +1,12 @@
 import os
 
-from thonny.backend import Executor, get_vm, prepare_hooks, return_execution_result
+from thonny.backend import Executor, get_backend, prepare_hooks, return_execution_result
 
 
 def _cmd_Birdseye(cmd):
-    vm = get_vm()
-    vm.switch_env_to_script_mode(cmd)
-    return vm._execute_file(cmd, BirdsEyeRunner)
+    backend = get_backend()
+    backend.switch_env_to_script_mode(cmd)
+    return backend._execute_file(cmd, BirdsEyeRunner)
 
 
 class BirdsEyeRunner(Executor):
@@ -27,7 +27,7 @@ class BirdsEyeRunner(Executor):
 
         # Following is a trick, which allows importing birdseye in the backends,
         # which doesn't have it installed (provided it is installed for frontend Python)
-        self._vm.load_modules_with_frontend_path(["birdseye.bird"])
+        self._backend.load_modules_with_frontend_path(["birdseye.bird"])
         from birdseye.bird import eye
 
         eye.exec_string(source, filename, globs=global_vars, locs=global_vars, deep=True)
@@ -36,4 +36,4 @@ class BirdsEyeRunner(Executor):
 
 
 def load_plugin():
-    get_vm().add_command("Birdseye", _cmd_Birdseye)
+    get_backend().add_command("Birdseye", _cmd_Birdseye)

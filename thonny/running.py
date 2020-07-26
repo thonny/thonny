@@ -481,18 +481,18 @@ class Runner:
         proxy = self.get_backend_proxy()
         return proxy and proxy.is_connected()
 
-    def _poll_vm_messages(self) -> None:
+    def _poll_backend_messages(self) -> None:
         """I chose polling instead of event_generate in listener thread,
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
         self._polling_after_id = None
-        if self._pull_vm_messages() is False:
+        if self._pull_backend_messages() is False:
             return
 
-        self._polling_after_id = get_workbench().after(20, self._poll_vm_messages)
+        self._polling_after_id = get_workbench().after(20, self._poll_backend_messages)
 
-    def _pull_vm_messages(self):
+    def _pull_backend_messages(self):
         while self._proxy is not None:
             try:
                 msg = self._proxy.fetch_next_message()
@@ -577,12 +577,12 @@ class Runner:
         self._proxy = None
         self._proxy = backend_class(clean)
 
-        self._poll_vm_messages()
+        self._poll_backend_messages()
 
         if wait:
             start_time = time.time()
             while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
-                # self._pull_vm_messages()
+                # self._pull_backend_messages()
                 get_workbench().update()
                 sleep(0.01)
 

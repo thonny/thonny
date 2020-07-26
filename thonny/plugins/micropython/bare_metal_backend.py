@@ -1015,7 +1015,7 @@ if __name__ == "__main__":
             connection = SerialConnection(port, BAUDRATE)
             # connection = DifficultSerialConnection(port, BAUDRATE)
 
-        vm = MicroPythonBareMetalBackend(
+        backend = MicroPythonBareMetalBackend(
             connection, clean=args.clean, api_stubs_path=args.api_stubs_path
         )
 

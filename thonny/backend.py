@@ -88,13 +88,13 @@ TempFrameInfo = namedtuple(
 )
 
 
-_vm = None
+_backend = None
 
 
-class VM:
+class CPythonBackend:
     def __init__(self):
-        global _vm
-        _vm = self
+        global _backend
+        _backend = self
 
         self._ini = None
         self._command_handlers = {}
@@ -846,9 +846,9 @@ class VM:
 
         # yes, both out and err will be directed to out (but with different tags)
         # this allows client to see the order of interleaving writes to stdout/stderr
-        sys.stdin = VM.FakeInputStream(self, sys.stdin)
-        sys.stdout = VM.FakeOutputStream(self, sys.stdout, "stdout")
-        sys.stderr = VM.FakeOutputStream(self, sys.stdout, "stderr")
+        sys.stdin = CPythonBackend.FakeInputStream(self, sys.stdin)
+        sys.stdout = CPythonBackend.FakeOutputStream(self, sys.stdout, "stdout")
+        sys.stderr = CPythonBackend.FakeOutputStream(self, sys.stdout, "stderr")
 
         # fake it properly: replace also "backup" streams
         sys.__stdin__ = sys.stdin
@@ -910,7 +910,7 @@ class VM:
             raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _debug(self, *args):
-        logger.debug("VM: " + str(args))
+        logger.debug("CPythonBackend: " + str(args))
 
     def _enter_io_function(self):
         self._io_level += 1
@@ -1064,7 +1064,10 @@ class VM:
         except ValueError:
             return None
 
-        import friendly_traceback
+        try:
+            import friendly_traceback
+        except ImportError:
+            raise
 
         friendly_traceback.set_level(ft_level)
 
@@ -1082,49 +1085,49 @@ class VM:
             self._tty_mode = cmd["tty_mode"]
 
     class FakeStream:
-        def __init__(self, vm, target_stream):
-            self._vm = vm
+        def __init__(self, backend, target_stream):
+            self._backend = backend
             self._target_stream = target_stream
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return self._vm._tty_mode and (os.name != "nt" or "click" not in sys.modules)
+            return self._backend._tty_mode and (os.name != "nt" or "click" not in sys.modules)
 
         def __getattr__(self, name):
-            # TODO: is it safe to perform those other functions without notifying vm
+            # TODO: is it safe to perform those other functions without notifying backend
             # via _enter_io_function?
             return getattr(self._target_stream, name)
 
     class FakeOutputStream(FakeStream):
-        def __init__(self, vm, target_stream, stream_name):
-            VM.FakeStream.__init__(self, vm, target_stream)
+        def __init__(self, backend, target_stream, stream_name):
+            CPythonBackend.FakeStream.__init__(self, backend, target_stream)
             self._stream_name = stream_name
 
         def write(self, data):
             try:
-                self._vm._enter_io_function()
+                self._backend._enter_io_function()
                 # click may send bytes instead of strings
                 if isinstance(data, bytes):
                     data = data.decode(errors="replace")
 
                 if data != "":
-                    self._vm.send_message(
+                    self._backend.send_message(
                         BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data)
                     )
                     self._processed_symbol_count += len(data)
             finally:
-                self._vm._exit_io_function()
+                self._backend._exit_io_function()
 
         def writelines(self, lines):
             try:
-                self._vm._enter_io_function()
+                self._backend._enter_io_function()
                 self.write("".join(lines))
             finally:
-                self._vm._exit_io_function()
+                self._backend._exit_io_function()
 
     class FakeInputStream(FakeStream):
-        def __init__(self, vm, target_stream):
-            super().__init__(vm, target_stream)
+        def __init__(self, backend, target_stream):
+            super().__init__(backend, target_stream)
             self._buffer = ""
             self._eof = False
 
@@ -1140,7 +1143,7 @@ class VM:
                 effective_limit = original_limit
 
             try:
-                self._vm._enter_io_function()
+                self._backend._enter_io_function()
                 while True:
                     if effective_limit == 0:
                         result = ""
@@ -1174,24 +1177,24 @@ class VM:
                         break
 
                     else:
-                        self._vm.send_message(
+                        self._backend.send_message(
                             BackendEvent("InputRequest", method=method, limit=original_limit)
                         )
-                        cmd = self._vm._fetch_command()
+                        cmd = self._backend._fetch_command()
                         if isinstance(cmd, InputSubmission):
                             self._buffer += cmd.data
                             self._processed_symbol_count += len(cmd.data)
                         elif isinstance(cmd, EOFCommand):
                             self._eof = True
                         elif isinstance(cmd, InlineCommand):
-                            self._vm.handle_command(cmd)
+                            self._backend.handle_command(cmd)
                         else:
                             raise RuntimeError("Wrong type of command when waiting for input")
 
                 return result
 
             finally:
-                self._vm._exit_io_function()
+                self._backend._exit_io_function()
 
         def read(self, limit=-1):
             return self._generic_read("read", limit)
@@ -1218,12 +1221,12 @@ def prepare_hooks(method):
     def wrapper(self, *args, **kwargs):
         try:
             sys.meta_path.insert(0, self)
-            self._vm._install_custom_import()
+            self._backend._install_custom_import()
             return method(self, *args, **kwargs)
         finally:
             del sys.meta_path[0]
-            if hasattr(self._vm, "_original_import"):
-                self._vm._restore_original_import()
+            if hasattr(self._backend, "_original_import"):
+                self._backend._restore_original_import()
 
     return wrapper
 
@@ -1237,14 +1240,14 @@ def return_execution_result(method):
                 return result
             return {"context_info": "after normal execution"}
         except Exception:
-            return {"user_exception": self._vm._prepare_user_exception()}
+            return {"user_exception": self._backend._prepare_user_exception()}
 
     return wrapper
 
 
 class Executor:
-    def __init__(self, vm, original_cmd):
-        self._vm = vm
+    def __init__(self, backend, original_cmd):
+        self._backend = backend
         self._original_cmd = original_cmd
         self._main_module_path = None
 
@@ -1279,7 +1282,7 @@ class Executor:
 
             return self._execute_prepared_user_code(statements, global_vars)
         except SyntaxError:
-            return {"user_exception": self._vm._prepare_user_exception()}
+            return {"user_exception": self._backend._prepare_user_exception()}
         except SystemExit:
             return {"SystemExit": True}
         except Exception:
@@ -1315,8 +1318,8 @@ class SimpleRunner(Executor):
 
 
 class Tracer(Executor):
-    def __init__(self, vm, original_cmd):
-        super().__init__(vm, original_cmd)
+    def __init__(self, backend, original_cmd):
+        super().__init__(backend, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
         self._prev_breakpoints = {}
@@ -1429,9 +1432,9 @@ class Tracer(Executor):
 
     def _fetch_next_debugger_command(self, current_frame):
         while True:
-            cmd = self._vm._fetch_command()
+            cmd = self._backend._fetch_command()
             if isinstance(cmd, InlineCommand):
-                self._vm.handle_command(cmd)
+                self._backend.handle_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
                 self._prev_breakpoints = self._current_command.breakpoints
@@ -1501,7 +1504,7 @@ class Tracer(Executor):
     def _check_notify_return(self, frame_id):
         if frame_id in self._last_reported_frame_ids:
             # Need extra notification, because it may be long time until next interesting event
-            self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
+            self._backend.send_message(InlineResponse("debugger_return", frame_id=frame_id))
 
     def _check_store_main_frame_id(self, frame):
         # initial command doesn't have a frame id
@@ -1512,8 +1515,8 @@ class Tracer(Executor):
 
 
 class FastTracer(Tracer):
-    def __init__(self, vm, original_cmd):
-        super().__init__(vm, original_cmd)
+    def __init__(self, backend, original_cmd):
+        super().__init__(backend, original_cmd)
 
         self._command_frame_returned = False
         self._code_linenos_cache = {}
@@ -1559,7 +1562,7 @@ class FastTracer(Tracer):
                     and not self._get_breakpoints_in_code(frame.f_code)
                 )
                 or not self._is_interesting_frame(frame)
-                or self._vm.is_doing_io()
+                or self._backend.is_doing_io()
             )
 
         else:
@@ -1610,7 +1613,7 @@ class FastTracer(Tracer):
         return self._trace
 
     def _report_current_state(self, frame):
-        stack = self._vm._export_stack(frame, self._is_interesting_frame)
+        stack = self._backend._export_stack(frame, self._is_interesting_frame)
         msg = DebuggerResponse(
             stack=stack,
             in_present=True,
@@ -1621,7 +1624,7 @@ class FastTracer(Tracer):
 
         self._last_reported_frame_ids = set(map(lambda f: f.id, stack))
 
-        self._vm.send_message(msg)
+        self._backend.send_message(msg)
 
     def _cmd_step_into_completed(self, frame):
         return True
@@ -1677,8 +1680,8 @@ class FastTracer(Tracer):
 
 
 class NiceTracer(Tracer):
-    def __init__(self, vm, original_cmd):
-        super().__init__(vm, original_cmd)
+    def __init__(self, backend, original_cmd):
+        super().__init__(backend, original_cmd)
         self._instrumented_files = set()
         self._install_marker_functions()
         self._custom_stack = []
@@ -1737,7 +1740,7 @@ class NiceTracer(Tracer):
                 return False
 
             else:
-                return not self._is_interesting_frame(frame) or self._vm.is_doing_io()
+                return not self._is_interesting_frame(frame) or self._backend.is_doing_io()
 
         else:
             # once we have entered a frame, we need to reach the return event
@@ -1922,7 +1925,7 @@ class NiceTracer(Tracer):
             if event == "after_expression" and "value" in args:
                 # value is missing in case of exception
                 custom_frame.current_evaluations.append(
-                    (focus, self._vm.export_value(args["value"]))
+                    (focus, self._backend.export_value(args["value"]))
                 )
 
         # Save the snapshot.
@@ -2041,7 +2044,7 @@ class NiceTracer(Tracer):
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
 
-            source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
+            source, firstlineno, in_library = self._backend._get_frame_source_info(system_frame)
 
             assert firstlineno is not None, "nofir " + str(system_frame)
             frame_id = id(system_frame)
@@ -2072,7 +2075,7 @@ class NiceTracer(Tracer):
         state["stack"] = new_stack
         state["tracer_class"] = "NiceTracer"
 
-        self._vm.send_message(DebuggerResponse(**state))
+        self._backend.send_message(DebuggerResponse(**state))
 
     def _try_interpret_as_again_event(self, frame, original_event, original_args, original_node):
         """
@@ -2226,7 +2229,7 @@ class NiceTracer(Tracer):
 
         def export_globals(module_name, frame):
             if module_name not in exported_globals_per_module:
-                exported_globals_per_module[module_name] = self._vm.export_variables(
+                exported_globals_per_module[module_name] = self._backend.export_variables(
                     frame.f_globals
                 )
             return exported_globals_per_module[module_name]
@@ -2244,7 +2247,7 @@ class NiceTracer(Tracer):
                     system_frame=system_frame,
                     locals=None
                     if system_frame.f_locals is system_frame.f_globals
-                    else self._vm.export_variables(system_frame.f_locals),
+                    else self._backend.export_variables(system_frame.f_locals),
                     globals=export_globals(module_name, system_frame),
                     event=custom_frame.event,
                     focus=custom_frame.focus,
@@ -2833,5 +2836,5 @@ def _report_internal_error():
     traceback.print_exc()
 
 
-def get_vm():
-    return _vm
+def get_backend():
+    return _backend

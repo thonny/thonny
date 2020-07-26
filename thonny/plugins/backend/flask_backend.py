@@ -1,6 +1,6 @@
 import ast
 
-from thonny.backend import get_vm
+from thonny.backend import get_backend
 
 
 def augment_source(source, cmd):
@@ -59,4 +59,4 @@ if "{app_name}" in globals():
 
 
 def load_plugin():
-    get_vm().add_source_preprocessor(augment_source)
+    get_backend().add_source_preprocessor(augment_source)
