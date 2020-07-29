@@ -46,7 +46,9 @@ import traceback
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
+from typing import Optional, Dict, Union, Tuple, List
 
+from thonny.backend import BaseBackend, UploadDownloadBackend, MainBackend, ensure_posix_directory
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -91,6 +93,10 @@ WAIT_OR_CRASH_TIMEOUT = 5
 
 SECONDS_IN_YEAR = 60 * 60 * 24 * 365
 
+STAT_KIND_INDEX = 0
+STAT_SIZE_INDEX = 6
+STAT_MTIME_INDEX = 8
+
 logger = logging.getLogger("thonny.micropython.backend")
 
 
@@ -99,7 +105,7 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class MicroPythonBackend:
+class MicroPythonBackend(MainBackend):
     def __init__(self, clean, api_stubs_path, cwd=None):
         self._prev_time = time.time()
 
@@ -556,15 +562,7 @@ class MicroPythonBackend:
             )
         return {"module_name": cmd.module_name, "globals": globs}
 
-    def _cmd_get_dirs_child_data(self, cmd):
-        data = self._get_dirs_child_data_generic(cmd["paths"])
-        dir_separator = "/"
-        return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
-
     def _cmd_get_fs_info(self, cmd):
-        raise NotImplementedError()
-
-    def _cmd_write_file(self, cmd):
         raise NotImplementedError()
 
     def _cmd_delete(self, cmd):
@@ -595,103 +593,29 @@ class MicroPythonBackend:
             % paths
         )
 
-    def _cmd_read_file(self, cmd):
-        raise NotImplementedError()
+    def _get_stat(self, path: str) -> Optional[Tuple[int]]:
+        if not self._supports_directories():
+            func = "size"
+        else:
+            func = "stat"
 
-    def _cmd_download(self, cmd):
-        total_size = 0
-        completed_files_size = 0
-        # TODO: also deal with empty directories
-        remote_files = self._list_remote_files_with_info(cmd["source_paths"])
-        target_dir = cmd["target_dir"].rstrip("/").rstrip("\\")
-
-        download_items = []
-        for file in remote_files:
-            total_size += file["size"]
-            # compute filenames (and subdirs) in target_dir
-            # relative to the context of the user selected items
-            assert file["path"].startswith(file["original_context"])
-            path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
-            target_path = os.path.join(target_dir, os.path.normpath(path_suffix))
-            download_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
-
-        if not cmd["allow_overwrite"]:
-            targets = [item["target"] for item in download_items]
-            existing_files = list(filter(os.path.exists, targets))
-            if existing_files:
-                return {
-                    "existing_files": existing_files,
-                    "source_paths": cmd["source_paths"],
-                    "target_dir": cmd["target_dir"],
-                    "description": cmd["description"],
-                }
-
-        def notify(current_file_progress):
-            self._check_send_inline_progress(
-                cmd, completed_files_size + current_file_progress, total_size
+            stat = self._evaluate(
+                dedent(
+                    """
+                try:
+                    __thonny_helper.print_mgmt_value(__thonny_helper.os.%s(%r))
+                except Exception:
+                    __thonny_helper.print_mgmt_value(None)
+                """
+                )
+                % (func, path)
             )
-
-        # replace the indeterminate progressbar with determinate as soon as possible
-        notify(0)
-
-        for item in download_items:
-            os.makedirs(os.path.dirname(item["target"]), exist_ok=True)
-            written_bytes = self._download_file(item["source"], item["target"], notify)
-            assert written_bytes is None or written_bytes == item["size"]
-            completed_files_size += item["size"]
-
-        return {}
-
-    def _cmd_upload(self, cmd):
-        completed_files_size = 0
-        # TODO: also deal with empty directories
-        local_files = self._list_local_files_with_info(cmd["source_paths"])
-        target_dir = cmd["target_dir"]
-        assert target_dir.startswith("/") or not self._supports_directories()
-        assert not target_dir.endswith("/") or target_dir == "/"
-
-        upload_items = []
-        for file in local_files:
-            # compute filenames (and subdirs) in target_dir
-            # relative to the context of the user selected items
-            assert file["path"].startswith(file["original_context"])
-            path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
-            target_path = self._join_remote_path_parts(target_dir, to_remote_path(path_suffix))
-            upload_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
-
-        if not cmd["allow_overwrite"]:
-            targets = [item["target"] for item in upload_items]
-            existing_files = self._get_existing_remote_files(targets)
-            if existing_files:
-                return {
-                    "existing_files": existing_files,
-                    "source_paths": cmd["source_paths"],
-                    "target_dir": cmd["target_dir"],
-                    "description": cmd["description"],
-                }
-
-        total_size = sum([item["size"] for item in upload_items])
-
-        def notify(current_file_progress):
-            self._check_send_inline_progress(
-                cmd, completed_files_size + current_file_progress, total_size
-            )
-
-        # replace the indeterminate progressbar with determinate as soon as possible
-        notify(0)
-
-        for item in upload_items:
-            assert item["target"].startswith("/") or not self._supports_directories()
-            target_dir, _ = linux_dirname_basename(item["target"])
-            assert target_dir.startswith("/") or not self._supports_directories()
-            self._makedirs(target_dir)
-
-            written_bytes = self._upload_file(item["source"], item["target"], notify)
-            assert written_bytes is None or written_bytes == item["size"]
-
-            completed_files_size += item["size"]
-
-        return {}
+            if stat is None:
+                return None
+            elif isinstance(stat, int):
+                return (0b1000000000000000, 0, 0, 0, 0, 0, stat, 0, 0, 0)
+            else:
+                return stat
 
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
@@ -699,35 +623,7 @@ class MicroPythonBackend:
         self._makedirs(cmd.path)
 
     def _makedirs(self, path):
-        if path == "/":
-            return
-
-        path = path.rstrip("/")
-
-        script = (
-            dedent(
-                """
-            __thonny_parts = %r.split('/')
-            __thonny_dummy = None
-            for i in range(2, len(__thonny_parts) + 1):
-                __thonny_path = "/".join(__thonny_parts[:i])
-                try:
-                    __thonny_helper.os.stat(__thonny_path) and None
-                except OSError:
-                    # does not exist
-                    __thonny_helper.os.mkdir(__thonny_path)
-            
-            del __thonny_parts
-            try:
-                del __thonny_path
-            except:
-                pass
-        """
-            )
-            % path
-        )
-
-        self._execute_without_output(script)
+        ensure_posix_directory(path, self._get_stat_mode, self._mkdir)
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -913,125 +809,6 @@ class MicroPythonBackend:
                 # keep only the name
                 fp.write(indent + name + " = None\n")
 
-    def _list_local_files_with_info(self, paths):
-        def rec_list_with_size(path):
-            result = {}
-            if os.path.isfile(path):
-                result[path] = os.path.getsize(path)
-            elif os.path.isdir(path):
-                for name in os.listdir(path):
-                    result.update(rec_list_with_size(os.path.join(path, name)))
-            else:
-                raise RuntimeError("Can't process " + path)
-
-            return result
-
-        result = []
-        for requested_path in paths:
-            sizes = rec_list_with_size(requested_path)
-            for path in sizes:
-                result.append(
-                    {
-                        "path": path,
-                        "size": sizes[path],
-                        "original_context": os.path.dirname(requested_path),
-                    }
-                )
-
-        result.sort(key=lambda rec: rec["path"])
-        return result
-
-    def _list_remote_files_with_info(self, paths):
-        # prepare universal functions
-        self._execute_without_output(
-            dedent(
-                """
-            if hasattr(__thonny_helper.os, "stat"):
-                def __thonny_getsize(path):
-                    return __thonny_helper.os.stat(path)[6]
-                
-                def __thonny_isdir(path):
-                    return __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000
-                    
-            else:
-                # micro:bit
-                from os import size as __thonny_getsize
-                
-                def __thonny_isdir(path):
-                    return False
-        """
-            )
-        )
-
-        self._execute_without_output(
-            dedent(
-                """
-            def __thonny_rec_list_with_size(path):
-                result = {}
-                if __thonny_isdir(path):
-                    for name in __thonny_helper.listdir(path):
-                        result.update(__thonny_rec_list_with_size(path + "/" + name))
-                else:
-                    result[path] = __thonny_getsize(path)
-    
-                return result
-        """
-            )
-        )
-
-        result = []
-        for requested_path in paths:
-            sizes = self._evaluate("__thonny_rec_list_with_size(%r)" % requested_path)
-            for path in sizes:
-                result.append(
-                    {
-                        "path": path,
-                        "size": sizes[path],
-                        "original_context": os.path.dirname(requested_path),
-                    }
-                )
-
-        result.sort(key=lambda rec: rec["path"])
-
-        self._execute_without_output(
-            dedent(
-                """
-                
-                del __thonny_getsize
-                del __thonny_isdir
-                del __thonny_rec_list_with_size
-            """
-            )
-        )
-        return result
-
-    def _get_existing_remote_files(self, paths):
-        if self._supports_directories():
-            func = "stat"
-        else:
-            func = "size"
-
-        return self._evaluate(
-            dedent(
-                """
-                
-                __thonny_result = []
-                __thonny_dummy = None
-                for __thonny_path in %r:
-                    try:
-                        __thonny_dummy = __thonny_helper.os.%s(__thonny_path)
-                        __thonny_result.append(__thonny_path)
-                    except OSError:
-                        pass
-                __thonny_helper.print_mgmt_value(__thonny_result)
-                del __thonny_dummy
-                del __thonny_result
-                del __thonny_path
-                """
-            )
-            % (paths, func)
-        )
-
     def _join_remote_path_parts(self, left, right):
         if left == "":  # micro:bit
             assert not self._supports_directories()
@@ -1039,75 +816,61 @@ class MicroPythonBackend:
 
         return left.rstrip("/") + "/" + right.strip("/")
 
-    def _get_file_size(self, path):
-        return self._evaluate("__thonny_helper.os.stat(%r)[6]" % path)
+    def _get_file_size(self, path: str) -> int:
+        stat = self._get_stat(path)
+        if stat is None:
+            raise RuntimeError("Path '%' does not exist" % path)
 
-    def _upload_file(self, source, target, notifier):
-        raise NotImplementedError()
+        return stat[STAT_SIZE_INDEX]
 
-    def _download_file(self, source, target, notifier=None):
-        raise NotImplementedError()
+    def _get_stat_mode(self, path: str) -> Optional[int]:
+        stat = self._get_stat(path)
+        if stat is None:
+            return None
+        return stat[0]
 
-    def _get_dirs_child_data_generic(self, paths):
-        return self._evaluate(
-            dedent(
-                """
-                
-                # Init all vars, so that they can be deleted
-                # even if the loop makes no iterations
-                __thonny_result = {}
-                __thonny_path = None
-                __thonny_st = None 
-                __thonny_child_names = None
-                __thonny_children = None
-                __thonny_name = None
-                __thonny_real_path = None
-                __thonny_full = None
-                
-                for __thonny_path in %(paths)r:
-                    __thonny_real_path = __thonny_path or '/'
-                    try:
-                        __thonny_child_names = __thonny_helper.listdir(__thonny_real_path)
-                    except OSError:
-                        # probably deleted directory
-                        __thonny_children = None
-                    else:
-                        __thonny_children = {}
-                        for __thonny_name in __thonny_child_names:
-                            if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
-                                continue
-                            __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
-                            try:
-                                __thonny_st = __thonny_helper.os.stat(__thonny_full)
-                                if __thonny_st[0] & 0o170000 == 0o040000:
-                                    # directory
-                                    __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
-                                else:
-                                    __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
-                                
-                                # converting from 2000-01-01 epoch to Unix epoch 
-                                __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9]) + 946684800
-                            except OverflowError:
-                                # Probably "System Volume Information" in trinket
-                                # https://github.com/thonny/thonny/issues/923
-                                pass
-                            
-                    __thonny_result[__thonny_path] = __thonny_children
-                
-                
-                __thonny_helper.print_mgmt_value(__thonny_result)
-                                       
-                del __thonny_st
-                del __thonny_children
-                del __thonny_name
-                del __thonny_path
-                del __thonny_full
-                del __thonny_result
-                del __thonny_real_path
+    def _get_path_info(self, path: str) -> Optional[Dict]:
+        stat = self._get_stat(path)
+
+        if stat is None:
+            return None
+
+        _, basename = unix_dirname_basename(path)
+        return self._expand_stat(stat, basename)
+
+    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+        """The key of the result dict is simple name"""
+        if self._supports_directories():
+            raw_data = self._evaluate(
+                dedent(
+                    """
+                __thonny_result = {} 
+                try:
+                    __thonny_names = __thonny_helper.os.listdir(%r)
+                except OSError:
+                    __thonny_helper.print_mgmt_value(None) 
+                else:
+                    for __thonny_name in __thonny_names:
+                        try:
+                            __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
+                        except OSError as e:
+                            __thonny_result[__thonny_name] = str(e)
+                    __thonny_helper.print_mgmg_value(__thonny_result)
             """
+                )
+                % (path.rstrip("/") + "/", path)
             )
-            % {"paths": paths}
-        )
+            if raw_data is None:
+                return None
+        elif path == "":
+            # used to represent all files in micro:bit
+            raw_data = self._evaluate(
+                "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir(%r)}"
+            )
+        else:
+            return None
+
+        return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
     def _on_connection_closed(self, error=None):
         self._forward_unexpected_output("stderr")
@@ -1170,6 +933,44 @@ class MicroPythonBackend:
         # print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
         self._prev_time = new_time
 
+    def _system_time_to_posix_time(self, value: float) -> float:
+        return value + self._get_epoch_offset()
+
+    def _get_epoch_offset(self) -> int:
+        raise NotImplementedError()
+
+    def _expand_stat(self, stat: Union[Tuple, int, str], basename: str) -> Dict:
+        error = None
+        if isinstance(stat, int):
+            # file size is only info available for micro:bit files
+            size = stat
+            modified = None
+            kind = "file"
+        elif isinstance(stat, str):
+            kind = None
+            size = None
+            modified = None
+            error = stat
+        else:
+            if stat[STAT_KIND_INDEX] & 0o170000 == 0o040000:
+                kind = "dir"
+                size = None
+            else:
+                kind = "file"
+                size = stat[STAT_SIZE_INDEX]
+
+            modified = self._system_time_to_posix_time(stat[STAT_MTIME_INDEX])
+
+        result = {
+            "kind": kind,
+            "size": size,
+            "modified": modified,
+            "hidden": basename.startswith("."),
+        }
+        if error:
+            result["error"] = error
+        return result
+
 
 class ProtocolError(Exception):
     def __init__(self, message, captured):
@@ -1215,7 +1016,7 @@ def parse_api_information(file_path):
     return defs
 
 
-def linux_dirname_basename(path):
+def unix_dirname_basename(path):
     if path == "/":
         return ("/", "")
 

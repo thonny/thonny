@@ -6,6 +6,7 @@ import shlex
 import sys
 import textwrap
 
+from thonny.backend import SshBackend
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.backend import ENCODING, EOT, MicroPythonBackend, ends_overlap
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
@@ -263,6 +264,9 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _is_connected(self):
         return not self._connection._error
 
+    def _get_epoch_offset(self) -> int:
+        return 0
+
 
 class MicroPythonLocalBackend(MicroPythonOsBackend):
     def _create_connection(self, run_args=[]):
@@ -280,19 +284,15 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
         os.chdir(self._cwd)
         return result
 
+    def _get_sep(self) -> str:
+        return os.path.sep
 
-class MicroPythonSshBackend(MicroPythonOsBackend):
+
+class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
     def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
         from paramiko.client import SSHClient
 
-        self._host = host
-        self._user = user
-        self._password = password
-        self._sftp = None
-        self._client = SSHClient()
-        self._client.load_system_host_keys()
-        # TODO: does it get closed properly after process gets killed?
-        self._client.connect(hostname=host, username=user, password=password)
+        self._init_client(host, user, password)
 
         self._cwd = cwd
         super().__init__(mp_executable, api_stubs_path, cwd=cwd)
@@ -318,50 +318,8 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
             + "\n"
         )
 
-    def _get_sftp(self):
-        if self._sftp is None:
-            import paramiko
-
-            # TODO: does it get closed properly after process gets killed?
-            self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
-
-        return self._sftp
-
-    def _cmd_write_file(self, cmd):
-        with io.BytesIO(cmd["content_bytes"]) as fp:
-            self._get_sftp().putfo(fp, cmd["path"])
-
-        return {"path": cmd["path"], "editor_id": cmd.get("editor_id")}
-
-    def _cmd_read_file(self, cmd):
-        try:
-            with io.BytesIO() as fp:
-                self._get_sftp().getfo(cmd["path"], fp)
-                fp.seek(0)
-                content_bytes = fp.read()
-            error = None
-        except Exception as e:
-            # TODO: _report_internal_error()
-            error = str(e)
-            content_bytes = None
-
-        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
-
-    def _upload_file(self, source, target, notifier=None):
-        self._move_data_via_sftp(self._get_sftp().put, source, target, notifier)
-
-    def _download_file(self, source, target, notifier=None):
-        self._move_data_via_sftp(self._get_sftp().get, source, target, notifier)
-
-    def _move_data_via_sftp(self, op, source, target, notifier):
-        if notifier is None:
-            callback = None
-        else:
-
-            def callback(sent, total):
-                notifier(sent)
-
-        op(source, target, callback=callback)
+    def _get_sep(self) -> str:
+        return "/"
 
 
 if __name__ == "__main__":

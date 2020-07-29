@@ -12,7 +12,7 @@ import sys
 import traceback
 from collections import namedtuple
 from threading import Thread
-from typing import List, Optional  # @UnusedImport
+from typing import List, Optional, Dict, Iterable  # @UnusedImport
 
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny]"
@@ -378,19 +378,7 @@ def is_hidden_or_system_file(path: str) -> bool:
         return False
 
 
-def get_dirs_child_data(paths):
-    """Used for populating local file browser's tree view.
-    dir_paths contains full paths of the open directories.
-    Returns information required for refreshing this view"""
-    res = {}
-    for path in paths:
-        # assuming the path already has actual case
-        res[path] = get_single_dir_child_data(path)
-
-    return res
-
-
-def get_single_dir_child_data(path):
+def get_single_dir_child_data(path: str) -> Optional[Dict[str, Dict]]:
     if path == "":
         if platform.system() == "Windows":
             return {**get_windows_volumes_info(), **get_windows_network_locations()}
@@ -407,15 +395,20 @@ def get_single_dir_child_data(path):
                     # must be broken link
                     continue
                 full_child_path = normpath_with_actual_case(full_child_path)
-                if not is_hidden_or_system_file(full_child_path):
-                    st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
-                    name = os.path.basename(full_child_path)
-                    result[name] = {
-                        "size": None if os.path.isdir(full_child_path) else st.st_size,
-                        "time": max(st.st_mtime, st.st_ctime),
-                    }
+                st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
+                name = os.path.basename(full_child_path)
+                result[name] = {
+                    "size": None if os.path.isdir(full_child_path) else st.st_size,
+                    "modified": st.st_mtime,
+                    "hidden": is_hidden_or_system_file(full_child_path),
+                }
         except PermissionError:
-            result["<not accessible>"] = {"kind": "error", "size": -1, "time": None}
+            result["<not accessible>"] = {
+                "kind": "error",
+                "size": -1,
+                "modified": None,
+                "hidden": None,
+            }
 
         return result
     else:

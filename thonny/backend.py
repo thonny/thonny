@@ -9,25 +9,33 @@ import inspect
 import io
 import logging
 import os.path
+import pathlib
 import pkgutil
 import pydoc
 import queue
 import re
 import signal
 import site
+import stat
 import sys
 import tokenize
 import traceback
 import types
 import warnings
+from abc import abstractmethod, ABC
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 
 import _ast
+from typing import BinaryIO, Callable, List, Dict, Tuple, Set, Optional, Iterable
 
 import __main__  # @UnresolvedImport
 import thonny
-from thonny.common import path_startswith  # TODO: try to get rid of this
+from thonny.common import (
+    path_startswith,
+    get_dirs_child_data,
+    get_single_dir_child_data,
+)  # TODO: try to get rid of this
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -52,6 +60,8 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     serialize_message,
 )
+
+NEW_DIR_MODE = 0o755
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -91,7 +101,246 @@ TempFrameInfo = namedtuple(
 _backend = None
 
 
-class CPythonBackend:
+class MainBackend(ABC):
+    """Backend which does not forward to another backend"""
+
+    def _cmd_get_dirs_children_info(self, cmd):
+        """Provides information about immediate children of paths opened in a file browser"""
+        data = {path: self._get_dir_children_info(path) for path in cmd["paths"]}
+        return {"node_id": cmd["node_id"], "dir_separator": "/", "data": data}
+
+    def _cmd_prepare_upload(self, cmd):
+        """Returns info about items to be overwritten or merged by cmd.paths"""
+        return {"existing_items": self._get_paths_info(cmd.target_paths, recurse=False)}
+
+    def _cmd_prepare_download(self, cmd):
+        """Returns info about all items under and including cmd.paths"""
+        return {"all_items": self._get_paths_info(cmd.source_paths, recurse=True)}
+
+    def _get_paths_info(self, paths: List[str], recurse: bool) -> Dict[str, Dict]:
+        result = {}
+
+        for path in paths:
+            info = self._get_path_info(path)
+            result[path] = info
+
+            if recurse and info is not None and info["kind"] == "dir":
+                result.update(self._get_dir_descendants_info(path))
+
+        return result
+
+    def _get_dir_descendants_info(self, path: str) -> Dict[str, Dict]:
+        """Assumes path is dir. Dict is keyed by full path"""
+        result = {}
+        children_info = self._get_dir_children_info(path)
+        for child_name, child_info in children_info.items():
+            full_child_path = path + self._get_sep() + child_name
+            result[full_child_path] = child_info
+            if child_info["kind"] == "dir":
+                result.update(self._get_dir_descendants_info(full_child_path))
+
+        return result
+
+    @abstractmethod
+    def _get_path_info(self, path: str) -> Optional[Dict]:
+        """Returns information about this path or None if it doesn't exist"""
+
+    @abstractmethod
+    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+        """For existing dirs returns Dict[child_short_name, Dict of its information].
+        Returns None if path doesn't exist or is not a dir.
+        """
+
+    @abstractmethod
+    def _get_sep(self) -> str:
+        """Returns symbol for combining parent directory path and child name"""
+
+
+class UploadDownloadBackend(ABC):
+    """Backend, which runs on a local process and talks to a nonlocal system,
+    and therefore is able to upload/download"""
+
+    def _cmd_download(self, cmd):
+        errors = self._transfer_files_and_dirs(
+            cmd.items, self._ensure_local_directory, self._download_file, cmd.id, pathlib.Path
+        )
+        return {"errors": errors}
+
+    def _cmd_upload(self, cmd):
+        errors = self._transfer_files_and_dirs(
+            cmd.items,
+            self._ensure_remote_directory,
+            self._upload_file,
+            cmd.id,
+            pathlib.PurePosixPath,
+        )
+        return {"errors": errors}
+
+    def _cmd_read_file(self, cmd):
+        def callback(completed, total):
+            self._report_progress(cmd["id"], cmd["path"], completed, total)
+
+        try:
+            with io.BytesIO() as fp:
+                self._read_file(cmd["path"], fp, callback)
+                fp.seek(0)
+                content_bytes = fp.read()
+
+            error = None
+        except Exception as e:
+            _report_internal_error()
+            error = str(e)
+            content_bytes = None
+
+        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
+
+    def _cmd_write_file(self, cmd):
+        def callback(completed, total):
+            self._report_progress(cmd["id"], cmd["path"], completed, total)
+
+        try:
+            with io.BytesIO() as fp:
+                fp.write(cmd["content_bytes"])
+                fp.seek(0)
+                self._write_file(fp, cmd["path"], len(cmd["content_bytes"]), callback)
+
+            error = None
+        except Exception as e:
+            _report_internal_error()
+            error = str(e)
+
+        return InlineResponse(
+            command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id"), error=error
+        )
+
+    def _transfer_files_and_dirs(
+        self, items, ensure_dir_fun, transfer_file_fun, cmd_id, target_path_class
+    ):
+        total_cost = 0
+        for item in items:
+            if item["kind"] == "file":
+                total_cost += item["source_size"] + self._get_file_fixed_cost()
+            else:
+                total_cost += self._get_dir_transfer_cost()
+
+        completed_cost = 0
+        errors = []
+
+        for item in sorted(items, key=lambda x: x["source_path"]):
+            self._report_progress(cmd_id, item["source_path"], completed_cost, total_cost)
+
+            def copy_bytes_notifier(completed_bytes, total_bytes):
+                self._report_progress(
+                    cmd_id, item["source_path"], completed_cost + completed_bytes, total_cost
+                )
+
+            try:
+                if item["kind"] == "dir":
+                    ensure_dir_fun(item["source_path"])
+                    completed_cost += self._get_dir_transfer_cost()
+                else:
+                    transfer_file_fun(item["source_path"], item["source_path"], copy_bytes_notifier)
+                    completed_cost += self._get_file_fixed_cost() + item["source_size"]
+            except Exception as e:
+                errors.append(str(e))
+
+        return errors
+
+    def _get_dir_transfer_cost(self):
+        # Validating and maybe creating a directory is taken to be equal to copying this number of bytes
+        return 1000
+
+    def _get_file_fixed_cost(self):
+        # Creating or overwriting a file is taken to be equal to copying this number of bytes
+        return 100
+
+    @abstractmethod
+    def _report_progress(self, cmd_id, description, completed, total):
+        raise NotImplementedError()
+
+    def _ensure_local_directory(self, path: str) -> None:
+        os.makedirs(path, NEW_DIR_MODE, exist_ok=True)
+
+    def _ensure_remote_directory(self, path: str) -> None:
+        # assuming remote system is Posix
+        ensure_posix_directory(path, self._get_stat_mode_for_upload, self._mkdir_for_upload)
+
+    @abstractmethod
+    def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
+        "returns None if path doesn't exist"
+
+    @abstractmethod
+    def _mkdir_for_upload(self, path: str) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _write_file(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _read_file(
+        self, target_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+    ) -> None:
+        raise NotImplementedError()
+
+
+class SshBackend(UploadDownloadBackend):
+    def _init_client(self, host, user, password):
+        try:
+            import paramiko
+            from paramiko.client import SSHClient
+        except ImportError:
+            raise RuntimeError("paramiko is required")
+
+        self._host = host
+        self._user = user
+        self._password = password
+        self._sftp = None  # type: paramiko.SFTPClient
+        self._client = SSHClient()
+        self._client.load_system_host_keys()
+        # TODO: does it get closed properly after process gets killed?
+        self._client.connect(hostname=host, username=user, password=password)
+
+    def _get_sftp(self):
+        if self._sftp is None:
+            import paramiko
+
+            # TODO: does it get closed properly after process gets killed?
+            self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+
+        return self._sftp
+
+    def _read_file(
+        self, target_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+    ) -> None:
+        self._get_sftp().getfo(target_path, target, callback)
+
+    def _write_file(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
+        self._get_sftp().putfo(source, target_path, callback)
+
+    def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
+        try:
+            self._get_sftp().stat(path).st_mode
+        except OSError:
+            return None
+
+    def _mkdir_for_upload(self, path: str) -> None:
+        self._get_sftp().mkdir(path, NEW_DIR_MODE)
+
+
+class CPythonMainBackend(MainBackend):
     def __init__(self):
         global _backend
         _backend = self
@@ -168,7 +417,7 @@ class CPythonBackend:
 
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
-        
+
         Handler may return None (in this case no response is sent to frontend)
         or a BackendResponse
         """
@@ -630,6 +879,38 @@ class CPythonBackend:
             )
         else:
             raise UserError("Command 'Reset' doesn't take arguments")
+
+    def _get_sep(self) -> str:
+        return os.path.sep
+
+    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+        return get_single_dir_child_data(path)
+
+    def _get_path_info(self, path: str) -> Optional[Dict]:
+
+        try:
+            if not os.path.exists(path):
+                return None
+        except OSError:
+            pass
+
+        try:
+            kind = "dir" if os.path.isdir(path) else "file"
+            return {
+                "path": path,
+                "kind": kind,
+                "size": None if kind == "dir" else os.path.getsize(path),
+                "modified": os.path.getmtime(path),
+                "error": None,
+            }
+        except OSError as e:
+            return {
+                "path": path,
+                "kind": None,
+                "size": None,
+                "modified": None,
+                "error": str(e),
+            }
 
     def _export_completions(self, jedi_completions):
         result = []
@@ -2838,3 +3119,58 @@ def _report_internal_error():
 
 def get_backend():
     return _backend
+
+
+def _longest_common_path_prefix(str_paths, path_class):
+    assert str_paths
+
+    if len(str_paths) == 1:
+        return str_paths[0]
+
+    list_of_parts = []
+    for str_path in str_paths:
+        list_of_parts.append(path_class(str_path).parts)
+
+    first = list_of_parts[0]
+    rest = list_of_parts[1:]
+
+    i = 0
+    while i < len(first):
+        item_i = first[i]
+        if not all([len(x) > i and x[i] == item_i for x in rest]):
+            break
+        else:
+            i += 1
+
+    if i == 0:
+        return ""
+
+    result = path_class(first[0])
+    for j in range(1, i):
+        result = result.joinpath(first[j])
+
+    return str(result)
+
+
+def ensure_posix_directory(
+    path: str, stat_mode_fun: Callable[[str], Optional[int]], mkdir_fun: Callable[[str], None]
+) -> None:
+    assert path.startswith("/")
+    if path == "/":
+        return
+
+    for parent in reversed(list(map(str, pathlib.PurePosixPath(path).parents))):
+        if parent != "/":
+            mode = stat_mode_fun(parent)
+            if mode is None:
+                mkdir_fun(parent)
+            elif not stat.S_IFDIR(mode):
+                raise AssertionError("'%s' is file, not a directory" % parent)
+
+    mkdir_fun(path)
+
+
+if __name__ == "__main__":
+    # print(_closest_common_directory(["C:\\kala\\pala", "C:\\kala", "D:\\kuku"], pathlib.PureWindowsPath))
+    print(_longest_common_path_prefix(["C:\\kala\\pala", "C:\\kala"], pathlib.PureWindowsPath))
+    print(_longest_common_path_prefix(["C:\\kala\\pala"], pathlib.PureWindowsPath))

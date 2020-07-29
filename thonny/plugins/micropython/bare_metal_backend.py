@@ -6,7 +6,9 @@ import re
 import sys
 import time
 from textwrap import dedent
+from typing import BinaryIO, Callable, Optional
 
+from thonny.backend import UploadDownloadBackend, write_file_directly
 from thonny.common import (
     BackendEvent,
     InlineResponse,
@@ -23,7 +25,7 @@ from thonny.plugins.micropython.backend import (
     ReadOnlyFilesystemError,
     _report_internal_error,
     ends_overlap,
-    linux_dirname_basename,
+    unix_dirname_basename,
 )
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
@@ -104,7 +106,7 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class MicroPythonBareMetalBackend(MicroPythonBackend):
+class MicroPythonBareMetalBackend(UploadDownloadBackend, MicroPythonBackend):
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
         self._startup_time = time.time()
@@ -599,17 +601,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         return result
 
-    def _cmd_write_file(self, cmd):
-        def generate_blocks(content_bytes, block_size):
-            for i in range(0, len(content_bytes), block_size):
-                yield content_bytes[i : i + block_size]
-
-        self._write_file(generate_blocks(cmd["content_bytes"], BUFFER_SIZE), cmd["path"])
-
-        return InlineResponse(
-            command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
-        )
-
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():
             # micro:bit
@@ -634,16 +625,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
             self._sync_all_filesystems()
 
-    def _cmd_get_dirs_child_data(self, cmd):
-        if self._connected_to_microbit():
-            children = {}
-            sizes = self._get_microbit_file_sizes()
-            for name in sizes:
-                children[name] = {"kind": "file", "size": sizes[name], "time": None}
-            return {"node_id": cmd["node_id"], "dir_separator": "", "data": {"": children}}
-        else:
-            return super()._cmd_get_dirs_child_data(cmd)
-
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
         if mount_path is None:
@@ -657,42 +638,46 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         return os.path.join(mount_path, os.path.normpath(path_suffix))
 
-    def _cmd_read_file(self, cmd):
-        try:
-            content_bytes = b"".join(self._read_file(cmd["path"]))
-            error = None
-        except Exception as e:
-            _report_internal_error()
-            error = str(e)
-            content_bytes = None
-
-        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
-
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
         assert cmd.path.startswith("/")
         self._makedirs(cmd.path)
         self._sync_all_filesystems()
 
-    def _read_file(self, path):
-        # TODO: read from mount when possible
-        # file_size = self._get_file_size(path)
-        block_size = 512
-        hex_mode = self._should_hexlify(path)
+    def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
+        return self._get_stat_mode(self, path)
 
-        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % path)
+    def _mkdir_for_upload(self, path: str) -> None:
+        self._mkdir(path)
+
+    def _read_file(
+        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+    ) -> None:
+        # TODO: Is it better to read from mount when possible? Is the mount up to date when the file
+        # is written via serial? Does the MP API give up to date bytes when the file is written via mount?
+
+        hex_mode = self._should_hexlify(source_path)
+
+        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % source_path)
         if hex_mode:
             self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
+        block_size = 1024
+        file_size = self._get_file_size(source_path)
+        num_bytes_read = 0
         while True:
+            callback(num_bytes_read, file_size)
             if hex_mode:
                 block = binascii.unhexlify(
                     self._evaluate("__temp_hexlify(__thonny_fp.read(%s))" % block_size)
                 )
             else:
                 block = self._evaluate("__thonny_fp.read(%s)" % block_size)
+
             if block:
-                yield block
+                target.write(block)
+                num_bytes_read += len(block)
+
             if len(block) < block_size:
                 break
 
@@ -709,52 +694,74 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             )
         )
 
-    def _write_file(self, content_blocks, target_path, notifier=None):
+    def _write_file(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
         try:
-            result = self._write_file_via_serial(content_blocks, target_path, notifier)
+            result = self._write_file_via_serial(source, target_path, file_size, callback)
         except ReadOnlyFilesystemError:
-            result = self._write_file_via_mount(content_blocks, target_path, notifier)
+            result = self._write_file_via_mount(source, target_path, file_size, callback)
 
         self._sync_all_filesystems()
         return result
 
-    def _write_file_via_mount(self, content_blocks, target_path, notifier=None):
+    def _write_file_via_mount(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
         mounted_target_path = self._internal_path_to_mounted_path(target_path)
         with open(mounted_target_path, "wb") as f:
             bytes_written = 0
-            for block in content_blocks:
-                bytes_written += f.write(block)
-                f.flush()
-                os.fsync(f)
-                if notifier is not None:
-                    notifier(bytes_written)
+            block_size = 4 * 1024
+            while True:
+                callback(bytes_written, file_size)
+                block = source.read(block_size)
+                if block:
+                    bytes_written += f.write(block)
+                    f.flush()
+                    os.fsync(f)
+
+                if len(block) < block_size:
+                    break
+
+        assert bytes_written == file_size
 
         return bytes_written
 
-    def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
-        result = self._evaluate(
+    def _write_file_via_serial(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
+        out, err = self._execute(
             dedent(
                 """
             try:
                 __thonny_path = '{path}'
                 __thonny_written = 0
                 __thonny_fp = open(__thonny_path, 'wb')
-                __thonny_result = "OK"
             except Exception as e:
-                __thonny_result = str(e)
-            
-            __thonny_helper.print_mgmt_value(__thonny_result)
-            
-            del __thonny_result
+                print(str(e))
             """
-            ).format(path=target_path)
+            ).format(path=target_path),
+            capture_output=True,
         )
 
-        if "readonly" in result.replace("-", "").lower():
+        if b"readonly" in (out + err).replace(b"-", b"").lower():
             raise ReadOnlyFilesystemError()
-
-        elif result != "OK":
-            raise RuntimeError("Problem opening file for writing: " + result)
+        elif out + err:
+            raise RuntimeError(
+                "Could not open file %s for writing, output:\n%s" % (target_path, out + err)
+            )
 
         # Define function to allow shorter write commands
         hex_mode = self._should_hexlify(target_path)
@@ -782,15 +789,21 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             )
 
         bytes_sent = 0
-        for block in content_blocks:
-            if hex_mode:
-                script = "__W(%r)" % binascii.hexlify(block)
-            else:
-                script = "__W(%r)" % block
-            self._execute_without_output(script)
-            bytes_sent += len(block)
-            if notifier is not None:
-                notifier(bytes_sent)
+        block_size = 1024
+        while True:
+            callback(bytes_sent, file_size)
+            block = source.read(block_size)
+
+            if block:
+                if hex_mode:
+                    script = "__W(%r)" % binascii.hexlify(block)
+                else:
+                    script = "__W(%r)" % block
+                self._execute_without_output(script)
+                bytes_sent += len(block)
+
+            if len(block) < block_size:
+                break
 
         bytes_received = self._evaluate("__thonny_written")
 
@@ -855,29 +868,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             import shutil
 
             shutil.rmtree(mounted_path)
-
-    def _upload_file(self, source, target, notifier):
-        def block_generator():
-            with open(source, "rb") as source_fp:
-                while True:
-                    block = source_fp.read(512)
-                    if block:
-                        yield block
-                    else:
-                        break
-
-        return self._write_file(block_generator(), target, notifier=notifier)
-
-    def _download_file(self, source, target, notifier=None):
-        bytes_written = 0
-        with open(target, "wb") as out_fp:
-            for block in self._read_file(source):
-                out_fp.write(block)
-                os.fsync(out_fp)
-                bytes_written += len(block)
-                notifier(bytes_written)
-
-        return bytes_written
 
     def _get_fs_mount_label(self):
         # This method is most likely required with CircuitPython,
@@ -953,11 +943,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             else:
                 return candidates[0]
 
-    def _get_microbit_file_sizes(self):
-        return self._evaluate(
-            "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()}"
-        )
-
     def _should_hexlify(self, path):
         if "binascii" not in self._builtin_modules:
             return False
@@ -970,6 +955,10 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _is_connected(self):
         return self._connection._error is None
+
+    def _get_epoch_offset(self) -> int:
+        # https://docs.micropython.org/en/latest/library/utime.html
+        return 946684800
 
 
 if __name__ == "__main__":
