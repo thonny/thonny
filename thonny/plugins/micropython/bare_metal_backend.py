@@ -8,7 +8,7 @@ import time
 from textwrap import dedent
 from typing import BinaryIO, Callable, Optional
 
-from thonny.backend import UploadDownloadBackend, write_file_directly
+from thonny.backend import UploadDownloadBackend
 from thonny.common import (
     BackendEvent,
     InlineResponse,
@@ -106,7 +106,7 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class MicroPythonBareMetalBackend(UploadDownloadBackend, MicroPythonBackend):
+class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
         self._startup_time = time.time()
@@ -756,7 +756,7 @@ class MicroPythonBareMetalBackend(UploadDownloadBackend, MicroPythonBackend):
             capture_output=True,
         )
 
-        if b"readonly" in (out + err).replace(b"-", b"").lower():
+        if "readonly" in (out + err).replace("-", "").lower():
             raise ReadOnlyFilesystemError()
         elif out + err:
             raise RuntimeError(
@@ -959,6 +959,9 @@ class MicroPythonBareMetalBackend(UploadDownloadBackend, MicroPythonBackend):
     def _get_epoch_offset(self) -> int:
         # https://docs.micropython.org/en/latest/library/utime.html
         return 946684800
+
+    def _get_sep(self):
+        return "/"
 
 
 if __name__ == "__main__":

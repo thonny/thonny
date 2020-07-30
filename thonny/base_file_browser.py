@@ -5,7 +5,7 @@ from tkinter import messagebox, simpledialog, ttk
 from tkinter.simpledialog import askstring
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, get_dirs_child_data
+from thonny.common import InlineCommand, get_dirs_children_info
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
@@ -44,7 +44,7 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree = ttk.Treeview(
             self,
-            columns=["#0", "kind", "path", "name", "time", "size"],
+            columns=["#0", "kind", "path", "name", "modified", "size"],
             displaycolumns=(
                 # 4,
                 # 5
@@ -76,8 +76,8 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree.column("#0", width=200, anchor=tk.W)
         self.tree.heading("#0", text="Name", anchor=tk.W)
-        self.tree.column("time", width=60, anchor=tk.W)
-        self.tree.heading("time", text="Time", anchor=tk.W)
+        self.tree.column("modified", width=60, anchor=tk.W)
+        self.tree.heading("modified", text="Modified", anchor=tk.W)
         self.tree.column("size", width=40, anchor=tk.E)
         self.tree.heading("size", text="Size (bytes)", anchor=tk.E)
         self.tree.column("kind", width=30, anchor=tk.W)
@@ -466,9 +466,9 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.tree.set(node_id, "path")
 
-        if data.get("time"):
+        if data.get("modified"):
             try:
-                dtime = datetime.datetime.fromtimestamp(int(data["time"]))
+                dtime = datetime.datetime.fromtimestamp(int(data["modified"]))
             except Exception:
                 time_str = ""
             else:
@@ -476,7 +476,7 @@ class BaseFileBrowser(ttk.Frame):
         else:
             time_str = ""
 
-        self.tree.set(node_id, "time", time_str)
+        self.tree.set(node_id, "modified", time_str)
 
         if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
@@ -636,8 +636,8 @@ class BaseFileBrowser(ttk.Frame):
                 + "\n\n"
             )
 
-        if values["time"].strip():
-            text += tr("Modified") + ":\n    " + values["time"] + "\n\n"
+        if values["modified"].strip():
+            text += tr("Modified") + ":\n    " + values["modified"] + "\n\n"
 
         messagebox.showinfo(title, text.strip())
 
@@ -771,7 +771,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
 
     def request_dirs_child_data(self, node_id, paths):
-        self.cache_dirs_child_data(get_dirs_child_data(paths))
+        self.cache_dirs_child_data(get_dirs_children_info(paths))
         self.render_children_from_cache(node_id)
 
     def split_path(self, path):
@@ -842,13 +842,13 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         )
         self.dir_separator = "/"
 
-        get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
+        get_workbench().bind("get_dirs_children_info_response", self.update_dir_data, True)
         get_workbench().bind("get_fs_info_response", self.present_fs_info, True)
         get_workbench().bind("RemoteFileOperation", self.on_remote_file_operation, True)
 
     def destroy(self):
         super().destroy()
-        get_workbench().unbind("get_dirs_child_data_response", self.update_dir_data)
+        get_workbench().unbind("get_dirs_children_info_response", self.update_dir_data)
         get_workbench().unbind("get_fs_info_response", self.present_fs_info)
         get_workbench().unbind("RemoteFileOperation", self.on_remote_file_operation)
 
@@ -862,7 +862,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
             get_runner().send_command(
-                InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths)
+                InlineCommand("get_dirs_children_info", node_id=node_id, paths=paths)
             )
 
     def request_fs_info(self, path):

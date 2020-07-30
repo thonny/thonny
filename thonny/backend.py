@@ -33,7 +33,7 @@ import __main__  # @UnresolvedImport
 import thonny
 from thonny.common import (
     path_startswith,
-    get_dirs_child_data,
+    get_dirs_children_info,
     get_single_dir_child_data,
 )  # TODO: try to get rid of this
 from thonny.common import (
@@ -106,7 +106,7 @@ class MainBackend(ABC):
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
-        data = {path: self._get_dir_children_info(path) for path in cmd["paths"]}
+        data = {path: self._get_filtered_dir_children_info(path) for path in cmd["paths"]}
         return {"node_id": cmd["node_id"], "dir_separator": "/", "data": data}
 
     def _cmd_prepare_upload(self, cmd):
@@ -132,7 +132,7 @@ class MainBackend(ABC):
     def _get_dir_descendants_info(self, path: str) -> Dict[str, Dict]:
         """Assumes path is dir. Dict is keyed by full path"""
         result = {}
-        children_info = self._get_dir_children_info(path)
+        children_info = self._get_filtered_dir_children_info(path)
         for child_name, child_info in children_info.items():
             full_child_path = path + self._get_sep() + child_name
             result[full_child_path] = child_info
@@ -140,6 +140,15 @@ class MainBackend(ABC):
                 result.update(self._get_dir_descendants_info(full_child_path))
 
         return result
+
+    def _get_filtered_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+        children = self._get_dir_children_info(path)
+        if children is None:
+            return None
+
+        hidden = ["System Volume Information", "._.Trashes", ".Trashes"]
+
+        return {name: children[name] for name in children if name not in hidden}
 
     @abstractmethod
     def _get_path_info(self, path: str) -> Optional[Dict]:
@@ -162,23 +171,19 @@ class UploadDownloadBackend(ABC):
 
     def _cmd_download(self, cmd):
         errors = self._transfer_files_and_dirs(
-            cmd.items, self._ensure_local_directory, self._download_file, cmd.id, pathlib.Path
+            cmd.items, self._ensure_local_directory, self._download_file, cmd, pathlib.Path
         )
         return {"errors": errors}
 
     def _cmd_upload(self, cmd):
         errors = self._transfer_files_and_dirs(
-            cmd.items,
-            self._ensure_remote_directory,
-            self._upload_file,
-            cmd.id,
-            pathlib.PurePosixPath,
+            cmd.items, self._ensure_remote_directory, self._upload_file, cmd, pathlib.PurePosixPath,
         )
         return {"errors": errors}
 
     def _cmd_read_file(self, cmd):
         def callback(completed, total):
-            self._report_progress(cmd["id"], cmd["path"], completed, total)
+            self._report_progress(cmd, cmd["path"], completed, total)
 
         try:
             with io.BytesIO() as fp:
@@ -196,7 +201,7 @@ class UploadDownloadBackend(ABC):
 
     def _cmd_write_file(self, cmd):
         def callback(completed, total):
-            self._report_progress(cmd["id"], cmd["path"], completed, total)
+            self._report_progress(cmd, cmd["path"], completed, total)
 
         try:
             with io.BytesIO() as fp:
@@ -214,7 +219,7 @@ class UploadDownloadBackend(ABC):
         )
 
     def _transfer_files_and_dirs(
-        self, items, ensure_dir_fun, transfer_file_fun, cmd_id, target_path_class
+        self, items, ensure_dir_fun, transfer_file_fun, cmd, target_path_class
     ):
         total_cost = 0
         for item in items:
@@ -227,11 +232,11 @@ class UploadDownloadBackend(ABC):
         errors = []
 
         for item in sorted(items, key=lambda x: x["source_path"]):
-            self._report_progress(cmd_id, item["source_path"], completed_cost, total_cost)
+            self._report_progress(cmd, item["source_path"], completed_cost, total_cost)
 
             def copy_bytes_notifier(completed_bytes, total_bytes):
                 self._report_progress(
-                    cmd_id, item["source_path"], completed_cost + completed_bytes, total_cost
+                    cmd, item["source_path"], completed_cost + completed_bytes, total_cost
                 )
 
             try:
@@ -255,7 +260,7 @@ class UploadDownloadBackend(ABC):
         return 100
 
     @abstractmethod
-    def _report_progress(self, cmd_id, description, completed, total):
+    def _report_progress(self, cmd, description, completed, total):
         raise NotImplementedError()
 
     def _ensure_local_directory(self, path: str) -> None:
@@ -1127,9 +1132,9 @@ class CPythonMainBackend(MainBackend):
 
         # yes, both out and err will be directed to out (but with different tags)
         # this allows client to see the order of interleaving writes to stdout/stderr
-        sys.stdin = CPythonBackend.FakeInputStream(self, sys.stdin)
-        sys.stdout = CPythonBackend.FakeOutputStream(self, sys.stdout, "stdout")
-        sys.stderr = CPythonBackend.FakeOutputStream(self, sys.stdout, "stderr")
+        sys.stdin = CPythonMainBackend.FakeInputStream(self, sys.stdin)
+        sys.stdout = CPythonMainBackend.FakeOutputStream(self, sys.stdout, "stdout")
+        sys.stderr = CPythonMainBackend.FakeOutputStream(self, sys.stdout, "stderr")
 
         # fake it properly: replace also "backup" streams
         sys.__stdin__ = sys.stdin
@@ -1191,7 +1196,7 @@ class CPythonMainBackend(MainBackend):
             raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _debug(self, *args):
-        logger.debug("CPythonBackend: " + str(args))
+        logger.debug("CPythonMainBackend: " + str(args))
 
     def _enter_io_function(self):
         self._io_level += 1
@@ -1381,7 +1386,7 @@ class CPythonMainBackend(MainBackend):
 
     class FakeOutputStream(FakeStream):
         def __init__(self, backend, target_stream, stream_name):
-            CPythonBackend.FakeStream.__init__(self, backend, target_stream)
+            CPythonMainBackend.FakeStream.__init__(self, backend, target_stream)
             self._stream_name = stream_name
 
         def write(self, data):

@@ -43,12 +43,13 @@ import textwrap
 import threading
 import time
 import traceback
+from abc import ABC
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
 from typing import Optional, Dict, Union, Tuple, List
 
-from thonny.backend import BaseBackend, UploadDownloadBackend, MainBackend, ensure_posix_directory
+from thonny.backend import MainBackend, ensure_posix_directory
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -105,7 +106,7 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class MicroPythonBackend(MainBackend):
+class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, api_stubs_path, cwd=None):
         self._prev_time = time.time()
 
@@ -261,7 +262,7 @@ class MicroPythonBackend(MainBackend):
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
-    def _check_send_inline_progress(self, cmd, value, maximum, description=None):
+    def _report_progress(self, cmd, description, value, maximum):
         assert "id" in cmd
         prev_time = self._progress_times.get(cmd["id"], 0)
         if value != maximum and time.time() - prev_time < 0.2:
@@ -408,7 +409,7 @@ class MicroPythonBackend(MainBackend):
     def _transform_output(self, data):
         return data
 
-    def _execute(self, script, capture_output=False):
+    def _execute(self, script, capture_output=False) -> Tuple[str, str]:
         if capture_output:
             output_lists = {"stdout": [], "stderr": []}
 
@@ -416,13 +417,14 @@ class MicroPythonBackend(MainBackend):
                 output_lists[stream_name].append(data)
 
             self._execute_with_consumer(script, consume_output)
-            return [
+            result = [
                 b"".join(output_lists[name]).decode(ENCODING, errors="replace")
                 for name in ["stdout", "stderr"]
             ]
+            return result[0], result[1]
         else:
             self._execute_with_consumer(script, self._send_output)
-            return b"", b""
+            return "", ""
 
     def _execute_with_consumer(self, script, output_consumer):
         """Ensures prompt and submits the script.
@@ -855,10 +857,10 @@ class MicroPythonBackend(MainBackend):
                             __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
                         except OSError as e:
                             __thonny_result[__thonny_name] = str(e)
-                    __thonny_helper.print_mgmg_value(__thonny_result)
+                    __thonny_helper.print_mgmt_value(__thonny_result)
             """
                 )
-                % (path.rstrip("/") + "/", path)
+                % (path, path.rstrip("/") + "/")
             )
             if raw_data is None:
                 return None

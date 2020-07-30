@@ -5,6 +5,7 @@ import re
 import shlex
 import sys
 import textwrap
+from abc import ABC
 
 from thonny.backend import SshBackend
 from thonny.common import BackendEvent, serialize_message
@@ -44,7 +45,7 @@ PASTE_MODE_CMD = b"\x05"
 PASTE_MODE_LINE_PREFIX = b"=== "
 
 
-class MicroPythonOsBackend(MicroPythonBackend):
+class MicroPythonOsBackend(MicroPythonBackend, ABC):
     def __init__(self, mp_executable, api_stubs_path, cwd=None):
         try:
             self._mp_executable = self._resolve_executable(mp_executable)

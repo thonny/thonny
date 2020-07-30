@@ -378,6 +378,10 @@ def is_hidden_or_system_file(path: str) -> bool:
         return False
 
 
+def get_dirs_children_info(paths: List[str]) -> Dict[str, Optional[Dict[str, Dict]]]:
+    return {path: get_single_dir_child_data(path) for path in paths}
+
+
 def get_single_dir_child_data(path: str) -> Optional[Dict[str, Dict]]:
     if path == "":
         if platform.system() == "Windows":
@@ -467,7 +471,7 @@ def get_windows_volumes_info():
                     result[path] = {
                         "label": label,
                         "size": None,
-                        "time": max(st.st_mtime, st.st_ctime),
+                        "modified": max(st.st_mtime, st.st_ctime),
                     }
 
                 except PermissionError:
@@ -526,7 +530,7 @@ def get_windows_network_locations():
                 result[target] = {
                     "label": entry.name + " (" + target + ")",
                     "size": None,
-                    "time": None,
+                    "modified": None,
                 }
             except Exception:
                 logging.getLogger("thonny").error(

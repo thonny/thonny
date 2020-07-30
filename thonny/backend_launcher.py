@@ -7,7 +7,7 @@ This file is run by CPythonProxy
 (Why separate file for launching? I want to have clean global scope 
 in toplevel __main__ module (because that's where user scripts run), but backend's global scope 
 is far from clean. 
-I could also do python -c "from backend import CPythonBackend: CPythonBackend().mainloop()", but looks like this 
+I could also do python -c "from backend import CPythonMainBackend: CPythonMainBackend().mainloop()", but looks like this 
 gives relative __file__-s on imported modules.) 
 """
 
@@ -81,6 +81,6 @@ if __name__ == "__main__":
     # Disable blurry scaling in Windows
     thonny.set_dpi_aware()
 
-    from thonny.backend import CPythonBackend  # @UnresolvedImport
+    from thonny.backend import CPythonMainBackend  # @UnresolvedImport
 
-    CPythonBackend().mainloop()
+    CPythonMainBackend().mainloop()
