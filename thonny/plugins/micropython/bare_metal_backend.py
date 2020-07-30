@@ -789,7 +789,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             )
 
         bytes_sent = 0
-        block_size = 1024
+        block_size = 512
         while True:
             callback(bytes_sent, file_size)
             block = source.read(block_size)

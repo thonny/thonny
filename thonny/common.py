@@ -18,6 +18,14 @@ MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
 
+IGNORED_FILES_AND_DIRS = [
+    "System Volume Information",
+    "._.Trashes",
+    ".Trashes",
+    "__MACOSX",
+    ".DS_Store",
+]
+
 ValueInfo = namedtuple("ValueInfo", ["id", "repr"])
 FrameInfo = namedtuple(
     "FrameInfo",

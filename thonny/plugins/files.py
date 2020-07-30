@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pathlib
 import tkinter as tk
+from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
+from tkinter.messagebox import showerror, askyesno
+from typing import Iterable, Type, List, Dict
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
-from thonny.common import InlineCommand, normpath_with_actual_case
+from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
 from thonny.running import construct_cd_command
@@ -191,25 +195,58 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     + "You can only upload files.",
                 )
             else:
-                response = get_runner().send_command(
-                    InlineCommand(
-                        "upload",
-                        allow_overwrite=False,
-                        source_paths=selection["paths"],
-                        target_dir=target_dir,
-                        blocking=True,
-                        description=tr("Uploading %s to %s")
-                        % (selection["description"], target_dir),
+                upload_items = []
+                for path in selection["paths"]:
+                    upload_items.extend(
+                        self._prepare_upload_items(path, self.get_active_directory(), target_dir)
                     )
+                target_paths = [x["target_path"] for x in upload_items]
+                response = get_runner().send_command_and_wait(
+                    InlineCommand("prepare_upload", target_paths=target_paths,)
                 )
-                check_upload_download_response("upload", response)
-                self.master.remote_files.refresh_tree()
+
+                picked_items = pick_transfer_items(upload_items, response["existing_items"])
+                if picked_items:
+                    get_runner().send_command_and_wait(InlineCommand("upload", items=picked_items))
+                    self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=upload)
 
     def add_middle_menu_items(self, context):
         self.check_add_upload_command()
         super().add_middle_menu_items(context)
+
+    def _prepare_upload_items(
+        self, source_path: str, source_context_dir: str, target_dir: str
+    ) -> Iterable[Dict]:
+        # assuming target system has Posix paths
+        if os.path.isdir(source_path):
+            kind = "dir"
+            size = None
+        else:
+            kind = "file"
+            size = os.path.getsize(source_path)
+
+        result = [
+            {
+                "kind": kind,
+                "size": size,
+                "source_path": source_path,
+                "target_path": transpose_path(
+                    source_path, source_context_dir, target_dir, pathlib.Path, PurePosixPath
+                ),
+            }
+        ]
+
+        if os.path.isdir(source_path):
+            for child in os.listdir(source_path):
+                if child not in IGNORED_FILES_AND_DIRS:
+                    result.extend(
+                        self._prepare_upload_items(
+                            os.path.join(source_path, child), source_context_dir, target_dir
+                        )
+                    )
+        return result
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
@@ -237,52 +274,129 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             if not selection:
                 return
 
-            response = get_runner().send_command(
+            response = get_runner().send_command_and_wait(
                 InlineCommand(
-                    "download",
-                    allow_overwrite=False,
+                    "prepare_download",
                     source_paths=selection["paths"],
-                    target_dir=target_dir,
-                    blocking=True,
                     description=tr("Downloading %s to %s") % (selection["description"], target_dir),
                 )
             )
-            check_upload_download_response("download", response)
-            self.master.local_files.refresh_tree()
+            prepared_items = self._prepare_download_items(
+                response["all_items"], self.get_active_directory(), target_dir
+            )
+            existing_target_items = self._get_existing_target_items(prepared_items)
+            picked_items = pick_transfer_items(response["all_items"], existing_target_items)
+            if picked_items:
+                get_runner().send_command_and_wait(InlineCommand("download", items=picked_items))
+                self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=tr("Download to %s") % target_dir, command=download)
+
+    def _prepare_download_items(
+        self, all_source_items: Dict[str, Dict], source_context_dir: str, target_dir: str
+    ) -> List[Dict]:
+        result = []
+        for source_path, source_item in all_source_items.items():
+            result.append(
+                {
+                    "kind": source_item["kind"],
+                    "size": source_item["size"],
+                    "source_path": source_path,
+                    "target_path": transpose_path(
+                        source_path, source_context_dir, target_dir, PurePosixPath, pathlib.Path
+                    ),
+                }
+            )
+        return result
+
+    def _get_existing_target_items(self, prepared_items: List[Dict]) -> Dict[str, Dict]:
+        result = {}
+
+        for item in prepared_items:
+            target_path = item["target_path"]
+            if os.path.exists(target_path):
+                if os.path.isdir(target_path):
+                    kind = "dir"
+                    size = None
+                else:
+                    kind = "file"
+                    size = os.path.getsize(target_path)
+
+                result[target_path] = {
+                    "kind": kind,
+                    "size": size,
+                }
+        return result
 
     def add_middle_menu_items(self, context):
         self.add_download_command()
         super().add_middle_menu_items(context)
 
 
-def check_upload_download_response(command_name, command_response):
-    if command_response and command_response.get("existing_files"):
-        # command was not performed because overwriting existing files need confirmation
-        existing = sorted(command_response["existing_files"][:25])
-        if len(command_response["existing_files"]) > 25:
-            existing.append("...")
+def transpose_path(
+    source_path: str,
+    source_dir: str,
+    target_dir: str,
+    source_path_class: Type[PurePath],
+    target_path_class: Type[PurePath],
+) -> str:
+    assert not source_dir.endswith(":")
+    source_path_parts = source_path_class(source_path).parts
+    source_dir_parts = source_path_class(source_dir).parts
+    assert source_path_parts[: len(source_dir_parts)] == source_dir_parts
+    source_suffix_parts = source_path_parts[len(source_dir_parts) :]
 
-        user_response = messagebox.askokcancel(
-            "Overwriting",
-            "Some file(s) will be overwritten:\n\n" + "   " + "\n   ".join(existing),
-            icon="info",
-        )
-        if not user_response:
-            return
+    target = target_path_class(target_dir).joinpath(*source_suffix_parts)
+    return str(target)
 
-        else:
-            get_runner().send_command(
-                InlineCommand(
-                    command_name,
-                    allow_overwrite=True,
-                    source_paths=command_response["source_paths"],
-                    target_dir=command_response["target_dir"],
-                    blocking=True,
-                    description=command_response["description"],
+
+def pick_transfer_items(
+    prepared_items: List[Dict], existing_target_items: Dict[str, Dict]
+) -> List[Dict]:
+    if not existing_target_items:
+        return prepared_items
+
+    errors = []
+    overwrites = []
+
+    for item in prepared_items:
+        if item["target_path"] in existing_target_items:
+            target_info = existing_target_items[item["target_path"]]
+            if item["kind"] != target_info["kind"]:
+                errors.append(
+                    "Can't overwrite '%s' with '%s', because former is a %s but latter is a %s"
+                    % (item["target_path"], item["source_path"], target_info["kind"], item["kind"])
                 )
-            )
+            elif item["kind"] == "file":
+                if item["size"] > target_info["size"]:
+                    replacement = "a file larget by %d bytes" % item["size"] - target_info["size"]
+                elif item["size"] > target_info["size"]:
+                    replacement = "a file smaller by %d bytes" % target_info["size"] - item["size"]
+                else:
+                    replacement = "a file of equal size"
+
+                overwrites.append("'%s' with %s" % (item["target_path"], replacement))
+
+    def format_items(items):
+        max_count = 10
+        if len(items) == 1:
+            return items[0]
+        msg = "• " + "\n• ".join(items[:max_count])
+        if len(items) > max_count:
+            msg += "\n ... %d more ..."
+
+        return msg
+
+    if errors:
+        showerror("Error", format_items(errors))
+        return []
+    elif overwrites:
+        if askyesno("Overwrite?", "This operation would overwrite\n" + format_items(overwrites)):
+            return prepared_items
+        else:
+            return []
+    else:
+        return prepared_items
 
 
 def load_plugin() -> None:
@@ -291,3 +405,9 @@ def load_plugin() -> None:
     )
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
+
+
+if __name__ == "__main__":
+    print(
+        transpose_path(r"C:\kala\pala\kama.py", "C:", "/home/aivar", PureWindowsPath, PurePosixPath)
+    )

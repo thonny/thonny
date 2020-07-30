@@ -35,6 +35,7 @@ from thonny.common import (
     path_startswith,
     get_dirs_children_info,
     get_single_dir_child_data,
+    IGNORED_FILES_AND_DIRS,
 )  # TODO: try to get rid of this
 from thonny.common import (
     OBJECT_LINK_END,
@@ -107,7 +108,7 @@ class MainBackend(ABC):
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
         data = {path: self._get_filtered_dir_children_info(path) for path in cmd["paths"]}
-        return {"node_id": cmd["node_id"], "dir_separator": "/", "data": data}
+        return {"node_id": cmd["node_id"], "dir_separator": self._get_sep(), "data": data}
 
     def _cmd_prepare_upload(self, cmd):
         """Returns info about items to be overwritten or merged by cmd.paths"""
@@ -146,9 +147,7 @@ class MainBackend(ABC):
         if children is None:
             return None
 
-        hidden = ["System Volume Information", "._.Trashes", ".Trashes"]
-
-        return {name: children[name] for name in children if name not in hidden}
+        return {name: children[name] for name in children if name not in IGNORED_FILES_AND_DIRS}
 
     @abstractmethod
     def _get_path_info(self, path: str) -> Optional[Dict]:
@@ -219,12 +218,17 @@ class UploadDownloadBackend(ABC):
         )
 
     def _transfer_files_and_dirs(
-        self, items, ensure_dir_fun, transfer_file_fun, cmd, target_path_class
-    ):
+        self,
+        items: Iterable[Dict],
+        ensure_dir_fun: Callable[[str], None],
+        transfer_file_fun: Callable,
+        cmd,
+        target_path_class,
+    ) -> List[str]:
         total_cost = 0
         for item in items:
             if item["kind"] == "file":
-                total_cost += item["source_size"] + self._get_file_fixed_cost()
+                total_cost += item["size"] + self._get_file_fixed_cost()
             else:
                 total_cost += self._get_dir_transfer_cost()
 
@@ -244,12 +248,20 @@ class UploadDownloadBackend(ABC):
                     ensure_dir_fun(item["source_path"])
                     completed_cost += self._get_dir_transfer_cost()
                 else:
-                    transfer_file_fun(item["source_path"], item["source_path"], copy_bytes_notifier)
-                    completed_cost += self._get_file_fixed_cost() + item["source_size"]
+                    transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
+                    completed_cost += self._get_file_fixed_cost() + item["size"]
             except Exception as e:
                 errors.append(str(e))
 
         return errors
+
+    def _download_file(self, source_path, target_path, callback):
+        with open(target_path, "bw") as fp:
+            self._read_file(source_path, fp, callback)
+
+    def _upload_file(self, source_path, target_path, callback):
+        with open(source_path, "br") as fp:
+            self._read_file(fp, target_path, callback)
 
     def _get_dir_transfer_cost(self):
         # Validating and maybe creating a directory is taken to be equal to copying this number of bytes
@@ -290,7 +302,7 @@ class UploadDownloadBackend(ABC):
 
     @abstractmethod
     def _read_file(
-        self, target_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
         raise NotImplementedError()
 
@@ -322,9 +334,9 @@ class SshBackend(UploadDownloadBackend):
         return self._sftp
 
     def _read_file(
-        self, target_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
-        self._get_sftp().getfo(target_path, target, callback)
+        self._get_sftp().getfo(source_path, target, callback)
 
     def _write_file(
         self,

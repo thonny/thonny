@@ -43,6 +43,7 @@ from thonny.common import (
     path_startswith,
     serialize_message,
     update_system_path,
+    MessageFromBackend,
 )
 from thonny.editors import (
     get_current_breakpoints,
@@ -225,13 +226,13 @@ class Runner:
 
     def send_command(self, cmd: CommandToBackend) -> None:
         if self._proxy is None:
-            return None
+            return
 
         if self._publishing_events:
             # allow all event handlers to complete before sending the commands
             # issued by first event handlers
             self._postpone_command(cmd)
-            return None
+            return
 
         # First sanity check
         if (
@@ -245,7 +246,7 @@ class Runner:
             logging.warning(
                 "RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state())
             )
-            return None
+            return
 
         # Attach extra info
         if "debug" in cmd.name.lower():
@@ -264,7 +265,7 @@ class Runner:
             return None
         elif response == "postpone":
             self._postpone_command(cmd)
-            return None
+            return
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
@@ -275,12 +276,11 @@ class Runner:
         if cmd.name[0].isupper():
             get_workbench().event_generate("BackendRestart", full=False)
 
-        if cmd.get("blocking"):
-            dlg = BlockingDialog(get_workbench(), cmd)
-            show_dialog(dlg)
-            return dlg.response
-        else:
-            return None
+    def send_command_and_wait(self, cmd: CommandToBackend) -> MessageFromBackend:
+        self.send_command(cmd)
+        dlg = BlockingDialog(get_workbench(), cmd)
+        show_dialog(dlg)
+        return dlg.response
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
         # in case of InlineCommands, discard older same type command
