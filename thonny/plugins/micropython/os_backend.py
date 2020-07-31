@@ -86,38 +86,37 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
     def _get_custom_helpers(self):
         return textwrap.dedent(
             """
-            if not hasattr(os, "getcwd") or not hasattr(os, "getcwd") or not hasattr(os, "rmdir"):
-                # https://github.com/pfalcon/pycopy-lib/blob/master/os/os/__init__.py
-                
-                import ffi
-                
-                libc = ffi.open(
-                    "libc.so.6" if sys.platform == "linux" else "libc.dylib"
-                )
-                
-                @classmethod
-                def check_error(cls, ret):
-                    if ret == -1:
-                        raise OSError(cls.os.errno())
-                
-                _getcwd = libc.func("s", "getcwd", "si")
-                @classmethod
-                def getcwd(cls):
-                    buf = bytearray(512)
-                    return cls._getcwd(buf, 512)
+            # https://github.com/pfalcon/pycopy-lib/blob/master/os/os/__init__.py
+            
+            import ffi
+            
+            libc = ffi.open(
+                "libc.so.6" if sys.platform == "linux" else "libc.dylib"
+            )
+            
+            @classmethod
+            def check_error(cls, ret):
+                if ret == -1:
+                    raise OSError(cls.os.errno())
+            
+            _getcwd = libc.func("s", "getcwd", "si")
+            @classmethod
+            def getcwd(cls):
+                buf = bytearray(512)
+                return cls._getcwd(buf, 512)
 
-                _chdir = libc.func("i", "chdir", "s")
-                @classmethod
-                def chdir(cls, dir):
-                    r = cls._chdir(dir)
-                    cls.check_error(r)
-                
-                _rmdir = libc.func("i", "rmdir", "s")
-                @classmethod
-                def rmdir(cls, name):
-                    e = cls._rmdir(name)
-                    cls.check_error(e)                                    
-                """
+            _chdir = libc.func("i", "chdir", "s")
+            @classmethod
+            def chdir(cls, dir):
+                r = cls._chdir(dir)
+                cls.check_error(r)
+            
+            _rmdir = libc.func("i", "rmdir", "s")
+            @classmethod
+            def rmdir(cls, name):
+                e = cls._rmdir(name)
+                cls.check_error(e)                                    
+            """
         )
 
     def _process_until_initial_prompt(self, clean):
@@ -291,10 +290,7 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
     def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
-        from paramiko.client import SSHClient
-
         self._init_client(host, user, password)
-
         self._cwd = cwd
         super().__init__(mp_executable, api_stubs_path, cwd=cwd)
 

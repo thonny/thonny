@@ -638,12 +638,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         return os.path.join(mount_path, os.path.normpath(path_suffix))
 
-    def _cmd_mkdir(self, cmd):
-        assert self._supports_directories()
-        assert cmd.path.startswith("/")
-        self._makedirs(cmd.path)
-        self._sync_all_filesystems()
-
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         return self._get_stat_mode(self, path)
 

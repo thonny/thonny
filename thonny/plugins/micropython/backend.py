@@ -49,7 +49,7 @@ from textwrap import dedent
 from threading import Lock
 from typing import Optional, Dict, Union, Tuple, List
 
-from thonny.backend import MainBackend, ensure_posix_directory
+from thonny.backend import MainBackend
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -161,7 +161,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._report_time("prepared")
 
     def _prepare_helpers(self):
-        self._execute_without_output(self._get_all_helpers())
+        script = self._get_all_helpers()
+        self._execute_without_output(script)
 
     def _get_all_helpers(self):
         # Can't import functions into class context:
@@ -262,7 +263,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
-    def _report_progress(self, cmd, description: Optional[str], value: float, maximum: float):
+    def _report_progress(
+        self, cmd, description: Optional[str], value: float, maximum: float
+    ) -> None:
         prev_time = self._progress_times.get(cmd["id"], 0)
         if value != maximum and time.time() - prev_time < 0.2:
             # Don't notify too often
@@ -284,7 +287,7 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _read_commands(self):
-        "works in separate thread"
+        # works in separate thread
 
         while True:
             line = sys.stdin.readline()
@@ -567,6 +570,10 @@ class MicroPythonBackend(MainBackend, ABC):
         assert cmd.paths
         self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
 
+    def _mkdir(self, path: str) -> None:
+        # assumes part path exists and path doesn't
+        self._execute("__thonny_helper.os.mkdir(%r)" % path)
+
     def _delete_sorted_paths(self, paths):
         self._execute_without_output(
             dedent(
@@ -591,7 +598,9 @@ class MicroPythonBackend(MainBackend, ABC):
             % paths
         )
 
-    def _get_stat(self, path: str) -> Optional[Tuple[int]]:
+    def _get_stat(
+        self, path: str
+    ) -> Optional[Tuple[int, int, int, int, int, int, int, int, int, int]]:
         if not self._supports_directories():
             func = "size"
         else:
@@ -618,10 +627,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
         assert cmd.path.startswith("/")
-        self._makedirs(cmd.path)
-
-    def _makedirs(self, path):
-        ensure_posix_directory(path, self._get_stat_mode, self._mkdir)
+        self._mkdir(cmd.path)
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -817,7 +823,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _get_file_size(self, path: str) -> int:
         stat = self._get_stat(path)
         if stat is None:
-            raise RuntimeError("Path '%' does not exist" % path)
+            raise RuntimeError("Path '%s' does not exist" % path)
 
         return stat[STAT_SIZE_INDEX]
 
@@ -950,6 +956,7 @@ class MicroPythonBackend(MainBackend, ABC):
             modified = None
             error = stat
         else:
+            assert isinstance(stat, tuple)
             if stat[STAT_KIND_INDEX] & 0o170000 == 0o040000:
                 kind = "dir"
                 size = None

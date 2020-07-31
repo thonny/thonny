@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import _ast
 import ast
 import builtins
 import dis
@@ -25,18 +26,11 @@ import warnings
 from abc import abstractmethod, ABC
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
-
-import _ast
-from typing import BinaryIO, Callable, List, Dict, Tuple, Set, Optional, Iterable
+from typing import BinaryIO, Callable, List, Dict, Optional, Iterable
 
 import __main__  # @UnresolvedImport
+
 import thonny
-from thonny.common import (
-    path_startswith,
-    get_dirs_children_info,
-    get_single_dir_child_data,
-    IGNORED_FILES_AND_DIRS,
-)  # TODO: try to get rid of this
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -61,6 +55,11 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     serialize_message,
 )
+from thonny.common import (
+    path_startswith,
+    get_single_dir_child_data,
+    IGNORED_FILES_AND_DIRS,
+)  # TODO: try to get rid of this
 
 NEW_DIR_MODE = 0o755
 
@@ -123,7 +122,8 @@ class MainBackend(ABC):
 
         for path in paths:
             info = self._get_path_info(path)
-            result[path] = info
+            if info is not None:
+                result[path] = info
 
             if recurse and info is not None and info["kind"] == "dir":
                 result.update(self._get_dir_descendants_info(path))
@@ -847,6 +847,7 @@ class CPythonMainBackend(MainBackend):
         try:
             import jedi
         except ImportError:
+            jedi = None
             completions = []
             error = "Could not import jedi"
         else:
@@ -873,6 +874,7 @@ class CPythonMainBackend(MainBackend):
                 completions = self._export_completions(script.completions())
 
         except ImportError:
+            jedi = None
             completions = []
             error = "Could not import jedi"
         except Exception as e:
