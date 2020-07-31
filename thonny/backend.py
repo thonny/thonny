@@ -225,6 +225,7 @@ class UploadDownloadBackend(ABC):
         cmd,
         target_path_class,
     ) -> List[str]:
+
         total_cost = 0
         for item in items:
             if item["kind"] == "file":

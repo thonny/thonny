@@ -262,17 +262,13 @@ class MicroPythonBackend(MainBackend, ABC):
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
-    def _report_progress(self, cmd, description, value, maximum):
-        assert "id" in cmd
+    def _report_progress(self, cmd, description: Optional[str], value: float, maximum: float):
         prev_time = self._progress_times.get(cmd["id"], 0)
         if value != maximum and time.time() - prev_time < 0.2:
             # Don't notify too often
             return
         else:
             self._progress_times[cmd["id"]] = time.time()
-
-        if description is None:
-            description = cmd.get("description", "Working...")
 
         self.send_message(
             BackendEvent(

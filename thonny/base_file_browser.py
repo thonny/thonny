@@ -920,12 +920,14 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def perform_delete(self, paths, description):
         get_runner().send_command_and_wait(
-            InlineCommand("delete", paths=paths, description=description)
+            InlineCommand("delete", paths=paths, description=description),
+            dialog_title=tr("Deleting"),
         )
 
     def perform_mkdir(self, parent_dir, name):
         get_runner().send_command_and_wait(
-            InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name)
+            InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name),
+            dialog_title=tr("Creating directory"),
         )
 
     def supports_trash(self):

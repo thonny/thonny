@@ -202,13 +202,14 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     )
                 target_paths = [x["target_path"] for x in upload_items]
                 response = get_runner().send_command_and_wait(
-                    InlineCommand("prepare_upload", target_paths=target_paths,)
+                    InlineCommand("prepare_upload", target_paths=target_paths,),
+                    dialog_title=tr("Preparing"),
                 )
 
                 picked_items = pick_transfer_items(upload_items, response["existing_items"])
                 if picked_items:
                     response = get_runner().send_command_and_wait(
-                        InlineCommand("upload", items=picked_items)
+                        InlineCommand("upload", items=picked_items), dialog_title="Copying"
                     )
                     _check_transfer_errors(response["errors"])
                     self.master.remote_files.refresh_tree()
@@ -282,7 +283,8 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                     "prepare_download",
                     source_paths=selection["paths"],
                     description=tr("Downloading %s to %s") % (selection["description"], target_dir),
-                )
+                ),
+                dialog_title=tr("Preparing"),
             )
             prepared_items = self._prepare_download_items(
                 response["all_items"], self.get_active_directory(), target_dir
@@ -291,7 +293,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             picked_items = pick_transfer_items(prepared_items, existing_target_items)
             if picked_items:
                 response = get_runner().send_command_and_wait(
-                    InlineCommand("download", items=picked_items)
+                    InlineCommand("download", items=picked_items), dialog_title=tr("Copying")
                 )
                 _check_transfer_errors(response["errors"])
 

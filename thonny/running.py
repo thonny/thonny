@@ -276,9 +276,9 @@ class Runner:
         if cmd.name[0].isupper():
             get_workbench().event_generate("BackendRestart", full=False)
 
-    def send_command_and_wait(self, cmd: CommandToBackend) -> MessageFromBackend:
+    def send_command_and_wait(self, cmd: CommandToBackend, dialog_title: str) -> MessageFromBackend:
         self.send_command(cmd)
-        dlg = BlockingDialog(get_workbench(), cmd)
+        dlg = BlockingDialog(get_workbench(), cmd, title=dialog_title + " ...")
         show_dialog(dlg)
         return dlg.response
 
@@ -1532,16 +1532,16 @@ def generate_command_id():
 
 
 class BlockingDialog(CommonDialogEx):
-    def __init__(self, master, cmd, mode="indeterminate"):
+    def __init__(self, master, cmd, title, mode="indeterminate"):
         super().__init__(master)
-        self.title(tr("Working..."))
+        self.title(title)
         self.response = None
         self._sent_interrupt = False
         self._mode = mode
 
         self._cmd_id = cmd["id"]
 
-        description = cmd.get("description", str(cmd))
+        description = cmd.get("description", " ")
 
         self._description_label = ttk.Label(self.main_frame, text=description)
         self._description_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
@@ -1580,6 +1580,8 @@ class BlockingDialog(CommonDialogEx):
             self._progress_bar.stop()
             self._mode = "determinate"
             self._progress_bar.configure(mode=self._mode)
+            if event.get("description"):
+                self._description_label.configure(text=event.get("description"))
         self._progress_bar.configure(maximum=event["maximum"], value=event["value"])
 
     def _send_interrupt(self):
