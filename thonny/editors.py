@@ -192,10 +192,8 @@ class Editor(ttk.Frame):
         target_filename = extract_target_path(self._filename)
 
         self.update_title()
-        response = get_runner().send_command(
-            InlineCommand(
-                "read_file", path=target_filename, blocking=True, description=tr("Loading") + "..."
-            )
+        response = get_runner().send_command_and_wait(
+            InlineCommand("read_file", path=target_filename, description=tr("Loading") + "...")
         )
 
         if response.get("error"):

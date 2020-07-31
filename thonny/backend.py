@@ -250,18 +250,20 @@ class UploadDownloadBackend(ABC):
                 else:
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
-            except Exception as e:
+            except OSError as e:
                 errors.append(str(e))
 
         return errors
 
     def _download_file(self, source_path, target_path, callback):
-        with open(target_path, "bw") as fp:
-            self._read_file(source_path, fp, callback)
+        with open(target_path, "bw") as target_fp:
+            self._read_file(source_path, target_fp, callback)
 
     def _upload_file(self, source_path, target_path, callback):
-        with open(source_path, "br") as fp:
-            self._read_file(fp, target_path, callback)
+        with open(source_path, "br") as source_fp:
+            self._write_file(
+                source_fp, target_path, os.path.getsize(source_path), callback,
+            )
 
     def _get_dir_transfer_cost(self):
         # Validating and maybe creating a directory is taken to be equal to copying this number of bytes
@@ -293,7 +295,7 @@ class UploadDownloadBackend(ABC):
     @abstractmethod
     def _write_file(
         self,
-        source: BinaryIO,
+        source_fp: BinaryIO,
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
@@ -302,7 +304,7 @@ class UploadDownloadBackend(ABC):
 
     @abstractmethod
     def _read_file(
-        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+        self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
         raise NotImplementedError()
 
@@ -334,18 +336,18 @@ class SshBackend(UploadDownloadBackend):
         return self._sftp
 
     def _read_file(
-        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+        self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
-        self._get_sftp().getfo(source_path, target, callback)
+        self._get_sftp().getfo(source_path, target_fp, callback)
 
     def _write_file(
         self,
-        source: BinaryIO,
+        source_fp: BinaryIO,
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
     ) -> None:
-        self._get_sftp().putfo(source, target_path, callback)
+        self._get_sftp().putfo(source_fp, target_path, callback)
 
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         try:

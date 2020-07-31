@@ -919,12 +919,12 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         self.path_to_highlight = path
 
     def perform_delete(self, paths, description):
-        get_runner().send_command(
-            InlineCommand("delete", paths=paths, blocking=True, description=description)
+        get_runner().send_command_and_wait(
+            InlineCommand("delete", paths=paths, description=description)
         )
 
     def perform_mkdir(self, parent_dir, name):
-        get_runner().send_command(
+        get_runner().send_command_and_wait(
             InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name)
         )
 

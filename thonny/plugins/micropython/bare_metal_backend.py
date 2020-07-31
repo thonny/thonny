@@ -651,7 +651,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         self._mkdir(path)
 
     def _read_file(
-        self, source_path: str, target: BinaryIO, callback: Callable[[int, int], None]
+        self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
         # TODO: Is it better to read from mount when possible? Is the mount up to date when the file
         # is written via serial? Does the MP API give up to date bytes when the file is written via mount?
@@ -675,7 +675,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 block = self._evaluate("__thonny_fp.read(%s)" % block_size)
 
             if block:
-                target.write(block)
+                target_fp.write(block)
                 num_bytes_read += len(block)
 
             if len(block) < block_size:
@@ -696,18 +696,17 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _write_file(
         self,
-        source: BinaryIO,
+        source_fp: BinaryIO,
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
     ) -> None:
         try:
-            result = self._write_file_via_serial(source, target_path, file_size, callback)
+            self._write_file_via_serial(source_fp, target_path, file_size, callback)
         except ReadOnlyFilesystemError:
-            result = self._write_file_via_mount(source, target_path, file_size, callback)
+            self._write_file_via_mount(source_fp, target_path, file_size, callback)
 
-        self._sync_all_filesystems()
-        return result
+        # self._sync_all_filesystems()
 
     def _write_file_via_mount(
         self,
@@ -737,7 +736,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _write_file_via_serial(
         self,
-        source: BinaryIO,
+        source_fp: BinaryIO,
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
@@ -792,7 +791,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         block_size = 512
         while True:
             callback(bytes_sent, file_size)
-            block = source.read(block_size)
+            block = source_fp.read(block_size)
 
             if block:
                 if hex_mode:

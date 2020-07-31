@@ -5,14 +5,14 @@ import pathlib
 import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
-from tkinter.messagebox import showerror, askyesno
+from tkinter.messagebox import showerror, askyesno, askokcancel
 from typing import Iterable, Type, List, Dict
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows
+from thonny.misc_utils import running_on_windows, sizeof_fmt
 from thonny.running import construct_cd_command
 from thonny.ui_utils import lookup_style_option
 
@@ -207,7 +207,10 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
                 picked_items = pick_transfer_items(upload_items, response["existing_items"])
                 if picked_items:
-                    get_runner().send_command_and_wait(InlineCommand("upload", items=picked_items))
+                    response = get_runner().send_command_and_wait(
+                        InlineCommand("upload", items=picked_items)
+                    )
+                    _check_transfer_errors(response["errors"])
                     self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=upload)
@@ -285,9 +288,13 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 response["all_items"], self.get_active_directory(), target_dir
             )
             existing_target_items = self._get_existing_target_items(prepared_items)
-            picked_items = pick_transfer_items(response["all_items"], existing_target_items)
+            picked_items = pick_transfer_items(prepared_items, existing_target_items)
             if picked_items:
-                get_runner().send_command_and_wait(InlineCommand("download", items=picked_items))
+                response = get_runner().send_command_and_wait(
+                    InlineCommand("download", items=picked_items)
+                )
+                _check_transfer_errors(response["errors"])
+
                 self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=tr("Download to %s") % target_dir, command=download)
@@ -368,35 +375,50 @@ def pick_transfer_items(
                     % (item["target_path"], item["source_path"], target_info["kind"], item["kind"])
                 )
             elif item["kind"] == "file":
-                if item["size"] > target_info["size"]:
-                    replacement = "a file larget by %d bytes" % item["size"] - target_info["size"]
-                elif item["size"] > target_info["size"]:
-                    replacement = "a file smaller by %d bytes" % target_info["size"] - item["size"]
+                size_diff = item["size"] - target_info["size"]
+                if size_diff > 0:
+                    replacement = "a larger file (%s + %s)" % (
+                        sizeof_fmt(target_info["size"]),
+                        sizeof_fmt(size_diff),
+                    )
+                elif size_diff < 0:
+                    replacement = "a smaller file (%s - %s)" % (
+                        sizeof_fmt(target_info["size"]),
+                        sizeof_fmt(-item["size"]),
+                    )
                 else:
-                    replacement = "a file of equal size"
+                    replacement = "a file of same size (%s)" % sizeof_fmt(target_info["size"])
 
                 overwrites.append("'%s' with %s" % (item["target_path"], replacement))
-
-    def format_items(items):
-        max_count = 10
-        if len(items) == 1:
-            return items[0]
-        msg = "• " + "\n• ".join(items[:max_count])
-        if len(items) > max_count:
-            msg += "\n ... %d more ..."
-
-        return msg
 
     if errors:
         showerror("Error", format_items(errors))
         return []
     elif overwrites:
-        if askyesno("Overwrite?", "This operation would overwrite\n" + format_items(overwrites)):
+        if askokcancel(
+            "Overwrite?", "This operation will overwrite\n\n" + format_items(overwrites)
+        ):
             return prepared_items
         else:
             return []
     else:
         return prepared_items
+
+
+def _check_transfer_errors(errors):
+    if errors:
+        showerror("Error", "Got following errors:\n" + format_items(errors))
+
+
+def format_items(items):
+    max_count = 10
+    if len(items) == 1:
+        return items[0]
+    msg = "• " + "\n• ".join(items[:max_count])
+    if len(items) > max_count:
+        msg += "\n ... %d more ..."
+
+    return msg
 
 
 def load_plugin() -> None:
