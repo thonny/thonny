@@ -1,5 +1,3 @@
-def momo():
-    print("momo")
+import sys
+print(sys.path)
 
-
-print("momodone")

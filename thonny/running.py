@@ -852,7 +852,7 @@ class SubprocessProxy(BackendProxy):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self.get_cwd() if self.uses_local_filesystem() else None,
+            cwd=self._get_launch_cwd(),
             env=env,
             universal_newlines=True,
             creationflags=creationflags,
@@ -862,6 +862,9 @@ class SubprocessProxy(BackendProxy):
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
+
+    def _get_launch_cwd(self):
+        return self.get_cwd() if self.uses_local_filesystem() else None
 
     def _get_launcher_with_args(self):
         raise NotImplementedError()

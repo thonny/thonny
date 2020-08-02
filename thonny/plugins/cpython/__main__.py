@@ -37,16 +37,6 @@ if not sys.version_info > (3, 5):
 import logging
 import os.path
 
-# remove script dir from path
-sys.path.pop(0)
-
-# import thonny relative to this script (not from current interpreter path)
-import importlib.util
-
-spec = importlib.util.spec_from_file_location(
-    "thonny", os.path.join(os.path.dirname(__file__), "__init__.py")
-)
-
 # set up logging
 logger = logging.getLogger("thonny")
 logger.propagate = False
@@ -77,4 +67,5 @@ faulthandler.enable(fault_out)
 # Disable blurry scaling in Windows
 thonny.set_dpi_aware()
 
-CPythonMainBackend()
+target_cwd = sys.argv[1]
+CPythonMainBackend(target_cwd)

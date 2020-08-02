@@ -27,7 +27,6 @@ class BirdsEyeRunner(Executor):
 
         # Following is a trick, which allows importing birdseye in the backends,
         # which doesn't have it installed (provided it is installed for frontend Python)
-        self._backend.load_modules_with_frontend_path(["birdseye.bird"])
         from birdseye.bird import eye
 
         eye.exec_string(source, filename, globs=global_vars, locs=global_vars, deep=True)
@@ -36,4 +35,8 @@ class BirdsEyeRunner(Executor):
 
 
 def load_plugin():
+    try:
+        import birdseye.bird  # need to import at plugin load time, because later it may not be in path
+    except ImportError:
+        pass
     get_backend().add_command("Birdseye", _cmd_Birdseye)

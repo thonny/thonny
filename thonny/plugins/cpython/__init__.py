@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
+import thonny
 from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running
 from thonny.common import ToplevelCommand, InlineCommand, is_same_path, normpath_with_actual_case
 from thonny.languages import tr
@@ -32,8 +33,12 @@ class CPythonProxy(SubprocessProxy):
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
 
+    def _get_launch_cwd(self):
+        # launch in the directory containing thonny package, so that other interpreters can import it as well
+        return os.path.dirname(os.path.dirname(thonny.__file__))
+
     def _get_launcher_with_args(self):
-        return ["-m", "thonny.plugins.cpython"]
+        return ["-m", "thonny.plugins.cpython", self.get_cwd()]
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)

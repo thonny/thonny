@@ -89,7 +89,7 @@ _backend = None
 
 
 class CPythonMainBackend(MainBackend):
-    def __init__(self):
+    def __init__(self, target_cwd):
 
         MainBackend.__init__(self)
 
@@ -115,13 +115,6 @@ class CPythonMainBackend(MainBackend):
         self._tty_mode = True
         self._tcl = None
 
-        # clean up path
-        sys.path = [d for d in sys.path if d != ""]
-
-        # start in shell mode
-        sys.argv[:] = [""]  # empty "script name"
-        sys.path.insert(0, "")  # current dir
-
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if not key.startswith("__") or key in {"__file__", "__cached__"}:
@@ -136,6 +129,15 @@ class CPythonMainBackend(MainBackend):
             self._frontend_sys_path = []
         self._load_shared_modules()
         self._load_plugins()
+
+        # preceding code was run in the directory containing thonny module, now switch to user cwd
+        os.chdir(target_cwd)
+        # ... and replace current-dir path item
+        # start in shell mode (may be later switched to script mode)
+        sys.path[
+            0
+        ] = ""  # required in shell mode and also required to overwrite thonny location dir
+        sys.argv[:] = [""]  # empty "script name"
 
         self.mainloop()
 
@@ -298,27 +300,14 @@ class CPythonMainBackend(MainBackend):
         return module
 
     def _load_shared_modules(self):
-        self.load_modules_with_frontend_path(["parso", "jedi", "thonnycontrib", "six", "asttokens"])
-
-    def load_modules_with_frontend_path(self, names):
         from importlib import import_module
 
-        original_sys_path = sys.path
-        try:
-            # add fallback import directory in case backend doesn't have these modules
-            sys.path = sys.path + self._frontend_sys_path
-
-            # remove current script dir / current dir to reduce chance of shadowing
-            # (example: asttokens import numbers. The user wouldn't meet this problem when running
-            # with plain python)
-            sys.path = sys.path[1:]
-            for name in names:
-                try:
-                    import_module(name)
-                except ImportError:
-                    pass
-        finally:
-            sys.path = original_sys_path
+        # these need to be loaded during initialization, because later they may not be in path
+        for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
+            try:
+                import_module(name)
+            except ImportError:
+                pass
 
     def _load_plugins(self):
         # built-in plugins
@@ -558,9 +547,9 @@ class CPythonMainBackend(MainBackend):
             error = "Could not import jedi"
         else:
             try:
-                # with warnings.catch_warnings():
-                interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
-                completions = self._export_completions(interpreter.completions())
+                with warnings.catch_warnings():
+                    interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
+                    completions = self._export_completions(interpreter.completions())
             except Exception as e:
                 completions = []
                 error = "Autocomplete error: " + str(e)
