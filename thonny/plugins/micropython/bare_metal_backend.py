@@ -262,7 +262,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         bdata = cdata.encode(ENCODING)
 
-        with self._writing_lock:
+        with self._interrupt_lock:
             self._write(bdata)
             # Try to consume the echo
 
@@ -305,7 +305,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             self._prepare_helpers()
 
         # send command
-        with self._writing_lock:
+        with self._interrupt_lock:
             self._connection.write(script.encode(ENCODING) + EOT)
             debug("Wrote " + script + "\n--------\n")
 

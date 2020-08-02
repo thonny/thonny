@@ -849,7 +849,7 @@ class CPythonMainBackend(MainBackend):
     def _restore_original_import(self):
         builtins.__import__ = self._original_import
 
-    def _fetch_command(self) -> CommandToBackend:
+    def _fetch_message(self) -> CommandToBackend:
         return self._incoming_message_queue.get()
 
     def send_message(self, msg: MessageFromBackend) -> None:
@@ -1162,14 +1162,14 @@ class FakeInputStream(FakeStream):
                     self._backend.send_message(
                         BackendEvent("InputRequest", method=method, limit=original_limit)
                     )
-                    cmd = self._backend._fetch_command()
-                    if isinstance(cmd, InputSubmission):
-                        self._buffer += cmd.data
-                        self._processed_symbol_count += len(cmd.data)
-                    elif isinstance(cmd, EOFCommand):
+                    msg = self._backend._fetch_message()
+                    if isinstance(msg, InputSubmission):
+                        self._buffer += msg.data
+                        self._processed_symbol_count += len(msg.data)
+                    elif isinstance(msg, EOFCommand):
                         self._eof = True
-                    elif isinstance(cmd, InlineCommand):
-                        self._backend._handle_normal_command(cmd)
+                    elif isinstance(msg, InlineCommand):
+                        self._backend._handle_normal_command(msg)
                     else:
                         raise RuntimeError("Wrong type of command when waiting for input")
 
@@ -1414,7 +1414,7 @@ class Tracer(Executor):
 
     def _fetch_next_debugger_command(self, current_frame):
         while True:
-            cmd = self._backend._fetch_command()
+            cmd = self._backend._fetch_message()
             if isinstance(cmd, InlineCommand):
                 self._backend._handle_normal_command(cmd)
             else:

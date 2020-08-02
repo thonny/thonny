@@ -118,16 +118,10 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._local_cwd = None
         self._cwd = cwd
-        self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
         self._welcome_text = None
 
         self._api_stubs_path = api_stubs_path
-
-        self._command_reading_thread = threading.Thread(target=self._read_commands, daemon=True)
-        self._command_reading_thread.start()
-
-        self._writing_lock = Lock()
 
         try:
             self._report_time("before prepare")
@@ -344,21 +338,6 @@ class MicroPythonBackend(MainBackend, ABC):
     def _soft_reboot(self, side_command):
         raise NotImplementedError()
 
-    def _read_commands(self):
-        # works in separate thread
-
-        while True:
-            line = sys.stdin.readline()
-            if line == "":
-                logger.info("Read stdin EOF")
-                sys.exit()
-            cmd = parse_message(line)
-            if isinstance(cmd, ImmediateCommand):
-                # This is a priority command and will be handled right away
-                self._interrupt_in_command_reading_thread()
-            else:
-                self._command_queue.put(cmd)
-
     def _write(self, data):
         raise NotImplementedError()
 
@@ -452,23 +431,27 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _check_for_side_commands(self):
+        # NB! EOFCommand gets different treatment depending whether it is read during processing a command
+        # (ie. here) or it gets read when REPL is idle (ie. in mainloop)
+
         # most likely the queue is empty
-        if self._command_queue.empty():
+        if self._incoming_message_queue.empty():
             return
 
         postponed = []
-        while not self._command_queue.empty():
-            cmd = self._command_queue.get()
+        while not self._incoming_message_queue.empty():
+            cmd = self._incoming_message_queue.get()
             if isinstance(cmd, InputSubmission):
                 self._submit_input(cmd.data)
             elif isinstance(cmd, EOFCommand):
-                self._soft_reboot(True)
+                # in this context it is not supposed to soft-reboot
+                self._submit_input(EOT.decode())
             else:
                 postponed.append(cmd)
 
         # put back postponed commands
         while postponed:
-            self._command_queue.put(postponed.pop(0))
+            self._incoming_message_queue.put(postponed.pop(0))
 
     def _supports_directories(self):
         # NB! make sure self._cwd is queried first
