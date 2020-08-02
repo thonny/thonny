@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import _ast
+import _thread
 import ast
 import builtins
 import dis
@@ -15,10 +16,12 @@ import pkgutil
 import pydoc
 import queue
 import re
-import signal
+import shlex
 import site
 import stat
 import sys
+import threading
+import time
 import tokenize
 import traceback
 import types
@@ -26,7 +29,7 @@ import warnings
 from abc import abstractmethod, ABC
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
-from typing import BinaryIO, Callable, List, Dict, Optional, Iterable
+from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Any, Union
 
 import __main__  # @UnresolvedImport
 
@@ -54,12 +57,17 @@ from thonny.common import (
     range_contains_smaller,
     range_contains_smaller_or_equal,
     serialize_message,
+    ImmediateCommand,
+    MessageFromBackend,
+    CommandToBackend,
+    Record,
 )
 from thonny.common import (
     path_startswith,
     get_single_dir_child_data,
     IGNORED_FILES_AND_DIRS,
 )  # TODO: try to get rid of this
+from thonny.plugins.microbit.api_stubs.sys import platform
 
 NEW_DIR_MODE = 0o755
 
@@ -101,8 +109,134 @@ TempFrameInfo = namedtuple(
 _backend = None
 
 
-class MainBackend(ABC):
+class BaseBackend(ABC):
+    """Methods for both MainBackend and forwarding backend"""
+
+    def __init__(self):
+        self._incoming_message_queue = queue.Queue()  # populated by the reader thread
+        self._interrupt_lock = threading.Lock()
+
+        # Don't use threading for creating a management thread, because I don't want them
+        # to be affected by threading.settrace
+        self._message_reading_thread = _thread.start_new_thread(self._read_incoming_messages, ())
+
+        self._last_progress_reporting_time = 0
+
+    def mainloop(self):
+        while self._should_keep_going():
+            try:
+                try:
+                    msg = self._incoming_message_queue.get(block=True, timeout=0.01)
+                except queue.Empty:
+                    self._perform_idle_tasks()
+                else:
+                    if isinstance(msg, InputSubmission):
+                        self._handle_user_input(msg)
+                    elif isinstance(msg, EOFCommand):
+                        self._handle_eof_command(msg)
+                    else:
+                        self._handle_normal_command(msg)
+            except KeyboardInterrupt:
+                self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
+                self.send_message(ToplevelResponse())
+
+    def _report_progress(
+        self, cmd, description: Optional[str], value: float, maximum: float
+    ) -> None:
+        # Don't notify too often (unless it's the final notification)
+        if value != maximum and time.time() - self._last_progress_reporting_time < 0.2:
+            return
+
+        self.send_message(
+            BackendEvent(
+                event_type="InlineProgress",
+                command_id=cmd["id"],
+                value=value,
+                maximum=maximum,
+                description=description,
+            )
+        )
+        self._last_progress_reporting_time = time.time()
+
+    def _read_incoming_messages(self):
+        # works in a separate thread
+        while self._should_keep_going():
+            line = self._read_incoming_msg_line()
+            if line == "":
+                break
+            msg = parse_message(line)
+            if isinstance(msg, ImmediateCommand):
+                # This will be handled right away
+                self._handle_immediate_command(msg)
+            else:
+                self._incoming_message_queue.put(msg)
+
+    def _prepare_response(
+        self, response: Union[MessageFromBackend, Dict, None], command: MessageFromBackend
+    ) -> MessageFromBackend:
+        if isinstance(response, MessageFromBackend):
+            return response
+        else:
+            if isinstance(response, dict):
+                args = response
+            else:
+                args = {}
+
+            if isinstance(command, ToplevelCommand):
+                return ToplevelResponse(command_name=command.name, **args)
+            else:
+                assert isinstance(command, InlineCommand)
+                return InlineResponse(command_name=command.name, **args)
+
+    def send_message(self, msg: MessageFromBackend) -> None:
+        sys.stdout.write(serialize_message(msg) + "\n")
+        sys.stdout.flush()
+
+    def _send_output(self, data, stream_name):
+        if not data:
+            return
+
+        data = self._transform_output(data, stream_name)
+        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
+        self.send_message(msg)
+
+    def _transform_output(self, data, stream_name):
+        return data
+
+    def _read_incoming_msg_line(self) -> str:
+        return sys.stdin.readline()
+
+    def _perform_idle_tasks(self):
+        """Executed when there is no commands in queue"""
+        pass
+
+    @abstractmethod
+    def _should_keep_going(self) -> bool:
+        """Returns False when there is no point in processing more commands
+         (eg. connection to the target process is lost or target process has exited)"""
+
+    @abstractmethod
+    def _handle_user_input(self, msg: InputSubmission) -> None:
+        pass
+
+    @abstractmethod
+    def _handle_eof_command(self, msg: EOFCommand) -> None:
+        pass
+
+    @abstractmethod
+    def _handle_normal_command(self, cmd: CommandToBackend) -> None:
+        pass
+
+    @abstractmethod
+    def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        """Command handler will be executed in command reading thread, right after receiving the command"""
+
+
+class MainBackend(BaseBackend, ABC):
     """Backend which does not forward to another backend"""
+
+    def __init__(self):
+        BaseBackend.__init__(self)
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
@@ -274,10 +408,6 @@ class UploadDownloadBackend(ABC):
         # Creating or overwriting a file is taken to be equal to copying this number of bytes
         return 100
 
-    @abstractmethod
-    def _report_progress(self, cmd, description, completed, total):
-        raise NotImplementedError()
-
     def _ensure_local_directory(self, path: str) -> None:
         os.makedirs(path, NEW_DIR_MODE, exist_ok=True)
 
@@ -310,8 +440,36 @@ class UploadDownloadBackend(ABC):
         raise NotImplementedError()
 
 
+class RemoteProcess:
+    """Modelled after subprocess.Popen"""
+
+    def __init__(self, client, channel, stdin, stdout, pid):
+        self._client = client
+        self._channel = channel
+        self.stdin = stdin
+        self.stdout = stdout
+        self.pid = pid
+        self.returncode = None
+
+    def poll(self):
+        if self._channel.exit_status_ready():
+            self.returncode = self._channel.recv_exit_status()
+            return self.returncode
+        else:
+            return None
+
+    def wait(self):
+        self.returncode = self._channel.recv_exit_status()
+        return self.returncode
+
+    def kill(self):
+        _, stdout, _ = self._client.exec_command("kill -9 %s" % self.pid)
+        # wait until completion
+        stdout.channel.recv_exit_status()
+
+
 class SshBackend(UploadDownloadBackend):
-    def _init_client(self, host, user, password):
+    def __init__(self, host, user, password, remote_interpreter):
         try:
             import paramiko
             from paramiko.client import SSHClient
@@ -321,11 +479,51 @@ class SshBackend(UploadDownloadBackend):
         self._host = host
         self._user = user
         self._password = password
-        self._sftp = None  # type: paramiko.SFTPClient
+        self._remote_interpreter = remote_interpreter
+        self._proc = None  # type: Optional[RemoteProcess]
+        self._sftp = None  # type: Optional[paramiko.SFTPClient]
         self._client = SSHClient()
         self._client.load_system_host_keys()
         # TODO: does it get closed properly after process gets killed?
         self._client.connect(hostname=host, username=user, password=password)
+
+    def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
+        # Before running the main thing:
+        # * print process id (so that we can kill it later)
+        #   http://redes-privadas-virtuales.blogspot.com/2013/03/getting-hold-of-remote-pid-through.html
+        # * change to desired directory
+
+        cmd_line_str = (
+            "echo $$ ;"
+            + (" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else "")
+            + (" exec " + " ".join(map(shlex.quote, cmd_items)))
+        )
+        stdin, stdout, _ = self._client.exec_command(
+            cmd_line_str, bufsize=0, get_pty=True, environment=env
+        )
+
+        # stderr gets directed to stdout because of pty
+        pid = stdout.readline().strip()
+        channel = stdout.channel
+
+        return RemoteProcess(self._client, channel, stdin, stdout, pid)
+
+    def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        if cmd.name == "kill":
+            self._kill()
+        elif cmd.name == "interrupt":
+            self._interrupt()
+        else:
+            raise RuntimeError("Unknown immediateCommand %s" % cmd.name)
+
+    def _kill(self):
+        if self._proc is None or self._proc.poll() is not None:
+            return
+
+        self._proc.kill()
+
+    def _interrupt(self):
+        pass
 
     def _get_sftp(self):
         if self._sftp is None:
@@ -362,6 +560,9 @@ class SshBackend(UploadDownloadBackend):
 
 class CPythonMainBackend(MainBackend):
     def __init__(self):
+
+        MainBackend.__init__(self)
+
         global _backend
         _backend = self
 
@@ -406,34 +607,7 @@ class CPythonMainBackend(MainBackend):
         self._load_shared_modules()
         self._load_plugins()
 
-        self._install_signal_handler()
-
-    def mainloop(self):
-        try:
-            while True:
-                try:
-                    cmd = self._fetch_command()
-                    if isinstance(cmd, InputSubmission):
-                        self._input_queue.put(cmd)
-                    elif isinstance(cmd, EOFCommand):
-                        self.send_message(ToplevelResponse(SystemExit=True))
-                        sys.exit()
-                    elif isinstance(cmd, ToplevelCommand):
-                        self._source_info_by_frame = {}
-                        self._input_queue = queue.Queue()
-                        self.handle_command(cmd)
-                    else:
-                        self.handle_command(cmd)
-                except KeyboardInterrupt:
-                    logger.exception("Interrupt in mainloop")
-                    # Interrupt must always result in waiting_toplevel_command state
-                    # Don't show error messages, as the interrupted command may have been InlineCommand
-                    # (handlers of ToplevelCommands in normal cases catch the interrupt and provide
-                    # relevant message)
-                    self.send_message(ToplevelResponse())
-        except Exception:
-            logger.exception("Crash in mainloop")
-            traceback.print_exc()
+        self.mainloop()
 
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
@@ -461,14 +635,22 @@ class CPythonMainBackend(MainBackend):
     def get_main_module(self):
         return __main__
 
-    def handle_command(self, cmd):
+    def _read_incoming_msg_line(self) -> str:
+        return self._original_stdin.readline()
+
+    def _handle_user_input(self, msg: InputSubmission) -> None:
+        self._input_queue.put(msg)
+
+    def _handle_eof_command(self, msg: EOFCommand) -> None:
+        self.send_message(ToplevelResponse(SystemExit=True))
+        sys.exit()
+
+    def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
-        def create_error_response(**kw):
-            if isinstance(cmd, ToplevelCommand):
-                return ToplevelResponse(command_name=cmd.name, **kw)
-            else:
-                return InlineResponse(command_name=cmd.name, **kw)
+        if isinstance(cmd, ToplevelCommand):
+            self._source_info_by_frame = {}
+            self._input_queue = queue.Queue()
 
         if cmd.name in self._command_handlers:
             handler = self._command_handlers[cmd.name]
@@ -476,7 +658,7 @@ class CPythonMainBackend(MainBackend):
             handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
-            response = create_error_response(error="Unknown command: " + cmd.name)
+            response = {"error": "Unknown command: " + cmd.name}
         else:
             try:
                 response = handler(cmd)
@@ -484,31 +666,35 @@ class CPythonMainBackend(MainBackend):
                 # Must be caused by Thonny or plugins code
                 if isinstance(cmd, ToplevelCommand):
                     traceback.print_exc()
-                response = create_error_response(SystemExit=True)
+                response = {"SystemExit": True}
             except UserError as e:
                 sys.stderr.write(str(e) + "\n")
-                response = create_error_response()
+                response = {}
             except KeyboardInterrupt:
-                response = create_error_response(user_exception=self._prepare_user_exception())
+                response = {"user_exception": self._prepare_user_exception()}
             except Exception:
                 _report_internal_error()
-                response = create_error_response(context_info="other unhandled exception")
+                response = {"context_info": "other unhandled exception"}
 
         if response is False:
             # Command doesn't want to send any response
             return
 
-        if response is None and isinstance(cmd, ToplevelCommand):
-            # create simple default response
-            response = ToplevelResponse(command_name=cmd.name)
-
-        # TODO: add these in response creation time in a helper function
-        if isinstance(response, ToplevelResponse):
-            response["gui_is_active"] = (
+        real_response = self._prepare_response(response, cmd)
+        if isinstance(real_response, ToplevelResponse):
+            real_response["gui_is_active"] = (
                 self._get_tcl() is not None or self._get_qt_app() is not None
             )
 
         self.send_message(response)
+
+    def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        if cmd.name == "interrupt":
+            with self._interrupt_lock.acquire():
+                interrupt_local_process()
+
+    def _should_keep_going(self) -> bool:
+        return True
 
     def get_option(self, name, default=None):
         section, subname = self._parse_option_name(name)
@@ -527,15 +713,6 @@ class CPythonMainBackend(MainBackend):
             value = repr(value)
         ini.set(section, subname, value)
         self.save_settings()
-
-    def switch_env_to_script_mode(self, cmd):
-        if "" in sys.path:
-            sys.path.remove("")  # current directory
-
-        filename = cmd.args[0]
-        if os.path.isfile(filename):
-            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
-            __main__.__dict__["__file__"] = filename
 
     def _parse_option_name(self, name):
         if "." in name:
@@ -558,6 +735,15 @@ class CPythonMainBackend(MainBackend):
 
         with open(_CONFIG_FILENAME, "w") as fp:
             self._ini.write(fp)
+
+    def switch_env_to_script_mode(self, cmd):
+        if "" in sys.path:
+            sys.path.remove("")  # current directory
+
+        filename = cmd.args[0]
+        if os.path.isfile(filename):
+            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
+            __main__.__dict__["__file__"] = filename
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
@@ -638,17 +824,7 @@ class CPythonMainBackend(MainBackend):
             except Exception:
                 logger.exception("Failed loading plugin '" + module_name + "'")
 
-    def _install_signal_handler(self):
-        def signal_handler(signal_, frame):
-            raise KeyboardInterrupt("Execution interrupted")
-
-        if os.name == "nt":
-            signal.signal(signal.SIGBREAK, signal_handler)  # pylint: disable=no-member
-        else:
-            signal.signal(signal.SIGINT, signal_handler)
-
     def _cmd_get_environment_info(self, cmd):
-
         return ToplevelResponse(
             main_dir=self._main_dir,
             path=sys.path,
@@ -891,72 +1067,6 @@ class CPythonMainBackend(MainBackend):
             error=error,
         )
 
-    def _cmd_Reset(self, cmd):
-        if len(cmd.args) == 0:
-            # nothing to do, because Reset always happens in fresh process
-            return ToplevelResponse(
-                command_name="Reset",
-                welcome_text="Python " + _get_python_version_string(),
-                executable=sys.executable,
-            )
-        else:
-            raise UserError("Command 'Reset' doesn't take arguments")
-
-    def _get_sep(self) -> str:
-        return os.path.sep
-
-    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
-        return get_single_dir_child_data(path)
-
-    def _get_path_info(self, path: str) -> Optional[Dict]:
-
-        try:
-            if not os.path.exists(path):
-                return None
-        except OSError:
-            pass
-
-        try:
-            kind = "dir" if os.path.isdir(path) else "file"
-            return {
-                "path": path,
-                "kind": kind,
-                "size": None if kind == "dir" else os.path.getsize(path),
-                "modified": os.path.getmtime(path),
-                "error": None,
-            }
-        except OSError as e:
-            return {
-                "path": path,
-                "kind": None,
-                "size": None,
-                "modified": None,
-                "error": str(e),
-            }
-
-    def _export_completions(self, jedi_completions):
-        result = []
-        for c in jedi_completions:
-            if not c.name.startswith("__"):
-                record = {
-                    "name": c.name,
-                    "complete": c.complete,
-                    "type": c.type,
-                    "description": c.description,
-                }
-                """ TODO: 
-                try:
-                    if c.type in ["class", "module", "function"]:
-                        if c.type == "function":
-                            record["docstring"] = c.docstring()
-                        else:
-                            record["docstring"] = c.description + "\n" + c.docstring()
-                except Exception:
-                    pass
-                """
-                result.append(record)
-        return result
-
     def _cmd_get_object_info(self, cmd):
         if isinstance(self._current_executor, NiceTracer) and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
@@ -1018,6 +1128,61 @@ class CPythonMainBackend(MainBackend):
             info = {"id": cmd.object_id, "error": "object info not available"}
 
         return InlineResponse("get_object_info", id=cmd.object_id, info=info)
+
+    def _get_sep(self) -> str:
+        return os.path.sep
+
+    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+        return get_single_dir_child_data(path)
+
+    def _get_path_info(self, path: str) -> Optional[Dict]:
+
+        try:
+            if not os.path.exists(path):
+                return None
+        except OSError:
+            pass
+
+        try:
+            kind = "dir" if os.path.isdir(path) else "file"
+            return {
+                "path": path,
+                "kind": kind,
+                "size": None if kind == "dir" else os.path.getsize(path),
+                "modified": os.path.getmtime(path),
+                "error": None,
+            }
+        except OSError as e:
+            return {
+                "path": path,
+                "kind": None,
+                "size": None,
+                "modified": None,
+                "error": str(e),
+            }
+
+    def _export_completions(self, jedi_completions):
+        result = []
+        for c in jedi_completions:
+            if not c.name.startswith("__"):
+                record = {
+                    "name": c.name,
+                    "complete": c.complete,
+                    "type": c.type,
+                    "description": c.description,
+                }
+                """ TODO: 
+                try:
+                    if c.type in ["class", "module", "function"]:
+                        if c.type == "function":
+                            record["docstring"] = c.docstring()
+                        else:
+                            record["docstring"] = c.description + "\n" + c.docstring()
+                except Exception:
+                    pass
+                """
+                result.append(record)
+        return result
 
     def _get_tcl(self):
         if self._tcl is not None:
@@ -1149,9 +1314,9 @@ class CPythonMainBackend(MainBackend):
 
         # yes, both out and err will be directed to out (but with different tags)
         # this allows client to see the order of interleaving writes to stdout/stderr
-        sys.stdin = CPythonMainBackend.FakeInputStream(self, sys.stdin)
-        sys.stdout = CPythonMainBackend.FakeOutputStream(self, sys.stdout, "stdout")
-        sys.stderr = CPythonMainBackend.FakeOutputStream(self, sys.stdout, "stderr")
+        sys.stdin = FakeInputStream(self, sys.stdin)
+        sys.stdout = FakeOutputStream(self, sys.stdout, "stdout")
+        sys.stderr = FakeOutputStream(self, sys.stdout, "stderr")
 
         # fake it properly: replace also "backup" streams
         sys.__stdin__ = sys.stdin
@@ -1165,20 +1330,16 @@ class CPythonMainBackend(MainBackend):
     def _restore_original_import(self):
         builtins.__import__ = self._original_import
 
-    def _fetch_command(self):
-        line = self._original_stdin.readline()
-        if line == "":
-            logger.info("Read stdin EOF")
-            sys.exit()
-        cmd = parse_message(line)
-        return cmd
+    def _fetch_command(self) -> CommandToBackend:
+        return self._incoming_message_queue.get()
 
-    def send_message(self, msg):
-        if "cwd" not in msg:
-            msg["cwd"] = os.getcwd()
+    def send_message(self, msg: MessageFromBackend) -> None:
 
-        if isinstance(msg, ToplevelResponse) and "globals" not in msg:
-            msg["globals"] = self.export_globals()
+        if isinstance(msg, ToplevelResponse):
+            if "cwd" not in msg:
+                msg["cwd"] = os.getcwd()
+            if "globals" not in msg:
+                msg["globals"] = self.export_globals()
 
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
@@ -1387,136 +1548,135 @@ class CPythonMainBackend(MainBackend):
         if "tty_mode" in cmd:
             self._tty_mode = cmd["tty_mode"]
 
-    class FakeStream:
-        def __init__(self, backend, target_stream):
-            self._backend = backend
-            self._target_stream = target_stream
-            self._processed_symbol_count = 0
 
-        def isatty(self):
-            return self._backend._tty_mode and (os.name != "nt" or "click" not in sys.modules)
+class FakeStream:
+    def __init__(self, backend: CPythonMainBackend, target_stream):
+        self._backend = backend
+        self._target_stream = target_stream
+        self._processed_symbol_count = 0
 
-        def __getattr__(self, name):
-            # TODO: is it safe to perform those other functions without notifying backend
-            # via _enter_io_function?
-            return getattr(self._target_stream, name)
+    def isatty(self):
+        return self._backend._tty_mode and (os.name != "nt" or "click" not in sys.modules)
 
-    class FakeOutputStream(FakeStream):
-        def __init__(self, backend, target_stream, stream_name):
-            CPythonMainBackend.FakeStream.__init__(self, backend, target_stream)
-            self._stream_name = stream_name
+    def __getattr__(self, name):
+        # TODO: is it safe to perform those other functions without notifying backend
+        # via _enter_io_function?
+        return getattr(self._target_stream, name)
 
-        def write(self, data):
-            try:
-                self._backend._enter_io_function()
-                # click may send bytes instead of strings
-                if isinstance(data, bytes):
-                    data = data.decode(errors="replace")
 
-                if data != "":
+class FakeOutputStream(FakeStream):
+    def __init__(self, backend: CPythonMainBackend, target_stream, stream_name):
+        FakeStream.__init__(self, backend, target_stream)
+        self._stream_name = stream_name
+
+    def write(self, data):
+        try:
+            self._backend._enter_io_function()
+            # click may send bytes instead of strings
+            if isinstance(data, bytes):
+                data = data.decode(errors="replace")
+
+            if data != "":
+                self._backend.send_message(
+                    BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data)
+                )
+                self._processed_symbol_count += len(data)
+        finally:
+            self._backend._exit_io_function()
+
+    def writelines(self, lines):
+        try:
+            self._backend._enter_io_function()
+            self.write("".join(lines))
+        finally:
+            self._backend._exit_io_function()
+
+
+class FakeInputStream(FakeStream):
+    def __init__(self, backend: CPythonMainBackend, target_stream):
+        super().__init__(backend, target_stream)
+        self._buffer = ""
+        self._eof = False
+
+    def _generic_read(self, method, original_limit):
+        if original_limit is None:
+            effective_limit = -1
+        elif method == "readlines" and original_limit > -1:
+            # NB! size hint is defined in weird way
+            # "no more lines will be read if the total size (in bytes/characters)
+            # of all lines so far **exceeds** the hint".
+            effective_limit = original_limit + 1
+        else:
+            effective_limit = original_limit
+
+        try:
+            self._backend._enter_io_function()
+            while True:
+                if effective_limit == 0:
+                    result = ""
+                    break
+
+                elif effective_limit > 0 and len(self._buffer) >= effective_limit:
+                    result = self._buffer[:effective_limit]
+                    self._buffer = self._buffer[effective_limit:]
+                    if method == "readlines" and not result.endswith("\n") and "\n" in self._buffer:
+                        # limit is just a hint
+                        # https://docs.python.org/3/library/io.html#io.IOBase.readlines
+                        extra = self._buffer[: self._buffer.find("\n") + 1]
+                        result += extra
+                        self._buffer = self._buffer[len(extra) :]
+                    break
+
+                elif method == "readline" and "\n" in self._buffer:
+                    pos = self._buffer.find("\n") + 1
+                    result = self._buffer[:pos]
+                    self._buffer = self._buffer[pos:]
+                    break
+
+                elif self._eof:
+                    result = self._buffer
+                    self._buffer = ""
+                    self._eof = False  # That's how official implementation does
+                    break
+
+                else:
                     self._backend.send_message(
-                        BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data)
+                        BackendEvent("InputRequest", method=method, limit=original_limit)
                     )
-                    self._processed_symbol_count += len(data)
-            finally:
-                self._backend._exit_io_function()
-
-        def writelines(self, lines):
-            try:
-                self._backend._enter_io_function()
-                self.write("".join(lines))
-            finally:
-                self._backend._exit_io_function()
-
-    class FakeInputStream(FakeStream):
-        def __init__(self, backend, target_stream):
-            super().__init__(backend, target_stream)
-            self._buffer = ""
-            self._eof = False
-
-        def _generic_read(self, method, original_limit):
-            if original_limit is None:
-                effective_limit = -1
-            elif method == "readlines" and original_limit > -1:
-                # NB! size hint is defined in weird way
-                # "no more lines will be read if the total size (in bytes/characters)
-                # of all lines so far **exceeds** the hint".
-                effective_limit = original_limit + 1
-            else:
-                effective_limit = original_limit
-
-            try:
-                self._backend._enter_io_function()
-                while True:
-                    if effective_limit == 0:
-                        result = ""
-                        break
-
-                    elif effective_limit > 0 and len(self._buffer) >= effective_limit:
-                        result = self._buffer[:effective_limit]
-                        self._buffer = self._buffer[effective_limit:]
-                        if (
-                            method == "readlines"
-                            and not result.endswith("\n")
-                            and "\n" in self._buffer
-                        ):
-                            # limit is just a hint
-                            # https://docs.python.org/3/library/io.html#io.IOBase.readlines
-                            extra = self._buffer[: self._buffer.find("\n") + 1]
-                            result += extra
-                            self._buffer = self._buffer[len(extra) :]
-                        break
-
-                    elif method == "readline" and "\n" in self._buffer:
-                        pos = self._buffer.find("\n") + 1
-                        result = self._buffer[:pos]
-                        self._buffer = self._buffer[pos:]
-                        break
-
-                    elif self._eof:
-                        result = self._buffer
-                        self._buffer = ""
-                        self._eof = False  # That's how official implementation does
-                        break
-
+                    cmd = self._backend._fetch_command()
+                    if isinstance(cmd, InputSubmission):
+                        self._buffer += cmd.data
+                        self._processed_symbol_count += len(cmd.data)
+                    elif isinstance(cmd, EOFCommand):
+                        self._eof = True
+                    elif isinstance(cmd, InlineCommand):
+                        self._backend._handle_normal_command(cmd)
                     else:
-                        self._backend.send_message(
-                            BackendEvent("InputRequest", method=method, limit=original_limit)
-                        )
-                        cmd = self._backend._fetch_command()
-                        if isinstance(cmd, InputSubmission):
-                            self._buffer += cmd.data
-                            self._processed_symbol_count += len(cmd.data)
-                        elif isinstance(cmd, EOFCommand):
-                            self._eof = True
-                        elif isinstance(cmd, InlineCommand):
-                            self._backend.handle_command(cmd)
-                        else:
-                            raise RuntimeError("Wrong type of command when waiting for input")
-
-                return result
-
-            finally:
-                self._backend._exit_io_function()
-
-        def read(self, limit=-1):
-            return self._generic_read("read", limit)
-
-        def readline(self, limit=-1):
-            return self._generic_read("readline", limit)
-
-        def readlines(self, limit=-1):
-            return self._generic_read("readlines", limit).splitlines(True)
-
-        def __next__(self):
-            result = self.readline()
-            if not result:
-                raise StopIteration
+                        raise RuntimeError("Wrong type of command when waiting for input")
 
             return result
 
-        def __iter__(self):
-            return self
+        finally:
+            self._backend._exit_io_function()
+
+    def read(self, limit=-1):
+        return self._generic_read("read", limit)
+
+    def readline(self, limit=-1):
+        return self._generic_read("readline", limit)
+
+    def readlines(self, limit=-1):
+        return self._generic_read("readlines", limit).splitlines(True)
+
+    def __next__(self):
+        result = self.readline()
+        if not result:
+            raise StopIteration
+
+        return result
+
+    def __iter__(self):
+        return self
 
 
 def prepare_hooks(method):
@@ -1549,7 +1709,7 @@ def return_execution_result(method):
 
 
 class Executor:
-    def __init__(self, backend, original_cmd):
+    def __init__(self, backend: CPythonMainBackend, original_cmd):
         self._backend = backend
         self._original_cmd = original_cmd
         self._main_module_path = None
@@ -1737,7 +1897,7 @@ class Tracer(Executor):
         while True:
             cmd = self._backend._fetch_command()
             if isinstance(cmd, InlineCommand):
-                self._backend.handle_command(cmd)
+                self._backend._handle_normal_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
                 self._prev_breakpoints = self._current_command.breakpoints
@@ -3190,6 +3350,25 @@ def ensure_posix_directory(
                 raise AssertionError("'%s' is file, not a directory" % parent)
 
     mkdir_fun(path)
+
+
+def interrupt_local_process() -> None:
+    """Meant to be executed from a background thread"""
+    import signal
+
+    if hasattr(signal, "raise_signal"):
+        # Python 3.8 and later
+        signal.raise_signal(signal.SIGINT)
+    elif sys.platform == "win32":
+        # https://stackoverflow.com/a/51122690/261181
+        import ctypes
+
+        ucrtbase = ctypes.CDLL("ucrtbase")
+        c_raise = ucrtbase["raise"]
+        c_raise(signal.SIGINT)
+    else:
+        # Does not give KeyboardInterrupt in Windows
+        os.kill(os.getpid(), signal.SIGINT)
 
 
 if __name__ == "__main__":

@@ -241,7 +241,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             self._forward_output_until_active_prompt(self._send_output)
             self.send_message(ToplevelResponse(cwd=self._cwd))
 
-    def _transform_output(self, data):
+    def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work
         return data.replace(
             "Press any key to enter the REPL. Use CTRL-D to reload.",
@@ -319,7 +319,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         else:
             debug("GOTOK")
 
-    def _execute_with_consumer(self, script, output_consumer):
+    def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
 
             stdout
@@ -350,7 +350,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             self._connection.unread(data)
             self._forward_output_until_active_prompt(output_consumer, "stdout")
 
-    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
+    def _forward_output_until_active_prompt(
+        self, output_consumer: Callable[[str, str], None], stream_name="stdout"
+    ):
         """Used for finding initial prompt or forwarding problematic output
         in case of parse errors"""
         while True:
@@ -361,7 +363,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 self._raw_prompt_ensured = terminator in (RAW_PROMPT, FIRST_RAW_PROMPT)
                 return terminator
             else:
-                output_consumer(terminator, "stdout")
+                output_consumer(self._decode(terminator), "stdout")
 
     def _forward_output_until_eot_or_active_propmt(self, output_consumer, stream_name="stdout"):
         """Meant for incrementally forwarding stdout from user statements,
@@ -457,11 +459,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             pending += new_data
 
             if pending.endswith(EOT):
-                output_consumer(pending[: -len(EOT)], stream_name)
+                output_consumer(self._decode(pending[: -len(EOT)]), stream_name)
                 return EOT
 
             elif pending.endswith(LF):
-                output_consumer(pending, stream_name)
+                output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
             elif pending.endswith(NORMAL_PROMPT) or pending.endswith(FIRST_RAW_PROMPT):
@@ -494,7 +496,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                             out = out[: -len(FIRST_RAW_PROMPT)]
                         else:
                             break
-                    output_consumer(out, stream_name)
+                    output_consumer(self._decode(out), stream_name)
 
                     return terminator
 
@@ -503,7 +505,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 follow_up = self._connection.soft_read(1, timeout=0.1)
                 if not follow_up:
                     # most likely not a Python prompt, let's forget about it
-                    output_consumer(pending, stream_name)
+                    output_consumer(self._decode(pending), stream_name)
                     pending = b""
                 else:
                     # Let's withhold this for now
@@ -512,7 +514,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             else:
                 # No EOT or prompt in sight.
                 # Output and keep working.
-                output_consumer(pending, stream_name)
+                output_consumer(self.decode(pending), stream_name)
                 pending = b""
 
     def _forward_unexpected_output(self, stream_name="stdout"):
@@ -955,6 +957,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _get_sep(self):
         return "/"
+
+    def _decode(self, data: bytes) -> str:
+        return data.decode(ENCODING, errors="replace")
 
 
 if __name__ == "__main__":

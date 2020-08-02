@@ -83,4 +83,4 @@ if __name__ == "__main__":
 
     from thonny.backend import CPythonMainBackend  # @UnresolvedImport
 
-    CPythonMainBackend().mainloop()
+    CPythonMainBackend()

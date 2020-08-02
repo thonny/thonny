@@ -153,7 +153,7 @@ class SshProxy(SubprocessProxy):
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
-        # self._send_msg(InterruptCommand())
+        # self._send_msg(ImmediateCommand())
         self._proc.stdin.write("\x03")
 
     def fetch_next_message(self):
@@ -198,54 +198,6 @@ class SshProxy(SubprocessProxy):
 
     def _get_remote_program_directory(self):
         return "/tmp/thonny-backend-" + thonny.get_version()
-
-    def _check_install_thonny_backend(self):
-        import paramiko
-
-        sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
-
-        launch_dir = self._get_remote_program_directory()
-        try:
-            sftp.stat(launch_dir)
-            # dir is present
-            if not launch_dir.endswith("-dev"):
-                # don't overwrite unless in dev mode
-                return
-
-        except IOError:
-            sftp.mkdir(launch_dir)
-
-        # copy backend_launcher next to thonny module so that thonny module will be in path
-        # import thonny.backend_launcher
-        # sftp.put(thonny.backend_launcher.__file__, launch_dir + "/launch.py")
-
-        # other files go to thonny directory
-        module_dir = launch_dir + "/thonny"
-        try:
-            sftp.stat(module_dir)
-        except IOError:
-            sftp.mkdir(module_dir)
-
-        import thonny.ast_utils
-        import thonny.backend
-        import thonny.backend_launcher
-        import thonny.common
-
-        # create empty __init__.py
-        # sftp.open(module_dir + "/__init__.py", "w").close()
-
-        for module in [
-            thonny,
-            thonny.backend_launcher,
-            thonny.backend,
-            thonny.common,
-            thonny.ast_utils,
-        ]:
-            local_path = module.__file__
-            remote_path = module_dir + "/" + os.path.basename(local_path)
-            sftp.put(local_path, remote_path)
-
-        sftp.close()
 
 
 class SshPopen:

@@ -22,7 +22,7 @@ from thonny.common import (
     CommandToBackend,
     EOFCommand,
     InlineResponse,
-    InterruptCommand,
+    ImmediateCommand,
     MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
@@ -100,7 +100,7 @@ class BareMetalMicroPythonProxy(SubprocessProxy):
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
-        self._send_msg(InterruptCommand())
+        self._send_msg(ImmediateCommand("interrupt"))
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
@@ -425,7 +425,7 @@ class LocalMicroPythonProxy(SubprocessProxy):
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to the device
-        self._send_msg(InterruptCommand())
+        self._send_msg(ImmediateCommand("interrupt"))
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
@@ -525,7 +525,7 @@ class SshMicroPythonProxy(SubprocessProxy):
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to the device
-        self._send_msg(InterruptCommand())
+        self._send_msg(ImmediateCommand("interrupt"))
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):

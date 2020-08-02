@@ -57,7 +57,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
             sys.stdout.flush()
             return
 
-        super().__init__(None, api_stubs_path, cwd=cwd)
+        MicroPythonBackend.__init__(self, None, api_stubs_path, cwd=cwd)
 
     def _resolve_executable(self, executable):
         result = self._which(executable)
@@ -290,9 +290,9 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
     def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
-        self._init_client(host, user, password)
         self._cwd = cwd
-        super().__init__(mp_executable, api_stubs_path, cwd=cwd)
+        SshBackend.__init__(self, host, user, password)
+        MicroPythonOsBackend.__init__(self, mp_executable, api_stubs_path, cwd=cwd)
 
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))

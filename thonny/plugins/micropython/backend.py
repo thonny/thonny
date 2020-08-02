@@ -58,12 +58,15 @@ from thonny.common import (
     InlineCommand,
     InlineResponse,
     InputSubmission,
-    InterruptCommand,
+    ImmediateCommand,
     ToplevelCommand,
     ToplevelResponse,
     UserError,
     parse_message,
     serialize_message,
+    MessageFromBackend,
+    Record,
+    CommandToBackend,
 )
 from thonny.plugins.micropython.connection import ConnectionClosedException
 from thonny.running import EXPECTED_TERMINATION_CODE
@@ -108,6 +111,9 @@ def debug(msg):
 
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, api_stubs_path, cwd=None):
+
+        MainBackend.__init__(self)
+
         self._prev_time = time.time()
 
         self._local_cwd = None
@@ -126,7 +132,7 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             self._report_time("before prepare")
             self._prepare(clean)
-            self._mainloop()
+            self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
         except ProtocolError as e:
@@ -215,103 +221,28 @@ class MicroPythonBackend(MainBackend, ABC):
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
 
-    def _mainloop(self):
-        while self._is_connected():
-            try:
-                cmd = self._command_queue.get(timeout=0.1)
-            except Empty:
-                # No command in queue, but maybe a thread produced output meanwhile
-                # or the user resetted the device
-                self._forward_unexpected_output()
-                continue
+    def _perform_idle_tasks(self):
+        self._forward_unexpected_output()
 
-            if isinstance(cmd, InputSubmission):
-                self._submit_input(cmd.data)
-            elif isinstance(cmd, EOFCommand):
-                self._soft_reboot(False)
-            else:
-                self.handle_command(cmd)
+    def _handle_user_input(self, msg: InputSubmission) -> None:
+        self._submit_input(msg.data)
 
-            self._forward_unexpected_output("stdout")
+    def _handle_eof_command(self, msg: EOFCommand) -> None:
+        self._soft_reboot(False)
 
-    def _is_connected(self):
-        raise NotImplementedError()
+    def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        if cmd["name"] == "interrupt":
+            with self._interrupt_lock:
+                # don't interrupt while command or input is being written
+                self._write(INTERRUPT_CMD)
+                time.sleep(0.1)
+                self._write(INTERRUPT_CMD)
+                time.sleep(0.1)
+                self._write(INTERRUPT_CMD)
+                print("sent interrupt")
 
-    def _fetch_welcome_text(self):
-        raise NotImplementedError()
+    def _handle_normal_command(self, cmd: CommandToBackend) -> None:
 
-    def _fetch_builtin_modules(self):
-        raise NotImplementedError()
-
-    def _fetch_builtins_info(self):
-        """
-        for p in self._get_api_stubs_path():
-            builtins_file = os.path.join(p, "__builtins__.py")
-            if os.path.exists(builtins_file):
-                return parse_api_information(builtins_file)
-        """
-        path = os.path.join(self._api_stubs_path, "builtins.py")
-        if os.path.exists(path):
-            return parse_api_information(path)
-        else:
-            return {}
-
-    def _update_cwd(self):
-        if "micro:bit" not in self._welcome_text.lower():
-            self._cwd = self._evaluate("__thonny_helper.getcwd()")
-
-    def _send_ready_message(self):
-        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
-
-    def _report_progress(
-        self, cmd, description: Optional[str], value: float, maximum: float
-    ) -> None:
-        prev_time = self._progress_times.get(cmd["id"], 0)
-        if value != maximum and time.time() - prev_time < 0.2:
-            # Don't notify too often
-            return
-        else:
-            self._progress_times[cmd["id"]] = time.time()
-
-        self.send_message(
-            BackendEvent(
-                event_type="InlineProgress",
-                command_id=cmd["id"],
-                value=value,
-                maximum=maximum,
-                description=description,
-            )
-        )
-
-    def _soft_reboot(self, side_command):
-        raise NotImplementedError()
-
-    def _read_commands(self):
-        # works in separate thread
-
-        while True:
-            line = sys.stdin.readline()
-            if line == "":
-                logger.info("Read stdin EOF")
-                sys.exit()
-            cmd = parse_message(line)
-            if isinstance(cmd, InterruptCommand):
-                # This is a priority command and will be handled right away
-                self._interrupt_in_command_reading_thread()
-            else:
-                self._command_queue.put(cmd)
-
-    def _interrupt_in_command_reading_thread(self):
-        with self._writing_lock:
-            # don't interrupt while command or input is being written
-            self._write(INTERRUPT_CMD)
-            time.sleep(0.1)
-            self._write(INTERRUPT_CMD)
-            time.sleep(0.1)
-            self._write(INTERRUPT_CMD)
-            print("sent interrupt")
-
-    def handle_command(self, cmd):
         self._report_time("before " + cmd.name)
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
@@ -378,6 +309,56 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._report_time("after " + cmd.name)
 
+    def _should_keep_going(self) -> bool:
+        return self._is_connected()
+
+    def _is_connected(self):
+        raise NotImplementedError()
+
+    def _fetch_welcome_text(self):
+        raise NotImplementedError()
+
+    def _fetch_builtin_modules(self):
+        raise NotImplementedError()
+
+    def _fetch_builtins_info(self):
+        """
+        for p in self._get_api_stubs_path():
+            builtins_file = os.path.join(p, "__builtins__.py")
+            if os.path.exists(builtins_file):
+                return parse_api_information(builtins_file)
+        """
+        path = os.path.join(self._api_stubs_path, "builtins.py")
+        if os.path.exists(path):
+            return parse_api_information(path)
+        else:
+            return {}
+
+    def _update_cwd(self):
+        if "micro:bit" not in self._welcome_text.lower():
+            self._cwd = self._evaluate("__thonny_helper.getcwd()")
+
+    def _send_ready_message(self):
+        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
+
+    def _soft_reboot(self, side_command):
+        raise NotImplementedError()
+
+    def _read_commands(self):
+        # works in separate thread
+
+        while True:
+            line = sys.stdin.readline()
+            if line == "":
+                logger.info("Read stdin EOF")
+                sys.exit()
+            cmd = parse_message(line)
+            if isinstance(cmd, ImmediateCommand):
+                # This is a priority command and will be handled right away
+                self._interrupt_in_command_reading_thread()
+            else:
+                self._command_queue.put(cmd)
+
     def _write(self, data):
         raise NotImplementedError()
 
@@ -391,22 +372,8 @@ class MicroPythonBackend(MainBackend, ABC):
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
 
-    def _send_output(self, data, stream_name):
-        if not data:
-            return
-
-        if isinstance(data, (bytes, bytearray)):
-            data = data.decode(ENCODING, errors="replace")
-
-        data = self._transform_output(data)
-        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
-        self.send_message(msg)
-
     def _send_error_message(self, msg):
         self._send_output("\n" + msg + "\n", "stderr")
-
-    def _transform_output(self, data):
-        return data
 
     def _execute(self, script, capture_output=False) -> Tuple[str, str]:
         if capture_output:
@@ -416,10 +383,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 output_lists[stream_name].append(data)
 
             self._execute_with_consumer(script, consume_output)
-            result = [
-                b"".join(output_lists[name]).decode(ENCODING, errors="replace")
-                for name in ["stdout", "stderr"]
-            ]
+            result = ["".join(output_lists[name]) for name in ["stdout", "stderr"]]
             return result[0], result[1]
         else:
             self._execute_with_consumer(script, self._send_output)

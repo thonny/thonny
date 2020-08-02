@@ -154,11 +154,8 @@ class CommandToBackend(Record):
         self.name = name
 
 
-class InterruptCommand(CommandToBackend):
-    def __init__(self, **kw) -> None:
-        if "name" in kw:
-            del kw["name"]
-        super().__init__("interrupt", **kw)
+class ImmediateCommand(CommandToBackend):
+    pass
 
 
 class EOFCommand(CommandToBackend):
