@@ -4,7 +4,13 @@ import sys
 from threading import Thread
 
 import thonny
-from thonny.backend import SshBackend, BaseBackend, interrupt_local_process, RemoteProcess
+from thonny.backend import (
+    SshBackend,
+    BaseBackend,
+    interrupt_local_process,
+    RemoteProcess,
+    ensure_posix_directory,
+)
 from thonny.common import parse_message, serialize_message, InlineCommand, ImmediateCommand
 
 
@@ -49,10 +55,7 @@ class CPythonSshBackend(BaseBackend, SshBackend):
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         return self._create_remote_process(
-            [
-                self._remote_interpreter,
-                self._get_remote_program_directory() + "/thonny/backend_launcher.py",
-            ],
+            [self._remote_interpreter, "-m", "thonny.plugins.cpython"],
             cwd=self._get_remote_program_directory(),
             env=env,
         )
@@ -71,32 +74,26 @@ class CPythonSshBackend(BaseBackend, SshBackend):
                 # don't overwrite unless in dev mode
                 return
         except IOError:
-            sftp.mkdir(launch_dir)
+            pass
 
-        # other files go to thonny directory
-        module_dir = launch_dir + "/thonny"
-        try:
-            sftp.stat(module_dir)
-        except IOError:
-            sftp.mkdir(module_dir)
+        ensure_posix_directory(launch_dir + "/thonny/plugins/cpython", sftp.stat, sftp.mkdir)
 
-        import thonny.backend_launcher
         import thonny.ast_utils
         import thonny.backend
         import thonny.common
+        import thonny.plugins.cpython.backend
 
-        # create empty __init__.py
-        # sftp.open(module_dir + "/__init__.py", "w").close()
-
+        local_context = os.path.dirname(os.path.dirname(thonny.__file__))
         for module in [
             thonny,
-            thonny.backend_launcher,
-            thonny.backend,
             thonny.common,
             thonny.ast_utils,
+            thonny.backend,
+            thonny.plugins.cpython.backend,
         ]:
             local_path = module.__file__
-            remote_path = module_dir + "/" + os.path.basename(local_path)
+            local_suffix = module.__file__[len(local_context) :]
+            remote_path = launch_dir + local_suffix.replace("\\", "/")
             sftp.put(local_path, remote_path)
 
         sftp.close()

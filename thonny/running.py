@@ -24,8 +24,9 @@ from logging import debug
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
+from typing import Any, List, Optional, Set  # @UnusedImport; @UnusedImport
 
-from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
+from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -52,11 +53,7 @@ from thonny.editors import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
-from thonny.terminal import run_in_terminal
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
-
-from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
-
 
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
@@ -687,6 +684,8 @@ class Runner:
             return self._proxy.get_node_label()
 
     def using_venv(self) -> bool:
+        from thonny.plugins.cpython import CPythonProxy
+
         return isinstance(self._proxy, CPythonProxy) and self._proxy._in_venv
 
 
@@ -1090,244 +1089,6 @@ def _ends_with_incomplete_ansi_code(data):
     # note ANSI_CODE_TERMINATOR also includes [
     params_and_terminator = data[pos + 2 :]
     return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
-
-
-class CPythonProxy(SubprocessProxy):
-    "abstract class"
-
-    def __init__(self, clean: bool, executable: str) -> None:
-        super().__init__(clean, executable)
-        self._send_msg(ToplevelCommand("get_environment_info"))
-
-    def _get_initial_cwd(self):
-        return get_workbench().get_local_cwd()
-
-    def _get_launcher_with_args(self):
-        import thonny.backend_launcher
-
-        return [thonny.backend_launcher.__file__]
-
-    def _store_state_info(self, msg):
-        super()._store_state_info(msg)
-
-        if "gui_is_active" in msg:
-            self._update_gui_updating(msg)
-
-    def _clear_environment(self):
-        self._close_backend()
-        self._start_background_process()
-
-    def _close_backend(self):
-        self._cancel_gui_update_loop()
-        super()._close_backend()
-
-    def get_local_executable(self):
-        return self._executable
-
-    def _update_gui_updating(self, msg):
-        """Enables running Tkinter or Qt programs which doesn't call mainloop. 
-        
-        When mainloop is omitted, then program can be interacted with
-        from the shell after it runs to the end.
-        
-        Each ToplevelResponse is supposed to tell, whether gui is active
-        and needs updating.
-        """
-        if not "gui_is_active" in msg:
-            return
-
-        if msg["gui_is_active"] and self._gui_update_loop_id is None:
-            # Start updating
-            self._loop_gui_update(True)
-        elif not msg["gui_is_active"] and self._gui_update_loop_id is not None:
-            self._cancel_gui_update_loop()
-
-    def _loop_gui_update(self, force=False):
-        if force or get_runner().is_waiting_toplevel_command():
-            try:
-                self.send_command(InlineCommand("process_gui_events"))
-            except OSError:
-                # the backend process may have been closed already
-                # https://github.com/thonny/thonny/issues/966
-                logging.getLogger("thonny").exception("Could not send process_gui_events")
-
-        self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)
-
-    def _cancel_gui_update_loop(self):
-        if self._gui_update_loop_id is not None:
-            try:
-                get_workbench().after_cancel(self._gui_update_loop_id)
-            finally:
-                self._gui_update_loop_id = None
-
-    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
-        cmd = [self._executable]
-        if interactive:
-            cmd.append("-i")
-        cmd.append(os.path.basename(script_path))
-        cmd.extend(args)
-
-        run_in_terminal(cmd, os.path.dirname(script_path), keep_open=keep_open)
-
-    def get_supported_features(self):
-        return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
-
-
-class PrivateVenvCPythonProxy(CPythonProxy):
-    def __init__(self, clean):
-        self._prepare_private_venv()
-        super().__init__(clean, get_private_venv_executable())
-
-    def _prepare_private_venv(self):
-        path = get_private_venv_path()
-        if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
-            self._check_upgrade_private_venv(path)
-        else:
-            self._create_private_venv(
-                path, "Please wait!\nThonny prepares its virtual environment."
-            )
-
-    def _check_upgrade_private_venv(self, path):
-        # If home is wrong then regenerate
-        # If only micro version is different, then upgrade
-        info = _get_venv_info(path)
-
-        if not is_same_path(info["home"], os.path.dirname(sys.executable)):
-            self._create_private_venv(
-                path,
-                "Thonny's virtual environment was created for another interpreter.\n"
-                + "Regenerating the virtual environment for current interpreter.\n"
-                + "(You may need to reinstall your 3rd party packages)\n"
-                + "Please wait!.",
-                clear=True,
-            )
-        else:
-            venv_version = tuple(map(int, info["version"].split(".")))
-            sys_version = sys.version_info[:3]
-            assert venv_version[0] == sys_version[0]
-            assert venv_version[1] == sys_version[1]
-
-            if venv_version[2] != sys_version[2]:
-                self._create_private_venv(
-                    path, "Please wait!\nUpgrading Thonny's virtual environment.", upgrade=True
-                )
-
-    def _create_private_venv(self, path, description, clear=False, upgrade=False):
-        # Don't include system site packages
-        # This way all students will have similar configuration
-        # independently of system Python (if Thonny is used with system Python)
-
-        # NB! Cant run venv.create directly, because in Windows bundle
-        # it tries to link venv to thonny.exe.
-        # Need to run it via proper python
-        args = ["-m", "venv"]
-        if clear:
-            args.append("--clear")
-        if upgrade:
-            args.append("--upgrade")
-
-        try:
-            import ensurepip
-        except ImportError:
-            args.append("--without-pip")
-
-        args.append(path)
-
-        proc = create_frontend_python_process(args)
-
-        from thonny.ui_utils import SubprocessDialog
-
-        dlg = SubprocessDialog(
-            get_workbench(), proc, "Preparing the backend", long_description=description
-        )
-        try:
-            ui_utils.show_dialog(dlg)
-        except Exception:
-            # if using --without-pip the dialog may close very quickly
-            # and for some reason wait_window would give error then
-            logging.exception("Problem with waiting for venv creation dialog")
-        get_workbench().become_active_window()  # Otherwise focus may get stuck somewhere
-
-        bindir = os.path.dirname(get_private_venv_executable())
-        # create private env marker
-        marker_path = os.path.join(bindir, "is_private")
-        with open(marker_path, mode="w") as fp:
-            fp.write("# This file marks Thonny-private venv")
-
-        # Create recommended pip conf to get rid of list deprecation warning
-        # https://github.com/pypa/pip/issues/4058
-        pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
-        with open(os.path.join(path, pip_conf), mode="w") as fp:
-            fp.write("[list]\nformat = columns")
-
-        assert os.path.isdir(path)
-
-
-class SameAsFrontendCPythonProxy(CPythonProxy):
-    def __init__(self, clean):
-        super().__init__(clean, get_interpreter_for_subprocess())
-
-    def fetch_next_message(self):
-        msg = super().fetch_next_message()
-        if msg and "welcome_text" in msg:
-            if is_bundled_python(self._executable):
-                msg["welcome_text"] += " (bundled)"
-            else:
-                msg["welcome_text"] += " (" + self._executable + ")"
-        return msg
-
-
-class CustomCPythonProxy(CPythonProxy):
-    def __init__(self, clean):
-        executable = get_workbench().get_option("CustomInterpreter.path")
-
-        # Rembember the usage of this non-default interpreter
-        used_interpreters = get_workbench().get_option("CustomInterpreter.used_paths")
-        if executable not in used_interpreters:
-            used_interpreters.append(executable)
-        get_workbench().set_option("CustomInterpreter.used_paths", used_interpreters)
-
-        super().__init__(clean, get_interpreter_for_subprocess(executable))
-
-    def fetch_next_message(self):
-        msg = super().fetch_next_message()
-        if msg and "welcome_text" in msg:
-            msg["welcome_text"] += " (" + self._executable + ")"
-        return msg
-
-
-def get_private_venv_path():
-    if is_bundled_python(sys.executable.lower()):
-        prefix = "BundledPython"
-    else:
-        prefix = "Python"
-    return os.path.join(
-        THONNY_USER_DIR, prefix + "%d%d" % (sys.version_info[0], sys.version_info[1])
-    )
-
-
-def get_private_venv_executable():
-    venv_path = get_private_venv_path()
-
-    if running_on_windows():
-        exe = os.path.join(venv_path, "Scripts", WINDOWS_EXE)
-    else:
-        exe = os.path.join(venv_path, "bin", "python3")
-
-    return exe
-
-
-def _get_venv_info(venv_path):
-    cfg_path = os.path.join(venv_path, "pyvenv.cfg")
-    result = {}
-
-    with open(cfg_path, encoding="UTF-8") as fp:
-        for line in fp:
-            if "=" in line:
-                key, val = line.split("=", maxsplit=1)
-                result[key.strip()] = val.strip()
-
-    return result
 
 
 def is_bundled_python(executable):

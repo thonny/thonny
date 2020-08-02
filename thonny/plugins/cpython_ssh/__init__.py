@@ -38,7 +38,7 @@ class SshProxy(SubprocessProxy):
         pass
 
     def _get_launcher_with_args(self):
-        return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
+        return [self._get_remote_program_directory(), "-m", "thonny.plugins.cpython"]
 
     def _process_thread_commands(self):
         while True:

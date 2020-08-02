@@ -21,7 +21,6 @@ from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import ToplevelResponse, read_source
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.running import CPythonProxy
 from thonny.ui_utils import CommonDialog, scrollbar_style
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
@@ -103,6 +102,8 @@ class AssistantView(tktextext.TextFrame):
             return
 
         self._clear()
+
+        from thonny.plugins.cpython import CPythonProxy
 
         if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
             # TODO: add some support for MicroPython as well

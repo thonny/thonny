@@ -145,8 +145,6 @@ class Workbench(tk.Tk):
 
         self._init_scaling()
 
-        self._add_main_backends()
-
         self._init_theming()
         self._init_window()
         self.add_view(
@@ -500,37 +498,6 @@ class Workbench(tk.Tk):
         ]
 
         self.update_fonts()
-
-    def _add_main_backends(self) -> None:
-        self.set_default("run.backend_name", "SameAsFrontend")
-        self.set_default("CustomInterpreter.used_paths", [])
-        self.set_default("CustomInterpreter.path", "")
-
-        from thonny import running_config_page
-
-        self.add_backend(
-            "SameAsFrontend",
-            running.SameAsFrontendCPythonProxy,
-            tr("The same interpreter which runs Thonny (default)"),
-            running_config_page.SameAsFrontEndConfigurationPage,
-            "1",
-        )
-
-        self.add_backend(
-            "CustomCPython",
-            running.CustomCPythonProxy,
-            tr("Alternative Python 3 interpreter or virtual environment"),
-            running_config_page.CustomCPythonConfigurationPage,
-            "2",
-        )
-
-        self.add_backend(
-            "PrivateVenv",
-            running.PrivateVenvCPythonProxy,
-            tr("A special virtual environment (deprecated)"),
-            running_config_page.PrivateVenvConfigurationPage,
-            "z",
-        )
 
     def _start_runner(self) -> None:
         try:
