@@ -6,6 +6,7 @@ import shlex
 import sys
 import textwrap
 from abc import ABC
+from typing import Callable
 
 from thonny.backend import SshBackend
 from thonny.common import BackendEvent, serialize_message
@@ -75,7 +76,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
     def _create_connection(self, run_args=[]):
         raise NotImplementedError()
 
-    def _tweak_welcome_text(self, original):
+    def _tweak_welcome_text(self, original: str) -> str:
         return (
             original.replace("Use Ctrl-D to exit, Ctrl-E for paste mode\n", "").strip()
             + " ("
@@ -127,7 +128,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
 
         self._report_time("befini")
         self._forward_output_until_active_prompt(collect_output, "stdout")
-        self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
+        self._original_welcome_text = "".join(output).replace("\r\n", "\n")
         self._welcome_text = self._tweak_welcome_text(self._original_welcome_text)
         self._report_time("afini")
 
@@ -137,7 +138,9 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
     def _soft_reboot(self, side_command):
         raise NotImplementedError()
 
-    def _execute_with_consumer(self, script, output_consumer):
+    def _execute_with_consumer(
+        self, script: str, output_consumer: Callable[[str, str], None]
+    ) -> None:
         """Ensures prompt and submits the script.
         Returns (out, value_repr, err) if there are no problems, ie. all parts of the 
         output are present and it reaches active prompt.
@@ -147,17 +150,20 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         required input or issue an interrupt). The UI should remind the interrupt in case
         of Thonny commands.
         """
+        end_marker = "#uIuIu"
         self._connection.write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
-        self._connection.write(script + "#uuu")
-        self._connection.read_until(b"#uuu")
+        self._connection.write(script + end_marker)
+        self._connection.read_until(end_marker.encode("ascii"))
         self._connection.write(EOT)
         self._connection.read_until(b"\n")
 
         out = self._connection.read_until(NORMAL_PROMPT)[: -len(NORMAL_PROMPT)]
-        output_consumer(out, "stdout")
+        output_consumer(self._decode(out), "stdout")
 
-    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
+    def _forward_output_until_active_prompt(
+        self, output_consumer: Callable[[str, str], None], stream_name="stdout"
+    ):
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
             b"|".join(map(re.escape, [LF, NORMAL_PROMPT]))
         )
@@ -178,12 +184,12 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
             pending += new_data
 
             if pending.endswith(LF):
-                output_consumer(pending, stream_name)
+                output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
             elif pending.endswith(NORMAL_PROMPT):
                 out = pending[: -len(NORMAL_PROMPT)]
-                output_consumer(out, stream_name)
+                output_consumer(self._decode(out), stream_name)
                 return NORMAL_PROMPT
 
             elif ends_overlap(pending, NORMAL_PROMPT):
@@ -191,7 +197,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
                 follow_up = self._connection.soft_read(1, timeout=0.1)
                 if not follow_up:
                     # most likely not a Python prompt, let's forget about it
-                    output_consumer(pending, stream_name)
+                    output_consumer(self._decode(pending), stream_name)
                     pending = b""
                 else:
                     # Let's withhold this for now
@@ -200,16 +206,17 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
             else:
                 # No prompt in sight.
                 # Output and keep working.
-                output_consumer(pending, stream_name)
+                output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         data = self._connection.read_all()
         if data.endswith(NORMAL_PROMPT):
-            self._send_output(data[: -len(NORMAL_PROMPT)], "stdout")
-        elif data:
-            self._send_output(data, "stdout")
+            out = data[: -len(NORMAL_PROMPT)]
+        else:
+            out = data
+        self._send_output(self._decode(out), "stdout")
 
     def _write(self, data):
         self._connection.write(data)
@@ -287,11 +294,14 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
     def _get_sep(self) -> str:
         return os.path.sep
 
+    def _decode(self, data: bytes) -> str:
+        return data.decode(errors="replace")
+
 
 class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
     def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
         self._cwd = cwd
-        SshBackend.__init__(self, host, user, password)
+        SshBackend.__init__(self, host, user, password, mp_executable)
         MicroPythonOsBackend.__init__(self, mp_executable, api_stubs_path, cwd=cwd)
 
     def _which(self, executable):
@@ -317,6 +327,9 @@ class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
 
     def _get_sep(self) -> str:
         return "/"
+
+    def _decode(self, data: bytes) -> str:
+        return data.decode(ENCODING, errors="replace")
 
 
 if __name__ == "__main__":

@@ -143,14 +143,14 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             self._connection.write(RAW_MODE_CMD)
             self._forward_output_until_active_prompt(self._send_output)
 
-    def _fetch_welcome_text(self):
+    def _fetch_welcome_text(self) -> str:
         self._connection.write(NORMAL_MODE_CMD)
         self._raw_prompt_ensured = False
         welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace(b"\r\n", b"\n")
 
-        return welcome_text.decode(ENCODING, errors="replace")
+        return self._decode(welcome_text)
 
     def _fetch_builtin_modules(self):
         script = "help('modules')"

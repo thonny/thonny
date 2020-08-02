@@ -306,10 +306,10 @@ class MicroPythonBackend(MainBackend, ABC):
     def _should_keep_going(self) -> bool:
         return self._is_connected()
 
-    def _is_connected(self):
+    def _is_connected(self) -> bool:
         raise NotImplementedError()
 
-    def _fetch_welcome_text(self):
+    def _fetch_welcome_text(self) -> str:
         raise NotImplementedError()
 
     def _fetch_builtin_modules(self):
@@ -359,6 +359,7 @@ class MicroPythonBackend(MainBackend, ABC):
             output_lists = {"stdout": [], "stderr": []}
 
             def consume_output(data, stream_name):
+                assert isinstance(data, str)
                 output_lists[stream_name].append(data)
 
             self._execute_with_consumer(script, consume_output)
