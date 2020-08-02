@@ -32,7 +32,7 @@ class NotesView(TextFrame):
         if not os.path.isfile(self.filename):
             self.text.insert(
                 "1.0",
-                _(
+                tr(
                     "This box is meant for your working notes -- assignment instructions, "
                     + "code snippets, whatever.\n\n"
                     + "Everything will be saved automatically "

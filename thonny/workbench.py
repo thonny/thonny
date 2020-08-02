@@ -1288,7 +1288,7 @@ class Workbench(tk.Tk):
             self.set_option("general.ui_mode", "regular")
             tk.messagebox.showinfo(
                 tr("Regular mode"),
-                _(
+                tr(
                     "Configuration has been updated. "
                     + "Restart Thonny to start working in regular mode.\n\n"
                     + "(See 'Tools → Options → General' if you change your mind later.)"

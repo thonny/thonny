@@ -15,6 +15,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
+from thonny.plugins.cpython import CPythonProxy
 from thonny.running import get_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -349,7 +350,7 @@ class PipDialog(CommonDialog):
             self.info_text.direct_insert("end", tr("Browse the packages") + "\n", ("caption",))
             self.info_text.direct_insert(
                 "end",
-                _(
+                tr(
                     "With current interpreter you can only browse the packages here.\n"
                     + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
                 )
@@ -365,7 +366,7 @@ class PipDialog(CommonDialog):
             self.info_text.direct_insert("end", tr("Install from PyPI") + "\n", ("caption",))
             self.info_text.direct_insert(
                 "end",
-                _(
+                tr(
                     "If you don't know where to get the package from, "
                     + "then most likely you'll want to search the Python Package Index. "
                     + "Start by entering the name of the package in the search box above and pressing ENTER."
@@ -391,7 +392,7 @@ class PipDialog(CommonDialog):
             self.info_text.direct_insert(
                 "end",
                 " "
-                + _(
+                + tr(
                     "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
                 )
                 + "\n\n",
@@ -415,7 +416,7 @@ class PipDialog(CommonDialog):
 
                 self.info_text.direct_insert(
                     "end",
-                    _(
+                    tr(
                         "This dialog lists all available packages,"
                         + " but allows upgrading and uninstalling only packages from"
                     )
@@ -425,7 +426,7 @@ class PipDialog(CommonDialog):
                 self.info_text.direct_insert(
                     "end",
                     ". "
-                    + _(
+                    + tr(
                         "New packages will be also installed into this directory."
                         + " Other locations must be managed by alternative means."
                     ),
@@ -609,7 +610,7 @@ class PipDialog(CommonDialog):
         elif action == "uninstall":
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
                 tr("Really uninstall?"),
-                _(
+                tr(
                     "Package '{}' is required for installing and uninstalling other packages."
                 ).format(name)
                 + "\n\n"
@@ -772,7 +773,7 @@ class BackendPipDialog(PipDialog):
     def __init__(self, master):
         self._backend_proxy = get_runner().get_backend_proxy()
         super().__init__(master)
-        assert isinstance(self._backend_proxy, running.CPythonProxy)
+        assert isinstance(self._backend_proxy, CPythonProxy)
 
         self._last_name_to_show = None
 
@@ -809,7 +810,7 @@ class BackendPipDialog(PipDialog):
         if name.lower().startswith("thonny"):
             return messagebox.askyesno(
                 tr("Confirmation"),
-                _(
+                tr(
                     "Looks like you are installing a Thonny-related package.\n"
                     + "If you meant to install a Thonny plugin, then you should\n"
                     + "choose 'Tools → Manage plugins...' instead\n"
@@ -906,7 +907,7 @@ class PluginsPipDialog(PipDialog):
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
 
-        other_version_text = _(
+        other_version_text = tr(
             "NB! There may be another version available "
             + "which is compatible with current Thonny version. "
             + "Click on '...' button to choose the version to install."
@@ -915,7 +916,7 @@ class PluginsPipDialog(PipDialog):
         if name.lower().startswith("thonny-") and not reqs:
             showerror(
                 tr("Thonny plugin without requirements"),
-                _(
+                tr(
                     "Looks like you are trying to install an outdated Thonny\n"
                     + "plug-in (it doesn't specify required Thonny version).\n\n"
                     + "If you still want it, then please install it from the command line."
@@ -962,7 +963,7 @@ class PluginsPipDialog(PipDialog):
         banner.grid(row=0, column=0, sticky="nsew")
 
         banner_msg = (
-            _(
+            tr(
                 "This dialog is for managing Thonny plug-ins and their dependencies.\n"
                 + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
             )
@@ -976,13 +977,13 @@ class PluginsPipDialog(PipDialog):
             and is_same_path(self._get_interpreter(), get_runner().get_local_executable())
         ):
             banner_msg += (
-                _(
+                tr(
                     "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
                 )
                 + "\n"
             )
 
-        banner_msg += "\n" + _(
+        banner_msg += "\n" + tr(
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
 

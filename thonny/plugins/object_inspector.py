@@ -450,7 +450,7 @@ class FloatInspector(TextFrame, ContentInspector):
             ratio_dec_str = str(Decimal(ratio[0]) / Decimal(ratio[1]))
 
             if ratio_dec_str != object_info["repr"]:
-                explanation = _(
+                explanation = tr(
                     "The representation above is an approximate value of this float. "
                     "The exact stored value is %s which is about %s"
                 )

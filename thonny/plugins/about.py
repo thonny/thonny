@@ -102,7 +102,7 @@ class AboutDialog(CommonDialog):
             text="Copyright (©) "
             + str(datetime.datetime.now().year)
             + " Aivar Annamaa\n"
-            + _(
+            + tr(
                 "This program comes with\n"
                 + "ABSOLUTELY NO WARRANTY!\n"
                 + "It is free software, and you are welcome to\n"

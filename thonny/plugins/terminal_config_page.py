@@ -28,7 +28,7 @@ class TerminalConfigurationPage(ConfigurationPage):
 
         exit_remark = " "
         if running_on_mac_os():
-            exit_remark = _(
+            exit_remark = tr(
                 "NB! Automatic closing needs to be enabled in Terminal's settings\n"
                 + "(Profiles → Shell → When the shell exits)"
             )

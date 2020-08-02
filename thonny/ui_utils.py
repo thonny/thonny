@@ -2327,7 +2327,7 @@ def tr_btn(s):
     if _btn_padding is None:
         _btn_padding = get_button_padding()
 
-    return _btn_padding + _(s) + _btn_padding
+    return _btn_padding + tr(s) + _btn_padding
 
 
 if __name__ == "__main__":

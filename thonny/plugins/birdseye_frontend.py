@@ -52,7 +52,7 @@ def debug_with_birdseye():
     except ImportError:
         if messagebox.askyesno(
             tr("About Birdseye"),
-            _(
+            tr(
                 "Birdseye is a Python debugger which needs to be installed separately.\n\n"
                 + "Do you want to open the help page and learn more?"
             ),
