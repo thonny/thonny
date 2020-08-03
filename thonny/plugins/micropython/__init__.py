@@ -416,10 +416,13 @@ class LocalMicroPythonProxy(SubprocessProxy):
 
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
-            "--executable",
-            self._mp_executable,
-            "--api_stubs_path",
-            self._get_api_stubs_path(),
+            repr(
+                {
+                    "interpreter": self._mp_executable,
+                    "api_stubs_path": self._get_api_stubs_path(),
+                    "cwd": self.get_cwd(),
+                }
+            ),
         ]
         return cmd
 
@@ -508,18 +511,16 @@ class SshMicroPythonProxy(SubprocessProxy):
 
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
-            "--cwd",
-            get_workbench().get_option("SshMicroPython.cwd") or "",
-            "--executable",
-            self._mp_executable,
-            "--api_stubs_path",
-            self._get_api_stubs_path(),
-            "--host",
-            self._host,
-            "--user",
-            self._user,
-            "--password",
-            self._password,
+            repr(
+                {
+                    "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
+                    "interpreter": self._mp_executable,
+                    "api_stubs_path": self._get_api_stubs_path(),
+                    "host": self._host,
+                    "user": self._user,
+                    "password": self._password,
+                }
+            ),
         ]
         return cmd
 

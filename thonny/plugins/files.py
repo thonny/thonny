@@ -386,7 +386,7 @@ def pick_transfer_items(
                 elif size_diff < 0:
                     replacement = "a smaller file (%s - %s)" % (
                         sizeof_fmt(target_info["size"]),
-                        sizeof_fmt(-item["size"]),
+                        sizeof_fmt(-size_diff),
                     )
                 else:
                     replacement = "a file of same size (%s)" % sizeof_fmt(target_info["size"])

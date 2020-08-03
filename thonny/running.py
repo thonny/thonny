@@ -774,10 +774,13 @@ class BackendProxy:
 
 
 class SubprocessProxy(BackendProxy):
-    def __init__(self, clean: bool, executable: str) -> None:
+    def __init__(self, clean: bool, executable: Optional[str] = None) -> None:
         super().__init__(clean)
 
-        self._executable = executable
+        if executable:
+            self._executable = executable
+        else:
+            self._executable = get_interpreter_for_subprocess()
         self._welcome_text = ""
 
         self._proc = None
@@ -1012,6 +1015,9 @@ class SubprocessProxy(BackendProxy):
         if "exe_dirs" in msg:
             self._exe_dirs = msg["exe_dirs"]
 
+        if msg.get("executable"):
+            self._reported_executable = msg["executable"]
+
     def _publish_cwd(self, cwd):
         if self.uses_local_filesystem():
             get_workbench().set_local_cwd(cwd)
@@ -1047,7 +1053,8 @@ class SubprocessProxy(BackendProxy):
 
         msg = self._response_queue.popleft()
         self._store_state_info(msg)
-
+        if not hasattr(msg, "event_type"):
+            print("gotww", msg)
         if msg.event_type == "ProgramOutput":
             # combine available small output messages to one single message,
             # in order to put less pressure on UI code

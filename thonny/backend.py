@@ -43,14 +43,13 @@ class BaseBackend(ABC):
     def __init__(self):
         self._incoming_message_queue = queue.Queue()  # populated by the reader thread
         self._interrupt_lock = threading.Lock()
+        self._last_progress_reporting_time = 0
 
+    def mainloop(self):
         # Don't use threading for creating a management thread, because I don't want them
         # to be affected by threading.settrace
         self._message_reading_thread = _thread.start_new_thread(self._read_incoming_messages, ())
 
-        self._last_progress_reporting_time = 0
-
-    def mainloop(self):
         while self._should_keep_going():
             try:
                 try:
@@ -401,7 +400,7 @@ class RemoteProcess:
 
 
 class SshBackend(UploadDownloadBackend):
-    def __init__(self, host, user, password, remote_interpreter):
+    def __init__(self, host, user, password, interpreter, cwd):
         try:
             import paramiko
             from paramiko.client import SSHClient
@@ -411,7 +410,8 @@ class SshBackend(UploadDownloadBackend):
         self._host = host
         self._user = user
         self._password = password
-        self._remote_interpreter = remote_interpreter
+        self._remote_interpreter = interpreter
+        self._cwd = cwd
         self._proc = None  # type: Optional[RemoteProcess]
         self._sftp = None  # type: Optional[paramiko.SFTPClient]
         self._client = SSHClient()
@@ -426,7 +426,7 @@ class SshBackend(UploadDownloadBackend):
         # * change to desired directory
 
         cmd_line_str = (
-            "echo $$ ;"
+            "echo $$ ; stty -echo ; "
             + (" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else "")
             + (" exec " + " ".join(map(shlex.quote, cmd_items)))
         )
@@ -463,13 +463,17 @@ class SshBackend(UploadDownloadBackend):
 
             # TODO: does it get closed properly after process gets killed?
             self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+            print("constructed sftp")
 
+        print("returned sftp")
         return self._sftp
 
     def _read_file(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
+        print("before reading", source_path)
         self._get_sftp().getfo(source_path, target_fp, callback)
+        print("after reading", source_path)
 
     def _write_file(
         self,
@@ -482,8 +486,8 @@ class SshBackend(UploadDownloadBackend):
 
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         try:
-            self._get_sftp().stat(path).st_mode
-        except OSError:
+            return self._get_sftp().stat(path).st_mode
+        except OSError as e:
             return None
 
     def _mkdir_for_upload(self, path: str) -> None:
@@ -528,15 +532,14 @@ def ensure_posix_directory(
     if path == "/":
         return
 
-    for parent in reversed(list(map(str, pathlib.PurePosixPath(path).parents))):
-        if parent != "/":
-            mode = stat_mode_fun(parent)
-            if mode is None:
-                mkdir_fun(parent)
-            elif not stat.S_IFDIR(mode):
-                raise AssertionError("'%s' is file, not a directory" % parent)
+    for step in list(reversed(list(map(str, pathlib.PurePosixPath(path).parents)))) + [path]:
 
-    mkdir_fun(path)
+        if step != "/":
+            mode = stat_mode_fun(step)
+            if mode is None:
+                mkdir_fun(step)
+            elif not stat.S_ISDIR(mode):
+                raise AssertionError("'%s' is file, not a directory" % step)
 
 
 def interrupt_local_process() -> None:

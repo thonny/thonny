@@ -47,9 +47,9 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend, ABC):
-    def __init__(self, mp_executable, api_stubs_path, cwd=None):
+    def __init__(self, interpreter, api_stubs_path, cwd):
         try:
-            self._mp_executable = self._resolve_executable(mp_executable)
+            self._interpreter = self._resolve_executable(interpreter)
             self._connection = self._create_connection()
         except ConnectionFailedException as e:
             text = "\n" + str(e) + "\n"
@@ -80,7 +80,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         return (
             original.replace("Use Ctrl-D to exit, Ctrl-E for paste mode\n", "").strip()
             + " ("
-            + self._mp_executable
+            + self._interpreter
             + ")\n"
         )
 
@@ -279,7 +279,7 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
     def _create_connection(self, run_args=[]):
         from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
 
-        return SubprocessConnection(self._mp_executable, ["-i"] + run_args)
+        return SubprocessConnection(self._interpreter, ["-i"] + run_args)
 
     def _which(self, executable):
         import shutil
@@ -299,10 +299,9 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 
 class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
-    def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
-        self._cwd = cwd
-        SshBackend.__init__(self, host, user, password, mp_executable)
-        MicroPythonOsBackend.__init__(self, mp_executable, api_stubs_path, cwd=cwd)
+    def __init__(self, host, user, password, interpreter, cwd, api_stubs_path):
+        SshBackend.__init__(self, host, user, password, interpreter, cwd)
+        MicroPythonOsBackend.__init__(self, interpreter, api_stubs_path, cwd=cwd)
 
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
@@ -313,7 +312,7 @@ class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
         # NB! It's connection to the micropython process, not to the host
         from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
-        return SshProcessConnection(self._client, self._cwd, self._mp_executable, ["-i"] + run_args)
+        return SshProcessConnection(self._client, self._cwd, self._interpreter, ["-i"] + run_args)
 
     def _tweak_welcome_text(self, original):
         return (
@@ -344,25 +343,11 @@ if __name__ == "__main__":
     file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
-    import argparse
+    import ast
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str)
-    parser.add_argument("--user", type=str)
-    parser.add_argument("--password", type=str)
-    parser.add_argument("--executable", type=str)
-    parser.add_argument("--cwd", type=str)
-    parser.add_argument("--api_stubs_path", type=str)
-    args = parser.parse_args()
+    args = ast.literal_eval(sys.argv[1])
 
-    if args.host:
-        backend = MicroPythonSshBackend(
-            args.host,
-            args.user,
-            args.password,
-            args.cwd or None,
-            args.executable,
-            args.api_stubs_path,
-        )
+    if "host" in args:
+        backend = MicroPythonSshBackend(**args)
     else:
-        backend = MicroPythonLocalBackend(args.executable, api_stubs_path=args.api_stubs_path)
+        backend = MicroPythonLocalBackend(**args)

@@ -1675,8 +1675,11 @@ class LongTextDialog(CommonDialog):
         )
         copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
 
-        close_button = ttk.Button(main_frame, command=self._close, text=tr("Close"))
+        close_button = ttk.Button(
+            main_frame, command=self._close, text=tr("Close"), default="active"
+        )
         close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0, 20))
+        close_button.focus_set()
 
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)

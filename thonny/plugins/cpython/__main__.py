@@ -10,62 +10,63 @@ I could also do python -c "from backend import CPythonMainBackend: CPythonMainBa
 gives relative __file__-s on imported modules.)
 """
 
-import platform
-import sys
-import thonny
-from thonny.plugins.cpython.backend import CPythonMainBackend
+if __name__ == "__main__":
+    import platform
+    import sys
+    import thonny
+    from thonny.plugins.cpython.backend import CPythonMainBackend
 
-if platform.system() == "Darwin":
-    import os
+    if platform.system() == "Darwin":
+        import os
 
-    try:
-        os.getcwd()
-    except Exception:
+        try:
+            os.getcwd()
+        except Exception:
+            print(
+                "\nNB! Potential problems detected, see\nhttps://github.com/thonny/thonny/wiki/MacOSX#catalina\n",
+                file=sys.stderr,
+            )
+
+    if not sys.version_info > (3, 5):
         print(
-            "\nNB! Potential problems detected, see\nhttps://github.com/thonny/thonny/wiki/MacOSX#catalina\n",
+            "Thonny only supports Python 3.5 and later.\n"
+            + "Choose another interpreter from Tools => Options => Interpreter",
             file=sys.stderr,
         )
+        sys.exit()
 
-if not sys.version_info > (3, 5):
-    print(
-        "Thonny only supports Python 3.5 and later.\n"
-        + "Choose another interpreter from Tools => Options => Interpreter",
-        file=sys.stderr,
+    import logging
+    import os.path
+
+    # set up logging
+    logger = logging.getLogger("thonny")
+    logger.propagate = False
+    logFormatter = logging.Formatter("%(levelname)s: %(message)s")
+    file_handler = logging.FileHandler(
+        os.path.join(thonny.THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
     )
-    sys.exit()
+    file_handler.setFormatter(logFormatter)
+    file_handler.setLevel(logging.INFO)
+    logger.addHandler(file_handler)
 
-import logging
-import os.path
+    # Don't litter user stderr with thonny logging
+    # TODO: Can I somehow send the log to front-end's stderr?
+    """
+    stream_handler = logging.StreamHandler(stream=sys.stderr)
+    stream_handler.setLevel(logging.INFO);
+    stream_handler.setFormatter(logFormatter)
+    logger.addHandler(stream_handler)
+    """
 
-# set up logging
-logger = logging.getLogger("thonny")
-logger.propagate = False
-logFormatter = logging.Formatter("%(levelname)s: %(message)s")
-file_handler = logging.FileHandler(
-    os.path.join(thonny.THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
-)
-file_handler.setFormatter(logFormatter)
-file_handler.setLevel(logging.INFO)
-logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
 
-# Don't litter user stderr with thonny logging
-# TODO: Can I somehow send the log to front-end's stderr?
-"""
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-stream_handler.setLevel(logging.INFO);
-stream_handler.setFormatter(logFormatter)
-logger.addHandler(stream_handler)
-"""
+    import faulthandler
 
-logger.setLevel(logging.INFO)
+    fault_out = open(os.path.join(thonny.THONNY_USER_DIR, "backend_faults.log"), mode="w")
+    faulthandler.enable(fault_out)
 
-import faulthandler
+    # Disable blurry scaling in Windows
+    thonny.set_dpi_aware()
 
-fault_out = open(os.path.join(thonny.THONNY_USER_DIR, "backend_faults.log"), mode="w")
-faulthandler.enable(fault_out)
-
-# Disable blurry scaling in Windows
-thonny.set_dpi_aware()
-
-target_cwd = sys.argv[1]
-CPythonMainBackend(target_cwd)
+    target_cwd = sys.argv[1]
+    CPythonMainBackend(target_cwd)

@@ -131,7 +131,7 @@ class CPythonMainBackend(MainBackend):
         self._load_plugins()
 
         # preceding code was run in the directory containing thonny module, now switch to user cwd
-        os.chdir(target_cwd)
+        os.chdir(os.path.expanduser(target_cwd))
         # ... and replace current-dir path item
         # start in shell mode (may be later switched to script mode)
         sys.path[
@@ -213,16 +213,17 @@ class CPythonMainBackend(MainBackend):
             return
 
         real_response = self._prepare_response(response, cmd)
+
         if isinstance(real_response, ToplevelResponse):
             real_response["gui_is_active"] = (
                 self._get_tcl() is not None or self._get_qt_app() is not None
             )
 
-        self.send_message(response)
+        self.send_message(real_response)
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         if cmd.name == "interrupt":
-            with self._interrupt_lock.acquire():
+            with self._interrupt_lock:
                 interrupt_local_process()
 
     def _should_keep_going(self) -> bool:
@@ -2757,8 +2758,8 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
             for entry in traceback.extract_tb(tb):
                 assert tb_temp is not None  # actual tb doesn't end before extract_tb
                 if (
-                    "thonny/backend" not in entry.filename
-                    and "thonny\\backend" not in entry.filename
+                    "cpython/backend" not in entry.filename
+                    and "cpython\\backend" not in entry.filename
                     and (
                         not entry.filename.endswith(os.sep + "ast.py")
                         or entry.name != "parse"
