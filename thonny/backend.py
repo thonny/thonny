@@ -473,7 +473,6 @@ class SshBackend(UploadDownloadBackend):
 
             # TODO: does it get closed properly after process gets killed?
             self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
-            print("creftp")
 
         return self._sftp
 

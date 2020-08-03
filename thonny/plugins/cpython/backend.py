@@ -130,8 +130,15 @@ class CPythonMainBackend(MainBackend):
         self._load_shared_modules()
         self._load_plugins()
 
-        # preceding code was run in the directory containing thonny module, now switch to user cwd
-        os.chdir(os.path.expanduser(target_cwd))
+        # preceding code was run in the directory containing thonny module, now switch to provided
+        try:
+            os.chdir(os.path.expanduser(target_cwd))
+        except OSError:
+            try:
+                os.chdir(os.path.expanduser("~"))
+            except OSError:
+                os.chdir("/")  # yes, this works also in Windows
+
         # ... and replace current-dir path item
         # start in shell mode (may be later switched to script mode)
         # required in shell mode and also required to overwrite thonny location dir

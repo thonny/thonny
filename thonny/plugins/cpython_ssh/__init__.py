@@ -33,7 +33,10 @@ class SshProxy(SubprocessProxy):
         pass
 
     def _get_initial_cwd(self):
-        return "~/"
+        return get_workbench().get_option("ssh.cwd")
+
+    def _publish_cwd(self, cwd):
+        return get_workbench().set_option("ssh.cwd", cwd)
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
@@ -96,5 +99,5 @@ def load_plugin():
     get_workbench().set_default("ssh.user", "pi")
     get_workbench().set_default("ssh.password", "raspberry")
     get_workbench().set_default("ssh.interpreter", "python3")
-    get_workbench().set_default("ssh.cwd", "python3")
-    get_workbench().add_backend("SSHProxy", SshProxy, "SSH proxy", SshProxyConfigPage)
+    get_workbench().set_default("ssh.cwd", "~")
+    get_workbench().add_backend("SSHProxy", SshProxy, "Remote Python (SSH)", SshProxyConfigPage)

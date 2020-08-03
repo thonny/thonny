@@ -32,7 +32,6 @@ class CPythonSshBackend(SshBackend):
         self._proc = self._start_main_backend()
         Thread(target=self._forward_main_responses, daemon=True).start()
         self._upload_main_backend()
-        print("doneupback")
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._forward_incoming_message(msg)
