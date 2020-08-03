@@ -138,6 +138,7 @@ def _check_welcome():
 
 def launch():
     import runpy
+    import socket
 
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
@@ -162,8 +163,8 @@ def launch():
             _delegate_to_existing_instance(sys.argv[1:])
             print("Delegated to an existing Thonny instance. Exiting now.")
             return 0
-        except Exception:
-            traceback.print_exc()
+        except (ConnectionRefusedError, socket.timeout):
+            pass
 
     # Did not or could not delegate
 
@@ -252,11 +253,9 @@ def _delegate_to_existing_instance(args):
 
     try:
         sock, secret = _create_client_socket()
-    except Exception:
+    except (ConnectionRefusedError, socket.timeout):
         # Maybe the lock is abandoned
-        print("Trying to remove lock")
         os.remove(get_ipc_file_path())
-        print("Successfully removed abandoned lock")
         raise
 
     data = repr((secret, transformed_args)).encode(encoding="utf_8")
