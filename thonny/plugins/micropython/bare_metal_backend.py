@@ -974,39 +974,32 @@ if __name__ == "__main__":
     file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
-    import argparse
+    import ast
+    import sys
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--clean", type=lambda s: s == "True")
-    parser.add_argument("--port", type=str)
-    parser.add_argument("--url", type=str)
-    parser.add_argument("--password", type=str)
-    parser.add_argument("--api_stubs_path", type=str)
-    parser.add_argument("--min_write_delay", type=float, default=0.01)
-    args = parser.parse_args()
+    args = ast.literal_eval(sys.argv[1])
 
-    port = None if args.port == "None" else args.port
     try:
         connection: MicroPythonConnection
-        if port is None:
+        if args["port"] is None:
             # remain busy
             while True:
                 time.sleep(1000)
-        elif port == "webrepl":
+        elif args["port"] == "webrepl":
             from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
-            connection = WebReplConnection(args.url, args.password, args.min_write_delay)
+            connection = WebReplConnection(args["url"], args["password"], args["min_write_delay"])
         else:
             from thonny.plugins.micropython.serial_connection import (
                 DifficultSerialConnection,
                 SerialConnection,
             )
 
-            connection = SerialConnection(port, BAUDRATE)
+            connection = SerialConnection(args["port"], BAUDRATE)
             # connection = DifficultSerialConnection(port, BAUDRATE)
 
         backend = MicroPythonBareMetalBackend(
-            connection, clean=args.clean, api_stubs_path=args.api_stubs_path
+            connection, clean=args["clean"], api_stubs_path=args["api_stubs_path"]
         )
 
     except ConnectionFailedException as e:

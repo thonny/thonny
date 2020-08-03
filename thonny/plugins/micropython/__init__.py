@@ -76,25 +76,20 @@ class BareMetalMicroPythonProxy(SubprocessProxy):
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.bare_metal_backend
 
+        args = {
+            "clean": self._clean_start,
+            "port": self._port,
+            "api_stubs_path": self._get_api_stubs_path(),
+            "min_write_delay": 0.01,
+        }
+        if self._port == "webrepl":
+            args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
+            args["password"] = get_workbench().get_option(self.backend_name + ".webrepl_password")
+
         cmd = [
             thonny.plugins.micropython.bare_metal_backend.__file__,
-            "--clean",
-            str(self._clean_start),
-            "--port",
-            str(self._port),
-            "--api_stubs_path",
-            self._get_api_stubs_path(),
+            repr(args),
         ]
-
-        if self._port == "webrepl":
-            cmd.extend(
-                [
-                    "--url",
-                    get_workbench().get_option(self.backend_name + ".webrepl_url"),
-                    "--password",
-                    get_workbench().get_option(self.backend_name + ".webrepl_password"),
-                ]
-            )
 
         return cmd
 
