@@ -295,11 +295,8 @@ class MicroPythonBackend(MainBackend, ABC):
             elif isinstance(cmd, InlineCommand):
                 response = InlineResponse(cmd.name, **response)
 
-        if "id" in cmd and "command_id" not in response:
-            response["command_id"] = cmd["id"]
-
         debug("cmd: " + str(cmd) + ", respin: " + str(response))
-        self.send_message(response)
+        self.send_message(self._prepare_command_response(response, cmd))
 
         self._report_time("after " + cmd.name)
 
@@ -344,12 +341,10 @@ class MicroPythonBackend(MainBackend, ABC):
     def _submit_input(self, cdata: str) -> None:
         raise NotImplementedError()
 
-    def send_message(self, msg):
+    def send_message(self, msg: MessageFromBackend) -> None:
         if "cwd" not in msg:
             msg["cwd"] = self._cwd
-
-        sys.stdout.write(serialize_message(msg) + "\n")
-        sys.stdout.flush()
+        super().send_message(msg)
 
     def _send_error_message(self, msg):
         self._send_output("\n" + msg + "\n", "stderr")

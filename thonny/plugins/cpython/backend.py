@@ -134,12 +134,9 @@ class CPythonMainBackend(MainBackend):
         os.chdir(os.path.expanduser(target_cwd))
         # ... and replace current-dir path item
         # start in shell mode (may be later switched to script mode)
-        sys.path[
-            0
-        ] = ""  # required in shell mode and also required to overwrite thonny location dir
+        # required in shell mode and also required to overwrite thonny location dir
+        sys.path[0] = ""
         sys.argv[:] = [""]  # empty "script name"
-
-        self.mainloop()
 
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
@@ -212,7 +209,7 @@ class CPythonMainBackend(MainBackend):
             # Command doesn't want to send any response
             return
 
-        real_response = self._prepare_response(response, cmd)
+        real_response = self._prepare_command_response(response, cmd)
 
         if isinstance(real_response, ToplevelResponse):
             real_response["gui_is_active"] = (
@@ -854,6 +851,7 @@ class CPythonMainBackend(MainBackend):
         return self._incoming_message_queue.get()
 
     def send_message(self, msg: MessageFromBackend) -> None:
+        sys.stdout.flush()
 
         if isinstance(msg, ToplevelResponse):
             if "cwd" not in msg:

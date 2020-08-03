@@ -13,7 +13,7 @@ import threading
 import time
 import traceback
 from abc import abstractmethod, ABC
-from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union
+from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
 
 from thonny.common import (
     BackendEvent,
@@ -34,7 +34,7 @@ from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 NEW_DIR_MODE = 0o755
 
 
-logger = logging.getLogger("thonny.backend")
+logger = logging.getLogger("thonny")
 
 
 class BaseBackend(ABC):
@@ -48,7 +48,7 @@ class BaseBackend(ABC):
     def mainloop(self):
         # Don't use threading for creating a management thread, because I don't want them
         # to be affected by threading.settrace
-        self._message_reading_thread = _thread.start_new_thread(self._read_incoming_messages, ())
+        _thread.start_new_thread(self._read_incoming_messages, ())
 
         while self._should_keep_going():
             try:
@@ -98,9 +98,12 @@ class BaseBackend(ABC):
             else:
                 self._incoming_message_queue.put(msg)
 
-    def _prepare_response(
+    def _prepare_command_response(
         self, response: Union[MessageFromBackend, Dict, None], command: CommandToBackend
     ) -> MessageFromBackend:
+        if "id" in command and "command_id" not in response:
+            response["command_id"] = command["id"]
+
         if isinstance(response, MessageFromBackend):
             return response
         else:
@@ -179,6 +182,7 @@ class MainBackend(BaseBackend, ABC):
         return {"existing_items": self._get_paths_info(cmd.target_paths, recurse=False)}
 
     def _cmd_prepare_download(self, cmd):
+        assert "id" in cmd
         """Returns info about all items under and including cmd.paths"""
         return {"all_items": self._get_paths_info(cmd.source_paths, recurse=True)}
 
@@ -401,6 +405,7 @@ class RemoteProcess:
 
 class SshBackend(UploadDownloadBackend):
     def __init__(self, host, user, password, interpreter, cwd):
+        UploadDownloadBackend.__init__(self)
         try:
             import paramiko
             from paramiko.client import SSHClient
@@ -457,23 +462,27 @@ class SshBackend(UploadDownloadBackend):
     def _interrupt(self):
         pass
 
-    def _get_sftp(self):
+    def _get_sftp(self, fresh: bool):
+
+        if fresh and self._sftp is not None:
+            self._sftp.close()
+            self._sftp = None
+
         if self._sftp is None:
             import paramiko
 
             # TODO: does it get closed properly after process gets killed?
             self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
-            print("constructed sftp")
+            print("creftp")
 
-        print("returned sftp")
         return self._sftp
 
     def _read_file(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
-        print("before reading", source_path)
-        self._get_sftp().getfo(source_path, target_fp, callback)
-        print("after reading", source_path)
+        self._perform_sftp_operation_with_retry(
+            lambda sftp: sftp.getfo(source_path, target_fp, callback)
+        )
 
     def _write_file(
         self,
@@ -482,16 +491,26 @@ class SshBackend(UploadDownloadBackend):
         file_size: int,
         callback: Callable[[int, int], None],
     ) -> None:
-        self._get_sftp().putfo(source_fp, target_path, callback)
+        self._perform_sftp_operation_with_retry(
+            lambda sftp: sftp.putfo(source_fp, target_path, callback)
+        )
+
+    def _perform_sftp_operation_with_retry(self, operation) -> Any:
+        try:
+            return operation(self._get_sftp(fresh=False))
+        except OSError:
+            # It looks like SFTPClient gets stale after a while.
+            # Try again with fresh SFTPClient
+            return operation(self._get_sftp(fresh=True))
 
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         try:
-            return self._get_sftp().stat(path).st_mode
+            return self._perform_sftp_operation_with_retry(lambda sftp: sftp.stat(path).st_mode)
         except OSError as e:
             return None
 
     def _mkdir_for_upload(self, path: str) -> None:
-        self._get_sftp().mkdir(path, NEW_DIR_MODE)
+        self._perform_sftp_operation_with_retry(lambda sftp: sftp.mkdir(path, NEW_DIR_MODE))
 
 
 def _longest_common_path_prefix(str_paths, path_class):
@@ -537,6 +556,7 @@ def ensure_posix_directory(
         if step != "/":
             mode = stat_mode_fun(step)
             if mode is None:
+                print("creating dir", step)
                 mkdir_fun(step)
             elif not stat.S_ISDIR(mode):
                 raise AssertionError("'%s' is file, not a directory" % step)

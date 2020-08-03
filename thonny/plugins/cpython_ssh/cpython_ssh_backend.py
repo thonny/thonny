@@ -29,9 +29,10 @@ class CPythonSshBackend(SshBackend):
         self._response_lock = threading.Lock()
         BaseBackend.__init__(self)
         SshBackend.__init__(self, host, user, password, interpreter, cwd)
-        # self._upload_main_backend()
         self._proc = self._start_main_backend()
         Thread(target=self._forward_main_responses, daemon=True).start()
+        self._upload_main_backend()
+        print("doneupback")
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._forward_incoming_message(msg)
@@ -40,7 +41,6 @@ class CPythonSshBackend(SshBackend):
         self._forward_incoming_message(msg)
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        print("Got cmd", cmd)
         handler = getattr(self, "_cmd_" + cmd.name, None)
         if handler is not None:
             # SFTP methods defined in SshBackend
@@ -49,7 +49,7 @@ class CPythonSshBackend(SshBackend):
             except Exception as e:
                 response = {"error": str(e)}  # TODO:
 
-            self.send_message(self._prepare_response(response, cmd))
+            self.send_message(self._prepare_command_response(response, cmd))
         else:
             # other methods running in the remote process
             self._forward_incoming_message(cmd)
@@ -75,7 +75,6 @@ class CPythonSshBackend(SshBackend):
             if not line:
                 break
             with self._response_lock:
-                print("returning", repr(line))
                 sys.stdout.write(line)
                 sys.stdout.flush()
 
@@ -94,7 +93,7 @@ class CPythonSshBackend(SshBackend):
         return "/tmp/thonny-backend-" + thonny.get_version()
 
     def _upload_main_backend(self):
-        sftp = self._get_sftp()
+        sftp = self._get_sftp(fresh=True)
 
         launch_dir = self._get_remote_program_directory()
         try:
