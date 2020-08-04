@@ -10,6 +10,7 @@ from logging import exception
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
+from typing import List, Union, Dict
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
@@ -118,8 +119,8 @@ class PipDialog(CommonDialog):
         main_pw.add(listframe)
         main_pw.add(info_frame)
 
-        self.name_label = ttk.Label(info_frame, text="", font=name_font)
-        self.name_label.grid(row=0, column=0, sticky="w", padx=5)
+        self.title_label = ttk.Label(info_frame, text="", font=name_font)
+        self.title_label.grid(row=0, column=0, sticky="w", padx=5)
 
         info_text_frame = tktextext.TextFrame(
             info_frame,
@@ -336,11 +337,11 @@ class PipDialog(CommonDialog):
         if self.search_box.get().strip() == "":
             return
 
-        self._start_show_package_info(self.search_box.get().strip())
+        self._start_search(self.search_box.get().strip())
 
     def _clear(self):
         self.current_package_data = None
-        self.name_label.grid_remove()
+        self.title_label.grid_remove()
         self.command_frame.grid_remove()
         self.info_text.direct_delete("1.0", "end")
 
@@ -444,13 +445,13 @@ class PipDialog(CommonDialog):
         _start_fetching_package_info(name, None, self._show_package_info)
 
         self.info_text.direct_delete("1.0", "end")
-        self.name_label["text"] = ""
-        self.name_label.grid()
+        self.title_label["text"] = ""
+        self.title_label.grid()
         self.command_frame.grid()
 
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
-            self.name_label["text"] = active_dist["project_name"]
+            self.title_label["text"] = active_dist["project_name"]
             self.info_text.direct_insert("end", tr("Installed version:") + " ", ("caption",))
             self.info_text.direct_insert("end", active_dist["version"] + "\n")
             self.info_text.direct_insert("end", tr("Installed to:") + " ", ("caption",))
@@ -525,7 +526,7 @@ class PipDialog(CommonDialog):
             return
 
         info = data["info"]
-        self.name_label["text"] = info["name"]  # search name could have been a bit different
+        self.title_label["text"] = info["name"]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att(tr("Latest stable version"), latest_stable_version)
@@ -567,6 +568,36 @@ class PipDialog(CommonDialog):
 
         # https://www.python.org/dev/peps/pep-0503/#id4
         return re.sub(r"[-_.]+", "-", name).lower().strip()
+
+    def _start_search(self, query):
+        self.current_package_data = None
+        # Fetch info from PyPI
+        self._set_state("fetching")
+        self._clear()
+        self.title_label.grid()
+        self.title_label["text"] = tr("Search results")
+        self.info_text.direct_insert("1.0", tr("Searching") + " ...")
+        _start_fetching_search_results(query, self._show_search_results)
+        self._select_list_item(0)
+
+    def _show_search_results(self, query, results: Union[List[Dict], str]) -> None:
+        self._set_state("idle")
+        self.info_text.direct_delete("1.0", "end")
+
+        if isinstance(results, str):
+            self.info_text.direct_insert(results)
+            return
+
+        for item in results:
+            # self.info_text.direct_insert("end", "•")
+            tags = ("url", "package_link")
+            if item["name"].lower() == query.lower():
+                tags = tags + ("bold",)
+
+            self.info_text.direct_insert("end", item["name"], tags)
+            self.info_text.direct_insert("end", "\n")
+            self.info_text.direct_insert("end", item["description"].strip() + "\n")
+            self.info_text.direct_insert("end", "\n")
 
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
@@ -1206,6 +1237,73 @@ def _start_fetching_package_info(name, version_str, completion_handler):
             tk._default_root.after(200, poll_fetch_complete)
 
     poll_fetch_complete()
+
+
+def _start_fetching_search_results(query, completion_handler):
+    import urllib.error
+    import urllib.parse
+
+    url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
+
+    url_future = _fetch_url_future(url)
+
+    def poll_fetch_complete():
+        import json
+
+        if url_future.done():
+            try:
+                _, bin_data = url_future.result()
+                raw_data = bin_data.decode("UTF-8")
+                completion_handler(query, _extract_search_results(raw_data))
+            except urllib.error.HTTPError as e:
+                completion_handler(query, str(e))
+        else:
+            tk._default_root.after(200, poll_fetch_complete)
+
+    poll_fetch_complete()
+
+
+def _extract_search_results(html_data: str) -> List:
+    from html.parser import HTMLParser
+
+    def get_class(attrs):
+        for name, value in attrs:
+            if name == "class":
+                return value
+
+        return None
+
+    class_prefix = "package-snippet__"
+
+    class PypiSearchResultsParser(HTMLParser):
+        def __init__(self, data):
+            HTMLParser.__init__(self)
+            self.results = []
+            self.active_class = None
+            self.feed(data)
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "a" and get_class(attrs) == "package-snippet":
+                self.results.append({})
+
+            if tag in ("span", "p"):
+                tag_class = get_class(attrs)
+                if tag_class in ("package-snippet__name", "package-snippet__description"):
+                    self.active_class = tag_class
+                else:
+                    self.active_class = None
+            else:
+                self.active_class = None
+
+        def handle_data(self, data):
+            if self.active_class is not None:
+                att_name = self.active_class[len(class_prefix) :]
+                self.results[-1][att_name] = data
+
+        def handle_endtag(self, tag):
+            self.active_class = None
+
+    return PypiSearchResultsParser(html_data).results
 
 
 def _extract_click_text(widget, event, tag):

@@ -43,7 +43,7 @@ import textwrap
 import threading
 import time
 import traceback
-from abc import ABC
+from abc import ABC, abstractmethod
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
@@ -120,6 +120,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._cwd = cwd
         self._progress_times = {}
         self._welcome_text = None
+        self._sys_path = None
 
         self._api_stubs_path = api_stubs_path
 
@@ -149,6 +150,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._update_cwd()
         self._report_time("got cwd")
+
+        if self._sys_path is None:
+            self._sys_path = self._fetch_sys_path()
 
         if self._welcome_text:
             # not required when a script is run in os_backend
@@ -311,6 +315,20 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _fetch_builtin_modules(self):
         raise NotImplementedError()
+
+    def _fetch_sys_path(self):
+        if not self._supports_directories():
+            return []
+        else:
+            return self._evaluate(
+                dedent(
+                    """
+            import sys as __thonny_sys
+            __thonny_helper.print_mgmt_value(sys.path)
+            del __thonny_sys
+            """
+                )
+            )
 
     def _fetch_builtins_info(self):
         """
@@ -512,6 +530,43 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_delete(self, cmd):
         assert cmd.paths
         self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
+
+    def _cmd_get_active_distributions(self, cmd):
+        try:
+            dists = {}
+            for path in self._get_library_paths():
+                children = self._get_dir_children_info(path)
+                if children is None:
+                    continue
+
+                for name, info in children.items():
+                    if info["kind"] == "dir":
+                        key = name
+                    elif name.endswith(".py"):
+                        key = name[:-3]
+                    elif name.endswith(".mpy"):
+                        key = name[:-4]
+                    else:
+                        continue
+
+                    dists[key] = {
+                        "project_name": key,
+                        "key": key,
+                        "guessed_pypi_name": self._guess_package_pypi_name(key),
+                        "location": path,
+                        "version": "n/a",
+                    }
+
+            return dict(distributions=dists, usersitepackages=None,)
+        except Exception:
+            return InlineResponse("get_active_distributions", error=traceback.format_exc())
+
+    def _get_library_paths(self) -> [str]:
+        """Returns list of directories which are supposed to contain library code"""
+        return [path for path in self._sys_path if "lib" in path]
+
+    def _guess_package_pypi_name(self, installed_name) -> str:
+        return "micropython-" + installed_name
 
     def _mkdir(self, path: str) -> None:
         # assumes part path exists and path doesn't
