@@ -70,6 +70,7 @@ class PipDialog(CommonDialog):
         self.search_box = ttk.Entry(header_frame)
         self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
+        self.search_box.bind("<KP_Enter>", self._on_search, False)
 
         self.search_button = ttk.Button(
             header_frame, text=tr("Find package from PyPI"), command=self._on_search, width=25
@@ -327,7 +328,10 @@ class PipDialog(CommonDialog):
             if selection[0] == 0:  # special first item
                 self._show_instructions()
             else:
-                self._start_show_package_info(self.listbox.get(selection[0]).strip())
+                self._on_listbox_select_package(self.listbox.get(selection[0]).strip())
+
+    def _on_listbox_select_package(self, name):
+        self._start_show_package_info(name)
 
     def _on_search(self, event=None):
         if self._get_state() != "idle":
