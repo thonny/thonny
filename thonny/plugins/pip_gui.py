@@ -590,13 +590,15 @@ class PipDialog(CommonDialog):
 
         for item in results:
             # self.info_text.direct_insert("end", "•")
-            tags = ("url", "package_link")
+            tags = ("url",)
             if item["name"].lower() == query.lower():
                 tags = tags + ("bold",)
 
             self.info_text.direct_insert("end", item["name"], tags)
             self.info_text.direct_insert("end", "\n")
-            self.info_text.direct_insert("end", item["description"].strip() + "\n")
+            self.info_text.direct_insert(
+                "end", item.get("description", "<No description>").strip() + "\n"
+            )
             self.info_text.direct_insert("end", "\n")
 
     def _select_list_item(self, name_or_index):
@@ -740,9 +742,11 @@ class PipDialog(CommonDialog):
                 import webbrowser
 
                 webbrowser.open(url)
-            else:
+            elif os.path.sep in url:
                 os.makedirs(url, exist_ok=True)
                 open_path_in_system_file_manager(url)
+            else:
+                self._start_show_package_info(url)
 
     def _on_close(self, event=None):
         self.destroy()
