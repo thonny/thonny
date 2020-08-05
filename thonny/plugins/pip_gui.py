@@ -508,15 +508,7 @@ class PipDialog(CommonDialog):
                 write(tr("Could not find the package from PyPI."))
                 if not self._get_active_version(name):
                     # new package
-                    write(
-                        "\n"
-                        + tr("Please check your spelling!")
-                        + "\n"
-                        + tr("You need to enter")
-                        + " "
-                    )
-                    write(tr("exact package name"), "bold")
-                    write("!")
+                    write("\n" + tr("Please check your spelling!"))
 
             else:
                 write(
@@ -588,8 +580,15 @@ class PipDialog(CommonDialog):
         self._set_state("idle")
         self.info_text.direct_delete("1.0", "end")
 
-        if isinstance(results, str):
-            self.info_text.direct_insert(results)
+        if isinstance(results, str) or not results:
+            if not results:
+                self.info_text.direct_insert("end", "No results.\n\n")
+            else:
+                self.info_text.direct_insert("end", "Could not fetch search results:\n")
+                self.info_text.direct_insert("end", results + "\n\n")
+
+            self.info_text.direct_insert("end", "Try opening the package directly:\n")
+            self.info_text.direct_insert("end", query, ("url",))
             return
 
         for item in results:
@@ -1248,7 +1247,6 @@ def _start_fetching_package_info(name, version_str, completion_handler):
 
 
 def _start_fetching_search_results(query, completion_handler):
-    import urllib.error
     import urllib.parse
 
     url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
@@ -1256,14 +1254,13 @@ def _start_fetching_search_results(query, completion_handler):
     url_future = _fetch_url_future(url)
 
     def poll_fetch_complete():
-        import json
 
         if url_future.done():
             try:
                 _, bin_data = url_future.result()
                 raw_data = bin_data.decode("UTF-8")
                 completion_handler(query, _extract_search_results(raw_data))
-            except urllib.error.HTTPError as e:
+            except Exception as e:
                 completion_handler(query, str(e))
         else:
             tk._default_root.after(200, poll_fetch_complete)
