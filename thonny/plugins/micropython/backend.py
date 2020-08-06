@@ -324,7 +324,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 dedent(
                     """
             import sys as __thonny_sys
-            __thonny_helper.print_mgmt_value(sys.path)
+            __thonny_helper.print_mgmt_value(__thonny_sys.path)
             del __thonny_sys
             """
                 )
@@ -362,6 +362,10 @@ class MicroPythonBackend(MainBackend, ABC):
     def send_message(self, msg: MessageFromBackend) -> None:
         if "cwd" not in msg:
             msg["cwd"] = self._cwd
+
+        if "sys_path" not in msg:
+            msg["sys_path"] = self._sys_path
+
         super().send_message(msg)
 
     def _send_error_message(self, msg):
@@ -560,6 +564,19 @@ class MicroPythonBackend(MainBackend, ABC):
             return dict(distributions=dists, usersitepackages=None,)
         except Exception:
             return InlineResponse("get_active_distributions", error=traceback.format_exc())
+
+    def _cmd_get_module_info(self, cmd):
+        effective = []
+
+        for lib_dir in self._get_library_paths():
+            dir_children = self._get_dir_children_info(lib_dir)
+            if not dir_children:
+                continue
+
+            for suffix in [".py", ".mpy"]:
+                with_suffix = cmd.module_name + suffix
+                if with_suffix in dir_children and dir_children[with_suffix]["kind"] == "file":
+                    effective.append(with_suffix)
 
     def _get_library_paths(self) -> [str]:
         """Returns list of directories which are supposed to contain library code"""

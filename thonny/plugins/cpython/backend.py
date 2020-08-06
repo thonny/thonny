@@ -351,7 +351,7 @@ class CPythonMainBackend(MainBackend):
     def _cmd_get_environment_info(self, cmd):
         return ToplevelResponse(
             main_dir=self._main_dir,
-            path=sys.path,
+            sys_path=sys.path,
             usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
             prefix=sys.prefix,
             welcome_text="Python " + _get_python_version_string(),

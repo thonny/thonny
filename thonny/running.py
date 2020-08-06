@@ -728,6 +728,9 @@ class BackendProxy:
     def get_backend_name(self):
         return type(self).backend_name
 
+    def get_pip_gui_class(self):
+        return None
+
     def interrupt(self):
         """Tries to interrupt current command without reseting the backend"""
         pass
@@ -1003,8 +1006,8 @@ class SubprocessProxy(BackendProxy):
         if "in_venv" in msg:
             self._in_venv = msg["in_venv"]
 
-        if "path" in msg:
-            self._sys_path = msg["path"]
+        if "sys_path" in msg:
+            self._sys_path = msg["sys_path"]
 
         if "usersitepackages" in msg:
             self._usersitepackages = msg["usersitepackages"]

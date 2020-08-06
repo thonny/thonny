@@ -239,7 +239,7 @@ class PipDialog(CommonDialog):
         from urllib.request import urlretrieve
 
         self._clear()
-        self.info_text.direct_insert("end", ("Installing pip") + "\n\n", ("caption",))
+        self._append_info_text(("Installing pip") + "\n\n", ("caption",))
         self.info_text.direct_insert(
             "end",
             (
@@ -253,7 +253,7 @@ class PipDialog(CommonDialog):
 
         installer_filename, _ = urlretrieve(PIP_INSTALLER_URL)
 
-        self.info_text.direct_insert("end", ("Installing pip, please wait ...") + "\n")
+        self._append_info_text(("Installing pip, please wait ...") + "\n")
         self.update()
         self.update_idletasks()
 
@@ -264,7 +264,7 @@ class PipDialog(CommonDialog):
         if err != "":
             raise RuntimeError("Error while installing pip:\n" + err)
 
-        self.info_text.direct_insert("end", out + "\n")
+        self._append_info_text(out + "\n")
         self.update()
         self.update_idletasks()
 
@@ -273,7 +273,7 @@ class PipDialog(CommonDialog):
 
     def _provide_pip_install_instructions(self, error):
         self._clear()
-        self.info_text.direct_insert("end", error)
+        self._append_info_text(error)
         self.info_text.direct_insert(
             "end", ("You seem to have problems with pip" + "\n\n"), ("caption",)
         )
@@ -286,7 +286,7 @@ class PipDialog(CommonDialog):
             )
             + " ",
         )
-        self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
+        self._append_info_text(PIP_INSTALLER_URL, ("url",))
         self.info_text.direct_insert(
             "end",
             " "
@@ -298,7 +298,7 @@ class PipDialog(CommonDialog):
             + "\n\n",
         )
 
-        self.info_text.direct_insert("end", self._instructions_for_command_line_install())
+        self._append_info_text(self._instructions_for_command_line_install())
         self._set_state("disabled", True)
 
     def _instructions_for_command_line_install(self):
@@ -347,28 +347,20 @@ class PipDialog(CommonDialog):
         self.current_package_data = None
         self.title_label.grid_remove()
         self.command_frame.grid_remove()
+        self._clear_info_text()
+
+    def _clear_info_text(self):
         self.info_text.direct_delete("1.0", "end")
+
+    def _append_info_text(self, text, tags=()):
+        self.info_text.direct_insert("end", text, tags)
 
     def _show_instructions(self):
         self._clear()
         if self._read_only():
-            self.info_text.direct_insert("end", tr("Browse the packages") + "\n", ("caption",))
-            self.info_text.direct_insert(
-                "end",
-                tr(
-                    "With current interpreter you can only browse the packages here.\n"
-                    + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-                )
-                + "\n\n",
-            )
-
-            if self._get_target_directory():
-                self.info_text.direct_insert("end", tr("Packages' directory") + "\n", ("caption",))
-                self.info_text.direct_insert(
-                    "end", self._get_target_directory(), ("target_directory")
-                )
+            self._show_read_only_instructions()
         else:
-            self.info_text.direct_insert("end", tr("Install from PyPI") + "\n", ("caption",))
+            self._append_info_text(tr("Install from PyPI") + "\n", ("caption",))
             self.info_text.direct_insert(
                 "end",
                 tr(
@@ -382,8 +374,8 @@ class PipDialog(CommonDialog):
             self.info_text.direct_insert(
                 "end", tr("Install from requirements file") + "\n", ("caption",)
             )
-            self.info_text.direct_insert("end", tr("Click" + " "))
-            self.info_text.direct_insert("end", tr("here"), ("install_reqs",))
+            self._append_info_text(tr("Click" + " "))
+            self._append_info_text(tr("here"), ("install_reqs",))
             self.info_text.direct_insert(
                 "end",
                 " "
@@ -391,53 +383,72 @@ class PipDialog(CommonDialog):
                 + "\n\n",
             )
 
-            self.info_text.direct_insert("end", tr("Install from local file") + "\n", ("caption",))
-            self.info_text.direct_insert("end", tr("Click") + " ")
-            self.info_text.direct_insert("end", tr("here"), ("install_file",))
-            self.info_text.direct_insert(
-                "end",
-                " "
-                + tr(
-                    "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-                )
-                + "\n\n",
-            )
-
-            self.info_text.direct_insert("end", tr("Upgrade or uninstall") + "\n", ("caption",))
-            self.info_text.direct_insert(
-                "end", tr("Start by selecting the package from the left.") + "\n\n"
-            )
+            self._show_instructions_about_installing_from_local_file()
+            self._show_instructions_about_existing_packages()
 
             if self._get_target_directory():
-                self.info_text.direct_insert("end", tr("Target:") + "  ", ("caption",))
-                if self._should_install_to_site_packages():
-                    self.info_text.direct_insert(
-                        "end", tr("virtual environment") + "\n", ("caption",)
-                    )
-                else:
-                    self.info_text.direct_insert(
-                        "end", tr("user site packages") + "\n", ("caption",)
-                    )
-
-                self.info_text.direct_insert(
-                    "end",
-                    tr(
-                        "This dialog lists all available packages,"
-                        + " but allows upgrading and uninstalling only packages from"
-                    )
-                    + " ",
-                )
-                self.info_text.direct_insert("end", self._get_target_directory(), ("url"))
-                self.info_text.direct_insert(
-                    "end",
-                    ". "
-                    + tr(
-                        "New packages will be also installed into this directory."
-                        + " Other locations must be managed by alternative means."
-                    ),
-                )
+                self._show_instructions_about_target()
 
         self._select_list_item(0)
+
+    def _show_read_only_instructions(self):
+        self._append_info_text(tr("Browse the packages") + "\n", ("caption",))
+        self.info_text.direct_insert(
+            "end",
+            tr(
+                "With current interpreter you can only browse the packages here.\n"
+                + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+            )
+            + "\n\n",
+        )
+
+        if self._get_target_directory():
+            self._append_info_text(tr("Packages' directory") + "\n", ("caption",))
+            self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
+
+    def _show_instructions_about_installing_from_local_file(self):
+        self._append_info_text(tr("Install from local file") + "\n", ("caption",))
+        self._append_info_text(tr("Click") + " ")
+        self._append_info_text(tr("here"), ("install_file",))
+        self.info_text.direct_insert(
+            "end",
+            " "
+            + tr(
+                "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+            )
+            + "\n\n",
+        )
+
+    def _show_instructions_about_existing_packages(self):
+        self._append_info_text(tr("Upgrade or uninstall") + "\n", ("caption",))
+        self.info_text.direct_insert(
+            "end", tr("Start by selecting the package from the left.") + "\n\n"
+        )
+
+    def _show_instructions_about_target(self):
+        self._append_info_text(tr("Target:") + "  ", ("caption",))
+        if self._should_install_to_site_packages():
+            self.info_text.direct_insert("end", tr("virtual environment") + "\n", ("caption",))
+        else:
+            self.info_text.direct_insert("end", tr("user site packages") + "\n", ("caption",))
+
+        self.info_text.direct_insert(
+            "end",
+            tr(
+                "This dialog lists all available packages,"
+                + " but allows upgrading and uninstalling only packages from"
+            )
+            + " ",
+        )
+        self._append_info_text(self._get_target_directory(), ("url"))
+        self.info_text.direct_insert(
+            "end",
+            ". "
+            + tr(
+                "New packages will be also installed into this directory."
+                + " Other locations must be managed by alternative means."
+            ),
+        )
 
     def _start_show_package_info(self, name):
         self.current_package_data = None
@@ -448,7 +459,7 @@ class PipDialog(CommonDialog):
         # because new version may have more relevant and complete info.
         _start_fetching_package_info(name, None, self._show_package_info)
 
-        self.info_text.direct_delete("1.0", "end")
+        self._clear_info_text()
         self.title_label["text"] = ""
         self.title_label.grid()
         self.command_frame.grid()
@@ -456,13 +467,13 @@ class PipDialog(CommonDialog):
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
             self.title_label["text"] = active_dist["project_name"]
-            self.info_text.direct_insert("end", tr("Installed version:") + " ", ("caption",))
-            self.info_text.direct_insert("end", active_dist["version"] + "\n")
-            self.info_text.direct_insert("end", tr("Installed to:") + " ", ("caption",))
+            self._append_info_text(tr("Installed version:") + " ", ("caption",))
+            self._append_info_text(active_dist["version"] + "\n")
+            self._append_info_text(tr("Installed to:") + " ", ("caption",))
             self.info_text.direct_insert(
                 "end", normpath_with_actual_case(active_dist["location"]), ("url",)
             )
-            self.info_text.direct_insert("end", "\n\n")
+            self._append_info_text("\n\n")
             self._select_list_item(name)
         else:
             self._select_list_item(0)
@@ -496,7 +507,7 @@ class PipDialog(CommonDialog):
                 tags = ()
             else:
                 tags = (tag,)
-            self.info_text.direct_insert("end", s, tags)
+            self._append_info_text(s, tags)
 
         def write_att(caption, value, value_tag=None):
             write(caption + ": ", "caption")
@@ -565,7 +576,7 @@ class PipDialog(CommonDialog):
         # https://www.python.org/dev/peps/pep-0503/#id4
         return re.sub(r"[-_.]+", "-", name).lower().strip()
 
-    def _start_search(self, query):
+    def _start_search(self, query, discard_selection=True):
         self.current_package_data = None
         # Fetch info from PyPI
         self._set_state("fetching")
@@ -574,35 +585,36 @@ class PipDialog(CommonDialog):
         self.title_label["text"] = tr("Search results")
         self.info_text.direct_insert("1.0", tr("Searching") + " ...")
         _start_fetching_search_results(query, self._show_search_results)
-        self._select_list_item(0)
+        if discard_selection:
+            self._select_list_item(0)
 
     def _show_search_results(self, query, results: Union[List[Dict], str]) -> None:
         self._set_state("idle")
-        self.info_text.direct_delete("1.0", "end")
+        self._clear_info_text()
 
         if isinstance(results, str) or not results:
             if not results:
-                self.info_text.direct_insert("end", "No results.\n\n")
+                self._append_info_text("No results.\n\n")
             else:
-                self.info_text.direct_insert("end", "Could not fetch search results:\n")
-                self.info_text.direct_insert("end", results + "\n\n")
+                self._append_info_text("Could not fetch search results:\n")
+                self._append_info_text(results + "\n\n")
 
-            self.info_text.direct_insert("end", "Try opening the package directly:\n")
-            self.info_text.direct_insert("end", query, ("url",))
+            self._append_info_text("Try opening the package directly:\n")
+            self._append_info_text(query, ("url",))
             return
 
         for item in results:
-            # self.info_text.direct_insert("end", "•")
+            # self._append_info_text("•")
             tags = ("url",)
             if item["name"].lower() == query.lower():
                 tags = tags + ("bold",)
 
-            self.info_text.direct_insert("end", item["name"], tags)
-            self.info_text.direct_insert("end", "\n")
+            self._append_info_text(item["name"], tags)
+            self._append_info_text("\n")
             self.info_text.direct_insert(
                 "end", item.get("description", "<No description>").strip() + "\n"
             )
-            self.info_text.direct_insert("end", "\n")
+            self._append_info_text("\n")
 
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
@@ -625,20 +637,33 @@ class PipDialog(CommonDialog):
         finally:
             self.listbox["state"] = old_state
 
-    def _perform_action(self, action):
+    def _get_install_command(self):
+        cmd = ["install", "--no-cache-dir"]
+        if self._use_user_install():
+            cmd.append("--user")
+        return cmd
+
+    def _perform_action(self, action: str) -> bool:
+        if self._perform_action_without_refresh(action):
+            if action == "uninstall":
+                self._show_instructions()  # Make the old package go away as fast as possible
+            self._start_update_list(
+                None if action == "uninstall" else self.current_package_data["info"]["name"]
+            )
+
+    def _perform_action_without_refresh(self, action: str) -> bool:
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
-        install_args = ["install", "--no-cache-dir"]
-        if self._use_user_install():
-            install_args.append("--user")
+
+        install_cmd = self._get_install_command()
 
         if action == "install":
             if not self._confirm_install(self.current_package_data):
-                return
+                return False
 
-            args = install_args
+            args = install_cmd
             if self._get_active_version(name) is not None:
                 args.append("--upgrade")
 
@@ -652,20 +677,23 @@ class PipDialog(CommonDialog):
                 + "\n\n"
                 + tr("Are you sure you want to uninstall it?"),
             ):
-                return
+                return False
             args = ["uninstall", "-y", name]
         elif action == "advanced":
             details = _ask_installation_details(
-                self, data, _get_latest_stable_version(list(data["releases"].keys()))
+                self,
+                data,
+                _get_latest_stable_version(list(data["releases"].keys())),
+                self._does_support_update_deps_switch(),
             )
             if details is None:  # Cancel
-                return
+                return False
 
             version, package_data, upgrade_deps = details
             if not self._confirm_install(package_data):
-                return
+                return False
 
-            args = install_args
+            args = install_cmd
             if upgrade_deps:
                 args.append("--upgrade")
             args.append(name + "==" + version)
@@ -677,9 +705,11 @@ class PipDialog(CommonDialog):
 
         # following call blocks
         _show_subprocess_dialog(self, proc, title)
-        if action == "uninstall":
-            self._show_instructions()  # Make the old package go away as fast as possible
-        self._start_update_list(None if action == "uninstall" else name)
+
+        return True
+
+    def does_support_update_deps_switch(self):
+        return True
 
     def _handle_install_file_click(self, event):
         if self._get_state() != "idle":
@@ -811,7 +841,6 @@ class BackendPipDialog(PipDialog):
     def __init__(self, master):
         self._backend_proxy = get_runner().get_backend_proxy()
         super().__init__(master)
-        assert isinstance(self._backend_proxy, CPythonProxy)
 
         self._last_name_to_show = None
 
@@ -826,7 +855,7 @@ class BackendPipDialog(PipDialog):
     def _complete_update_list(self, msg):
         get_workbench().unbind("get_active_distributions_response", self._complete_update_list)
         if "error" in msg:
-            self.info_text.direct_delete("1.0", "end")
+            self._clear_info_text()
             self.info_text.direct_insert("1.0", msg["error"])
             self._set_state("idle", True)
             return
@@ -834,6 +863,12 @@ class BackendPipDialog(PipDialog):
         self._active_distributions = msg.distributions
         self._set_state("idle", True)
         self._update_list(self._last_name_to_show)
+
+
+class CPythonBackendPipDialog(PipDialog):
+    def __init__(self, master):
+        super().__init__(master)
+        assert isinstance(self._backend_proxy, CPythonProxy)
 
     def _get_interpreter(self):
         return get_runner().get_local_executable()
@@ -1038,7 +1073,7 @@ class PluginsPipDialog(PipDialog):
 
 
 class DetailsDialog(CommonDialog):
-    def __init__(self, master, package_metadata, selected_version):
+    def __init__(self, master, package_metadata, selected_version, support_update_deps_switch):
         from distutils.version import StrictVersion
 
         super().__init__(master)
@@ -1095,7 +1130,8 @@ class DetailsDialog(CommonDialog):
         self.update_deps_cb = ttk.Checkbutton(
             main_frame, text=tr("Upgrade dependencies"), variable=self.update_deps_var
         )
-        self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
+        if support_update_deps_switch:
+            self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
 
         self.ok_button = ttk.Button(main_frame, text=tr("Install"), command=self._ok)
         self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
@@ -1208,8 +1244,8 @@ def _show_subprocess_dialog(master, proc, title):
     return dlg.returncode, dlg.stdout, dlg.stderr
 
 
-def _ask_installation_details(master, data, selected_version):
-    dlg = DetailsDialog(master, data, selected_version)
+def _ask_installation_details(master, data, selected_version, support_update_deps_switch):
+    dlg = DetailsDialog(master, data, selected_version, support_update_deps_switch)
     ui_utils.show_dialog(dlg, master)
     return dlg.result
 
@@ -1327,12 +1363,21 @@ def _extract_click_text(widget, event, tag):
 
 
 def load_plugin() -> None:
+    def get_pip_gui_class():
+        proxy = get_runner().get_backend_proxy()
+        if proxy is None:
+            return None
+
+        return proxy.get_pip_gui_class()
+
     def open_backend_pip_gui(*args):
-        pg = BackendPipDialog(get_workbench())
-        ui_utils.show_dialog(pg)
+        pg_class = get_pip_gui_class()
+        if pg_class is not None:
+            pg = pg_class(get_workbench())
+            ui_utils.show_dialog(pg)
 
     def open_backend_pip_gui_enabled():
-        return "pip_gui" in get_runner().get_supported_features()
+        return get_pip_gui_class() is not None
 
     def open_frontend_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())

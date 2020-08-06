@@ -43,7 +43,36 @@ from thonny.ui_utils import (
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
 
-class BareMetalMicroPythonProxy(SubprocessProxy):
+class MicroPythonProxy(SubprocessProxy):
+    def __init__(self, clean):
+        super().__init__(clean, running.get_interpreter_for_subprocess())
+
+    def get_pip_gui_class(self):
+        from thonny.plugins.micropython.pip_gui import MicroPythonPipDialog
+
+        return MicroPythonPipDialog
+
+    def get_pip_target_dir(self) -> Optional[str]:
+
+        lib_dirs = self.get_lib_dirs()
+        if not lib_dirs:
+            return None
+
+        for path in lib_dirs:
+            if path.startswith("/home/"):
+                return path
+
+        for path in ["/lib", "/flash/lib"]:
+            if path in lib_dirs:
+                return path
+
+        return lib_dirs[0]
+
+    def get_lib_dirs(self):
+        return [path for path in self._sys_path if "lib" in path]
+
+
+class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._port = get_workbench().get_option(self.backend_name + ".port")
         self._clean_start = clean
@@ -67,7 +96,7 @@ class BareMetalMicroPythonProxy(SubprocessProxy):
 
                 self._show_error(message)
 
-        super().__init__(clean, running.get_interpreter_for_subprocess())
+        super().__init__(clean)
 
         # Following is required for compatibility with older MP plugins (ESP)
         # TODO: remove it later
@@ -401,10 +430,10 @@ class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
         return False
 
 
-class LocalMicroPythonProxy(SubprocessProxy):
+class LocalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._mp_executable = get_workbench().get_option("LocalMicroPython.executable")
-        super().__init__(clean, running.get_interpreter_for_subprocess())
+        super().__init__(clean)
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
@@ -492,14 +521,14 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
         return self._changed
 
 
-class SshMicroPythonProxy(SubprocessProxy):
+class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("SshMicroPython.host")
         self._user = get_workbench().get_option("SshMicroPython.user")
         self._password = get_workbench().get_option("SshMicroPython.password")
         self._mp_executable = get_workbench().get_option("SshMicroPython.executable")
 
-        super().__init__(clean, running.get_interpreter_for_subprocess())
+        super().__init__(clean)
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend

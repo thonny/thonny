@@ -105,6 +105,11 @@ class CPythonProxy(SubprocessProxy):
     def get_supported_features(self):
         return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
 
+    def get_pip_gui_class(self):
+        from thonny.plugins.pip_gui import CPythonBackendPipDialog
+
+        return CPythonBackendPipDialog
+
 
 class PrivateVenvCPythonProxy(CPythonProxy):
     def __init__(self, clean):

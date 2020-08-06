@@ -183,7 +183,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         else:
             target_dir_desc = target_dir
 
-        def upload():
+        def _upload():
             selection = self.get_selection_info(True)
             if not selection:
                 return
@@ -195,62 +195,14 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     + "You can only upload files.",
                 )
             else:
-                upload_items = []
-                for path in selection["paths"]:
-                    upload_items.extend(
-                        self._prepare_upload_items(path, self.get_active_directory(), target_dir)
-                    )
-                target_paths = [x["target_path"] for x in upload_items]
-                response = get_runner().send_command_and_wait(
-                    InlineCommand("prepare_upload", target_paths=target_paths,),
-                    dialog_title=tr("Preparing"),
-                )
-
-                picked_items = pick_transfer_items(upload_items, response["existing_items"])
-                if picked_items:
-                    response = get_runner().send_command_and_wait(
-                        InlineCommand("upload", items=picked_items), dialog_title="Copying"
-                    )
-                    _check_transfer_errors(response["errors"])
+                if upload(selection["paths"], self.get_active_directory(), target_dir):
                     self.master.remote_files.refresh_tree()
 
-        self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=upload)
+        self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
 
     def add_middle_menu_items(self, context):
         self.check_add_upload_command()
         super().add_middle_menu_items(context)
-
-    def _prepare_upload_items(
-        self, source_path: str, source_context_dir: str, target_dir: str
-    ) -> Iterable[Dict]:
-        # assuming target system has Posix paths
-        if os.path.isdir(source_path):
-            kind = "dir"
-            size = None
-        else:
-            kind = "file"
-            size = os.path.getsize(source_path)
-
-        result = [
-            {
-                "kind": kind,
-                "size": size,
-                "source_path": source_path,
-                "target_path": transpose_path(
-                    source_path, source_context_dir, target_dir, pathlib.Path, PurePosixPath
-                ),
-            }
-        ]
-
-        if os.path.isdir(source_path):
-            for child in os.listdir(source_path):
-                if child not in IGNORED_FILES_AND_DIRS:
-                    result.extend(
-                        self._prepare_upload_items(
-                            os.path.join(source_path, child), source_context_dir, target_dir
-                        )
-                    )
-        return result
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
@@ -421,6 +373,60 @@ def format_items(items):
         msg += "\n ... %d more ..."
 
     return msg
+
+
+def upload(paths, source_dir, target_dir) -> bool:
+    items = []
+    for path in paths:
+        items.extend(_prepare_upload_items(path, source_dir, target_dir))
+
+    target_paths = [x["target_path"] for x in items]
+    response = get_runner().send_command_and_wait(
+        InlineCommand("prepare_upload", target_paths=target_paths,), dialog_title=tr("Preparing"),
+    )
+
+    picked_items = pick_transfer_items(items, response["existing_items"])
+    if picked_items:
+        response = get_runner().send_command_and_wait(
+            InlineCommand("upload", items=picked_items), dialog_title="Copying"
+        )
+        _check_transfer_errors(response["errors"])
+        return True
+    else:
+        return False
+
+
+def _prepare_upload_items(
+    source_path: str, source_context_dir: str, target_dir: str
+) -> Iterable[Dict]:
+    # assuming target system has Posix paths
+    if os.path.isdir(source_path):
+        kind = "dir"
+        size = None
+    else:
+        kind = "file"
+        size = os.path.getsize(source_path)
+
+    result = [
+        {
+            "kind": kind,
+            "size": size,
+            "source_path": source_path,
+            "target_path": transpose_path(
+                source_path, source_context_dir, target_dir, pathlib.Path, PurePosixPath
+            ),
+        }
+    ]
+
+    if os.path.isdir(source_path):
+        for child in os.listdir(source_path):
+            if child not in IGNORED_FILES_AND_DIRS:
+                result.extend(
+                    _prepare_upload_items(
+                        os.path.join(source_path, child), source_context_dir, target_dir
+                    )
+                )
+    return result
 
 
 def load_plugin() -> None:
