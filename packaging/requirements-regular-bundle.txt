@@ -3,10 +3,11 @@ jedi==0.17.*
 pyserial==3.4.*
 pylint==2.5.*
 docutils==0.16.*
-mypy==0.782
+mypy==0.782.*
 asttokens==2.0.*
 Send2Trash==1.5.*
-esptool==2.8
+esptool==2.8.*
 paramiko==2.7.*
 ptyprocess==0.6.*
-websockets==8.1
+websockets==8.1.*
+wheel==0.34.*
