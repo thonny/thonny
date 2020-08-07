@@ -2,7 +2,7 @@
 
 set -e
 
-XZ_VERSION=5.2.4
+XZ_VERSION=5.2.5
 
 wget http://tukaani.org/xz/xz-$XZ_VERSION.tar.gz
 tar -xvzf xz-$XZ_VERSION.tar.gz
