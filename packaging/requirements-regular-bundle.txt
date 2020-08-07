@@ -1,9 +1,12 @@
-parso==0.5.*
-jedi==0.15.*
+parso==0.7.*
+jedi==0.17.*
 pyserial==3.4.*
-pylint==2.4.*
-docutils==0.15.*
-mypy==0.761
+pylint==2.5.*
+docutils==0.16.*
+mypy==0.782
 asttokens==2.0.*
 Send2Trash==1.5.*
 esptool==2.8
+paramiko==2.7.*
+ptyprocess==0.6.*
+websockets==8.1
