@@ -10,4 +10,4 @@ esptool==2.8.*
 paramiko==2.7.*
 ptyprocess==0.6.*
 websockets==8.1.*
-wheel==0.34.*
+

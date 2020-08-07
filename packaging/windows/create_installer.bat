@@ -15,6 +15,8 @@ copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
 
+%BUILDDIR%\python -s -m pip install --no-cache-dir wheel
+
 %BUILDDIR%\python -s -m pip install --no-cache-dir --no-binary mypy -r ..\requirements-regular-bundle.txt
 
 @echo ............... INSTALLING THONNY ...................................

@@ -32,8 +32,9 @@ then
     $TARGET_DIR/bin/python3.7 -s -m pip install setuptools-scm
 fi
 
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir wheel
 $TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir distro==1.4.*
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir distro==1.5.*
 $TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################

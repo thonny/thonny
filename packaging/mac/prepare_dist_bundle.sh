@@ -31,6 +31,8 @@ PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7
 export MACOSX_DEPLOYMENT_TARGET=10.9
 export SDKROOT=~/MacOSX10.9.sdk
 
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir wheel
+
 for req_file in $req_files
 do
 	echo "installing from $req_file"
