@@ -6,7 +6,7 @@ import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
 from tkinter.messagebox import showerror, askyesno, askokcancel
-from typing import Iterable, Type, List, Dict
+from typing import Iterable, Type, List, Dict, Set
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
@@ -378,14 +378,22 @@ def format_items(items):
 def upload(paths, source_dir, target_dir) -> bool:
     items = []
     for path in paths:
-        items.extend(_prepare_upload_items(path, source_dir, target_dir))
+        for item in _prepare_upload_items(path, source_dir, target_dir):
+            # same path could have been provided directly and also via its parent
+            if item not in items:
+                items.append(item)
 
     target_paths = [x["target_path"] for x in items]
     response = get_runner().send_command_and_wait(
         InlineCommand("prepare_upload", target_paths=target_paths,), dialog_title=tr("Preparing"),
     )
 
-    picked_items = pick_transfer_items(items, response["existing_items"])
+    picked_items = list(
+        sorted(
+            pick_transfer_items(items, response["existing_items"]), key=lambda x: x["target_path"]
+        )
+    )
+    print(picked_items)
     if picked_items:
         response = get_runner().send_command_and_wait(
             InlineCommand("upload", items=picked_items), dialog_title="Copying"

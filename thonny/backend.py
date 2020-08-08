@@ -315,13 +315,16 @@ class UploadDownloadBackend(BaseBackend, ABC):
 
             try:
                 if item["kind"] == "dir":
-                    ensure_dir_fun(item["source_path"])
+                    ensure_dir_fun(item["target_path"])
                     completed_cost += self._get_dir_transfer_cost()
                 else:
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
             except OSError as e:
-                errors.append(str(e))
+                errors.append(
+                    "Could not copy %s to %s: %s"
+                    % (item["source_path"], item["target_path"], str(e))
+                )
 
         return errors
 
@@ -555,7 +558,6 @@ def ensure_posix_directory(
         if step != "/":
             mode = stat_mode_fun(step)
             if mode is None:
-                print("creating dir", step)
                 mkdir_fun(step)
             elif not stat.S_ISDIR(mode):
                 raise AssertionError("'%s' is file, not a directory" % step)

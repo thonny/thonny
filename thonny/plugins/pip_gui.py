@@ -27,9 +27,16 @@ from thonny.ui_utils import (
     lookup_style_option,
     open_path_in_system_file_manager,
     scrollbar_style,
+    ems_to_pixels,
 )
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
+
+SEARCH_ON_PYPI = "Search on PyPI"
+INSTALL = "Install"
+UPGRADE = "Upgrade"
+UNINSTALL = "Uninstall"
+DELETE_SELECTED = "Delete selected"
 
 
 class PipDialog(CommonDialog):
@@ -72,8 +79,11 @@ class PipDialog(CommonDialog):
         self.search_box.bind("<Return>", self._on_search, False)
         self.search_box.bind("<KP_Enter>", self._on_search, False)
 
+        # Selecting chars in the search box with mouse didn't make the box active on Linux without following line
+        self.search_box.bind("<B1-Motion>", lambda _: self.search_box.focus_set())
+
         self.search_button = ttk.Button(
-            header_frame, text=tr("Find package from PyPI"), command=self._on_search, width=25
+            header_frame, text=tr(SEARCH_ON_PYPI), command=self._on_search, width=25
         )
         self.search_button.grid(row=1, column=1, sticky="nse", padx=(10, 0))
 
@@ -121,7 +131,7 @@ class PipDialog(CommonDialog):
         main_pw.add(info_frame)
 
         self.title_label = ttk.Label(info_frame, text="", font=name_font)
-        self.title_label.grid(row=0, column=0, sticky="w", padx=5)
+        self.title_label.grid(row=0, column=0, sticky="w", padx=5, pady=(0, ems_to_pixels(1)))
 
         info_text_frame = tktextext.TextFrame(
             info_frame,
@@ -176,16 +186,16 @@ class PipDialog(CommonDialog):
         self.command_frame.grid(row=2, column=0, sticky="w")
 
         self.install_button = ttk.Button(
-            self.command_frame, text=" " + tr("Upgrade") + " ", command=self._on_click_install
+            self.command_frame,
+            text=" " + tr(UPGRADE) + " ",
+            command=self._on_install_click,
+            width=20,
         )
 
         self.install_button.grid(row=0, column=0, sticky="w", padx=0)
 
         self.uninstall_button = ttk.Button(
-            self.command_frame,
-            text=tr("Uninstall"),
-            command=lambda: self._perform_action("uninstall"),
-            width=len(tr("Uninstall")),
+            self.command_frame, text=tr(UNINSTALL), command=self._on_uninstall_click, width=20,
         )
 
         self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5, 0))
@@ -194,16 +204,13 @@ class PipDialog(CommonDialog):
             self.command_frame,
             text="...",
             width=3,
-            command=lambda: self._perform_action("advanced"),
+            command=lambda: self._perform_pip_action("advanced"),
         )
 
         self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5, 0))
 
         self.close_button = ttk.Button(info_frame, text=tr("Close"), command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
-
-    def _on_click_install(self):
-        self._perform_action("install")
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
@@ -315,10 +322,10 @@ class PipDialog(CommonDialog):
         for name in sorted(self._active_distributions.keys()):
             self.listbox.insert("end", " " + name)
 
-        if name_to_show is None:
+        if name_to_show is None or name_to_show not in self._active_distributions.keys():
             self._show_instructions()
         else:
-            self._start_show_package_info(name_to_show)
+            self._on_listbox_select_package(name_to_show)
 
     def _on_listbox_select(self, event):
         self.listbox.focus_set()
@@ -342,6 +349,12 @@ class PipDialog(CommonDialog):
             return
 
         self._start_search(self.search_box.get().strip())
+
+    def _on_install_click(self):
+        self._perform_pip_action("install")
+
+    def _on_uninstall_click(self):
+        self._perform_pip_action("uninstall")
 
     def _clear(self):
         self.current_package_data = None
@@ -463,6 +476,7 @@ class PipDialog(CommonDialog):
         self.title_label["text"] = ""
         self.title_label.grid()
         self.command_frame.grid()
+        self.uninstall_button["text"] = tr(UNINSTALL)
 
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
@@ -489,12 +503,12 @@ class PipDialog(CommonDialog):
 
             if active_dist is not None:
                 # existing package in target directory
-                self.install_button["text"] = tr("Upgrade")
+                self.install_button["text"] = tr(UPGRADE)
                 self.install_button["state"] = "disabled"
                 self.uninstall_button.grid(row=0, column=1)
             else:
                 # new package
-                self.install_button["text"] = tr("Install")
+                self.install_button["text"] = tr(INSTALL)
                 self.uninstall_button.grid_remove()
 
     def _show_package_info(self, name, data, error_code=None):
@@ -592,6 +606,8 @@ class PipDialog(CommonDialog):
         self._set_state("idle")
         self._clear_info_text()
 
+        results = self._tweak_search_results(results, query)
+
         if isinstance(results, str) or not results:
             if not results:
                 self._append_info_text("No results.\n\n")
@@ -643,15 +659,15 @@ class PipDialog(CommonDialog):
             cmd.append("--user")
         return cmd
 
-    def _perform_action(self, action: str) -> bool:
-        if self._perform_action_without_refresh(action):
+    def _perform_pip_action(self, action: str) -> bool:
+        if self._perform_pip_action_without_refresh(action):
             if action == "uninstall":
                 self._show_instructions()  # Make the old package go away as fast as possible
             self._start_update_list(
                 None if action == "uninstall" else self.current_package_data["info"]["name"]
             )
 
-    def _perform_action_without_refresh(self, action: str) -> bool:
+    def _perform_pip_action_without_refresh(self, action: str) -> bool:
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
         data = self.current_package_data
@@ -684,7 +700,7 @@ class PipDialog(CommonDialog):
                 self,
                 data,
                 _get_latest_stable_version(list(data["releases"].keys())),
-                self._does_support_update_deps_switch(),
+                self.does_support_update_deps_switch(),
             )
             if details is None:  # Cancel
                 return False
@@ -835,6 +851,9 @@ class PipDialog(CommonDialog):
             import site
 
             return not site.ENABLE_USER_SITE
+
+    def _tweak_search_results(self, results, query):
+        return results
 
 
 class BackendPipDialog(PipDialog):
@@ -1133,7 +1152,7 @@ class DetailsDialog(CommonDialog):
         if support_update_deps_switch:
             self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
 
-        self.ok_button = ttk.Button(main_frame, text=tr("Install"), command=self._ok)
+        self.ok_button = ttk.Button(main_frame, text=tr(INSTALL), command=self._ok)
         self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
         self.cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
         self.cancel_button.grid(row=4, column=1, pady=15, padx=(5, 20), sticky="se")

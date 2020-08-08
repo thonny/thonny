@@ -175,7 +175,10 @@ class MicroPythonBackend(MainBackend, ABC):
             dedent(
                 """
             class __thonny_helper:
-                import os
+                try:
+                    import uos as os
+                except ImportError:
+                    import os
                 import sys
                 
                 # for object inspector
@@ -542,7 +545,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 children = self._get_dir_children_info(path)
                 if children is None:
                     continue
-
                 for name, info in children.items():
                     if info["kind"] == "dir":
                         key = name
@@ -566,17 +568,48 @@ class MicroPythonBackend(MainBackend, ABC):
             return InlineResponse("get_active_distributions", error=traceback.format_exc())
 
     def _cmd_get_module_info(self, cmd):
-        effective = []
+        location = None
+        effective_items = []
+        shadowed_items = []
 
         for lib_dir in self._get_library_paths():
             dir_children = self._get_dir_children_info(lib_dir)
             if not dir_children:
                 continue
 
+            # print(lib_dir, dir_children)
+
+            if cmd.module_name in dir_children and dir_children[cmd.module_name]["kind"] == "dir":
+                # dir takes precedence over .py and .mpy
+                # presence of __init__.py is not required
+                dir_full_path = lib_dir + "/" + cmd.module_name
+                descendants = self._get_dir_descendants_info(dir_full_path)
+                # print("desc", dir_full_path, descendants)
+                desc_paths = list(sorted(descendants.keys()))
+
+                if not effective_items:  # ie. it's the first one found
+                    effective_items.append(dir_full_path)
+                    effective_items.extend(desc_paths)
+                    location = lib_dir
+                else:
+                    shadowed_items.extend(desc_paths)
+
             for suffix in [".py", ".mpy"]:
                 with_suffix = cmd.module_name + suffix
                 if with_suffix in dir_children and dir_children[with_suffix]["kind"] == "file":
-                    effective.append(with_suffix)
+                    full_path = lib_dir + "/" + with_suffix
+                    if not effective_items:
+                        effective_items.append(full_path)
+                        location = lib_dir
+                    else:
+                        shadowed_items.append(full_path)
+
+        return {
+            "location": location,
+            "effective_items": effective_items,
+            "shadowed_items": shadowed_items,
+            "module_name": cmd.module_name,
+        }
 
     def _get_library_paths(self) -> [str]:
         """Returns list of directories which are supposed to contain library code"""
@@ -865,7 +898,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     """
                 __thonny_result = {} 
                 try:
-                    __thonny_names = __thonny_helper.os.listdir(%r)
+                    __thonny_names = __thonny_helper.listdir(%r)
                 except OSError:
                     __thonny_helper.print_mgmt_value(None) 
                 else:
@@ -884,7 +917,7 @@ class MicroPythonBackend(MainBackend, ABC):
         elif path == "":
             # used to represent all files in micro:bit
             raw_data = self._evaluate(
-                "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir(%r)}"
+                "{name : __thonny_helper.os.size(name) for name in __thonny_helper.listdir(%r)}"
             )
         else:
             return None

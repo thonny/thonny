@@ -499,6 +499,11 @@ class LocalMicroPythonProxy(MicroPythonProxy):
     def get_exe_dirs(self):
         return []
 
+    def get_pip_gui_class(self):
+        from thonny.plugins.micropython.pip_gui import LocalMicroPythonPipDialog
+
+        return LocalMicroPythonPipDialog
+
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
