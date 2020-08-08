@@ -190,7 +190,11 @@ def clean(
                 "indicatorforeground": [
                     ("disabled", "alternate", low_foreground),
                     ("disabled", low_foreground),
-                ]
+                ],
+                "indicatorbackground": [
+                    ("disabled", "alternate", text_background),
+                    ("disabled", text_background),
+                ],
             },
         },
         "TRadiobutton": {
@@ -310,7 +314,7 @@ def load_plugin() -> None:
             low_detail="#404040",
             normal_foreground="#9f9f9f",
             high_foreground="#eeeeee",
-            low_foreground="#595959",
+            low_foreground="#666666",
         ),
         dark_images,
     )
@@ -326,7 +330,7 @@ def load_plugin() -> None:
             low_detail="#33402F",
             normal_foreground="#9E9E9E",
             high_foreground="#eeeeee",
-            low_foreground="#485C49",
+            low_foreground="#5a725b",
         ),
         dark_images,
     )
@@ -342,7 +346,7 @@ def load_plugin() -> None:
             low_detail="#2F3640",
             normal_foreground="#9E9E9E",
             high_foreground="#eeeeee",
-            low_foreground="#484A5C",
+            low_foreground="#5a5c72",
         ),
         dark_images,
     )
