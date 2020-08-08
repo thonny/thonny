@@ -755,6 +755,10 @@ class BackendProxy:
         """Used as files caption if back-end has separate files"""
         return "Back-end"
 
+    def get_full_label(self):
+        """Used in pip GUI title"""
+        return self.get_node_label()
+
     def supports_remote_files(self):
         """Whether remote file browser should be presented with this back-end"""
         return False

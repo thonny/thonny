@@ -825,7 +825,7 @@ class PipDialog(CommonDialog):
         return self._create_python_process(["-m", "pip"] + args, stderr=stderr)
 
     def _get_interpreter(self):
-        pass
+        raise NotImplementedError()
 
     def _should_install_to_site_packages(self):
         raise NotImplementedError()
@@ -1258,7 +1258,7 @@ def _get_latest_stable_version(version_strings):
 
 
 def _show_subprocess_dialog(master, proc, title):
-    dlg = SubprocessDialog(master, proc, title)
+    dlg = SubprocessDialog(master, proc, title, autoclose=False)
     ui_utils.show_dialog(dlg, master)
     return dlg.returncode, dlg.stdout, dlg.stderr
 

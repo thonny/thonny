@@ -209,6 +209,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         else:
             return tr("MicroPython device")
 
+    def get_full_label(self):
+        return self.get_node_label() + " @ " + self._port
+
     def get_exe_dirs(self):
         return []
 
@@ -496,6 +499,9 @@ class LocalMicroPythonProxy(MicroPythonProxy):
     def get_node_label(self):
         return "Local"
 
+    def get_full_label(self):
+        return self._mp_executable
+
     def get_exe_dirs(self):
         return []
 
@@ -601,6 +607,9 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def get_node_label(self):
         return self._host
+
+    def get_full_label(self):
+        return self._mp_executable + " @ " + self._host
 
     def get_exe_dirs(self):
         return []

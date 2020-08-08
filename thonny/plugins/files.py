@@ -393,7 +393,6 @@ def upload(paths, source_dir, target_dir) -> bool:
             pick_transfer_items(items, response["existing_items"]), key=lambda x: x["target_path"]
         )
     )
-    print(picked_items)
     if picked_items:
         response = get_runner().send_command_and_wait(
             InlineCommand("upload", items=picked_items), dialog_title="Copying"

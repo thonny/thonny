@@ -12,12 +12,14 @@ from thonny.common import InlineCommand
 from thonny.languages import tr
 from thonny.plugins.files import upload
 from thonny.plugins.micropython import MicroPythonProxy, LocalMicroPythonProxy
+from thonny.plugins.micropython.micropip import MICROPYTHON_ORG_JSON
 from thonny.plugins.pip_gui import (
     BackendPipDialog,
     SEARCH_ON_PYPI,
     DELETE_SELECTED,
     INSTALL,
     UNINSTALL,
+    _fetch_url_future,
 )
 
 
@@ -113,7 +115,6 @@ class MicroPythonPipDialog(BackendPipDialog):
             showerror("Error", "Did not find anything to upload from micropip target path")
             return False
 
-        print("up", paths)
         return upload(paths, self._current_temp_dir, self._get_target_directory())
 
     def _create_python_process(self, args, stderr):
@@ -181,6 +182,49 @@ class MicroPythonPipDialog(BackendPipDialog):
 
         self._append_info_text("\n")
 
+    def _show_package_info(self, name, data, error_code=None):
+        super(MicroPythonPipDialog, self)._show_package_info(name, data, error_code)
+
+        if name.lower().startswith("micropython-"):
+            self._set_state("fetching")
+            self._append_info_text("\n\n")
+            self.info_text.mark_set("wait", "end-1c")
+            self.info_text.mark_gravity("wait", "left")
+            self._append_info_text("Querying micropython.org, please wait...")
+            _start_fetching_micropython_org_info(name, self._add_micropython_org_info)
+
+    def _add_micropython_org_info(self, name, data, error_code=None):
+        self._set_state("idle")
+        self.info_text.direct_delete("wait", "end")
+        self.info_text.mark_unset("wait")
+        self._append_info_text("\n")
+
+        if error_code == 404:
+            self._append_info_text(
+                tr(
+                    "Package is not available at micropython.org. "
+                    "Version at PyPI will be installed."
+                )
+            )
+        elif error_code:
+            self._append_info_text("Error %s\n" % error_code)
+            self._append_info_text(data.get("error", "") + "\n")
+        else:
+            ver = data["info"]["version"]
+            self._append_info_text(
+                tr(
+                    "NB! micropython.org has published version %s of this package "
+                    "and this will be installed by default."
+                )
+                % ver
+                + "\n",
+                ("bold",),
+            )
+            self._append_info_text(
+                "If you want to install a version from PyPI, then use the advanced install button '...'. "
+                "Note that PyPI version may require a specific fork of MicroPython."
+            )
+
     def _can_delete(self, path):
         return not path.startswith("/usr/lib")
 
@@ -247,21 +291,31 @@ class MicroPythonPipDialog(BackendPipDialog):
     def _tweak_search_results(self, results, query):
         if results is None:
             return results
+        query = query.lower()
 
         def get_order(item):
-            name = item["name"]
-            if name == query or name.startswith("micropython-") or name.startswith("pycopy-"):
+            name = item["name"].lower()
+            if name == query:
+                return 0
+            elif name == "micropython-" + query:
                 return 1
-            elif "micropython" in name.lower() or "pycopy" in name.lower():
+            elif name == "pycopy-" + query:
                 return 2
+            elif "micropython" in name:
+                return 3
+            elif "pycopy" in name:
+                return 4
             elif item.get("description"):
                 description = item["description"]
                 if "micropython" in description.lower() or "pycopy" in description.lower():
-                    return 3
+                    return 5
 
-            return 4
+            return 6
 
         return sorted(results, key=get_order)
+
+    def _get_interpreter(self):
+        return self._backend_proxy.get_full_label()
 
 
 class LocalMicroPythonPipDialog(MicroPythonPipDialog):
@@ -275,3 +329,30 @@ class LocalMicroPythonPipDialog(MicroPythonPipDialog):
         # assuming all files are listed if their directory is listed
         for path in reversed(sorted(paths, key=len, reverse=True)):
             os.remove(path)
+
+
+def _start_fetching_micropython_org_info(name, completion_handler):
+    import urllib.error
+    import urllib.parse
+
+    # Fetch info from PyPI
+    url = MICROPYTHON_ORG_JSON % urllib.parse.quote(name)
+
+    url_future = _fetch_url_future(url)
+
+    def poll_fetch_complete():
+        import json
+
+        if url_future.done():
+            try:
+                _, bin_data = url_future.result()
+                raw_data = bin_data.decode("UTF-8")
+                completion_handler(name, json.loads(raw_data), None)
+            except urllib.error.HTTPError as e:
+                completion_handler(
+                    name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
+                )
+        else:
+            tk._default_root.after(200, poll_fetch_complete)
+
+    poll_fetch_complete()

@@ -30,6 +30,8 @@ import tempfile
 import ssl as ussl
 import socket as usocket
 
+MICROPYTHON_ORG_JSON = "https://micropython.org/pi/%s/json"
+
 debug = False
 g_install_path = os.getcwd()  # Default install path
 gzdict_sz = 16 + 15
@@ -186,7 +188,7 @@ def get_pkg_metadata(pkg_spec):
         f = url_open("https://pypi.org/pypi/%s/%s/json" % (name, ver))
     else:
         try:
-            f = url_open("https://micropython.org/pi/%s/json" % pkg_spec)
+            f = url_open(MICROPYTHON_ORG_JSON % pkg_spec)
         except:
             f = url_open("https://pypi.org/pypi/%s/json" % pkg_spec)
     s = read_lines(f)
