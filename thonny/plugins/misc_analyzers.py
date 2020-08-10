@@ -182,7 +182,6 @@ known_stdlib_modules = {
     "telnetlib",
     "tempfile",
     "termios",
-    "test",
     "textwrap",
     "threading",
     "time",
