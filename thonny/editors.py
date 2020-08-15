@@ -176,6 +176,7 @@ class Editor(ttk.Frame):
         # Make sure Windows filenames have proper format
         filename = normpath_with_actual_case(filename)
         self._filename = filename
+        self.update_file_type()
         self._last_known_mtime = os.path.getmtime(self._filename)
 
         get_workbench().event_generate("Open", editor=self, filename=filename)
@@ -186,6 +187,7 @@ class Editor(ttk.Frame):
 
     def _load_remote_file(self, filename):
         self._filename = filename
+        self.update_file_type()
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
 
@@ -237,6 +239,7 @@ class Editor(ttk.Frame):
 
         if not save_copy:
             self._filename = save_filename
+            self.update_file_type()
 
         self.update_title()
         return save_filename
@@ -267,6 +270,20 @@ class Editor(ttk.Frame):
             self._code_view.text.edit_modified(False)
 
         return True
+
+    def update_file_type(self):
+        if self._filename is None:
+            self._code_view.set_file_type(None)
+        else:
+            ext = self._filename.split(".")[-1].lower()
+            if ext in ["py", "pyw", "pyi"]:
+                file_type = "python"
+            else:
+                file_type = None
+
+            self._code_view.set_file_type(file_type)
+
+        self.update_appearance()
 
     def write_remote_file(self, save_filename, content_bytes, save_copy):
         if get_runner().ready_for_remote_file_operations(show_message=True):
@@ -384,6 +401,7 @@ class Editor(ttk.Frame):
         self._code_view.set_line_length_margin(
             get_workbench().get_option("view.recommended_line_length")
         )
+        self._code_view.text.update_tabs()
         self._code_view.text.event_generate("<<UpdateAppearance>>")
 
     def _listen_debugger_progress(self, event):

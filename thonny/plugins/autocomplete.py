@@ -281,7 +281,7 @@ def handle_autocomplete_request(event=None):
 
 def _handle_autocomplete_request_for_text(text):
     if not hasattr(text, "autocompleter"):
-        if isinstance(text, (CodeViewText, ShellText)):
+        if isinstance(text, (CodeViewText, ShellText)) and text.is_python_text():
             if isinstance(text, CodeViewText):
                 text.autocompleter = Completer(text)
             elif isinstance(text, ShellText):
@@ -294,19 +294,20 @@ def _handle_autocomplete_request_for_text(text):
 
 
 def patched_perform_midline_tab(text, event):
-    if isinstance(text, ShellText):
-        option_name = "edit.tab_complete_in_shell"
-    else:
-        option_name = "edit.tab_complete_in_editor"
-
-    if get_workbench().get_option(option_name):
-        if not text.has_selection():
-            _handle_autocomplete_request_for_text(text)
-            return "break"
+    if text.is_python_text():
+        if isinstance(text, ShellText):
+            option_name = "edit.tab_complete_in_shell"
         else:
-            return None
+            option_name = "edit.tab_complete_in_editor"
 
-    return text.perform_smart_tab(event)
+        if get_workbench().get_option(option_name):
+            if not text.has_selection():
+                _handle_autocomplete_request_for_text(text)
+                return "break"
+            else:
+                return None
+
+    return text.perform_dumb_tab(event)
 
 
 def load_plugin() -> None:

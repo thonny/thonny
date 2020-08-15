@@ -129,7 +129,9 @@ class SyntaxColorer:
         self.text.tag_add(TODO, start_index, end_index)
 
     def schedule_update(self):
-        self._use_coloring = get_workbench().get_option("view.syntax_coloring")
+        self._use_coloring = (
+            get_workbench().get_option("view.syntax_coloring") and self.text.is_python_text()
+        )
 
         if not self._update_scheduled:
             self._update_scheduled = True

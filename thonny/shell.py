@@ -10,7 +10,7 @@ from tkinter import ttk
 from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
-from thonny.codeview import PythonText, get_syntax_options_for_tag
+from thonny.codeview import get_syntax_options_for_tag, perform_python_return, SyntaxText
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
@@ -279,7 +279,7 @@ class ShellMenu(TextMenu):
         return not self.text.selection_is_writable()
 
 
-class BaseShellText(EnhancedTextWithLogging, PythonText):
+class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     """Passive version of ShellText. Used also for preview"""
 
     def __init__(self, master, view=None, cnf={}, **kw):
@@ -372,6 +372,9 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_raise("italic_io")
         self.tag_raise("intense_italic_io")
         self.tag_raise("sel")
+
+    def is_python_text(self):
+        return True
 
     def submit_command(self, cmd_line, tags):
         # assert get_runner().is_waiting_toplevel_command()
@@ -989,7 +992,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                     EnhancedTextWithLogging.perform_return(self, event)
                 else:
                     # Allow auto-indent
-                    PythonText.perform_return(self, event)
+                    perform_python_return(self, event)
 
             self._try_submit_input()
 

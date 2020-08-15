@@ -45,7 +45,7 @@ class BaseNameHighlighter:
     def update(self):
         self.text.tag_remove("matched_name", "1.0", "end")
 
-        if get_workbench().get_option("view.name_highlighting"):
+        if get_workbench().get_option("view.name_highlighting") and self.text.is_python_text():
             try:
                 positions = self.get_positions()
                 if len(positions) > 1:

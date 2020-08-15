@@ -93,7 +93,7 @@ class LocalsHighlighter:
     def update(self):
         self.text.tag_remove("local_name", "1.0", "end")
 
-        if get_workbench().get_option("view.locals_highlighting"):
+        if get_workbench().get_option("view.locals_highlighting") and self.text.is_python_text():
             try:
                 highlight_positions = self.get_positions()
                 self._highlight(highlight_positions)

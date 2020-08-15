@@ -884,7 +884,7 @@ class BackendPipDialog(PipDialog):
         self._update_list(self._last_name_to_show)
 
 
-class CPythonBackendPipDialog(PipDialog):
+class CPythonBackendPipDialog(BackendPipDialog):
     def __init__(self, master):
         super().__init__(master)
         assert isinstance(self._backend_proxy, CPythonProxy)

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
+import codecs
 import io
 import os
 import re
 import tkinter as tk
+from tkinter import messagebox
 from typing import Dict, Union  # @UnusedImport
 
 from thonny import get_workbench, roughparse, tktextext, ui_utils
@@ -23,6 +24,10 @@ WINDOWS_LINEBREAK = re.compile("\r\n")
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
+        if "indent_with_tabs" not in kw:
+            kw["indent_with_tabs"] = False
+
+        self.file_type = "python"
         self._syntax_options = {}
         super().__init__(master=master, cnf=cnf, **kw)
         get_workbench().bind("SyntaxThemeChanged", self._reload_syntax_options, True)
@@ -68,123 +73,35 @@ class SyntaxText(EnhancedText):
         super().destroy()
         get_workbench().unbind("SyntaxThemeChanged", self._reload_syntax_options)
 
-
-class PythonText(SyntaxText):
-    def __init__(self, master=None, cnf={}, **kw):
-        if "indent_with_tabs" not in kw:
-            kw["indent_with_tabs"] = False
-
-        super().__init__(master=master, cnf=cnf, **kw)
-
     def perform_return(self, event):
-        # copied from idlelib.EditorWindow (Python 3.4.2)
-        # slightly modified
-        # pylint: disable=lost-exception
+        if self.file_type == "python":
+            return perform_python_return(self, event)
+        else:
+            return perform_simple_return(self, event)
 
-        text = event.widget
-        assert text is self
+    def perform_smart_backspace(self, event):
+        if self.file_type == "python":
+            return EnhancedText.perform_smart_backspace(self, event)
+        else:
+            self._log_keypress_for_undo(event)
+            # let the default action work
+            return
 
-        try:
-            # delete selection
-            first, last = text.get_selection_indices()
-            if first and last:
-                text.delete(first, last)
-                text.mark_set("insert", first)
+    def set_file_type(self, file_type):
+        self.file_type = file_type
+        self.replace_tabs = file_type == "python"
 
-            # Strip whitespace after insert point
-            # (ie. don't carry whitespace from the right of the cursor over to the new line)
-            while text.get("insert") in [" ", "\t"]:
-                text.delete("insert")
+    def is_python_text(self):
+        return self.file_type == "python"
 
-            left_part = text.get("insert linestart", "insert")
-            # locate first non-white character
-            i = 0
-            n = len(left_part)
-            while i < n and left_part[i] in " \t":
-                i = i + 1
-
-            # is it only whitespace?
-            if i == n:
-                # start the new line with the same whitespace
-                text.insert("insert", "\n" + left_part)
-                return "break"
-
-            # Turned out the left part contains visible chars
-            # Remember the indent
-            indent = left_part[:i]
-
-            # Strip whitespace before insert point
-            # (ie. after inserting the linebreak this line doesn't have trailing whitespace)
-            while text.get("insert-1c", "insert") in [" ", "\t"]:
-                text.delete("insert-1c", "insert")
-
-            # start new line
-            text.insert("insert", "\n")
-
-            # adjust indentation for continuations and block
-            # open/close first need to find the last stmt
-            lno = tktextext.index2line(text.index("insert"))
-            y = roughparse.RoughParser(text.indent_width, text.tabwidth)
-
-            for context in roughparse.NUM_CONTEXT_LINES:
-                startat = max(lno - context, 1)
-                startatindex = repr(startat) + ".0"
-                rawtext = text.get(startatindex, "insert")
-                y.set_str(rawtext)
-                bod = y.find_good_parse_start(
-                    False, roughparse._build_char_in_string_func(startatindex)
-                )
-                if bod is not None or startat == 1:
-                    break
-            y.set_lo(bod or 0)
-
-            c = y.get_continuation_type()
-            if c != roughparse.C_NONE:
-                # The current stmt hasn't ended yet.
-                if c == roughparse.C_STRING_FIRST_LINE:
-                    # after the first line of a string; do not indent at all
-                    pass
-                elif c == roughparse.C_STRING_NEXT_LINES:
-                    # inside a string which started before this line;
-                    # just mimic the current indent
-                    text.insert("insert", indent)
-                elif c == roughparse.C_BRACKET:
-                    # line up with the first (if any) element of the
-                    # last open bracket structure; else indent one
-                    # level beyond the indent of the line with the
-                    # last open bracket
-                    text._reindent_to(y.compute_bracket_indent())
-                elif c == roughparse.C_BACKSLASH:
-                    # if more than one line in this stmt already, just
-                    # mimic the current indent; else if initial line
-                    # has a start on an assignment stmt, indent to
-                    # beyond leftmost =; else to beyond first chunk of
-                    # non-whitespace on initial line
-                    if y.get_num_lines_in_stmt() > 1:
-                        text.insert("insert", indent)
-                    else:
-                        text._reindent_to(y.compute_backslash_indent())
-                else:
-                    assert 0, "bogus continuation type %r" % (c,)
-                return "break"
-
-            # This line starts a brand new stmt; indent relative to
-            # indentation of initial line of closest preceding
-            # interesting stmt.
-            indent = y.get_base_indent_string()
-            text.insert("insert", indent)
-            if y.is_block_opener():
-                text.perform_smart_tab(event)
-            elif indent and y.is_block_closer():
-                text.perform_smart_backspace(event)
-            return "break"
-        finally:
-            text.see("insert")
-            text.event_generate("<<NewLine>>")
-            return "break"
+    def update_tabs(self):
+        tab_chars = 4
+        tab_pixels = tk.font.nametofont(self["font"]).measure("n" * tab_chars)
+        tabs = [tab_pixels]
+        self.configure(tabs=tabs, tabstyle="wordprocessor")
 
 
-class CodeViewText(EnhancedTextWithLogging, PythonText):
+class CodeViewText(EnhancedTextWithLogging, SyntaxText):
     """Provides opportunities for monkey-patching by plugins"""
 
     def __init__(self, master=None, cnf={}, **kw):
@@ -254,10 +171,35 @@ class CodeView(tktextext.EnhancedTextFrame):
         return self.text.get("1.0", "end-1c")  # -1c because Text always adds a newline itself
 
     def detect_encoding(self, data):
-        import tokenize
+        enc = self.detect_encoding_without_check(data)
+        try:
+            codecs.lookup(enc)
+            return enc
+        except LookupError:
+            messagebox.showerror("Error", "Unknown encoding '%s'. Using utf-8 instead" % enc)
+            return "utf-8"
 
-        encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
-        return encoding
+    def detect_encoding_without_check(self, data):
+        if self.text.is_python_text():
+            import tokenize
+
+            encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
+            return encoding
+        else:
+            ENCODING_MARKER = re.compile(
+                br"(charset|coding)[\t ]*[=: ][\t ]*[\"\']?([a-z][0-9a-z-_ ]*[0-9a-z])[\"\'\n\r\t ]?",
+                re.IGNORECASE,
+            )
+
+            for line in data[:1024].splitlines():
+                match = ENCODING_MARKER.search(line)
+                if match and len(match.group(2)) > 2:
+                    return match.group(2).decode("ascii", errors="replace")
+
+            return "utf-8"
+
+    def set_file_type(self, file_type):
+        self.text.set_file_type(file_type)
 
     def get_content_as_bytes(self):
         content = self.get_content()
@@ -420,3 +362,146 @@ def tweak_newlines(content):
     content = WINDOWS_LINEBREAK.sub("\n", content)
 
     return content, original_newlines
+
+
+def perform_python_return(text: EnhancedText, event):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    # slightly modified
+    # pylint: disable=lost-exception
+
+    assert text is event.widget
+    assert isinstance(text, EnhancedText)
+
+    try:
+        # delete selection
+        first, last = text.get_selection_indices()
+        if first and last:
+            text.delete(first, last)
+            text.mark_set("insert", first)
+
+        # Strip whitespace after insert point
+        # (ie. don't carry whitespace from the right of the cursor over to the new line)
+        while text.get("insert") in [" ", "\t"]:
+            text.delete("insert")
+
+        left_part = text.get("insert linestart", "insert")
+        # locate first non-white character
+        i = 0
+        n = len(left_part)
+        while i < n and left_part[i] in " \t":
+            i = i + 1
+
+        # is it only whitespace?
+        if i == n:
+            # start the new line with the same whitespace
+            text.insert("insert", "\n" + left_part)
+            return "break"
+
+        # Turned out the left part contains visible chars
+        # Remember the indent
+        indent = left_part[:i]
+
+        # Strip whitespace before insert point
+        # (ie. after inserting the linebreak this line doesn't have trailing whitespace)
+        while text.get("insert-1c", "insert") in [" ", "\t"]:
+            text.delete("insert-1c", "insert")
+
+        # start new line
+        text.insert("insert", "\n")
+
+        # adjust indentation for continuations and block
+        # open/close first need to find the last stmt
+        lno = tktextext.index2line(text.index("insert"))
+        y = roughparse.RoughParser(text.indent_width, text.tabwidth)
+
+        for context in roughparse.NUM_CONTEXT_LINES:
+            startat = max(lno - context, 1)
+            startatindex = repr(startat) + ".0"
+            rawtext = text.get(startatindex, "insert")
+            y.set_str(rawtext)
+            bod = y.find_good_parse_start(
+                False, roughparse._build_char_in_string_func(startatindex)
+            )
+            if bod is not None or startat == 1:
+                break
+        y.set_lo(bod or 0)
+
+        c = y.get_continuation_type()
+        if c != roughparse.C_NONE:
+            # The current stmt hasn't ended yet.
+            if c == roughparse.C_STRING_FIRST_LINE:
+                # after the first line of a string; do not indent at all
+                pass
+            elif c == roughparse.C_STRING_NEXT_LINES:
+                # inside a string which started before this line;
+                # just mimic the current indent
+                text.insert("insert", indent)
+            elif c == roughparse.C_BRACKET:
+                # line up with the first (if any) element of the
+                # last open bracket structure; else indent one
+                # level beyond the indent of the line with the
+                # last open bracket
+                text._reindent_to(y.compute_bracket_indent())
+            elif c == roughparse.C_BACKSLASH:
+                # if more than one line in this stmt already, just
+                # mimic the current indent; else if initial line
+                # has a start on an assignment stmt, indent to
+                # beyond leftmost =; else to beyond first chunk of
+                # non-whitespace on initial line
+                if y.get_num_lines_in_stmt() > 1:
+                    text.insert("insert", indent)
+                else:
+                    text._reindent_to(y.compute_backslash_indent())
+            else:
+                assert 0, "bogus continuation type %r" % (c,)
+            return "break"
+
+        # This line starts a brand new stmt; indent relative to
+        # indentation of initial line of closest preceding
+        # interesting stmt.
+        indent = y.get_base_indent_string()
+        text.insert("insert", indent)
+        if y.is_block_opener():
+            text.perform_smart_tab(event)
+        elif indent and y.is_block_closer():
+            text.perform_smart_backspace(event)
+        return "break"
+    finally:
+        text.see("insert")
+        text.event_generate("<<NewLine>>")
+        return "break"
+
+
+def perform_simple_return(text: EnhancedText, event):
+    assert text is event.widget
+    assert isinstance(text, EnhancedText)
+
+    text._log_keypress_for_undo(event)
+
+    try:
+        # delete selection
+        first, last = text.get_selection_indices()
+        if first and last:
+            text.delete(first, last)
+            text.mark_set("insert", first)
+
+        # Strip whitespace after insert point
+        # (ie. don't carry whitespace from the right of the cursor over to the new line)
+        while text.get("insert") in [" ", "\t"]:
+            text.delete("insert")
+
+        left_part = text.get("insert linestart", "insert")
+        # locate first non-white character
+        i = 0
+        n = len(left_part)
+        while i < n and left_part[i] in " \t":
+            i = i + 1
+
+        # start the new line with the same whitespace
+        text.insert("insert", "\n" + left_part[:i])
+        return "break"
+
+    finally:
+        text.see("insert")
+        text.event_generate("<<NewLine>>")
+        return "break"

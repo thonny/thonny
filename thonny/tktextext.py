@@ -193,7 +193,7 @@ class EnhancedText(TweakableText):
         self._original_options = kw.copy()
 
         super().__init__(master=master, cnf=cnf, **kw)
-        self.tabwidth = 8  # See comments in idlelib.editor.EditorWindow
+        self.tabwidth = 4
         self.indent_width = 4
         self.indent_with_tabs = indent_with_tabs
         self.replace_tabs = replace_tabs
@@ -397,7 +397,12 @@ class EnhancedText(TweakableText):
     def perform_midline_tab(self, event=None):
         "autocompleter can put its magic here"
         # by default
-        return self.perform_smart_tab(event)
+        return self.perform_dumb_tab(event)
+
+    def perform_dumb_tab(self, event=None):
+        self._log_keypress_for_undo(event)
+        self.insert("insert", "\t")
+        return "break"
 
     def perform_smart_tab(self, event=None):
         self._log_keypress_for_undo(event)
