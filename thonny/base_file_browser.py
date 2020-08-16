@@ -575,18 +575,24 @@ class BaseFileBrowser(ttk.Frame):
         self.menu.add_separator()
         self.add_last_menu_items(context)
 
+    def is_active_browser(self):
+        return False
+
     def add_first_menu_items(self, context):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
 
-        self.menu.add_command(label=tr("Refresh"), command=self.cmd_refresh_tree)
-
-        if selected_kind == "dir":
-            self.menu.add_command(
-                label=tr("Focus into"), command=lambda: self.request_focus_into(selected_path)
-            )
+        if context == "button":
+            self.menu.add_command(label=tr("Refresh"), command=self.cmd_refresh_tree)
         else:
-            "TODO: add open command"
+            if selected_kind == "dir":
+                self.menu.add_command(
+                    label=tr("Focus into"), command=lambda: self.request_focus_into(selected_path)
+                )
+            elif self.is_active_browser():
+                self.menu.add_command(
+                    label=tr("Open in Thonny"), command=lambda: self.open_file(selected_path)
+                )
 
     def cmd_refresh_tree(self):
         self.refresh_tree()

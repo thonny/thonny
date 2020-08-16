@@ -11,7 +11,7 @@ from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
-from thonny.codeview import CodeView
+from thonny.codeview import CodeView, BinaryFileException
 from thonny.common import (
     InlineCommand,
     TextRange,
@@ -156,9 +156,14 @@ class Editor(ttk.Frame):
     def _load_file(self, filename, keep_undo=False):
         try:
             if is_remote_path(filename):
-                self._load_remote_file(filename)
+                result = self._load_remote_file(filename)
             else:
-                self._load_local_file(filename, keep_undo)
+                result = self._load_local_file(filename, keep_undo)
+                if not result:
+                    return False
+        except BinaryFileException:
+            messagebox.showerror("Problem", "%s doesn't look like a text file" % filename)
+            return False
         except SyntaxError as e:
             assert "encoding" in str(e).lower()
             messagebox.showerror(
@@ -166,8 +171,10 @@ class Editor(ttk.Frame):
                 "This file seems to have problems with encoding.\n\n"
                 + "Make sure it is in UTF-8 or contains proper encoding hint.",
             )
+            return False
 
         self.update_appearance()
+        return True
 
     def _load_local_file(self, filename, keep_undo=False):
         with open(filename, "rb") as fp:
@@ -180,10 +187,12 @@ class Editor(ttk.Frame):
         self._last_known_mtime = os.path.getmtime(self._filename)
 
         get_workbench().event_generate("Open", editor=self, filename=filename)
-        self._code_view.set_content_as_bytes(source, keep_undo)
+        if not self._code_view.set_content_as_bytes(source, keep_undo):
+            return False
         self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
+        return True
 
     def _load_remote_file(self, filename):
         self._filename = filename
@@ -204,9 +213,11 @@ class Editor(ttk.Frame):
 
         content = response["content_bytes"]
         self._code_view.text.set_read_only(False)
-        self._code_view.set_content_as_bytes(content)
+        if not self._code_view.set_content_as_bytes(content):
+            return False
         self.get_text_widget().edit_modified(False)
         self.update_title()
+        return True
 
     def is_modified(self):
         return self._code_view.text.edit_modified()
@@ -864,7 +875,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             messagebox.showerror("Permission error", msg)
             return None
 
-        assert editor is not None
+        if editor is None:
+            return
 
         self.select(editor)
         if set_focus:
@@ -926,9 +938,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
     def _open_file(self, filename):
         editor = Editor(self)
-        editor._load_file(filename)
-        self.add(editor, text=editor.get_title())
-        return editor
+        if editor._load_file(filename):
+            self.add(editor, text=editor.get_title())
+            return editor
+        else:
+            editor.destroy()
+            return None
 
     def get_editor(self, filename, open_when_necessary=False):
         if not is_remote_path(filename):

@@ -3,6 +3,7 @@ import codecs
 import io
 import os
 import re
+import sys
 import tkinter as tk
 from tkinter import messagebox
 from typing import Dict, Union  # @UnusedImport
@@ -10,7 +11,7 @@ from typing import Dict, Union  # @UnusedImport
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.tktextext import EnhancedText
-from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
+from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style, ask_string
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
@@ -20,6 +21,13 @@ BREAKPOINT_SYMBOL = "●"  # Black circle
 OLD_MAC_LINEBREAK = re.compile("\r(?!\n)")
 UNIX_LINEBREAK = re.compile("(?<!\r)\n")
 WINDOWS_LINEBREAK = re.compile("\r\n")
+
+FALLBACK_ENCODING = "ISO-8859-1"
+
+NON_TEXT_CHARS = list(map(chr, range(32)))
+NON_TEXT_CHARS.remove("\t")
+NON_TEXT_CHARS.remove("\n")
+NON_TEXT_CHARS.remove("\r")
 
 
 class SyntaxText(EnhancedText):
@@ -196,7 +204,7 @@ class CodeView(tktextext.EnhancedTextFrame):
                 if match and len(match.group(2)) > 2:
                     return match.group(2).decode("ascii", errors="replace")
 
-            return "utf-8"
+            return "UTF-8"
 
     def set_file_type(self, file_type):
         self.text.set_file_type(file_type)
@@ -212,9 +220,33 @@ class CodeView(tktextext.EnhancedTextFrame):
         return content.encode(self.detect_encoding(content.encode("ascii", errors="replace")))
 
     def set_content_as_bytes(self, data, keep_undo=False):
+
         encoding = self.detect_encoding(data)
-        chars = data.decode(encoding)
-        self.set_content(chars, keep_undo)
+        while True:
+            try:
+                chars = data.decode(encoding)
+                if self.looks_like_text(chars):
+                    self.set_content(chars, keep_undo)
+                    return True
+            except UnicodeDecodeError:
+                pass
+
+            encoding = ask_string(
+                "Bad encoding",
+                "Could not read as %s text.\nYou could try another encoding" % encoding,
+                initial_value=encoding,
+                options=get_proposed_encodings(),
+            )
+            if not encoding:
+                return False
+
+    def looks_like_text(self, chars):
+        non_text_char_count = 0
+        for ch in chars:
+            if ch in NON_TEXT_CHARS:
+                non_text_char_count += 1
+
+        return non_text_char_count / len(chars) < 0.01
 
     def set_content(self, content, keep_undo=False):
         content, self._original_newlines = tweak_newlines(content)
@@ -505,3 +537,67 @@ def perform_simple_return(text: EnhancedText, event):
         text.see("insert")
         text.event_generate("<<NewLine>>")
         return "break"
+
+
+class BinaryFileException(RuntimeError):
+    pass
+
+
+def get_proposed_encodings():
+    # https://w3techs.com/technologies/overview/character_encoding
+    result = [
+        "UTF-8",
+        "ISO-8859-1",
+        "Windows-1251",
+        "Windows-1252",
+        "GB2312",
+        "Shift JIS",
+        "GBK",
+        "EUC-KR",
+        "ISO-8859-9",
+        "Windows-1254",
+        "EUC-JP",
+        "Big5",
+        "ISO-8859-2  ",
+        "Windows-1250",
+        "Windows-874",
+        "Windows-1256",
+        "ISO-8859-15",
+        "US-ASCII",
+        "Windows-1255",
+        "TIS-620",
+        "ISO-8859-7",
+        "Windows-1253",
+        "UTF-16",
+        "KOI8-R",
+        "GB18030",
+        "Windows-1257",
+        "KS C 5601",
+        "UTF-7",
+        "ISO-8859-8",
+        "Windows-31J",
+        "ISO-8859-5",
+        "ISO-8859-6",
+        "ISO-8859-4",
+        "ANSI_X3.110-1983",
+        "ISO-8859-3",
+        "KOI8-U",
+        "Big5 HKSCS",
+        "ISO-2022-JP",
+        "Windows-1258",
+        "ISO-8859-13",
+        "ISO-8859-14",
+        "Windows-949",
+        "ISO-8859-10",
+        "ISO-8859-11",
+        "ISO-8859-16",
+    ]
+
+    sys_enc = sys.getdefaultencoding()
+    for item in result[:]:
+        if item.lower() == sys_enc.lower():
+            result.remove(item)
+            sys_enc = item
+
+    result.insert(0, sys_enc)
+    return result

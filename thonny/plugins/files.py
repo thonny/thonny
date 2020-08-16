@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+import subprocess
 import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
@@ -12,7 +13,7 @@ from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt
+from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
 from thonny.running import construct_cd_command
 from thonny.ui_utils import lookup_style_option
 
@@ -116,6 +117,21 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         super().__init__(master, show_hidden_files)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
+    def is_active_browser(self):
+        return True
+
+    def add_first_menu_items(self, context):
+        BaseLocalFileBrowser.add_first_menu_items(self, context)
+
+        if context == "item":
+            selected_path = self.get_selected_path()
+        else:
+            selected_path = self.get_active_directory()
+
+        self.menu.add_command(
+            label=tr("Open in default app"), command=lambda: open_with_default_app(selected_path)
+        )
+
     def create_new_file(self):
         path = super().create_new_file()
         if path and path.endswith(".py"):
@@ -209,6 +225,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
+
+    def is_active_browser(self):
+        return True
 
     def on_toplevel_response(self, event):
         if get_runner().get_backend_proxy().supports_remote_files():
@@ -434,6 +453,15 @@ def _prepare_upload_items(
                     )
                 )
     return result
+
+
+def open_with_default_app(path):
+    if running_on_windows():
+        os.startfile(path)
+    elif running_on_mac_os():
+        subprocess.run(["open", path])
+    else:
+        subprocess.run(["xdg-open", path])
 
 
 def load_plugin() -> None:
