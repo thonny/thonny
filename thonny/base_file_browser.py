@@ -1,12 +1,13 @@
 import datetime
 import os.path
+import subprocess
 import tkinter as tk
-from tkinter import messagebox, simpledialog, ttk
+from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt
+from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
 from thonny.ui_utils import (
     CommonDialog,
     create_string_var,
@@ -14,12 +15,12 @@ from thonny.ui_utils import (
     scrollbar_style,
     show_dialog,
     ask_string,
+    ask_one_from_choices,
 )
 
 _dummy_node_text = "..."
 
 _LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
-TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 
 
@@ -69,7 +70,7 @@ class BaseFileBrowser(ttk.Frame):
 
         wb = get_workbench()
         self.folder_icon = wb.get_image("folder")
-        self.python_file_icon = wb.get_image("python-file")
+        self.python_file_icon = wb.get_image("python-icon")
         self.text_file_icon = wb.get_image("text-file")
         self.generic_file_icon = wb.get_image("generic-file")
         self.hard_drive_icon = wb.get_image("hard-drive")
@@ -275,6 +276,14 @@ class BaseFileBrowser(ttk.Frame):
 
     def get_selected_name(self):
         return self.get_selected_value("name")
+
+    def get_extension_from_name(self, name):
+        if name is None:
+            return None
+        if "." in name:
+            return "." + name.split(".")[-1].lower()
+        else:
+            return name.lower()
 
     def get_selected_value(self, key):
         node_id = self.get_selected_node()
@@ -503,9 +512,13 @@ class BaseFileBrowser(ttk.Frame):
             # Make sure it doesn't have children
             self.tree.set_children(node_id)
 
-            if path.lower().endswith(".py"):
+            if (
+                path.lower().endswith(".py")
+                or path.lower().endswith(".pyw")
+                or path.lower().endswith(".pyi")
+            ):
                 img = self.python_file_icon
-            elif path.lower().endswith(".txt") or path.lower().endswith(".csv"):
+            elif self.should_open_name_in_thonny(name):
                 img = self.text_file_icon
             else:
                 img = self.generic_file_icon
@@ -531,16 +544,21 @@ class BaseFileBrowser(ttk.Frame):
     def on_double_click(self, event):
         path = self.get_selected_path()
         kind = self.get_selected_kind()
-        parts = path.split(".")
-        ext = "." + parts[-1]
-        if path.endswith(ext) and kind == "file" and ext.lower() in TEXT_EXTENSIONS:
-            self.open_file(path)
+        name = self.get_selected_name()
+        if kind == "file":
+            if self.should_open_name_in_thonny(name):
+                self.open_file(path)
+            else:
+                self.open_path_with_system_app(path)
         elif kind == "dir":
             self.request_focus_into(path)
 
         return "break"
 
     def open_file(self, path):
+        pass
+
+    def open_path_with_system_app(self, path):
         pass
 
     def on_secondary_click(self, event):
@@ -579,22 +597,69 @@ class BaseFileBrowser(ttk.Frame):
         return False
 
     def add_first_menu_items(self, context):
-        selected_path = self.get_selected_path()
-        selected_kind = self.get_selected_kind()
+        if context == "item":
+            selected_path = self.get_selected_path()
+            selected_kind = self.get_selected_kind()
+        else:
+            selected_path = self.get_active_directory()
+            selected_kind = "dir"
 
         if context == "button":
             self.menu.add_command(label=tr("Refresh"), command=self.cmd_refresh_tree)
+            self.menu.add_command(
+                label=tr("Open in system file manager"),
+                command=lambda: self.open_path_with_system_app(selected_path),
+            )
         else:
             if selected_kind == "dir":
                 self.menu.add_command(
                     label=tr("Focus into"), command=lambda: self.request_focus_into(selected_path)
                 )
-            elif self.is_active_browser():
+            else:
                 self.menu.add_command(
                     label=tr("Open in Thonny"), command=lambda: self.open_file(selected_path)
                 )
 
+            if self.is_active_browser():
+                self.menu.add_command(
+                    label=tr("Open in system default app"),
+                    command=lambda: self.open_path_with_system_app(selected_path),
+                )
+
+                ext = self.get_extension_from_name(self.get_selected_name())
+                self.menu.add_command(
+                    label=tr("Configure %s files ...") % ext,
+                    command=lambda: self.open_extension_dialog(ext),
+                )
+
     def cmd_refresh_tree(self):
+        self.refresh_tree()
+
+    def open_extension_dialog(self, extension: str) -> None:
+        system_choice = tr("Open it in system default application")
+        thonny_choice = tr("Open it in Thonny's text editor")
+
+        current_index = (
+            1 if get_workbench().get_option(get_file_handler_conf_key(extension)) == "thonny" else 0
+        )
+
+        choice = ask_one_from_choices(
+            title=tr("Configure %s files") % extension,
+            question=tr(
+                "What to do with a %s file when you double-click it in Thonny's file browser?"
+            )
+            % extension,
+            choices=[system_choice, thonny_choice],
+            initial_choice_index=current_index,
+        )
+
+        if not choice:
+            return
+
+        get_workbench().set_option(
+            get_file_handler_conf_key(extension), "system" if choice == system_choice else "thonny",
+        )
+        # update icons
         self.refresh_tree()
 
     def add_middle_menu_items(self, context):
@@ -760,6 +825,10 @@ class BaseFileBrowser(ttk.Frame):
     def notify_missing_selection(self):
         messagebox.showerror("Nothing selected", "Select an item and try again!")
 
+    def should_open_name_in_thonny(self, name):
+        ext = self.get_extension_from_name(name)
+        return get_workbench().get_option(get_file_handler_conf_key(ext), "system") == "thonny"
+
 
 class BaseLocalFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
@@ -795,6 +864,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
     def open_file(self, path):
         get_workbench().get_editor_notebook().show_file(path)
+
+    def open_path_with_system_app(self, path):
+        open_with_default_app(path)
 
     def on_window_focus_in(self, event=None):
         self.refresh_tree()
@@ -890,6 +962,12 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def open_file(self, path):
         get_workbench().get_editor_notebook().show_remote_file(path)
+
+    def open_path_with_system_app(self, path):
+        messagebox.showinfo(
+            "Opening remote files in system app is not supported.\n"
+            "Please download the file to a local directory and open it from there!"
+        )
 
     def supports_directories(self):
         runner = get_runner()
@@ -1198,3 +1276,16 @@ def get_local_files_root_text():
         _LOCAL_FILES_ROOT_TEXT = tr("This computer")
 
     return _LOCAL_FILES_ROOT_TEXT
+
+
+def open_with_default_app(path):
+    if running_on_windows():
+        os.startfile(path)
+    elif running_on_mac_os():
+        subprocess.run(["open", path])
+    else:
+        subprocess.run(["xdg-open", path])
+
+
+def get_file_handler_conf_key(extension):
+    return "file_default_handlers.%s" % extension

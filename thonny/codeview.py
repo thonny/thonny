@@ -22,8 +22,6 @@ OLD_MAC_LINEBREAK = re.compile("\r(?!\n)")
 UNIX_LINEBREAK = re.compile("(?<!\r)\n")
 WINDOWS_LINEBREAK = re.compile("\r\n")
 
-FALLBACK_ENCODING = "ISO-8859-1"
-
 NON_TEXT_CHARS = list(map(chr, range(32)))
 NON_TEXT_CHARS.remove("\t")
 NON_TEXT_CHARS.remove("\n")

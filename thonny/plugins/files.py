@@ -10,7 +10,11 @@ from tkinter.messagebox import showerror, askyesno, askokcancel
 from typing import Iterable, Type, List, Dict, Set
 
 from thonny import get_runner, get_shell, get_workbench
-from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
+from thonny.base_file_browser import (
+    BaseLocalFileBrowser,
+    BaseRemoteFileBrowser,
+    get_file_handler_conf_key,
+)
 from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
@@ -119,18 +123,6 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
     def is_active_browser(self):
         return True
-
-    def add_first_menu_items(self, context):
-        BaseLocalFileBrowser.add_first_menu_items(self, context)
-
-        if context == "item":
-            selected_path = self.get_selected_path()
-        else:
-            selected_path = self.get_active_directory()
-
-        self.menu.add_command(
-            label=tr("Open in default app"), command=lambda: open_with_default_app(selected_path)
-        )
 
     def create_new_file(self):
         path = super().create_new_file()
@@ -455,21 +447,15 @@ def _prepare_upload_items(
     return result
 
 
-def open_with_default_app(path):
-    if running_on_windows():
-        os.startfile(path)
-    elif running_on_mac_os():
-        subprocess.run(["open", path])
-    else:
-        subprocess.run(["xdg-open", path])
-
-
 def load_plugin() -> None:
     get_workbench().set_default(
         "file.last_browser_folder", normpath_with_actual_case(os.path.expanduser("~"))
     )
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
+
+    for ext in [".py", ".pyw", ".pyi", ".txt", ".log", ".json", ".yml", ".yaml", ".md", ".rst"]:
+        get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
 
 if __name__ == "__main__":

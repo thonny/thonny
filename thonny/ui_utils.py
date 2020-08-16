@@ -1669,40 +1669,44 @@ class FileCopyDialog(CommonDialog):
         self._close()
 
 
-class ChoiceDialog(CommonDialog):
+class ChoiceDialog(CommonDialogEx):
     def __init__(
-        self, master=None, title="Choose one", question: str = "Choose one:", choices=[]
+        self,
+        master=None,
+        title="Choose one",
+        question: str = "Choose one:",
+        choices=[],
+        initial_choice_index=None,
     ) -> None:
         super().__init__(master=master)
 
         self.title(title)
         self.resizable(False, False)
 
-        self.columnconfigure(0, weight=1)
+        self.main_frame.columnconfigure(0, weight=1)
 
         row = 0
-        question_label = ttk.Label(self, text=question)
+        question_label = ttk.Label(self.main_frame, text=question)
         question_label.grid(row=row, column=0, columnspan=2, sticky="w", padx=20, pady=20)
         row += 1
 
-        self.var = tk.StringVar()
+        self.var = tk.StringVar("")
+        if initial_choice_index is not None:
+            self.var.set(choices[initial_choice_index])
         for choice in choices:
-            rb = ttk.Radiobutton(self, text=choice, variable=self.var, value=choice)
+            rb = ttk.Radiobutton(self.main_frame, text=choice, variable=self.var, value=choice)
             rb.grid(row=row, column=0, columnspan=2, sticky="w", padx=20)
             row += 1
 
-        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
+        ok_button = ttk.Button(self.main_frame, text="OK", command=self._ok, default="active")
         ok_button.grid(row=row, column=0, sticky="e", pady=20)
 
-        cancel_button = ttk.Button(self, text="Cancel", command=self._cancel)
+        cancel_button = ttk.Button(self.main_frame, text="Cancel", command=self._cancel)
         cancel_button.grid(row=row, column=1, sticky="e", padx=20, pady=20)
 
         self.bind("<Escape>", self._cancel, True)
         self.bind("<Return>", self._ok, True)
         self.protocol("WM_DELETE_WINDOW", self._cancel)
-
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
 
     def _ok(self):
         self.result = self.var.get()
@@ -1770,9 +1774,13 @@ class LongTextDialog(CommonDialog):
 
 
 def ask_one_from_choices(
-    master=None, title="Choose one", question: str = "Choose one:", choices=[]
+    master=None,
+    title="Choose one",
+    question: str = "Choose one:",
+    choices=[],
+    initial_choice_index=None,
 ):
-    dlg = ChoiceDialog(master, title, question, choices)
+    dlg = ChoiceDialog(master, title, question, choices, initial_choice_index)
     show_dialog(dlg, master)
     return dlg.result
 
