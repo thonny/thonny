@@ -965,8 +965,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def open_path_with_system_app(self, path):
         messagebox.showinfo(
+            "Not supported",
             "Opening remote files in system app is not supported.\n"
-            "Please download the file to a local directory and open it from there!"
+            + "Please download the file to a local directory and open it from there!"
         )
 
     def supports_directories(self):

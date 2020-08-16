@@ -425,7 +425,7 @@ class SshBackend(UploadDownloadBackend):
         self._client = SSHClient()
         self._client.load_system_host_keys()
         # TODO: does it get closed properly after process gets killed?
-        self._client.connect(hostname=host, username=user, password=password)
+        self._client.connect(hostname=host, username=user, password=password, port=2222)
 
     def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
         # Before running the main thing:

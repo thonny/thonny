@@ -239,6 +239,9 @@ class CodeView(tktextext.EnhancedTextFrame):
                 return False
 
     def looks_like_text(self, chars):
+        if not chars:
+            return True
+
         non_text_char_count = 0
         for ch in chars:
             if ch in NON_TEXT_CHARS:
