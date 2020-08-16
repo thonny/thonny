@@ -2,7 +2,6 @@ import datetime
 import os.path
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
-from tkinter.simpledialog import askstring
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_children_info
@@ -14,6 +13,7 @@ from thonny.ui_utils import (
     lookup_style_option,
     scrollbar_style,
     show_dialog,
+    ask_string,
 )
 
 _dummy_node_text = "..."
@@ -665,7 +665,7 @@ class BaseFileBrowser(ttk.Frame):
         else:
             parent_path = self.current_focus
 
-        name = askstring("File name", "Provide filename", initialvalue="")
+        name = ask_string("File name", "Provide filename", initial_value="")
 
         if not name:
             return None
@@ -732,9 +732,7 @@ class BaseFileBrowser(ttk.Frame):
                 # dirname does the right thing even if parent is Linux path and runnning on Windows
                 parent = os.path.dirname(parent)
 
-        name = simpledialog.askstring(
-            "New directory", "Enter name for new directory under\n%s" % parent
-        )
+        name = ask_string("New directory", "Enter name for new directory under\n%s" % parent)
         if not name or not name.strip():
             return
 

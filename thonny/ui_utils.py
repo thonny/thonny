@@ -44,6 +44,9 @@ class CommonDialog(tk.Toplevel):
             if focussed_widget:
                 focussed_widget.focus_set()
 
+    def get_padding(self):
+        return ems_to_pixels(2)
+
 
 class CommonDialogEx(CommonDialog):
     def __init__(self, master=None, cnf={}, **kw):
@@ -60,6 +63,79 @@ class CommonDialogEx(CommonDialog):
 
     def on_close(self, event=None):
         self.destroy()
+
+
+class QueryDialog(CommonDialogEx):
+    def __init__(
+        self,
+        master,
+        title: str,
+        prompt: str,
+        initial_value: str = "",
+        options: List[str] = [],
+        entry_width: Optional[int] = None,
+    ):
+        super().__init__(master)
+        self.var = tk.StringVar(value=initial_value)
+        self.result = None
+
+        margin = self.get_padding()
+        spacing = margin // 2
+
+        self.title(title)
+        self.prompt_label = ttk.Label(self.main_frame, text=prompt)
+        self.prompt_label.grid(row=1, column=1, columnspan=2, padx=margin, pady=(margin, spacing))
+
+        if options:
+            self.entry_widget = ttk.Combobox(
+                self.main_frame, textvariable=self.var, values=options, height=15, width=entry_width
+            )
+        else:
+            self.entry_widget = ttk.Entry(self.main_frame, textvariable=self.var, width=entry_width)
+
+        self.entry_widget.bind("<Return>", self.on_ok, True)
+        self.entry_widget.bind("<KP_Enter>", self.on_ok, True)
+
+        self.entry_widget.grid(
+            row=3, column=1, columnspan=2, sticky="we", padx=margin, pady=(0, margin)
+        )
+
+        self.ok_button = ttk.Button(
+            self.main_frame, text=tr("OK"), command=self.on_ok, default="active"
+        )
+        self.ok_button.grid(row=5, column=1, padx=(margin, spacing), pady=(0, margin), sticky="e")
+        self.cancel_button = ttk.Button(self.main_frame, text=tr("Cancel"), command=self.on_cancel)
+        self.cancel_button.grid(row=5, column=2, padx=(0, margin), pady=(0, margin), sticky="e")
+
+        self.main_frame.columnconfigure(1, weight=1)
+
+        self.entry_widget.focus_set()
+
+    def on_ok(self):
+        self.result = self.var.get()
+        self.destroy()
+
+    def on_cancel(self):
+        self.result = None
+        self.destroy()
+
+    def get_result(self) -> Optional[str]:
+        return self.result
+
+
+def ask_string(
+    title: str,
+    prompt: str,
+    initial_value: str = "",
+    options: List[str] = [],
+    entry_width: Optional[int] = None,
+    master=None,
+):
+    dlg = QueryDialog(
+        master, title, prompt, initial_value=initial_value, options=options, entry_width=entry_width
+    )
+    show_dialog(dlg, master)
+    return dlg.get_result()
 
 
 class CustomMenubar(ttk.Frame):
@@ -1211,7 +1287,6 @@ class NoteBox(CommonDialog):
         lines = self._current_chars.splitlines()
         max_line_width = 0
         for line in lines:
-
             max_line_width = max(max_line_width, font.measure(line))
 
         width = min(max_line_width, self._max_default_width) + self.padx * 2 + 2
@@ -1425,7 +1500,6 @@ def center_window(win, master=None):
 
 
 def assign_geometry(win, master=None, min_left=0, min_top=0):
-
     if master is None:
         master = tk._default_root
 
