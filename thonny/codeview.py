@@ -26,6 +26,8 @@ NON_TEXT_CHARS = list(map(chr, range(32)))
 NON_TEXT_CHARS.remove("\t")
 NON_TEXT_CHARS.remove("\n")
 NON_TEXT_CHARS.remove("\r")
+NON_TEXT_CHARS.remove("\f")
+
 
 
 class SyntaxText(EnhancedText):
