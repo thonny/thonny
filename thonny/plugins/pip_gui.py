@@ -1386,14 +1386,20 @@ def load_plugin() -> None:
         proxy = get_runner().get_backend_proxy()
         if proxy is None:
             return None
-
         return proxy.get_pip_gui_class()
 
     def open_backend_pip_gui(*args):
         pg_class = get_pip_gui_class()
-        if pg_class is not None:
-            pg = pg_class(get_workbench())
-            ui_utils.show_dialog(pg)
+        if pg_class is None:
+            showerror(tr("Not supported"), tr("Package manager is not available for this back-end."))
+            return
+
+        if not get_runner().is_waiting_toplevel_command():
+            showerror(tr("Not available"), tr("You need to stop your program before launching the package manager."))
+            return
+
+        pg = pg_class(get_workbench())
+        ui_utils.show_dialog(pg)
 
     def open_backend_pip_gui_enabled():
         return get_pip_gui_class() is not None

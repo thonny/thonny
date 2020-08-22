@@ -102,6 +102,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         # TODO: remove it later
         self.micropython_upload_enabled = False
 
+    def _start_background_process(self, clean=None, extra_args=[]):
+        if self._port is None:
+            return
+
+        super()._start_background_process(clean=clean, extra_args=extra_args)
+
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.bare_metal_backend
 
@@ -178,13 +184,13 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     def supports_remote_files(self):
-        return self._proc is not None
+        return self.is_connected()
 
     def uses_local_filesystem(self):
         return False
 
     def ready_for_remote_file_operations(self):
-        return self._proc is not None and get_runner().is_waiting_toplevel_command()
+        return self.is_connected() and get_runner().is_waiting_toplevel_command()
 
     def supports_remote_directories(self):
         return self._cwd is not None and self._cwd != ""
@@ -193,7 +199,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return False
 
     def is_connected(self):
-        return self._proc is not None
+        return self._port is not None and self._proc is not None
 
     def _show_error(self, text):
         get_shell().print_error("\n" + text + "\n")
@@ -210,7 +216,10 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             return tr("MicroPython device")
 
     def get_full_label(self):
-        return self.get_node_label() + " @ " + self._port
+        if self.is_connected():
+            return self.get_node_label() + " @ " + self._port
+        else:
+            return self.get_node_label() + " (" + tr("Not connected") + ")"
 
     def get_exe_dirs(self):
         return []

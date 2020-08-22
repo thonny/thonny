@@ -514,7 +514,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             else:
                 # No EOT or prompt in sight.
                 # Output and keep working.
-                output_consumer(self.decode(pending), stream_name)
+                output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
     def _forward_unexpected_output(self, stream_name="stdout"):
