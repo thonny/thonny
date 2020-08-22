@@ -525,7 +525,7 @@ def load_plugin():
         SameAsFrontendCPythonProxy,
         tr("The same interpreter which runs Thonny (default)"),
         SameAsFrontEndConfigurationPage,
-        "1",
+        "01",
     )
 
     wb.add_backend(
@@ -533,7 +533,7 @@ def load_plugin():
         CustomCPythonProxy,
         tr("Alternative Python 3 interpreter or virtual environment"),
         CustomCPythonConfigurationPage,
-        "2",
+        "02",
     )
 
     wb.add_backend(
@@ -541,5 +541,5 @@ def load_plugin():
         PrivateVenvCPythonProxy,
         tr("A special virtual environment (deprecated)"),
         PrivateVenvConfigurationPage,
-        "z",
+        "zz",
     )

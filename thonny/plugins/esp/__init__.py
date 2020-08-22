@@ -326,41 +326,9 @@ class ESPFlashingDialog(CommonDialogEx):
 
 
 def load_plugin():
-    add_micropython_backend("ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage)
-    add_micropython_backend("ESP32", ESP32Proxy, "MicroPython (ESP32)", ESP32ConfigPage)
-
-    def upload_micropython():
-        proxy = get_runner().get_backend_proxy()
-        proxy.select_and_upload_micropython()
-
-    def upload_micropython_enabled():
-        proxy = get_runner().get_backend_proxy()
-        return getattr(proxy, "micropython_upload_enabled", False) and isinstance(proxy, ESPProxy)
-
-    def erase_flash():
-        proxy = get_runner().get_backend_proxy()
-        proxy.erase_flash()
-
-    def erase_flash_enabled():
-        return (
-            isinstance(get_runner().get_backend_proxy(), ESPProxy)
-            and get_runner().get_backend_proxy().micropython_upload_enabled
-        )
-
-    get_workbench().add_command(
-        "uploadmicropythonesp",
-        "device",
-        "Install MicroPython to ESP8266/ESP32 ...",
-        upload_micropython,
-        upload_micropython_enabled,
-        group=40,
+    add_micropython_backend(
+        "ESP32", ESP32Proxy, "MicroPython (ESP32)", ESP32ConfigPage, sort_key="32"
     )
-
-    get_workbench().add_command(
-        "erasespflash",
-        "device",
-        "Erase ESP8266/ESP32 flash",
-        erase_flash,
-        tester=erase_flash_enabled,
-        group=40,
+    add_micropython_backend(
+        "ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage, sort_key="33"
     )

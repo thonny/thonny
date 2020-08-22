@@ -659,12 +659,14 @@ def list_serial_ports_with_descriptions():
     ]
 
 
-def add_micropython_backend(name, proxy_class, description, config_page, bare_metal=True):
+def add_micropython_backend(
+    name, proxy_class, description, config_page, bare_metal=True, sort_key=None
+):
     if bare_metal:
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")
-    get_workbench().add_backend(name, proxy_class, description, config_page)
+    get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 
 
 def load_plugin():
@@ -673,6 +675,7 @@ def load_plugin():
         GenericBareMetalMicroPythonProxy,
         tr("MicroPython (generic)"),
         GenericBareMetalMicroPythonConfigPage,
+        sort_key="49",
     )
 
     add_micropython_backend(
@@ -681,6 +684,7 @@ def load_plugin():
         tr("MicroPython (local)"),
         LocalMicroPythonConfigPage,
         bare_metal=False,
+        sort_key="21",
     )
     get_workbench().set_default("LocalMicroPython.executable", "micropython")
 
@@ -690,6 +694,7 @@ def load_plugin():
         tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
+        sort_key="22",
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")
     get_workbench().set_default("SshMicroPython.cwd", None)

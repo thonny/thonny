@@ -1,5 +1,6 @@
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
+from thonny.languages import tr
 from thonny.plugins.backend_config_page import BaseSshProxyConfigPage
 from thonny.running import SubprocessProxy
 
@@ -100,4 +101,6 @@ def load_plugin():
     get_workbench().set_default("ssh.password", "raspberry")
     get_workbench().set_default("ssh.interpreter", "python3")
     get_workbench().set_default("ssh.cwd", "~")
-    get_workbench().add_backend("SSHProxy", SshProxy, "Remote Python (SSH)", SshProxyConfigPage)
+    get_workbench().add_backend(
+        "SSHProxy", SshProxy, tr("Remote Python 3 (SSH)"), SshProxyConfigPage, sort_key="15"
+    )
