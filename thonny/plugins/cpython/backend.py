@@ -616,7 +616,6 @@ class CPythonMainBackend(MainBackend):
                 .replace("<class '", "")
                 .replace("'>", "")
                 .strip(),
-                "type_id": id(type(value)),
                 "attributes": self.export_variables(attributes),
             }
 

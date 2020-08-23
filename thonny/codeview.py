@@ -29,7 +29,6 @@ NON_TEXT_CHARS.remove("\r")
 NON_TEXT_CHARS.remove("\f")
 
 
-
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
         if "indent_with_tabs" not in kw:

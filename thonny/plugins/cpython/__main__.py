@@ -69,5 +69,4 @@ if __name__ == "__main__":
     thonny.set_dpi_aware()
 
     target_cwd = sys.argv[1]
-    backend = CPythonMainBackend(target_cwd)
-    backend.mainloop()
+    CPythonMainBackend(target_cwd).mainloop()
