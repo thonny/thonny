@@ -67,6 +67,7 @@ from thonny.common import (
     MessageFromBackend,
     Record,
     CommandToBackend,
+    ValueInfo,
 )
 from thonny.plugins.micropython.connection import ConnectionClosedException
 from thonny.running import EXPECTED_TERMINATION_CODE
@@ -182,17 +183,28 @@ class MicroPythonBackend(MainBackend, ABC):
                 import sys
                 
                 # for object inspector
+                inspector_values = dict()
                 last_repl_values = []
                 @classmethod
                 def print_repl_value(cls, obj):
                     if obj is not None:
                         cls.last_repl_values.append(obj)
                         cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
-                        print({start_marker!r}, obj, '@', id(obj), {end_marker!r}, sep='')
+                        print({start_marker!r}, cls.repr(obj), '@', id(obj), {end_marker!r}, sep='')
                 
                 @staticmethod
                 def print_mgmt_value(obj):
                     print({mgmt_marker!r}, repr(obj), sep='', end='')
+                    
+                @staticmethod
+                def repr(obj):
+                    try:
+                        s = repr(obj)
+                        if len(s) > 5000:
+                            s = s[:5000] + "..."
+                        return s
+                    except Exception as e:
+                        return "<could not serialize: " + str(e) + ">"
                     
                 @classmethod
                 def listdir(cls, x):
@@ -513,7 +525,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":
             globs = self._evaluate(
-                "{name : repr(value) for (name, value) in globals().items() if not name.startswith('__')}"
+                "{name : __thonny_helper.repr(value) for (name, value) in globals().items() if not name.startswith('__')}"
             )
         else:
             globs = self._evaluate(
@@ -521,7 +533,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     """
                 import %s as __mod_for_globs
                 __thonny_helper.print_mgmt_value(
-                    {name : repr(getattr(__mod_for_globs, name)) 
+                    {name : __thonny_helper.repr(getattr(__mod_for_globs, name)) 
                         in dir(__mod_for_globs) 
                         if not name.startswith('__')}
                 )
@@ -533,6 +545,142 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _cmd_get_fs_info(self, cmd):
         raise NotImplementedError()
+
+    def _cmd_get_object_info(self, cmd):
+        context_id = cmd.get("context_id", None)
+        basic_info = self._find_basic_object_info(cmd.object_id, context_id)
+        if basic_info is None:
+            return {"id": cmd.object_id, "error": "object info not available"}
+
+        type_name = basic_info["type"].replace("<class '", "").replace("'>", "").strip()
+        info = {
+            "id": cmd.object_id,
+            "repr": basic_info["repr"],
+            "type": basic_info["type"],
+            "full_type_name": type_name,
+            "attributes": {},
+        }
+
+        info.update(self._get_object_info_extras(type_name))
+        if cmd.include_attributes:
+            info["attributes"] = self._get_object_attributes(cmd.all_attributes)
+
+        # need to keep the reference corresponding to object_id so that it can be later found as next context object
+        # remove non-relevant items
+        relevant = set([cmd.object_id] + cmd.back_links + cmd.forward_links)
+        self._execute(
+            dedent(
+                """
+                if id(__thonny_value) not in __thonny_helper.inspector_values:
+                    __thonny_helper.inspector_values[id(__thonny_value)] = __thonny_value
+                __thonny_relevant = %r
+                #__thonny_helper.inspector_values = {
+                #    obj_id : __thonny_helper.inspector_values[obj_id] for obj_id in __thonny_helper.inspector_values
+                #    if obj_id in __thonny_relevant
+                #}
+            """
+                % relevant
+            )
+        )
+
+        self._execute("del __thonny_value")
+
+        return {"id": cmd.object_id, "info": info}
+
+    def _find_basic_object_info(self, object_id, context_id):
+        """If object is found then returns basic info and leaves object reference to __thonny_value"""
+
+        result = self._evaluate(
+            dedent(
+                """
+                for __thonny_value in (
+                        list(globals().values()) 
+                        + __thonny_helper.last_repl_values
+                        + list(__thonny_helper.inspector_values.values())):
+                    #print("testing", id(__thonny_value), __thonny_value)
+                    if id(__thonny_value) == %d:
+                        __thonny_helper.print_mgmt_value({
+                            "repr" : __thonny_helper.repr(__thonny_value),
+                            "type": str(type(__thonny_value))
+                        })
+                        break
+                else:
+                    __thonny_value = None
+                    del __thonny_value
+                    __thonny_helper.print_mgmt_value(None)
+            """
+                % object_id
+            )
+        )
+
+        if result is not None:
+            return result
+        elif context_id is not None:
+            return self._evaluate(
+                dedent(
+                    """
+                
+                __thonny_context_value = __thonny_helper.inspector_values.get(%d, None)
+                
+                if __thonny_context_value is None:
+                    __thonny_value = None
+                    __thonny_helper.print_mgmt_value(None)
+                else:
+                    __thonny_children = [getattr(__thonny_context_value, name) for name in dir(__thonny_context_value)]
+                    if isinstance(__thonny_context_value, (set, tuple, list)):
+                        __thonny_children += list(__thonny_context_value)
+                    elif isinstance(__thonny_context_value, dict):
+                        __thonny_children += list(__thonny_context_value.values())
+                    
+                    for __thonny_value in __thonny_children:
+                        if id(__thonny_value) == %d:
+                            __thonny_helper.print_mgmt_value({
+                                "repr" : __thonny_helper.repr(__thonny_value),
+                                "type": str(type(__thonny_value))
+                            })
+                            break
+                    else:
+                        __thonny_value = None
+                        del __thonny_value
+                        __thonny_helper.print_mgmt_value(None)
+                        
+                    del __thonny_children
+                
+                del __thonny_context_value
+            """
+                    % (context_id, object_id)
+                )
+            )
+        else:
+            return None
+
+    def _get_object_attributes(self, all_attributes):
+        """object is given in __thonny_value """
+        atts = self._evaluate(
+            "{name : (id(getattr(__thonny_value, name)), __thonny_helper.repr(getattr(__thonny_value, name))) for name in dir(__thonny_value)}"
+        )
+        return {
+            name: ValueInfo(atts[name][0], atts[name][1])
+            for name in atts
+            if not name.startswith("__") or all_attributes
+        }
+
+    def _get_object_info_extras(self, type_name):
+        """object is given in __thonny_value """
+        if type_name in ("list", "tuple", "set"):
+            items = self._evaluate("[(id(x), __thonny_helper.repr(x)) for x in __thonny_value]")
+            return {"elements": [ValueInfo(x[0], x[1]) for x in items]}
+        elif type_name == "dict":
+            items = self._evaluate(
+                "[((id(key), __thonny_helper.repr(key)), (id(__thonny_value[key]), __thonny_helper.repr(__thonny_value[key]))) for key in __thonny_value]"
+            )
+            return {
+                "entries": [
+                    (ValueInfo(x[0][0], x[0][1]), ValueInfo(x[1][0], x[1][1])) for x in items
+                ]
+            }
+        else:
+            return {}
 
     def _cmd_delete(self, cmd):
         assert cmd.paths

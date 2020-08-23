@@ -1,12 +1,13 @@
 import ast
 import logging
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 import thonny.memory
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
 from thonny.languages import tr
+from thonny.memory import MemoryFrame
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import ems_to_pixels
@@ -173,10 +174,11 @@ class ObjectInspector(ttk.Frame):
                 self.back_links.append(self.object_id)
                 del self.forward_links[:]
 
+            context_id = self.object_id
             self.object_id = object_id
             self.set_object_info(None)
             self._set_title("object @ " + thonny.memory.format_object_id(object_id))
-            self.request_object_info()
+            self.request_object_info(context_id=context_id)
 
     def _on_backend_restart(self, event=None):
         self.set_object_info(None)
@@ -187,6 +189,10 @@ class ObjectInspector(ttk.Frame):
 
     def _handle_object_info_event(self, msg):
         if self.winfo_ismapped():
+            if msg.get("error") and not msg.get("info"):
+                self.set_object_info({"error": msg["error"]})
+                return
+
             if msg.info["id"] == self.object_id:
                 if hasattr(msg, "not_found") and msg.not_found:
                     self.object_id = None
@@ -196,9 +202,10 @@ class ObjectInspector(ttk.Frame):
 
     def _handle_progress_event(self, event):
         if self.object_id is not None:
+            # refresh
             self.request_object_info()
 
-    def request_object_info(self):
+    def request_object_info(self, context_id=None):
         # current width and height of the frame are required for
         # some content providers
         if self.active_page is not None:
@@ -209,7 +216,6 @@ class ObjectInspector(ttk.Frame):
             if frame_width < 5 or frame_height < 5:
                 frame_width = None
                 frame_height = None
-            # print("pa", frame_width, frame_height)
         else:
             frame_width = None
             frame_height = None
@@ -218,6 +224,9 @@ class ObjectInspector(ttk.Frame):
             InlineCommand(
                 "get_object_info",
                 object_id=self.object_id,
+                context_id=context_id,
+                back_links=self.back_links,
+                forward_links=self.forward_links,
                 include_attributes=self.active_page == self.attributes_page,
                 all_attributes=False,
                 frame_width=frame_width,
@@ -243,6 +252,7 @@ class ObjectInspector(ttk.Frame):
                 + thonny.memory.format_object_id(object_info["id"])
             )
             self.attributes_page.update_variables(object_info["attributes"])
+            self.attributes_page.context_id = object_info["id"]
             self.update_type_specific_info(object_info)
 
             # update layout
@@ -269,7 +279,6 @@ class ObjectInspector(ttk.Frame):
                 content_inspector = insp
                 break
 
-        # print("TYPSE", content_inspector)
         if content_inspector != self.current_content_inspector:
             if self.current_content_inspector is not None:
                 self.current_content_inspector.grid_remove()  # TODO: or forget?
@@ -282,10 +291,6 @@ class ObjectInspector(ttk.Frame):
 
         if self.current_content_inspector is not None:
             self.current_content_inspector.set_object_info(object_info)
-
-    def goto_type(self, event):
-        if self.object_info is not None:
-            get_workbench().event_generate("ObjectSelect", object_id=self.object_info["type_id"])
 
 
 class ContentInspector:
@@ -544,6 +549,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
 
         self.elements_have_indices = object_info["type"] in (repr(tuple), repr(list))
         self._update_columns()
+        self.context_id = object_info["id"]
 
         self._clear_tree()
         index = 0
@@ -607,6 +613,7 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
 
     def set_object_info(self, object_info):
         assert "entries" in object_info
+        self.context_id = object_info["id"]
 
         self._clear_tree()
         # TODO: don't show too big number of elements
@@ -636,7 +643,6 @@ class ImageInspector(ContentInspector, tk.Frame):
         self.columnconfigure(0, weight=1)
 
     def set_object_info(self, object_info):
-        # print(object_info["image_data"])
         if isinstance(object_info["image_data"], bytes):
             import base64
 
@@ -669,6 +675,27 @@ class AttributesFrame(thonny.memory.VariablesFrame):
 
     def on_double_click(self, event):
         self.show_selected_object_info()
+
+    def show_selected_object_info(self):
+        object_id = self.get_object_id()
+        if object_id is None:
+            return
+
+        iid = self.tree.focus()
+        if not iid:
+            return
+        repr_str = self.tree.item(iid)["values"][2]
+
+        if repr_str == "<bound_method>":
+            from thonny.plugins.micropython import MicroPythonProxy
+
+            if isinstance(get_runner().get_backend_proxy(), MicroPythonProxy):
+                messagebox.showinfo(
+                    "Not supported", "Inspecting bound methods is not supported with MicroPython"
+                )
+                return
+
+        get_workbench().event_generate("ObjectSelect", object_id=object_id)
 
 
 def load_plugin() -> None:

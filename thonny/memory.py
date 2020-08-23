@@ -34,15 +34,21 @@ class MemoryFrame(TreeFrame):
         self._clear_tree()
 
     def show_selected_object_info(self):
+        object_id = self.get_object_id()
+        if object_id is not None:
+            get_workbench().event_generate("ObjectSelect", object_id=object_id)
+
+    def get_object_id(self):
         iid = self.tree.focus()
         if iid != "":
             # NB! Assuming id is second column!
             id_str = self.tree.item(iid)["values"][1]
             if id_str in ["", None, "None"]:
-                return
+                return None
 
-            object_id = parse_object_id(id_str)
-            get_workbench().event_generate("ObjectSelect", object_id=object_id)
+            return parse_object_id(id_str)
+
+        return None
 
 
 class VariablesFrame(MemoryFrame):

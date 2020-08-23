@@ -54,11 +54,12 @@ class HeapView(MemoryFrame):
     def before_show(self):
         self._request_heap_data(even_when_hidden=True)
 
-    def on_select(self, event):
+    def get_object_id(self):
         iid = self.tree.focus()
         if iid != "":
-            object_id = parse_object_id(self.tree.item(iid)["values"][0])
-            get_workbench().event_generate("ObjectSelect", object_id=object_id)
+            return parse_object_id(self.tree.item(iid)["values"][0])
+
+        return None
 
     def _request_heap_data(self, msg=None, even_when_hidden=False):
         if self.winfo_ismapped() or even_when_hidden:
