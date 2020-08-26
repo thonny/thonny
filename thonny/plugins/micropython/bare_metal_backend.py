@@ -423,7 +423,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
-            b"|".join(map(re.escape, [LF, EOT, NORMAL_PROMPT, FIRST_RAW_PROMPT]))
+            b"|".join(map(re.escape, [FIRST_RAW_PROMPT, NORMAL_PROMPT, LF, EOT]))
         )
 
         pending = b""
@@ -440,6 +440,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             )
             if not new_data:
                 # In case we are still waiting for the first bits after connecting ...
+                # TODO: this suggestion should be implemented in Shell
                 if (
                     self._connection.num_bytes_received == 0
                     and not self._interrupt_suggestion_given
@@ -454,7 +455,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                     )
                     self._interrupt_suggestion_given = True
 
-                continue
+                if not pending:
+                    # nothing to parse
+                    continue
 
             pending += new_data
 
@@ -462,7 +465,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 output_consumer(self._decode(pending[: -len(EOT)]), stream_name)
                 return EOT
 
-            elif pending.endswith(LF):
+            elif pending.endswith(LF) and not pending.endswith(FIRST_RAW_PROMPT[:-1]):
                 output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
@@ -996,7 +999,7 @@ if __name__ == "__main__":
             )
 
             connection = SerialConnection(args["port"], BAUDRATE)
-            # connection = DifficultSerialConnection(port, BAUDRATE)
+            # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         backend = MicroPythonBareMetalBackend(
             connection, clean=args["clean"], api_stubs_path=args["api_stubs_path"]

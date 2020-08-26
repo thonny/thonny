@@ -5,6 +5,7 @@ import threading
 import time
 from textwrap import dedent
 
+from thonny.plugins.micropython.backend import FIRST_RAW_PROMPT
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
 
@@ -124,11 +125,11 @@ class DifficultSerialConnection(SerialConnection):
     def _make_output_available(self, data, block=True):
 
         # output Thonny message marker as two parts
-        pos = data.find(b"<thonny>")
+        pos = data.find(FIRST_RAW_PROMPT)
         if pos > -1:
-            super()._make_output_available(data[: pos + 5], block=block)
+            super()._make_output_available(data[: -1], block=block)
             time.sleep(0.1)
-            super()._make_output_available(data[pos + 5 :], block=block)
+            super()._make_output_available(data[-1 :], block=block)
         else:
             super()._make_output_available(data, block=block)
 
