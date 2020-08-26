@@ -179,7 +179,6 @@ class alt_WebReplConnection(MicroPythonConnection):
                     self._error = "EOF"
                     break
                 self._make_output_available(data)
-                self.num_bytes_received += len(data)
         except Exception as e:
             self._error = str(e)
 

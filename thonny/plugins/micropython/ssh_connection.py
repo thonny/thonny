@@ -38,7 +38,6 @@ class SshProcessConnection(MicroPythonConnection):
             while True:
                 data = self._stdout.read(1)
                 if len(data) > 0:
-                    self.num_bytes_received += len(data)
                     self._make_output_available(data)
                 else:
                     self._error = "EOF"

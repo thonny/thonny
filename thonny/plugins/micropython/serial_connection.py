@@ -73,7 +73,6 @@ class SerialConnection(MicroPythonConnection):
                     # print("LISTEN EOFFFFFFFFFF")
                     break
                 data += self._serial.read_all()
-                self.num_bytes_received += len(data)
 
                 # don't publish incomplete utf-8 data
                 try:

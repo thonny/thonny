@@ -36,7 +36,6 @@ class SubprocessConnection(MicroPythonConnection):
                 chars = self._proc.read(1)
                 if len(chars) > 0:
                     as_bytes = chars.encode(self.encoding)
-                    self.num_bytes_received += len(as_bytes)
                     self._make_output_available(as_bytes)
                 else:
                     self._error = "EOF"
