@@ -1225,14 +1225,25 @@ def to_remote_path(path):
     return path.replace("\\", "/")
 
 
-def ends_overlap(left, right):
-    """Returns whether the left ends with one of the non-empty prefixes of the right"""
-    for i in range(1, min(len(left), len(right)) + 1):
+def ends_overlap(left, right) -> int:
+    """Returns the length of maximum overlap between end of the first and start of the second"""
+    max_overlap = min(len(left), len(right))
+    for i in range(max_overlap, 0, -1):
         if left.endswith(right[:i]):
-            return True
+            return i
 
-    return False
+    return 0
 
 
 class ReadOnlyFilesystemError(RuntimeError):
     pass
+
+
+if __name__ == "__main__":
+    print(ends_overlap("a", "b"))
+    print(ends_overlap(">>>", ">>> "))
+    print(ends_overlap("\n>>>", ">>> "))
+    print(ends_overlap(">>> ", ">>> "))
+    print(ends_overlap(">>> ", ">>>"))
+    print(ends_overlap(">", ">>> "))
+    print(ends_overlap("", ">>> "))

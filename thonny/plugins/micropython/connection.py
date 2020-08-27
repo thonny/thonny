@@ -117,11 +117,15 @@ class MicroPythonConnection:
         raise ConnectionClosedException(self._error)
 
     def unread(self, data):
+        if not data:
+            return
+
         if isinstance(data, str):
             data = data.encode(self.encoding)
+        elif isinstance(data, bytes):
+            data = bytearray(data)
 
-        if data:
-            self._read_buffer = data + self._read_buffer
+        self._read_buffer = data + self._read_buffer
 
     def write(self, data, block_size=32, delay=0.01):
         raise NotImplementedError()

@@ -406,8 +406,8 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         Note that interrupt does not affect the structure of the output -- it is
         presented just like any other exception.
 
-        The method returns pair of captured output (or b"" if not requested)
-        and EOT, RAW_PROMPT or NORMAL_PROMPT, depending on which terminator ended the processing.
+        The method returns EOT, RAW_PROMPT or NORMAL_PROMPT, depending on which terminator
+        ended the processing.
 
         The terminating EOT may be either the first EOT from normal raw-REPL
         output or the starting EOT from Thonny expression (or, in principle, even
@@ -415,7 +415,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         -- the caller will do the interpretation.
 
         Because ot the special role of EOT and NORMAL_PROMT, we assume user code
-        will not output these. If it does, processing will break.
+        will not output these. If it does, processing may break.
+        It may succceed if the propmt is followed by something (quickly enough)
+        -- that's why we look for *active* prompt, ie. prompt without following text.
         TODO: Experiment with this!
 
         Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties,
@@ -460,6 +462,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                     # nothing to parse
                     continue
 
+            # print("Got", new_data)
             pending += new_data
 
             if pending.endswith(EOT):
@@ -473,7 +476,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             elif pending.endswith(NORMAL_PROMPT) or pending.endswith(FIRST_RAW_PROMPT):
                 # This looks like prompt.
                 # Make sure it is not followed by anything.
-                # Note that in this context the prompt means something is wrong
+                # Note that in this context the prompt usually means something is wrong
                 # (EOT would have been the happy path), so no need to hurry.
                 # The only case where this path is happy path is just after connecting.
                 follow_up = self._connection.soft_read(1, timeout=0.5)
@@ -483,7 +486,8 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                     # but this would be too hard to consider.)
                     # Don't output yet, because the follow up may turn into another prompt
                     # and they can be captured all together.
-                    pending += follow_up
+                    self._connection.unread(follow_up)
+                    # read propmt must remain in pending
                 else:
                     # let's hope it is an active prompt
                     if pending.endswith(NORMAL_PROMPT):
@@ -506,14 +510,25 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
             elif ends_overlap(pending, NORMAL_PROMPT) or ends_overlap(pending, FIRST_RAW_PROMPT):
                 # Maybe we have a prefix of the prompt and the rest is still coming?
+                # (it's OK to wait a bit, as the user output usually ends with a newline, ie not
+                # with a prompt prefix)
                 follow_up = self._connection.soft_read(1, timeout=0.1)
                 if not follow_up:
                     # most likely not a Python prompt, let's forget about it
                     output_consumer(self._decode(pending), stream_name)
                     pending = b""
                 else:
-                    # Let's withhold this for now
-                    pending += follow_up
+                    # Let's try the possible prefix again in the next iteration
+                    # (I'm unreading otherwise the read_until won't see the whole prompt
+                    # and needs to wait for the timeout)
+                    if ends_overlap(pending, NORMAL_PROMPT):
+                        n = ends_overlap(pending, NORMAL_PROMPT)
+                    else:
+                        n = ends_overlap(pending, FIRST_RAW_PROMPT)
+
+                    try_again = pending[-n:]
+                    pending = pending[:-n]
+                    self._connection.unread(try_again + follow_up)
 
             else:
                 # No EOT or prompt in sight.
@@ -998,8 +1013,8 @@ if __name__ == "__main__":
                 SerialConnection,
             )
 
-            connection = SerialConnection(args["port"], BAUDRATE)
-            # connection = DifficultSerialConnection(args["port"], BAUDRATE)
+            # connection = SerialConnection(args["port"], BAUDRATE)
+            connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         backend = MicroPythonBareMetalBackend(
             connection, clean=args["clean"], api_stubs_path=args["api_stubs_path"]
