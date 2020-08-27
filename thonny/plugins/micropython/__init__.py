@@ -687,15 +687,16 @@ def load_plugin():
         sort_key="49",
     )
 
-    add_micropython_backend(
-        "LocalMicroPython",
-        LocalMicroPythonProxy,
-        tr("MicroPython (local)"),
-        LocalMicroPythonConfigPage,
-        bare_metal=False,
-        sort_key="21",
-    )
-    get_workbench().set_default("LocalMicroPython.executable", "micropython")
+    if platform.system() in ("Linux", "Darwin"):
+        add_micropython_backend(
+            "LocalMicroPython",
+            LocalMicroPythonProxy,
+            tr("MicroPython (local)"),
+            LocalMicroPythonConfigPage,
+            bare_metal=False,
+            sort_key="21",
+        )
+        get_workbench().set_default("LocalMicroPython.executable", "micropython")
 
     add_micropython_backend(
         "SshMicroPython",
