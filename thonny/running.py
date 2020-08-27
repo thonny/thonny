@@ -1347,9 +1347,6 @@ class BlockingDialog(CommonDialogEx):
         if event.get("command_id") == self._cmd_id:
             self.destroy()
 
-        if event.get("error") and not event.get("interrupted"):
-            messagebox.showerror("Error", event.get("error"))
-
     def _on_progress(self, event):
         if event.get("command_id") != self._cmd_id:
             return

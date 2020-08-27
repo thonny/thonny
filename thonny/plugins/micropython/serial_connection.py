@@ -127,9 +127,9 @@ class DifficultSerialConnection(SerialConnection):
         # output Thonny message marker as two parts
         pos = data.find(FIRST_RAW_PROMPT)
         if pos > -1:
-            super()._make_output_available(data[: -1], block=block)
+            super()._make_output_available(data[:-1], block=block)
             time.sleep(0.1)
-            super()._make_output_available(data[-1 :], block=block)
+            super()._make_output_available(data[-1:], block=block)
         else:
             super()._make_output_available(data, block=block)
 

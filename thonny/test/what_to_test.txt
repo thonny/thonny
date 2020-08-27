@@ -62,3 +62,8 @@ if os.name == "nt":
 # import win32pipe
 # import win32ui
 # import win32wnet
+
+MicroPython
+
+* upload too big file
+* overwrite a big file (so that a copy wouldn't fit)

@@ -142,7 +142,7 @@ class MicroPythonConnection:
         if data:
             self._read_queue.put(data, block=block)
             self.num_bytes_received += len(data)
-            #print("GOT", data)
+            # print("GOT", data)
 
     def incoming_is_empty(self):
         return self._read_queue.empty() and len(self._read_buffer) == 0

@@ -140,9 +140,12 @@ class BaseBackend(ABC):
         """Executed when there is no commands in queue"""
         pass
 
-    def _report_internal_error(self):
+    def _report_internal_exception(self):
         print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
         traceback.print_exc()
+
+    def _report_internal_error(self, message):
+        print("PROBLEM WITH THONNY'S BACK-END:\n" + message + "\n", file=sys.stderr)
 
     @abstractmethod
     def _should_keep_going(self) -> bool:
@@ -261,7 +264,7 @@ class UploadDownloadBackend(BaseBackend, ABC):
 
             error = None
         except Exception as e:
-            self._report_internal_error()
+            self._report_internal_exception()
             error = str(e)
             content_bytes = None
 
@@ -279,7 +282,7 @@ class UploadDownloadBackend(BaseBackend, ABC):
 
             error = None
         except Exception as e:
-            self._report_internal_error()
+            self._report_internal_exception()
             error = str(e)
 
         return InlineResponse(

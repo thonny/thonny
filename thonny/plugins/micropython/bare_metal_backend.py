@@ -21,7 +21,7 @@ from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 from thonny.plugins.micropython.backend import (
     WAIT_OR_CRASH_TIMEOUT,
     MicroPythonBackend,
-    ProtocolError,
+    ManagementError,
     ReadOnlyFilesystemError,
     _report_internal_error,
     ends_overlap,
@@ -313,8 +313,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         if confirmation != OK:
-            raise ProtocolError(
-                "Could not read command confirmation", confirmation + self._connection.read_all()
+            self._report_internal_error(
+                "Could not read command confirmation. Got "
+                + repr(confirmation + self._connection.read_all())
             )
         else:
             debug("GOTOK")
@@ -983,7 +984,6 @@ if __name__ == "__main__":
     args = ast.literal_eval(sys.argv[1])
 
     try:
-        connection: MicroPythonConnection
         if args["port"] is None:
             # remain busy
             while True:

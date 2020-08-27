@@ -10,7 +10,13 @@ from typing import Callable
 
 from thonny.backend import SshBackend
 from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.backend import ENCODING, EOT, MicroPythonBackend, ends_overlap
+from thonny.plugins.micropython.backend import (
+    ENCODING,
+    EOT,
+    MicroPythonBackend,
+    ends_overlap,
+    ManagementError,
+)
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
 from thonny.plugins.micropython.connection import ConnectionFailedException
 
@@ -144,7 +150,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         """Ensures prompt and submits the script.
         Returns (out, value_repr, err) if there are no problems, ie. all parts of the 
         output are present and it reaches active prompt.
-        Otherwise raises ProtocolError.
+        Otherwise raises ManagementError.
         
         The execution may block. In this case the user should do something (eg. provide
         required input or issue an interrupt). The UI should remind the interrupt in case
@@ -265,8 +271,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
                 "used": (total - free) * block_size,
             }
         except Exception:
-            self._handle_bad_output(script, out, err)
-            raise
+            raise ManagementError(script, out, err)
 
     def _is_connected(self):
         return not self._connection._error

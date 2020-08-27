@@ -147,6 +147,8 @@ class Workbench(tk.Tk):
 
         self._init_theming()
         self._init_window()
+        self.option_add("*Dialog.msg.wrapLength", "8i")
+
         self.add_view(
             ShellView, tr("Shell"), "s", visible_by_default=True, default_position_key="A"
         )

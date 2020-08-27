@@ -3,6 +3,7 @@
 import os
 import pathlib
 import subprocess
+import time
 import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
@@ -258,7 +259,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 response = get_runner().send_command_and_wait(
                     InlineCommand("download", items=picked_items), dialog_title=tr("Copying")
                 )
-                _check_transfer_errors(response["errors"])
+                _check_transfer_errors(response)
 
                 self.master.local_files.refresh_tree()
 
@@ -370,9 +371,13 @@ def pick_transfer_items(
         return prepared_items
 
 
-def _check_transfer_errors(errors):
-    if errors:
-        showerror("Error", "Got following errors:\n" + format_items(errors))
+def _check_transfer_errors(response):
+    if response.get("error"):
+        showerror(tr("Transfer error"), response["error"])
+    elif response["errors"]:
+        showerror(
+            tr("Transfer error"), "Got following errors:\n" + format_items(response["errors"])
+        )
 
 
 def format_items(items):
@@ -405,10 +410,12 @@ def upload(paths, source_dir, target_dir) -> bool:
         )
     )
     if picked_items:
+        start = time.time()
         response = get_runner().send_command_and_wait(
             InlineCommand("upload", items=picked_items), dialog_title="Copying"
         )
-        _check_transfer_errors(response["errors"])
+        print("took", time.time() - start)
+        _check_transfer_errors(response)
         return True
     else:
         return False

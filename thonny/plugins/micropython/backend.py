@@ -131,9 +131,6 @@ class MicroPythonBackend(MainBackend, ABC):
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
-        except ProtocolError as e:
-            self._send_output("ProtocolError: %s\n" % (e.message,), "stderr")
-            self._send_output("CAPTURED DATA: %s\n" % (e.captured,), "stderr")
         except Exception:
             logger.exception("Crash in backend")
             traceback.print_exc()
@@ -252,7 +249,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._write(INTERRUPT_CMD)
                 time.sleep(0.1)
                 self._write(INTERRUPT_CMD)
-                print("sent interrupt")
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
 
@@ -288,15 +284,18 @@ class MicroPythonBackend(MainBackend, ABC):
                 response = create_error_response()
             except KeyboardInterrupt:
                 response = create_error_response(error="Interrupted", interrupted=True)
-            except ProtocolError as e:
-                self._send_output(
-                    "THONNY FAILED TO EXECUTE %s (%s)\n" % (cmd.name, e.message), "stderr"
-                )
-                self._send_output("CAPTURED DATA: %r\n" % e.captured, "stderr")
-                self._send_output("TRYING TO RECOVER ...\n", "stderr")
-                # TODO: detect when there is no output for long time and suggest interrupt
-                self._forward_output_until_active_prompt("stdout")
-                response = create_error_response(error=e.message)
+            except ManagementError as e:
+                if "KeyboardInterrupt" in e.err:
+                    response = create_error_response(error="Interrupted", interrupted=True)
+                else:
+                    self._send_output("THONNY FAILED TO EXECUTE COMMAND %s\n" % cmd.name, "stderr")
+                    # traceback.print_exc() # I'll know the trace from command
+                    self._show_error("\n")
+                    self._show_error("SCRIPT:\n" + e.script + "\n")
+                    self._show_error("STDOUT:\n" + e.out + "\n")
+                    self._show_error("STDERR:\n" + e.err + "\n")
+
+                    response = create_error_response(error="ManagementError")
             except Exception:
                 _report_internal_error()
                 response = create_error_response(context_info="other unhandled exception")
@@ -408,7 +407,9 @@ class MicroPythonBackend(MainBackend, ABC):
         If capture is False, then forwards output incrementally. Otherwise
         returns output if there are no problems, ie. all expected parts of the 
         output are present and it reaches a prompt.
-        Otherwise raises ProtocolError.
+        Otherwise raises ManagementError.
+
+        NB! If the consumer raises an exception, the processing may stop between prompts.
         
         The execution may block. In this case the user should do something (eg. provide
         required input or issue an interrupt). The UI should remind the interrupt in case
@@ -420,10 +421,10 @@ class MicroPythonBackend(MainBackend, ABC):
         """Meant for management tasks."""
         out, err = self._execute(script, capture_output=True)
         if out or err:
-            self._handle_bad_output(script, out, err)
+            raise ManagementError(script, out, err)
 
     def _evaluate(self, script):
-        """Evaluate the output of the script or raise ProtocolError, if anything looks wrong.
+        """Evaluate the output of the script or raise ManagementError, if anything looks wrong.
         
         Adds printing code if the script contains single expression and doesn't 
         already contain printing code"""
@@ -437,11 +438,8 @@ class MicroPythonBackend(MainBackend, ABC):
             pass
 
         out, err = self._execute(script, capture_output=True)
-        if err:
-            return self._handle_bad_output(script, out, err)
-
-        if MGMT_VALUE_START.decode(ENCODING) not in out:
-            return self._handle_bad_output(script, out, err)
+        if err or MGMT_VALUE_START.decode(ENCODING) not in out:
+            raise ManagementError(script, out, err)
 
         side_effects, value_str = out.rsplit(MGMT_VALUE_START.decode(ENCODING), maxsplit=1)
         if side_effects:
@@ -452,7 +450,7 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             return ast.literal_eval(value_str)
         except SyntaxError:
-            return self._handle_bad_output(script, out, err)
+            raise ManagementError(script, out, err)
 
     def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
         """Used for finding initial prompt or forwarding problematic output 
@@ -1084,12 +1082,6 @@ class MicroPythonBackend(MainBackend, ABC):
     def _show_error(self, msg):
         self._send_output(msg + "\n", "stderr")
 
-    def _handle_bad_output(self, script, out, err):
-        self._show_error("PROBLEM WITH INTERNAL MANAGEMENT COMMAND\n")
-        self._show_error("COMMAND:\n" + script + "\n")
-        self._show_error("STDOUT:\n" + out + "\n")
-        self._show_error("STDERR:\n" + err + "\n")
-
     def _add_expression_statement_handlers(self, source):
         try:
             root = ast.parse(source)
@@ -1173,15 +1165,12 @@ class MicroPythonBackend(MainBackend, ABC):
         return result
 
 
-class ProtocolError(Exception):
-    def __init__(self, message, captured):
-        Exception.__init__(self, message)
-        self.message = message
-        self.captured = captured
-
-
-class ExecutionError(Exception):
-    pass
+class ManagementError(Exception):
+    def __init__(self, script, out, err):
+        Exception.__init__(self, "Problem with a management command")
+        self.script = script
+        self.out = out
+        self.err = err
 
 
 def _report_internal_error():

@@ -557,7 +557,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             ):
                 self._io_cursor_offset = 0  # ignore the effect of preceding \r and \b
                 actual_text = self._remove_object_link_markers(data)
-                button_text = actual_text[:40] + " …"
+                button_text = actual_text[:70] + " …"
                 btn = tk.Label(
                     self,
                     text=button_text,

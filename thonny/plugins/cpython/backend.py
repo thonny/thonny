@@ -209,7 +209,7 @@ class CPythonMainBackend(MainBackend):
             except KeyboardInterrupt:
                 response = {"user_exception": self._prepare_user_exception()}
             except Exception:
-                self._report_internal_error()
+                self._report_internal_exception()
                 response = {"context_info": "other unhandled exception"}
 
         if response is False:
@@ -293,14 +293,14 @@ class CPythonMainBackend(MainBackend):
             try:
                 handler(module)
             except Exception:
-                self._report_internal_error()
+                self._report_internal_exception()
 
         # general handlers
         for handler in self._import_handlers.get("*", []):
             try:
                 handler(module)
             except Exception:
-                self._report_internal_error()
+                self._report_internal_exception()
 
         return module
 
@@ -1273,7 +1273,7 @@ class Executor:
         except SystemExit:
             return {"SystemExit": True}
         except Exception:
-            self._backend._report_internal_error()
+            self._backend._report_internal_exception()
             return {}
 
     @return_execution_result
