@@ -817,7 +817,19 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                     script = "__W(%r)" % binascii.hexlify(block)
                 else:
                     script = "__W(%r)" % block
-                self._execute_without_output(script)
+                out, err = self._execute(script, capture_output=True)
+                if out or err:
+                    self._show_error(
+                        "\nCould not write next block after having written %d bytes to %s"
+                        % (bytes_sent, target_path)
+                    )
+                    if bytes_sent > 0:
+                        self._show_error(
+                            "Make sure your device's filesystem has enough free space. "
+                            + "(When overwriting a file, the old content may occupy space "
+                            "until the end of the operation.)\n"
+                        )
+                    raise ManagementError(script, out, err)
                 bytes_sent += len(block)
 
             if len(block) < block_size:

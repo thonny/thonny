@@ -365,7 +365,11 @@ class UploadDownloadBackend(BaseBackend, ABC):
             sep = "\\"
 
         path = path.rstrip(sep)
-        return path[: path.rindex(sep)]
+        result = path[: path.rindex(sep)]
+        if not result:
+            return sep
+        else:
+            return result
 
     def _ensure_local_directory(self, path: str) -> None:
         os.makedirs(path, NEW_DIR_MODE, exist_ok=True)
