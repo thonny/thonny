@@ -138,13 +138,13 @@ class MicroPythonBackend(MainBackend, ABC):
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
 
-        self._report_time("bef preparing helpers")
-        self._prepare_helpers()
-        self._report_time("prepared helpers")
-
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
             self._report_time("got welcome")
+
+        self._report_time("bef preparing helpers")
+        self._prepare_helpers()
+        self._report_time("prepared helpers")
 
         self._update_cwd()
         self._report_time("got cwd")

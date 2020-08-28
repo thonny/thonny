@@ -58,6 +58,9 @@ OK = b"OK"
 # Looks like it's not translatable in CP
 # https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
 FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
+
+# https://forum.micropython.org/viewtopic.php?f=12&t=7652&hilit=w600#p43640
+W600_FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\r\n>"
 FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
 
 RAW_PROMPT = b">"
@@ -204,7 +207,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             self._connection.write(RAW_MODE_CMD)
             time.sleep(delay)
             discarded_bytes += self._connection.read_all()
-            if discarded_bytes.endswith(FIRST_RAW_PROMPT):
+            if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
+                W600_FIRST_RAW_PROMPT
+            ):
                 self._raw_prompt_ensured = True
                 break
         else:
