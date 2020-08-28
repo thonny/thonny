@@ -2,13 +2,11 @@
 
 import os
 import pathlib
-import subprocess
-import time
 import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
-from tkinter.messagebox import showerror, askyesno, askokcancel
-from typing import Iterable, Type, List, Dict, Set
+from tkinter.messagebox import showerror, askokcancel
+from typing import Iterable, Type, List, Dict
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.base_file_browser import (
@@ -218,18 +216,32 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
+        get_workbench().bind("PackagesUpdated", self.on_packages_updated, True)
 
     def is_active_browser(self):
         return True
 
-    def on_toplevel_response(self, event):
+    def on_toplevel_response(self, msg):
+        if not self.winfo_ismapped():
+            return
         if get_runner().get_backend_proxy().supports_remote_files():
-            self.check_update_focus()
+            # pass cwd, as proxy may not yet know it
+            self.check_update_focus(msg.get("cwd"))
 
-    def check_update_focus(self):
-        proxy = get_runner().get_backend_proxy()
-        if self.current_focus != proxy.get_cwd():
-            self.focus_into(proxy.get_cwd())
+    def on_packages_updated(self, event=None):
+        if not self.winfo_ismapped():
+            return
+
+        if get_runner().get_backend_proxy().supports_remote_files():
+            self.refresh_tree()
+
+    def check_update_focus(self, new_cwd=None):
+        if new_cwd is None:
+            proxy = get_runner().get_backend_proxy()
+            new_cwd = proxy.get_cwd()
+
+        if self.current_focus != new_cwd:
+            self.focus_into(new_cwd)
 
     def request_new_focus(self, path):
         get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
@@ -410,11 +422,9 @@ def upload(paths, source_dir, target_dir) -> bool:
         )
     )
     if picked_items:
-        start = time.time()
         response = get_runner().send_command_and_wait(
             InlineCommand("upload", items=picked_items), dialog_title="Copying"
         )
-        print("took", time.time() - start)
         _check_transfer_errors(response)
         return True
     else:

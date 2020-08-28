@@ -238,7 +238,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._submit_input(msg.data)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
-        self._soft_reboot(False)
+        self._soft_reboot()
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         if cmd["name"] == "interrupt":
@@ -364,7 +364,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
-    def _soft_reboot(self, side_command):
+    def _soft_reboot(self):
         raise NotImplementedError()
 
     def _write(self, data):

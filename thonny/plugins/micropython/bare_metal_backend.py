@@ -228,21 +228,16 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             )
             sys.exit()
 
-    def _soft_reboot(self, side_command):
-        if side_command:
-            self._interrupt_to_raw_prompt()
-
+    def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
         self._connection.write(NORMAL_MODE_CMD)
         self._raw_prompt_ensured = False
         self._connection.read_until(NORMAL_PROMPT)
-
         self._connection.write(SOFT_REBOOT_CMD)
-
-        if not side_command:
-            self._forward_output_until_active_prompt(self._send_output)
-            self.send_message(ToplevelResponse(cwd=self._cwd))
+        self._forward_output_until_active_prompt(self._send_output)
+        self._ensure_raw_prompt()
+        self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work
@@ -287,25 +282,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         # assuming we are already in a prompt
         self._forward_unexpected_output()
-
-        if not self._raw_prompt_ensured:
-            debug("Ensuring raw prompt")
-            self._connection.write(RAW_MODE_CMD)
-
-            prompt = (
-                self._connection.read_until(
-                    FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
-                )
-                + self._connection.read_all()
-            )
-
-            if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
-                self._send_output(prompt, "stdout")
-                raise TimeoutError("Could not ensure raw prompt")
-
-            self._raw_prompt_ensured = True
-            debug("Restoring helpers")
-            self._prepare_helpers()
+        self._ensure_raw_prompt()
 
         # send command
         with self._interrupt_lock:
@@ -324,6 +301,29 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             )
         else:
             debug("GOTOK")
+
+    def _ensure_raw_prompt(self):
+        if self._raw_prompt_ensured:
+            return
+
+        debug("Ensuring raw prompt")
+        self._connection.write(RAW_MODE_CMD)
+
+        prompt = (
+            self._connection.read_until(
+                FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
+            )
+            + self._connection.read_all()
+        )
+
+        if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
+            self._send_output(prompt, "stdout")
+            raise TimeoutError("Could not ensure raw prompt")
+
+        self._raw_prompt_ensured = True
+        debug("Restoring helpers")
+        self._prepare_helpers()
+        self._update_cwd()
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
@@ -664,7 +664,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         return os.path.join(mount_path, os.path.normpath(path_suffix))
 
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
-        return self._get_stat_mode(self, path)
+        return self._get_stat_mode(path)
 
     def _mkdir_for_upload(self, path: str) -> None:
         self._mkdir(path)

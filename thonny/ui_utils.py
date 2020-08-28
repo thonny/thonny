@@ -111,11 +111,11 @@ class QueryDialog(CommonDialogEx):
 
         self.entry_widget.focus_set()
 
-    def on_ok(self):
+    def on_ok(self, event=None):
         self.result = self.var.get()
         self.destroy()
 
-    def on_cancel(self):
+    def on_cancel(self, event=None):
         self.result = None
         self.destroy()
 

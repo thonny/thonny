@@ -308,6 +308,14 @@ class UploadDownloadBackend(BaseBackend, ABC):
         completed_cost = 0
         errors = []
 
+        ensured_dirs = set()
+
+        def ensure_dir(path):
+            if path in ensured_dirs:
+                return
+            ensure_dir_fun(path)
+            ensured_dirs.add(path)
+
         for item in sorted(items, key=lambda x: x["source_path"]):
             self._report_progress(cmd, item["source_path"], completed_cost, total_cost)
 
@@ -318,9 +326,10 @@ class UploadDownloadBackend(BaseBackend, ABC):
 
             try:
                 if item["kind"] == "dir":
-                    ensure_dir_fun(item["target_path"])
+                    ensure_dir(item["target_path"])
                     completed_cost += self._get_dir_transfer_cost()
                 else:
+                    ensure_dir(self._get_parent_directory(item["target_path"]))
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
             except OSError as e:
@@ -348,6 +357,15 @@ class UploadDownloadBackend(BaseBackend, ABC):
     def _get_file_fixed_cost(self):
         # Creating or overwriting a file is taken to be equal to copying this number of bytes
         return 100
+
+    def _get_parent_directory(self, path: str):
+        if "/" in path:
+            sep = "/"
+        else:
+            sep = "\\"
+
+        path = path.rstrip(sep)
+        return path[: path.rindex(sep)]
 
     def _ensure_local_directory(self, path: str) -> None:
         os.makedirs(path, NEW_DIR_MODE, exist_ok=True)

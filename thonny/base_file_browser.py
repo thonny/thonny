@@ -177,6 +177,7 @@ class BaseFileBrowser(ttk.Frame):
 
     def focus_into(self, path):
         self.clear_error()
+        self.invalidate_cache()
 
         # clear
         self.tree.set_children(ROOT_NODE_ID)

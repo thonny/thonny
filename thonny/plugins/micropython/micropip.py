@@ -248,11 +248,13 @@ def install(to_install):
             if deps:
                 deps = deps.decode("utf-8").split("\n")
                 to_install.extend(deps)
+        return True
     except Exception as e:
         print(
             "Error installing '{}': {}, packages may be partially installed".format(pkg_spec, e),
             file=sys.stderr,
         )
+        return False
 
 
 def help_msg():
@@ -320,7 +322,8 @@ def main():
 
     g_install_path = os.path.expanduser(g_install_path)
     g_install_path = os.path.abspath(g_install_path)
-    install(to_install)
+    if not install(to_install):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -141,7 +141,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
 
-    def _soft_reboot(self, side_command):
+    def _soft_reboot(self):
         raise NotImplementedError()
 
     def _execute_with_consumer(
