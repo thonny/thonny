@@ -140,6 +140,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         if clean:
             self._interrupt_to_raw_prompt()
         else:
+            # Order first raw prompt to be output when the code is done.
+            # If the device is already at raw prompt then it gets repeated as first raw prompt.
+            # If it is at normal prompt then outputs first raw prompt
             self._connection.write(RAW_MODE_CMD)
             self._forward_output_until_active_prompt(self._send_output)
 
@@ -196,12 +199,12 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 self._show_error(
                     "Could not enter REPL. Trying again with %d second waiting time..." % delay
                 )
-            self._connection.reset_output_buffer()
+            self._connection.reset_output_buffer()  # cancels previous writes
             self._connection.write(INTERRUPT_CMD)
             self._connection.write(RAW_MODE_CMD)
             time.sleep(delay)
             discarded_bytes += self._connection.read_all()
-            if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(b"\r\n>"):
+            if discarded_bytes.endswith(FIRST_RAW_PROMPT):
                 self._raw_prompt_ensured = True
                 break
         else:
@@ -313,9 +316,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         if confirmation != OK:
+            data = confirmation + self._connection.read_all()
+            data += self._connection.read(1, timeout=1, timeout_is_soft=True)
+            data += self._connection.read_all()
             self._report_internal_error(
-                "Could not read command confirmation. Got "
-                + repr(confirmation + self._connection.read_all())
+                "Could not read command confirmation. Got " + repr(data) + "\n\nSCRIPT:\n" + script
             )
         else:
             debug("GOTOK")
@@ -462,7 +467,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                     # nothing to parse
                     continue
 
-            # print("Got", new_data)
             pending += new_data
 
             if pending.endswith(EOT):
@@ -512,7 +516,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 # Maybe we have a prefix of the prompt and the rest is still coming?
                 # (it's OK to wait a bit, as the user output usually ends with a newline, ie not
                 # with a prompt prefix)
-                follow_up = self._connection.soft_read(1, timeout=0.1)
+                follow_up = self._connection.soft_read(1, timeout=0.3)
                 if not follow_up:
                     # most likely not a Python prompt, let's forget about it
                     output_consumer(self._decode(pending), stream_name)
