@@ -20,6 +20,7 @@ from thonny.plugins.pip_gui import (
     INSTALL,
     UNINSTALL,
     _fetch_url_future,
+    get_not_supported_translation,
 )
 
 
@@ -87,6 +88,7 @@ class MicroPythonPipDialog(BackendPipDialog):
 
             # don't know which module to show, therefore None arg
             self._start_update_list(None)
+            get_workbench().event_generate("PackagesUpdated")
 
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
         assert action in ["install", "advanced"]
@@ -284,8 +286,12 @@ class MicroPythonPipDialog(BackendPipDialog):
 
     def _show_read_only_instructions(self):
         self._append_info_text(tr("Not available") + "\n", ("caption",))
+        if not self._get_target_directory():
+            reason = " (" + tr("no lib directory in sys.path") + ")"
+        else:
+            reason = ""
         self.info_text.direct_insert(
-            "end", tr("Package manager is not available for this interpreter") + "\n\n",
+            "end", get_not_supported_translation() + reason + "\n\n",
         )
 
     def _tweak_search_results(self, results, query):

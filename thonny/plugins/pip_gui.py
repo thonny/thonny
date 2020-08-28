@@ -214,27 +214,37 @@ class PipDialog(CommonDialog):
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
-        widgets = [
-            self.listbox,
-            # self.search_box, # looks funny when disabled
-            self.search_button,
+        action_buttons = [
             self.install_button,
             self.advanced_button,
             self.uninstall_button,
         ]
 
-        if state == "idle":
-            self.config(cursor="")
-            for widget in widgets:
+        other_widgets = [
+            self.listbox,
+            # self.search_box, # looks funny when disabled
+            self.search_button,
+        ]
+
+        if state == "idle" and not self._read_only():
+            for widget in action_buttons:
                 widget["state"] = tk.NORMAL
         else:
-            if force_normal_cursor:
-                self.config(cursor="")
-            else:
-                self.config(cursor=get_busy_cursor())
-
-            for widget in widgets:
+            for widget in action_buttons:
                 widget["state"] = tk.DISABLED
+
+        if state == "idle":
+            for widget in other_widgets:
+                widget["state"] = tk.NORMAL
+        else:
+            self.config(cursor=get_busy_cursor())
+            for widget in other_widgets:
+                widget["state"] = tk.DISABLED
+
+        if state == "idle" or force_normal_cursor:
+            self.config(cursor="")
+        else:
+            self.config(cursor=get_busy_cursor())
 
     def _get_state(self):
         return self._state
@@ -667,6 +677,8 @@ class PipDialog(CommonDialog):
                 None if action == "uninstall" else self.current_package_data["info"]["name"]
             )
 
+            get_workbench().event_generate("PackagesUpdated")
+
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
@@ -720,9 +732,11 @@ class PipDialog(CommonDialog):
         title = subprocess.list2cmdline(cmd)
 
         # following call blocks
-        _show_subprocess_dialog(self, proc, title)
-
-        return True
+        returncode, _, _ = _show_subprocess_dialog(self, proc, title)
+        if returncode != 0:
+            return False
+        else:
+            return True
 
     def does_support_update_deps_switch(self):
         return True
@@ -1258,7 +1272,7 @@ def _get_latest_stable_version(version_strings):
 
 
 def _show_subprocess_dialog(master, proc, title):
-    dlg = SubprocessDialog(master, proc, title, autoclose=False)
+    dlg = SubprocessDialog(master, proc, title, autoclose=True)
     ui_utils.show_dialog(dlg, master)
     return dlg.returncode, dlg.stdout, dlg.stderr
 
@@ -1381,6 +1395,10 @@ def _extract_click_text(widget, event, tag):
     return None
 
 
+def get_not_supported_translation():
+    return tr("Package manager is not available for this interpreter")
+
+
 def load_plugin() -> None:
     def get_pip_gui_class():
         proxy = get_runner().get_backend_proxy()
@@ -1391,9 +1409,7 @@ def load_plugin() -> None:
     def open_backend_pip_gui(*args):
         pg_class = get_pip_gui_class()
         if pg_class is None:
-            showerror(
-                tr("Not supported"), tr("Package manager is not available for this back-end.")
-            )
+            showerror(tr("Not supported"), get_not_supported_translation())
             return
 
         if not get_runner().is_waiting_toplevel_command():
