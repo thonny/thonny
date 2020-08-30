@@ -77,6 +77,15 @@ class MicroPythonProxy(SubprocessProxy):
         if "lib_dirs" in msg:
             self._lib_dirs = msg["lib_dirs"]
 
+    def _get_time_args(self):
+        result = {
+            "sync_time": get_workbench().get_option(self.backend_name + ".sync_time", False),
+            "validate_time": get_workbench().get_option(
+                self.backend_name + ".validate_time", False
+            ),
+        }
+        return result
+
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -126,6 +135,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if self._port == "webrepl":
             args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
             args["password"] = get_workbench().get_option(self.backend_name + ".webrepl_password")
+
+        args.update(self._get_time_args())
 
         cmd = [
             thonny.plugins.micropython.bare_metal_backend.__file__,
@@ -559,18 +570,21 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
 
+        args = {
+            "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
+            "interpreter": self._mp_executable,
+            "api_stubs_path": self._get_api_stubs_path(),
+            "host": self._host,
+            "user": self._user,
+            "password": self._password,
+        }
+
+        args.update(self._get_time_args())
+        print(args)
+
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
-            repr(
-                {
-                    "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
-                    "interpreter": self._mp_executable,
-                    "api_stubs_path": self._get_api_stubs_path(),
-                    "host": self._host,
-                    "user": self._user,
-                    "password": self._password,
-                }
-            ),
+            repr(args),
         ]
         return cmd
 
@@ -681,6 +695,12 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")
+
+        get_workbench().set_default(name + ".sync_time", True)
+    else:
+        get_workbench().set_default(name + ".sync_time", False)
+
+    get_workbench().set_default(name + ".validate_time", True)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 
 

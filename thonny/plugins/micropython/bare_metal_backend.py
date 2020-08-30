@@ -5,8 +5,9 @@ import queue
 import re
 import sys
 import time
-from textwrap import dedent
-from typing import BinaryIO, Callable, Optional
+from _ast import Not
+from textwrap import dedent, indent
+from typing import BinaryIO, Callable, Optional, Tuple
 
 from thonny.backend import UploadDownloadBackend
 from thonny.common import (
@@ -25,7 +26,8 @@ from thonny.plugins.micropython.backend import (
     ReadOnlyFilesystemError,
     _report_internal_error,
     ends_overlap,
-    unix_dirname_basename, Y2000_EPOCH_OFFSET,
+    unix_dirname_basename,
+    Y2000_EPOCH_OFFSET,
 )
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
@@ -110,13 +112,13 @@ def debug(msg):
 
 
 class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
-    def __init__(self, connection, clean, api_stubs_path):
+    def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
         self._raw_prompt_ensured = False
 
-        super().__init__(clean, api_stubs_path)
+        super().__init__(clean, args)
 
     def _get_custom_helpers(self):
         return dedent(
@@ -183,6 +185,97 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         )
 
         return modules_str.split()
+
+    def _sync_time(self):
+        """Sets the time on the pyboard to match the time on the host."""
+        if self._connected_to_microbit():
+            return
+        elif self._connected_to_circuitpython():
+            specific_script = dedent(
+                """
+                from rtc import RTC as __thonny_RTC
+                __thonny_RTC().datetime = {ts}
+                del __thonny_RTC
+            """
+            ).format(ts=tuple(time.localtime()))
+        else:
+            now = time.localtime()
+            specific_script = dedent(
+                """
+                from machine import RTC as __thonny_RTC
+                try:
+                    __thonny_RTC().datetime({datetime_ts})
+                except:
+                    __thonny_RTC().init({init_ts})
+                del __thonny_RTC
+
+            """
+            ).format(
+                datetime_ts=(
+                    now.tm_year,
+                    now.tm_mon,
+                    now.tm_mday,
+                    now.tm_wday + 1,
+                    now.tm_hour,
+                    now.tm_min,
+                    now.tm_sec,
+                    0,
+                ),
+                init_ts=tuple(now)[:6] + (0, 0),
+            )
+
+        script = (
+            dedent(
+                """
+            try:
+            %s
+                __thonny_helper.print_mgmt_value(True)
+            except Exception as e:
+                __thonny_helper.print_mgmt_value(str(e))
+        """
+            )
+            % indent(specific_script, "    ")
+        )
+
+        # Adapted from RShell by Dave Hylands
+
+        val = self._evaluate(script)
+        if isinstance(val, str):
+            print("WARNING: Could not sync device's clock: " + val)
+
+    def _validate_time(self):
+        script = dedent(
+            """
+            try:
+                try:
+                    from time import localtime as __thonny_localtime
+                    __thonny_helper.print_mgmt_value(tuple(__thonny_localtime()))
+                    del __thonny_localtime
+                except:
+                    # some CP boards
+                    from rtc import RTC as __thonny_RTC
+                    __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime))
+                    del __thonny_RTC
+            except Exception as e:
+                __thonny_helper.print_mgmt_value(str(e))
+        """
+        )
+
+        val = self._evaluate(script)
+        if isinstance(val, tuple):
+            # make sure it ended up right
+            val = val[:8]
+            while len(val) < 8:
+                val += (0,)
+            val += (-1,)  # unknown DST
+            diff = int(time.mktime(time.localtime()) - time.mktime(val))
+            if abs(diff) > 10:
+                print("WARNING: Device's time differs from local time by %s seconds." % diff)
+            else:
+                print("Diff in seconds", diff)
+        else:
+            assert isinstance(val, str)
+            print("WARNING: Could not validate time: " + val)
 
     def _update_cwd(self):
         if self._connected_to_microbit():
@@ -628,6 +721,14 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         return result
 
+    def _cmd_upload(self, cmd):
+        self._check_sync_time()
+        super(MicroPythonBareMetalBackend, self)._cmd_upload()
+
+    def _cmd_write_file(self, cmd):
+        self._check_sync_time()
+        super(MicroPythonBareMetalBackend, self)._cmd_write_file()
+
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():
             # micro:bit
@@ -1038,9 +1139,7 @@ if __name__ == "__main__":
             # connection = SerialConnection(args["port"], BAUDRATE)
             connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
-        backend = MicroPythonBareMetalBackend(
-            connection, clean=args["clean"], api_stubs_path=args["api_stubs_path"]
-        )
+        backend = MicroPythonBareMetalBackend(connection, clean=args["clean"], args=args)
 
     except ConnectionFailedException as e:
         text = "\n" + str(e) + "\n"

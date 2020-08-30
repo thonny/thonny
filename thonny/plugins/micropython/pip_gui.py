@@ -88,7 +88,7 @@ class MicroPythonPipDialog(BackendPipDialog):
 
             # don't know which module to show, therefore None arg
             self._start_update_list(None)
-            get_workbench().event_generate("PackagesUpdated")
+            get_workbench().event_generate("RemoteFilesChanged")
 
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
         assert action in ["install", "advanced"]

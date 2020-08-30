@@ -5,6 +5,7 @@ import re
 import shlex
 import sys
 import textwrap
+import time
 from abc import ABC
 from typing import Callable
 
@@ -53,9 +54,9 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend, ABC):
-    def __init__(self, interpreter, api_stubs_path, cwd):
+    def __init__(self, args):
         try:
-            self._interpreter = self._resolve_executable(interpreter)
+            self._interpreter = self._resolve_executable(args["interpreter"])
             self._connection = self._create_connection()
         except ConnectionFailedException as e:
             text = "\n" + str(e) + "\n"
@@ -64,7 +65,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
             sys.stdout.flush()
             return
 
-        MicroPythonBackend.__init__(self, None, api_stubs_path, cwd=cwd)
+        MicroPythonBackend.__init__(self, None, args)
 
     def _resolve_executable(self, executable):
         result = self._which(executable)
@@ -282,6 +283,30 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         except NotImplementedError:
             return 0
 
+    def _sync_time(self):
+        self._show_error("WARNING: Automatic time synchronization by Thonny is not supported.")
+
+    def _validate_time(self):
+
+        script = textwrap.dedent(
+            """
+            try:
+                from time import time as __thonny_time
+                __thonny_helper.print_mgmt_value(__thonny_time())
+                del __thonny_time
+            except Exception as e:
+                __thonny_helper.print_mgmt_value(str(e))
+            """
+        )
+
+        val = self._evaluate(script)
+        if isinstance(val, str):
+            print("WARNING: Could not validate time: " + val)
+        else:
+            diff = int(time.time() - val)
+            if abs(diff) > 10:
+                print("WARNING: Device's time differs from local time by %s seconds." % diff)
+
 
 class MicroPythonLocalBackend(MicroPythonOsBackend):
     def _create_connection(self, run_args=[]):
@@ -307,9 +332,19 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 
 class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
-    def __init__(self, host, user, password, interpreter, cwd, api_stubs_path):
-        SshBackend.__init__(self, host, user, password, interpreter, cwd)
-        MicroPythonOsBackend.__init__(self, interpreter, api_stubs_path, cwd=cwd)
+    def __init__(self, args):
+        SshBackend.__init__(
+            self, args["host"], args["user"], args["password"], args["interpreter"], args.get("cwd")
+        )
+        MicroPythonOsBackend.__init__(self, args)
+
+    def _cmd_upload(self, cmd):
+        self._check_sync_time()
+        super(MicroPythonSshBackend, self)._cmd_upload()
+
+    def _cmd_write_file(self, cmd):
+        self._check_sync_time()
+        super(MicroPythonSshBackend, self)._cmd_write_file()
 
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
@@ -356,6 +391,6 @@ if __name__ == "__main__":
     args = ast.literal_eval(sys.argv[1])
 
     if "host" in args:
-        backend = MicroPythonSshBackend(**args)
+        backend = MicroPythonSshBackend(args)
     else:
-        backend = MicroPythonLocalBackend(**args)
+        backend = MicroPythonLocalBackend(args)

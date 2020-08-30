@@ -677,7 +677,7 @@ class PipDialog(CommonDialog):
                 None if action == "uninstall" else self.current_package_data["info"]["name"]
             )
 
-            get_workbench().event_generate("PackagesUpdated")
+            get_workbench().event_generate("RemoteFilesChanged")
 
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
         assert self._get_state() == "idle"

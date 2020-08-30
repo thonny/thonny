@@ -216,7 +216,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
-        get_workbench().bind("PackagesUpdated", self.on_packages_updated, True)
+        get_workbench().bind("RemoteFilesChanged", self.on_remote_files_changed, True)
 
     def is_active_browser(self):
         return True
@@ -228,7 +228,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             # pass cwd, as proxy may not yet know it
             self.check_update_focus(msg.get("cwd"))
 
-    def on_packages_updated(self, event=None):
+    def on_remote_files_changed(self, event=None):
         if not self.winfo_ismapped():
             return
 

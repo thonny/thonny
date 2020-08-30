@@ -478,11 +478,13 @@ class BaseFileBrowser(ttk.Frame):
 
         if data.get("modified"):
             try:
-                dtime = datetime.datetime.fromtimestamp(int(data["modified"]))
+                dtime = datetime.datetime.fromtimestamp(
+                    int(data["modified"]), tz=datetime.timezone.utc
+                )
             except Exception:
                 time_str = ""
             else:
-                time_str = dtime.isoformat().replace("T", " ")
+                time_str = dtime.isoformat(sep=" ")[:19]  # cut timezone information
         else:
             time_str = ""
 

@@ -113,19 +113,18 @@ def debug(msg):
 
 
 class MicroPythonBackend(MainBackend, ABC):
-    def __init__(self, clean, api_stubs_path, cwd=None):
+    def __init__(self, clean, args):
 
+        self._args = args
         MainBackend.__init__(self)
-
         self._prev_time = time.time()
-
         self._local_cwd = None
-        self._cwd = cwd
+        self._cwd = args.get("cwd")
         self._progress_times = {}
         self._welcome_text = None
         self._sys_path = None
 
-        self._api_stubs_path = api_stubs_path
+        self._api_stubs_path = args.get("api_stubs_path")
 
         try:
             self._report_time("before prepare")
@@ -154,8 +153,11 @@ class MicroPythonBackend(MainBackend, ABC):
         if self._sys_path is None:
             self._sys_path = self._fetch_sys_path()
 
+        self._check_sync_time()
+        if self._args.get("validate_time"):
+            self._validate_time()
+
         if self._welcome_text:
-            # not required when a script is run in os_backend
             self._send_ready_message()
             self._report_time("sent ready")
 
@@ -163,6 +165,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._builtins_info = self._fetch_builtins_info()
 
         self._zero_localtime = self._fetch_zero_localtime()
+
         self._report_time("prepared")
 
     def _prepare_helpers(self):
@@ -230,6 +233,16 @@ class MicroPythonBackend(MainBackend, ABC):
         """How many last evaluated REPL values and visited Object inspector values to keep
         in internal lists for the purpose of retrieving them by id for Object inspector"""
         return 5
+
+    def _check_sync_time(self):
+        if self._args.get("sync_time"):
+            self._sync_time()
+
+    def _sync_time(self):
+        raise NotImplementedError()
+
+    def _validate_time(self):
+        raise NotImplementedError()
 
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
@@ -336,7 +349,6 @@ class MicroPythonBackend(MainBackend, ABC):
     def _connected_to_circuitpython(self):
         return "circuitpython" in self._welcome_text.lower()
 
-
     def _fetch_welcome_text(self) -> str:
         raise NotImplementedError()
 
@@ -374,14 +386,18 @@ class MicroPythonBackend(MainBackend, ABC):
         if self._connected_to_microbit():
             return None
 
-        return self._evaluate(dedent("""
+        return self._evaluate(
+            dedent(
+                """
             try:
                 from time import localtime as __thonny_localtime
                 __thonny_helper.print_mgmt_value(__thonny_localtime(0))
                 del __thonny_localtime
             except ImportError:
                 __thonny_helper.print_mgmt_value(None)
-        """))
+        """
+            )
+        )
 
     def _update_cwd(self):
         if "micro:bit" not in self._welcome_text.lower():
@@ -1163,9 +1179,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _get_epoch_offset(self) -> int:
         if self._zero_localtime is None:
             raise NotImplementedError()
-        elif self._zero_localtime[:6] == (1970, 1, 1, 0, 0, 0):
+        elif self._zero_localtime[0] in (1970, 1969):  # account for tz-related tweaks
             return 0
-        elif self._zero_localtime[:6] == (2000, 1, 1, 0, 0, 0):
+        elif self._zero_localtime[0] in (2000, 1999):
             return Y2000_EPOCH_OFFSET
         else:
             raise NotImplementedError()

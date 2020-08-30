@@ -320,6 +320,7 @@ class Editor(ttk.Frame):
             get_workbench().event_generate(
                 "RemoteFileOperation", path=target_filename, operation="save"
             )
+            get_workbench().event_generate("RemoteFilesChanged")
             return True
         else:
             return False
