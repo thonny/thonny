@@ -1,6 +1,7 @@
 import datetime
 import os.path
 import subprocess
+import time
 import tkinter as tk
 from tkinter import messagebox, ttk
 
@@ -478,13 +479,10 @@ class BaseFileBrowser(ttk.Frame):
 
         if data.get("modified"):
             try:
-                dtime = datetime.datetime.fromtimestamp(
-                    int(data["modified"]), tz=datetime.timezone.utc
-                )
+                # modification time is Unix epoch
+                time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(data["modified"])))
             except Exception:
                 time_str = ""
-            else:
-                time_str = dtime.isoformat(sep=" ")[:19]  # cut timezone information
         else:
             time_str = ""
 

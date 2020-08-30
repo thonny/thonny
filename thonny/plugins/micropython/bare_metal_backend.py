@@ -1,4 +1,5 @@
 import binascii
+import datetime
 import logging
 import os
 import queue
@@ -7,7 +8,7 @@ import sys
 import time
 from _ast import Not
 from textwrap import dedent, indent
-from typing import BinaryIO, Callable, Optional, Tuple
+from typing import BinaryIO, Callable, Optional, Tuple, Union
 
 from thonny.backend import UploadDownloadBackend
 from thonny.common import (
@@ -186,8 +187,33 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         return modules_str.split()
 
+    def _resolve_unknown_timezone(self) -> str:
+        return "utc"
+
+    def _fetch_utc_offset(self):
+        if self._connected_to_pycom():
+            offset = self._evaluate(
+                dedent(
+                    """
+                try:
+                    import time as __thonny_time
+                    __thonny_helper.print_mgmt_value(__thonny_time.timezone())
+                except:
+                    __thonny_helper.print_mgmt_value(None)
+            """
+                )
+            )
+            if offset is not None:
+                # https://docs.pycom.io/firmwareapi/micropython/utime/
+                return -offset
+
+        return None
+
     def _sync_time(self):
         """Sets the time on the pyboard to match the time on the host."""
+
+        now = self._get_proposed_struct_time_for_device()
+
         if self._connected_to_microbit():
             return
         elif self._connected_to_circuitpython():
@@ -197,9 +223,8 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
                 __thonny_RTC().datetime = {ts}
                 del __thonny_RTC
             """
-            ).format(ts=tuple(time.localtime()))
+            ).format(ts=tuple(now))
         else:
-            now = time.localtime()
             specific_script = dedent(
                 """
                 from machine import RTC as __thonny_RTC
@@ -243,7 +268,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         if isinstance(val, str):
             print("WARNING: Could not sync device's clock: " + val)
 
-    def _validate_time(self):
+    def _get_actual_time_tuple_on_device(self):
         script = dedent(
             """
             try:
@@ -261,21 +286,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
         """
         )
 
-        val = self._evaluate(script)
-        if isinstance(val, tuple):
-            # make sure it ended up right
-            val = val[:8]
-            while len(val) < 8:
-                val += (0,)
-            val += (-1,)  # unknown DST
-            diff = int(time.mktime(time.localtime()) - time.mktime(val))
-            if abs(diff) > 10:
-                print("WARNING: Device's time differs from local time by %s seconds." % diff)
-            else:
-                print("Diff in seconds", diff)
-        else:
-            assert isinstance(val, str)
-            print("WARNING: Could not validate time: " + val)
+        return self._evaluate(script)
 
     def _update_cwd(self):
         if self._connected_to_microbit():

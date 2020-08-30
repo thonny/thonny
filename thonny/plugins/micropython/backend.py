@@ -34,6 +34,7 @@ CP 5.0
 """
 
 import ast
+import datetime
 import io
 import logging
 import os
@@ -153,6 +154,8 @@ class MicroPythonBackend(MainBackend, ABC):
         if self._sys_path is None:
             self._sys_path = self._fetch_sys_path()
 
+        self._epoch_year = self._fetch_epoch_year()
+        self._utc_offset = self._fetch_utc_offset()
         self._check_sync_time()
         if self._args.get("validate_time"):
             self._validate_time()
@@ -163,8 +166,6 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
-
-        self._zero_localtime = self._fetch_zero_localtime()
 
         self._report_time("prepared")
 
@@ -242,6 +243,63 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _validate_time(self):
+        value = self._get_actual_time_tuple_on_device()
+
+        if isinstance(value, tuple):
+            # make sure it ended up right
+            value = value[:8]
+            while len(value) < 8:
+                value += (0,)
+            value += (-1,)  # unknown DST
+            diff = int(
+                time.mktime(self._get_proposed_struct_time_for_device()) - time.mktime(value)
+            )
+            if abs(diff) > 10:
+                if self._get_timezone() == "utc":
+                    assumption = " (assuming UTC)"
+                else:
+                    assumption = ""
+
+                print(
+                    "WARNING: Device's real-time clock seems to be off by %s seconds%s"
+                    % (diff, assumption)
+                )
+            else:
+                print("Diff in seconds", diff)
+        else:
+            assert isinstance(value, str)
+            print("WARNING: Could not validate time: " + value)
+
+    def _get_proposed_struct_time_for_device(self) -> Optional[time.struct_time]:
+        timezone = self._get_timezone()
+
+        if timezone == "local":
+            return time.localtime()
+        elif timezone == "utc":
+            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        else:
+            assert isinstance(timezone, datetime.tzinfo)
+            return datetime.datetime.now(tz=timezone).timetuple()
+
+    def _get_timezone(self) -> Union[str, datetime.tzinfo]:
+        setting = self._args.get("timezone", "auto")
+        if setting == "auto":
+            if self._utc_offset is None:
+                return self._resolve_unknown_timezone()
+            else:
+                seconds_in_a_day = 60 * 60 * 24
+                if -seconds_in_a_day < self._utc_offset < seconds_in_a_day:
+                    return datetime.timezone(datetime.timedelta(seconds=self._utc_offset))
+                else:
+                    self._show_error("Not valid UTC offset: %s" % self._utc_offset)
+                    return self._resolve_unknown_timezone()
+        else:
+            return setting
+
+    def _resolve_unknown_timezone(self) -> str:
+        raise NotImplementedError()
+
+    def _get_actual_time_tuple_on_device(self):
         raise NotImplementedError()
 
     def _process_until_initial_prompt(self, clean):
@@ -349,6 +407,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _connected_to_circuitpython(self):
         return "circuitpython" in self._welcome_text.lower()
 
+    def _connected_to_pycom(self):
+        return "pycom" in self._welcome_text.lower()
+
     def _fetch_welcome_text(self) -> str:
         raise NotImplementedError()
 
@@ -382,22 +443,37 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             return {}
 
-    def _fetch_zero_localtime(self):
+    def _fetch_epoch_year(self):
         if self._connected_to_microbit():
             return None
 
-        return self._evaluate(
+        # can't query for 0, because CP doesn't support it
+        val = self._evaluate(
             dedent(
                 """
             try:
                 from time import localtime as __thonny_localtime
-                __thonny_helper.print_mgmt_value(__thonny_localtime(0))
+                __thonny_helper.print_mgmt_value(tuple(__thonny_localtime(%d)))
                 del __thonny_localtime
-            except ImportError:
-                __thonny_helper.print_mgmt_value(None)
+            except Exception as e:
+                __thonny_helper.print_mgmt_value(str(e))
         """
+                % Y2000_EPOCH_OFFSET
             )
         )
+        if isinstance(val, str):
+            self._show_error("Could not fetch epoch year: " + val)
+            return None
+        elif val[0] in (2000, 1999):
+            # when it gives 2000 (or end of 1999) for 2000-s Posix epoch, then it uses Posix epoch
+            return 1970
+        elif val[0] in (2030, 2029):
+            return 2000
+        else:
+            return None
+
+    def _fetch_utc_offset(self):
+        raise NotImplementedError()
 
     def _update_cwd(self):
         if "micro:bit" not in self._welcome_text.lower():
@@ -1177,11 +1253,9 @@ class MicroPythonBackend(MainBackend, ABC):
         return value + self._get_epoch_offset()
 
     def _get_epoch_offset(self) -> int:
-        if self._zero_localtime is None:
-            raise NotImplementedError()
-        elif self._zero_localtime[0] in (1970, 1969):  # account for tz-related tweaks
+        if self._epoch_year == 1970:
             return 0
-        elif self._zero_localtime[0] in (2000, 1999):
+        elif self._epoch_year == 2000:
             return Y2000_EPOCH_OFFSET
         else:
             raise NotImplementedError()

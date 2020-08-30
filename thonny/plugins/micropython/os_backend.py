@@ -1,3 +1,4 @@
+import datetime
 import io
 import logging
 import os
@@ -7,7 +8,7 @@ import sys
 import textwrap
 import time
 from abc import ABC
-from typing import Callable
+from typing import Callable, Optional, Union
 
 from thonny.backend import SshBackend
 from thonny.common import BackendEvent, serialize_message
@@ -283,29 +284,28 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         except NotImplementedError:
             return 0
 
+    def _resolve_unknown_timezone(self) -> str:
+        return "local"
+
+    def _fetch_utc_offset(self):
+        return None
+
     def _sync_time(self):
         self._show_error("WARNING: Automatic time synchronization by Thonny is not supported.")
 
-    def _validate_time(self):
-
+    def _get_actual_time_tuple_on_device(self):
         script = textwrap.dedent(
             """
             try:
-                from time import time as __thonny_time
-                __thonny_helper.print_mgmt_value(__thonny_time())
-                del __thonny_time
+                from time import localtime as __thonny_localtime
+                __thonny_helper.print_mgmt_value(__thonny_localtime())
+                del __thonny_localtime
             except Exception as e:
                 __thonny_helper.print_mgmt_value(str(e))
             """
         )
 
-        val = self._evaluate(script)
-        if isinstance(val, str):
-            print("WARNING: Could not validate time: " + val)
-        else:
-            diff = int(time.time() - val)
-            if abs(diff) > 10:
-                print("WARNING: Device's time differs from local time by %s seconds." % diff)
+        return self._evaluate(script)
 
 
 class MicroPythonLocalBackend(MicroPythonOsBackend):
