@@ -25,7 +25,7 @@ from thonny.plugins.micropython.backend import (
     ReadOnlyFilesystemError,
     _report_internal_error,
     ends_overlap,
-    unix_dirname_basename,
+    unix_dirname_basename, Y2000_EPOCH_OFFSET,
 )
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
@@ -568,9 +568,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             if met_prompt:
                 # ... and recreate Thonny prompt
                 self.send_message(ToplevelResponse())
-
-    def _connected_to_microbit(self):
-        return "micro:bit" in self._welcome_text.lower()
 
     def _cmd_execute_system_command(self, cmd):
         # Can't use stdin, because a thread is draining it

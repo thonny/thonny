@@ -287,7 +287,7 @@ class MicroPythonPipDialog(BackendPipDialog):
     def _show_read_only_instructions(self):
         self._append_info_text(tr("Not available") + "\n", ("caption",))
         if not self._get_target_directory():
-            reason = " (" + tr("no lib directory in sys.path") + ")"
+            reason = " (" + tr("no absolute lib directory in sys.path") + ")"
         else:
             reason = ""
         self.info_text.direct_insert(

@@ -330,6 +330,13 @@ class MicroPythonBackend(MainBackend, ABC):
     def _connected_to_microbit(self):
         return "micro:bit" in self._welcome_text.lower()
 
+    def _connected_to_pyboard(self):
+        return "pyb" in self._welcome_text.lower() or "pyb" in self._builtin_modules
+
+    def _connected_to_circuitpython(self):
+        return "circuitpython" in self._welcome_text.lower()
+
+
     def _fetch_welcome_text(self) -> str:
         raise NotImplementedError()
 
@@ -398,6 +405,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
         if "sys_path" not in msg:
             msg["sys_path"] = self._sys_path
+
+        if "lib_dirs" not in msg:
+            msg["lib_dirs"] = self._get_library_paths()
 
         super().send_message(msg)
 
@@ -778,7 +788,10 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _get_library_paths(self) -> [str]:
         """Returns list of directories which are supposed to contain library code"""
-        return [path for path in self._sys_path if "lib" in path]
+        if self._sys_path is None:
+            return None
+
+        return [path for path in self._sys_path if "lib" in path and path.startswith("/")]
 
     def _guess_package_pypi_name(self, installed_name) -> str:
         return "micropython-" + installed_name

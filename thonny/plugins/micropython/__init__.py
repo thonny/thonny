@@ -45,6 +45,7 @@ DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
 class MicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
+        self._lib_dirs = []
         super().__init__(clean, running.get_interpreter_for_subprocess())
 
     def get_pip_gui_class(self):
@@ -69,7 +70,12 @@ class MicroPythonProxy(SubprocessProxy):
         return lib_dirs[0]
 
     def get_lib_dirs(self):
-        return [path for path in self._sys_path if "lib" in path]
+        return self._lib_dirs
+
+    def _store_state_info(self, msg):
+        super(MicroPythonProxy, self)._store_state_info(msg)
+        if "lib_dirs" in msg:
+            self._lib_dirs = msg["lib_dirs"]
 
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
