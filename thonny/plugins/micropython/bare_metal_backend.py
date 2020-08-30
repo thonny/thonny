@@ -723,11 +723,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _cmd_upload(self, cmd):
         self._check_sync_time()
-        super(MicroPythonBareMetalBackend, self)._cmd_upload()
+        super(MicroPythonBareMetalBackend, self)._cmd_upload(cmd)
 
     def _cmd_write_file(self, cmd):
         self._check_sync_time()
-        super(MicroPythonBareMetalBackend, self)._cmd_write_file()
+        super(MicroPythonBareMetalBackend, self)._cmd_write_file(cmd)
 
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():

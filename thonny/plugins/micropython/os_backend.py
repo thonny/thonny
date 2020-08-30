@@ -338,14 +338,6 @@ class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
         )
         MicroPythonOsBackend.__init__(self, args)
 
-    def _cmd_upload(self, cmd):
-        self._check_sync_time()
-        super(MicroPythonSshBackend, self)._cmd_upload()
-
-    def _cmd_write_file(self, cmd):
-        self._check_sync_time()
-        super(MicroPythonSshBackend, self)._cmd_write_file()
-
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
         _, stdout, _ = self._client.exec_command(cmd_str, bufsize=0, timeout=3, get_pty=False)
