@@ -993,7 +993,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _get_epoch_offset(self) -> int:
         # https://docs.micropython.org/en/latest/library/utime.html
-        return 946684800
+        # NB! Some boards (eg Pycom) may use Posix epoch!
+        try:
+            return super()._get_epoch_offset()
+        except NotImplementedError:
+            return Y2000_EPOCH_OFFSET
 
     def _get_sep(self):
         return "/"

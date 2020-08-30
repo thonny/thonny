@@ -277,7 +277,10 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         return not self._connection._error
 
     def _get_epoch_offset(self) -> int:
-        return 0
+        try:
+            return super()._get_epoch_offset()
+        except NotImplementedError:
+            return 0
 
 
 class MicroPythonLocalBackend(MicroPythonOsBackend):

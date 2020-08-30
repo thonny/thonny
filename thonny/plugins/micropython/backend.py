@@ -98,6 +98,8 @@ WAIT_OR_CRASH_TIMEOUT = 5
 
 SECONDS_IN_YEAR = 60 * 60 * 24 * 365
 
+Y2000_EPOCH_OFFSET = 946684800
+
 STAT_KIND_INDEX = 0
 STAT_SIZE_INDEX = 6
 STAT_MTIME_INDEX = 8
@@ -160,6 +162,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
 
+        self._zero_localtime = self._fetch_zero_localtime()
         self._report_time("prepared")
 
     def _prepare_helpers(self):
@@ -324,6 +327,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _is_connected(self) -> bool:
         raise NotImplementedError()
 
+    def _connected_to_microbit(self):
+        return "micro:bit" in self._welcome_text.lower()
+
     def _fetch_welcome_text(self) -> str:
         raise NotImplementedError()
 
@@ -356,6 +362,19 @@ class MicroPythonBackend(MainBackend, ABC):
             return parse_api_information(path)
         else:
             return {}
+
+    def _fetch_zero_localtime(self):
+        if self._connected_to_microbit():
+            return None
+
+        return self._evaluate(dedent("""
+            try:
+                from time import localtime as __thonny_localtime
+                __thonny_helper.print_mgmt_value(__thonny_localtime(0))
+                del __thonny_localtime
+            except ImportError:
+                __thonny_helper.print_mgmt_value(None)
+        """))
 
     def _update_cwd(self):
         if "micro:bit" not in self._welcome_text.lower():
@@ -1129,7 +1148,14 @@ class MicroPythonBackend(MainBackend, ABC):
         return value + self._get_epoch_offset()
 
     def _get_epoch_offset(self) -> int:
-        raise NotImplementedError()
+        if self._zero_localtime is None:
+            raise NotImplementedError()
+        elif self._zero_localtime[:6] == (1970, 1, 1, 0, 0, 0):
+            return 0
+        elif self._zero_localtime[:6] == (2000, 1, 1, 0, 0, 0):
+            return Y2000_EPOCH_OFFSET
+        else:
+            raise NotImplementedError()
 
     def _expand_stat(self, stat: Union[Tuple, int, str], basename: str) -> Dict:
         error = None
