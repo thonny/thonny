@@ -243,5 +243,11 @@ class FlashingDialog(CommonDialog):
 
 def load_plugin():
     add_micropython_backend(
-        "microbit", MicrobitProxy, "MicroPython (BBC micro:bit)", MicrobitConfigPage, sort_key="31"
+        "microbit",
+        MicrobitProxy,
+        "MicroPython (BBC micro:bit)",
+        MicrobitConfigPage,
+        sort_key="31",
+        validate_time=False,
+        sync_time=False,
     )

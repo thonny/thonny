@@ -688,18 +688,23 @@ def list_serial_ports_with_descriptions():
 
 
 def add_micropython_backend(
-    name, proxy_class, description, config_page, bare_metal=True, sort_key=None
+    name, proxy_class, description, config_page, bare_metal=True, sort_key=None, validate_time=True,
+    sync_time=None
 ):
     if bare_metal:
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")
 
-        get_workbench().set_default(name + ".sync_time", True)
+        if sync_time is None:
+            sync_time = True
+        get_workbench().set_default(name + ".sync_time", sync_time)
     else:
-        get_workbench().set_default(name + ".sync_time", False)
+        if sync_time is None:
+            sync_time = False
+        get_workbench().set_default(name + ".sync_time", sync_time)
 
-    get_workbench().set_default(name + ".validate_time", True)
+    get_workbench().set_default(name + ".validate_time", validate_time)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 
 
