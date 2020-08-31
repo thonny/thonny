@@ -70,7 +70,7 @@ from thonny.common import (
     CommandToBackend,
     ValueInfo,
 )
-from thonny.plugins.micropython.connection import ConnectionClosedException
+from thonny.common import ConnectionClosedException
 from thonny.running import EXPECTED_TERMINATION_CODE
 
 ENCODING = "utf-8"
@@ -117,7 +117,6 @@ class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
 
         self._args = args
-        MainBackend.__init__(self)
         self._prev_time = time.time()
         self._local_cwd = None
         self._cwd = args.get("cwd")
@@ -127,6 +126,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._api_stubs_path = args.get("api_stubs_path")
 
+        MainBackend.__init__(self)
         try:
             self._report_time("before prepare")
             self._prepare(clean)

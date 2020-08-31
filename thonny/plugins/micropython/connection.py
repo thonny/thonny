@@ -2,6 +2,7 @@ import queue
 import re
 from queue import Queue
 
+from thonny.common import ConnectionClosedException
 from thonny.misc_utils import TimeHelper
 
 
@@ -166,9 +167,3 @@ class MicroPythonConnection:
         raise NotImplementedError()
 
 
-class ConnectionFailedException(Exception):
-    pass
-
-
-class ConnectionClosedException(Exception):
-    pass

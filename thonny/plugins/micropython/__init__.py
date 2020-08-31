@@ -179,6 +179,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 or "UART" in p.description
                 or "DAPLink" in p.description
                 or "STLink" in p.description
+                or "python" in p.description.lower()
             )
         ]
 

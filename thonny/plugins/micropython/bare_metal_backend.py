@@ -30,7 +30,7 @@ from thonny.plugins.micropython.backend import (
     unix_dirname_basename,
     Y2000_EPOCH_OFFSET,
 )
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.common import ConnectionFailedException
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE

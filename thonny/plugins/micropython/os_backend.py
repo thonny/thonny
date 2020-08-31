@@ -20,7 +20,7 @@ from thonny.plugins.micropython.backend import (
     ManagementError,
 )
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
-from thonny.plugins.micropython.connection import ConnectionFailedException
+from thonny.common import ConnectionFailedException
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",

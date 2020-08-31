@@ -7,7 +7,8 @@ from textwrap import dedent
 
 from thonny.plugins.micropython.backend import FIRST_RAW_PROMPT
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.common import ConnectionFailedException
+from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SerialConnection(MicroPythonConnection):

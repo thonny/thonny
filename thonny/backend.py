@@ -30,6 +30,7 @@ from thonny.common import (
     CommandToBackend,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
+from thonny.common import ConnectionClosedException
 
 NEW_DIR_MODE = 0o755
 
@@ -45,27 +46,31 @@ class BaseBackend(ABC):
         self._interrupt_lock = threading.Lock()
         self._last_progress_reporting_time = 0
 
-    def mainloop(self):
         # Don't use threading for creating a management thread, because I don't want them
         # to be affected by threading.settrace
         _thread.start_new_thread(self._read_incoming_messages, ())
 
-        while self._should_keep_going():
-            try:
+
+    def mainloop(self):
+        try:
+            while self._should_keep_going():
                 try:
-                    msg = self._incoming_message_queue.get(block=True, timeout=0.01)
-                except queue.Empty:
-                    self._perform_idle_tasks()
-                else:
-                    if isinstance(msg, InputSubmission):
-                        self._handle_user_input(msg)
-                    elif isinstance(msg, EOFCommand):
-                        self._handle_eof_command(msg)
+                    try:
+                        msg = self._incoming_message_queue.get(block=True, timeout=0.01)
+                    except queue.Empty:
+                        self._perform_idle_tasks()
                     else:
-                        self._handle_normal_command(msg)
-            except KeyboardInterrupt:
-                self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
-                self.send_message(ToplevelResponse())
+                        if isinstance(msg, InputSubmission):
+                            self._handle_user_input(msg)
+                        elif isinstance(msg, EOFCommand):
+                            self._handle_eof_command(msg)
+                        else:
+                            self._handle_normal_command(msg)
+                except KeyboardInterrupt:
+                    self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
+                    self.send_message(ToplevelResponse())
+        except ConnectionClosedException:
+            sys.exit(0)
 
     def _report_progress(
         self, cmd, description: Optional[str], value: float, maximum: float
