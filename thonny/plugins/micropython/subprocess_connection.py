@@ -1,4 +1,5 @@
 import signal
+import sys
 
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
@@ -7,7 +8,12 @@ class SubprocessConnection(MicroPythonConnection):
     def __init__(self, executable, args=[]):
         import threading
 
-        import ptyprocess
+        try:
+            import ptyprocess
+        except ImportError:
+            print("ERROR: This back-end requires a Python package named 'ptyprocess'.\n"
+                + "Install it via system package manager or 'Tools => Manage plug-ins'.")
+            sys.exit(1)
 
         super().__init__()
         cmd = [executable] + args
