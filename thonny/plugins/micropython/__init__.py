@@ -699,7 +699,6 @@ def add_micropython_backend(
     else:
         get_workbench().set_default(name + ".sync_time", False)
 
-    get_workbench().set_default(name + ".timezone", "auto")
     get_workbench().set_default(name + ".validate_time", True)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 

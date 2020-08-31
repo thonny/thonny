@@ -284,28 +284,25 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         except NotImplementedError:
             return 0
 
-    def _resolve_unknown_timezone(self) -> str:
-        return "local"
-
-    def _fetch_utc_offset(self):
-        return None
+    def _resolve_unknown_epoch(self) -> int:
+        return 1970
 
     def _sync_time(self):
         self._show_error("WARNING: Automatic time synchronization by Thonny is not supported.")
 
-    def _get_actual_time_tuple_on_device(self):
-        script = textwrap.dedent(
-            """
-            try:
-                from time import localtime as __thonny_localtime
-                __thonny_helper.print_mgmt_value(__thonny_localtime())
-                del __thonny_localtime
-            except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
-            """
-        )
+    def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
+        out, err = self._execute("__thonny_helper.os.system('date -u +%s')")
+        if err:
+            return err
 
-        return self._evaluate(script)
+        if not out:
+            return "Failed querying device's UTC time"
+
+        try:
+            secs = int(out.splitlines()[0].strip())
+            return tuple(time.gmtime(secs))
+        except Exception as e:
+            return str(e)
 
 
 class MicroPythonLocalBackend(MicroPythonOsBackend):

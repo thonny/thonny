@@ -187,32 +187,17 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
         return modules_str.split()
 
-    def _resolve_unknown_timezone(self) -> str:
-        return "utc"
-
-    def _fetch_utc_offset(self):
-        if self._connected_to_pycom():
-            offset = self._evaluate(
-                dedent(
-                    """
-                try:
-                    import time as __thonny_time
-                    __thonny_helper.print_mgmt_value(__thonny_time.timezone())
-                except:
-                    __thonny_helper.print_mgmt_value(None)
-            """
-                )
-            )
-            if offset is not None:
-                # https://docs.pycom.io/firmwareapi/micropython/utime/
-                return -offset
-
-        return None
+    def _resolve_unknown_epoch(self) -> int:
+        if self._connected_to_circuitpython() or self._connected_to_pycom():
+            return 1970
+        else:
+            return 2000
 
     def _sync_time(self):
         """Sets the time on the pyboard to match the time on the host."""
 
-        now = self._get_proposed_struct_time_for_device()
+        # RTC works on UTC
+        now = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
 
         if self._connected_to_microbit():
             return
@@ -262,11 +247,51 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             % indent(specific_script, "    ")
         )
 
-        # Adapted from RShell by Dave Hylands
-
         val = self._evaluate(script)
         if isinstance(val, str):
             print("WARNING: Could not sync device's clock: " + val)
+
+    def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
+        if self._connected_to_microbit():
+            return "Time not supported on this device"
+        elif self._connected_to_circuitpython():
+            specific_script = dedent(
+                """
+                from rtc import RTC as __thonny_RTC
+                __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime)[:6])
+                del __thonny_RTC
+                """
+            )
+        else:
+            specific_script = dedent(
+                """
+                from machine import RTC as __thonny_RTC
+                try:
+                    # now() on some devices also gives weekday, so prefer datetime
+                    __thonny_temp = tuple(__thonny_RTC().datetime())
+                    # remove weekday from index 3
+                    __thonny_helper.print_mgmt_value(__thonny_temp[0:3] + __thonny_temp[4:7])
+                    del __thonny_temp
+                except:
+                    __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().now())[:6])
+                del __thonny_RTC
+                """
+            )
+
+        script = (
+            dedent(
+                """
+            try:
+            %s
+            except Exception as e:
+                __thonny_helper.print_mgmt_value(str(e))
+        """
+            )
+            % indent(specific_script, "    ")
+        )
+
+        val = self._evaluate(script)
+        return val
 
     def _get_actual_time_tuple_on_device(self):
         script = dedent(
@@ -734,11 +759,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _cmd_upload(self, cmd):
         self._check_sync_time()
-        super(MicroPythonBareMetalBackend, self)._cmd_upload(cmd)
+        return super(MicroPythonBareMetalBackend, self)._cmd_upload(cmd)
 
     def _cmd_write_file(self, cmd):
         self._check_sync_time()
-        super(MicroPythonBareMetalBackend, self)._cmd_write_file(cmd)
+        return super(MicroPythonBareMetalBackend, self)._cmd_write_file(cmd)
 
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():
