@@ -291,7 +291,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
         self._show_error("WARNING: Automatic time synchronization by Thonny is not supported.")
 
     def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
-        out, err = self._execute("__thonny_helper.os.system('date -u +%s')")
+        out, err = self._execute("__thonny_helper.os.system('date -u +%s')", capture_output=True)
         if err:
             return err
 
