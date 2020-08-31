@@ -688,8 +688,14 @@ def list_serial_ports_with_descriptions():
 
 
 def add_micropython_backend(
-    name, proxy_class, description, config_page, bare_metal=True, sort_key=None, validate_time=True,
-    sync_time=None
+    name,
+    proxy_class,
+    description,
+    config_page,
+    bare_metal=True,
+    sort_key=None,
+    validate_time=True,
+    sync_time=None,
 ):
     if bare_metal:
         get_workbench().set_default(name + ".port", "auto")

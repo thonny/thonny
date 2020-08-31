@@ -892,23 +892,24 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             func = "stat"
 
-            stat = self._evaluate(
-                dedent(
-                    """
-                try:
-                    __thonny_helper.print_mgmt_value(__thonny_helper.os.%s(%r))
-                except Exception:
-                    __thonny_helper.print_mgmt_value(None)
+        stat = self._evaluate(
+            dedent(
                 """
-                )
-                % (func, path)
+            try:
+                __thonny_helper.print_mgmt_value(__thonny_helper.os.%s(%r))
+            except Exception:
+                __thonny_helper.print_mgmt_value(None)
+            """
             )
-            if stat is None:
-                return None
-            elif isinstance(stat, int):
-                return (0b1000000000000000, 0, 0, 0, 0, 0, stat, 0, 0, 0)
-            else:
-                return stat
+            % (func, path)
+        )
+
+        if stat is None:
+            return None
+        elif isinstance(stat, int):
+            return (0b1000000000000000, 0, 0, 0, 0, 0, stat, 0, 0, 0)
+        else:
+            return stat
 
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
@@ -1155,7 +1156,7 @@ class MicroPythonBackend(MainBackend, ABC):
         elif path == "":
             # used to represent all files in micro:bit
             raw_data = self._evaluate(
-                "{name : __thonny_helper.os.size(name) for name in __thonny_helper.listdir(%r)}"
+                "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()}"
             )
         else:
             return None
@@ -1262,9 +1263,22 @@ class MicroPythonBackend(MainBackend, ABC):
         return result
 
 
-class ManagementError(Exception):
+class ManagementError(RuntimeError):
     def __init__(self, script, out, err):
-        Exception.__init__(self, "Problem with a management command")
+        msg = (
+            "Problem with a management command\n\n"
+            + "SCRIPT:\n"
+            + script
+            + "\n\n"
+            + "STDOUT:\n"
+            + out
+            + "\n\n"
+            + "STDERR:\n"
+            + err
+            + "\n\n"
+        )
+
+        RuntimeError.__init__(self, msg)
         self.script = script
         self.out = out
         self.err = err

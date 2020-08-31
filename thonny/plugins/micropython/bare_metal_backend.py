@@ -253,7 +253,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
         if self._connected_to_microbit():
-            return "Time not supported on this device"
+            return "This device does not have a real-time clock"
         elif self._connected_to_circuitpython():
             specific_script = dedent(
                 """
@@ -1134,7 +1134,10 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
             return Y2000_EPOCH_OFFSET
 
     def _get_sep(self):
-        return "/"
+        if self._supports_directories():
+            return "/"
+        else:
+            return ""
 
     def _decode(self, data: bytes) -> str:
         return data.decode(ENCODING, errors="replace")

@@ -289,6 +289,9 @@ class UploadDownloadBackend(BaseBackend, ABC):
             command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id"), error=error
         )
 
+    def _supports_directories(self) -> bool:
+        return True
+
     def _transfer_files_and_dirs(
         self,
         items: Iterable[Dict],
@@ -329,7 +332,8 @@ class UploadDownloadBackend(BaseBackend, ABC):
                     ensure_dir(item["target_path"])
                     completed_cost += self._get_dir_transfer_cost()
                 else:
-                    ensure_dir(self._get_parent_directory(item["target_path"]))
+                    if self._supports_directories():
+                        ensure_dir(self._get_parent_directory(item["target_path"]))
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
             except OSError as e:
