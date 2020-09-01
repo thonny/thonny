@@ -627,11 +627,12 @@ class BaseFileBrowser(ttk.Frame):
                     command=lambda: self.open_path_with_system_app(selected_path),
                 )
 
-                ext = self.get_extension_from_name(self.get_selected_name())
-                self.menu.add_command(
-                    label=tr("Configure %s files ...") % ext,
-                    command=lambda: self.open_extension_dialog(ext),
-                )
+                if selected_kind == "file":
+                    ext = self.get_extension_from_name(self.get_selected_name())
+                    self.menu.add_command(
+                        label=tr("Configure %s files ...") % ext,
+                        command=lambda: self.open_extension_dialog(ext),
+                    )
 
     def cmd_refresh_tree(self):
         self.refresh_tree()
