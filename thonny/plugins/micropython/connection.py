@@ -165,5 +165,3 @@ class MicroPythonConnection:
 
     def close(self):
         raise NotImplementedError()
-
-

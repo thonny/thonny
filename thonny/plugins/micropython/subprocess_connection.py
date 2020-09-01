@@ -11,8 +11,10 @@ class SubprocessConnection(MicroPythonConnection):
         try:
             import ptyprocess
         except ImportError:
-            print("ERROR: This back-end requires a Python package named 'ptyprocess'.\n"
-                + "Install it via system package manager or 'Tools => Manage plug-ins'.")
+            print(
+                "ERROR: This back-end requires a Python package named 'ptyprocess'.\n"
+                + "Install it via system package manager or 'Tools => Manage plug-ins'."
+            )
             sys.exit(1)
 
         super().__init__()

@@ -543,6 +543,7 @@ class BaseFileBrowser(ttk.Frame):
         return os.path.sep
 
     def on_double_click(self, event):
+        # TODO: don't act when the click happens below last item
         path = self.get_selected_path()
         kind = self.get_selected_kind()
         name = self.get_selected_name()

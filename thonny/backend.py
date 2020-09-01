@@ -50,7 +50,6 @@ class BaseBackend(ABC):
         # to be affected by threading.settrace
         _thread.start_new_thread(self._read_incoming_messages, ())
 
-
     def mainloop(self):
         try:
             while self._should_keep_going():
