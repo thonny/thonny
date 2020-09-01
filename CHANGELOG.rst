@@ -10,7 +10,24 @@ Version history
 * NEW: Clicking on a value in the Shell selects it and opens in the Object inspector. 
 * NEW: By default, after evaluating an expression in the Shell the value will be automatically shown in the Object inspector (if open). See Options => Shell to turn it off.
 * NEW: Display more information about numbers in the Object inspector, #1230
-* FIXED #795: Support evaluating several expressions at once in the Shell (just like official Python REPL)
+* NEW: Support Object inspector with MicroPython back-ends, #1309
+* NEW: Back-end for local Unix MicroPython
+* NEW: Back-end for remote Unix MicroPython over SSH
+* NEW: Back-end for remote CPython over SSH
+* NEW: Package manager for MicroPython (using micropip.py by Peter Hinch), #1299, see https://forum.micropython.org/viewtopic.php?f=15&t=8787&start=14
+* NEW: Thonny now synchronizes real-time clock of MicroPython devices on connect and before each file operation, #1004
+* NEW: Support evaluating several expressions at once in the Shell (just like official Python REPL), #795
+* CHANGED: Package manager now searches PyPI instead of requiring exact package name, #1300
+* CHANGED: File browser now shows remote files below local files. This way local pane won't jump around when switching between local and remote back-ends.
+* FIXED #1283: Disable save button after save
+* TECHNICAL: Versions of serveral dependencies were updated
+* TECHNICAL: MicroPython backend was refactored. The communication with the board should be now more robust with respect to lags in MicroPython REPL output. #1103, #1147
+* FIXED #1145: Provide understandable error message, when Linux installer downloader is run on a non-supported platform (by Andrew Scheller)
+* FIXED #1138: Allow semicolon in Shell input with Python 3.8
+* FIXED #1129: Support terminator as system shell
+* FIXED #772: Allow invoking interrupt command from the menu when the editor has text selected (Ctrl+C would copy then)
+* FIXED #1146, #1159: "No module named pwd" error
+
 
 3.2.7 (2020-01-22)
 ==================
