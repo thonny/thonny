@@ -54,7 +54,7 @@ PASTE_MODE_CMD = b"\x05"
 PASTE_MODE_LINE_PREFIX = b"=== "
 
 
-class MicroPythonOsBackend(MicroPythonBackend, ABC):
+class UnixMicroPythonBackend(MicroPythonBackend, ABC):
     def __init__(self, args):
         try:
             self._interpreter = self._resolve_executable(args["interpreter"])
@@ -305,7 +305,7 @@ class MicroPythonOsBackend(MicroPythonBackend, ABC):
             return str(e)
 
 
-class MicroPythonLocalBackend(MicroPythonOsBackend):
+class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
     def _create_connection(self, run_args=[]):
         from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
 
@@ -328,12 +328,12 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
         return data.decode(errors="replace")
 
 
-class MicroPythonSshBackend(MicroPythonOsBackend, SshBackend):
+class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshBackend):
     def __init__(self, args):
         SshBackend.__init__(
             self, args["host"], args["user"], args["password"], args["interpreter"], args.get("cwd")
         )
-        MicroPythonOsBackend.__init__(self, args)
+        UnixMicroPythonBackend.__init__(self, args)
 
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
@@ -380,6 +380,6 @@ if __name__ == "__main__":
     args = ast.literal_eval(sys.argv[1])
 
     if "host" in args:
-        backend = MicroPythonSshBackend(args)
+        backend = SshUnixMicroPythonBackend(args)
     else:
-        backend = MicroPythonLocalBackend(args)
+        backend = LocalUnixMicroPythonBackend(args)

@@ -6,7 +6,7 @@ This file is run by CPythonProxy
 (Why separate file for launching? I want to have clean global scope
 in toplevel __main__ module (because that's where user scripts run), but backend's global scope
 is far from clean.
-I could also do python -c "from backend import CPythonMainBackend: CPythonMainBackend().mainloop()", but looks like this
+I could also do python -c "from backend import MainCPythonBackend: MainCPythonBackend().mainloop()", but looks like this
 gives relative __file__-s on imported modules.)
 """
 
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     import platform
     import sys
     import thonny
-    from thonny.plugins.cpython.backend import CPythonMainBackend
+    from thonny.plugins.cpython.cpython_backend import MainCPythonBackend
 
     if platform.system() == "Darwin":
         import os
@@ -69,4 +69,4 @@ if __name__ == "__main__":
     thonny.set_dpi_aware()
 
     target_cwd = sys.argv[1]
-    CPythonMainBackend(target_cwd).mainloop()
+    MainCPythonBackend(target_cwd).mainloop()

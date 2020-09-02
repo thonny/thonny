@@ -466,10 +466,10 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         super().__init__(clean)
 
     def _get_launcher_with_args(self):
-        import thonny.plugins.micropython.os_backend
+        import thonny.plugins.micropython.os_mp_backend
 
         cmd = [
-            thonny.plugins.micropython.os_backend.__file__,
+            thonny.plugins.micropython.os_mp_backend.__file__,
             repr(
                 {
                     "interpreter": self._mp_executable,
@@ -569,7 +569,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         super().__init__(clean)
 
     def _get_launcher_with_args(self):
-        import thonny.plugins.micropython.os_backend
+        import thonny.plugins.micropython.os_mp_backend
 
         args = {
             "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
@@ -583,7 +583,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         args.update(self._get_time_args())
 
         cmd = [
-            thonny.plugins.micropython.os_backend.__file__,
+            thonny.plugins.micropython.os_mp_backend.__file__,
             repr(args),
         ]
         return cmd

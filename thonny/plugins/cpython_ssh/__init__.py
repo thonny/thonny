@@ -5,7 +5,7 @@ from thonny.plugins.backend_config_page import BaseSshProxyConfigPage
 from thonny.running import SubprocessProxy
 
 
-class SshProxy(SubprocessProxy):
+class SshCPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("ssh.host")
         self._user = get_workbench().get_option("ssh.user")
@@ -102,5 +102,5 @@ def load_plugin():
     get_workbench().set_default("ssh.interpreter", "python3")
     get_workbench().set_default("ssh.cwd", "~")
     get_workbench().add_backend(
-        "SSHProxy", SshProxy, tr("Remote Python 3 (SSH)"), SshProxyConfigPage, sort_key="15"
+        "SSHProxy", SshCPythonProxy, tr("Remote Python 3 (SSH)"), SshProxyConfigPage, sort_key="15"
     )

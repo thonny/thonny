@@ -50,7 +50,7 @@ class Debugger:
         if get_runner().is_waiting_debugger_command():
             logging.debug("_check_issue_debugger_command: %s", cmd)
 
-            # tell CPythonMainBackend the state we are seeing
+            # tell MainCPythonBackend the state we are seeing
             cmd.setdefault(
                 frame_id=self._last_progress_message.stack[-1].id,
                 breakpoints=self.get_effective_breakpoints(command),

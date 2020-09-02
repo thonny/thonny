@@ -88,7 +88,7 @@ TempFrameInfo = namedtuple(
 _backend = None
 
 
-class CPythonMainBackend(MainBackend):
+class MainCPythonBackend(MainBackend):
     def __init__(self, target_cwd):
 
         MainBackend.__init__(self)
@@ -898,7 +898,7 @@ class CPythonMainBackend(MainBackend):
             raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _debug(self, *args):
-        logger.debug("CPythonMainBackend: " + str(args))
+        logger.debug("MainCPythonBackend: " + str(args))
 
     def _enter_io_function(self):
         self._io_level += 1
@@ -1074,7 +1074,7 @@ class CPythonMainBackend(MainBackend):
 
 
 class FakeStream:
-    def __init__(self, backend: CPythonMainBackend, target_stream):
+    def __init__(self, backend: MainCPythonBackend, target_stream):
         self._backend = backend
         self._target_stream = target_stream
         self._processed_symbol_count = 0
@@ -1089,7 +1089,7 @@ class FakeStream:
 
 
 class FakeOutputStream(FakeStream):
-    def __init__(self, backend: CPythonMainBackend, target_stream, stream_name):
+    def __init__(self, backend: MainCPythonBackend, target_stream, stream_name):
         FakeStream.__init__(self, backend, target_stream)
         self._stream_name = stream_name
 
@@ -1117,7 +1117,7 @@ class FakeOutputStream(FakeStream):
 
 
 class FakeInputStream(FakeStream):
-    def __init__(self, backend: CPythonMainBackend, target_stream):
+    def __init__(self, backend: MainCPythonBackend, target_stream):
         super().__init__(backend, target_stream)
         self._buffer = ""
         self._eof = False
@@ -1233,7 +1233,7 @@ def return_execution_result(method):
 
 
 class Executor:
-    def __init__(self, backend: CPythonMainBackend, original_cmd):
+    def __init__(self, backend: MainCPythonBackend, original_cmd):
         self._backend = backend
         self._original_cmd = original_cmd
         self._main_module_path = None

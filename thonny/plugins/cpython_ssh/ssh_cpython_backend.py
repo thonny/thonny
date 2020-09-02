@@ -24,14 +24,16 @@ from thonny.common import (
 )
 
 
-class CPythonSshBackend(SshBackend):
+class SshCPythonBackend(SshBackend):
     def __init__(self, host, user, password, interpreter, cwd):
         self._response_lock = threading.Lock()
-        BaseBackend.__init__(self)
+        self._proc = None
+        self._starting = True
         SshBackend.__init__(self, host, user, password, interpreter, cwd)
+        self._upload_main_backend()
         self._proc = self._start_main_backend()
         Thread(target=self._forward_main_responses, daemon=True).start()
-        self._upload_main_backend()
+        self._starting = False
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._forward_incoming_message(msg)
@@ -78,7 +80,7 @@ class CPythonSshBackend(SshBackend):
                 sys.stdout.flush()
 
     def _should_keep_going(self) -> bool:
-        return self._proc is not None and self._proc.poll() is None
+        return self._starting or self._proc is not None and self._proc.poll() is None
 
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
@@ -92,27 +94,19 @@ class CPythonSshBackend(SshBackend):
         return "/tmp/thonny-backend-" + thonny.get_version()
 
     def _upload_main_backend(self):
-        sftp = self._get_sftp(fresh=True)
-
         launch_dir = self._get_remote_program_directory()
-        try:
-            sftp.stat(launch_dir)
-        except IOError:
-            pass
-        else:
-            # dir is present
-            if not launch_dir.endswith("-dev"):
-                # don't overwrite unless in dev mode
-                return
+        if self._get_stat_mode_for_upload(launch_dir) and not launch_dir.endswith("-dev"):
+            # don't overwrite unless in dev mode
+            return
 
         ensure_posix_directory(
-            launch_dir + "/thonny/plugins/cpython", self._get_stat_mode_for_upload, sftp.mkdir
+            launch_dir + "/thonny/plugins/cpython", self._get_stat_mode_for_upload, self._mkdir_for_upload
         )
 
         import thonny.ast_utils
         import thonny.backend
         import thonny.common
-        import thonny.plugins.cpython.backend
+        import thonny.plugins.cpython.cpython_backend
 
         local_context = os.path.dirname(os.path.dirname(thonny.__file__))
         for local_path in [
@@ -120,11 +114,15 @@ class CPythonSshBackend(SshBackend):
             thonny.common.__file__,
             thonny.ast_utils.__file__,
             thonny.backend.__file__,
-            thonny.plugins.cpython.backend.__file__,
+            thonny.plugins.cpython.cpython_backend.__file__,
             thonny.plugins.cpython.__file__.replace("__init__", "__main__"),
         ]:
             local_suffix = local_path[len(local_context) :]
             remote_path = launch_dir + local_suffix.replace("\\", "/")
-            sftp.put(local_path, remote_path)
+            self._perform_sftp_operation_with_retry(lambda sftp: sftp.put(local_path, remote_path))
 
-        sftp.close()
+        def create_empty_cpython_init(sftp):
+            with sftp.open(thonny.plugins.cpython.__file__, "w") as fp:
+                fp.close(
+
+        self._perform_sftp_operation_with_retry(create_empty_cpython_init))

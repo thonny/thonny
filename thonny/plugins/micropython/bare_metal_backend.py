@@ -112,7 +112,7 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
+class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadBackend):
     def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
@@ -759,11 +759,11 @@ class MicroPythonBareMetalBackend(MicroPythonBackend, UploadDownloadBackend):
 
     def _cmd_upload(self, cmd):
         self._check_sync_time()
-        return super(MicroPythonBareMetalBackend, self)._cmd_upload(cmd)
+        return super(BareMetalMicroPythonBackend, self)._cmd_upload(cmd)
 
     def _cmd_write_file(self, cmd):
         self._check_sync_time()
-        return super(MicroPythonBareMetalBackend, self)._cmd_write_file(cmd)
+        return super(BareMetalMicroPythonBackend, self)._cmd_write_file(cmd)
 
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():
@@ -1178,7 +1178,7 @@ if __name__ == "__main__":
             # connection = SerialConnection(args["port"], BAUDRATE)
             connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
-        backend = MicroPythonBareMetalBackend(connection, clean=args["clean"], args=args)
+        backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
 
     except ConnectionFailedException as e:
         text = "\n" + str(e) + "\n"
