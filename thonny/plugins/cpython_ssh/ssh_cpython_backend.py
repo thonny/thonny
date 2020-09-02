@@ -6,16 +6,14 @@ from threading import Thread
 
 import thonny
 from thonny.backend import (
-    SshBackend,
+    SshMixin,
     BaseBackend,
     interrupt_local_process,
     RemoteProcess,
     ensure_posix_directory,
 )
 from thonny.common import (
-    parse_message,
     serialize_message,
-    InlineCommand,
     ImmediateCommand,
     EOFCommand,
     InputSubmission,
@@ -24,16 +22,15 @@ from thonny.common import (
 )
 
 
-class SshCPythonBackend(SshBackend):
+class SshCPythonBackend(BaseBackend, SshMixin):
     def __init__(self, host, user, password, interpreter, cwd):
-        self._response_lock = threading.Lock()
-        self._proc = None
-        self._starting = True
-        SshBackend.__init__(self, host, user, password, interpreter, cwd)
+        SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()
         self._proc = self._start_main_backend()
+
+        self._response_lock = threading.Lock()
         Thread(target=self._forward_main_responses, daemon=True).start()
-        self._starting = False
+        BaseBackend.__init__(self)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._forward_incoming_message(msg)
@@ -44,7 +41,7 @@ class SshCPythonBackend(SshBackend):
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         handler = getattr(self, "_cmd_" + cmd.name, None)
         if handler is not None:
-            # SFTP methods defined in SshBackend
+            # SFTP methods defined in SshMixin
             try:
                 response = handler(cmd)
             except Exception as e:
@@ -56,7 +53,7 @@ class SshCPythonBackend(SshBackend):
             self._forward_incoming_message(cmd)
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
-        SshBackend._handle_immediate_command(self, cmd)
+        SshMixin._handle_immediate_command(self, cmd)
         # It is possible that there is a command being executed both in the local and remote process,
         # interrupt them both
         with self._interrupt_lock:
@@ -80,7 +77,7 @@ class SshCPythonBackend(SshBackend):
                 sys.stdout.flush()
 
     def _should_keep_going(self) -> bool:
-        return self._starting or self._proc is not None and self._proc.poll() is None
+        return self._proc is not None and self._proc.poll() is None
 
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
@@ -100,7 +97,9 @@ class SshCPythonBackend(SshBackend):
             return
 
         ensure_posix_directory(
-            launch_dir + "/thonny/plugins/cpython", self._get_stat_mode_for_upload, self._mkdir_for_upload
+            launch_dir + "/thonny/plugins/cpython",
+            self._get_stat_mode_for_upload,
+            self._mkdir_for_upload,
         )
 
         import thonny.ast_utils
@@ -123,6 +122,4 @@ class SshCPythonBackend(SshBackend):
 
         def create_empty_cpython_init(sftp):
             with sftp.open(thonny.plugins.cpython.__file__, "w") as fp:
-                fp.close(
-
-        self._perform_sftp_operation_with_retry(create_empty_cpython_init))
+                fp.close(self._perform_sftp_operation_with_retry(create_empty_cpython_init))

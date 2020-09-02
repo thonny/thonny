@@ -10,7 +10,7 @@ from _ast import Not
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, Optional, Tuple, Union
 
-from thonny.backend import UploadDownloadBackend
+from thonny.backend import UploadDownloadMixin
 from thonny.common import (
     BackendEvent,
     InlineResponse,
@@ -112,14 +112,14 @@ def debug(msg):
     # print(msg, file=sys.stderr)
 
 
-class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadBackend):
+class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
         self._raw_prompt_ensured = False
 
-        super().__init__(clean, args)
+        MicroPythonBackend.__init__(self, clean, args)
 
     def _get_custom_helpers(self):
         return dedent(

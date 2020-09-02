@@ -10,7 +10,7 @@ import time
 from abc import ABC
 from typing import Callable, Optional, Union
 
-from thonny.backend import SshBackend
+from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.backend import (
     ENCODING,
@@ -328,9 +328,9 @@ class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
         return data.decode(errors="replace")
 
 
-class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshBackend):
+class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args):
-        SshBackend.__init__(
+        SshMixin.__init__(
             self, args["host"], args["user"], args["password"], args["interpreter"], args.get("cwd")
         )
         UnixMicroPythonBackend.__init__(self, args)

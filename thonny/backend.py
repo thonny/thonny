@@ -240,7 +240,7 @@ class MainBackend(BaseBackend, ABC):
         """Returns symbol for combining parent directory path and child name"""
 
 
-class UploadDownloadBackend(BaseBackend, ABC):
+class UploadDownloadMixin(ABC):
     """Backend, which runs on a local process and talks to a nonlocal system,
     and therefore is able to upload/download"""
 
@@ -410,6 +410,16 @@ class UploadDownloadBackend(BaseBackend, ABC):
     ) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def _report_internal_exception(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _report_progress(
+        self, cmd, description: Optional[str], value: float, maximum: float
+    ) -> None:
+        raise NotImplementedError()
+
 
 class RemoteProcess:
     """Modelled after subprocess.Popen"""
@@ -439,9 +449,9 @@ class RemoteProcess:
         stdout.channel.recv_exit_status()
 
 
-class SshBackend(UploadDownloadBackend):
+class SshMixin(UploadDownloadMixin):
     def __init__(self, host, user, password, interpreter, cwd):
-        UploadDownloadBackend.__init__(self)
+        # UploadDownloadMixin.__init__(self)
         try:
             import paramiko
             from paramiko.client import SSHClient
