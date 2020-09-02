@@ -652,6 +652,21 @@ class MainCPythonBackend(MainBackend):
 
         return InlineResponse("get_object_info", id=cmd.object_id, info=info)
 
+    def _cmd_mkdir(self, cmd):
+        os.mkdir(cmd.path)
+
+    def _cmd_delete(self, cmd):
+        for path in cmd.paths:
+            try:
+                if os.path.isfile(path):
+                    os.remove(path)
+                elif os.path.isdir(path):
+                    import shutil
+
+                    shutil.rmtree(path)
+            except Exception as e:
+                print("Could not delete %s: %s" % (path, str(e)), file=sys.stderr)
+
     def _get_sep(self) -> str:
         return os.path.sep
 
