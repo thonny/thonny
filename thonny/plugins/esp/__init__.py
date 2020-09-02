@@ -3,8 +3,7 @@ import subprocess
 import time
 import tkinter as tk
 from collections import OrderedDict
-from time import sleep
-from tkinter import LabelFrame, filedialog, messagebox, ttk
+from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os
@@ -15,9 +14,8 @@ from thonny.plugins.micropython import (
     list_serial_ports_with_descriptions,
 )
 from thonny.plugins.micropython.serial_connection import SerialConnection
-from thonny.running import get_frontend_python, get_interpreter_for_subprocess
+from thonny.running import get_interpreter_for_subprocess
 from thonny.ui_utils import (
-    CommonDialog,
     CommonDialogEx,
     SubprocessDialog,
     ems_to_pixels,
@@ -149,7 +147,7 @@ class ESPFlashingDialog(CommonDialogEx):
 
         # FLASH_MODE
         self._flashmode = tk.StringVar(None, "keep")
-        flashmode_group = LabelFrame(self.main_frame, text="Flash mode", padx=10, pady=10)
+        flashmode_group = ttk.Labelframe(self.main_frame, text="Flash mode")
         flashmode_group.grid(
             row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady * 2, 0)
         )
