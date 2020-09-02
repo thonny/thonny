@@ -19,6 +19,7 @@ from thonny.common import (
     InputSubmission,
     CommandToBackend,
     MessageFromBackend,
+    parse_message,
 )
 
 
@@ -27,18 +28,25 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()
         self._proc = self._start_main_backend()
+        self._main_backend_is_fresh = True
 
         self._response_lock = threading.Lock()
-        Thread(target=self._forward_main_responses, daemon=True).start()
+        self._start_response_forwarder()
         BaseBackend.__init__(self)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
-        self._forward_incoming_message(msg)
+        self._forward_incoming_command(msg)
 
     def _handle_user_input(self, msg: InputSubmission) -> None:
-        self._forward_incoming_message(msg)
+        self._forward_incoming_command(msg)
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
+        if cmd.name[0].isupper():
+            if "expected_cwd" in cmd:
+                self._cwd = cmd["expected_cwd"]
+            print(cmd)
+            self._restart_main_backend()
+
         handler = getattr(self, "_cmd_" + cmd.name, None)
         if handler is not None:
             # SFTP methods defined in SshMixin
@@ -50,7 +58,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             self.send_message(self._prepare_command_response(response, cmd))
         else:
             # other methods running in the remote process
-            self._forward_incoming_message(cmd)
+            self._forward_incoming_command(cmd)
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         SshMixin._handle_immediate_command(self, cmd)
@@ -64,28 +72,53 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         with self._response_lock:
             super().send_message(msg)
 
-    def _forward_incoming_message(self, msg):
+    def _forward_incoming_command(self, msg):
         self._proc.stdin.write(serialize_message(msg) + "\n")
+
+    def _start_response_forwarder(self):
+        self._response_forwarder = Thread(target=self._forward_main_responses, daemon=True)
+        self._response_forwarder.start()
 
     def _forward_main_responses(self):
         while self._should_keep_going():
             line = self._proc.stdout.readline()
+            if self._main_backend_is_fresh and not self._looks_like_response(line):
+                # In the beginning the backend may echo commands sent to it (perhaps this echo-avoiding trick
+                # takes time). Don't forward those lines.
+                continue
+
             if not line:
                 break
             with self._response_lock:
                 sys.stdout.write(line)
                 sys.stdout.flush()
+                self._main_backend_is_fresh = False
+
+    def _looks_like_response(self, line):
+        try:
+            parse_message(line)
+            return True
+        except:
+            return False
 
     def _should_keep_going(self) -> bool:
         return self._proc is not None and self._proc.poll() is None
 
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
+        self._main_backend_is_fresh = True
         return self._create_remote_process(
             [self._remote_interpreter, "-m", "thonny.plugins.cpython", self._cwd],
             cwd=self._get_remote_program_directory(),
             env=env,
         )
+
+    def _restart_main_backend(self):
+        self._proc.kill()
+        self._proc = None
+        self._response_forwarder.join()
+        self._proc = self._start_main_backend()
+        self._start_response_forwarder()
 
     def _get_remote_program_directory(self):
         return "/tmp/thonny-backend-" + thonny.get_version()

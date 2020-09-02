@@ -242,6 +242,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def get_exe_dirs(self):
         return []
 
+    def can_run_local_files(self):
+        return False
+
+    def can_run_remote_files(self):
+        return False
+
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
@@ -537,6 +543,12 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
         return LocalMicroPythonPipDialog
 
+    def can_run_local_files(self):
+        return True
+
+    def can_run_remote_files(self):
+        return False
+
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
@@ -642,6 +654,12 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def get_exe_dirs(self):
         return []
+
+    def can_run_local_files(self):
+        return False
+
+    def can_run_remote_files(self):
+        return True
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):

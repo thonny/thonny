@@ -784,13 +784,16 @@ class MainCPythonBackend(MainBackend):
         if len(cmd.args) >= 1:
             sys.argv = cmd.args
             filename = cmd.args[0]
-            if os.path.isabs(filename):
+            if filename == "-c" or os.path.isabs(filename):
                 full_filename = filename
             else:
                 full_filename = os.path.abspath(filename)
 
-            with tokenize.open(full_filename) as fp:
-                source = fp.read()
+            if full_filename == "-c":
+                source = cmd.source
+            else:
+                with tokenize.open(full_filename) as fp:
+                    source = fp.read()
 
             for preproc in self._source_preprocessors:
                 source = preproc(source, cmd)
@@ -2762,8 +2765,7 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
             for entry in traceback.extract_tb(tb):
                 assert tb_temp is not None  # actual tb doesn't end before extract_tb
                 if (
-                    "cpython/backend" not in entry.filename
-                    and "cpython\\backend" not in entry.filename
+                    "cpython_backend" not in entry.filename
                     and (
                         not entry.filename.endswith(os.sep + "ast.py")
                         or entry.name != "parse"

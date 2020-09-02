@@ -608,6 +608,34 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
     copy_err.join()
 
 
+def universal_dirname(path: str) -> str:
+    if "/" in path:
+        sep = "/"
+    else:
+        sep = "\\"
+
+    path = path.rstrip(sep)
+    result = path[: path.rindex(sep)]
+    if not result:
+        return sep
+    else:
+        return result
+
+
+def universal_relpath(path: str, context: str) -> str:
+    """Tries to give relative path"""
+    if "/" in path:
+        import pathlib
+
+        p = pathlib.PurePosixPath(path)
+        try:
+            return str(p.relative_to(context))
+        except ValueError:
+            return path
+    else:
+        return os.path.relpath(path, context)
+
+
 class ConnectionFailedException(Exception):
     pass
 

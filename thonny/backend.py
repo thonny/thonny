@@ -28,6 +28,7 @@ from thonny.common import (
     ImmediateCommand,
     MessageFromBackend,
     CommandToBackend,
+    universal_dirname,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import ConnectionClosedException
@@ -105,10 +106,15 @@ class BaseBackend(ABC):
     def _prepare_command_response(
         self, response: Union[MessageFromBackend, Dict, None], command: CommandToBackend
     ) -> MessageFromBackend:
+        if response is None:
+            response = {}
+
         if "id" in command and "command_id" not in response:
             response["command_id"] = command["id"]
 
         if isinstance(response, MessageFromBackend):
+            if "command_name" not in response:
+                response["command_name"] = command["name"]
             return response
         else:
             if isinstance(response, dict):
@@ -367,17 +373,7 @@ class UploadDownloadMixin(ABC):
         return 100
 
     def _get_parent_directory(self, path: str):
-        if "/" in path:
-            sep = "/"
-        else:
-            sep = "\\"
-
-        path = path.rstrip(sep)
-        result = path[: path.rindex(sep)]
-        if not result:
-            return sep
-        else:
-            return result
+        return universal_dirname(path)
 
     def _ensure_local_directory(self, path: str) -> None:
         os.makedirs(path, NEW_DIR_MODE, exist_ok=True)

@@ -87,6 +87,12 @@ class SshCPythonProxy(SubprocessProxy):
             pass
         super().destroy()
 
+    def can_run_remote_files(self):
+        return True
+
+    def can_run_local_files(self):
+        return False
+
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend

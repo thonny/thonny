@@ -45,11 +45,15 @@ from thonny.common import (
     serialize_message,
     update_system_path,
     MessageFromBackend,
+    universal_relpath,
 )
 from thonny.editors import (
     get_current_breakpoints,
     get_saved_current_script_filename,
     is_remote_path,
+    is_local_path,
+    get_target_dirname_from_editor_filename,
+    extract_target_path,
 )
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
@@ -80,7 +84,7 @@ class Runner:
 
         self._init_commands()
         self._state = "starting"
-        self._proxy = None  # type: Any
+        self._proxy = None  # type: BackendProxy
         self._publishing_events = False
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
@@ -311,26 +315,27 @@ class Runner:
         command_name: str = "Run",
     ) -> None:
 
-        if working_directory is not None and get_workbench().get_local_cwd() != working_directory:
+        if self._proxy.get_cwd() != working_directory:
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cd_command(working_directory) + "\n"
-            next_cwd = working_directory
         else:
             # create simple command
             cd_cmd_line = ""
-            next_cwd = get_workbench().get_local_cwd()
 
-        if not is_remote_path(script_path) and self._proxy.uses_local_filesystem():
-            rel_filename = os.path.relpath(script_path, next_cwd)
-            cmd_parts = ["%" + command_name, rel_filename] + args
-        else:
-            cmd_parts = ["%" + command_name, "-c", EDITOR_CONTENT_TOKEN] + args
-
+        rel_filename = universal_relpath(script_path, working_directory)
+        cmd_parts = ["%" + command_name, rel_filename] + args
         exe_cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN]) + "\n"
 
         # submit to shell (shell will execute it)
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
+
+    def execute_editor_content(self, command_name, args):
+        get_shell().submit_magic_command(
+            construct_cmd_line(
+                ["%" + command_name, "-c", EDITOR_CONTENT_TOKEN] + args, [EDITOR_CONTENT_TOKEN]
+            )
+        )
 
     def execute_current(self, command_name: str) -> None:
         """
@@ -347,20 +352,26 @@ class Runner:
             # user has cancelled file saving
             return
 
-        if is_remote_path(filename) or not self._proxy.uses_local_filesystem():
-            working_directory = None
+        if (
+            is_remote_path(filename)
+            and not self._proxy.can_run_remote_files()
+            or is_local_path(filename)
+            and not self._proxy.can_run_local_files()
+        ):
+            self.execute_editor_content(command_name, self._get_active_arguments())
         else:
-            # changing dir may be required
-            script_dir = os.path.dirname(filename)
-
             if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
-                working_directory = script_dir  # type: Optional[str]
+                working_directory = get_target_dirname_from_editor_filename(filename)
             else:
-                working_directory = None
+                working_directory = self._proxy.get_cwd()
 
-        args = self._get_active_arguments()
-
-        self.execute_script(filename, args, working_directory, command_name)
+            if is_local_path(filename):
+                target_path = filename
+            else:
+                target_path = extract_target_path(filename)
+            self.execute_script(
+                target_path, self._get_active_arguments(), working_directory, command_name
+            )
 
     def _get_active_arguments(self):
         if get_workbench().get_option("view.show_program_arguments"):
@@ -773,6 +784,12 @@ class BackendProxy:
     def supports_trash(self):
         return True
 
+    def can_run_remote_files(self):
+        raise NotImplementedError()
+
+    def can_run_local_files(self):
+        raise NotImplementedError()
+
     def ready_for_remote_file_operations(self):
         return False
 
@@ -881,14 +898,19 @@ class SubprocessProxy(BackendProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
-        method_name = "_cmd_" + cmd.name
-        if hasattr(self, method_name):
-            getattr(self, method_name)(cmd)
-
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
             self._clear_environment()
 
-        self._send_msg(cmd)
+        if isinstance(cmd, ToplevelCommand):
+            # required by SshCPythonBackend for creating fresh target process
+            cmd["expected_cwd"] = self._cwd
+
+        method_name = "_cmd_" + cmd.name
+
+        if hasattr(self, method_name):
+            getattr(self, method_name)(cmd)
+        else:
+            self._send_msg(cmd)
 
     def _send_msg(self, msg):
         self._proc.stdin.write(serialize_message(msg) + "\n")
@@ -1296,8 +1318,8 @@ def get_environment_overrides_for_python_subprocess(target_executable):
     return result
 
 
-def construct_cd_command(path):
-    return construct_cmd_line(["%cd", normpath_with_actual_case(path)])
+def construct_cd_command(path) -> str:
+    return construct_cmd_line(["%cd", path])
 
 
 _command_id_counter = 0

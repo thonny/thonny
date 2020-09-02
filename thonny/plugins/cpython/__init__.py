@@ -110,6 +110,12 @@ class CPythonProxy(SubprocessProxy):
 
         return CPythonBackendPipDialog
 
+    def can_run_remote_files(self):
+        return False
+
+    def can_run_local_files(self):
+        return True
+
 
 class PrivateVenvCPythonProxy(CPythonProxy):
     def __init__(self, clean):

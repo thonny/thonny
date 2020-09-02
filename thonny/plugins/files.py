@@ -163,7 +163,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             and proxy.get_cwd() != path
             and get_runner().is_waiting_toplevel_command()
         ):
-            get_shell().submit_magic_command(construct_cd_command(path))
+            get_shell().submit_magic_command(construct_cd_command(normpath_with_actual_case(path)))
         else:
             # it's OK, if it's already focused into this directory
             # focus again to refresh

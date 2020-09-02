@@ -227,7 +227,7 @@ def _unix_get_used_memory():
     "TODO:"
 
 
-def construct_cmd_line(parts, safe_tokens=[]):
+def construct_cmd_line(parts, safe_tokens=[]) -> str:
     def quote(s):
         if s in safe_tokens:
             return s

@@ -18,6 +18,7 @@ from thonny.common import (
     ToplevelResponse,
     is_same_path,
     normpath_with_actual_case,
+    universal_dirname,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
@@ -1026,6 +1027,17 @@ def get_saved_current_script_filename(force=True):
 
 def is_remote_path(s):
     return REMOTE_PATH_MARKER in s
+
+
+def is_local_path(s):
+    return not is_remote_path(s)
+
+
+def get_target_dirname_from_editor_filename(s):
+    if is_local_path(s):
+        return os.path.dirname(s)
+    else:
+        return universal_dirname(extract_target_path(s))
 
 
 def extract_target_path(s):
