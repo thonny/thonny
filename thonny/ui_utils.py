@@ -1111,6 +1111,8 @@ class ToolTip:
                 tw.tk.call(
                     "::tk::unsupported::MacWindowStyle", "style", tw._w, "help", "noActivates"
                 )
+                if get_tk_version_info() >= (8, 6, 10) and running_on_mac_os():
+                    tw.wm_overrideredirect(1)
             except tk.TclError:
                 pass
         else:

@@ -31,6 +31,8 @@ from thonny.memory import VariablesFrame
 from thonny.misc_utils import running_on_mac_os, running_on_rpi, shorten_repr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import CommonDialog, select_sequence
+from thonny.ui_utils import select_sequence, CommonDialog, get_tk_version_info
+from _tkinter import TclError
 
 _current_debugger = None
 
@@ -862,6 +864,8 @@ class ToplevelExpressionBox(BaseExpressionBox, tk.Toplevel):
             raise RuntimeError("Should be used only on Mac")
 
         self.resizable(False, False)
+        if get_tk_version_info() >= (8, 6, 10) and running_on_mac_os():
+            self.wm_overrideredirect(1)
         self.wm_transient(codeview.winfo_toplevel())
         self.lift()
 
