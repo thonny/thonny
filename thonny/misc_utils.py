@@ -10,6 +10,10 @@ from typing import Optional, Sequence, Tuple
 
 from thonny.languages import tr
 
+PASSWORD_METHOD = "password"
+PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
+PUBLIC_KEY_WITH_PASS_METHOD = "public-key (with passphrase)"
+
 
 def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
     # Deleting the folder on Windows is not so easy task

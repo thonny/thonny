@@ -450,9 +450,14 @@ class SshMixin(UploadDownloadMixin):
         # UploadDownloadMixin.__init__(self)
         try:
             import paramiko
-            from paramiko.client import SSHClient
+            from paramiko.client import SSHClient, AutoAddPolicy
         except ImportError:
-            raise RuntimeError("paramiko is required")
+            print(
+                "\nThis back-end requires an extra package named 'paramiko'."
+                " Install it from 'Tools => Manage plug-ins' or via your system package manager.",
+                file=sys.stderr,
+            )
+            sys.exit()
 
         self._host = host
         self._user = user
@@ -463,8 +468,33 @@ class SshMixin(UploadDownloadMixin):
         self._sftp = None  # type: Optional[paramiko.SFTPClient]
         self._client = SSHClient()
         self._client.load_system_host_keys()
+        self._client.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
         # TODO: does it get closed properly after process gets killed?
-        self._client.connect(hostname=host, username=user, password=password)
+        self._connect()
+
+    def _connect(self):
+        from paramiko.ssh_exception import AuthenticationException
+        import socket
+
+        try:
+            self._client.connect(
+                hostname=self._host,
+                username=self._user,
+                password=self._password,
+                passphrase=self._password,
+            )
+        except socket.gaierror as e:
+            print("\nCan't connect to '%s': %s" % (self._host, str(e)), file=sys.stderr)
+            sys.exit(1)
+        except AuthenticationException as e:
+            print(
+                "\nCan't connect to '%s' with user '%s': %s" % (self._host, self._user, str(e)),
+                file=sys.stderr,
+            )
+            print("Re-check your authentication method, password or keys.", file=sys.stderr)
+            delete_stored_ssh_password()
+
+            sys.exit(1)
 
     def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
         # Before running the main thing:
@@ -619,6 +649,18 @@ def interrupt_local_process() -> None:
     else:
         # Does not give KeyboardInterrupt in Windows
         os.kill(os.getpid(), signal.SIGINT)
+
+
+def get_ssh_password_file_path():
+    from thonny import THONNY_USER_DIR
+
+    return os.path.join(THONNY_USER_DIR, "ssh_password")
+
+
+def delete_stored_ssh_password():
+    if os.path.exists(get_ssh_password_file_path()):
+        # invalidate stored password
+        os.remove(get_ssh_password_file_path())
 
 
 if __name__ == "__main__":

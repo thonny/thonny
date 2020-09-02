@@ -1962,6 +1962,9 @@ class Workbench(tk.Tk):
 
         ui_utils.show_dialog(dlg)
 
+        if dlg.backend_restart_required:
+            get_runner().restart_backend(False)
+
     def _cmd_focus_editor(self) -> None:
         self.get_editor_notebook().focus_set()
 

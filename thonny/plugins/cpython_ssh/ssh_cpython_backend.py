@@ -20,6 +20,7 @@ from thonny.common import (
     CommandToBackend,
     MessageFromBackend,
     parse_message,
+    MESSAGE_MARKER,
 )
 
 
@@ -44,7 +45,6 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         if cmd.name[0].isupper():
             if "expected_cwd" in cmd:
                 self._cwd = cmd["expected_cwd"]
-            print(cmd)
             self._restart_main_backend()
 
         handler = getattr(self, "_cmd_" + cmd.name, None)
@@ -82,7 +82,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
     def _forward_main_responses(self):
         while self._should_keep_going():
             line = self._proc.stdout.readline()
-            if self._main_backend_is_fresh and not self._looks_like_response(line):
+            if self._main_backend_is_fresh and self._looks_like_echo(line):
                 # In the beginning the backend may echo commands sent to it (perhaps this echo-avoiding trick
                 # takes time). Don't forward those lines.
                 continue
@@ -94,12 +94,8 @@ class SshCPythonBackend(BaseBackend, SshMixin):
                 sys.stdout.flush()
                 self._main_backend_is_fresh = False
 
-    def _looks_like_response(self, line):
-        try:
-            parse_message(line)
-            return True
-        except:
-            return False
+    def _looks_like_echo(self, line):
+        return line.startswith("^B")
 
     def _should_keep_going(self) -> bool:
         return self._proc is not None and self._proc.poll() is None

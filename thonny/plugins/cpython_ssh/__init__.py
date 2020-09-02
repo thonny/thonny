@@ -1,7 +1,7 @@
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
 from thonny.languages import tr
-from thonny.plugins.backend_config_page import BaseSshProxyConfigPage
+from thonny.plugins.backend_config_page import BaseSshProxyConfigPage, get_ssh_password
 from thonny.running import SubprocessProxy
 
 
@@ -9,8 +9,7 @@ class SshCPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("ssh.host")
         self._user = get_workbench().get_option("ssh.user")
-        self._password = get_workbench().get_option("ssh.password")
-        self._interpreter = get_workbench().get_option("ssh.interpreter")
+        self._remote_interpreter = get_workbench().get_option("ssh.executable")
 
         super().__init__(clean)
         self._send_msg(ToplevelCommand("get_environment_info"))
@@ -23,8 +22,8 @@ class SshCPythonProxy(SubprocessProxy):
                 {
                     "host": self._host,
                     "user": self._user,
-                    "password": self._password,
-                    "interpreter": self._interpreter,
+                    "password": get_ssh_password("ssh"),
+                    "interpreter": self._remote_interpreter,
                     "cwd": self._get_initial_cwd(),
                 }
             ),
@@ -102,10 +101,10 @@ class SshProxyConfigPage(BaseSshProxyConfigPage):
 
 
 def load_plugin():
-    get_workbench().set_default("ssh.host", "raspberrypi.local")
-    get_workbench().set_default("ssh.user", "pi")
-    get_workbench().set_default("ssh.password", "raspberry")
-    get_workbench().set_default("ssh.interpreter", "python3")
+    get_workbench().set_default("ssh.host", "")
+    get_workbench().set_default("ssh.user", "")
+    get_workbench().set_default("ssh.auth_method", "password")
+    get_workbench().set_default("ssh.executable", "python3")
     get_workbench().set_default("ssh.cwd", "~")
     get_workbench().add_backend(
         "SSHProxy", SshCPythonProxy, tr("Remote Python 3 (SSH)"), SshProxyConfigPage, sort_key="15"

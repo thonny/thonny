@@ -1,6 +1,7 @@
 import tkinter as tk
 import traceback
 from tkinter import ttk
+from typing import Optional
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
@@ -19,6 +20,9 @@ class ConfigurationDialog(CommonDialog):
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+
+        self.backend_restart_required = False
+        self.gui_restart_required = False
 
         main_frame = ttk.Frame(self)  # otherwise there is wrong color background with clam
         main_frame.grid(row=0, column=0, sticky=tk.NSEW)
@@ -43,6 +47,7 @@ class ConfigurationDialog(CommonDialog):
                 spacer.columnconfigure(0, weight=1)
                 page = page_class(spacer)
                 page.key = key
+                page.dialog = self
                 self._page_records.append((key, title, page))
                 page.grid(sticky=tk.NSEW, pady=(15, 10), padx=15)
                 self._notebook.add(spacer, text=title)
@@ -92,6 +97,7 @@ class ConfigurationPage(ttk.Frame):
 
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
+        self.dialog = None  # type: Optional[ConfigurationDialog]
 
     def add_checkbox(
         self, flag_name, description, row=None, column=0, padx=0, pady=0, columnspan=1, tooltip=None
@@ -106,9 +112,10 @@ class ConfigurationPage(ttk.Frame):
             ui_utils.create_tooltip(checkbox, tooltip)
 
     def add_combobox(
-        self, option_name, values, row=None, column=0, padx=0, pady=0, columnspan=1, width=None
+        self, variable, values, row=None, column=0, padx=0, pady=0, columnspan=1, width=None
     ):
-        variable = get_workbench().get_variable(option_name)
+        if isinstance(variable, str):
+            variable = get_workbench().get_variable(variable)
         combobox = ttk.Combobox(
             self,
             exportselection=False,
@@ -121,6 +128,7 @@ class ConfigurationPage(ttk.Frame):
         combobox.grid(
             row=row, column=column, sticky=tk.W, pady=pady, padx=padx, columnspan=columnspan
         )
+        return variable
 
     def add_entry(self, option_name, row=None, column=0, pady=0, padx=0, columnspan=1, **kw):
         variable = get_workbench().get_variable(option_name)

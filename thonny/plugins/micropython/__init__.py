@@ -30,7 +30,11 @@ from thonny.common import (
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.misc_utils import TimeHelper, find_volumes_by_name
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
+from thonny.plugins.backend_config_page import (
+    BackendDetailsConfigPage,
+    BaseSshProxyConfigPage,
+    get_ssh_password,
+)
 from thonny.running import BackendProxy, SubprocessProxy
 from thonny.ui_utils import (
     SubprocessDialog,
@@ -575,7 +579,6 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("SshMicroPython.host")
         self._user = get_workbench().get_option("SshMicroPython.user")
-        self._password = get_workbench().get_option("SshMicroPython.password")
         self._mp_executable = get_workbench().get_option("SshMicroPython.executable")
 
         super().__init__(clean)
@@ -589,7 +592,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "api_stubs_path": self._get_api_stubs_path(),
             "host": self._host,
             "user": self._user,
-            "password": self._password,
+            "password": get_ssh_password("ssh"),
         }
 
         args.update(self._get_time_args())
@@ -765,4 +768,4 @@ def load_plugin():
     get_workbench().set_default("SshMicroPython.cwd", None)
     get_workbench().set_default("SshMicroPython.host", "")
     get_workbench().set_default("SshMicroPython.user", "")
-    get_workbench().set_default("SshMicroPython.password", "")
+    get_workbench().set_default("SshMicroPython.auth_method", "password")
