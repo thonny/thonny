@@ -492,14 +492,14 @@ class MicroPythonBackend(MainBackend, ABC):
     def _execute_with_consumer(self, script, output_consumer):
         """Ensures prompt and submits the script.
         Reads (and doesn't return) until next prompt or connection error.
-        
+
         If capture is False, then forwards output incrementally. Otherwise
-        returns output if there are no problems, ie. all expected parts of the 
+        returns output if there are no problems, ie. all expected parts of the
         output are present and it reaches a prompt.
         Otherwise raises ManagementError.
 
         NB! If the consumer raises an exception, the processing may stop between prompts.
-        
+
         The execution may block. In this case the user should do something (eg. provide
         required input or issue an interrupt). The UI should remind the interrupt in case
         of Thonny commands.
@@ -514,8 +514,8 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _evaluate(self, script):
         """Evaluate the output of the script or raise ManagementError, if anything looks wrong.
-        
-        Adds printing code if the script contains single expression and doesn't 
+
+        Adds printing code if the script contains single expression and doesn't
         already contain printing code"""
         try:
             ast.parse(script, mode="eval")
@@ -542,7 +542,7 @@ class MicroPythonBackend(MainBackend, ABC):
             raise ManagementError(script, out, err)
 
     def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
-        """Used for finding initial prompt or forwarding problematic output 
+        """Used for finding initial prompt or forwarding problematic output
         in case of protocol errors"""
         raise NotImplementedError()
 
@@ -798,7 +798,10 @@ class MicroPythonBackend(MainBackend, ABC):
                         "version": "n/a",
                     }
 
-            return dict(distributions=dists, usersitepackages=None,)
+            return dict(
+                distributions=dists,
+                usersitepackages=None,
+            )
         except Exception:
             return InlineResponse("get_active_distributions", error=traceback.format_exc())
 

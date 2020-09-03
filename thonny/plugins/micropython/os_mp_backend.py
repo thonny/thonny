@@ -150,10 +150,10 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         self, script: str, output_consumer: Callable[[str, str], None]
     ) -> None:
         """Ensures prompt and submits the script.
-        Returns (out, value_repr, err) if there are no problems, ie. all parts of the 
+        Returns (out, value_repr, err) if there are no problems, ie. all parts of the
         output are present and it reaches active prompt.
         Otherwise raises ManagementError.
-        
+
         The execution may block. In this case the user should do something (eg. provide
         required input or issue an interrupt). The UI should remind the interrupt in case
         of Thonny commands.

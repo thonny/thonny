@@ -90,7 +90,7 @@ class ConfigurationDialog(CommonDialog):
 
 class ConfigurationPage(ttk.Frame):
     """This is an example dummy implementation of a configuration page.
-    
+
     It's not required that configuration pages inherit from this class
     (can be any widget), but the class must have constructor with single parameter
     for getting the master."""

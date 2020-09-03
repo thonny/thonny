@@ -1486,7 +1486,7 @@ class Workbench(tk.Tk):
 
         Args:
             view_id: View class name
-            without package name (eg. 'ShellView') """
+            without package name (eg. 'ShellView')"""
 
         if view_id == "MainFileBrowser":
             # Was renamed in 3.1.1
@@ -1607,13 +1607,17 @@ class Workbench(tk.Tk):
         )
 
     def in_debug_mode(self) -> bool:
-        return os.environ.get("THONNY_DEBUG", False) in [
-            "1",
-            1,
-            "True",
-            True,
-            "true",
-        ] or self.get_option("general.debug_mode", False)
+        return (
+            os.environ.get("THONNY_DEBUG", False)
+            in [
+                "1",
+                1,
+                "True",
+                True,
+                "true",
+            ]
+            or self.get_option("general.debug_mode", False)
+        )
 
     def _init_scaling(self) -> None:
         self._default_scaling_factor = self.tk.call("tk", "scaling")

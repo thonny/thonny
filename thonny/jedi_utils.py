@@ -19,13 +19,17 @@ def _copy_of_get_statement_of_position(node, pos):
 
     for c in node.children:
         if c.start_pos <= pos <= c.end_pos:
-            if c.type not in (
-                "decorated",
-                "simple_stmt",
-                "suite",
-                "async_stmt",
-                "async_funcdef",
-            ) and not isinstance(c, (tree.Flow, tree.ClassOrFunc)):
+            if (
+                c.type
+                not in (
+                    "decorated",
+                    "simple_stmt",
+                    "suite",
+                    "async_stmt",
+                    "async_funcdef",
+                )
+                and not isinstance(c, (tree.Flow, tree.ClassOrFunc))
+            ):
                 return c
             else:
                 try:

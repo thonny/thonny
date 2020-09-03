@@ -76,7 +76,8 @@ class MicroPythonPipDialog(BackendPipDialog):
 
     def _delete_paths(self, paths):
         get_runner().send_command_and_wait(
-            InlineCommand("delete", paths=paths), dialog_title=tr("Deleting"),
+            InlineCommand("delete", paths=paths),
+            dialog_title=tr("Deleting"),
         )
 
     def _get_install_command(self):
@@ -291,7 +292,8 @@ class MicroPythonPipDialog(BackendPipDialog):
         else:
             reason = ""
         self.info_text.direct_insert(
-            "end", get_not_supported_translation() + reason + "\n\n",
+            "end",
+            get_not_supported_translation() + reason + "\n\n",
         )
 
     def _tweak_search_results(self, results, query):

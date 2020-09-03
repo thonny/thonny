@@ -160,7 +160,7 @@ class BaseBackend(ABC):
     @abstractmethod
     def _should_keep_going(self) -> bool:
         """Returns False when there is no point in processing more commands
-         (eg. connection to the target process is lost or target process has exited)"""
+        (eg. connection to the target process is lost or target process has exited)"""
 
     @abstractmethod
     def _handle_user_input(self, msg: InputSubmission) -> None:
@@ -258,7 +258,11 @@ class UploadDownloadMixin(ABC):
 
     def _cmd_upload(self, cmd):
         errors = self._transfer_files_and_dirs(
-            cmd.items, self._ensure_remote_directory, self._upload_file, cmd, pathlib.PurePosixPath,
+            cmd.items,
+            self._ensure_remote_directory,
+            self._upload_file,
+            cmd,
+            pathlib.PurePosixPath,
         )
         return {"errors": errors}
 
@@ -361,7 +365,10 @@ class UploadDownloadMixin(ABC):
     def _upload_file(self, source_path, target_path, callback):
         with open(source_path, "br") as source_fp:
             self._write_file(
-                source_fp, target_path, os.path.getsize(source_path), callback,
+                source_fp,
+                target_path,
+                os.path.getsize(source_path),
+                callback,
             )
 
     def _get_dir_transfer_cost(self):

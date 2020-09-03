@@ -233,8 +233,9 @@ class SingleWindowDebugger(Debugger):
             )
 
     def handle_debugger_return(self, msg):
-        if self._last_frame_visualizer is not None and self._last_frame_visualizer.get_frame_id() == msg.get(
-            "frame_id"
+        if (
+            self._last_frame_visualizer is not None
+            and self._last_frame_visualizer.get_frame_id() == msg.get("frame_id")
         ):
             self._last_frame_visualizer.close()
 

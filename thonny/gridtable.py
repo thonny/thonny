@@ -127,7 +127,7 @@ class GridTable(tk.Frame):
                     w.configure(text=str(value))
 
     def get_data_value(self, row_no, col_no):
-        """ lazy dict version:
+        """lazy dict version:
         assert 0 <= row_no < self.data_row_count
         if row_no in self.data_rows:
             return self.data_rows[row_no][col_no]

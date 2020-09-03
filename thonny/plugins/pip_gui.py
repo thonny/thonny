@@ -195,7 +195,10 @@ class PipDialog(CommonDialog):
         self.install_button.grid(row=0, column=0, sticky="w", padx=0)
 
         self.uninstall_button = ttk.Button(
-            self.command_frame, text=tr(UNINSTALL), command=self._on_uninstall_click, width=20,
+            self.command_frame,
+            text=tr(UNINSTALL),
+            command=self._on_uninstall_click,
+            width=20,
         )
 
         self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5, 0))

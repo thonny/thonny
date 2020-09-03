@@ -462,11 +462,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
 
-            stdout
-            EOT
-            stderr
-            EOT
-            RAW_PROMPT
+        stdout
+        EOT
+        stderr
+        EOT
+        RAW_PROMPT
         """
 
         self._submit_code(script)
@@ -1176,7 +1176,7 @@ if __name__ == "__main__":
             )
 
             connection = SerialConnection(args["port"], BAUDRATE)
-            #connection = DifficultSerialConnection(args["port"], BAUDRATE)
+            # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
 

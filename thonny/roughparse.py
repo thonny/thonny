@@ -670,7 +670,7 @@ _IS_ASCII_ID_FIRST_CHAR = [(chr(x) in _ASCII_ID_FIRST_CHARS) for x in range(128)
 
 class HyperParser:
     """Provide advanced parsing abilities for ParenMatch and other extensions.
-    
+
     HyperParser uses PyParser.  PyParser mostly gives information on the
     proper indentation of code.  HyperParser gives additional information on
     the structure of code.

@@ -145,7 +145,7 @@ class WebReplConnection(MicroPythonConnection):
 class alt_WebReplConnection(MicroPythonConnection):
     """
     pip install websocket_client
-    
+
     Kind of works, but drops the connection when Thonny starts querying globals
     """
 

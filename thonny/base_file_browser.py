@@ -391,7 +391,7 @@ class BaseFileBrowser(ttk.Frame):
                     del self._cached_child_data[path]
 
     def render_children_from_cache(self, node_id=""):
-        """ This node is supposed to be a directory and 
+        """This node is supposed to be a directory and
         its contents needs to be shown and/or refreshed"""
         path = self.tree.set(node_id, "path")
 
@@ -660,7 +660,8 @@ class BaseFileBrowser(ttk.Frame):
             return
 
         get_workbench().set_option(
-            get_file_handler_conf_key(extension), "system" if choice == system_choice else "thonny",
+            get_file_handler_conf_key(extension),
+            "system" if choice == system_choice else "thonny",
         )
         # update icons
         self.refresh_tree()

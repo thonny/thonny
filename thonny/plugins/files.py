@@ -413,7 +413,11 @@ def upload(paths, source_dir, target_dir) -> bool:
 
     target_paths = [x["target_path"] for x in items]
     response = get_runner().send_command_and_wait(
-        InlineCommand("prepare_upload", target_paths=target_paths,), dialog_title=tr("Preparing"),
+        InlineCommand(
+            "prepare_upload",
+            target_paths=target_paths,
+        ),
+        dialog_title=tr("Preparing"),
     )
 
     picked_items = list(

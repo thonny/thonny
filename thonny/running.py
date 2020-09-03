@@ -201,8 +201,7 @@ class Runner:
         )
 
     def get_state(self) -> str:
-        """State is one of "running", "waiting_debugger_command", "waiting_toplevel_command"
-        """
+        """State is one of "running", "waiting_debugger_command", "waiting_toplevel_command" """
         return self._state
 
     def _set_state(self, state: str) -> None:
@@ -702,8 +701,8 @@ class Runner:
 
 class BackendProxy:
     """Communicates with backend process.
-    
-    All communication methods must be non-blocking, 
+
+    All communication methods must be non-blocking,
     ie. suitable for calling from GUI thread."""
 
     # backend_name will be overwritten on Workbench.add_backend
@@ -712,7 +711,7 @@ class BackendProxy:
 
     def __init__(self, clean: bool) -> None:
         """Initializes (or starts the initialization of) the backend process.
-        
+
         Backend is considered ready when the runner gets a ToplevelResponse
         with attribute "welcome_text" from fetch_next_message.
         """
@@ -747,7 +746,7 @@ class BackendProxy:
         pass
 
     def destroy(self):
-        """Called when Thonny no longer needs this instance 
+        """Called when Thonny no longer needs this instance
         (Thonny gets closed or new backend gets selected)
         """
         pass
@@ -1245,7 +1244,7 @@ def get_environment_with_overrides(overrides):
 
 
 def get_environment_overrides_for_python_subprocess(target_executable):
-    """Take care of not not confusing different interpreter 
+    """Take care of not not confusing different interpreter
     with variables meant for bundled interpreter"""
 
     # At the moment I'm tweaking the environment only if current

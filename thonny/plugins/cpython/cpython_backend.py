@@ -1752,8 +1752,9 @@ class NiceTracer(Tracer):
             return False
 
     def _is_interesting_frame(self, frame):
-        return frame.f_code.co_filename in self._instrumented_files and super()._is_interesting_frame(
-            frame
+        return (
+            frame.f_code.co_filename in self._instrumented_files
+            and super()._is_interesting_frame(frame)
         )
 
     def find_spec(self, fullname, path=None, target=None):

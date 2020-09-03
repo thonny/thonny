@@ -57,7 +57,7 @@ class BaseNameHighlighter:
 
 
 class VariablesHighlighter(BaseNameHighlighter):
-    """This is heavy, but more correct solution for variables, than Script.usages provides 
+    """This is heavy, but more correct solution for variables, than Script.usages provides
     (at least for Jedi 0.10)"""
 
     def _is_name_function_call_name(self, name):
@@ -285,9 +285,9 @@ class UsagesHighlighter(BaseNameHighlighter):
     but it only returns last
     assignments to a variable, not really all usages (with Jedi 0.10).
     But it finds attribute usages quite nicely.
-    
+
     TODO: check if this gets fixed in later versions of Jedi
-    
+
     NB!!!!!!!!!!!!! newer jedi versions use subprocess and are too slow to run
     for each keypress"""
 

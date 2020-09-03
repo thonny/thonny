@@ -8,14 +8,14 @@ from thonny.misc_utils import TimeHelper
 
 class MicroPythonConnection:
     """Utility class for using Serial or WebSocket connection
-    
+
     Uses background thread to read from the source as soon as possible
-    to avoid loss of data (because buffer overflow or the device discarding 
+    to avoid loss of data (because buffer overflow or the device discarding
     unread data).
 
     Allows writing with delays after each n bytes.
-    
-    Allows unreading data.    
+
+    Allows unreading data.
     """
 
     def __init__(self):
