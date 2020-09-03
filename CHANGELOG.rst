@@ -7,7 +7,7 @@ Version history
 
 New
 ---
-* Back-end for remote CPython over SSH
+* Back-end for remote Python over SSH (try editing and running remote and local scripts and upload/download in the file browser; package manager, system shell, and debuggers don't work yet)
 * Back-end for remote Unix MicroPython over SSH
 * Back-end for local Unix MicroPython
 * Package manager for MicroPython (using micropip.py by Peter Hinch), #1299, see https://forum.micropython.org/viewtopic.php?f=15&t=8787&start=14
