@@ -8,8 +8,6 @@ import sys
 import time
 from typing import Optional, Sequence, Tuple
 
-from thonny.languages import tr
-
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
 PUBLIC_KEY_WITH_PASS_METHOD = "public-key (with passphrase)"
@@ -124,6 +122,7 @@ def find_volumes_by_name(volume_name: str, skip_letters={"A"}) -> Sequence[str]:
 def find_volume_by_name(
     volume_name: str, not_found_msg: Optional[str] = None, found_several_msg: Optional[str] = None
 ) -> Optional[str]:
+    from thonny.languages import tr
 
     # Can't translate in the header as _ may not be available at import time
     if not_found_msg is None:

@@ -26,7 +26,7 @@ copy thonny_python.ini %BUILDDIR%
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON_LICENSE.txt
 move %BUILDDIR%\README.txt %BUILDDIR%\PYTHON_README.txt
-moce %BUILDDIR%\NEWS.txt %BUILDDIR%\PYTHON_NEWS.txt
+move %BUILDDIR%\NEWS.txt %BUILDDIR%\PYTHON_NEWS.txt
 
 del /S "%BUILDDIR%\*.pyc">NUL
 @rem del /S "%BUILDDIR%\*.lib">NUL
