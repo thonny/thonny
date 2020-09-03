@@ -84,6 +84,8 @@ class SshCPythonProxy(SubprocessProxy):
             self.send_command(ImmediateCommand("kill"))
         except BrokenPipeError:
             pass
+        except OSError:
+            pass
         super().destroy()
 
     def can_run_remote_files(self):
