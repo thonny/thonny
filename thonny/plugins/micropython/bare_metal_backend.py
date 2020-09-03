@@ -1175,8 +1175,8 @@ if __name__ == "__main__":
                 SerialConnection,
             )
 
-            # connection = SerialConnection(args["port"], BAUDRATE)
-            connection = DifficultSerialConnection(args["port"], BAUDRATE)
+            connection = SerialConnection(args["port"], BAUDRATE)
+            #connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
 
