@@ -73,9 +73,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             super().send_message(msg)
 
     def _forward_incoming_command(self, msg):
-        # sending as bytes, otherwise Paramiko does something funny
-        # (expands "\n" to "\r\n" ?)
-        self._proc.stdin.write((serialize_message(msg) + "\n").encode("ascii"))
+        self._proc.stdin.write(serialize_message(msg) + "\n")
 
     def _start_response_forwarder(self):
         self._response_forwarder = Thread(target=self._forward_main_responses, daemon=True)
