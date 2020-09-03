@@ -501,9 +501,10 @@ class SshMixin(UploadDownloadMixin):
         # * print process id (so that we can kill it later)
         #   http://redes-privadas-virtuales.blogspot.com/2013/03/getting-hold-of-remote-pid-through.html
         # * change to desired directory
-
+        #
+        # About -onlcr: https://stackoverflow.com/q/35887380/261181
         cmd_line_str = (
-            "echo $$ ; stty -echo ; "
+            "echo $$ ; stty -echo ; stty -onlcr ; "
             + (" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else "")
             + (" exec " + " ".join(map(shlex.quote, cmd_items)))
         )
