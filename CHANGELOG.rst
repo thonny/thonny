@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.3.0b2 (2020-09-03)
+====================
+* Fixed problem with circular imports affecting Python 3.7
+* Restored Python 3.5 compatibility
+
 3.3.0b1 (2020-09-03)
 ====================
 
