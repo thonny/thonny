@@ -1339,7 +1339,10 @@ class EnhancedVar(tk.Variable):
         super().__init__(master=master, value=value, name=name)
         self.modified = False
         self.modification_listener = modification_listener
-        self.trace_add("write", self._on_write)
+        if sys.version_info < (3, 6):
+            self.trace("w", self._on_write)
+        else:
+            self.trace_add("write", self._on_write)
 
     def _on_write(self, *args):
         self.modified = True
