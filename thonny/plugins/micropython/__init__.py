@@ -592,7 +592,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "api_stubs_path": self._get_api_stubs_path(),
             "host": self._host,
             "user": self._user,
-            "password": get_ssh_password("ssh"),
+            "password": get_ssh_password("SshMicroPython"),
         }
 
         args.update(self._get_time_args())
