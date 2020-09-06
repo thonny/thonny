@@ -166,7 +166,7 @@ class Workbench(tk.Tk):
         assert self._editor_notebook is not None
 
         self._init_program_arguments_frame()
-        self._init_regular_mode_link()
+        self._init_backend_switcher()
 
         self._show_views()
         # Make sure ShellView is loaded
@@ -1272,19 +1272,39 @@ class Workbench(tk.Tk):
 
         update_visibility()
 
-    def _init_regular_mode_link(self):
+    def _init_backend_switcher(self):
         if self.get_ui_mode() != "simple":
             return
 
+        frame = ttk.Frame(self._toolbar)
+        frame.grid(row=0, column=1001, sticky="ne")
+
         label = ttk.Label(
-            self._toolbar,
-            text=tr("Switch to\nregular\nmode"),
+            frame,
+            text=tr("Python 3 "),
+            # text="Python 3 ▼ ",
+            # text="Python 3 ▾ ",
             justify="right",
-            font="SmallLinkFont",
-            style="Url.TLabel",
+            # font="SmallLinkFont",
+            # style="Url.TLabel",
             cursor="hand2",
         )
-        label.grid(row=0, column=1001, sticky="ne")
+        label.grid(row=0, column=0, sticky="ne")
+
+        self._gear_menu = tk.Menu(frame, tearoff=False)
+
+        def post_menu():
+            self._gear_menu.delete(0, "end")
+            self._populate_gear_menu()
+            self._gear_menu.tk_popup(
+                button.winfo_rootx(),
+                button.winfo_rooty() + button.winfo_height(),
+            )
+
+        # ☼
+        # ≡
+        button = ttk.Button(frame, text=" ☼ ", style="ViewToolbar.Toolbutton", command=post_menu)
+        button.grid(row=1, column=0, sticky="ne")
 
         def on_click(event):
             self.set_option("general.ui_mode", "regular")
@@ -1298,6 +1318,38 @@ class Workbench(tk.Tk):
             )
 
         label.bind("<1>", on_click, True)
+
+    def _populate_gear_menu(self):
+        """Constructs the menu for upper-right gear button"""
+        self._gear_menu.add_checkbutton(
+            label="Python 3", command=lambda: self._switch_backend_group("CPython")
+        )
+        self._gear_menu.add_checkbutton(
+            label="MicroPython", command=lambda: self._switch_backend_group("MicroPython")
+        )
+        self._gear_menu.add_checkbutton(
+            label="CircuitPython", command=lambda: self._switch_backend_group("CircuitPython")
+        )
+        self._gear_menu.add_separator()
+        self._gear_menu.add_checkbutton(
+            label=tr("Light"), command=lambda: self._switch_darkness("light")
+        )
+        self._gear_menu.add_checkbutton(
+            label=tr("Dark"), command=lambda: self._switch_darkness("dark")
+        )
+        self._gear_menu.add_separator()
+        self._gear_menu.add_command(
+            label=tr("Switch to regular mode"), command=self._switch_to_regular_mode
+        )
+
+    def _switch_backend_group(self, group):
+        pass
+
+    def _switch_darkness(self, mode):
+        pass
+
+    def _switch_to_regular_mode(self):
+        pass
 
     def log_program_arguments_string(self, arg_str: str) -> None:
         arg_str = arg_str.strip()
