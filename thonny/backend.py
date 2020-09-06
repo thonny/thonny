@@ -483,6 +483,8 @@ class SshMixin(UploadDownloadMixin):
         from paramiko.ssh_exception import AuthenticationException
         import socket
 
+        from paramiko import SSHException
+
         try:
             self._client.connect(
                 hostname=self._host,
@@ -490,15 +492,12 @@ class SshMixin(UploadDownloadMixin):
                 password=self._password,
                 passphrase=self._password,
             )
-        except socket.gaierror as e:
-            print("\nCan't connect to '%s': %s" % (self._host, str(e)), file=sys.stderr)
-            sys.exit(1)
-        except AuthenticationException as e:
+        except (SSHException, OSError) as e:
             print(
                 "\nCan't connect to '%s' with user '%s': %s" % (self._host, self._user, str(e)),
                 file=sys.stderr,
             )
-            print("Re-check your authentication method, password or keys.", file=sys.stderr)
+            print("Re-check your host, authentication method, password or keys.", file=sys.stderr)
             delete_stored_ssh_password()
 
             sys.exit(1)

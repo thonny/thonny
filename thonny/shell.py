@@ -1894,8 +1894,8 @@ class PlotterCanvas(tk.Canvas):
         if not segments_by_color:
             return
 
-        range_start = 2**15
-        range_end = - (2**15)
+        range_start = 2 ** 15
+        range_end = -(2 ** 15)
 
         # if new block is using 3/4 of the width,
         # then don't consider old block's values anymore
