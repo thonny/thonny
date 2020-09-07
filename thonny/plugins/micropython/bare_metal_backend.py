@@ -339,6 +339,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
                 W600_FIRST_RAW_PROMPT
             ):
+                self._soft_reboot_after_interrupting_to_raw_prompt()
                 self._raw_prompt_ensured = True
                 break
         else:
@@ -361,6 +362,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 + "  - ask for help in Thonny's forum or issue tracker."
             )
             sys.exit()
+
+    def _soft_reboot_after_interrupting_to_raw_prompt(self):
+        self._connection.write(SOFT_REBOOT_CMD)
+        # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
+        # # (they don't do anything in raw repl)
+        self._connection.write(INTERRUPT_CMD)
+        self._connection.write(INTERRUPT_CMD)
+        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=2)
+        if not output.endswith(FIRST_RAW_PROMPT):
+            self._show_error("Could not soft-reboot after reaching raw prompt. Got %s" % output)
 
     def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
