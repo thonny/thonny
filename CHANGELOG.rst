@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.3.0b3 (2020-09-07)
+====================
+* Stop/Restart command now soft-reboots MicroPython device after reaching the prompt
+* Fixed problem with saving SSH password
+
 3.3.0b2 (2020-09-03)
 ====================
 * Fixed problem with circular imports affecting Python 3.7
