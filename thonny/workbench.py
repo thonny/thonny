@@ -153,6 +153,10 @@ class Workbench(tk.Tk):
         self.add_view(
             ShellView, tr("Shell"), "s", visible_by_default=True, default_position_key="A"
         )
+
+        from thonny.exercises import ExercisesView
+
+        self.add_view(ExercisesView, tr("Exercises"), "ne")
         assistance.init()
         self._runner = Runner()
         self._load_plugins()
@@ -1084,7 +1088,7 @@ class Workbench(tk.Tk):
 
     def add_exercise_provider(self, name, title, class_, sort_key=None):
         self._exercise_providers.append(
-            {"name": name, "title": title, "class": class_, "sort_key": sort_key}
+            {"name": name, "title": title, "class": class_, "sort_key": sort_key or title}
         )
 
     def get_exercise_providers(self):

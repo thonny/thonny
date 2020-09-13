@@ -1,9 +1,11 @@
 import logging
+import sys
 import traceback
 from html.parser import HTMLParser
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
+from typing import Tuple, List
 
 from thonny import tktextext, ui_utils, get_workbench
 from thonny.codeview import get_syntax_options_for_tag
@@ -86,6 +88,8 @@ class ExercisesView(ttk.Frame):
         elif target.startswith("!"):
             self._provider_name = target[1:]
             self.go_to("/")
+        elif target.startswith("/"):
+            self.go_to(target)
         else:
             get_workbench().open_url(target)
 
@@ -111,7 +115,7 @@ class ExercisesView(ttk.Frame):
             self._provider_records_by_name.values(), key=lambda p: p["sort_key"]
         )
 
-        html = "algus"
+        html = "\n"
         html += "<ul>\n"
         for provider_record in provider_records:
             html += '<li><a href="!%s">%s</a></li>\n' % (
@@ -176,10 +180,10 @@ class HtmlText(tktextext.TweakableText):
         italic_font.configure(slant="italic", size=main_font.cget("size"))
 
         h1_font = main_font.copy()
-        h1_font.configure(size=main_font.cget("size") * 2, weight="bold")
+        h1_font.configure(size=round(main_font.cget("size") * 1.4), weight="bold")
 
         h2_font = main_font.copy()
-        h2_font.configure(size=round(main_font.cget("size") * 1.5), weight="bold")
+        h2_font.configure(size=round(main_font.cget("size") * 1.3), weight="bold")
 
         h3_font = main_font.copy()
         h3_font.configure(size=main_font.cget("size"), weight="bold")
@@ -210,6 +214,7 @@ class HtmlText(tktextext.TweakableText):
         self.tag_configure("small", font=small_font)
         self.tag_configure("light", foreground="gray")
         self.tag_configure("remark", font=small_italic_font)
+        self.tag_bind("a", "<ButtonRelease-1>", self._hyperlink_click)
         self.tag_bind("a", "<Enter>", self._hyperlink_enter)
         self.tag_bind("a", "<Leave>", self._hyperlink_leave)
 
@@ -254,297 +259,14 @@ class HtmlText(tktextext.TweakableText):
         self.tag_delete("1.0", "end")
         self._reset_renderer()
 
-    def create_visitor(self, doc, global_tags=()):
-        # Pass unique tag count from previous visitor
-        # to keep uniqueness
-
-        if self._visitor is None:
-            unique_tag_count = 0
-        else:
-            unique_tag_count = self._visitor.unique_tag_count
-
-        import docutils.nodes
-
-        class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
-            def __init__(self, document, text, global_tags=(), unique_tag_count=0):
-                super().__init__(document)
-
-                self._context_tags = list(global_tags)
-                self.text = text
-                self.section_level = 0
-                self.in_topic = False
-                self.in_paragraph = False
-                self.in_title = False
-
-                self.active_lists = []
-
-                self.unique_tag_count = unique_tag_count
-
-            def visit_document(self, node):
-                pass
-
-            def visit_Text(self, node):
-                self._append_text(self._node_to_text(node))
-
-            def visit_section(self, node):
-                self.section_level += 1
-
-            def depart_section(self, node):
-                self.section_level -= 1
-
-            def _get_title_tag(self):
-                if self.in_topic:
-                    return "topic_title"
-                else:
-                    return "h%d" % (self.section_level + 1)
-
-            def visit_title(self, node):
-                self.in_title = True
-                self._add_tag(self._get_title_tag())
-
-            def depart_title(self, node):
-                self.in_title = False
-                self._append_text("\n")
-                self._pop_tag(self._get_title_tag())
-
-            def visit_paragraph(self, node):
-                self.in_paragraph = True
-                if not self.active_lists:
-                    self._add_tag("p")
-
-            def depart_paragraph(self, node):
-                self.in_paragraph = False
-                self._append_text("\n")
-                if not self.active_lists:
-                    self._pop_tag("p")
-
-            def visit_line_block(self, node):
-                self._add_tag("line_block")
-
-            def depart_line_block(self, node):
-                self._pop_tag("line_block")
-
-            def visit_line(self, node):
-                pass
-
-            def depart_line(self, node):
-                self._append_text("\n")
-
-            def visit_topic(self, node):
-                self.in_topic = True
-
-                if "toggle" in node.attributes["classes"]:
-                    return self._visit_toggle_topic(node)
-                elif "empty" in node.attributes["classes"]:
-                    return self._visit_empty_topic(node)
-                else:
-                    return self.default_visit(node)
-
-            def _visit_toggle_topic(self, node):
-                tag = self._create_unique_tag()
-                title_id_tag = tag + "_title"
-                body_id_tag = tag + "_body"
-
-                def get_toggler_image_name(kind):
-                    if get_workbench().uses_dark_ui_theme():
-                        return kind + "_light"
-                    else:
-                        return kind
-
-                if "open" in node.attributes["classes"]:
-                    initial_image = get_toggler_image_name("boxminus")
-                    initial_elide = False
-                else:
-                    initial_image = get_toggler_image_name("boxplus")
-                    initial_elide = True
-
-                label = tk.Label(
-                    self.text,
-                    image=get_workbench().get_image(initial_image),
-                    borderwidth=0,
-                    background=self.text["background"],
-                    cursor="arrow",
-                )
-
-                def toggle_body(event=None):
-                    elide = self.text.tag_cget(body_id_tag, "elide")
-                    if elide == "1":
-                        elide = True
-                    elif elide == "0":
-                        elide = False
-                    else:
-                        elide = bool(elide)
-
-                    elide = not elide
-
-                    self.text.tag_configure(body_id_tag, elide=elide)
-                    if self.text.has_selection():
-                        self.text.tag_remove("sel", "1.0", "end")
-
-                    if elide:
-                        label.configure(
-                            image=get_workbench().get_image(get_toggler_image_name("boxplus"))
-                        )
-                    else:
-                        label.configure(
-                            image=get_workbench().get_image(get_toggler_image_name("boxminus"))
-                        )
-
-                assert isinstance(node.children[0], docutils.nodes.title)
-
-                # self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
-                self._add_tag(title_id_tag)
-                self._append_window(label)
-                label.bind("<1>", toggle_body, True)
-                node.children[0].walkabout(self)
-                self._pop_tag(title_id_tag)
-
-                self.text.tag_configure(body_id_tag, elide=initial_elide)
-                self._add_tag(body_id_tag)
-                self._add_tag("topic_body")
-                for child in list(node.children)[1:]:
-                    child.walkabout(self)
-                self._pop_tag("topic_body")
-                self._pop_tag(body_id_tag)
-
-                if "tight" not in node.attributes["classes"]:
-                    self._append_text("\n")
-
-                raise docutils.nodes.SkipNode()
-
-            def _visit_empty_topic(self, node):
-                img = get_workbench().get_image(
-                    "boxdot_light" if get_workbench().uses_dark_ui_theme() else "boxdot"
-                )
-                label = tk.Label(
-                    self.text,
-                    image=img,
-                    borderwidth=0,
-                    background=self.text["background"],
-                    cursor="arrow",
-                )
-                self._append_window(label)
-                assert isinstance(node.children[0], docutils.nodes.title)
-                node.children[0].walkabout(self)
-
-                if "tight" not in node.attributes["classes"]:
-                    self._append_text("\n")
-
-                raise docutils.nodes.SkipNode()
-
-            def depart_topic(self, node):
-                # only for non-toggle topics
-                self.in_topic = False
-                self._append_text("\n")
-
-            def visit_image(self, node):
-                self._append_image(node.attributes["uri"])
-                if not self.in_paragraph and not self.in_title:
-                    self._append_text("\n")
-
-            def visit_reference(self, node):
-                tag = self._create_unique_tag()
-                node.unique_tag = tag
-                self._add_tag("a")
-                self._add_tag(tag)
-
-                def handle_click(event):
-                    get_workbench().open_url(node.attributes["refuri"])
-
-                self.text.tag_bind(tag, "<ButtonRelease-1>", handle_click)
-
-            def depart_reference(self, node):
-                self._pop_tag("a")
-                self._pop_tag(node.unique_tag)
-
-            def visit_literal(self, node):
-                self._add_tag("code")
-
-            def depart_literal(self, node):
-                self._pop_tag("code")
-
-            def visit_inline(self, node):
-                for cls in node.attributes["classes"]:
-                    self._add_tag(cls)
-
-            def depart_inline(self, node):
-                for cls in node.attributes["classes"]:
-                    self._pop_tag(cls)
-
-            def visit_literal_block(self, node):
-                self._add_tag("code")
-
-            def depart_literal_block(self, node):
-                self._pop_tag("code")
-                self._append_text("\n\n")
-
-            def visit_bullet_list(self, node):
-                self.active_lists.append(node.attributes["bullet"])
-
-            def depart_bullet_list(self, node):
-                self._append_text("\n")
-                self.active_lists.pop()
-
-            def visit_enumerated_list(self, node):
-                self.active_lists.append(node.attributes["enumtype"])
-
-            def depart_enumerated_list(self, node):
-                self._append_text("\n")
-                self.active_lists.pop()
-
-            def visit_list_item(self, node):
-                if self.active_lists[-1] == "*":
-                    self._append_text("• ")
-                elif self.active_lists[-1] == "arabic":
-                    for i, sib in enumerate(node.parent.children):
-                        if sib is node:
-                            self._append_text("%d. " % (i + 1))
-                            break
-
-            def visit_note(self, node):
-                self._add_tag("em")
-
-            def depart_note(self, node):
-                self._pop_tag("em")
-
-            def visit_target(self, node):
-                pass
-
-            def visit_substitution_definition(self, node):
-                raise docutils.nodes.SkipNode()
-
-            def visit_system_message(self, node):
-                logging.getLogger("thonny").warning(
-                    "docutils message: '%s'. Context: %s" % (node.astext(), node.parent)
-                )
-                raise docutils.nodes.SkipNode
-
-            def visit_emphasis(self, node):
-                self._add_tag("em")
-
-            def depart_emphasis(self, node):
-                self._pop_tag("em")
-
-            def visit_strong(self, node):
-                self._add_tag("strong")
-
-            def depart_strong(self, node):
-                self._pop_tag("strong")
-
-            def visit_block_quote(self, node):
-                self._add_tag("code")
-
-            def depart_block_quote(self, node):
-                self._pop_tag("code")
-
-            def default_visit(self, node):
-                self._append_text(self._node_to_text(node))
-                print("skipping children", type(node), node)
-                raise docutils.nodes.SkipChildren()
-
-            def default_departure(self, node):
-                # Pass all other nodes through.
-                pass
+    def _hyperlink_click(self, event):
+        mouse_index = self.index("@%d,%d" % (event.x, event.y))
+
+        for tag in self.tag_names(mouse_index):
+            # formatting tags are alphanumeric
+            if self._renderer._is_link_tag(tag):
+                self._link_handler(tag)
+                break
 
     def _hyperlink_enter(self, event):
         self.config(cursor="hand2")
@@ -557,11 +279,13 @@ class HtmlRenderer(HTMLParser):
     def __init__(self, text_widget, link_handler):
         super().__init__()
         self.widget = text_widget
+        self.widget.mark_set("mark", "end")
         self._link_handler = link_handler
         self._unique_tag_count = 0
         self._context_tags = []
-        self.active_lists = []
-        self._block_tags = ["div", "p", "ul", "ol", "pre", "code", "form"]
+        self._active_lists = []
+        self._active_forms = []
+        self._block_tags = ["div", "p", "ul", "ol", "li", "pre", "code", "form", "h1", "h2"]
         self._alternatives = {"b": "strong", "i": "em"}
         self._simple_tags = ["strong", "u", "em"]
         self._ignored_tags = ["span"]
@@ -575,21 +299,35 @@ class HtmlRenderer(HTMLParser):
         else:
             self._active_attrs_by_tag[tag] = attrs
 
-        if tag == "a":
-            if "href" in attrs:
-                self._add_tag("a")
-                link_tag = self._create_unique_tag()
-                self._add_tag(link_tag)
+        if tag in self._block_tags:
+            self._ensure_new_line()
 
-                def handle_click(event):
-                    self._link_handler(attrs["href"])
+        self._add_tag(tag)
 
-                self.widget.tag_bind(tag, "<ButtonRelease-1>", handle_click)
-
-        if tag in self._simple_tags:
-            self._add_tag(tag)
-        elif tag in self._block_tags:
-            self._append_text("\n")
+        if tag == "a" and "href" in attrs:
+            self._add_tag(attrs["href"])
+        elif tag == "ul":
+            self._active_lists.append("ul")
+        elif tag == "ol":
+            self._active_lists.append("ol")
+        elif tag == "li":
+            if self._active_lists[-1] == "ul":
+                self._append_text("• ")
+            elif self._active_lists[-1] == "ol":
+                self._append_text("? ")
+        elif tag == "form":
+            form = attrs.copy()
+            form["inputs"] = []
+            self._active_forms.append(form)
+        elif tag == "input" and attrs.get("type") == "submit":
+            self._append_submit_button(attrs)
+        elif tag == "input":
+            if not attrs.get("name"):
+                raise RuntimeError("<input> without name")
+            if not attrs.get("type"):
+                raise RuntimeError("<input> without type")
+            if attrs["type"] == "file":
+                self._append_file_input(attrs)
 
     def handle_endtag(self, tag):
         tag = self._normalize_tag(tag)
@@ -598,13 +336,24 @@ class HtmlRenderer(HTMLParser):
         else:
             self._active_attrs_by_tag[tag] = {}
 
-        if tag in self._simple_tags:
-            self._pop_tag(tag)
-        elif tag in self._block_tags:
-            self._append_text("\n")
+        if tag == "ul":
+            self._close_active_list("ul")
+        elif tag == "ol":
+            self._close_active_list("ol")
+        elif tag == "form":
+            self._active_forms.pop()
+
+        self._pop_tag(tag)
+
+        # prepare for next piece of text
+        if tag in self._block_tags:
+            self._ensure_new_line()
 
     def handle_data(self, data):
         self._append_text(self._prepare_text(data))
+
+    def _is_link_tag(self, tag):
+        return ":" in tag or "/" in tag or "!" in tag
 
     def _create_unique_tag(self):
         self._unique_tag_count += 1
@@ -616,36 +365,74 @@ class HtmlRenderer(HTMLParser):
     def _add_tag(self, tag):
         self._context_tags.append(tag)
 
+    def _ensure_new_line(self):
+        last_line_without_spaces = self.widget.get("end-2l linestart", "end-1c").replace(" ", "")
+        if not last_line_without_spaces.endswith("\n"):
+            self.widget.direct_insert("end-1c", "\n")
+
     def _pop_tag(self, tag):
-        while self._context_tags and self._context_tags[-1] != "tag":
+        while self._context_tags and self._context_tags[-1] != tag:
             # remove unclosed or synthetic other tags
             self._context_tags.pop()
 
         if self._context_tags:
-            assert self._context_tags[-1] == "tag"
+            assert self._context_tags[-1] == tag
             self._context_tags.pop()
+
+    def _close_active_list(self, tag):
+        # TODO: active list may also include list item marker
+        while self._active_lists and self._active_lists[-1] != tag:
+            # remove unclosed or synthetic other tags
+            self._active_lists.pop()
+
+        if self._active_lists:
+            assert self._active_lists[-1] == tag
+            self._active_lists.pop()
 
     def _prepare_text(self, text):
         if self._context_tags and self._context_tags[-1] in ["pre", "code"]:
-            return text
-        else:
             text = text.replace("\n", " ").replace("\r", " ")
             while "  " in text:
                 text = text.replace("  ", " ")
-            return text
+
+        if self._should_trim_whitespace():
+            text = text.strip()
+
+        return text
+
+    def _should_trim_whitespace(self):
+        for tag in reversed(self._context_tags):
+            if self._is_link_tag(tag):
+                continue
+            return tag in self._block_tags
+
+        return True
 
     def _append_text(self, chars, extra_tags=()):
         # print("APPP", chars, tags)
-        self.widget.direct_insert("end", chars, self._get_effective_tags(extra_tags))
+        self.widget.direct_insert("mark", chars, self._get_effective_tags(extra_tags))
+
+    def _append_submit_button(self, attrs):
+        form = self._active_forms[-1]
+
+        def handler():
+            self._link_handler(form["action"])
+
+        btn = ttk.Button(self.widget, text=attrs.get("value", "Submit"), command=handler)
+        self._append_window(btn)
+
+    def _append_file_input(self, attrs):
+        cb = ttk.Combobox(self.widget, values=["<active editor>", "main.py", "kala.py"])
+        self._append_window(cb)
 
     def _append_image(self, name, extra_tags=()):
-        index = self.widget.index("end-1c")
+        index = self.widget.index("mark-1c")
         self.widget.image_create(index, image=get_workbench().get_image(name))
         for tag in self._get_effective_tags(extra_tags):
             self.widget.tag_add(tag, index)
 
     def _append_window(self, window, extra_tags=()):
-        index = self.widget.index("end-1c")
+        index = self.widget.index("mark-1c")
         self.widget.window_create(index, window=window)
         for tag in self._get_effective_tags(extra_tags):
             self.widget.tag_add(tag, index)
@@ -653,8 +440,8 @@ class HtmlRenderer(HTMLParser):
     def _get_effective_tags(self, extra_tags):
         tags = set(extra_tags) | set(self._context_tags)
 
-        if self.active_lists:
-            tags.add("list%d" % min(len(self.active_lists), 5))
+        if self._active_lists:
+            tags.add("list%d" % min(len(self._active_lists), 5))
 
         # combine tags
         if "code" in tags and "topic_title" in tags:
@@ -750,17 +537,5 @@ class BreadcrumbsBar(tktextext.TweakableText):
 
 
 class ExerciseProvider:
-    pass
-
-
-class DemoExerciseProvider(ExerciseProvider):
-    def __init__(self, exercises_view):
-        self.exercises_view = exercises_view
-
-    def get_html_and_breadcrumbs(self, url):
-        return ("<h1>Demo</h1>", [])
-
-
-def load_plugin():
-    get_workbench().add_view(ExercisesView, tr("Exercises"), "ne")
-    get_workbench().add_exercise_provider("demo", "Demo provider", DemoExerciseProvider)
+    def get_html_and_breadcrumbs(self, url: str) -> Tuple[str, List[Tuple[str, str]]]:
+        raise NotImplementedError()
