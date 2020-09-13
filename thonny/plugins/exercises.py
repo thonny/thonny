@@ -1,14 +1,152 @@
 import logging
-import tkinter as tk
 import traceback
+from html.parser import HTMLParser
+import tkinter as tk
+import tkinter.font as tkfont
+from tkinter import ttk
 
-from thonny import get_workbench, ui_utils
+from thonny import tktextext, ui_utils, get_workbench
 from thonny.codeview import get_syntax_options_for_tag
-from thonny.tktextext import TweakableText
+from thonny.languages import tr
+from thonny.ui_utils import scrollbar_style, lookup_style_option
+
+_HOME_KEY = "_home_"
 
 
-class RstText(TweakableText):
-    def __init__(self, master=None, cnf={}, read_only=False, **kw):
+class ExercisesView(ttk.Frame):
+    def __init__(self, master):
+        super().__init__(master, borderwidth=0, relief="flat")
+
+        self._provider_name = None
+        self._provider_records_by_name = {
+            p["name"]: p for p in get_workbench().get_exercise_providers()
+        }
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        self.vert_scrollbar = ttk.Scrollbar(
+            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
+        )
+        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
+
+        tktextext.fixwordbreaks(tk._default_root)
+        self.init_header(row=0, column=0)
+
+        self.breadcrumbs_bar.set_links(
+            [
+                ("_home", tr("Home")),
+                ("/", "lahendus.ut.ee"),
+                ("/c1", "Programmeerimise algkursus"),
+                ("/c1/ch1", "1. Funktsioonid"),
+                ("/c1/ch1", "14. Küpsisetort vol. 2"),
+            ]
+        )
+
+        spacer = ttk.Frame(self, height=1)
+        spacer.grid(row=1, sticky="nsew")
+
+        self._html_widget = HtmlText(
+            master=self,
+            link_handler=self._on_link_click,
+            read_only=True,
+            wrap="word",
+            font="TkDefaultFont",
+            padx=10,
+            pady=0,
+            insertwidth=0,
+            borderwidth=0,
+            highlightthickness=0,
+        )
+
+        self._html_widget.grid(row=1, column=0, sticky="nsew")
+
+        self.go_to_provider_selection_page()
+
+    def init_header(self, row, column):
+        header_frame = ttk.Frame(self, style="ViewToolbar.TFrame")
+        header_frame.grid(row=row, column=column, sticky="nsew")
+        header_frame.columnconfigure(0, weight=1)
+
+        self.breadcrumbs_bar = BreadcrumbsBar(header_frame, self._on_link_click)
+
+        self.breadcrumbs_bar.grid(row=0, column=0, sticky="nsew")
+
+        # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
+        self.menu_button = ttk.Button(
+            header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton", command=self.post_button_menu
+        )
+        # self.menu_button.grid(row=0, column=1, sticky="ne")
+        self.menu_button.place(anchor="ne", rely=0, relx=1)
+
+    def _on_link_click(self, target):
+        print("target", target)
+        if target == _HOME_KEY:
+            self.go_to_provider_selection_page()
+        elif target.startswith("!"):
+            self._provider_name = target[1:]
+            self.go_to("/")
+        else:
+            get_workbench().open_url(target)
+
+    def post_button_menu(self):
+        self.refresh_menu(context="button")
+        self.menu.tk_popup(
+            self.menu_button.winfo_rootx(),
+            self.menu_button.winfo_rooty() + self.menu_button.winfo_height(),
+        )
+
+    def go_to(self, url):
+        assert url.startswith("/")
+        assert self._provider_name is not None
+        provider = self._get_provider()
+        html, breadcrumbs = provider.get_html_and_breadcrumbs(url)
+        self._set_page_html(html)
+        self.breadcrumbs_bar.set_links(self._get_base_breadcrumb_links() + breadcrumbs)
+
+    def go_to_provider_selection_page(self):
+        self._provider_name = None
+
+        provider_records = sorted(
+            self._provider_records_by_name.values(), key=lambda p: p["sort_key"]
+        )
+
+        html = "algus"
+        html += "<ul>\n"
+        for provider_record in provider_records:
+            html += '<li><a href="!%s">%s</a></li>\n' % (
+                provider_record["name"],
+                provider_record["title"],
+            )
+        html += "</ul>\n"
+
+        self._set_page_html(html)
+        self.breadcrumbs_bar.set_links(self._get_base_breadcrumb_links())
+
+    def _get_provider(self):
+        if self._provider_name is None:
+            return None
+
+        rec = self._provider_records_by_name[self._provider_name]
+        if "instance" not in rec:
+            rec["instance"] = rec["class"](self)
+
+        return rec["instance"]
+
+    def _set_page_html(self, html):
+        self._html_widget.set_html_content(html)
+
+    def _get_base_breadcrumb_links(self):
+        result = [(_HOME_KEY, tr("Home"))]
+        if self._provider_name is not None:
+            provider_record = self._provider_records_by_name[self._provider_name]
+            result.append(("!" + provider_record["name"], provider_record["title"]))
+
+        return result
+
+
+class HtmlText(tktextext.TweakableText):
+    def __init__(self, master, link_handler, cnf={}, read_only=False, **kw):
 
         super().__init__(
             master=master,
@@ -20,11 +158,16 @@ class RstText(TweakableText):
                 **kw,
             }
         )
-        self.configure_tags()
-        self._visitor = None
+        self._link_handler = link_handler
+        self._configure_tags()
+        self._reset_renderer()
 
-    def configure_tags(self):
-        main_font = tk.font.nametofont("TkDefaultFont")
+    def set_html_content(self, html):
+        self.clear()
+        self._renderer.feed(html)
+
+    def _configure_tags(self):
+        main_font = tkfont.nametofont("TkDefaultFont")
 
         bold_font = main_font.copy()
         bold_font.configure(weight="bold", size=main_font.cget("size"))
@@ -103,26 +246,13 @@ class RstText(TweakableText):
             self.tag_configure("sel", lmargincolor=self["background"])
         self.tag_raise("sel")
 
+    def _reset_renderer(self):
+        self._renderer = HtmlRenderer(self, self._link_handler)
+
     def clear(self):
         self.direct_delete("1.0", "end")
-
-    def load_rst(self, rst_source, global_tags=()):
-        self.clear()
-        self.append_rst(rst_source, global_tags)
-
-    def append_rst(self, rst_source, global_tags=()):
-        try:
-            import docutils.core
-
-            doc = docutils.core.publish_doctree(rst_source)
-            doc.walkabout(self.create_visitor(doc, global_tags))
-        except Exception:
-            self.direct_insert("end", "RST SOURCE:\n" + rst_source + "\n\n")
-            self.direct_insert("end", traceback.format_exc())
-
-        # For debugging:
-        # self.direct_insert("end", doc.pformat())
-        # self.direct_insert("end", rst_source)
+        self.tag_delete("1.0", "end")
+        self._reset_renderer()
 
     def create_visitor(self, doc, global_tags=()):
         # Pass unique tag count from previous visitor
@@ -416,56 +546,6 @@ class RstText(TweakableText):
                 # Pass all other nodes through.
                 pass
 
-            def _create_unique_tag(self):
-                self.unique_tag_count += 1
-                return "_UT_%s" % self.unique_tag_count
-
-            def _node_to_text(self, node):
-                if node.parent.attributes.get("xml:space") == "preserve":
-                    return node.astext()
-                else:
-                    return node.astext().replace("\r", "").replace("\n", " ")
-
-            def _add_tag(self, tag):
-                self._context_tags.append(tag)
-
-            def _pop_tag(self, tag):
-                self._context_tags.remove(tag)
-
-            def _append_text(self, chars, extra_tags=()):
-                # print("APPP", chars, tags)
-                self.text.direct_insert("end", chars, self._get_effective_tags(extra_tags))
-
-            def _append_image(self, name, extra_tags=()):
-                index = self.text.index("end-1c")
-                self.text.image_create(index, image=get_workbench().get_image(name))
-                for tag in self._get_effective_tags(extra_tags):
-                    self.text.tag_add(tag, index)
-
-            def _append_window(self, window, extra_tags=()):
-                index = self.text.index("end-1c")
-                self.text.window_create(index, window=window)
-                for tag in self._get_effective_tags(extra_tags):
-                    self.text.tag_add(tag, index)
-
-            def _get_effective_tags(self, extra_tags):
-                tags = set(extra_tags) | set(self._context_tags)
-
-                if self.active_lists:
-                    tags.add("list%d" % min(len(self.active_lists), 5))
-
-                # combine tags
-                if "code" in tags and "topic_title" in tags:
-                    tags.remove("code")
-                    tags.remove("topic_title")
-                    tags.add("topic_title_code")
-
-                return tuple(sorted(tags))
-
-        self._visitor = TkTextRenderingVisitor(doc, self, global_tags, unique_tag_count)
-
-        return self._visitor
-
     def _hyperlink_enter(self, event):
         self.config(cursor="hand2")
 
@@ -473,16 +553,214 @@ class RstText(TweakableText):
         self.config(cursor="")
 
 
-def escape(s):
-    return (
-        s.replace("\\", "\\\\")
-        .replace("*", "\\*")
-        .replace("`", "\\`")
-        .replace("_", "\\_")
-        .replace("..", "\\..")
-    )
+class HtmlRenderer(HTMLParser):
+    def __init__(self, text_widget, link_handler):
+        super().__init__()
+        self.widget = text_widget
+        self._link_handler = link_handler
+        self._unique_tag_count = 0
+        self._context_tags = []
+        self.active_lists = []
+        self._block_tags = ["div", "p", "ul", "ol", "pre", "code", "form"]
+        self._alternatives = {"b": "strong", "i": "em"}
+        self._simple_tags = ["strong", "u", "em"]
+        self._ignored_tags = ["span"]
+        self._active_attrs_by_tag = {}  # assuming proper close tags
+
+    def handle_starttag(self, tag, attrs):
+        tag = self._normalize_tag(tag)
+        attrs = dict(attrs)
+        if tag in self._ignored_tags:
+            return
+        else:
+            self._active_attrs_by_tag[tag] = attrs
+
+        if tag == "a":
+            if "href" in attrs:
+                self._add_tag("a")
+                link_tag = self._create_unique_tag()
+                self._add_tag(link_tag)
+
+                def handle_click(event):
+                    self._link_handler(attrs["href"])
+
+                self.widget.tag_bind(tag, "<ButtonRelease-1>", handle_click)
+
+        if tag in self._simple_tags:
+            self._add_tag(tag)
+        elif tag in self._block_tags:
+            self._append_text("\n")
+
+    def handle_endtag(self, tag):
+        tag = self._normalize_tag(tag)
+        if tag in self._ignored_tags:
+            return
+        else:
+            self._active_attrs_by_tag[tag] = {}
+
+        if tag in self._simple_tags:
+            self._pop_tag(tag)
+        elif tag in self._block_tags:
+            self._append_text("\n")
+
+    def handle_data(self, data):
+        self._append_text(self._prepare_text(data))
+
+    def _create_unique_tag(self):
+        self._unique_tag_count += 1
+        return "_UT_%s" % self._unique_tag_count
+
+    def _normalize_tag(self, tag):
+        return self._alternatives.get(tag, tag)
+
+    def _add_tag(self, tag):
+        self._context_tags.append(tag)
+
+    def _pop_tag(self, tag):
+        while self._context_tags and self._context_tags[-1] != "tag":
+            # remove unclosed or synthetic other tags
+            self._context_tags.pop()
+
+        if self._context_tags:
+            assert self._context_tags[-1] == "tag"
+            self._context_tags.pop()
+
+    def _prepare_text(self, text):
+        if self._context_tags and self._context_tags[-1] in ["pre", "code"]:
+            return text
+        else:
+            text = text.replace("\n", " ").replace("\r", " ")
+            while "  " in text:
+                text = text.replace("  ", " ")
+            return text
+
+    def _append_text(self, chars, extra_tags=()):
+        # print("APPP", chars, tags)
+        self.widget.direct_insert("end", chars, self._get_effective_tags(extra_tags))
+
+    def _append_image(self, name, extra_tags=()):
+        index = self.widget.index("end-1c")
+        self.widget.image_create(index, image=get_workbench().get_image(name))
+        for tag in self._get_effective_tags(extra_tags):
+            self.widget.tag_add(tag, index)
+
+    def _append_window(self, window, extra_tags=()):
+        index = self.widget.index("end-1c")
+        self.widget.window_create(index, window=window)
+        for tag in self._get_effective_tags(extra_tags):
+            self.widget.tag_add(tag, index)
+
+    def _get_effective_tags(self, extra_tags):
+        tags = set(extra_tags) | set(self._context_tags)
+
+        if self.active_lists:
+            tags.add("list%d" % min(len(self.active_lists), 5))
+
+        # combine tags
+        if "code" in tags and "topic_title" in tags:
+            tags.remove("code")
+            tags.remove("topic_title")
+            tags.add("topic_title_code")
+
+        return tuple(sorted(tags))
 
 
-def create_title(text, line_symbol="="):
-    text = text.replace("\r\n", "\n").replace("\n", " ").strip()
-    return text + "\n" + line_symbol * len(text) + "\n"
+class BreadcrumbsBar(tktextext.TweakableText):
+    def __init__(self, master, click_handler):
+        super(BreadcrumbsBar, self).__init__(
+            master,
+            borderwidth=0,
+            relief="flat",
+            height=1,
+            font="TkDefaultFont",
+            wrap="word",
+            padx=6,
+            pady=5,
+            insertwidth=0,
+            highlightthickness=0,
+            background=lookup_style_option("ViewToolbar.TFrame", "background"),
+            read_only=True,
+        )
+
+        self._changing = False
+        self.bind("<Configure>", self.update_height, True)
+
+        self.tag_configure("_link", foreground=lookup_style_option("Url.TLabel", "foreground"))
+        self.tag_configure("_underline", underline=True)
+        self.tag_bind("_link", "<1>", self._link_click)
+        self.tag_bind("_link", "<Enter>", self._link_enter)
+        self.tag_bind("_link", "<Leave>", self._link_leave)
+        self.tag_bind("_link", "<Motion>", self._link_motion)
+
+        self._click_handler = click_handler
+
+    def set_links(self, links):
+        try:
+            self._changing = True
+
+            self.direct_delete("1.0", "end")
+            if not links:
+                return
+
+            # remove trailing newline
+            links = links[:]
+            links[-1] = (links[-1][0], links[-1][1].rstrip("\r\n"))
+
+            for key, label in links:
+                self.direct_insert("end", "/\xa0")
+                if not label.endswith("\n"):
+                    label += " "
+
+                self.direct_insert("end", label, ("_link", key))
+        finally:
+            self._changing = False
+            self.update_height()
+
+    def update_height(self, event=None):
+        if self._changing:
+            return
+        height = self.tk.call((self, "count", "-update", "-displaylines", "1.0", "end"))
+        self.configure(height=height)
+
+    def _link_click(self, event):
+        mouse_index = self.index("@%d,%d" % (event.x, event.y))
+        user_tags = [
+            tag for tag in self.tag_names(mouse_index) if tag not in ["_link", "_underline"]
+        ]
+        if len(user_tags) == 1:
+            self._click_handler(user_tags[0])
+
+    def _get_link_range(self, event):
+        mouse_index = self.index("@%d,%d" % (event.x, event.y))
+        return self.tag_prevrange("_link", mouse_index + "+1c")
+
+    def _link_motion(self, event):
+        self.tag_remove("_underline", "1.0", "end")
+        dir_range = self._get_link_range(event)
+        if dir_range:
+            range_start, range_end = dir_range
+            self.tag_add("_underline", range_start, range_end)
+
+    def _link_enter(self, event):
+        self.config(cursor="hand2")
+
+    def _link_leave(self, event):
+        self.config(cursor="")
+        self.tag_remove("_underline", "1.0", "end")
+
+
+class ExerciseProvider:
+    pass
+
+
+class DemoExerciseProvider(ExerciseProvider):
+    def __init__(self, exercises_view):
+        self.exercises_view = exercises_view
+
+    def get_html_and_breadcrumbs(self, url):
+        return ("<h1>Demo</h1>", [])
+
+
+def load_plugin():
+    get_workbench().add_view(ExercisesView, tr("Exercises"), "ne")
+    get_workbench().add_exercise_provider("demo", "Demo provider", DemoExerciseProvider)
