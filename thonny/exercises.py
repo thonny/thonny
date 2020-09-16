@@ -4,13 +4,15 @@ import traceback
 from html.parser import HTMLParser
 import tkinter as tk
 import tkinter.font as tkfont
-from tkinter import ttk
-from typing import Tuple, List
+from tkinter import ttk, messagebox
+from typing import Tuple, List, Any
 
 from thonny import tktextext, ui_utils, get_workbench
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.languages import tr
 from thonny.ui_utils import scrollbar_style, lookup_style_option
+
+EDITOR_CONTENT_NAME = "$EDITOR_CONTENT"
 
 _HOME_KEY = "_home_"
 
@@ -50,7 +52,7 @@ class ExercisesView(ttk.Frame):
 
         self._html_widget = HtmlText(
             master=self,
-            link_handler=self._on_link_click,
+            link_and_form_handler=self._on_request_new_page,
             read_only=True,
             wrap="word",
             font="TkDefaultFont",
@@ -70,7 +72,7 @@ class ExercisesView(ttk.Frame):
         header_frame.grid(row=row, column=column, sticky="nsew")
         header_frame.columnconfigure(0, weight=1)
 
-        self.breadcrumbs_bar = BreadcrumbsBar(header_frame, self._on_link_click)
+        self.breadcrumbs_bar = BreadcrumbsBar(header_frame, self._on_request_new_page)
 
         self.breadcrumbs_bar.grid(row=0, column=0, sticky="nsew")
 
@@ -81,7 +83,7 @@ class ExercisesView(ttk.Frame):
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
 
-    def _on_link_click(self, target):
+    def _on_request_new_page(self, target, form_data=None):
         print("target", target)
         if target == _HOME_KEY:
             self.go_to_provider_selection_page()
@@ -89,7 +91,7 @@ class ExercisesView(ttk.Frame):
             self._provider_name = target[1:]
             self.go_to("/")
         elif target.startswith("/"):
-            self.go_to(target)
+            self.go_to(target, form_data=form_data)
         else:
             get_workbench().open_url(target)
 
@@ -100,11 +102,14 @@ class ExercisesView(ttk.Frame):
             self.menu_button.winfo_rooty() + self.menu_button.winfo_height(),
         )
 
-    def go_to(self, url):
+    def go_to(self, url, form_data=None):
+        if form_data is None:
+            form_data = FormData()
+
         assert url.startswith("/")
         assert self._provider_name is not None
         provider = self._get_provider()
-        html, breadcrumbs = provider.get_html_and_breadcrumbs(url)
+        html, breadcrumbs = provider.get_html_and_breadcrumbs(url, form_data)
         self._set_page_html(html)
         self.breadcrumbs_bar.set_links(self._get_base_breadcrumb_links() + breadcrumbs)
 
@@ -150,7 +155,7 @@ class ExercisesView(ttk.Frame):
 
 
 class HtmlText(tktextext.TweakableText):
-    def __init__(self, master, link_handler, cnf={}, read_only=False, **kw):
+    def __init__(self, master, link_and_form_handler, cnf={}, read_only=False, **kw):
 
         super().__init__(
             master=master,
@@ -162,7 +167,7 @@ class HtmlText(tktextext.TweakableText):
                 **kw,
             }
         )
-        self._link_handler = link_handler
+        self._link_and_form_handler = link_and_form_handler
         self._configure_tags()
         self._reset_renderer()
 
@@ -252,7 +257,8 @@ class HtmlText(tktextext.TweakableText):
         self.tag_raise("sel")
 
     def _reset_renderer(self):
-        self._renderer = HtmlRenderer(self, self._link_handler)
+        print("NEWREND")
+        self._renderer = HtmlRenderer(self, self._link_and_form_handler)
 
     def clear(self):
         self.direct_delete("1.0", "end")
@@ -265,7 +271,7 @@ class HtmlText(tktextext.TweakableText):
         for tag in self.tag_names(mouse_index):
             # formatting tags are alphanumeric
             if self._renderer._is_link_tag(tag):
-                self._link_handler(tag)
+                self._link_and_form_handler(tag)
                 break
 
     def _hyperlink_enter(self, event):
@@ -276,11 +282,11 @@ class HtmlText(tktextext.TweakableText):
 
 
 class HtmlRenderer(HTMLParser):
-    def __init__(self, text_widget, link_handler):
+    def __init__(self, text_widget, link_and_form_handler):
         super().__init__()
         self.widget = text_widget
         self.widget.mark_set("mark", "end")
-        self._link_handler = link_handler
+        self._link_and_form_handler = link_and_form_handler
         self._unique_tag_count = 0
         self._context_tags = []
         self._active_lists = []
@@ -319,15 +325,16 @@ class HtmlRenderer(HTMLParser):
             form = attrs.copy()
             form["inputs"] = []
             self._active_forms.append(form)
-        elif tag == "input" and attrs.get("type") == "submit":
-            self._append_submit_button(attrs)
         elif tag == "input":
-            if not attrs.get("name"):
-                raise RuntimeError("<input> without name")
             if not attrs.get("type"):
-                raise RuntimeError("<input> without type")
-            if attrs["type"] == "file":
+                attrs["type"] = "text"
+
+            if attrs["type"] == "hidden":
+                self._add_hidden_form_variable(attrs)
+            elif attrs["type"] == "file":
                 self._append_file_input(attrs)
+            elif attrs["type"] == "submit":
+                self._append_submit_button(attrs)
 
     def handle_endtag(self, tag):
         tag = self._normalize_tag(tag)
@@ -416,12 +423,46 @@ class HtmlRenderer(HTMLParser):
         form = self._active_forms[-1]
 
         def handler():
-            self._link_handler(form["action"])
+            self._submit_form(form)
 
-        btn = ttk.Button(self.widget, text=attrs.get("value", "Submit"), command=handler)
+        value = attrs.get("value", "Submit")
+        btn = ttk.Button(self.widget, text=value, command=handler, width=len(value) + 2)
+        btn.html_attrs = attrs
         self._append_window(btn)
+        if "name" in attrs:
+            form["fields"].append([attrs, value])
+
+    def _submit_form(self, form):
+        form_data = FormData()
+        print("new_form", form_data)
+
+        for attrs, value in form["inputs"]:
+            if not "name" in attrs:
+                continue
+
+            if isinstance(value, tk.Variable):
+                value = value.get()
+            elif isinstance(value, tk.Text):
+                value = value.get("1.0", "end")
+
+            if attrs["type"] == "hidden" and attrs["name"] == EDITOR_CONTENT_NAME:
+                value = get_workbench().get_editor_notebook().get_current_editor_content()
+                if value is None:
+                    messagebox.showerror("Can't submit", "No active editor. Nothing to submit.")
+                    return
+
+            form_data.add(attrs["name"], value)
+
+        # TODO: support default action
+        # TODO: support GET forms
+        action = form["action"]
+        self._link_and_form_handler(action, form_data)
+
+    def _add_hidden_form_variable(self, attrs):
+        self._active_forms[-1]["inputs"].append([attrs, attrs.get("value")])
 
     def _append_file_input(self, attrs):
+        # TODO: support also "multiple" flag
         cb = ttk.Combobox(self.widget, values=["<active editor>", "main.py", "kala.py"])
         self._append_window(cb)
 
@@ -536,6 +577,55 @@ class BreadcrumbsBar(tktextext.TweakableText):
         self.tag_remove("_underline", "1.0", "end")
 
 
+class FormData:
+    """Used for representing form fields"""
+
+    def __init__(self, pairs: List[Tuple[Any, Any]] = None):
+        if pairs is None:
+            pairs = []
+        self.pairs = pairs
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def add(self, key, value):
+        self.pairs.append((key, value))
+
+    def getlist(self, key):
+        result = []
+        for a_key, value in self.pairs:
+            if a_key == key:
+                result.append(value)
+
+        return result
+
+    def __getitem__(self, key):
+        for a_key, value in self.pairs:
+            if a_key == key:
+                return value
+        raise KeyError(key)
+
+    def __len__(self):
+        return len(self.pairs)
+
+    def __contains__(self, key):
+        for a_key, _ in self.pairs:
+            if a_key == key:
+                return True
+        return False
+
+    def __str__(self):
+        return repr(self.pairs)
+
+    def __bool__(self):
+        return bool(len(self.pairs))
+
+
 class ExerciseProvider:
-    def get_html_and_breadcrumbs(self, url: str) -> Tuple[str, List[Tuple[str, str]]]:
+    def get_html_and_breadcrumbs(
+        self, url: str, form_data: FormData
+    ) -> Tuple[str, List[Tuple[str, str]]]:
         raise NotImplementedError()
