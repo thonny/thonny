@@ -82,7 +82,8 @@ INTERRUPT_CMD = b"\x03"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 EOT = b"\x04"
-MGMT_VALUE_START = b"\x02"
+MGMT_VALUE_START = b"<thonny>"
+MGMT_VALUE_END = b"</thonny>"
 
 # first prompt when switching to raw mode (or after soft reboot in raw mode)
 # Looks like it's not translatable in CP
@@ -197,7 +198,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 
                 @staticmethod
                 def print_mgmt_value(obj):
-                    print({mgmt_marker!r}, repr(obj), sep='', end='')
+                    print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
                     
                 @staticmethod
                 def repr(obj):
@@ -220,7 +221,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 num_values_to_keep=self._get_num_values_to_keep(),
                 start_marker=OBJECT_LINK_START,
                 end_marker=OBJECT_LINK_END,
-                mgmt_marker=MGMT_VALUE_START.decode(ENCODING),
+                mgmt_start=MGMT_VALUE_START.decode(ENCODING),
+                mgmt_end=MGMT_VALUE_END.decode(ENCODING),
             )
             + "\n"
             + textwrap.indent(self._get_custom_helpers(), "    ")
@@ -527,17 +529,26 @@ class MicroPythonBackend(MainBackend, ABC):
             pass
 
         out, err = self._execute(script, capture_output=True)
-        if err or MGMT_VALUE_START.decode(ENCODING) not in out:
+        if (
+            err
+            or MGMT_VALUE_START.decode(ENCODING) not in out
+            or MGMT_VALUE_END.decode(ENCODING) not in out
+        ):
             raise ManagementError(script, out, err)
 
-        side_effects, value_str = out.rsplit(MGMT_VALUE_START.decode(ENCODING), maxsplit=1)
-        if side_effects:
-            logging.getLogger("thonny").warning(
-                "Unexpected output from MP evaluate:\n" + side_effects + "\nSCRIPT:\n" + script
-            )
+        start_token_pos = out.index(MGMT_VALUE_START.decode(ENCODING))
+        end_token_pos = out.index(MGMT_VALUE_END.decode(ENCODING))
+
+        # a thread or IRQ handler may have written something before or after mgmt value
+        prefix = out[:start_token_pos]
+        value_str = out[start_token_pos + len(MGMT_VALUE_START) : end_token_pos]
+        suffix = out[end_token_pos + len(MGMT_VALUE_END) :]
 
         try:
-            return ast.literal_eval(value_str)
+            value = ast.literal_eval(value_str)
+            self._send_output(prefix, "stdout")
+            self._send_output(suffix, "stdout")
+            return value
         except SyntaxError:
             raise ManagementError(script, out, err)
 
