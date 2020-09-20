@@ -43,6 +43,7 @@ class PipDialog(CommonDialog):
     def __init__(self, master):
         self._state = "idle"  # possible values: "listing", "fetching", "idle"
         self._process = None
+        self._closed = False
         self._active_distributions = {}
         self.current_package_data = None
 
@@ -815,6 +816,7 @@ class PipDialog(CommonDialog):
                 self._start_show_package_info(url)
 
     def _on_close(self, event=None):
+        self._closed = True
         self.destroy()
 
     def _get_active_version(self, name):
@@ -889,6 +891,9 @@ class BackendPipDialog(PipDialog):
         get_runner().send_command(InlineCommand("get_active_distributions"))
 
     def _complete_update_list(self, msg):
+        if self._closed:
+            return
+
         get_workbench().unbind("get_active_distributions_response", self._complete_update_list)
         if "error" in msg:
             self._clear_info_text()

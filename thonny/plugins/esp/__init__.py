@@ -61,10 +61,6 @@ class ESPConfigPage(BareMetalMicroPythonConfigPage):
         self._firmware_start_address = firmware_start_address
         super().__init__(master)
 
-    def _get_flashing_frame(self):
-        frame = super()._get_flashing_frame()
-        return frame
-
     def _has_flashing_dialog(self):
         return True
 
@@ -317,7 +313,13 @@ class ESPFlashingDialog(CommonDialogEx):
 
 def load_plugin():
     add_micropython_backend(
-        "ESP32", ESP32Proxy, "MicroPython (ESP32)", ESP32ConfigPage, sort_key="32"
+        "ESP32",
+        ESP32Proxy,
+        "MicroPython (ESP32)",
+        ESP32ConfigPage,
+        sort_key="32",
+        write_block_size=255,
+        write_block_delay=0.5,
     )
     add_micropython_backend(
         "ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage, sort_key="33"

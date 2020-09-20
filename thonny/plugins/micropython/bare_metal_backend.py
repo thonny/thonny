@@ -374,13 +374,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _soft_reboot_after_interrupting_to_raw_prompt(self):
         self._write(SOFT_REBOOT_CMD)
+        self._check_reconnect()
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
-        # # (they don't do anything in raw repl)
+        # # (they don't do anything when already in raw repl)
         self._write(INTERRUPT_CMD)
         self._write(INTERRUPT_CMD)
-        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=2)
+        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=3)
         if not output.endswith(FIRST_RAW_PROMPT):
-            self._show_error("Could not soft-reboot after reaching raw prompt. Got %s" % output)
+            self._show_error("Could not get to raw prompt after soft-reboot. Got %s" % output)
 
     def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -389,9 +390,18 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._raw_prompt_ensured = False
         self._connection.read_until(NORMAL_PROMPT)
         self._write(SOFT_REBOOT_CMD)
+        self._check_reconnect()
         self._forward_output_until_active_prompt(self._send_output)
         self._ensure_raw_prompt()
+        debug("Restoring helpers")
+        self._prepare_helpers()
+        self._update_cwd()
         self.send_message(ToplevelResponse(cwd=self._cwd))
+
+    def _check_reconnect(self):
+        if isinstance(self._connection, WebReplConnection):
+            time.sleep(1)
+            self._connection = self._connection.close_and_return_new_connection()
 
     def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work
@@ -475,9 +485,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             raise TimeoutError("Could not ensure raw prompt")
 
         self._raw_prompt_ensured = True
-        debug("Restoring helpers")
-        self._prepare_helpers()
-        self._update_cwd()
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
@@ -606,7 +613,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 if (
                     self._connection.num_bytes_received == 0
                     and not self._interrupt_suggestion_given
-                    and time.time() - self._startup_time > 1.5
+                    and time.time() - self._connection.startup_time > 2.5
                 ):
                     self._show_error(
                         "\n"
@@ -1188,7 +1195,7 @@ if __name__ == "__main__":
         elif args["port"] == "webrepl":
             from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
-            connection = WebReplConnection(args["url"], args["password"], args["min_write_delay"])
+            connection = WebReplConnection(args["url"], args["password"])
         else:
             from thonny.plugins.micropython.serial_connection import (
                 DifficultSerialConnection,

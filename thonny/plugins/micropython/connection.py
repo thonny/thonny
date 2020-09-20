@@ -1,5 +1,6 @@
 import queue
 import re
+import time
 from queue import Queue
 
 from thonny.common import ConnectionClosedException
@@ -23,6 +24,7 @@ class MicroPythonConnection:
         self._read_queue = Queue()  # populated by reader thread
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
+        self.startup_time = time.time()
         self._error = None
         self._write_block_size = None
         self._write_block_delay = None

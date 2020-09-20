@@ -40,22 +40,22 @@ class MicrobitProxy(BareMetalMicroPythonProxy):
     @property
     def known_usb_vids_pids(self):
         """Copied from https://github.com/mu-editor/mu/blob/master/mu/modes/adafruit.py"""
-        return {(0x0D28, 0x0204)}  # Adafruit CRICKit M0
+        return {(0x0D28, 0x0204)}
 
 
 class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
     def _get_usb_driver_url(self):
         return "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html"
 
-    def _get_flashing_frame(self):
-        frame = super()._get_flashing_frame()
-        self._flashing_label.configure(
-            text=tr("Make sure MicroPython has been installed to your micro:bit.")
+    def _get_intro_text(self):
+        return (
+            super()._get_intro_text()
+            + "\n\n"
+            + tr("Make sure MicroPython has been installed to your micro:bit.")
             + "\n("
             + tr("Don't forget that main.py only works without embedded main script.")
             + ")"
         )
-        return frame
 
     def _has_flashing_dialog(self):
         return True

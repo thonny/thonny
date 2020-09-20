@@ -2368,13 +2368,15 @@ class TextMenu(MenuEx):
 def create_url_label(master, url, text=None):
     import webbrowser
 
+    return create_action_label(master, text or url, lambda _: webbrowser.open(url))
+
+
+def create_action_label(master, text, click_handler):
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
-    url_label = ttk.Label(
-        master, text=text if text else url, style="Url.TLabel", cursor="hand2", font=url_font
-    )
+    url_label = ttk.Label(master, text=text, style="Url.TLabel", cursor="hand2", font=url_font)
     url_label.grid()
-    url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
+    url_label.bind("<Button-1>", click_handler)
     return url_label
 
 

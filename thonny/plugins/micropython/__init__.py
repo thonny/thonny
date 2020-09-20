@@ -16,7 +16,7 @@ from time import sleep
 from tkinter import messagebox, ttk
 from typing import Optional
 
-from thonny import common, get_runner, get_shell, get_workbench, running
+from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -265,30 +265,8 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
     def __init__(self, master):
         super().__init__(master)
-        intro_text = (
-            tr("Connect your device to the computer and select corresponding port below")
-            + "\n"
-            + "("
-            + tr('look for your device name, "USB Serial" or "UART"')
-            + ").\n"
-            + tr("If you can't find it, you may need to install proper USB driver first.")
-        )
-        if self.allow_webrepl:
-            intro_text = (
-                ("Connecting via USB cable:")
-                + "\n"
-                + intro_text
-                + "\n\n"
-                + ("Connecting via WebREPL protocol (EXPERIMENTAL):")
-                + "\n"
-                + (
-                    "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                    + "(import webrepl_setup), connect your computer and device to same network and select\n"
-                    + "< WebREPL > below"
-                )
-            )
 
-        intro_label = ttk.Label(self, text=intro_text)
+        intro_label = ttk.Label(self, text=self._get_intro_text())
         intro_label.grid(row=0, column=0, sticky="nw")
 
         driver_url = self._get_usb_driver_url()
@@ -341,7 +319,52 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._webrepl_frame = None
         self._flashing_frame = None
 
+        last_row = ttk.Frame(self)
+        last_row.grid(row=100, sticky="swe")
+        self.rowconfigure(100, weight=1)
+        last_row.columnconfigure(1, weight=1)
+
+        advanced_link = ui_utils.create_action_label(
+            last_row, tr("Advanced options"), self._show_advanced_options
+        )
+        advanced_link.grid(row=0, column=1, sticky="e")
+
+        if self._has_flashing_dialog():
+            firmware_link = ui_utils.create_action_label(
+                last_row, tr("Install or update firmware"), self._open_flashing_dialog
+            )
+            firmware_link.grid(row=1, column=1, sticky="e")
+
         self._on_change_port()
+
+    def _show_advanced_options(self):
+        pass
+
+    def _get_intro_text(self):
+        result = (
+            tr("Connect your device to the computer and select corresponding port below")
+            + "\n"
+            + "("
+            + tr('look for your device name, "USB Serial" or "UART"')
+            + ").\n"
+            + tr("If you can't find it, you may need to install proper USB driver first.")
+        )
+        if self.allow_webrepl:
+            result = (
+                ("Connecting via USB cable:")
+                + "\n"
+                + result
+                + "\n\n"
+                + ("Connecting via WebREPL (EXPERIMENTAL):")
+                + "\n"
+                + (
+                    "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
+                    + "(import webrepl_setup), connect your computer and device to same network and select\n"
+                    + "< WebREPL > below"
+                )
+            )
+
+        return result
 
     def _get_webrepl_frame(self):
 
@@ -367,30 +390,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         pw_entry.grid(row=1, column=1, sticky="nw", padx=(10, 0))
 
         return self._webrepl_frame
-
-    def _get_flashing_frame(self):
-
-        if self._flashing_frame is not None:
-            return self._flashing_frame
-
-        self._flashing_frame = ttk.Frame(self)
-        self._flashing_label = ttk.Label(self._flashing_frame, text=tr("Firmware"))
-        self._flashing_label.grid(row=1, column=0, sticky="w", pady=(10, 0))
-
-        button_caption = tr(
-            "Open the dialog for installing or upgrading MicroPython on your device"
-        )
-        self._flashing_button = ttk.Button(
-            self._flashing_frame,
-            text=button_caption,
-            width=len(button_caption),
-            command=self._open_flashing_dialog,
-        )
-        self._flashing_button.grid(row=2, column=0, sticky="we")
-
-        self._flashing_frame.columnconfigure(0, weight=1)
-
-        return self._flashing_frame
 
     def get_stored_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
@@ -441,9 +440,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                 self._flashing_frame.grid_forget()
 
         else:
-            if self._has_flashing_dialog():
-                self._get_flashing_frame().grid(row=6, column=0, sticky="nwe")
-
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
 

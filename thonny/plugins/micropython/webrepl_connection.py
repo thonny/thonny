@@ -16,7 +16,7 @@ class WebReplConnection(MicroPythonConnection):
     Client may later reduce it for better efficiency
     """
 
-    def __init__(self, url, password, write_block_delay=0.5):
+    def __init__(self, url, password):
 
         self.num_bytes_received = 0
         super().__init__()
@@ -24,17 +24,19 @@ class WebReplConnection(MicroPythonConnection):
         try:
             import websockets  # @UnusedImport
         except:
-            raise RuntimeError(
-                "Can't import `websockets`. You can install it via 'Tools => Manage plug-ins'."
+            print(
+                "Can't import `websockets`. You can install it via 'Tools => Manage plug-ins'.",
+                file=sys.stderr,
             )
+            sys.exit(-1)
         self._url = url
         self._password = password
         self._write_block_size = 255
-        self._write_block_delay = write_block_delay
+        self._write_block_delay = 0.5
         self._write_responses = Queue()
 
         # Some tricks are needed to use async library in a sync program.
-        # Useing thread-safe queues to communicate with async world in another thread
+        # Using thread-safe queues to communicate with async world in another thread
         self._write_queue = Queue()
         self._connection_result = Queue()
         self._ws_thread = threading.Thread(target=self._wrap_ws_main, daemon=True)
@@ -88,9 +90,16 @@ class WebReplConnection(MicroPythonConnection):
         debug("sent password")
 
     async def _ws_keep_reading(self):
+        import websockets.exceptions
+
         while True:
-            data = (await self._ws.recv()).encode("UTF-8")
-            if len(data) == 0:
+            try:
+                data = (await self._ws.recv()).encode("UTF-8")
+                if len(data) == 0:
+                    self._error = "EOF"
+                    break
+            except websockets.exceptions.ConnectionClosedError:
+                # TODO: try to reconnect in case of Ctrl+D
                 self._error = "EOF"
                 break
 
@@ -116,6 +125,7 @@ class WebReplConnection(MicroPythonConnection):
                 while start_pos < len(data):
                     if start_pos > 0:
                         await asyncio.sleep(self._write_block_delay)
+                        print("sleep", self._write_block_delay, data)
 
                     end_pos = start_pos + self._write_block_size
                     # make sure next block doesn't start with a continuation char
@@ -142,8 +152,13 @@ class WebReplConnection(MicroPythonConnection):
     async def _async_close(self):
         await self._ws.close()
 
+    def close_and_return_new_connection(self):
+        self.close()
+        return WebReplConnection(self._url, self._password)
+
     def close(self):
         """
+        # TODO:
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
