@@ -325,13 +325,13 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         last_row.columnconfigure(1, weight=1)
 
         advanced_link = ui_utils.create_action_label(
-            last_row, tr("Advanced options"), self._show_advanced_options
+            last_row, tr("Advanced options"), lambda event: self._show_advanced_options()
         )
         advanced_link.grid(row=0, column=1, sticky="e")
 
         if self._has_flashing_dialog():
             firmware_link = ui_utils.create_action_label(
-                last_row, tr("Install or update firmware"), self._open_flashing_dialog
+                last_row, tr("Install or update firmware"), lambda event: self._open_flashing_dialog()
             )
             firmware_link.grid(row=1, column=1, sticky="e")
 
