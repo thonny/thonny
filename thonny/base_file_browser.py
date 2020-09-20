@@ -209,7 +209,13 @@ class BaseFileBrowser(ttk.Frame):
         self.building_breadcrumbs = False
         self.resize_path_bar()
         self.render_children_from_cache()
+        self.scroll_to_top()
         self.current_focus = path
+
+    def scroll_to_top(self):
+        children = self.tree.get_children()
+        if children:
+            self.tree.see(children[0])
 
     def split_path(self, path):
         return path.split(self.get_dir_separator())
