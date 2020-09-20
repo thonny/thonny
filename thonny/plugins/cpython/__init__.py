@@ -290,7 +290,7 @@ class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
         text = (
             tr("This virtual environment is automatically maintained by Thonny.\n")
             + tr("Location: ")
-            + running.get_private_venv_path()
+            + get_private_venv_path()
         )
 
         label = ttk.Label(self, text=text)
