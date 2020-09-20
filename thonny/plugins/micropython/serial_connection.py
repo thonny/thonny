@@ -13,10 +13,16 @@ from thonny.plugins.micropython.connection import MicroPythonConnection
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate, skip_reader=False):
+
         import serial
         from serial.serialutil import SerialException
 
         super().__init__()
+
+        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
+        self._write_block_size = 30
+        self._write_block_delay = 0.01
 
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
@@ -54,15 +60,16 @@ class SerialConnection(MicroPythonConnection):
             self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
             self._reading_thread.start()
 
-    def write(self, data, block_size=255, delay=0.01):
+    def write(self, data):
         # delay and block size taken from rshell
         # https://github.com/dhylands/rshell/blob/master/rshell/pyboard.py#L242
-        for i in range(0, len(data), block_size):
-            block = data[i : i + block_size]
+        for i in range(0, len(data), self._write_block_size):
+            if i > 0:
+                time.sleep(self._write_block_delay)
+            block = data[i : i + self._write_block_size]
             # self._log_data(b"[" + block + b"]")
             size = self._serial.write(block)
             assert size == len(block)
-            time.sleep(delay)
         return len(data)
 
     def _listen_serial(self):

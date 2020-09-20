@@ -24,6 +24,8 @@ class MicroPythonConnection:
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
         self._error = None
+        self._write_block_size = None
+        self._write_block_delay = None
 
     def soft_read(self, size, timeout=1):
         return self.read(size, timeout, True)
@@ -128,7 +130,7 @@ class MicroPythonConnection:
 
         self._read_buffer = data + self._read_buffer
 
-    def write(self, data, block_size=32, delay=0.01):
+    def write(self, data):
         raise NotImplementedError()
 
     def _log_data(self, data):
@@ -165,3 +167,9 @@ class MicroPythonConnection:
 
     def close(self):
         raise NotImplementedError()
+
+    def set_write_block_size(self, size):
+        self._write_block_size = size
+
+    def set_write_block_delay(self, delay_sec):
+        self._write_block_delay = delay_sec

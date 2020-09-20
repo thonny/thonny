@@ -51,14 +51,6 @@ class ESP32Proxy(ESPProxy):
             (0x10C4, 0xEA60)  # Silicon Labs CP210x USB to UART Bridge
         }
 
-    def _get_launcher_with_args(self):
-        cmd = super()._get_launcher_with_args()
-
-        if self._port == "webrepl":
-            cmd.extend(["--min_write_delay", "0.5"])
-
-        return cmd
-
     def _get_api_stubs_path(self):
         return os.path.join(os.path.dirname(__file__), "esp32_api_stubs")
 

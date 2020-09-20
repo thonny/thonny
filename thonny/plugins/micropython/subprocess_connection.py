@@ -30,7 +30,7 @@ class SubprocessConnection(MicroPythonConnection):
 
         self._reading_thread.start()
 
-    def write(self, data, block_size=255, delay=0.01):
+    def write(self, data):
         if isinstance(data, (bytes, bytearray)):
             data = data.decode(self.encoding)
         self._proc.write(data)

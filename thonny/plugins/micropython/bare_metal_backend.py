@@ -142,6 +142,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """
         )
 
+    def _configure_write_blocks(self):
+        block_size = self._args.get("write_block_size", 255)
+        block_delay = self._args.get("write_block_delay", 0.01)
+
+        print("using", block_size, block_delay)
+
+        self._connection.set_write_block_size(block_size)
+        self._connection.set_write_block_delay(block_delay)
+
     def _process_until_initial_prompt(self, clean):
         if clean:
             self._interrupt_to_raw_prompt()
@@ -149,11 +158,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # Order first raw prompt to be output when the code is done.
             # If the device is already at raw prompt then it gets repeated as first raw prompt.
             # If it is at normal prompt then outputs first raw prompt
-            self._connection.write(RAW_MODE_CMD)
+            self._write(RAW_MODE_CMD)
             self._forward_output_until_active_prompt(self._send_output)
 
     def _fetch_welcome_text(self) -> str:
-        self._connection.write(NORMAL_MODE_CMD)
+        self._write(NORMAL_MODE_CMD)
         self._raw_prompt_ensured = False
         welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
         if os.name != "nt":
@@ -332,8 +341,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     "Could not enter REPL. Trying again with %d second waiting time..." % delay
                 )
             self._connection.reset_output_buffer()  # cancels previous writes
-            self._connection.write(INTERRUPT_CMD)
-            self._connection.write(RAW_MODE_CMD)
+            self._write(INTERRUPT_CMD)
+            self._write(RAW_MODE_CMD)
             time.sleep(delay)
             discarded_bytes += self._connection.read_all()
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
@@ -364,11 +373,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             sys.exit()
 
     def _soft_reboot_after_interrupting_to_raw_prompt(self):
-        self._connection.write(SOFT_REBOOT_CMD)
+        self._write(SOFT_REBOOT_CMD)
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
         # # (they don't do anything in raw repl)
-        self._connection.write(INTERRUPT_CMD)
-        self._connection.write(INTERRUPT_CMD)
+        self._write(INTERRUPT_CMD)
+        self._write(INTERRUPT_CMD)
         output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=2)
         if not output.endswith(FIRST_RAW_PROMPT):
             self._show_error("Could not soft-reboot after reaching raw prompt. Got %s" % output)
@@ -376,10 +385,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
-        self._connection.write(NORMAL_MODE_CMD)
+        self._write(NORMAL_MODE_CMD)
         self._raw_prompt_ensured = False
         self._connection.read_until(NORMAL_PROMPT)
-        self._connection.write(SOFT_REBOOT_CMD)
+        self._write(SOFT_REBOOT_CMD)
         self._forward_output_until_active_prompt(self._send_output)
         self._ensure_raw_prompt()
         self.send_message(ToplevelResponse(cwd=self._cwd))
@@ -431,7 +440,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         # send command
         with self._interrupt_lock:
-            self._connection.write(script.encode(ENCODING) + EOT)
+            self._write(script.encode(ENCODING) + EOT)
             debug("Wrote " + script + "\n--------\n")
 
             # fetch command confirmation
@@ -452,7 +461,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             return
 
         debug("Ensuring raw prompt")
-        self._connection.write(RAW_MODE_CMD)
+        self._write(RAW_MODE_CMD)
 
         prompt = (
             self._connection.read_until(

@@ -145,6 +145,8 @@ class MicroPythonBackend(MainBackend, ABC):
             self._welcome_text = self._fetch_welcome_text()
             self._report_time("got welcome")
 
+        self._configure_write_blocks()
+
         self._report_time("bef preparing helpers")
         self._prepare_helpers()
         self._report_time("prepared helpers")
@@ -168,6 +170,9 @@ class MicroPythonBackend(MainBackend, ABC):
         self._builtins_info = self._fetch_builtins_info()
 
         self._report_time("prepared")
+
+    def _configure_write_blocks(self):
+        pass
 
     def _prepare_helpers(self):
         script = self._get_all_helpers()
