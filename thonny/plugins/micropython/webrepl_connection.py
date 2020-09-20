@@ -125,7 +125,6 @@ class WebReplConnection(MicroPythonConnection):
                 while start_pos < len(data):
                     if start_pos > 0:
                         await asyncio.sleep(self._write_block_delay)
-                        print("sleep", self._write_block_delay, data)
 
                     end_pos = start_pos + self._write_block_size
                     # make sure next block doesn't start with a continuation char

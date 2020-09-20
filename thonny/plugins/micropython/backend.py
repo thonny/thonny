@@ -1234,7 +1234,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _report_time(self, caption):
         new_time = time.time()
-        print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
+        # print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
         self._prev_time = new_time
 
     def _system_time_to_posix_time(self, value: float) -> float:

@@ -257,7 +257,6 @@ class HtmlText(tktextext.TweakableText):
         self.tag_raise("sel")
 
     def _reset_renderer(self):
-        print("NEWREND")
         self._renderer = HtmlRenderer(self, self._link_and_form_handler)
 
     def clear(self):

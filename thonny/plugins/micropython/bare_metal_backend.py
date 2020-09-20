@@ -1,6 +1,7 @@
 import binascii
 import datetime
 import logging
+import math
 import os
 import queue
 import re
@@ -146,7 +147,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         block_size = self._args.get("write_block_size", 255)
         block_delay = self._args.get("write_block_delay", 0.01)
 
-        print("using", block_size, block_delay)
+        delay_secs_per_kb = 1000 / block_size * block_delay
+        if delay_secs_per_kb > 0.5:
+            print(
+                "\nNB! Sending 1000 characters to the device will take about %.1f seconds with current configuration.\n"
+                "Please give Thonny some seconds for preparing the session...\n"
+                % delay_secs_per_kb,
+                file=sys.stderr,
+            )
 
         self._connection.set_write_block_size(block_size)
         self._connection.set_write_block_delay(block_delay)
@@ -348,9 +356,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
                 W600_FIRST_RAW_PROMPT
             ):
-                self._soft_reboot_after_interrupting_to_raw_prompt()
-                self._raw_prompt_ensured = True
-                break
+                if not self._soft_reboot_after_interrupting_to_raw_prompt(delay * 2):
+                    self._raw_prompt_ensured = True
+                    break
         else:
             max_tail_length = 500
             if len(discarded_bytes) > max_tail_length:
@@ -372,16 +380,20 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             sys.exit()
 
-    def _soft_reboot_after_interrupting_to_raw_prompt(self):
+    def _soft_reboot_after_interrupting_to_raw_prompt(self, timeout):
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
         # # (they don't do anything when already in raw repl)
         self._write(INTERRUPT_CMD)
         self._write(INTERRUPT_CMD)
-        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=3)
-        if not output.endswith(FIRST_RAW_PROMPT):
-            self._show_error("Could not get to raw prompt after soft-reboot. Got %s" % output)
+
+        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=timeout)
+        if output.endswith(FIRST_RAW_PROMPT):
+            return True
+        else:
+            # TODO log this
+            return False
 
     def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
