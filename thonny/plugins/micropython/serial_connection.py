@@ -26,6 +26,7 @@ class SerialConnection(MicroPythonConnection):
 
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+            # https://github.com/thonny/thonny/pull/1187
             self._serial.dtr = 0
             self._serial.rts = 0
         except SerialException as error:
