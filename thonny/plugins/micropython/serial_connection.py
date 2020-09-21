@@ -26,6 +26,8 @@ class SerialConnection(MicroPythonConnection):
 
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+            self._serial.dtr = 0
+            self._serial.rts = 0
         except SerialException as error:
             err_str = str(error)
             if "FileNotFoundError" in err_str:
