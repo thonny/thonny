@@ -356,9 +356,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
                 W600_FIRST_RAW_PROMPT
             ):
-                if not self._soft_reboot_after_interrupting_to_raw_prompt(delay * 2):
-                    self._raw_prompt_ensured = True
-                    break
+                break
         else:
             max_tail_length = 500
             if len(discarded_bytes) > max_tail_length:
@@ -380,20 +378,23 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             sys.exit()
 
-    def _soft_reboot_after_interrupting_to_raw_prompt(self, timeout):
-        self._write(SOFT_REBOOT_CMD)
+        self._soft_reboot_after_interrupting_to_raw_prompt()
+
+    def _soft_reboot_after_interrupting_to_raw_prompt(self):
+        print("SOREBORP")
+        self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
         # # (they don't do anything when already in raw repl)
         self._write(INTERRUPT_CMD)
         self._write(INTERRUPT_CMD)
 
-        output = self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=timeout)
-        if output.endswith(FIRST_RAW_PROMPT):
-            return True
-        else:
-            # TODO log this
-            return False
+        discarded_bytes = b""
+        while not discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
+            W600_FIRST_RAW_PROMPT
+        ):
+            discarded_bytes += self._connection.soft_read(1, timeout=1)
+            discarded_bytes += self._connection.read_all()
 
     def _soft_reboot(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -411,6 +412,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _check_reconnect(self):
+        from thonny.plugins.micropython.webrepl_connection import WebReplConnection
+
         if isinstance(self._connection, WebReplConnection):
             time.sleep(1)
             self._connection = self._connection.close_and_return_new_connection()
