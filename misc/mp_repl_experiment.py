@@ -6,7 +6,7 @@ PORT = "/dev/ttyACM0"
 MODE = "paste" # "paste" or "raw"
 BLOCK_SIZE = 256
 LENGTH_OF_STRING_LITERAL = 1000 # affects the size of the script sent to the device
-NUM_ITERATIONS = 100 # how many times to send the script to the device
+NUM_ITERATIONS = 10000 # how many times to send the script to the device
 
 # The output of following code tells me whether the code was received intact or not
 code = """
@@ -80,6 +80,7 @@ if MODE == "raw":
     start_raw_mode()
 
 for i in range(NUM_ITERATIONS):
+    print("Iteration", i)
     if MODE == "raw":
         run_in_raw_mode()
     else:
