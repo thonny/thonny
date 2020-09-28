@@ -360,6 +360,7 @@ class Editor(ttk.Frame):
             defaultextension=".py",
             initialdir=initialdir,
             initialfile=initialfile,
+            parent=get_workbench(),
         )
 
         # Different tkinter versions may return different values
@@ -733,7 +734,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 and self.get_current_editor().get_filename() is not None
             ):
                 initialdir = os.path.dirname(self.get_current_editor().get_filename())
-            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir)
+            path = askopenfilename(
+                filetypes=_dialog_filetypes, initialdir=initialdir, parent=get_workbench()
+            )
         else:
             assert node == "remote"
             target_path = ask_backend_path(self.winfo_toplevel(), "open")

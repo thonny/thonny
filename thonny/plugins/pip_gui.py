@@ -753,6 +753,7 @@ class PipDialog(CommonDialog):
             master=self,
             filetypes=[(tr("Package"), ".whl .zip .tar.gz"), (tr("all files"), ".*")],
             initialdir=get_workbench().get_local_cwd(),
+            parent=self.winfo_toplevel(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
             self._install_local_file(filename, False)
@@ -765,6 +766,7 @@ class PipDialog(CommonDialog):
             master=self,
             filetypes=[("requirements", ".txt"), (tr("all files"), ".*")],
             initialdir=get_workbench().get_local_cwd(),
+            parent=self.winfo_toplevel(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
             self._install_local_file(filename, True)

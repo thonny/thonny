@@ -68,6 +68,7 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
             + tr("Make sure you have micro:bit plugged in!")
             + "\n\n"
             + tr("Do you want to continue and locate the disk yourself?"),
+            parent=self.winfo_toplevel(),
         )
         if mount_path is None:
             return

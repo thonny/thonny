@@ -184,6 +184,7 @@ def export():
         defaultextension=".zip",
         initialdir=get_workbench().get_local_cwd(),
         initialfile=time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip"),
+        parent=get_workbench(),
     )
 
     if not filename:

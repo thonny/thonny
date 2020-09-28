@@ -2032,29 +2032,32 @@ def _get_dialog_provider():
 
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
-    _tweak_file_dialog_parent(options)
+    _check_file_dialog_options(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _tweak_file_dialog_parent(options)
+    _check_file_dialog_options(options)
     return _get_dialog_provider().askopenfilename(**options)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _tweak_file_dialog_parent(options)
+    _check_file_dialog_options(options)
     return _get_dialog_provider().askopenfilenames(**options)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
-    _tweak_file_dialog_parent(options)
+    _check_file_dialog_options(options)
     return _get_dialog_provider().askdirectory(**options)
 
 
-def _tweak_file_dialog_parent(options):
+def _check_file_dialog_options(options):
+    if not options.get("parent"):
+        logger.warning("File dialog without parent:\n%s", "".join(traceback.format_stack()))
+
     if running_on_mac_os():
         # used to require master/parent (https://bugs.python.org/issue34927)
         # but this is deprecated in Catalina (https://github.com/thonny/thonny/issues/840)

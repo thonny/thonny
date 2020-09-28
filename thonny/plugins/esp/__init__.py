@@ -205,7 +205,9 @@ class ESPFlashingDialog(CommonDialogEx):
         self._port_combo.configure(values=list(self._ports_by_desc.keys()))
 
     def _browse(self):
-        path = ui_utils.askopenfilename(filetypes=[("bin-files", ".bin"), ("all files", ".*")])
+        path = ui_utils.askopenfilename(
+            filetypes=[("bin-files", ".bin"), ("all files", ".*")], parent=self.winfo_toplevel()
+        )
         if path:
             self._firmware_entry.delete(0, "end")
             self._firmware_entry.insert(0, path)
