@@ -200,9 +200,10 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     "Can't upload directory",
                     "%s does not support directories.\n" % proxy.get_node_label()
                     + "You can only upload files.",
+                    master=self,
                 )
             else:
-                if upload(selection["paths"], self.get_active_directory(), target_dir):
+                if upload(selection["paths"], self.get_active_directory(), target_dir, master=self):
                     self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
@@ -266,12 +267,12 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 response["all_items"], self.get_active_directory(), target_dir
             )
             existing_target_items = self._get_existing_target_items(prepared_items)
-            picked_items = pick_transfer_items(prepared_items, existing_target_items)
+            picked_items = pick_transfer_items(prepared_items, existing_target_items, self)
             if picked_items:
                 response = get_runner().send_command_and_wait(
                     InlineCommand("download", items=picked_items), dialog_title=tr("Copying")
                 )
-                _check_transfer_errors(response)
+                _check_transfer_errors(response, self)
 
                 self.master.local_files.refresh_tree()
 
@@ -336,7 +337,7 @@ def transpose_path(
 
 
 def pick_transfer_items(
-    prepared_items: List[Dict], existing_target_items: Dict[str, Dict]
+    prepared_items: List[Dict], existing_target_items: Dict[str, Dict], master
 ) -> List[Dict]:
     if not existing_target_items:
         return prepared_items
@@ -370,11 +371,13 @@ def pick_transfer_items(
                 overwrites.append("'%s' with %s" % (item["target_path"], replacement))
 
     if errors:
-        showerror("Error", format_items(errors))
+        showerror("Error", format_items(errors), master=master)
         return []
     elif overwrites:
         if askokcancel(
-            "Overwrite?", "This operation will overwrite\n\n" + format_items(overwrites)
+            "Overwrite?",
+            "This operation will overwrite\n\n" + format_items(overwrites),
+            master=master,
         ):
             return prepared_items
         else:
@@ -383,12 +386,13 @@ def pick_transfer_items(
         return prepared_items
 
 
-def _check_transfer_errors(response):
+def _check_transfer_errors(response, master):
     if response.get("error"):
-        showerror(tr("Transfer error"), response["error"])
+        showerror(tr("Transfer error"), response["error"], master=master)
     elif response["errors"]:
         showerror(
-            tr("Transfer error"), "Got following errors:\n" + format_items(response["errors"])
+            tr("Transfer error"),
+            "Got following errors:\n" + format_items(response["errors"], master=master),
         )
 
 
@@ -403,7 +407,7 @@ def format_items(items):
     return msg
 
 
-def upload(paths, source_dir, target_dir) -> bool:
+def upload(paths, source_dir, target_dir, master) -> bool:
     items = []
     for path in paths:
         for item in _prepare_upload_items(path, source_dir, target_dir):
@@ -422,14 +426,15 @@ def upload(paths, source_dir, target_dir) -> bool:
 
     picked_items = list(
         sorted(
-            pick_transfer_items(items, response["existing_items"]), key=lambda x: x["target_path"]
+            pick_transfer_items(items, response["existing_items"], master),
+            key=lambda x: x["target_path"],
         )
     )
     if picked_items:
         response = get_runner().send_command_and_wait(
             InlineCommand("upload", items=picked_items), dialog_title="Copying"
         )
-        _check_transfer_errors(response)
+        _check_transfer_errors(response, master)
         return True
     else:
         return False

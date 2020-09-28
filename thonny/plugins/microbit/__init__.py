@@ -173,7 +173,7 @@ class FlashingDialog(CommonDialog):
             self._hex_size = candidates[0]["size"]
 
     def _close_with_error(self, text):
-        messagebox.showerror("Error", text)
+        messagebox.showerror("Error", text, master=self)
         self._close()
 
     def _update_state(self):
@@ -233,7 +233,7 @@ class FlashingDialog(CommonDialog):
 
     def _close(self):
         if self._state == "installing" and not messagebox.askyesno(
-            "Really cancel?", "Are you sure you want to cancel?"
+            "Really cancel?", "Are you sure you want to cancel?", master=self
         ):
             return
 

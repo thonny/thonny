@@ -183,7 +183,9 @@ class CodeView(tktextext.EnhancedTextFrame):
             codecs.lookup(enc)
             return enc
         except LookupError:
-            messagebox.showerror("Error", "Unknown encoding '%s'. Using utf-8 instead" % enc)
+            messagebox.showerror(
+                "Error", "Unknown encoding '%s'. Using utf-8 instead" % enc, master=self
+            )
             return "utf-8"
 
     def detect_encoding_without_check(self, data):
@@ -235,7 +237,7 @@ class CodeView(tktextext.EnhancedTextFrame):
                 "Could not read as %s text.\nYou could try another encoding" % encoding,
                 initial_value=encoding,
                 options=get_proposed_encodings(),
-                master=self.winfo_toplevel()
+                master=self.winfo_toplevel(),
             )
             if not encoding:
                 return False

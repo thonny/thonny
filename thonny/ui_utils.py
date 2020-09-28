@@ -1917,7 +1917,7 @@ class SubprocessDialog(CommonDialog):
             if messagebox.askyesno(
                 tr("Cancel the process?"),
                 tr("The process is still running.\nAre you sure you want to cancel?"),
-                parent=None if running_on_mac_os() else self,
+                parent=self,
             ):
                 # try gently first
                 try:
@@ -2437,8 +2437,17 @@ def add_messagebox_parent_checker():
         return wrapper
 
     from tkinter import messagebox
-    for name in ["showinfo", "showwarning", "showerror", "askquestion", "askokcancel", "askyesno",
-                 "askyesnocancel", "askretrycancel"]:
+
+    for name in [
+        "showinfo",
+        "showwarning",
+        "showerror",
+        "askquestion",
+        "askokcancel",
+        "askyesno",
+        "askyesnocancel",
+        "askretrycancel",
+    ]:
         fun = getattr(messagebox, name)
         setattr(messagebox, name, wrap_with_parent_checker(fun))
 

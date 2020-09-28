@@ -447,7 +447,9 @@ class HtmlRenderer(HTMLParser):
             if attrs["type"] == "hidden" and attrs["name"] == EDITOR_CONTENT_NAME:
                 value = get_workbench().get_editor_notebook().get_current_editor_content()
                 if value is None:
-                    messagebox.showerror("Can't submit", "No active editor. Nothing to submit.")
+                    messagebox.showerror(
+                        "Can't submit", "No active editor. Nothing to submit.", master=self
+                    )
                     return
 
             form_data.add(attrs["name"], value)

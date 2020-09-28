@@ -331,7 +331,7 @@ class BaseFileBrowser(ttk.Frame):
         if info.get("comment"):
             text += "\n" + info["comment"]
 
-        messagebox.showinfo("Storage info", text)
+        messagebox.showinfo("Storage info", text, master=self)
 
     def cache_dirs_child_data(self, data):
         from copy import deepcopy
@@ -660,7 +660,7 @@ class BaseFileBrowser(ttk.Frame):
             % extension,
             choices=[system_choice, thonny_choice],
             initial_choice_index=current_index,
-            master=self.winfo_toplevel()
+            master=self.winfo_toplevel(),
         )
 
         if not choice:
@@ -721,7 +721,7 @@ class BaseFileBrowser(ttk.Frame):
         if values["modified"].strip():
             text += tr("Modified") + ":\n    " + values["modified"] + "\n\n"
 
-        messagebox.showinfo(title, text.strip())
+        messagebox.showinfo(title, text.strip(), master=self)
 
     def refresh_tree(self, paths_to_invalidate=None):
         self.invalidate_cache(paths_to_invalidate)
@@ -747,8 +747,9 @@ class BaseFileBrowser(ttk.Frame):
         else:
             parent_path = self.current_focus
 
-        name = ask_string("File name", "Provide filename", initial_value="",
-                          master=self.winfo_toplevel())
+        name = ask_string(
+            "File name", "Provide filename", initial_value="", master=self.winfo_toplevel()
+        )
 
         if not name:
             return None
@@ -757,7 +758,7 @@ class BaseFileBrowser(ttk.Frame):
 
         if name in self._cached_child_data[parent_path]:
             # TODO: ignore case in windows
-            messagebox.showerror("Error", "The file '" + path + "' already exists")
+            messagebox.showerror("Error", "The file '" + path + "' already exists", master=self)
             return self.create_new_file()
         else:
             self.open_file(path)
@@ -774,7 +775,7 @@ class BaseFileBrowser(ttk.Frame):
         if "dir" in selection["kinds"]:
             confirmation += "\n" + "Directories will be deleted with content."
 
-        if not messagebox.askyesno("Are you sure?", confirmation):
+        if not messagebox.askyesno("Are you sure?", confirmation, master=self):
             return
 
         self.perform_delete(selection["paths"], tr("Deleting %s") % selection["description"])
@@ -795,6 +796,7 @@ class BaseFileBrowser(ttk.Frame):
             + "in some cases the files will be deleted\n"
             + "without the possibility to restore.",
             icon="info",
+            master=self,
         ):
             return
 
@@ -815,8 +817,11 @@ class BaseFileBrowser(ttk.Frame):
                 # dirname does the right thing even if parent is Linux path and runnning on Windows
                 parent = os.path.dirname(parent)
 
-        name = ask_string("New directory", "Enter name for new directory under\n%s" % parent,
-                          master=self.winfo_toplevel())
+        name = ask_string(
+            "New directory",
+            "Enter name for new directory under\n%s" % parent,
+            master=self.winfo_toplevel(),
+        )
         if not name or not name.strip():
             return
 
@@ -836,7 +841,7 @@ class BaseFileBrowser(ttk.Frame):
         raise NotImplementedError()
 
     def notify_missing_selection(self):
-        messagebox.showerror("Nothing selected", "Select an item and try again!")
+        messagebox.showerror("Nothing selected", "Select an item and try again!", master=self)
 
     def should_open_name_in_thonny(self, name):
         ext = self.get_extension_from_name(name)
@@ -981,6 +986,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             "Not supported",
             "Opening remote files in system app is not supported.\n\n"
             + "Please download the file to a local directory and open it from there!",
+            master=self,
         )
 
     def supports_directories(self):
@@ -1138,11 +1144,11 @@ class BackendFileDialog(CommonDialog):
         if node_id is not None:
             node_kind = tree.set(node_id, "kind")
             if node_kind != "file":
-                messagebox.showerror(tr("Error"), tr("You need to select a file!"))
+                messagebox.showerror(tr("Error"), tr("You need to select a file!"), master=self)
                 return
             elif self.kind == "save":
                 if not messagebox.askyesno(
-                    tr("Overwrite?"), tr("Do you want to overwrite '%s' ?") % name
+                    tr("Overwrite?"), tr("Do you want to overwrite '%s' ?") % name, master=self
                 ):
                     return
 

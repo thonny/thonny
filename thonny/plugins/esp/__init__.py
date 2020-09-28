@@ -98,6 +98,7 @@ class ESPFlashingDialog(CommonDialogEx):
                 "esptool not found.\n"
                 + "Install it via 'Tools => Manage plug-ins'\n"
                 + "or using your OP-system package manager.",
+                master=self,
             )
             self._close()
             return
@@ -227,9 +228,7 @@ class ESPFlashingDialog(CommonDialogEx):
 
             return True
         except Exception as e:
-            messagebox.showerror(
-                "Can't connect", str(e), master=None if running_on_mac_os() else self
-            )
+            messagebox.showerror("Can't connect", str(e), master=self)
             return False
 
     def _install(self):
@@ -241,7 +240,9 @@ class ESPFlashingDialog(CommonDialogEx):
 
         firmware_path = self._firmware_entry.get()
         if not os.path.exists(firmware_path):
-            messagebox.showerror("Bad firmware path", "Can't find firmware, please check path")
+            messagebox.showerror(
+                "Bad firmware path", "Can't find firmware, please check path", master=self
+            )
             return
 
         erase_command = self._esptool_command + [

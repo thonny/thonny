@@ -56,6 +56,7 @@ def debug_with_birdseye():
                 "Birdseye is a Python debugger which needs to be installed separately.\n\n"
                 + "Do you want to open the help page and learn more?"
             ),
+            master=get_workbench(),
         ):
             get_workbench().open_help_topic("birdseye")
 

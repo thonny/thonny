@@ -52,10 +52,10 @@ class VariablesView(VariablesFrame):
     def _handle_get_globals_response(self, event):
         if "error" in event:
             self._clear_tree()
-            messagebox.showerror("Error querying global variables", event["error"])
+            messagebox.showerror("Error querying global variables", event["error"], master=self)
         elif "globals" not in event:
             self._clear_tree()
-            messagebox.showerror("Error querying global variables", str(event))
+            messagebox.showerror("Error querying global variables", str(event), master=self)
         else:
             self.show_globals(event["globals"], event["module_name"])
 

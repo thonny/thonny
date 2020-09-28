@@ -148,7 +148,7 @@ def find_volume_by_name(
 
         from thonny.ui_utils import askdirectory
 
-        if askyesno(tr("Can't find suitable disk"), msg):
+        if askyesno(tr("Can't find suitable disk"), msg, master=parent):
             path = askdirectory(parent=parent)
             if path:
                 return path

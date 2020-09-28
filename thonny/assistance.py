@@ -818,7 +818,7 @@ class FeedbackDialog(CommonDialog):
                 "Problem",
                 "Something went wrong:\n%s\n\nIf you don't mind, then try again later!"
                 % result[:1000],
-                master=self.master,
+                master=self,
             )
 
     def _select_unsent_snapshots(self, all_snapshots):

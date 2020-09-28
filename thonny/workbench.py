@@ -233,6 +233,7 @@ class Workbench(tk.Tk):
             messagebox.showwarning(
                 "Problems with home directory",
                 bad_home_msg + "\nThis may cause problems for Thonny.",
+                master=self,
             )
 
     def _try_action(self, action: Callable) -> None:
@@ -1288,6 +1289,7 @@ class Workbench(tk.Tk):
                     + "Restart Thonny to start working in regular mode.\n\n"
                     + "(See 'Tools → Options → General' if you change your mind later.)"
                 ),
+                master=self,
             )
 
         label.bind("<1>", on_click, True)
@@ -1335,6 +1337,7 @@ class Workbench(tk.Tk):
                     + "Restart Thonny to start working in regular mode.\n\n"
                     + "(See 'Tools → Options → General' if you change your mind later.)"
                 ),
+                master=self,
             )
 
         label.bind("<1>", on_click, True)

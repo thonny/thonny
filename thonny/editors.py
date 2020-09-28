@@ -119,6 +119,7 @@ class Editor(ttk.Frame):
                     "Looks like '%s' was deleted or moved outside of the editor.\n\n"
                     % self._filename
                     + "Do you want to also close the editor?",
+                    master=self,
                 ):
                     self.master.close_editor(self)
                 else:
@@ -132,6 +133,7 @@ class Editor(ttk.Frame):
                     "External modification",
                     "Looks like '%s' was modified outside the editor.\n\n" % self._filename
                     + "Do you want to discard current editor content and reload the file from disk?",
+                    master=self,
                 ):
                     self._load_file(self._filename, keep_undo=True)
                 else:
@@ -165,7 +167,9 @@ class Editor(ttk.Frame):
                 if not result:
                     return False
         except BinaryFileException:
-            messagebox.showerror("Problem", "%s doesn't look like a text file" % filename)
+            messagebox.showerror(
+                "Problem", "%s doesn't look like a text file" % filename, master=self
+            )
             return False
         except SyntaxError as e:
             assert "encoding" in str(e).lower()
@@ -173,6 +177,7 @@ class Editor(ttk.Frame):
                 "Problem loading file",
                 "This file seems to have problems with encoding.\n\n"
                 + "Make sure it is in UTF-8 or contains proper encoding hint.",
+                master=self,
             )
             return False
 
@@ -273,7 +278,7 @@ class Editor(ttk.Frame):
             )
         except PermissionError:
             messagebox.showerror(
-                "Permission Error", "Looks like this file or folder is not writable."
+                "Permission Error", "Looks like this file or folder is not writable.", master=self
             )
             return False
 
@@ -402,6 +407,7 @@ class Editor(ttk.Frame):
                     + "you won't be able to import the library module named '%s'" % mod_name
                     + ".\n\n"
                     + "Do you still want to use this name for your script?",
+                    master=self,
                 ):
                     return self.ask_new_local_path()
 
@@ -879,7 +885,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             if running_on_mac_os() and propose_dialog:
                 msg += "\n\nTry opening it with File => Open."
 
-            messagebox.showerror("Permission error", msg)
+            messagebox.showerror("Permission error", msg, master=self)
             return None
 
         if editor is None:
@@ -981,7 +987,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             message = "Do you want to save file before closing?"
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close", message=message, default=messagebox.YES
+            title="Save On Close", message=message, default=messagebox.YES, master=self
         )
 
         if confirm:

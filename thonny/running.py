@@ -418,6 +418,7 @@ class Runner:
                 messagebox.showerror(
                     "No console",
                     "Can't interrupt as console was not allocated.\n\nUse Stop/Restart instead.",
+                    master=self,
                 )
         else:
             logging.warning("User tried interrupting without proxy")
@@ -481,6 +482,7 @@ class Runner:
                 "Can't perform this action",
                 "Ctrl+D only has effect on an empty line / prompt.\n"
                 + "Submit current input (press ENTER) and try again",
+                master=self,
             )
             return
 
@@ -668,7 +670,7 @@ class Runner:
                     "Device is busy -- can't perform this action now."
                     + "\nPlease wait or cancel current work and try again!",
                 )
-            messagebox.showerror("Can't complete", msg)
+            messagebox.showerror("Can't complete", msg, master=self)
 
         return ready
 
@@ -1397,6 +1399,7 @@ class BlockingDialog(CommonDialogEx):
             if messagebox.askyesno(
                 "Interrupt again?",
                 "Do you want to close this dialog without waiting cancelling to complete?",
+                master=self,
             ):
                 self.destroy()
             else:
@@ -1404,7 +1407,9 @@ class BlockingDialog(CommonDialogEx):
 
         else:
             if messagebox.askyesno(
-                "Cancel current operation?", "Do you really want to cancel this operation?"
+                "Cancel current operation?",
+                "Do you really want to cancel this operation?",
+                master=self,
             ):
                 self._send_interrupt()
 

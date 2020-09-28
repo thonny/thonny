@@ -708,6 +708,7 @@ class PipDialog(CommonDialog):
                 ).format(name)
                 + "\n\n"
                 + tr("Are you sure you want to uninstall it?"),
+                master=self,
             ):
                 return False
             args = ["uninstall", "-y", name]
@@ -934,6 +935,7 @@ class CPythonBackendPipDialog(BackendPipDialog):
                     + "Are you sure you want to install %s for the back-end?"
                 )
                 % name,
+                master=self,
             )
         else:
             return True
@@ -1039,6 +1041,7 @@ class PluginsPipDialog(PipDialog):
                 )
                 + "\n\n"
                 + other_version_text,
+                master=self,
             )
             return False
         elif reqs:
@@ -1053,6 +1056,7 @@ class PluginsPipDialog(PipDialog):
                     + tr("If you still want it, then please install it from the command line.")
                     + "\n\n"
                     + other_version_text,
+                    master=self,
                 )
                 return False
 
@@ -1426,6 +1430,7 @@ def load_plugin() -> None:
             showerror(
                 tr("Not available"),
                 tr("You need to stop your program before launching the package manager."),
+                master=get_workbench(),
             )
             return
 

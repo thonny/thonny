@@ -115,10 +115,12 @@ class MicroPythonPipDialog(BackendPipDialog):
                 paths.append(source_path)
 
         if not paths:
-            showerror("Error", "Did not find anything to upload from micropip target path")
+            showerror(
+                "Error", "Did not find anything to upload from micropip target path", master=self
+            )
             return False
 
-        return upload(paths, self._current_temp_dir, self._get_target_directory())
+        return upload(paths, self._current_temp_dir, self._get_target_directory(), master=self)
 
     def _create_python_process(self, args, stderr):
         proc = running.create_frontend_python_process(args, stderr=stderr)

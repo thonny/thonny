@@ -691,7 +691,9 @@ class AttributesFrame(thonny.memory.VariablesFrame):
 
             if isinstance(get_runner().get_backend_proxy(), MicroPythonProxy):
                 messagebox.showinfo(
-                    "Not supported", "Inspecting bound methods is not supported with MicroPython"
+                    "Not supported",
+                    "Inspecting bound methods is not supported with MicroPython",
+                    master=self,
                 )
                 return
 

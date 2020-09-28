@@ -770,6 +770,7 @@ class EnhancedText(TweakableText):
                 % tab_count
                 + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n"
                 + "Do you want me to replace each tab with %d spaces?\n\n" % self.indent_width,
+                master=self,
             ):
                 return chars.expandtabs(self.indent_width)
             else:

@@ -973,7 +973,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
         showinfo(
             tr("Can't close yet"),
             tr('Use "Stop" command if you want to cancel debugging'),
-            parent=None if running_on_mac_os() else self,
+            master=self,
         )
 
     def close(self, frame_id=None):
