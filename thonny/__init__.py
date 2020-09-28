@@ -312,6 +312,7 @@ def _configure_logging(filename):
     # NB! Don't mess with the root logger, because (CPython) backend runs user code
     thonny_root_logger = logging.getLogger("thonny")
     thonny_root_logger.setLevel(_choose_logging_level())
+    thonny_root_logger.propagate = False # otherwise it will be also reported by IDE-s root logger
 
     log_file = os.path.join(THONNY_USER_DIR, filename)
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
