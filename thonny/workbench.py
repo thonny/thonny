@@ -122,6 +122,7 @@ class Workbench(tk.Tk):
 
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
+        ui_utils.add_messagebox_parent_checker()
         self._event_handlers = {}  # type: Dict[str, Set[Callable]]
         self._images = (
             set()

@@ -2032,31 +2032,31 @@ def _get_dialog_provider():
 
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
-    _check_file_dialog_options(options)
+    _check_dialog_parent(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_file_dialog_options(options)
+    _check_dialog_parent(options)
     return _get_dialog_provider().askopenfilename(**options)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_file_dialog_options(options)
+    _check_dialog_parent(options)
     return _get_dialog_provider().askopenfilenames(**options)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
-    _check_file_dialog_options(options)
+    _check_dialog_parent(options)
     return _get_dialog_provider().askdirectory(**options)
 
 
-def _check_file_dialog_options(options):
+def _check_dialog_parent(options):
     if not options.get("parent"):
-        logger.warning("File dialog without parent:\n%s", "".join(traceback.format_stack()))
+        logger.warning("Dialog without parent:\n%s", "".join(traceback.format_stack()))
 
     if running_on_mac_os():
         # used to require master/parent (https://bugs.python.org/issue34927)
@@ -2428,6 +2428,19 @@ def tr_btn(s):
 
     return _btn_padding + tr(s) + _btn_padding
 
+def add_messagebox_parent_checker():
+    def wrap_with_parent_checker(original):
+        def wrapper(*args, **options):
+            _check_dialog_parent(options)
+            original(*args, **options)
+
+        return wrapper
+
+    from tkinter import messagebox
+    for name in ["showinfo", "showwarning", "showerror", "askquestion", "askokcancel", "askyesno",
+                 "askyesnocancel", "askretrycancel"]:
+        fun = getattr(messagebox, name)
+        setattr(messagebox, name, wrap_with_parent_checker(fun))
 
 if __name__ == "__main__":
     root = tk.Tk()
