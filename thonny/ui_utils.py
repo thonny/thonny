@@ -2207,7 +2207,7 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
         return
 
     if master is None:
-        master = tk._default_root
+        master = getattr(dlg, "parent", None) or getattr(dlg, "master", None) or tk._default_root
 
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
@@ -2222,13 +2222,13 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
             assign_geometry(dlg, master, min_left, min_top)
         # dlg.wm_deiconify()
 
-    try:
-        dlg.grab_set()
-    except TclError:
-        pass
-
     dlg.lift()
     dlg.focus_set()
+
+    try:
+        dlg.grab_set()
+    except TclError as e:
+        print("Can't grab:", e, file=sys.stderr)
 
     master.winfo_toplevel().wait_window(dlg)
     dlg.grab_release()

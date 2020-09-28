@@ -65,7 +65,7 @@ class ESPConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = ESPFlashingDialog(get_workbench(), self._chip, self._firmware_start_address)
+        dlg = ESPFlashingDialog(self.winfo_toplevel(), self._chip, self._firmware_start_address)
         ui_utils.show_dialog(dlg)
 
     @property
@@ -234,7 +234,7 @@ class ESPFlashingDialog(CommonDialogEx):
 
     def _install(self):
         if not self._port_desc_variable.get():
-            messagebox.showerror("Select port", "Please select port")
+            messagebox.showerror("Select port", "Please select port", parent=self)
             return
 
         port = self._ports_by_desc[self._port_desc_variable.get()]

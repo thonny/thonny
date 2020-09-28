@@ -120,7 +120,10 @@ def find_volumes_by_name(volume_name: str, skip_letters={"A"}) -> Sequence[str]:
 
 
 def find_volume_by_name(
-    volume_name: str, not_found_msg: Optional[str] = None, found_several_msg: Optional[str] = None
+    volume_name: str,
+    not_found_msg: Optional[str] = None,
+    found_several_msg: Optional[str] = None,
+    parent=None,
 ) -> Optional[str]:
     from thonny.languages import tr
 
@@ -146,7 +149,7 @@ def find_volume_by_name(
         from thonny.ui_utils import askdirectory
 
         if askyesno(tr("Can't find suitable disk"), msg):
-            path = askdirectory(master=tk._default_root)
+            path = askdirectory(parent=parent)
             if path:
                 return path
 
