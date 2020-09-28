@@ -2110,7 +2110,10 @@ def _check_dialog_parent(options):
         parent = options["parent"].winfo_toplevel()
         master = options["master"].winfo_toplevel()
         if parent is not master:
-            logger.warning("Dialog with different parent/master toplevels:\n%s", "".join(traceback.format_stack()))
+            logger.warning(
+                "Dialog with different parent/master toplevels:\n%s",
+                "".join(traceback.format_stack()),
+            )
     elif options.get("parent"):
         parent = options["parent"].winfo_toplevel()
         master = options["parent"].winfo_toplevel()
