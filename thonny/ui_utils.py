@@ -2055,22 +2055,30 @@ def askdirectory(**options):
 
 
 def _check_dialog_parent(options):
-    if not options.get("parent"):
+    if options.get("parent") and options.get("master"):
+        parent = options["parent"].winfo_toplevel()
+        master = options["master"].winfo_toplevel()
+        if parent is not master:
+            logger.warning("Dialog with different parent/master toplevels:\n%s", "".join(traceback.format_stack()))
+    elif options.get("parent"):
+        parent = options["parent"].winfo_toplevel()
+        master = options["parent"].winfo_toplevel()
+    elif options.get("master"):
+        parent = options["master"].winfo_toplevel()
+        master = options["master"].winfo_toplevel()
+    else:
         logger.warning("Dialog without parent:\n%s", "".join(traceback.format_stack()))
+        parent = tk._default_root
+        master = tk._default_root
+
+    options["parent"] = parent
+    options["master"] = master
 
     if running_on_mac_os():
         # used to require master/parent (https://bugs.python.org/issue34927)
         # but this is deprecated in Catalina (https://github.com/thonny/thonny/issues/840)
-        if "master" in options:
-            del options["master"]
-        if "parent" in options:
-            del options["parent"]
-    else:
-        if "parent" not in options:
-            if "master" in options:
-                options["parent"] = options["master"]
-            else:
-                options["parent"] = tk._default_root
+        del options["master"]
+        del options["parent"]
 
 
 class _ZenityDialogProvider:
