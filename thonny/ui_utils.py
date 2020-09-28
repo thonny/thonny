@@ -3,6 +3,7 @@ import collections
 import logging
 import os
 import platform
+import queue
 import re
 import signal
 import subprocess
@@ -13,6 +14,7 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+import warnings
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
@@ -28,6 +30,7 @@ from thonny.misc_utils import (
     running_on_windows,
 )
 from thonny.tktextext import TweakableText
+
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 
@@ -1466,6 +1469,7 @@ def try_remove_linenumbers(text, master):
             title="Remove linenumbers",
             message="Do you want to remove linenumbers from pasted text?",
             default=messagebox.YES,
+            master=master,
         ):
             return remove_line_numbers(text)
         else:
@@ -1790,6 +1794,53 @@ def ask_one_from_choices(
     dlg = ChoiceDialog(master, title, question, choices, initial_choice_index)
     show_dialog(dlg, master)
     return dlg.result
+
+
+class ProgressDialog(CommonDialogEx):
+    def __init__(self, master):
+        super(ProgressDialog, self).__init__(master)
+
+        self._events_queue = queue.Queue()
+
+        self._current_action_label = ttk.Label(self.main_frame)
+        self._current_action_label.grid(row=1, column=1)
+
+        self._progress_bar = ttk.Progressbar(self.main_frame)
+
+    def append_text(self, text: str, stream_name="stdout") -> None:
+        """Appends text to the details box. May be called from another thread."""
+        self._events_queue.put(("append", (text, stream_name)))
+
+    def replace_last_line(self, text: str, stream_name="stderr") -> None:
+        """Replaces last line in the details box. May be called from another thread."""
+        self._events_queue.put(("replace", (text, stream_name)))
+
+    def report_progress(self, value: float, maximum: float) -> None:
+        """Updates progress bar. May be called from another thread."""
+        self._events_queue.put(("progress", (value, maximum)))
+
+    def set_action_text(self, text: str) -> None:
+        """Updates text above the progress bar. May be called from another thread."""
+        self._events_queue.put(("action", text))
+
+    def report_done(self, success):
+        """May be called from another thread."""
+        self._events_queue.put(("done", success))
+
+    def _update_state(self):
+
+        while not self._events_queue.empty():
+            type, args = self._events_queue.get()
+            self._apply_event(type, args)
+
+        self.after(200, self._update_state)
+
+    def _apply_event(self, type, args):
+        if type in ("append", "replace"):
+            text, stream_name = args
+            if type == "replace":
+                self._text.direct_delete("end-1c linestart", "end")
+            self._text.direct_insert("end", text, (stream_name,))
 
 
 class SubprocessDialog(CommonDialog):
@@ -2157,6 +2208,8 @@ class _ZenityDialogProvider:
         if result.returncode == 0:
             return result.stdout.strip()
         else:
+            # TODO: log problems
+            print(result.stderr, file=sys.stderr)
             # could check stderr, but it may contain irrelevant warnings
             return None
 
@@ -2436,6 +2489,7 @@ def tr_btn(s):
 
     return _btn_padding + tr(s) + _btn_padding
 
+
 def add_messagebox_parent_checker():
     def wrap_with_parent_checker(original):
         def wrapper(*args, **options):
@@ -2458,6 +2512,7 @@ def add_messagebox_parent_checker():
     ]:
         fun = getattr(messagebox, name)
         setattr(messagebox, name, wrap_with_parent_checker(fun))
+
 
 if __name__ == "__main__":
     root = tk.Tk()
