@@ -660,6 +660,7 @@ class BaseFileBrowser(ttk.Frame):
             % extension,
             choices=[system_choice, thonny_choice],
             initial_choice_index=current_index,
+            master=self.winfo_toplevel()
         )
 
         if not choice:
@@ -746,7 +747,8 @@ class BaseFileBrowser(ttk.Frame):
         else:
             parent_path = self.current_focus
 
-        name = ask_string("File name", "Provide filename", initial_value="")
+        name = ask_string("File name", "Provide filename", initial_value="",
+                          master=self.winfo_toplevel())
 
         if not name:
             return None
@@ -813,7 +815,8 @@ class BaseFileBrowser(ttk.Frame):
                 # dirname does the right thing even if parent is Linux path and runnning on Windows
                 parent = os.path.dirname(parent)
 
-        name = ask_string("New directory", "Enter name for new directory under\n%s" % parent)
+        name = ask_string("New directory", "Enter name for new directory under\n%s" % parent,
+                          master=self.winfo_toplevel())
         if not name or not name.strip():
             return
 

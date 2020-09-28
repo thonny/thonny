@@ -235,6 +235,7 @@ class CodeView(tktextext.EnhancedTextFrame):
                 "Could not read as %s text.\nYou could try another encoding" % encoding,
                 initial_value=encoding,
                 options=get_proposed_encodings(),
+                master=self.winfo_toplevel()
             )
             if not encoding:
                 return False

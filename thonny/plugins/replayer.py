@@ -12,8 +12,8 @@ from thonny.ui_utils import CommonDialog, lookup_style_option
 
 
 class ReplayWindow(CommonDialog):
-    def __init__(self):
-        super().__init__(get_workbench(), background=lookup_style_option("TFrame", "background"))
+    def __init__(self, master):
+        super().__init__(master, background=lookup_style_option("TFrame", "background"))
         ui_utils.set_zoomed(self, True)
 
         self.main_pw = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
@@ -356,7 +356,7 @@ class ReplayerPanedWindow(tk.PanedWindow):
 
 def load_plugin() -> None:
     def open_replayer():
-        win = ReplayWindow()
+        win = ReplayWindow(get_workbench())
         ui_utils.show_dialog(win)
 
     get_workbench().set_default("tools.replayer_last_browser_folder", None)

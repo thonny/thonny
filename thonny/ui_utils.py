@@ -2209,6 +2209,8 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
     if master is None:
         master = getattr(dlg, "parent", None) or getattr(dlg, "master", None) or tk._default_root
 
+    master = master.winfo_toplevel()
+
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
