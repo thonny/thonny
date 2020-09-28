@@ -1,5 +1,6 @@
 import os.path
 import platform
+import logging
 import sys
 import traceback
 from typing import TYPE_CHECKING, Optional, cast
@@ -140,6 +141,7 @@ def launch():
     import runpy
     import socket
 
+    _configure_frontend_logging()
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
         # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
@@ -296,6 +298,38 @@ def _create_client_socket():
     return client_socket, secret
 
 
+def _configure_frontend_logging() -> None:
+    _configure_logging("frontend.log")
+
+
+def configure_backend_logging() -> None:
+    _configure_logging("backend.log")
+
+
+def _configure_logging(filename):
+    logFormatter = logging.Formatter("%(levelname)-7s %(name)s.%(funcName)s: %(message)s")
+
+    # NB! Don't mess with the root logger, because (CPython) backend runs user code
+    thonny_root_logger = logging.getLogger("thonny")
+    thonny_root_logger.setLevel(_choose_logging_level())
+
+    log_file = os.path.join(THONNY_USER_DIR, filename)
+    file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
+    file_handler.setFormatter(logFormatter)
+    # file_handler.setLevel(_choose_logging_level())
+    thonny_root_logger.addHandler(file_handler)
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(logFormatter)
+    # console_handler.setLevel(_choose_logging_level())
+    thonny_root_logger.addHandler(console_handler)
+
+    import faulthandler
+
+    fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
+    faulthandler.enable(fault_out)
+
+
 def set_dpi_aware():
     # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
     # https://bugs.python.org/issue33656
@@ -327,6 +361,31 @@ def get_workbench() -> "Workbench":
 
 
 _runner = None  # type: Optional[Runner]
+
+
+def set_logging_level(level=None):
+    if level is None:
+        level = _choose_logging_level()
+
+    logging.getLogger("thonny").setLevel(level)
+
+
+def _choose_logging_level():
+    if in_debug_mode():
+        return logging.DEBUG
+    else:
+        return logging.INFO
+
+
+def in_debug_mode() -> bool:
+    # Value may be something other than string when it is set in Python code
+    return os.environ.get("THONNY_DEBUG", False) in [
+        "1",
+        1,
+        "True",
+        True,
+        "true",
+    ]
 
 
 def get_runner() -> "Runner":

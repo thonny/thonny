@@ -345,8 +345,8 @@ class MainCPythonBackend(MainBackend):
                         f()
                     else:
                         f(self)
-            except Exception:
-                logger.exception("Failed loading plugin '" + module_name + "'")
+            except Exception as e:
+                logger.exception("Failed loading plugin '" + module_name + "'", exc_info=e)
 
     def _cmd_get_environment_info(self, cmd):
         return ToplevelResponse(

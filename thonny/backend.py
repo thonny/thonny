@@ -36,7 +36,7 @@ from thonny.common import ConnectionClosedException
 NEW_DIR_MODE = 0o755
 
 
-logger = logging.getLogger("thonny")
+logger = logging.getLogger(__name__)
 
 
 class BaseBackend(ABC):

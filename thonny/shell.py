@@ -34,6 +34,8 @@ from thonny.ui_utils import (
     tr_btn,
 )
 
+logger = logging.getLogger(__name__)
+
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
@@ -644,14 +646,14 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             "@", index=closer_start, stopindex="command_io_start", backwards=True
         )
         if not id_start:
-            logging.getLogger("thonny").warning("Can't find object id")
+            logger.warning("Can't find object id")
             return
 
         id_str = self.get(id_start, closer_start)[1:]
         try:
             int(id_str)
         except ValueError:
-            logging.getLogger("thonny").warning("Can't parse object id: " + id_str)
+            logger.warning("Can't parse object id: " + id_str)
             return
 
         self.direct_delete(id_start, "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)))

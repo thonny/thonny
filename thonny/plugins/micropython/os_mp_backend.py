@@ -10,6 +10,7 @@ import time
 from abc import ABC
 from typing import Callable, Optional, Union
 
+import thonny
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.backend import (
@@ -365,15 +366,7 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
-    logger = logging.getLogger("thonny.micropython.backend")
-    logger.propagate = False
-    logFormatter = logging.Formatter("%(levelname)s: %(message)s")
-    file_handler = logging.FileHandler(
-        os.path.join(THONNY_USER_DIR, "micropython-backend.log"), encoding="UTF-8", mode="w"
-    )
-    file_handler.setFormatter(logFormatter)
-    file_handler.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
+    thonny.configure_backend_logging()
 
     import ast
 

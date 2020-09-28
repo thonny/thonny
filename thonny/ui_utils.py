@@ -31,6 +31,8 @@ from thonny.tktextext import TweakableText
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 
+logger = logging.getLogger(__name__)
+
 
 class CommonDialog(tk.Toplevel):
     def __init__(self, master=None, cnf={}, **kw):

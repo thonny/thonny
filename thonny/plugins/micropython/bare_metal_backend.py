@@ -11,6 +11,7 @@ from _ast import Not
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, Optional, Tuple, Union
 
+import thonny
 from thonny.backend import UploadDownloadMixin
 from thonny.common import (
     BackendEvent,
@@ -105,7 +106,7 @@ FALLBACK_BUILTIN_MODULES = [
     "esp32",
 ]
 
-logger = logging.getLogger("thonny.micropython.backend")
+logger = logging.getLogger(__name__)
 
 
 def debug(msg):
@@ -1187,15 +1188,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
-    logger = logging.getLogger("thonny.micropython.backend")
-    logger.propagate = False
-    logFormatter = logging.Formatter("%(levelname)s: %(message)s")
-    file_handler = logging.FileHandler(
-        os.path.join(THONNY_USER_DIR, "micropython-backend.log"), encoding="UTF-8", mode="w"
-    )
-    file_handler.setFormatter(logFormatter)
-    file_handler.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
+
+    thonny.configure_backend_logging()
 
     import ast
     import sys

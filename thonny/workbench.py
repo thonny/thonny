@@ -55,6 +55,8 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
 )
 
+logger = logging.getLogger(__name__)
+
 SERVER_SUCCESS = "OK"
 SIMPLE_MODE_VIEWS = ["ShellView"]
 
@@ -139,7 +141,6 @@ class Workbench(tk.Tk):
         self.content_inspector_classes = []  # type: List[Type]
         self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
 
-        self._init_diagnostic_logging()
         self._init_language()
 
         self._active_ui_mode = os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
@@ -251,38 +252,15 @@ class Workbench(tk.Tk):
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        self.update_debug_mode()
+
+    def update_debug_mode(self):
+        os.environ["THONNY_DEBUG"] = str(self.get_option("general.debug_mode", False))
+        thonny.set_logging_level()
 
     def _init_language(self) -> None:
         """Initialize language."""
         languages.set_language(self.get_option("general.language"))
-
-    def _get_logging_level(self) -> int:
-        if self.in_debug_mode():
-            return logging.DEBUG
-        else:
-            return logging.INFO
-
-    def _init_diagnostic_logging(self) -> None:
-        logFormatter = logging.Formatter("%(levelname)s: %(message)s")
-        root_logger = logging.getLogger()
-
-        log_file = os.path.join(THONNY_USER_DIR, "frontend.log")
-        file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
-        file_handler.setFormatter(logFormatter)
-        file_handler.setLevel(self._get_logging_level())
-        root_logger.addHandler(file_handler)
-
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(logFormatter)
-        console_handler.setLevel(self._get_logging_level())
-        root_logger.addHandler(console_handler)
-
-        root_logger.setLevel(self._get_logging_level())
-
-        import faulthandler
-
-        fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
-        faulthandler.enable(fault_out)
 
     def _init_window(self) -> None:
         self.title("Thonny")
@@ -686,7 +664,7 @@ class Workbench(tk.Tk):
                 group=101,
             )
 
-        if self.in_debug_mode():
+        if thonny.in_debug_mode():
             self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
 
     def _print_state_for_debugging(self, event) -> None:
@@ -1687,9 +1665,7 @@ class Workbench(tk.Tk):
             try:
                 self._event_handlers[sequence].remove(func)
             except Exception:
-                logging.getLogger("thonny").exception(
-                    "Can't remove binding for '%s' and '%s'", sequence, func
-                )
+                logger.exception("Can't remove binding for '%s' and '%s'", sequence, func)
 
     def in_heap_mode(self) -> bool:
         # TODO: add a separate command for enabling the heap mode

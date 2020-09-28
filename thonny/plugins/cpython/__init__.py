@@ -22,6 +22,8 @@ from thonny.running import (
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import SubprocessDialog, askdirectory, askopenfilename, create_string_var
 
+logger = logging.getLogger(__name__)
+
 
 class CPythonProxy(SubprocessProxy):
     "abstract class"
@@ -82,7 +84,7 @@ class CPythonProxy(SubprocessProxy):
             except OSError:
                 # the backend process may have been closed already
                 # https://github.com/thonny/thonny/issues/966
-                logging.getLogger("thonny").exception("Could not send process_gui_events")
+                logger.exception("Could not send process_gui_events")
 
         self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)
 
@@ -356,7 +358,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
 
     def _select_executable(self):
         # TODO: get dir of current interpreter
-        options = {"master": self}
+        options = {"parent": self.winfo_toplevel()}
         if running_on_windows():
             options["filetypes"] = [
                 (tr("Python interpreters"), "python.exe"),
@@ -372,7 +374,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         path = None
         while True:
             path = askdirectory(
-                master=self,
+                parent=self.winfo_toplevel(),
                 initialdir=path,
                 title=tr("Select empty directory for new virtual environment"),
             )

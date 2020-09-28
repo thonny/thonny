@@ -7,6 +7,8 @@ from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.plugins.pylint.messages import checks_by_id
 from thonny.running import get_interpreter_for_subprocess
 
+logger = logging.getLogger(__name__)
+
 
 class PylintAnalyzer(SubprocessProgramAnalyzer):
     def is_enabled(self):
@@ -76,7 +78,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         )
 
         if err:
-            logging.getLogger("thonny").error("Pylint: " + err)
+            logger.error("Pylint: " + err)
 
         warnings = []
         for line in out_lines:

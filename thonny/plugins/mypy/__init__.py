@@ -9,6 +9,8 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_interpreter_for_subprocess
 
+logger = logging.getLogger(__name__)
+
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
     def is_enabled(self):
@@ -72,7 +74,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
     def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
         if err_lines:
-            logging.getLogger("thonny").warning("MyPy: " + "".join(err_lines))
+            logger.warning("MyPy: " + "".join(err_lines))
 
         warnings = []
         for line in out_lines:
@@ -84,7 +86,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
                 filename = m.group(1)
                 if filename not in self.interesting_files:
-                    logging.getLogger("thonny").warning("MyPy: " + line)
+                    logger.warning("MyPy: " + line)
                     continue
 
                 atts = {

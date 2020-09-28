@@ -106,7 +106,7 @@ STAT_KIND_INDEX = 0
 STAT_SIZE_INDEX = 6
 STAT_MTIME_INDEX = 8
 
-logger = logging.getLogger("thonny.micropython.backend")
+logger = logging.getLogger(__name__)
 
 
 def debug(msg):
@@ -1229,7 +1229,7 @@ class MicroPythonBackend(MainBackend, ABC):
             ast.parse(new_source)
             return new_source
         except Exception:
-            logging.getLogger("thonny").exception("Problem adding Expr handlers")
+            logger.exception("Problem adding Expr handlers")
             return source
 
     def _report_time(self, caption):

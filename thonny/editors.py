@@ -29,6 +29,8 @@ _dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all
 
 REMOTE_PATH_MARKER = " :: "
 
+logger = logging.getLogger(__name__)
+
 
 class Editor(ttk.Frame):
     def __init__(self, master):
@@ -869,7 +871,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         try:
             editor = self.get_editor(filename, True)
         except PermissionError:
-            logging.getLogger("thonny").exception("Loading " + filename)
+            logger.exception("Loading " + filename)
             msg = "Got permission error when trying to load\n" + filename
             if running_on_mac_os() and propose_dialog:
                 msg += "\n\nTry opening it with File => Open."

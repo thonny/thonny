@@ -26,6 +26,7 @@ from time import sleep
 from tkinter import messagebox, ttk
 from typing import Any, List, Optional, Set  # @UnusedImport; @UnusedImport
 
+import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
 from thonny.common import (
     BackendEvent,
@@ -58,6 +59,8 @@ from thonny.editors import (
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
+
+logger = logging.getLogger(__name__)
 
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
@@ -104,7 +107,7 @@ class Runner:
             self._check_alloc_console()
             _console_allocated = True
         except Exception:
-            logging.getLogger("thonny").exception("Problem allocating console")
+            logger.exception("Problem allocating console")
             _console_allocated = False
 
         self.restart_backend(False, True)
@@ -649,7 +652,7 @@ class Runner:
                 # May happen eg. when installation path has "&" in it
                 # See https://bitbucket.org/plas/thonny/issues/508/cant-allocate-windows-console-when
                 # Without flush the console window becomes visible, but Thonny can be still used
-                logging.getLogger("thonny").exception("Problem with finalizing console allocation")
+                logger.exception("Problem with finalizing console allocation")
 
     def ready_for_remote_file_operations(self, show_message=False):
         if not self._proxy or not self.supports_remote_files():
@@ -840,7 +843,7 @@ class SubprocessProxy(BackendProxy):
             get_workbench().get_option("assistance.friendly_traceback_level")
         )
 
-        if get_workbench().in_debug_mode():
+        if thonny.in_debug_mode():
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]

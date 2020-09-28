@@ -14,6 +14,8 @@ from collections import namedtuple
 from threading import Thread
 from typing import List, Optional, Dict, Iterable  # @UnusedImport
 
+logger = logging.getLogger(__name__)
+
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
@@ -538,9 +540,7 @@ def get_windows_network_locations():
                     "modified": None,
                 }
             except Exception:
-                logging.getLogger("thonny").error(
-                    "Can't get target from %s", lnk_path, exc_info=True
-                )
+                logger.error("Can't get target from %s", lnk_path, exc_info=True)
 
     return result
 

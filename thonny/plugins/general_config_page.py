@@ -97,6 +97,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         get_workbench().set_option(
             "general.language", languages.get_language_code_by_name(self._language_name_var.get())
         )
+        get_workbench().update_debug_mode()
 
 
 def load_plugin() -> None:

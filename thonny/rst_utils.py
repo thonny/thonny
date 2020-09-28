@@ -6,6 +6,8 @@ from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.tktextext import TweakableText
 
+logger = logging.getLogger(__name__)
+
 
 class RstText(TweakableText):
     def __init__(self, master=None, cnf={}, read_only=False, **kw):
@@ -384,9 +386,7 @@ class RstText(TweakableText):
                 raise docutils.nodes.SkipNode()
 
             def visit_system_message(self, node):
-                logging.getLogger("thonny").warning(
-                    "docutils message: '%s'. Context: %s" % (node.astext(), node.parent)
-                )
+                logger.warning("docutils message: '%s'. Context: %s" % (node.astext(), node.parent))
                 raise docutils.nodes.SkipNode
 
             def visit_emphasis(self, node):

@@ -35,37 +35,7 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    import logging
-    import os.path
-
-    # set up logging
-    logger = logging.getLogger("thonny")
-    logger.propagate = False
-    logFormatter = logging.Formatter("%(levelname)s: %(message)s")
-    file_handler = logging.FileHandler(
-        os.path.join(thonny.THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
-    )
-    file_handler.setFormatter(logFormatter)
-    file_handler.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
-
-    # Don't litter user stderr with thonny logging
-    # TODO: Can I somehow send the log to front-end's stderr?
-    """
-    stream_handler = logging.StreamHandler(stream=sys.stderr)
-    stream_handler.setLevel(logging.INFO);
-    stream_handler.setFormatter(logFormatter)
-    logger.addHandler(stream_handler)
-    """
-
-    logger.setLevel(logging.INFO)
-
-    import faulthandler
-
-    fault_out = open(os.path.join(thonny.THONNY_USER_DIR, "backend_faults.log"), mode="w")
-    faulthandler.enable(fault_out)
-
-    # Disable blurry scaling in Windows
+    thonny.configure_backend_logging()
     thonny.set_dpi_aware()
 
     target_cwd = sys.argv[1]
