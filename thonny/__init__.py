@@ -303,10 +303,10 @@ def _configure_frontend_logging() -> None:
 
 
 def configure_backend_logging() -> None:
-    _configure_logging("backend.log")
+    _configure_logging("backend.log", logging.WARNING)
 
 
-def _configure_logging(filename):
+def _configure_logging(filename, console_level=None):
     logFormatter = logging.Formatter("%(levelname)-7s %(name)s: %(message)s")
 
     # NB! Don't mess with the root logger, because (CPython) backend runs user code
@@ -322,7 +322,9 @@ def _configure_logging(filename):
 
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(logFormatter)
-    # console_handler.setLevel(_choose_logging_level())
+    if console_level is None:
+        console_level = _choose_logging_level()
+    console_handler.setLevel(console_level)
     thonny_root_logger.addHandler(console_handler)
 
     thonny_root_logger.info("Thonny version: %s", get_version())
