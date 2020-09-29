@@ -2497,7 +2497,7 @@ def add_messagebox_parent_checker():
     def wrap_with_parent_checker(original):
         def wrapper(*args, **options):
             _check_dialog_parent(options)
-            original(*args, **options)
+            return original(*args, **options)
 
         return wrapper
 
