@@ -2131,6 +2131,7 @@ def _check_dialog_parent(options):
     if running_on_mac_os():
         # used to require master/parent (https://bugs.python.org/issue34927)
         # but this is deprecated in Catalina (https://github.com/thonny/thonny/issues/840)
+        # TODO: Consider removing this when upgrading from Tk 8.6.8
         del options["master"]
         del options["parent"]
 
