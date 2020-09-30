@@ -17,12 +17,15 @@ print(len(s), set(s))
 
 s = serial.Serial(PORT, 115200)
 
-def forward_until(marker):
+def forward_until(marker, must_include=None):
     total = b""
     while not total.endswith(marker):
         b = s.read(1)
         total += b
         print(b.decode("UTF-8"), end="")
+
+    if must_include and must_include not in total:
+        raise RuntimeError("Did not find expected data in the output")
 
 def prepare():
     print("Interrupting...")
@@ -52,7 +55,8 @@ def run_in_raw_mode():
     s.write(b"\x04")
     forward_until(b"OK")
     # wait until completion
-    forward_until(b">")
+    expected_output = (str(LENGTH_OF_STRING_LITERAL) + " {'*'}").encode("UTF-8")
+    forward_until(b">", must_include=expected_output)
 
 def run_in_paste_mode():
     # goto paste mode
@@ -71,7 +75,8 @@ def run_in_paste_mode():
             data = data[BLOCK_SIZE:]
 
     s.write(b"\x04")
-    forward_until(b">>> ")
+    expected_output = (str(LENGTH_OF_STRING_LITERAL) + " {'*'}").encode("UTF-8")
+    forward_until(b">>> ", must_include=expected_output)
 
 prepare()
 start_time = time.time()
