@@ -86,7 +86,7 @@ Translations have move forwards? New language have been added? That's great news
 0. If it's a new language, follow the "Add a new language" paragraphe above. If not, move to next point.
 1. Download the `po` file from POEditor. See this [documentation](https://poeditor.com/kb/importing-and-exporting-strings) if needed.
 2. Replace the proper `po` file in the `thonny/locale/` folder.
-3. Compile it into a `mo` file (see above).
+3. Compile it into a `mo` file (see above).i want to do more deblopment in it
 4. Add both `po` and `mo` files to git and commit or PR.
 5. Done!
 
