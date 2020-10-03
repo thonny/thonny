@@ -305,6 +305,9 @@ class Workbench(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.bind("<Configure>", self._on_configure, True)
 
+    def _init_statusbar(self):
+        self._statusbar = ttk.Frame(self)
+
     def _init_icon(self) -> None:
         # Window icons
         if running_on_linux() and ui_utils.get_tk_version_info() >= (8, 6):
@@ -674,6 +677,7 @@ class Workbench(tk.Tk):
 
     def _init_containers(self) -> None:
 
+        margin = 10
         # Main frame functions as
         # - a backgroud behind padding of main_pw, without this OS X leaves white border
         # - a container to be hidden, when a view is maximized and restored when view is back home
@@ -685,7 +689,7 @@ class Workbench(tk.Tk):
         self._maximized_view = None  # type: Optional[tk.Widget]
 
         self._toolbar = ttk.Frame(main_frame, padding=0)
-        self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5, 0))
+        self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=margin, pady=(5, 0))
 
         self.set_default("layout.west_pw_width", self.scale(150))
         self.set_default("layout.east_pw_width", self.scale(150))
@@ -698,7 +702,7 @@ class Workbench(tk.Tk):
 
         self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
 
-        self._main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
+        self._main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=margin, pady=(margin, 0))
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
 
@@ -740,8 +744,27 @@ class Workbench(tk.Tk):
             self.set_default("layout.notebook_" + nb_name + "_visible_view", None)
 
         self._editor_notebook = EditorNotebook(self._center_pw)
-        self._editor_notebook.position_key = 1  # type: ignore
+        self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
+
+        self._statusbar = ttk.Frame(main_frame, padding=0)
+        self._statusbar.grid(column=0, row=2, sticky="nsew", padx=0, pady=(0))
+        self._statusbar.columnconfigure(2, weight=2)
+        status_label = ttk.Label(self._statusbar, text="Python 3.7")
+        #status_label.grid(row=1, column=2, sticky="e")
+
+        # text="  ≡  ⚙"
+        #status_button = ttk.Button(self._statusbar, image=self.get_image("gear"), style="Toolbutton")
+        status_button = ttk.Button(self._statusbar, text=" Python 3.7 ",
+                                   #image=self.get_image("gear"),
+                                   style="Toolbutton", compound="left")
+        status_button.grid(row=1, column=3, sticky="e")
+        menu_button = ttk.Button(self._statusbar, text="  ⚙  ",
+                                   #image=self.get_image("gear"),
+                                   style="Toolbutton", compound="left")
+        menu_button.grid(row=1, column=4, sticky="e")
+
+
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
