@@ -747,24 +747,55 @@ class Workbench(tk.Tk):
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
-        self._statusbar = ttk.Frame(main_frame, padding=0)
-        self._statusbar.grid(column=0, row=2, sticky="nsew", padx=0, pady=(0))
+        self._statusbar = ttk.Frame(main_frame)
+        self._statusbar.grid(column=0, row=2, sticky="nsew", padx=margin, pady=(0))
         self._statusbar.columnconfigure(2, weight=2)
-        status_label = ttk.Label(self._statusbar, text="Python 3.7")
-        #status_label.grid(row=1, column=2, sticky="e")
+
+        self._populate_statusbar()
+
+    def _populate_statusbar(self):
+
+        self._status_label = ttk.Label(self._statusbar, text="")
+        self._status_label.grid(row=1, column=1, sticky="w")
 
         # text="  ≡  ⚙"
-        #status_button = ttk.Button(self._statusbar, image=self.get_image("gear"), style="Toolbutton")
-        status_button = ttk.Button(self._statusbar, text=" Python 3.7 ",
-                                   #image=self.get_image("gear"),
-                                   style="Toolbutton", compound="left")
-        status_button.grid(row=1, column=3, sticky="e")
-        menu_button = ttk.Button(self._statusbar, text="  ⚙  ",
-                                   #image=self.get_image("gear"),
-                                   style="Toolbutton", compound="left")
-        menu_button.grid(row=1, column=4, sticky="e")
+        backend_button = ttk.Button(
+            self._statusbar, text="Python 3.7 (/usr/bin/python)", style="Toolbutton"
+        )
+        backend_button.grid(row=1, column=3, sticky="e")
 
+        backend_menu = tk.Menu(backend_button, tearoff=False)
 
+        def post_backend_menu():
+            backend_menu.tk_popup(
+                backend_button.winfo_rootx(),
+                backend_button.winfo_rooty() + backend_button.winfo_height(),
+            )
+
+        current_backend_name = self.get_option("run.backend_name")
+        try:
+            current_backend_desc = self.get_backends()[current_backend_name].description
+        except KeyError:
+            current_backend_desc = ""
+
+        backend_button.configure(
+            text=current_backend_desc,
+            # width=len(current_backend_desc),
+            command=post_backend_menu,
+        )
+
+        backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
+        for backend in backends:
+
+            def choose(name=backend.name, description=backend.description):
+                self.set_option("run.backend_name", name)
+                backend_button.configure(text=description)
+                # TODO: only if actually changed
+                get_runner().restart_backend(False)
+
+            backend_menu.add_command(label=backend.description, command=choose)
+
+        # menu_button.grid(row=1, column=4, sticky="e")
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
