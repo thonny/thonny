@@ -759,7 +759,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 del __thonny_statvfs
                 del __thonny_stat 
             except ImportError:
-                __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.listdir()]
+                __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()]
                 __thonny_used = None
                 __thonny_total = None
                 __thonny_free = None
