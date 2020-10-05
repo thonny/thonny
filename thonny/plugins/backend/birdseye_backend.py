@@ -1,6 +1,11 @@
 import os
 
-from thonny.backend import Executor, get_backend, prepare_hooks, return_execution_result
+from thonny.plugins.cpython.cpython_backend import (
+    get_backend,
+    Executor,
+    return_execution_result,
+    prepare_hooks,
+)
 
 
 def _cmd_Birdseye(cmd):
@@ -36,7 +41,9 @@ class BirdsEyeRunner(Executor):
 
 def load_plugin():
     try:
-        import birdseye.bird  # need to import at plugin load time, because later it may not be in path
+        os.environ["OUTDATED_IGNORE"] = "1"
+        # TODO: it would be good to do this here, but it's slow
+        # import birdseye.bird  # need to import at plugin load time, because later it may not be in path
     except ImportError:
         pass
     get_backend().add_command("Birdseye", _cmd_Birdseye)

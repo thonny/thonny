@@ -2,7 +2,7 @@ import ast
 import os
 import sys
 
-from thonny.backend import CPythonMainBackend, get_backend
+from thonny.plugins.cpython.cpython_backend import get_backend, MainCPythonBackend
 
 
 def augment_ast(root):
@@ -87,5 +87,5 @@ def load_plugin():
         return
 
     get_backend().add_ast_postprocessor(augment_ast)
-    CPythonMainBackend._original_editor_autocomplete = CPythonMainBackend._cmd_editor_autocomplete
-    CPythonMainBackend._cmd_editor_autocomplete = patched_editor_autocomplete
+    MainCPythonBackend._original_editor_autocomplete = MainCPythonBackend._cmd_editor_autocomplete
+    MainCPythonBackend._cmd_editor_autocomplete = patched_editor_autocomplete

@@ -769,7 +769,7 @@ class Workbench(tk.Tk):
         def post_backend_menu():
             backend_menu.tk_popup(
                 backend_button.winfo_rootx(),
-                backend_button.winfo_rooty() + backend_button.winfo_height(),
+                backend_button.winfo_rooty(),
             )
 
         current_backend_name = self.get_option("run.backend_name")
