@@ -979,6 +979,17 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             """
                 )
             )
+        elif self._connected_to_microbit():
+            # doesn't have neither BytesIO.flush, nor os.sync
+            self._execute_without_output(
+                dedent(
+                    """
+                def __W(x):
+                    global __thonny_written
+                    __thonny_written += __thonny_fp.write(x)
+            """
+                )
+            )
         else:
             self._execute_without_output(
                 dedent(
@@ -986,6 +997,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 def __W(x):
                     global __thonny_written
                     __thonny_written += __thonny_fp.write(x)
+                    __thonny_fp.flush()
                     if hasattr(__thonny_helper.os, "sync"):
                         __thonny_helper.os.sync()
             """
