@@ -54,6 +54,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * codemee
 * cspaier
 * cubimon
+* Curtis Wang
 * Dominic Twyman
 * Dominik George
 * Eliot Blennerhassett

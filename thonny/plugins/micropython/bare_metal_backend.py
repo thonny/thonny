@@ -974,6 +974,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     global __thonny_written
                     __thonny_written += __thonny_fp.write(__thonny_unhex(x))
                     __thonny_fp.flush()
+                    if hasattr(__thonny_helper.os, "sync"):
+                        __thonny_helper.os.sync()
             """
                 )
             )
@@ -984,6 +986,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 def __W(x):
                     global __thonny_written
                     __thonny_written += __thonny_fp.write(x)
+                    if hasattr(__thonny_helper.os, "sync"):
+                        __thonny_helper.os.sync()
             """
                 )
             )
