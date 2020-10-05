@@ -766,11 +766,17 @@ class Workbench(tk.Tk):
 
         backend_menu = tk.Menu(backend_button, tearoff=False)
 
+        menu_font = tk_font.nametofont("TkMenuFont")
+
+
         def post_backend_menu():
-            backend_menu.tk_popup(
-                backend_button.winfo_rootx(),
-                backend_button.winfo_rooty(),
-            )
+            # Tk will adjust x properly with single monitor, but when Thonny is maximized
+            # on a monitor, which has another monitor to its right, the menu can be partially
+            # displayed on another monitor (at least in Ubuntu).
+            button_text_width = menu_font.measure(backend_button.cget("text"))
+            width_diff = max_description_width - button_text_width
+            post_x = backend_button.winfo_rootx() - width_diff - menu_font.measure("V ")
+            backend_menu.tk_popup(post_x, backend_button.winfo_rooty())
 
         current_backend_name = self.get_option("run.backend_name")
         try:
@@ -780,11 +786,12 @@ class Workbench(tk.Tk):
 
         backend_button.configure(
             text=current_backend_desc,
-            # width=len(current_backend_desc),
             command=post_backend_menu,
         )
 
         backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
+
+        max_description_width = 0
         for backend in backends:
 
             def choose(name=backend.name, description=backend.description):
@@ -794,6 +801,7 @@ class Workbench(tk.Tk):
                 get_runner().restart_backend(False)
 
             backend_menu.add_command(label=backend.description, command=choose)
+            max_description_width = max(menu_font.measure(backend.description), max_description_width)
 
         # menu_button.grid(row=1, column=4, sticky="e")
 
