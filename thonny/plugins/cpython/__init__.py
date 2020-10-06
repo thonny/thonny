@@ -343,7 +343,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._venv_button = ttk.Button(
             self,
             style="Centered.TButton",
-            text=tr("Create new virtual environment")
+            text=tr("Find or create new virtual environment")
             + " ...\n"
             + "("
             + tr("Select existing or create a new empty directory")
@@ -371,36 +371,27 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             self._configuration_variable.set(filename)
 
     def _create_venv(self):
-        path = None
-        while True:
-            path = askdirectory(
-                parent=self.winfo_toplevel(),
-                initialdir=path,
-                title=tr("Select empty directory for new virtual environment"),
-            )
-            if not path:
-                return
+        path = askdirectory(
+            parent=self.winfo_toplevel(),
+            initialdir=None,
+            title=tr(
+                "Select an existing virtual environemnt or an empty directory for new virtual environment"
+            ),
+        )
 
-            if os.listdir(path):
-                messagebox.showerror(
-                    tr("Bad directory"),
-                    tr("Selected directory is not empty.\nSelect another or cancel."),
-                    master=self,
-                )
-            else:
-                break
         assert os.path.isdir(path)
         path = normpath_with_actual_case(path)
 
-        proc = subprocess.Popen(
-            [running.get_interpreter_for_subprocess(), "-m", "venv", path],
-            stdin=None,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-        )
-        dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"))
-        ui_utils.show_dialog(dlg)
+        if not os.listdir(path):
+            proc = subprocess.Popen(
+                [running.get_interpreter_for_subprocess(), "-m", "venv", path],
+                stdin=None,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+            )
+            dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"))
+            ui_utils.show_dialog(dlg)
 
         if running_on_windows():
             exe_path = normpath_with_actual_case(os.path.join(path, "Scripts", "python.exe"))
@@ -409,6 +400,9 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
 
         if os.path.exists(exe_path):
             self._configuration_variable.set(exe_path)
+        else:
+            # Undefined error handling.
+            pass
 
     def _get_interpreters(self):
         result = set()
