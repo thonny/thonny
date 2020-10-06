@@ -310,8 +310,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             get_workbench().get_option("CustomInterpreter.path")
         )
 
-        entry_label = ttk.Label(self, text=tr("Known interpreters"))
-        entry_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        entry_label = ttk.Label(self, text=tr("Python executable"))
+        entry_label.grid(row=0, column=1, columnspan=2, sticky=tk.W)
 
         self._entry = ttk.Combobox(
             self,
@@ -320,41 +320,38 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             values=self._get_interpreters(),
         )
 
-        self._entry.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
-        self._entry.state(["!disabled", "readonly"])
+        self._entry.grid(row=1, column=1, sticky=tk.NSEW)
 
-        another_label = ttk.Label(self, text=tr("Your interpreter isn't in the list?"))
-        another_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
-
-        ttk.Style().configure("Centered.TButton", justify="center")
         self._select_button = ttk.Button(
             self,
-            style="Centered.TButton",
-            text=tr("Locate another")
-            + " "
-            + ("python.exe ..." if running_on_windows() else tr("python executable") + " ...")
-            + "\n"
-            + tr("NB! Thonny only supports Python 3.5 and later"),
+            text="...",
+            width=3,
             command=self._select_executable,
         )
-
-        self._select_button.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
-
-        self._venv_button = ttk.Button(
-            self,
-            style="Centered.TButton",
-            text=tr("Create new virtual environment")
-            + " ...\n"
-            + "("
-            + tr("Select existing or create a new empty directory")
-            + ")",
-            command=self._create_venv,
-        )
-
-        self._venv_button.grid(row=4, column=0, columnspan=2, sticky=tk.NSEW, pady=(5, 0))
-
-        self.columnconfigure(0, weight=1)
+        self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.columnconfigure(1, weight=1)
+
+        extra_text = tr("NB! Thonny only supports Python 3.5 and later")
+        if running_on_mac_os():
+            extra_text += "\n\n" + tr(
+                "NB! File selection button may not work properly when selecting executables\n"
+                + "from a virtual environment. In this case enter the path directly to the box!"
+            )
+        extra_label = ttk.Label(self, text=extra_text)
+        extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
+
+        last_row = ttk.Frame(self)
+        last_row.grid(row=100, sticky="swe", column=1, columnspan=2)
+        self.rowconfigure(100, weight=1)
+        last_row.columnconfigure(1, weight=1)
+        new_venv_link = ui_utils.create_action_label(
+            last_row,
+            "New virtual environment",
+            self._create_venv,
+        )
+        new_venv_link.grid(row=0, column=1, sticky="e", pady=10)
+
+        # self.columnconfigure(1, weight=1)
 
     def _select_executable(self):
         # TODO: get dir of current interpreter
@@ -370,7 +367,13 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if filename:
             self._configuration_variable.set(filename)
 
-    def _create_venv(self):
+    def _create_venv(self, event=None):
+        messagebox.showinfo(
+            "Creating new virtual environment",
+            "After clicking 'OK' you need to choose an empty directory, "
+            "which will be the root of your new virtual environment.",
+            parent=self,
+        )
         path = None
         while True:
             path = askdirectory(
