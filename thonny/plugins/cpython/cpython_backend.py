@@ -51,7 +51,7 @@ from thonny.common import (
     OBJECT_LINK_START,
     OBJECT_LINK_END,
     range_contains_smaller,
-    DebuggerResponse,
+    DebuggerResponse, get_python_version_string,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -354,7 +354,7 @@ class MainCPythonBackend(MainBackend):
             sys_path=sys.path,
             usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
             prefix=sys.prefix,
-            welcome_text="Python " + _get_python_version_string(),
+            welcome_text="Python " + get_python_version_string(),
             executable=sys.executable,
             exe_dirs=get_exe_dirs(),
             in_venv=(
@@ -363,7 +363,7 @@ class MainCPythonBackend(MainBackend):
                 or hasattr(sys, "real_prefix")
                 and getattr(sys, "real_prefix") != sys.prefix
             ),
-            python_version=_get_python_version_string(),
+            python_version=get_python_version_string(),
             cwd=os.getcwd(),
         )
 
@@ -2691,16 +2691,6 @@ class FancySourceFileLoader(SourceFileLoader):
 def _get_frame_prefix(frame):
     return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
 
-
-def _get_python_version_string(add_word_size=False):
-    result = ".".join(map(str, sys.version_info[:3]))
-    if sys.version_info[3] != "final":
-        result += "-" + sys.version_info[3]
-
-    if add_word_size:
-        result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
-
-    return result
 
 
 def _fetch_frame_source_info(frame):

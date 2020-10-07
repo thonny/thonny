@@ -8,7 +8,8 @@ from tkinter import ttk
 
 import thonny
 from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running
-from thonny.common import ToplevelCommand, InlineCommand, is_same_path, normpath_with_actual_case
+from thonny.common import ToplevelCommand, InlineCommand, is_same_path, normpath_with_actual_case, \
+    get_python_version_string
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
@@ -222,6 +223,14 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
                 msg["welcome_text"] += " (" + self._executable + ")"
         return msg
 
+    @staticmethod
+    def show_in_switcher():
+        return True
+
+    @staticmethod
+    def get_statusbar_description():
+        return "Python " + get_python_version_string()
+
 
 class CustomCPythonProxy(CPythonProxy):
     def __init__(self, clean):
@@ -240,6 +249,18 @@ class CustomCPythonProxy(CPythonProxy):
         if msg and "welcome_text" in msg:
             msg["welcome_text"] += " (" + self._executable + ")"
         return msg
+
+    @staticmethod
+    def show_in_switcher():
+        return True
+
+    @staticmethod
+    def get_statusbar_description():
+        desc = get_workbench().get_option("CustomInterpreter.path")
+        if not desc:
+            desc = sys.executable
+
+        return desc
 
 
 def get_private_venv_path():

@@ -94,6 +94,7 @@ class MicroPythonProxy(SubprocessProxy):
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._port = get_workbench().get_option(self.backend_name + ".port")
+        self._have_stored_pidwid = False
         self._clean_start = clean
 
         if self._port == "auto":
@@ -258,6 +259,24 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def can_run_remote_files(self):
         return False
+
+    def fetch_next_message(self):
+        msg = super(BareMetalMicroPythonProxy, self).fetch_next_message()
+        if (not self._have_stored_pidwid
+            and getattr(msg, "event_type", None) == "ToplevelResponse"
+            and self._port != "webrepl"):
+            # Let's remember that this vidpid was used with this backend
+            # need to copy and store explicitly, because otherwise I may change the default value
+            used_vidpids = get_workbench().get_option(self.backend_name + ".used_vidpids").copy()
+            from serial.tools.list_ports_common import ListPortInfo
+            info = get_port_info(self._port)
+            used_vidpids.add((info.vid, info.pid))
+            self._have_stored_pidwid = True
+            get_workbench().set_option(self.backend_name + ".used_vidpids", used_vidpids)
+
+        return msg
+
+
 
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
@@ -713,6 +732,12 @@ def list_serial_ports_with_descriptions():
         for p in sorted_ports
     ]
 
+def get_port_info(port):
+    for info in list_serial_ports():
+        if info.device == port:
+            return info
+    raise RuntimeError("Port %s not found" % port)
+
 
 def add_micropython_backend(
     name,
@@ -739,6 +764,7 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".webrepl_password", "")
         get_workbench().set_default(name + ".write_block_size", write_block_size)
         get_workbench().set_default(name + ".write_block_delay", write_block_delay)
+        get_workbench().set_default(name + ".used_vidpids", set())
 
         if sync_time is None:
             sync_time = True

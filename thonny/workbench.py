@@ -197,6 +197,7 @@ class Workbench(tk.Tk):
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
         self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
+        self.bind("BackendRestart", self._on_backend_restart, True)
 
         self._publish_commands()
         self.initializing = False
@@ -750,61 +751,75 @@ class Workbench(tk.Tk):
         self._statusbar = ttk.Frame(main_frame)
         self._statusbar.grid(column=0, row=2, sticky="nsew", padx=margin, pady=(0))
         self._statusbar.columnconfigure(2, weight=2)
-
-        self._populate_statusbar()
-
-    def _populate_statusbar(self):
-
         self._status_label = ttk.Label(self._statusbar, text="")
         self._status_label.grid(row=1, column=1, sticky="w")
 
-        # text="  ≡  ⚙"
-        backend_button = ttk.Button(
-            self._statusbar, text="Python 3.7 (/usr/bin/python)", style="Toolbutton"
-        )
-        backend_button.grid(row=1, column=3, sticky="e")
+        self._init_backend_switcher()
 
-        backend_menu = tk.Menu(backend_button, tearoff=False)
+    def _init_backend_switcher(self):
+
+        backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
+        #backends = list(
+        #    filter(lambda b: hasattr(b.proxy_class, "show_in_switcher"), backends)
+        #)
+
+        # Set up the menu
+        menu_variable = tk.StringVar(value="")
+        backend_menu = tk.Menu(self._statusbar, tearoff=False)
+
+        def choose_backend():
+            chosen_backend = backends_by_name[menu_variable.get()]
+            self.set_option("run.backend_name", chosen_backend.name)
+            self._backend_button.configure(text=chosen_backend.description)
+            get_runner().restart_backend(False)
 
         menu_font = tk_font.nametofont("TkMenuFont")
 
-        def post_backend_menu():
-            # Tk will adjust x properly with single monitor, but when Thonny is maximized
-            # on a monitor, which has another monitor to its right, the menu can be partially
-            # displayed on another monitor (at least in Ubuntu).
-            button_text_width = menu_font.measure(backend_button.cget("text"))
-            width_diff = max_description_width - button_text_width
-            post_x = backend_button.winfo_rootx() - width_diff - menu_font.measure("V ")
-            backend_menu.tk_popup(post_x, backend_button.winfo_rooty())
-
-        current_backend_name = self.get_option("run.backend_name")
-        try:
-            current_backend_desc = self.get_backends()[current_backend_name].description
-        except KeyError:
-            current_backend_desc = ""
-
-        backend_button.configure(
-            text=current_backend_desc,
-            command=post_backend_menu,
-        )
-
-        backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
-
         max_description_width = 0
+        backends_by_name = {}
         for backend in backends:
-
-            def choose(name=backend.name, description=backend.description):
-                self.set_option("run.backend_name", name)
-                backend_button.configure(text=description)
-                # TODO: only if actually changed
-                get_runner().restart_backend(False)
-
-            backend_menu.add_command(label=backend.description, command=choose)
+            backend_menu.add_radiobutton(
+                label=backend.description,
+                command=choose_backend,
+                variable=menu_variable,
+                value=backend.name,
+            )
             max_description_width = max(
                 menu_font.measure(backend.description), max_description_width
             )
+            backends_by_name[backend.name] = backend
 
-        # menu_button.grid(row=1, column=4, sticky="e")
+        backend_menu.add_separator()
+        backend_menu.add_command(
+            label=tr("Select another interpreter..."),
+            command=lambda: self.show_options("interpreter"),
+        )
+
+        # Set up the button
+        self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
+
+        def post_backend_menu():
+            menu_variable.set(value=self.get_option("run.backend_name"))
+
+            # Tk will adjust x properly with single monitor, but when Thonny is maximized
+            # on a monitor, which has another monitor to its right, the menu can be partially
+            # displayed on another monitor (at least in Ubuntu).
+            button_text_width = menu_font.measure(self._backend_button.cget("text"))
+            width_diff = max_description_width - button_text_width
+            post_x = self._backend_button.winfo_rootx() - width_diff - menu_font.measure("  V ")
+            backend_menu.tk_popup(post_x, self._backend_button.winfo_rooty())
+
+        self._backend_button.grid(row=1, column=3, sticky="e")
+        self._backend_button.configure(command=post_backend_menu)
+
+    def _on_backend_restart(self, event):
+        backend = self.get_backends()[self.get_option("run.backend_name")]
+
+        if hasattr(backend.proxy_class, "get_statusbar_description"):
+            desc = backend.proxy_class.get_statusbar_description()
+        else:
+            desc = backend.description
+        self._backend_button.configure(text=desc)
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
@@ -1356,77 +1371,6 @@ class Workbench(tk.Tk):
             )
 
         label.bind("<1>", on_click, True)
-
-    def _init_backend_switcher(self):
-        if self.get_ui_mode() != "simple":
-            return
-
-        frame = ttk.Frame(self._toolbar)
-        frame.grid(row=0, column=1001, sticky="ne")
-
-        label = ttk.Label(
-            frame,
-            text=tr("Python 3 "),
-            # text="Python 3 ▼ ",
-            # text="Python 3 ▾ ",
-            justify="right",
-            # font="SmallLinkFont",
-            # style="Url.TLabel",
-            cursor="hand2",
-        )
-        label.grid(row=0, column=0, sticky="ne")
-
-        self._gear_menu = tk.Menu(frame, tearoff=False)
-
-        def post_menu():
-            self._gear_menu.delete(0, "end")
-            self._populate_gear_menu()
-            self._gear_menu.tk_popup(
-                button.winfo_rootx(),
-                button.winfo_rooty() + button.winfo_height(),
-            )
-
-        # ☼
-        # ≡
-        button = ttk.Button(frame, text=" ☼ ", style="ViewToolbar.Toolbutton", command=post_menu)
-        button.grid(row=1, column=0, sticky="ne")
-
-        def on_click(event):
-            self.set_option("general.ui_mode", "regular")
-            tk.messagebox.showinfo(
-                tr("Regular mode"),
-                tr(
-                    "Configuration has been updated. "
-                    + "Restart Thonny to start working in regular mode.\n\n"
-                    + "(See 'Tools → Options → General' if you change your mind later.)"
-                ),
-                master=self,
-            )
-
-        label.bind("<1>", on_click, True)
-
-    def _populate_gear_menu(self):
-        """Constructs the menu for upper-right gear button"""
-        self._gear_menu.add_checkbutton(
-            label="Python 3", command=lambda: self._switch_backend_group("CPython")
-        )
-        self._gear_menu.add_checkbutton(
-            label="MicroPython", command=lambda: self._switch_backend_group("MicroPython")
-        )
-        self._gear_menu.add_checkbutton(
-            label="CircuitPython", command=lambda: self._switch_backend_group("CircuitPython")
-        )
-        self._gear_menu.add_separator()
-        self._gear_menu.add_checkbutton(
-            label=tr("Light"), command=lambda: self._switch_darkness("light")
-        )
-        self._gear_menu.add_checkbutton(
-            label=tr("Dark"), command=lambda: self._switch_darkness("dark")
-        )
-        self._gear_menu.add_separator()
-        self._gear_menu.add_command(
-            label=tr("Switch to regular mode"), command=self._switch_to_regular_mode
-        )
 
     def _switch_backend_group(self, group):
         pass

@@ -163,19 +163,6 @@ def shorten_repr(original_repr: str, max_len: int = 1000) -> str:
         return original_repr
 
 
-def get_python_version_string(version_info: Optional[Tuple] = None) -> str:
-    if version_info is None:
-        version_info = sys.version_info
-
-    result = ".".join(map(str, version_info[:3]))
-    if version_info[3] != "final":
-        result += "-" + version_info[3]
-
-    result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)\n"
-
-    return result
-
-
 def _win_get_used_memory():
     # http://code.activestate.com/recipes/578513-get-memory-usage-of-windows-processes-using-getpro/
     import ctypes

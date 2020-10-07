@@ -12,7 +12,7 @@ import sys
 import traceback
 from collections import namedtuple
 from threading import Thread
-from typing import List, Optional, Dict, Iterable  # @UnusedImport
+from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
 
 logger = logging.getLogger(__name__)
 
@@ -634,6 +634,17 @@ def universal_relpath(path: str, context: str) -> str:
             return path
     else:
         return os.path.relpath(path, context)
+
+def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None):
+    result = ".".join(map(str, sys.version_info[:3]))
+    if sys.version_info[3] != "final":
+        result += "-" + sys.version_info[3]
+
+    if maxsize is not None:
+        result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
+
+    return result
+
 
 
 class ConnectionFailedException(Exception):

@@ -2,14 +2,15 @@
 
 import datetime
 import platform
+import sys
 import tkinter as tk
 import tkinter.font
 from tkinter import ttk
 
 import thonny
 from thonny import get_workbench, ui_utils
+from thonny.common import get_python_version_string
 from thonny.languages import tr
-from thonny.misc_utils import get_python_version_string
 from thonny.ui_utils import CommonDialog
 
 
@@ -68,7 +69,7 @@ class AboutDialog(CommonDialog):
             text=system_desc
             + "\n"
             + "Python "
-            + get_python_version_string()
+            + get_python_version_string(maxsize=sys.maxsize) + "\n"
             + "Tk "
             + ui_utils.get_tk_version_str(),
         )
