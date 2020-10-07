@@ -26,9 +26,11 @@ class SerialConnection(MicroPythonConnection):
 
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+            # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
-            self._serial.dtr = 0
-            self._serial.rts = 0
+            # but in some cases it messes up communication
+            # self._serial.dtr = 0
+            # self._serial.rts = 0
         except SerialException as error:
             err_str = str(error)
             if "FileNotFoundError" in err_str:
