@@ -382,7 +382,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._soft_reboot_after_interrupting_to_raw_prompt()
 
     def _soft_reboot_after_interrupting_to_raw_prompt(self):
-        print("SOREBORP")
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
