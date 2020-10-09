@@ -51,7 +51,8 @@ from thonny.common import (
     OBJECT_LINK_START,
     OBJECT_LINK_END,
     range_contains_smaller,
-    DebuggerResponse, get_python_version_string,
+    DebuggerResponse,
+    get_python_version_string,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -2690,7 +2691,6 @@ class FancySourceFileLoader(SourceFileLoader):
 
 def _get_frame_prefix(frame):
     return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
-
 
 
 def _fetch_frame_source_info(frame):

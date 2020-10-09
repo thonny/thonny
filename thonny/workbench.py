@@ -759,9 +759,9 @@ class Workbench(tk.Tk):
     def _init_backend_switcher(self):
 
         backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
-        #backends = list(
+        # backends = list(
         #    filter(lambda b: hasattr(b.proxy_class, "show_in_switcher"), backends)
-        #)
+        # )
 
         # Set up the menu
         menu_variable = tk.StringVar(value="")

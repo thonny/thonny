@@ -262,21 +262,22 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def fetch_next_message(self):
         msg = super(BareMetalMicroPythonProxy, self).fetch_next_message()
-        if (not self._have_stored_pidwid
+        if (
+            not self._have_stored_pidwid
             and getattr(msg, "event_type", None) == "ToplevelResponse"
-            and self._port != "webrepl"):
+            and self._port != "webrepl"
+        ):
             # Let's remember that this vidpid was used with this backend
             # need to copy and store explicitly, because otherwise I may change the default value
             used_vidpids = get_workbench().get_option(self.backend_name + ".used_vidpids").copy()
             from serial.tools.list_ports_common import ListPortInfo
+
             info = get_port_info(self._port)
             used_vidpids.add((info.vid, info.pid))
             self._have_stored_pidwid = True
             get_workbench().set_option(self.backend_name + ".used_vidpids", used_vidpids)
 
         return msg
-
-
 
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
@@ -731,6 +732,7 @@ def list_serial_ports_with_descriptions():
         )
         for p in sorted_ports
     ]
+
 
 def get_port_info(port):
     for info in list_serial_ports():

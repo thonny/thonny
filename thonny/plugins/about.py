@@ -69,7 +69,8 @@ class AboutDialog(CommonDialog):
             text=system_desc
             + "\n"
             + "Python "
-            + get_python_version_string(maxsize=sys.maxsize) + "\n"
+            + get_python_version_string(maxsize=sys.maxsize)
+            + "\n"
             + "Tk "
             + ui_utils.get_tk_version_str(),
         )
