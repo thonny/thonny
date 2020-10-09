@@ -8,8 +8,13 @@ from tkinter import ttk
 
 import thonny
 from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running
-from thonny.common import ToplevelCommand, InlineCommand, is_same_path, normpath_with_actual_case, \
-    get_python_version_string
+from thonny.common import (
+    ToplevelCommand,
+    InlineCommand,
+    is_same_path,
+    normpath_with_actual_case,
+    get_python_version_string,
+)
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
@@ -356,7 +361,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
-                + "from a virtual environment. In this case enter the path directly to the box!"
+                + "from a virtual environment. In this case choose the 'activate' script instead\n"
+                + "of the interpreter (or enter the path directly to the box)!"
             )
         extra_label = ttk.Label(self, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
@@ -384,6 +390,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             ]
 
         filename = askopenfilename(**options)
+        if filename.endswith("/activate"):
+            filename = filename[: -len("activate")] + "python3"
 
         if filename:
             self._configuration_variable.set(filename)
