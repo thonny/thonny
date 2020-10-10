@@ -10,9 +10,28 @@ NUM_ITERATIONS = 10000 # how many times to send the script to the device
 
 # The output of following code tells me whether the code was received intact or not
 code = """
-s = "%s"
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+# this line is just for taking space
+ssss = "%s"
 print()
-print(len(s), set(s))
+print(len(ssss), set(ssss))
 """ % ("*" * LENGTH_OF_STRING_LITERAL)
 
 s = serial.Serial(PORT, 115200)
@@ -25,7 +44,8 @@ def forward_until(marker, must_include=None):
         print(b.decode("UTF-8"), end="")
 
     if must_include and must_include not in total:
-        raise RuntimeError("Did not find expected data in the output")
+        raise RuntimeError("Did not find expected data in the output (%s)"
+                           % (total + s.read_all()))
 
 def prepare():
     print("Interrupting...")
@@ -64,7 +84,7 @@ def run_in_paste_mode():
     forward_until(b"=== ")
 
     for line in code.splitlines(keepends=True):
-        data = line.encode("UTF-8")
+        data = line.encode("UTF-8").replace(b"\n", b"\r\n")
         while data:
             block = data[:BLOCK_SIZE]
             s.write(block)
