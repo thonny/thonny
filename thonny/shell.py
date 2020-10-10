@@ -424,6 +424,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             if preceding.strip() and not preceding.endswith("\n"):
                 self._insert_text_directly("\n")
             self._insert_text_directly(welcome_text, ("welcome",))
+            self.see("end")
 
         if "value_info" in msg:
             num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)
@@ -914,6 +915,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             # "\n" + "═"*200 + "\n",
             ("magic", "restart_line"),
         )
+        self.see("end")
 
     def intercept_insert(self, index, txt, tags=()):
         # pylint: disable=arguments-differ
