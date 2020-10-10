@@ -94,6 +94,22 @@ class SshCPythonProxy(SubprocessProxy):
     def can_run_local_files(self):
         return False
 
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show when the executable, user and host are configured
+        return (
+            get_workbench().get_option("ssh.host")
+            and get_workbench().get_option("ssh.user")
+            and get_workbench().get_option("ssh.executable")
+        )
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
+
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend

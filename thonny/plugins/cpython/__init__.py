@@ -214,6 +214,10 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
         assert os.path.isdir(path)
 
+    @classmethod
+    def get_switcher_entries(cls):
+        return []
+
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):

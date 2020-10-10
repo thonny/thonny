@@ -279,6 +279,17 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         return msg
 
+    @classmethod
+    def should_show_in_switcher(cls):
+        return False
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
+
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
@@ -578,6 +589,23 @@ class LocalMicroPythonProxy(MicroPythonProxy):
     def can_run_remote_files(self):
         return False
 
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show when the executable is configured and exists
+        executable = get_workbench().get_option("LocalMicroPython.executable")
+        import shutil
+
+        return bool(executable) and (
+            os.path.isabs(executable) and os.path.exists(executable) or shutil.which(executable)
+        )
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
+
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
@@ -688,6 +716,22 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def can_run_remote_files(self):
         return True
+
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show when the executable, user and host are configured
+        return (
+            get_workbench().get_option("SshMicroPython.host")
+            and get_workbench().get_option("SshMicroPython.user")
+            and get_workbench().get_option("SshMicroPython.executable")
+        )
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
