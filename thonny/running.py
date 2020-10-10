@@ -277,6 +277,7 @@ class Runner:
             self._set_state("running")
 
         if cmd.name[0].isupper():
+            # This may be only logical restart, which does not look like restart to the runner
             get_workbench().event_generate("BackendRestart", full=False)
 
     def send_command_and_wait(self, cmd: CommandToBackend, dialog_title: str) -> MessageFromBackend:
@@ -713,6 +714,7 @@ class BackendProxy:
     # backend_name will be overwritten on Workbench.add_backend
     # Subclasses don't need to worry about it.
     backend_name = None
+    backend_description = None
 
     def __init__(self, clean: bool) -> None:
         """Initializes (or starts the initialization of) the backend process.
@@ -799,6 +801,22 @@ class BackendProxy:
 
     def get_cwd(self):
         return None
+
+    def get_clean_description(self):
+        return self.backend_description
+
+    @classmethod
+    def get_current_switcher_configuration(cls):
+        """returns the dict of configuration entries that distinguish current backend conf from other
+        items in the backend switcher"""
+        return {"run.backend_name": cls.backend_name}
+
+    @classmethod
+    def get_switcher_entries(cls):
+        """
+        Each returned entry creates one item in the backend switcher menu.
+        """
+        return [(cls.get_current_switcher_configuration(), cls.backend_description)]
 
 
 class SubprocessProxy(BackendProxy):

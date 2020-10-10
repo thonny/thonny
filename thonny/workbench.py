@@ -758,67 +758,79 @@ class Workbench(tk.Tk):
 
     def _init_backend_switcher(self):
 
-        backends = sorted(self.get_backends().values(), key=lambda x: x.sort_key)
-        # backends = list(
-        #    filter(lambda b: hasattr(b.proxy_class, "show_in_switcher"), backends)
-        # )
-
         # Set up the menu
-        menu_variable = tk.StringVar(value="")
-        backend_menu = tk.Menu(self._statusbar, tearoff=False)
-
-        def choose_backend():
-            chosen_backend = backends_by_name[menu_variable.get()]
-            self.set_option("run.backend_name", chosen_backend.name)
-            self._backend_button.configure(text=chosen_backend.description)
-            get_runner().restart_backend(False)
-
-        menu_font = tk_font.nametofont("TkMenuFont")
-
-        max_description_width = 0
-        backends_by_name = {}
-        for backend in backends:
-            backend_menu.add_radiobutton(
-                label=backend.description,
-                command=choose_backend,
-                variable=menu_variable,
-                value=backend.name,
-            )
-            max_description_width = max(
-                menu_font.measure(backend.description), max_description_width
-            )
-            backends_by_name[backend.name] = backend
-
-        backend_menu.add_separator()
-        backend_menu.add_command(
-            label=tr("Select another interpreter..."),
-            command=lambda: self.show_options("interpreter"),
-        )
+        self._backend_conf_variable = tk.StringVar(value="{}")
+        self._backend_menu = tk.Menu(self._statusbar, tearoff=False)
 
         # Set up the button
         self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
 
-        def post_backend_menu():
-            menu_variable.set(value=self.get_option("run.backend_name"))
-
-            # Tk will adjust x properly with single monitor, but when Thonny is maximized
-            # on a monitor, which has another monitor to its right, the menu can be partially
-            # displayed on another monitor (at least in Ubuntu).
-            button_text_width = menu_font.measure(self._backend_button.cget("text"))
-            width_diff = max_description_width - button_text_width
-            post_x = self._backend_button.winfo_rootx() - width_diff - menu_font.measure("  V ")
-            backend_menu.tk_popup(post_x, self._backend_button.winfo_rooty())
-
         self._backend_button.grid(row=1, column=3, sticky="e")
-        self._backend_button.configure(command=post_backend_menu)
+        self._backend_button.configure(command=self._post_backend_menu)
+
+    def _post_backend_menu(self):
+        menu_font = tk_font.nametofont("TkMenuFont")
+
+        def choose_backend():
+            backend_conf = ast.literal_eval(self._backend_conf_variable.get())
+            assert isinstance(backend_conf, dict), "backend conf is %r" % backend_conf
+            for name, value in backend_conf.items():
+                self.set_option(name, value)
+            get_runner().restart_backend(False)
+
+        self._backend_menu.delete(0, "end")
+        max_description_width = 0
+        button_text_width = menu_font.measure(self._backend_button.cget("text"))
+
+        for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
+            entries = backend.proxy_class.get_switcher_entries()
+            if not entries:
+                continue
+
+            if len(entries) == 1:
+                self._backend_menu.add_radiobutton(
+                    label=backend.description,
+                    command=choose_backend,
+                    variable=self._backend_conf_variable,
+                    value=repr(entries[0][0]),
+                )
+            else:
+                submenu = tk.Menu(self._backend_menu, tearoff=False)
+                for conf, label in entries:
+                    submenu.add_radiobutton(
+                        label=label,
+                        command=choose_backend,
+                        variable=self._backend_conf_variable,
+                        value=repr(conf),
+                    )
+                self._backend_menu.add_cascade(label=backend.description, menu=submenu)
+
+            max_description_width = max(
+                menu_font.measure(backend.description), max_description_width
+            )
+
+        # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
+
+        self._backend_menu.add_separator()
+        self._backend_menu.add_command(
+            label=tr("Select another interpreter..."),
+            command=lambda: self.show_options("interpreter"),
+        )
+
+        # Tk will adjust x properly with single monitor, but when Thonny is maximized
+        # on a monitor, which has another monitor to its right, the menu can be partially
+        # displayed on another monitor (at least in Ubuntu).
+        width_diff = max_description_width - button_text_width
+        post_x = self._backend_button.winfo_rootx() - width_diff - menu_font.measure("mmm")
+        self._backend_menu.tk_popup(post_x, self._backend_button.winfo_rooty())
 
     def _on_backend_restart(self, event):
-        backend = self.get_backends()[self.get_option("run.backend_name")]
-
-        if hasattr(backend.proxy_class, "get_statusbar_description"):
-            desc = backend.proxy_class.get_statusbar_description()
+        proxy = get_runner().get_backend_proxy()
+        if proxy:
+            desc = proxy.get_clean_description()
+            self._backend_conf_variable.set(value=repr(proxy.get_current_switcher_configuration()))
         else:
-            desc = backend.description
+            desc = "<no backend>"
         self._backend_button.configure(text=desc)
 
     def _init_theming(self) -> None:
@@ -1121,6 +1133,7 @@ class Workbench(tk.Tk):
 
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
+        proxy_class.backend_description = description  # type: ignore
         if not getattr(config_page_constructor, "backend_name", None):
             config_page_constructor.backend_name = name
 
