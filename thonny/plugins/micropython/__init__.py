@@ -186,6 +186,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             or (p.vid, None) in cls.get_known_usb_vids_pids()
             or p.description in cls.get_known_port_descriptions()
             or cls.should_consider_unknown_devices()
+            and (p.vid, p.pid) not in cls.get_vids_pids_to_avoid()
             and (
                 getattr(p, "manufacturer", "") == "MicroPython"
                 or ("USB" in p.description and "serial" in p.description.lower())
@@ -200,6 +201,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device VID, PID"""
         return cls.get_used_usb_vidpids()
+
+    @classmethod
+    def get_vids_pids_to_avoid(cls):
+        """Return set of pairs of USB device VID, PID to explicitly not consider
+        either because they are not compatible or to reduce the number of choices
+        in the switcher.
+        """
+        return set()
 
     @classmethod
     def get_used_usb_vidpids(cls):
@@ -528,6 +537,11 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
             # Generic MicroPython Board, see http://pid.codes/org/MicroPython/
             (0x1209, 0xADDA)
         } | cls.get_uart_adapter_vids_pids()
+
+    @classmethod
+    def get_vids_pids_to_avoid(self):
+        # micro:bit
+        return {(0x0D28, 0x0204)}
 
 
 class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):

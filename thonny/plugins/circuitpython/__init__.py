@@ -44,6 +44,11 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
             (0x2341, 0x8057),  # Arduino Nano 33 IoT board
         }
 
+    @classmethod
+    def get_vids_pids_to_avoid(self):
+        # micro:bit
+        return {(0x0D28, 0x0204)}
+
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
     def _get_usb_driver_url(self):

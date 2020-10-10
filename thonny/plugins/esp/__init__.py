@@ -32,6 +32,7 @@ class ESPProxy(BareMetalMicroPythonProxy):
             or (p.vid, None) in cls.get_known_usb_vids_pids()
             or p.description in cls.get_known_port_descriptions()
             or cls.should_consider_unknown_devices()
+            and (p.vid, p.pid) not in cls.get_vids_pids_to_avoid()
             and (
                 ("USB" in p.description and "serial" in p.description.lower())
                 or "UART" in p.description
@@ -41,6 +42,11 @@ class ESPProxy(BareMetalMicroPythonProxy):
             and getattr(p, "manufacturer", "") != "MicroPython"  # adapter can't have this?
             and "python" not in p.description.lower()
         )
+
+    @classmethod
+    def get_vids_pids_to_avoid(self):
+        # micro:bit
+        return {(0x0D28, 0x0204)}
 
 
 class ESP8266Proxy(ESPProxy):
