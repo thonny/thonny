@@ -33,13 +33,12 @@ class MicrobitProxy(BareMetalMicroPythonProxy):
     def supports_remote_directories(self):
         return False
 
-    @property
-    def consider_unknown_devices(self):
+    @classmethod
+    def should_consider_unknown_devices(cls):
         return False
 
-    @property
-    def known_usb_vids_pids(self):
-        """Copied from https://github.com/mu-editor/mu/blob/master/mu/modes/adafruit.py"""
+    @classmethod
+    def get_known_usb_vids_pids(self):
         return {(0x0D28, 0x0204)}
 
 

@@ -8,8 +8,13 @@ from tkinter import ttk
 
 import thonny
 from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running
-from thonny.common import ToplevelCommand, InlineCommand, is_same_path, normpath_with_actual_case, \
-    get_python_version_string
+from thonny.common import (
+    ToplevelCommand,
+    InlineCommand,
+    is_same_path,
+    normpath_with_actual_case,
+    get_python_version_string,
+)
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
@@ -209,6 +214,10 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
         assert os.path.isdir(path)
 
+    @classmethod
+    def get_switcher_entries(cls):
+        return []
+
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):
@@ -223,12 +232,7 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
                 msg["welcome_text"] += " (" + self._executable + ")"
         return msg
 
-    @staticmethod
-    def show_in_switcher():
-        return True
-
-    @staticmethod
-    def get_statusbar_description():
+    def get_clean_description(self):
         return "Python " + get_python_version_string()
 
 
@@ -250,17 +254,33 @@ class CustomCPythonProxy(CPythonProxy):
             msg["welcome_text"] += " (" + self._executable + ")"
         return msg
 
-    @staticmethod
-    def show_in_switcher():
-        return True
-
-    @staticmethod
-    def get_statusbar_description():
+    def get_clean_description(self):
         desc = get_workbench().get_option("CustomInterpreter.path")
         if not desc:
             desc = sys.executable
 
         return desc
+
+    @classmethod
+    def _get_switcher_entry_for_executable(cls, executable):
+        return (
+            {"run.backend_name": cls.backend_name, "CustomInterpreter.path": executable},
+            executable,
+        )
+
+    @classmethod
+    def get_current_switcher_configuration(cls):
+        return cls._get_switcher_entry_for_executable(
+            get_workbench().get_option("CustomInterpreter.path")
+        )[0]
+
+    @classmethod
+    def get_switcher_entries(cls):
+        return [
+            cls._get_switcher_entry_for_executable(executable)
+            for executable in _get_interpreters()
+            if os.path.exists(executable)
+        ]
 
 
 def get_private_venv_path():
@@ -338,7 +358,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             self,
             exportselection=False,
             textvariable=self._configuration_variable,
-            values=self._get_interpreters(),
+            values=_get_interpreters(),
         )
 
         self._entry.grid(row=1, column=1, sticky=tk.NSEW)
@@ -356,7 +376,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
-                + "from a virtual environment. In this case enter the path directly to the box!"
+                + "from a virtual environment. In this case choose the 'activate' script instead\n"
+                + "of the interpreter (or enter the path directly to the box)!"
             )
         extra_label = ttk.Label(self, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
@@ -384,6 +405,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             ]
 
         filename = askopenfilename(**options)
+        if filename.endswith("/activate"):
+            filename = filename[: -len("activate")] + "python3"
 
         if filename:
             self._configuration_variable.set(filename)
@@ -434,107 +457,6 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if os.path.exists(exe_path):
             self._configuration_variable.set(exe_path)
 
-    def _get_interpreters(self):
-        result = set()
-
-        if running_on_windows():
-            # registry
-            result.update(self._get_interpreters_from_windows_registry())
-
-            for minor in [5, 6, 7, 8]:
-                for dir_ in [
-                    "C:\\Python3%d" % minor,
-                    "C:\\Python3%d-32" % minor,
-                    "C:\\Python3%d-64" % minor,
-                    "C:\\Program Files\\Python 3.%d" % minor,
-                    "C:\\Program Files\\Python 3.%d-64" % minor,
-                    "C:\\Program Files (x86)\\Python 3.%d" % minor,
-                    "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
-                ]:
-                    path = os.path.join(dir_, WINDOWS_EXE)
-                    if os.path.exists(path):
-                        result.add(normpath_with_actual_case(path))
-
-            # other locations
-            for dir_ in ["C:\\Anaconda3", os.path.expanduser("~/Anaconda3")]:
-                path = os.path.join(dir_, WINDOWS_EXE)
-                if os.path.exists(path):
-                    result.add(normpath_with_actual_case(path))
-
-        else:
-            # Common unix locations
-            dirs = ["/bin", "/usr/bin", "/usr/local/bin", os.path.expanduser("~/.local/bin")]
-            for dir_ in dirs:
-                # if the dir_ is just a link to another dir_, skip it
-                # (not to show items twice)
-                # for example on Fedora /bin -> usr/bin
-                if not os.path.exists(dir_):
-                    continue
-
-                apath = normpath_with_actual_case(dir_)
-                if apath != dir_ and apath in dirs:
-                    continue
-                for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
-                    path = os.path.join(dir_, name)
-                    if os.path.exists(path):
-                        result.add(path)
-
-        if running_on_mac_os():
-            for version in ["3.5", "3.6", "3.7", "3.8"]:
-                dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
-                path = os.path.join(dir_, "python3")
-
-                if os.path.exists(path):
-                    result.add(path)
-
-        from shutil import which
-
-        for command in ["python3", "python3.5", "python3.5", "python3.6", "python3.7", "python3.8"]:
-            path = which(command)
-            if path is not None and os.path.isabs(path):
-                result.add(path)
-
-        for path in get_workbench().get_option("CustomInterpreter.used_paths"):
-            if os.path.exists(path):
-                result.add(normpath_with_actual_case(path))
-
-        return sorted(result)
-
-    def _get_interpreters_from_windows_registry(self):
-        # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
-        import winreg
-
-        result = set()
-        for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
-            for version in [
-                "3.5",
-                "3.5-32",
-                "3.5-64",
-                "3.6",
-                "3.6-32",
-                "3.6-64",
-                "3.7",
-                "3.7-32",
-                "3.7-64",
-                "3.8",
-                "3.8-32",
-                "3.8-64",
-            ]:
-                try:
-                    for subkey in [
-                        "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
-                        "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
-                    ]:
-                        dir_ = winreg.QueryValue(key, subkey)
-                        if dir_:
-                            path = os.path.join(dir_, WINDOWS_EXE)
-                            if os.path.exists(path):
-                                result.add(path)
-                except Exception:
-                    pass
-
-        return result
-
     def should_restart(self):
         return self._configuration_variable.modified
 
@@ -545,6 +467,109 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         path = self._configuration_variable.get()
         if os.path.isfile(path):
             get_workbench().set_option("CustomInterpreter.path", path)
+
+
+def _get_interpreters():
+    result = set()
+
+    if running_on_windows():
+        # registry
+        result.update(_get_interpreters_from_windows_registry())
+
+        for minor in [6, 7, 8, 9]:
+            for dir_ in [
+                "C:\\Python3%d" % minor,
+                "C:\\Python3%d-32" % minor,
+                "C:\\Python3%d-64" % minor,
+                "C:\\Program Files\\Python 3.%d" % minor,
+                "C:\\Program Files\\Python 3.%d-64" % minor,
+                "C:\\Program Files (x86)\\Python 3.%d" % minor,
+                "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
+            ]:
+                path = os.path.join(dir_, WINDOWS_EXE)
+                if os.path.exists(path):
+                    result.add(normpath_with_actual_case(path))
+
+        # other locations
+        for dir_ in ["C:\\Anaconda3", os.path.expanduser("~/Anaconda3")]:
+            path = os.path.join(dir_, WINDOWS_EXE)
+            if os.path.exists(path):
+                result.add(normpath_with_actual_case(path))
+
+    else:
+        # Common unix locations
+        dirs = ["/bin", "/usr/bin", "/usr/local/bin", os.path.expanduser("~/.local/bin")]
+        for dir_ in dirs:
+            # if the dir_ is just a link to another dir_, skip it
+            # (not to show items twice)
+            # for example on Fedora /bin -> usr/bin
+            if not os.path.exists(dir_):
+                continue
+
+            apath = normpath_with_actual_case(dir_)
+            if apath != dir_ and apath in dirs:
+                continue
+            for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
+                path = os.path.join(dir_, name)
+                if os.path.exists(path):
+                    result.add(path)
+
+    if running_on_mac_os():
+        for version in ["3.6", "3.7", "3.8", "3.9"]:
+            dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
+            path = os.path.join(dir_, "python3")
+
+            if os.path.exists(path):
+                result.add(path)
+
+    from shutil import which
+
+    for command in ["python3", "python3.6", "python3.7", "python3.8", "python3.9"]:
+        path = which(command)
+        if path is not None and os.path.isabs(path):
+            result.add(path)
+
+    for path in get_workbench().get_option("CustomInterpreter.used_paths"):
+        if os.path.exists(path):
+            result.add(normpath_with_actual_case(path))
+
+    return sorted(result)
+
+
+def _get_interpreters_from_windows_registry():
+    # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
+    import winreg
+
+    result = set()
+    for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
+        for version in [
+            "3.6",
+            "3.6-32",
+            "3.6-64",
+            "3.7",
+            "3.7-32",
+            "3.7-64",
+            "3.8",
+            "3.8-32",
+            "3.8-64",
+            "3.9",
+            "3.9-32",
+            "3.9-64",
+        ]:
+            try:
+                for subkey in [
+                    "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
+                    "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
+                ]:
+                    dir_ = winreg.QueryValue(key, subkey)
+                    if dir_:
+                        path = os.path.join(dir_, WINDOWS_EXE)
+                        if os.path.exists(path):
+                            result.add(path)
+            except Exception:
+                pass
+
+    return result
 
 
 def load_plugin():

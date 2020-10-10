@@ -24,32 +24,41 @@ from thonny.ui_utils import (
 
 
 class ESPProxy(BareMetalMicroPythonProxy):
-    pass
+    @classmethod
+    def _is_potential_port(cls, p):
+        # They have UART adapter
+        return (
+            (p.vid, p.pid) in cls.get_known_usb_vids_pids()
+            or (p.vid, None) in cls.get_known_usb_vids_pids()
+            or p.description in cls.get_known_port_descriptions()
+            or cls.should_consider_unknown_devices()
+            and (
+                ("USB" in p.description and "serial" in p.description.lower())
+                or "UART" in p.description
+                or "DAPLink" in p.description
+                or "STLink" in p.description
+            )
+            and getattr(p, "manufacturer", "") != "MicroPython"  # adapter can't have this?
+            and "python" not in p.description.lower()
+        )
 
 
 class ESP8266Proxy(ESPProxy):
     description = "MicroPython on ESP8266"
     config_page_constructor = "ESP8266"
 
-    @property
-    def known_usb_vids_pids(self):
-        return super().known_usb_vids_pids | {
-            # eg. Adafruit Feather Huzzah
-            (0x10C4, 0xEA60),  # Silicon Labs CP210x USB to UART Bridge,
-            (0x1A86, 0x7523),  # USB-SERIAL CH340,
-        }
+    @classmethod
+    def get_known_usb_vids_pids(cls):
+        return cls.get_uart_adapter_vids_pids()
 
     def _get_api_stubs_path(self):
         return os.path.join(os.path.dirname(__file__), "esp8266_api_stubs")
 
 
 class ESP32Proxy(ESPProxy):
-    @property
-    def known_usb_vids_pids(self):
-        return super().known_usb_vids_pids | {
-            # eg. ESP-WROOM-32
-            (0x10C4, 0xEA60)  # Silicon Labs CP210x USB to UART Bridge
-        }
+    @classmethod
+    def get_known_usb_vids_pids(cls):
+        return cls.get_uart_adapter_vids_pids()
 
     def _get_api_stubs_path(self):
         return os.path.join(os.path.dirname(__file__), "esp32_api_stubs")
@@ -320,10 +329,10 @@ def load_plugin():
         ESP32Proxy,
         "MicroPython (ESP32)",
         ESP32ConfigPage,
-        sort_key="32",
+        sort_key="35",
         write_block_size=255,
         write_block_delay=0.5,
     )
     add_micropython_backend(
-        "ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage, sort_key="33"
+        "ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage, sort_key="36"
     )

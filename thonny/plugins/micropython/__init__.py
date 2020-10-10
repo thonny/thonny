@@ -170,42 +170,60 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def _clear_environment(self):
         "TODO:"
 
-    def _detect_potential_ports(self):
+    @classmethod
+    def _detect_potential_ports(cls):
         all_ports = list_serial_ports()
         """
         for p in all_ports:
-            print(p.description,
-                  p.device,
-                  None if p.vid is None else hex(p.vid),
-                  None if p.pid is None else hex(p.pid),
-                  )
+            print(vars(p))
         """
-        return [
-            (p.device, p.description)
-            for p in all_ports
-            if (p.vid, p.pid) in self.known_usb_vids_pids
-            or p.description in self.known_port_descriptions
-            or self.consider_unknown_devices
+        return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
+
+    @classmethod
+    def _is_potential_port(cls, p):
+        return (
+            (p.vid, p.pid) in cls.get_known_usb_vids_pids()
+            or (p.vid, None) in cls.get_known_usb_vids_pids()
+            or p.description in cls.get_known_port_descriptions()
+            or cls.should_consider_unknown_devices()
             and (
-                ("USB" in p.description and "serial" in p.description.lower())
+                getattr(p, "manufacturer", "") == "MicroPython"
+                or ("USB" in p.description and "serial" in p.description.lower())
                 or "UART" in p.description
                 or "DAPLink" in p.description
                 or "STLink" in p.description
                 or "python" in p.description.lower()
             )
-        ]
+        )
 
-    @property
-    def known_usb_vids_pids(self):
+    @classmethod
+    def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device VID, PID"""
-        return set()
+        return cls.get_used_usb_vidpids()
 
-    @property
-    def consider_unknown_devices(self):
+    @classmethod
+    def get_used_usb_vidpids(cls):
+        return get_workbench().get_option(cls.backend_name + ".used_vidpids")
+
+    @classmethod
+    def get_uart_adapter_vids_pids(cls):
+        return {
+            (0x1A86, 0x7523),  # HL-340
+            (0x10C4, 0xEA60),  # CP210x"),
+            (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
+            (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
+            (0x0403, 0x6011),  # FT4232
+            (0x0403, 0x6014),  # FT232H
+            (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
+            (0x0403, 0x601C),  # FT4222H
+        }
+
+    @classmethod
+    def should_consider_unknown_devices(cls):
         return True
 
-    @property
-    def known_port_descriptions(self):
+    @classmethod
+    def get_known_port_descriptions(cls):
         return set()
 
     def _get_api_stubs_path(self):
@@ -262,13 +280,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def fetch_next_message(self):
         msg = super(BareMetalMicroPythonProxy, self).fetch_next_message()
-        if (not self._have_stored_pidwid
+        if (
+            not self._have_stored_pidwid
             and getattr(msg, "event_type", None) == "ToplevelResponse"
-            and self._port != "webrepl"):
+            and self._port != "webrepl"
+        ):
             # Let's remember that this vidpid was used with this backend
             # need to copy and store explicitly, because otherwise I may change the default value
             used_vidpids = get_workbench().get_option(self.backend_name + ".used_vidpids").copy()
             from serial.tools.list_ports_common import ListPortInfo
+
             info = get_port_info(self._port)
             used_vidpids.add((info.vid, info.pid))
             self._have_stored_pidwid = True
@@ -276,7 +297,28 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         return msg
 
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show only if it looks like we can connect using current configuration
+        port = get_workbench().get_option(cls.backend_name + ".port")
+        if port == "webrepl":
+            return True
+        if port == "auto":
+            potential_ports = cls._detect_potential_ports()
+            return len(potential_ports) > 0
+        else:
+            for p in list_serial_ports():
+                if p.device == port:
+                    return True
 
+            return False
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
 
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
@@ -479,13 +521,13 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
 
 class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
-    @property
-    def known_usb_vids_pids(self):
+    @classmethod
+    def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device (VID, PID)"""
         return {
             # Generic MicroPython Board, see http://pid.codes/org/MicroPython/
             (0x1209, 0xADDA)
-        }
+        } | cls.get_uart_adapter_vids_pids()
 
 
 class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
@@ -576,6 +618,23 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
     def can_run_remote_files(self):
         return False
+
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show when the executable is configured and exists
+        executable = get_workbench().get_option("LocalMicroPython.executable")
+        import shutil
+
+        return bool(executable) and (
+            os.path.isabs(executable) and os.path.exists(executable) or shutil.which(executable)
+        )
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
 
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
@@ -688,6 +747,22 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def can_run_remote_files(self):
         return True
 
+    @classmethod
+    def should_show_in_switcher(cls):
+        # Show when the executable, user and host are configured
+        return (
+            get_workbench().get_option("SshMicroPython.host")
+            and get_workbench().get_option("SshMicroPython.user")
+            and get_workbench().get_option("SshMicroPython.executable")
+        )
+
+    @classmethod
+    def get_switcher_entries(cls):
+        if cls.should_show_in_switcher():
+            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
+        else:
+            return []
+
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
@@ -731,6 +806,7 @@ def list_serial_ports_with_descriptions():
         )
         for p in sorted_ports
     ]
+
 
 def get_port_info(port):
     for info in list_serial_ports():
