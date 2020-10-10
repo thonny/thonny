@@ -784,6 +784,7 @@ class Workbench(tk.Tk):
 
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
             entries = backend.proxy_class.get_switcher_entries()
+
             if not entries:
                 continue
 
@@ -813,7 +814,7 @@ class Workbench(tk.Tk):
 
         self._backend_menu.add_separator()
         self._backend_menu.add_command(
-            label=tr("Select another interpreter..."),
+            label=tr("Configure interpreter..."),
             command=lambda: self.show_options("interpreter"),
         )
 

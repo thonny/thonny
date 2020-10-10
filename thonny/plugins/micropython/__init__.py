@@ -170,42 +170,60 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def _clear_environment(self):
         "TODO:"
 
-    def _detect_potential_ports(self):
+    @classmethod
+    def _detect_potential_ports(cls):
         all_ports = list_serial_ports()
         """
         for p in all_ports:
-            print(p.description,
-                  p.device,
-                  None if p.vid is None else hex(p.vid),
-                  None if p.pid is None else hex(p.pid),
-                  )
+            print(vars(p))
         """
-        return [
-            (p.device, p.description)
-            for p in all_ports
-            if (p.vid, p.pid) in self.known_usb_vids_pids
-            or p.description in self.known_port_descriptions
-            or self.consider_unknown_devices
+        return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
+
+    @classmethod
+    def _is_potential_port(cls, p):
+        return (
+            (p.vid, p.pid) in cls.get_known_usb_vids_pids()
+            or (p.vid, None) in cls.get_known_usb_vids_pids()
+            or p.description in cls.get_known_port_descriptions()
+            or cls.should_consider_unknown_devices()
             and (
-                ("USB" in p.description and "serial" in p.description.lower())
+                getattr(p, "manufacturer", "") == "MicroPython"
+                or ("USB" in p.description and "serial" in p.description.lower())
                 or "UART" in p.description
                 or "DAPLink" in p.description
                 or "STLink" in p.description
                 or "python" in p.description.lower()
             )
-        ]
+        )
 
-    @property
-    def known_usb_vids_pids(self):
+    @classmethod
+    def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device VID, PID"""
-        return set()
+        return cls.get_used_usb_vidpids()
 
-    @property
-    def consider_unknown_devices(self):
+    @classmethod
+    def get_used_usb_vidpids(cls):
+        return get_workbench().get_option(cls.backend_name + ".used_vidpids")
+
+    @classmethod
+    def get_uart_adapter_vids_pids(cls):
+        return {
+            (0x1A86, 0x7523),  # HL-340
+            (0x10C4, 0xEA60),  # CP210x"),
+            (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
+            (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
+            (0x0403, 0x6011),  # FT4232
+            (0x0403, 0x6014),  # FT232H
+            (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
+            (0x0403, 0x601C),  # FT4222H
+        }
+
+    @classmethod
+    def should_consider_unknown_devices(cls):
         return True
 
-    @property
-    def known_port_descriptions(self):
+    @classmethod
+    def get_known_port_descriptions(cls):
         return set()
 
     def _get_api_stubs_path(self):
@@ -281,7 +299,19 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def should_show_in_switcher(cls):
-        return False
+        # Show only if it looks like we can connect using current configuration
+        port = get_workbench().get_option(cls.backend_name + ".port")
+        if port == "webrepl":
+            return True
+        if port == "auto":
+            potential_ports = cls._detect_potential_ports()
+            return len(potential_ports) > 0
+        else:
+            for p in list_serial_ports():
+                if p.device == port:
+                    return True
+
+            return False
 
     @classmethod
     def get_switcher_entries(cls):
@@ -491,13 +521,13 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
 
 class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
-    @property
-    def known_usb_vids_pids(self):
+    @classmethod
+    def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device (VID, PID)"""
         return {
             # Generic MicroPython Board, see http://pid.codes/org/MicroPython/
             (0x1209, 0xADDA)
-        }
+        } | cls.get_uart_adapter_vids_pids()
 
 
 class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
