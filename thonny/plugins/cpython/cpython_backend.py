@@ -146,10 +146,24 @@ class MainCPythonBackend(MainBackend):
         sys.path[0] = ""
         sys.argv[:] = [""]  # empty "script name"
 
+        if os.name == "nt":
+            self._install_signal_handler()
+
     def _init_command_reader(self):
         # Can't use threaded reader
         # https://github.com/thonny/thonny/issues/1363
         pass
+
+    def _install_signal_handler(self):
+        import signal
+
+        def signal_handler(signal_, frame):
+            raise KeyboardInterrupt("Execution interrupted")
+
+        if os.name == "nt":
+            signal.signal(signal.SIGBREAK, signal_handler)  # pylint: disable=no-member
+        else:
+            signal.signal(signal.SIGINT, signal_handler)
 
     def _fetch_next_incoming_message(self, timeout=None) -> CommandToBackend:
         # Reading must be done synchronously
