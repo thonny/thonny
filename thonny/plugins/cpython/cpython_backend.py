@@ -468,7 +468,7 @@ class MainCPythonBackend(MainBackend):
         return False
 
     def _cmd_get_globals(self, cmd):
-        warnings.warn("_cmd_get_globals is deprecated for CPython")
+        # warnings.warn("_cmd_get_globals is deprecated for CPython")
         try:
             return InlineResponse(
                 "get_globals",

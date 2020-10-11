@@ -101,6 +101,18 @@ class CPythonProxy(SubprocessProxy):
             finally:
                 self._gui_update_loop_id = None
 
+    def interrupt(self):
+        import signal
+
+        if self._proc is not None and self._proc.poll() is None:
+            if running_on_windows():
+                try:
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
+                except Exception:
+                    logging.exception("Could not interrupt backend process")
+            else:
+                self._proc.send_signal(signal.SIGINT)
+
     def run_script_in_terminal(self, script_path, args, interactive, keep_open):
         cmd = [self._executable]
         if interactive:

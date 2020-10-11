@@ -956,16 +956,6 @@ class SubprocessProxy(BackendProxy):
     def get_sys_path(self):
         return self._sys_path
 
-    def interrupt(self):
-        if self._proc is not None and self._proc.poll() is None:
-            if running_on_windows():
-                try:
-                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
-                except Exception:
-                    logging.exception("Could not interrupt backend process")
-            else:
-                self._proc.send_signal(signal.SIGINT)
-
     def destroy(self):
         self._close_backend()
 
