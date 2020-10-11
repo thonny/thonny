@@ -146,6 +146,17 @@ class MainCPythonBackend(MainBackend):
         sys.path[0] = ""
         sys.argv[:] = [""]  # empty "script name"
 
+    def _init_command_reader(self):
+        # Can't use threaded reader
+        # https://github.com/thonny/thonny/issues/1363
+        pass
+
+    def _fetch_next_incoming_message(self, timeout=None) -> CommandToBackend:
+        # Reading must be done synchronously
+        # https://github.com/thonny/thonny/issues/1363
+        self._read_one_incoming_message()
+        return self._incoming_message_queue.get()
+
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
 
@@ -872,9 +883,6 @@ class MainCPythonBackend(MainBackend):
     def _restore_original_import(self):
         builtins.__import__ = self._original_import
 
-    def _fetch_message(self) -> CommandToBackend:
-        return self._incoming_message_queue.get()
-
     def send_message(self, msg: MessageFromBackend) -> None:
         sys.stdout.flush()
 
@@ -1186,7 +1194,7 @@ class FakeInputStream(FakeStream):
                     self._backend.send_message(
                         BackendEvent("InputRequest", method=method, limit=original_limit)
                     )
-                    msg = self._backend._fetch_message()
+                    msg = self._backend._fetch_next_incoming_message()
                     if isinstance(msg, InputSubmission):
                         self._buffer += msg.data
                         self._processed_symbol_count += len(msg.data)
@@ -1438,7 +1446,7 @@ class Tracer(Executor):
 
     def _fetch_next_debugger_command(self, current_frame):
         while True:
-            cmd = self._backend._fetch_message()
+            cmd = self._backend._fetch_next_incoming_message()
             if isinstance(cmd, InlineCommand):
                 self._backend._handle_normal_command(cmd)
             else:

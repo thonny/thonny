@@ -46,7 +46,9 @@ class BaseBackend(ABC):
         self._incoming_message_queue = queue.Queue()  # populated by the reader thread
         self._interrupt_lock = threading.Lock()
         self._last_progress_reporting_time = 0
+        self._init_command_reader()
 
+    def _init_command_reader(self):
         # Don't use threading for creating a management thread, because I don't want them
         # to be affected by threading.settrace
         _thread.start_new_thread(self._read_incoming_messages, ())
@@ -56,7 +58,7 @@ class BaseBackend(ABC):
             while self._should_keep_going():
                 try:
                     try:
-                        msg = self._incoming_message_queue.get(block=True, timeout=0.01)
+                        msg = self._fetch_next_incoming_message(timeout=0.01)
                     except queue.Empty:
                         self._perform_idle_tasks()
                     else:
@@ -71,6 +73,9 @@ class BaseBackend(ABC):
                     self.send_message(ToplevelResponse())
         except ConnectionClosedException:
             sys.exit(0)
+
+    def _fetch_next_incoming_message(self, timeout=None):
+        return self._incoming_message_queue.get(timeout=timeout)
 
     def _report_progress(
         self, cmd, description: Optional[str], value: float, maximum: float
@@ -93,15 +98,20 @@ class BaseBackend(ABC):
     def _read_incoming_messages(self):
         # works in a separate thread
         while self._should_keep_going():
-            line = self._read_incoming_msg_line()
-            if line == "":
+            if not self._read_one_incoming_message():
                 break
-            msg = parse_message(line)
-            if isinstance(msg, ImmediateCommand):
-                # This will be handled right away
-                self._handle_immediate_command(msg)
-            else:
-                self._incoming_message_queue.put(msg)
+
+    def _read_one_incoming_message(self):
+        line = self._read_incoming_msg_line()
+        if line == "":
+            return False
+        msg = parse_message(line)
+        if isinstance(msg, ImmediateCommand):
+            # This will be handled right away
+            self._handle_immediate_command(msg)
+        else:
+            self._incoming_message_queue.put(msg)
+        return True
 
     def _prepare_command_response(
         self, response: Union[MessageFromBackend, Dict, None], command: CommandToBackend
