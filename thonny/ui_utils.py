@@ -52,6 +52,9 @@ class CommonDialog(tk.Toplevel):
     def get_padding(self):
         return ems_to_pixels(2)
 
+    def get_internal_padding(self):
+        return self.get_padding() // 4
+
 
 class CommonDialogEx(CommonDialog):
     def __init__(self, master=None, cnf={}, **kw):
@@ -1801,11 +1804,77 @@ class ProgressDialog(CommonDialogEx):
         super(ProgressDialog, self).__init__(master)
 
         self._events_queue = queue.Queue()
+        self.populate_main_frame()
+        self.init_action_frame()
+        self.init_log_frame()
 
-        self._current_action_label = ttk.Label(self.main_frame)
-        self._current_action_label.grid(row=1, column=1)
+    def populate_main_frame(self):
+        entry = ttk.Entry(self.main_frame)
+        entry.grid(pady=self.get_padding(), padx=self.get_padding())
 
-        self._progress_bar = ttk.Progressbar(self.main_frame)
+    def init_action_frame(self):
+        padding = self.get_padding()
+        intpad = self.get_internal_padding()
+
+        self.action_frame = ttk.Frame(self)
+        self.action_frame.grid(row=2, column=0, sticky="nsew")
+
+        self._progress_bar = ttk.Progressbar(
+            self.action_frame, length=ems_to_pixels(4), mode="indeterminate"
+        )
+        self._progress_bar.start()
+        self._progress_bar.grid(
+            row=1, column=1, sticky="nsew", padx=(padding, intpad), pady=padding
+        )
+
+        self._current_action_label = create_action_label(
+            self.action_frame, text="Installing", width=20, click_handler=self.toggle_log_frame
+        )
+        self._current_action_label.grid(row=1, column=2, sticky="w", pady=padding, padx=(0, intpad))
+
+        self._ok_button = ttk.Button(self.action_frame, text=self.get_ok_text(), command=self.on_ok)
+        self._ok_button.grid(column=4, row=1, pady=padding, padx=(0, intpad))
+
+        self._cancel_button = ttk.Button(
+            self.action_frame, text=self.get_cancel_text(), command=self.on_cancel
+        )
+        self._cancel_button.grid(column=5, row=1, padx=(0, padding), pady=padding)
+
+        self.action_frame.columnconfigure(2, weight=1)
+
+    def init_log_frame(self):
+        self.log_frame = ttk.Frame(self)
+        self.log_frame.columnconfigure(1, weight=1)
+        self.log_frame.rowconfigure(1, weight=1)
+        self.log_text = tktextext.TextFrame(
+            self.log_frame,
+            horizontal_scrollbar=False,
+            wrap="word",
+            borderwidth=1,
+            height=5,
+            width=20,
+        )
+
+        padding = self.get_padding()
+        self.log_text.grid(row=1, column=1, sticky="nsew", padx=padding, pady=(0, padding))
+
+    def toggle_log_frame(self, event=None):
+        if self.log_frame.winfo_ismapped():
+            self.log_frame.grid_forget()
+        else:
+            self.log_frame.grid(row=3, column=0, sticky="nsew")
+
+    def get_ok_text(self):
+        return tr("OK")
+
+    def get_cancel_text(self):
+        return tr("Cancel")
+
+    def on_ok(self):
+        pass
+
+    def on_cancel(self):
+        pass
 
     def append_text(self, text: str, stream_name="stdout") -> None:
         """Appends text to the details box. May be called from another thread."""
@@ -2443,10 +2512,12 @@ def create_url_label(master, url, text=None):
     return create_action_label(master, text or url, lambda _: webbrowser.open(url))
 
 
-def create_action_label(master, text, click_handler):
+def create_action_label(master, text, click_handler, **kw):
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
-    url_label = ttk.Label(master, text=text, style="Url.TLabel", cursor="hand2", font=url_font)
+    url_label = ttk.Label(
+        master, text=text, style="Url.TLabel", cursor="hand2", font=url_font, **kw
+    )
     url_label.grid()
     url_label.bind("<Button-1>", click_handler)
     return url_label
@@ -2520,8 +2591,5 @@ def add_messagebox_parent_checker():
 
 if __name__ == "__main__":
     root = tk.Tk()
-    var = EnhancedIntVar(value=2)
-    print(var.get())
-    var.set(3)
-    print(repr(var.get()))
-    root.mainloop()
+    dlg = ProgressDialog(root)
+    show_dialog(dlg)

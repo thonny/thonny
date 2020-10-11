@@ -53,6 +53,8 @@ from thonny.ui_utils import (
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
+    ProgressDialog,
+    show_dialog,
 )
 
 logger = logging.getLogger(__name__)
@@ -222,6 +224,9 @@ class Workbench(tk.Tk):
     def advertise_ready(self):
         self.event_generate("WorkbenchReady")
         self.ready = True
+
+        dlg = ProgressDialog(self)
+        # show_dialog(dlg)
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
