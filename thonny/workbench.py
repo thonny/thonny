@@ -787,6 +787,7 @@ class Workbench(tk.Tk):
         max_description_width = 0
         button_text_width = menu_font.measure(self._backend_button.cget("text"))
 
+        num_entries = 0
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
             entries = backend.proxy_class.get_switcher_entries()
 
@@ -814,6 +815,7 @@ class Workbench(tk.Tk):
             max_description_width = max(
                 menu_font.measure(backend.description), max_description_width
             )
+        num_entries += 1
 
         # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
 
@@ -823,12 +825,29 @@ class Workbench(tk.Tk):
             command=lambda: self.show_options("interpreter"),
         )
 
-        # Tk will adjust x properly with single monitor, but when Thonny is maximized
-        # on a monitor, which has another monitor to its right, the menu can be partially
-        # displayed on another monitor (at least in Ubuntu).
-        width_diff = max_description_width - button_text_width
-        post_x = self._backend_button.winfo_rootx() - width_diff - menu_font.measure("mmm")
-        self._backend_menu.tk_popup(post_x, self._backend_button.winfo_rooty())
+        post_x = self._backend_button.winfo_rootx()
+        post_y = self._backend_button.winfo_rooty()
+
+        if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
+            # Most likely several monitors.
+            # Tk will adjust x properly with single monitor, but when Thonny is maximized
+            # on a monitor, which has another monitor to its right, the menu can be partially
+            # displayed on another monitor (at least in Ubuntu).
+            width_diff = max_description_width - button_text_width
+            post_x -= width_diff + menu_font.measure("mmm")
+
+        if running_on_mac_os():
+            # won't be good location otherwise
+            popup_entry = num_entries + 4
+        else:
+            popup_entry = ""
+
+        # print(post_x, post_y)
+        try:
+            self._backend_menu.tk_popup(post_x, post_y, entry=popup_entry)
+        except tk.TclError as e:
+            if not 'unknown option "-state"' in str(e):
+                logger.warning("Problem with switcher popup", exc_info=e)
 
     def _on_backend_restart(self, event):
         proxy = get_runner().get_backend_proxy()
