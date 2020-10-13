@@ -225,7 +225,7 @@ class Workbench(tk.Tk):
         self.event_generate("WorkbenchReady")
         self.ready = True
 
-        dlg = ProgressDialog(self)
+        #dlg = ProgressDialog(self)
         # show_dialog(dlg)
 
     def _make_sanity_checks(self):
