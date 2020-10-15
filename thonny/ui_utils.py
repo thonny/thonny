@@ -1803,7 +1803,7 @@ class WorkDialog(CommonDialog):
     def __init__(self, master):
         super(WorkDialog, self).__init__(master)
 
-        self._state = "preparing"
+        self._state = "idle"
         self._work_events_queue = queue.Queue()
         self.init_instructions_frame()
         self.init_main_frame()
@@ -1816,6 +1816,9 @@ class WorkDialog(CommonDialog):
 
         self._update_scheduler = None
         self._keep_updating_ui()
+
+        self.bind("<Escape>", self.on_cancel, True)
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
     def populate_main_frame(self):
         pass
@@ -1896,15 +1899,15 @@ class WorkDialog(CommonDialog):
         while not self._work_events_queue.empty():
             self.handle_work_event(*self._work_events_queue.get())
 
-        if self._state == "preparing":
+        if self._state == "idle":
             if self.is_ready_for_work():
                 self._ok_button.configure(state="normal")
             else:
                 self._ok_button.configure(state="disabled")
-        elif self._state == "done":
             set_text_if_different(self._cancel_button, tr("Close"))
         else:
             self._ok_button.configure(state="disabled")
+            set_text_if_different(self._cancel_button, tr("Cancel"))
 
     def start_work(self):
         pass
@@ -1920,11 +1923,19 @@ class WorkDialog(CommonDialog):
             self._update_scheduler = None
 
     def close(self):
+        self._state = "closed"
         if self._update_scheduler is not None:
             try:
                 self.after_cancel(self._update_scheduler)
             except TclError:
                 pass
+
+        self.destroy()
+
+    def cancel_work(self):
+        # worker should periodically check this value
+        self._state = "cancelling"
+        self.set_action_text(tr("Cancelling"))
 
     def toggle_log_frame(self, event=None):
         if self.log_frame.winfo_ismapped():
@@ -1942,22 +1953,41 @@ class WorkDialog(CommonDialog):
     def get_cancel_text(self):
         return tr("Cancel")
 
-    def on_ok(self):
-        assert self._state == "preparing"
+    def on_ok(self, event=None):
+        assert self._state == "idle"
         if self.start_work() is not False:
             self._state = "working"
             padding = self.get_padding()
             intpad = self.get_internal_padding()
             self._progress_bar.grid(
-                row=1, column=1, sticky="nsew", padx=(padding, intpad), pady=padding
+                row=1, column=1, sticky="w", padx=(padding, intpad), pady=padding
             )
             self._progress_bar.start()
             self._current_action_label.grid(
                 row=1, column=2, sticky="w", pady=padding, padx=(0, intpad)
             )
 
-    def on_cancel(self):
-        pass
+    def on_cancel(self, event=None):
+        if self._state in ("idle", "done"):
+            self.close()
+        elif self._state == "cancelling" and self.confirm_leaving_while_cancelling():
+            self.close()
+        elif self.confirm_cancel():
+            self.cancel_work()
+
+    def confirm_leaving_while_cancelling(self):
+        return messagebox.askyesno(
+            "Close dialog?",
+            "Cancelling is in progress.\nDo you still want to close the dialog?",
+            parent=self,
+        )
+
+    def confirm_cancel(self):
+        return messagebox.askyesno(
+            "Cancel work?",
+            "Are you sure you want to cancel?",
+            parent=self,
+        )
 
     def append_text(self, text: str, stream_name="stdout") -> None:
         """Appends text to the details box. May be called from another thread."""
@@ -1999,7 +2029,7 @@ class WorkDialog(CommonDialog):
                     self._progress_bar.stop()
                 self._progress_bar.configure(value=value, maximum=maximum)
         elif type == "done":
-            self._state = "done"
+            self._state = "idle"
             self._progress_bar.stop()
 
 

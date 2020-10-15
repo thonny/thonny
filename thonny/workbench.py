@@ -42,6 +42,7 @@ from thonny.misc_utils import (
     running_on_rpi,
     running_on_windows,
 )
+from thonny.plugins.microbit import MicrobitFlashingDialog
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
@@ -225,9 +226,6 @@ class Workbench(tk.Tk):
     def advertise_ready(self):
         self.event_generate("WorkbenchReady")
         self.ready = True
-
-        # dlg = Uf2FlashingDialog(self)
-        # show_dialog(dlg)
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
