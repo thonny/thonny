@@ -62,7 +62,7 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = MicrobitFlashingDialog(get_workbench())
+        dlg = MicrobitFlashingDialog(self)
         ui_utils.show_dialog(dlg)
 
 

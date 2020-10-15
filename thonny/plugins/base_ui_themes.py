@@ -439,7 +439,7 @@ def aqua() -> BasicUiThemeSettings:
 
 
 def windows() -> CompoundUiThemeSettings:
-    tip_background = "systemButtonShadow"
+    tip_background = "#bbbbbb"
     return [
         xpnative(),
         _treeview_settings(),
@@ -450,7 +450,7 @@ def windows() -> CompoundUiThemeSettings:
         _link_settings(),
         _button_notebook_settings(),
         {
-            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "systemButtonText"}},
+            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "black"}},
             "Tip.TFrame": {"configure": {"background": tip_background}},
         },
         {

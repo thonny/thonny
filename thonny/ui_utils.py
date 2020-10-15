@@ -1883,6 +1883,9 @@ class WorkDialog(CommonDialog):
         self.log_frame = ttk.Frame(self)
         self.log_frame.columnconfigure(1, weight=1)
         self.log_frame.rowconfigure(1, weight=1)
+        fixed_font = tk.font.nametofont("TkFixedFont")
+        font = fixed_font.copy()
+        font.configure(size=round(fixed_font.cget("size") * 0.8))
         self.log_text = tktextext.TextFrame(
             self.log_frame,
             horizontal_scrollbar=False,
@@ -1890,6 +1893,7 @@ class WorkDialog(CommonDialog):
             borderwidth=1,
             height=5,
             width=20,
+            font=font,
         )
 
         padding = self.get_padding()
@@ -2015,6 +2019,7 @@ class WorkDialog(CommonDialog):
             if type == "replace":
                 self.log_text.text.direct_delete("end-1c linestart", "end-1c")
             self.log_text.text.direct_insert("end", text, (stream_name,))
+            self.log_text.text.see("end")
         elif type == "action":
             set_text_if_different(self._current_action_label, args[0])
         elif type == "progress":
