@@ -450,7 +450,7 @@ def windows() -> CompoundUiThemeSettings:
         _link_settings(),
         _button_notebook_settings(),
         {
-            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "black"}},
+            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "systemButtonText"}},
             "Tip.TFrame": {"configure": {"background": tip_background}},
         },
         {
