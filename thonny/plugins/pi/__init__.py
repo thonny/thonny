@@ -13,7 +13,8 @@ GLOBAL_CONFIGURATION_PATH = os.path.join("/etc/xdg/lxsession", DESKTOP_SESSION, 
 
 def pix():
     MAIN_BACKGROUND = "#ededed"
-
+    detail_bg = "#d0d0d0"
+    detail_bg2 = "#cfcdc8"
     res_dir = os.path.join(os.path.dirname(__file__), "res")
     scrollbar_button_settings = {}
     for direction, element_name in [
@@ -61,11 +62,11 @@ def pix():
             "map": {"foreground": [("active", "black")]},
         },
         "TNotebook.Tab": {
-            "map": {"background": [("!selected", "#d0d0d0"), ("selected", MAIN_BACKGROUND)]}
+            "map": {"background": [("!selected", detail_bg), ("selected", MAIN_BACKGROUND)]}
         },
         "ButtonNotebook.TNotebook.Tab": {
             "map": {
-                "background": [("!selected", "#d0d0d0"), ("selected", MAIN_BACKGROUND)],
+                "background": [("!selected", detail_bg), ("selected", MAIN_BACKGROUND)],
                 "padding": [
                     ("selected", [scale(4), scale(2), scale(4), scale(3)]),
                     ("!selected", [scale(4), scale(2), scale(4), scale(3)]),
@@ -177,6 +178,8 @@ def pix():
                 "pady": 10,
             }
         },
+        "Tip.TLabel": {"configure": {"background": detail_bg2, "foreground": "black"}},
+        "Tip.TFrame": {"configure": {"background": detail_bg2}},
         "OPTIONS": {"configure": {"icons_in_menus": False, "shortcuts_in_tooltips": False}},
     }
 

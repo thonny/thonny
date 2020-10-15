@@ -1,126 +1,228 @@
+import logging
 import threading
 import tkinter as tk
 import os.path
 from tkinter import ttk, messagebox
 from typing import Optional
+from urllib.request import urlopen
 
 from thonny import get_workbench
+from thonny.languages import tr
 from thonny.misc_utils import list_volumes
-from thonny.ui_utils import create_url_label, askopenfilename
+from thonny.ui_utils import (
+    create_url_label,
+    askopenfilename,
+    WorkDialog,
+    set_text_if_different,
+    ems_to_pixels,
+)
+
+logger = logging.getLogger(__name__)
 
 
-class Uf2FlashingDialog(tk.Toplevel):
+class Uf2FlashingDialog(WorkDialog):
     def __init__(self, master):
-        tk.Toplevel.__init__(self, master)
+        self._release_info = None
+        self._target_dirs = []
+        super().__init__(master)
+        self._start_downloading_release_info()
 
-        self._copy_progess = None
-        self._device_info = None
+    def populate_main_frame(self):
+        pad = self.get_padding()
+        inpad = self.get_internal_padding()
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-
-        main_frame = ttk.Frame(self)
-        main_frame.grid(row=0, column=0, sticky=tk.NSEW, ipadx=15, ipady=15)
-
-        self.title(self._get_title())
-        # self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.protocol("WM_DELETE_WINDOW", self._close)
-
-        ttk.Label(main_frame, text="Download .uf2 file:").grid(
-            row=1, column=0, sticky="nw", pady=(15, 0), padx=15
+        version_caption_label = ttk.Label(self.main_frame, text=tr("Latest version:"))
+        version_caption_label.grid(
+            row=0, column=0, sticky="w", padx=(pad, inpad), pady=(pad, inpad)
         )
-        url_label = create_url_label(main_frame, url="https://circuitpython.org/downloads")
-        url_label.grid(row=1, column=1, columnspan=2, sticky="nw", pady=(15, 0), padx=15)
+        self._version_label = ttk.Label(self.main_frame, text=tr("please wait") + " ...")
+        self._version_label.grid(row=0, column=1, padx=(0, pad), pady=(pad, inpad), sticky="w")
 
-        ttk.Label(main_frame, text="Select the file:").grid(
-            row=2, column=0, sticky="nw", pady=(10, 0), padx=15
-        )
-        self._path_var = tk.StringVar(value="")
-        self._path_entry = ttk.Entry(main_frame, textvariable=self._path_var, width=60)
-        self._path_entry.grid(
-            row=2, column=1, columnspan=1, sticky="nsew", pady=(10, 0), padx=(15, 10)
-        )
-        file_button = ttk.Button(main_frame, text=" ... ", command=self._select_file)
-        file_button.grid(row=2, column=2, sticky="nsew", pady=(10, 0), padx=(0, 15))
-
-        ttk.Label(main_frame, text="Prepare device:").grid(
-            row=3, column=0, sticky="nw", pady=(10, 0), padx=15
-        )
-        self.device_label = ttk.Label(main_frame, text="<not found>")
-        self.device_label.grid(row=3, column=1, columnspan=2, sticky="nw", pady=(10, 0), padx=15)
-
-        main_frame.rowconfigure(3, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-
-        command_bar = ttk.Frame(main_frame)
-        command_bar.grid(row=4, column=0, columnspan=3, sticky="nsew")
-        command_bar.columnconfigure(0, weight=1)
-
-        self._install_button = ttk.Button(
-            command_bar, text="Install", command=self._start_install, width=20
-        )
-        self._install_button.grid(row=0, column=1, pady=15, padx=15, sticky="ne")
-        self._install_button.focus_set()
-
-        close_button = ttk.Button(command_bar, text="Cancel", command=self._close)
-        close_button.grid(row=0, column=2, pady=15, padx=(0, 15), sticky="ne")
-
-        self.bind("<Escape>", self._close, True)
-
-        self._update_state()
-
-    def _get_title(self):
-        return "Install firmware"
-
-    def _check_find_device_type(self, mount_path: str) -> Optional[str]:
-        """If this mount path is possible target, then return device type. Otherwise return None"""
-        raise NotImplementedError()
-
-    def _get_missing_device_instructions(self):
-        return "Can't find your device. Please plug it in it in bootloader mode!"
-
-    def _select_file(self):
-        result = askopenfilename(
-            filetypes=[("UF2 files", ".uf2")],
-            initialdir=get_workbench().get_option("run.working_directory"),
-            parent=self.winfo_toplevel(),
+        self.target_caption_label = ttk.Label(self.main_frame, text=tr("Target location:"))
+        self.target_caption_label.grid(
+            row=1, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
         )
 
-        if result:
-            self._path_var.set(os.path.normpath(result))
+        # add width, so that this label prescribes the width of the dialog and it doesn't grow
+        # when the progressbar and action text are gridded
+        self.target_label = ttk.Label(self.main_frame, text="", width=30)
+        self.target_label.grid(row=1, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
 
-    def _update_state(self):
-        self._update_device_info()
+    def init_action_frame(self):
+        super(Uf2FlashingDialog, self).init_action_frame()
+        self._progress_bar["length"] = ems_to_pixels(10)
 
-        if isinstance(self._copy_progess, int):
-            self._install_button.configure(text="Installing (%d %%)" % self._copy_progess)
-        elif self._copy_progess == "done":
-            self._install_button.configure(text="Installing (100%)")
-            self.update_idletasks()
-            messagebox.showinfo(
-                "Done",
-                "Firmware installation is complete.\nDevice will be back in normal mode.",
-                master=self,
+    def get_action_text_max_length(self):
+        return 15
+
+    def get_missing_device_text(self):
+        return "< No micro:bit in sight >"
+
+    def get_instructions(self) -> Optional[str]:
+        return (
+            "NB! Installing new firmware will erase all files you may have on your micro:bit!\n\n"
+            "1. Plug in your micro:bit\n"
+            "2. Wait until 'Target location' shows your micro:bit location\n"
+            "3. Press 'Install'\n"
+            "4. Wait until the latest firmware is downloaded and copied onto your device\n"
+            "5. Close the dialog and choose 'MicroPython (BBC micro:bit)' as Thonny's back-end"
+        )
+
+    def get_ok_text(self):
+        return tr("Install")
+
+    def _get_release_info_url(self):
+        return "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
+
+    def _start_downloading_release_info(self):
+        import json
+        from urllib.request import urlopen
+
+        def work():
+            # TODO: error handling
+            with urlopen(self._get_release_info_url()) as fp:
+                self._release_info = json.loads(fp.read().decode("UTF-8"))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def update_ui(self):
+        if self._state == "preparing":
+            self._target_dirs = self.get_target_dirs()
+            if not self._target_dirs:
+                set_text_if_different(self.target_label, self.get_missing_device_text())
+            else:
+                set_text_if_different(self.target_label, "\n".join(self._target_dirs))
+
+            unknown_version_text = tr("Please wait") + "..."
+            desc = self.get_firmware_description()
+            if desc is None:
+                set_text_if_different(self._version_label, unknown_version_text)
+            else:
+                set_text_if_different(self._version_label, desc)
+
+        super(Uf2FlashingDialog, self).update_ui()
+
+    def get_firmware_description(self):
+        if self._release_info is None:
+            return None
+        else:
+            return (
+                self._release_info["tag_name"]
+                + " ("
+                + self._release_info["published_at"][:10]
+                + ")"
             )
-            self._copy_progess = None
-            self._close()
-            return
+
+    def get_download_url_and_size(self, model_id):
+        if self._release_info is None:
+            return None
+
+        candidates = [
+            asset
+            for asset in self._release_info["assets"]
+            if self._is_suitable_asset(asset, model_id)
+        ]
+        if len(candidates) == 0:
+            raise RuntimeError(
+                "Could not find the right hex file from the release info (%s)"
+                % self._get_release_info_url()
+            )
+        elif len(candidates) > 1:
+            raise RuntimeError(
+                "Found several possible hex files from the release info (%s)"
+                % self._get_release_info_url()
+            )
         else:
-            self._install_button.configure(text="Install")
+            return (candidates[0]["browser_download_url"], candidates[0]["size"])
 
-        if (
-            os.path.isfile(self._get_file_path())
-            and self._copy_progess is None
-            and self._device_info
-        ):
-            self._install_button.state(["!disabled"])
-        else:
-            self._install_button.state(["disabled"])
+    def _is_suitable_asset(self, asset, model_id):
+        return (
+            asset["name"].endswith(".hex")
+            and "micropython" in asset["name"].lower()
+            and 400000 < asset["size"] < 800000
+        )
 
-        self.after(200, self._update_state)
+    def is_ready_for_work(self):
+        # Called after update_ui
+        return self._target_dirs and self._release_info
 
-    def _get_file_path(self):
-        return self._path_var.get()
+    def get_target_dirs(self):
+        return [
+            vol
+            for vol in list_volumes(skip_letters=["A"])
+            if os.path.exists(os.path.join(vol, "MICROBIT.HTM"))
+        ]
+
+    def start_work(self):
+        if len(self._target_dirs) > 1:
+            # size 0 is checked elsewhere
+            messagebox.showerror(
+                "Can't proceed",
+                "You seem to have plugged in %d compatible devices.\n"
+                + "Please leave only one and unplug the others!",
+                parent=self,
+            )
+            return False
+
+        target_dir = self._target_dirs[0]
+
+        try:
+            download_url, size = self.get_download_url_and_size(self._find_device_id(target_dir))
+        except Exception as e:
+            logger.error("Could not determine download url", exc_info=e)
+            messagebox.showerror("Could not determine download url", str(e), parent=self)
+            return False
+
+        self.report_progress(0, size)
+        threading.Thread(
+            target=self._download_to_the_device, args=[download_url, size, target_dir]
+        ).start()
+        return True
+
+    def _find_device_id(self, mount_path):
+        info_path = os.path.join(mount_path, "DETAILS.TXT")
+        assert os.path.isfile(info_path)
+
+        # https://tech.microbit.org/latest-revision/editors/
+        with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
+            id_marker = "Unique ID:"
+            for line in fp:
+                if line.startswith(id_marker):
+                    unique_id = line[len(id_marker) :].strip()
+                    return unique_id[:4]
+
+    def _download_to_the_device(self, download_url, size, target_dir):
+        """Running in a bg thread"""
+
+        target_path = os.path.join(target_dir, "micropython.hex")
+
+        self.set_action_text("Starting...")
+        self.append_text("Downloading %d bytes from %s\n" % (size, download_url))
+        with urlopen(download_url, timeout=5) as fsrc:
+            bytes_copied = 0
+            self.append_text("Writing to %s\n" % target_path)
+            self.append_text("Starting...")
+            with open(target_path, "wb") as fdst:
+                while True:
+                    buf = fsrc.read(8 * 1024)
+                    if not buf:
+                        break
+
+                    fdst.write(buf)
+                    fdst.flush()
+                    os.fsync(fdst.fileno())
+                    bytes_copied += len(buf)
+                    percent_str = "%.0f%%" % (bytes_copied / size * 100)
+                    self.set_action_text("Copying... " + percent_str)
+                    self.report_progress(bytes_copied, size)
+                    self.replace_last_line(percent_str)
+
+        self.append_text("\nDone!")
+        self.set_action_text("Done!")
+        self.report_done(True)
+
+    def get_title(self):
+        return "Install MicroPython firmware for BBC micro:bit"
 
     def _update_device_info(self):
         info_file_name = "INFO_UF2.TXT"

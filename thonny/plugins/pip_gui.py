@@ -1078,8 +1078,7 @@ class PluginsPipDialog(PipDialog):
             return None
 
     def _create_widgets(self, parent):
-        bg = "#ffff99"
-        banner = tk.Label(parent, background=bg)
+        banner = ttk.Frame(parent, style="Tip.TFrame")
         banner.grid(row=0, column=0, sticky="nsew")
 
         banner_msg = (
@@ -1107,7 +1106,7 @@ class PluginsPipDialog(PipDialog):
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
 
-        banner_text = tk.Label(banner, text=banner_msg, background=bg, justify="left")
+        banner_text = ttk.Label(banner, text=banner_msg, style="Tip.TLabel", justify="left")
         banner_text.grid(pady=10, padx=10)
 
         PipDialog._create_widgets(self, parent)

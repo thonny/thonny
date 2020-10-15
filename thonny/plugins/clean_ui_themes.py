@@ -214,7 +214,9 @@ def clean(
             "map": {"background": [("disabled", frame_background), ("active", high_detail)]},
         },
         "TLabel": {"configure": {"foreground": normal_foreground}},
-        "Url.TLabel": {"configure": {"foreground": high_foreground}},
+        "Url.TLabel": {"configure": {"foreground": normal_foreground}},
+        "Tip.TLabel": {"configure": {"foreground": normal_foreground, "background": low_detail}},
+        "Tip.TFrame": {"configure": {"background": low_detail}},
         "TScale": {
             "configure": {
                 "background": high_detail,
@@ -318,6 +320,8 @@ def load_plugin() -> None:
         ),
         dark_images,
     )
+
+    dark_tip_background = ("#b8c28d",)
 
     get_workbench().add_ui_theme(
         "Clean Dark Green",

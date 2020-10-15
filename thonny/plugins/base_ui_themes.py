@@ -89,8 +89,14 @@ def _text_settings() -> BasicUiThemeSettings:
     }
 
 
-def _label_settings() -> BasicUiThemeSettings:
-    return {"Url.TLabel": {"configure": {"foreground": "DarkBlue"}}}
+def _link_settings() -> BasicUiThemeSettings:
+    tip_background = "#b8c28d"
+    tip_background = "systemInfoBackground"
+    return {
+        "Url.TLabel": {"configure": {"foreground": "DarkBlue"}},
+        "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "black"}},
+        "Tip.TFrame": {"configure": {"background": tip_background}},
+    }
 
 
 def _button_notebook_settings() -> BasicUiThemeSettings:
@@ -433,6 +439,7 @@ def aqua() -> BasicUiThemeSettings:
 
 
 def windows() -> CompoundUiThemeSettings:
+    tip_background = "pink"
     return [
         xpnative(),
         _treeview_settings(),
@@ -440,8 +447,12 @@ def windows() -> CompoundUiThemeSettings:
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
-        _label_settings(),
+        _link_settings(),
         _button_notebook_settings(),
+        {
+            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "black"}},
+            "Tip.TFrame": {"configure": {"background": tip_background}},
+        },
         {
             "TNotebook": {
                 "configure": {
@@ -505,6 +516,7 @@ def windows() -> CompoundUiThemeSettings:
 
 
 def enhanced_clam() -> CompoundUiThemeSettings:
+    tip_background = "#bab5ab"
     return [
         clam(),
         _treeview_settings(),
@@ -512,7 +524,11 @@ def enhanced_clam() -> CompoundUiThemeSettings:
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
-        _label_settings(),
+        _link_settings(),
+        {
+            "Tip.TLabel": {"configure": {"background": tip_background, "foreground": "black"}},
+            "Tip.TFrame": {"configure": {"background": tip_background}},
+        },
         _button_notebook_settings(),
         {
             "ButtonNotebook.Tab": {
