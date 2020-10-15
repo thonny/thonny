@@ -439,7 +439,7 @@ def aqua() -> BasicUiThemeSettings:
 
 
 def windows() -> CompoundUiThemeSettings:
-    tip_background = "pink"
+    tip_background = "systemButtonShadow"
     return [
         xpnative(),
         _treeview_settings(),
