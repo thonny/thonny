@@ -1,0 +1,428 @@
+{
+    "SAMD21G18A-RoboHATMM1-v24": {
+        "VENDOR_NAME": "Robotics Masters",
+        "PRODUCT_NAME": "Robo HAT MM1",
+        "VOLUME_LABEL": "ROBOM0BOOT",
+        "INDEX_URL": "https://roboticsmasters.co",
+        "BOARD_ID": "SAMD21G18A-RoboHATMM1-v24",
+        "USB_VID": "0x1209",
+        "USB_PID": "0x4D44",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-PyGamer-M4": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "PyGamer",
+        "VOLUME_LABEL": "PYGAMERBOOT",
+        "INDEX_URL": "http://adafru.it/",
+        "BOARD_ID": "SAMD51J19A-PyGamer-M4",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x003D",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-USBHub-v0": {
+        "VENDOR_NAME": "Capable Robot Components",
+        "PRODUCT_NAME": "Programmable USB Hub",
+        "VOLUME_LABEL": "USBHUBBOOT",
+        "INDEX_URL": "http://capablerobot.com",
+        "BOARD_ID": "SAMD51G19A-USBHub-v0",
+        "USB_VID": "0x04D8",
+        "USB_PID": "0xEDB3",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-dadamachines-automat-v0": {
+        "VENDOR_NAME": "dadamachines",
+        "PRODUCT_NAME": "automat",
+        "VOLUME_LABEL": "AUTOMAT",
+        "INDEX_URL": "http://dadamachines.com/",
+        "BOARD_ID": "SAMD21G18A-dadamachines-automat-v0",
+        "USB_VID": "0x16D0",
+        "USB_PID": "0x0CDA",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-senseBox-MCU-v0": {
+        "VENDOR_NAME": "eduSense",
+        "PRODUCT_NAME": "senseBox MCU",
+        "VOLUME_LABEL": "SENSEBOX",
+        "INDEX_URL": "http://www.sensebox.de",
+        "BOARD_ID": "SAMD21G18A-senseBox-MCU-v0",
+        "USB_VID": "0x04D8",
+        "USB_PID": "0xEF66",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Feather-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Feather M0",
+        "VOLUME_LABEL": "FEATHERBOOT",
+        "INDEX_URL": "http://adafru.it/",
+        "BOARD_ID": "SAMD21G18A-Feather-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0015",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMR21G18A-Radiofruit-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Radiofruit M0",
+        "VOLUME_LABEL": "RADIOBOOT",
+        "INDEX_URL": "http://adafru.it/3403",
+        "BOARD_ID": "SAMR21G18A-Radiofruit-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0024",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Wattuino-RC-v0": {
+        "VENDOR_NAME": "Watterott electronic",
+        "PRODUCT_NAME": "Wattuino RC",
+        "VOLUME_LABEL": "RCBOOT",
+        "INDEX_URL": "http://www.watterott.com",
+        "BOARD_ID": "SAMD21G18A-Wattuino-RC-v0",
+        "USB_VID": "0x1D50",
+        "USB_PID": "0x6112",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Zero-v0": {
+        "VENDOR_NAME": "Arduino LLC",
+        "PRODUCT_NAME": "Arduino Zero",
+        "VOLUME_LABEL": "ZEROBOOT",
+        "BOARD_ID": "SAMD21G18A-Zero-v0",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Eitech-Robotics-v0": {
+        "VENDOR_NAME": "Eitech",
+        "PRODUCT_NAME": "Robotics",
+        "VOLUME_LABEL": "ROBOTICS",
+        "INDEX_URL": "http://www.eitech.de/",
+        "BOARD_ID": "SAMD21G18A-Eitech-Robotics-v0",
+        "USB_VID": "0x1D50",
+        "USB_PID": "0x6110",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51P20A-GrandCentral-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Grand Central M4 Express",
+        "VOLUME_LABEL": "GCM4BOOT",
+        "INDEX_URL": "http://adafru.it/4064",
+        "BOARD_ID": "SAMD51P20A-GrandCentral-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0031",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-ItsyBitsy-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "ItsyBitsy M0 Express",
+        "VOLUME_LABEL": "ITSYBOOT",
+        "INDEX_URL": "http://adafru.it/3727",
+        "BOARD_ID": "SAMD21G18A-ItsyBitsy-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x000F",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-Feather-Arcade-D51": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Feather Arcade D51",
+        "VOLUME_LABEL": "ARCADE-D5",
+        "INDEX_URL": "https://arcade.makecode.com/",
+        "BOARD_ID": "SAMD51J19A-Feather-Arcade-D51",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0022",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-PewPew-M4": {
+        "VENDOR_NAME": "Radomir Dopieralski",
+        "PRODUCT_NAME": "PewPew",
+        "VOLUME_LABEL": "PEWBOOT",
+        "INDEX_URL": "http://pewpew.rtfd.io",
+        "BOARD_ID": "SAMD51J19A-PewPew-M4",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0034",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21E18A-pIRKey-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "pIRKey M0",
+        "VOLUME_LABEL": "PIRKEYBOOT",
+        "INDEX_URL": "http://adafru.it/3364",
+        "BOARD_ID": "SAMD21E18A-pIRKey-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0027",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-Itsy-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "ItsyBitsy M4 Express",
+        "VOLUME_LABEL": "ITSYM4BOOT",
+        "INDEX_URL": "http://adafru.it/",
+        "BOARD_ID": "SAMD51G19A-Itsy-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x002B",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-Trellis-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Trellis M4 Express",
+        "VOLUME_LABEL": "TRELM4BOOT",
+        "INDEX_URL": "http://adafru.it/3938",
+        "BOARD_ID": "SAMD51G19A-Trellis-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x002F",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21E18A-Gemma-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Gemma M0",
+        "VOLUME_LABEL": "GEMMABOOT",
+        "INDEX_URL": "http://adafru.it/3501",
+        "BOARD_ID": "SAMD21E18A-Gemma-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x001C",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Grove-Zero-v1.0": {
+        "VENDOR_NAME": "Seeed Studio",
+        "PRODUCT_NAME": "Grove Zero",
+        "VOLUME_LABEL": "Grove Zero",
+        "INDEX_URL": "https://www.seeedstudio.com/",
+        "BOARD_ID": "SAMD21G18A-Grove-Zero-v1.0",
+        "USB_VID": "0x2886",
+        "USB_PID": "0x000D",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-Itsy-Arcade-D51": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Itsy Arcade D51",
+        "VOLUME_LABEL": "ARCADE-D5",
+        "INDEX_URL": "https://arcade.makecode.com/",
+        "BOARD_ID": "SAMD51G19A-Itsy-Arcade-D51",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x002B",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Mini-Sparkfun-v0": {
+        "VENDOR_NAME": "Sparkfun",
+        "PRODUCT_NAME": "SAMD21 Mini Breakout",
+        "VOLUME_LABEL": "SPARKFUN",
+        "INDEX_URL": "https://www.sparkfun.com/products/13664",
+        "BOARD_ID": "SAMD21G18A-Mini-Sparkfun-v0",
+        "USB_VID": "0x1B4F",
+        "USB_PID": "0x0D22",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Dev-Sparkfun-v0": {
+        "VENDOR_NAME": "Sparkfun",
+        "PRODUCT_NAME": "SAMD21 Dev Breakout",
+        "VOLUME_LABEL": "SPARKFUN",
+        "INDEX_URL": "https://www.sparkfun.com/products/13672",
+        "BOARD_ID": "SAMD21G18A-Dev-Sparkfun-v0",
+        "USB_VID": "0x1B4F",
+        "USB_PID": "0x0D23",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-crickit-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "crickit",
+        "VOLUME_LABEL": "CRICKITBOOT",
+        "INDEX_URL": "http://adafru.it/",
+        "BOARD_ID": "SAMD21G18A-crickit-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x002D",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-Metro-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Metro M4 Rev B",
+        "VOLUME_LABEL": "METROM4BOOT",
+        "INDEX_URL": "http://adafru.it/3505",
+        "BOARD_ID": "SAMD51J19A-Metro-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0021",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-CPlay-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "CPlay Express",
+        "VOLUME_LABEL": "CPLAYBOOT",
+        "INDEX_URL": "http://adafru.it/3333",
+        "BOARD_ID": "SAMD21G18A-CPlay-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0018",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-MiniSamM4-v0": {
+        "VENDOR_NAME": "Benjamin Shockley",
+        "PRODUCT_NAME": "Mini SAM M4",
+        "VOLUME_LABEL": "MINISAMBOOT",
+        "INDEX_URL": "https://minisam.cc",
+        "BOARD_ID": "SAMD51G19A-MiniSamM4-v0",
+        "USB_VID": "0x1209",
+        "USB_PID": "0x2017",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51G19A-RoboHATMM1-v24": {
+        "VENDOR_NAME": "Robotics Masters",
+        "PRODUCT_NAME": "Robo HAT MM1 M4",
+        "VOLUME_LABEL": "ROBOM4BOOT",
+        "INDEX_URL": "https://roboticsmasters.co",
+        "BOARD_ID": "SAMD51G19A-RoboHATMM1-v24",
+        "USB_VID": "0x1209",
+        "USB_PID": "0x4D44",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-MKR1000-v0": {
+        "VENDOR_NAME": "Arduino LLC",
+        "PRODUCT_NAME": "Arduino MKR1000",
+        "VOLUME_LABEL": "MKR1000",
+        "BOARD_ID": "SAMD21G18A-MKR1000-v0",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-CS11-v0": {
+        "VENDOR_NAME": "XinaBox Limited",
+        "PRODUCT_NAME": "CS11",
+        "VOLUME_LABEL": "CS11",
+        "INDEX_URL": "https://xinabox.cc/products/cc11",
+        "BOARD_ID": "SAMD21G18A-CS11-v0",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAM32": {
+        "VENDOR_NAME": "maholli",
+        "PRODUCT_NAME": "SAM32",
+        "VOLUME_LABEL": "SAM32BOOT",
+        "INDEX_URL": "https://github.com/maholli",
+        "BOARD_ID": "SAM32",
+        "USB_VID": "0x04D8",
+        "USB_PID": "0xEDBE",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-CC03-v0": {
+        "VENDOR_NAME": "XinaBox Limited",
+        "PRODUCT_NAME": "CC03",
+        "VOLUME_LABEL": "CC03",
+        "INDEX_URL": "https://xinabox.cc/products/cc03",
+        "BOARD_ID": "SAMD21G18A-CC03-v0",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-MKR1300-v0": {
+        "VENDOR_NAME": "Arduino LLC",
+        "PRODUCT_NAME": "Arduino MKR1300",
+        "VOLUME_LABEL": "MKR1300",
+        "BOARD_ID": "SAMD21G18A-MKR1300-v0",
+        "USB_VID": "0x2341",
+        "USB_PID": "0x8053",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21E18A-Trinket-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Trinket M0",
+        "VOLUME_LABEL": "TRINKETBOOT",
+        "INDEX_URL": "http://adafru.it/3500",
+        "BOARD_ID": "SAMD21E18A-Trinket-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x001E",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-MKRZero-v0": {
+        "VENDOR_NAME": "Arduino LLC",
+        "PRODUCT_NAME": "Arduino MKRZero",
+        "VOLUME_LABEL": "MKRZEROBOOT",
+        "BOARD_ID": "SAMD21G18A-MKRZero-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0035",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-Metro-AirLift-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Metro M4 AirLift",
+        "VOLUME_LABEL": "METROM4BOOT",
+        "INDEX_URL": "http://adafru.it/",
+        "BOARD_ID": "SAMD51J19A-Metro-AirLift-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0037",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-PyBadgeLC-M4": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "BadgeLC",
+        "VOLUME_LABEL": "BADGELCBOOT",
+        "INDEX_URL": "http://adafru.it/3939",
+        "BOARD_ID": "SAMD51J19A-PyBadgeLC-M4",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0034",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Metro-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Metro M0",
+        "VOLUME_LABEL": "METROBOOT",
+        "INDEX_URL": "http://adafru.it/3505",
+        "BOARD_ID": "SAMD21G18A-Metro-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0013",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-PyBadge-M4": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "PyBadge",
+        "VOLUME_LABEL": "PYBADGEBOOT",
+        "INDEX_URL": "http://adafru.it/4200",
+        "BOARD_ID": "SAMD51J19A-PyBadge-M4",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0033",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J20A-PyPortal-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "PyPortal M4 Express",
+        "VOLUME_LABEL": "PORTALBOOT",
+        "INDEX_URL": "http://adafru.it/4116",
+        "BOARD_ID": "SAMD51J20A-PyPortal-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0035",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Generic": {
+        "VENDOR_NAME": "Generic Corp.",
+        "PRODUCT_NAME": "SAMD21 Board",
+        "VOLUME_LABEL": "SAMD21",
+        "USB_VID": "0x03EB",
+        "USB_PID": "0x2402",
+        "BOARD_ID": "SAMD21G18A-Generic",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAME54N20A-Generic": {
+        "VENDOR_NAME": "Generic Corp.",
+        "PRODUCT_NAME": "SAME54 Board",
+        "VOLUME_LABEL": "SAME54",
+        "USB_VID": "0x03EB",
+        "USB_PID": "0x2402",
+        "BOARD_ID": "SAME54N20A-Generic",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Hallowing-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Hallowing M0",
+        "VOLUME_LABEL": "HALLOWBOOT",
+        "INDEX_URL": "http://adafru.it/3900",
+        "BOARD_ID": "SAMD21G18A-Hallowing-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0xB000",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD51J19A-FeatherM4-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Feather M4 Express",
+        "VOLUME_LABEL": "FEATHERBOOT",
+        "INDEX_URL": "http://adafru.it/3857",
+        "BOARD_ID": "SAMD51J19A-FeatherM4-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x0022",
+        "FIRMWARE_DOWNLOAD": ""
+    },
+    "SAMD21G18A-Feather-M0-Express-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Feather M0 Express",
+        "VOLUME_LABEL": "FEATHERBOOT",
+        "INDEX_URL": "http://adafru.it/3403",
+        "BOARD_ID": "SAMD21G18A-Feather-M0-Express-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x001B",
+        "FIRMWARE_DOWNLOAD": ""
+    }
+}
