@@ -31,8 +31,10 @@ def update_info(existing_map, name, info_path):
     if "BOARD_ID" in info:
         combined_record = existing_map.get(info["BOARD_ID"], {})
         combined_record.update(info)
-        if "FIRMWARE_DOWNLOAD" not in combined_record:
+        if "FIRMWARE_DOWNLOAD" in combined_record:
             combined_record["FIRMWARE_DOWNLOAD"] = ""
+        if "CP_URL" not in combined_record:
+            combined_record["CP_URL"] = ""
         existing_map[info["BOARD_ID"]] = combined_record
 
 
