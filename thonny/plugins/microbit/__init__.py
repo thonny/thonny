@@ -72,10 +72,11 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "NB! Installing new firmware will erase all files you may have on your micro:bit!\n\n"
+            "NB! Installing a new firmware will erase all files you may have on your micro:bit!\n"
+            "Make sure you have important files backed up!\n\n"
             "1. Plug in your micro:bit\n"
-            "2. Wait until 'Target location' shows your micro:bit location\n"
-            "3. Press 'Install'\n"
+            "2. Wait until 'Device location' shows the location of your micro:bit\n"
+            "3. Click 'Install'\n"
             "4. Wait until the latest firmware is downloaded and copied onto your device\n"
             "5. Close the dialog and choose 'MicroPython (BBC micro:bit)' interpreter"
         )
@@ -95,24 +96,27 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
         else:
             return False
 
-    def get_target_dirs(self):
-        return [
-            vol
-            for vol in list_volumes(skip_letters=["A"])
-            if os.path.exists(os.path.join(vol, "MICROBIT.HTM"))
-        ]
-
-    def _find_device_id(self, mount_path):
+    def find_device_board_id_and_model(self, mount_path):
         info_path = os.path.join(mount_path, "DETAILS.TXT")
-        assert os.path.isfile(info_path)
+        if not os.path.isfile(info_path):
+            return None
 
         # https://tech.microbit.org/latest-revision/editors/
+        models = {
+            "9900": "BBC micro:bit v1.3",
+            "9901": "BBC micro:bit v1.5",
+            "9904": "BBC micro:bit v2.0",
+        }
+
         with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
             id_marker = "Unique ID:"
             for line in fp:
                 if line.startswith(id_marker):
-                    unique_id = line[len(id_marker) :].strip()
-                    return unique_id[:4]
+                    board_id = line[len(id_marker) :].strip()[:4]
+                    if board_id in models:
+                        return board_id, models[board_id]
+
+        return None
 
     def get_title(self):
         return "Install MicroPython firmware for BBC micro:bit"

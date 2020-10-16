@@ -1961,15 +1961,14 @@ class WorkDialog(CommonDialog):
         assert self._state == "idle"
         if self.start_work() is not False:
             self._state = "working"
-            padding = self.get_padding()
-            intpad = self.get_internal_padding()
-            self._progress_bar.grid(
-                row=1, column=1, sticky="w", padx=(padding, intpad), pady=padding
-            )
+            self.grid_progress_widgets()
             self._progress_bar.start()
-            self._current_action_label.grid(
-                row=1, column=2, sticky="w", pady=padding, padx=(0, intpad)
-            )
+
+    def grid_progress_widgets(self):
+        padding = self.get_padding()
+        intpad = self.get_internal_padding()
+        self._progress_bar.grid(row=1, column=1, sticky="w", padx=(padding, intpad), pady=padding)
+        self._current_action_label.grid(row=1, column=2, sticky="w", pady=padding, padx=(0, intpad))
 
     def on_cancel(self, event=None):
         if self._state in ("idle", "done"):

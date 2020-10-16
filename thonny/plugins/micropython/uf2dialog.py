@@ -8,6 +8,7 @@ from urllib.request import urlopen
 
 from thonny import get_runner
 from thonny.languages import tr
+from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import BareMetalMicroPythonProxy
 from thonny.ui_utils import (
     WorkDialog,
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 class Uf2FlashingDialog(WorkDialog):
     def __init__(self, master):
         self._release_info = None
-        self._target_dirs = []
+        self._possible_targets = []
         super().__init__(master)
         self._start_downloading_release_info()
 
@@ -29,22 +30,31 @@ class Uf2FlashingDialog(WorkDialog):
         pad = self.get_padding()
         inpad = self.get_internal_padding()
 
-        version_caption_label = ttk.Label(self.main_frame, text=tr("Latest version:"))
+        version_caption_label = ttk.Label(self.main_frame, text=tr("Latest version") + ":")
         version_caption_label.grid(
             row=0, column=0, sticky="w", padx=(pad, inpad), pady=(pad, inpad)
         )
         self._version_label = ttk.Label(self.main_frame, text=tr("please wait") + " ...")
         self._version_label.grid(row=0, column=1, padx=(0, pad), pady=(pad, inpad), sticky="w")
 
-        self.target_caption_label = ttk.Label(self.main_frame, text=tr("Target location:"))
+        self.target_caption_label = ttk.Label(self.main_frame, text=tr("Device location") + ":")
         self.target_caption_label.grid(
             row=1, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
         )
 
         # add width, so that this label prescribes the width of the dialog and it doesn't grow
         # when the progressbar and action text are gridded
-        self.target_label = ttk.Label(self.main_frame, text="", width=30)
+        info_width = 40
+
+        self.target_label = ttk.Label(self.main_frame, text="", width=info_width)
         self.target_label.grid(row=1, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
+
+        self.model_caption_label = ttk.Label(self.main_frame, text=tr("Device model") + ":")
+        self.model_caption_label.grid(
+            row=2, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
+        )
+        self.model_label = ttk.Label(self.main_frame, text="", width=info_width)
+        self.model_label.grid(row=2, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
 
     def init_action_frame(self):
         super(Uf2FlashingDialog, self).init_action_frame()
@@ -72,24 +82,52 @@ class Uf2FlashingDialog(WorkDialog):
     def _get_release_info_url(self):
         raise NotImplementedError()
 
+    def _get_fallback_release_info_url(self):
+        raise NotImplementedError()
+
     def _start_downloading_release_info(self):
         import json
         from urllib.request import urlopen
 
         def work():
-            # TODO: error handling
-            with urlopen(self._get_release_info_url()) as fp:
-                self._release_info = json.loads(fp.read().decode("UTF-8"))
+            try:
+                with urlopen(self._get_release_info_url()) as fp:
+                    self._release_info = json.loads(fp.read().decode("UTF-8"))
+                    if not self._release_info.get("assets"):
+                        self._release_info = None
+            except Exception as e:
+                logger.warning(
+                    "Could not find release info from %s", self._get_release_info_url(), exc_info=e
+                )
+
+            if not self._release_info:
+                try:
+                    self.append_text(
+                        "Warning: Could not find release info from %s, trying %s instead\n"
+                        % (self._get_release_info_url(), self._get_fallback_release_info_url())
+                    )
+                    with urlopen(self._get_fallback_release_info_url()) as fp:
+                        self._release_info = json.loads(fp.read().decode("UTF-8"))
+                except Exception as e:
+                    self.append_text(
+                        "Could not find release info from %s\n"
+                        % self._get_fallback_release_info_url()
+                    )
+                    self.set_action_text("Error!")
+                    self.grid_progress_widgets()
 
         threading.Thread(target=work, daemon=True).start()
 
     def update_ui(self):
         if self._state == "idle":
-            self._target_dirs = self.get_target_dirs()
-            if not self._target_dirs:
+            self._possible_targets = self.get_possible_targets()
+            if not self._possible_targets:
                 set_text_if_different(self.target_label, self.get_missing_device_text())
+                set_text_if_different(self.model_label, "")
             else:
-                set_text_if_different(self.target_label, "\n".join(self._target_dirs))
+                unpacked = list(zip(*self._possible_targets))
+                set_text_if_different(self.target_label, "\n".join(unpacked[0]))
+                set_text_if_different(self.model_label, "\n".join(unpacked[2]))
 
             unknown_version_text = tr("Please wait") + "..."
             desc = self.get_firmware_description()
@@ -122,12 +160,12 @@ class Uf2FlashingDialog(WorkDialog):
         ]
         if len(candidates) == 0:
             raise RuntimeError(
-                "Could not find the right hex file from the release info (%s)"
+                "Could not find the right file from the release info (%s)"
                 % self._get_release_info_url()
             )
         elif len(candidates) > 1:
             raise RuntimeError(
-                "Found several possible hex files from the release info (%s)"
+                "Found several possible files from the release info (%s)"
                 % self._get_release_info_url()
             )
         else:
@@ -138,13 +176,18 @@ class Uf2FlashingDialog(WorkDialog):
 
     def is_ready_for_work(self):
         # Called after update_ui
-        return self._target_dirs and self._release_info
+        return self._possible_targets and self._release_info
 
-    def get_target_dirs(self):
-        raise NotImplementedError()
+    def get_possible_targets(self):
+        all_vol_infos = [
+            (vol, self.find_device_board_id_and_model(vol))
+            for vol in list_volumes(skip_letters=["A"])
+        ]
+
+        return [(info[0], info[1][0], info[1][1]) for info in all_vol_infos if info[1] is not None]
 
     def start_work(self):
-        if len(self._target_dirs) > 1:
+        if len(self._possible_targets) > 1:
             # size 0 is checked elsewhere
             messagebox.showerror(
                 "Can't proceed",
@@ -154,10 +197,10 @@ class Uf2FlashingDialog(WorkDialog):
             )
             return False
 
-        target_dir = self._target_dirs[0]
+        target_dir, board_id, _ = self._possible_targets[0]
 
         try:
-            download_url, size = self.get_download_url_and_size(self._find_device_id(target_dir))
+            download_url, size = self.get_download_url_and_size(board_id)
         except Exception as e:
             logger.error("Could not determine download url", exc_info=e)
             messagebox.showerror("Could not determine download url", str(e), parent=self)
@@ -173,8 +216,31 @@ class Uf2FlashingDialog(WorkDialog):
         ).start()
         return True
 
-    def _find_device_id(self, mount_path):
-        raise NotImplementedError()
+    def find_device_board_id_and_model(self, mount_path):
+        info_path = os.path.join(mount_path, "INFO_UF2.TXT")
+        if not os.path.isfile(info_path):
+            return None
+
+        board_id = None
+        model = None
+        with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
+            for line in fp:
+                parts = list(map(str.strip, line.split(":", maxsplit=1)))
+                if len(parts) == 2:
+                    if parts[0] == "Model":
+                        model = parts[1]
+                    elif parts[0] == "Board-ID":
+                        board_id = parts[1]
+                        if not self._is_relevant_board_id(board_id):
+                            return None
+
+                    if board_id and model:
+                        return board_id, model
+
+        return None
+
+    def _is_relevant_board_id(self, board_id):
+        return True
 
     def _download_to_the_device(self, download_url, size, target_dir):
         """Running in a bg thread"""
