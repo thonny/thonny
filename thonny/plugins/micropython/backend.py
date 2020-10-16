@@ -170,12 +170,30 @@ class MicroPythonBackend(MainBackend, ABC):
         self._builtins_info = self._fetch_builtins_info()
 
         self._report_time("prepared")
+        self._check_perform_just_in_case_gc()
 
     def _configure_write_blocks(self):
         pass
 
+    def _check_perform_just_in_case_gc(self):
+        if self._connected_to_microbit():
+            # May fail to allocate memory without this
+            self._perform_gc()
+
+    def _perform_gc(self):
+        self._execute_without_output(
+            dedent(
+                """
+            import gc as __thonny_gc
+            __thonny_gc.collect()
+            del __thonny_gc
+        """
+            )
+        )
+
     def _prepare_helpers(self):
         script = self._get_all_helpers()
+        self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
 
     def _get_all_helpers(self):
@@ -360,6 +378,8 @@ class MicroPythonBackend(MainBackend, ABC):
 
         debug("cmd: " + str(cmd) + ", respin: " + str(response))
         self.send_message(self._prepare_command_response(response, cmd))
+
+        self._check_perform_just_in_case_gc()
 
         self._report_time("after " + cmd.name)
 

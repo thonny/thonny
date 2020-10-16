@@ -124,6 +124,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         MicroPythonBackend.__init__(self, clean, args)
 
     def _get_custom_helpers(self):
+        if self._connected_to_microbit():
+            return ""
+
         return dedent(
             """
             @classmethod
