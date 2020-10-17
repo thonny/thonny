@@ -178,9 +178,10 @@ class Uf2FlashingDialog(WorkDialog):
         # Called after update_ui
         return self._possible_targets and self._release_info
 
-    def get_possible_targets(self):
+    @classmethod
+    def get_possible_targets(cls):
         all_vol_infos = [
-            (vol, self.find_device_board_id_and_model(vol))
+            (vol, cls.find_device_board_id_and_model(vol))
             for vol in list_volumes(skip_letters=["A"])
         ]
 
@@ -216,7 +217,8 @@ class Uf2FlashingDialog(WorkDialog):
         ).start()
         return True
 
-    def find_device_board_id_and_model(self, mount_path):
+    @classmethod
+    def find_device_board_id_and_model(cls, mount_path):
         info_path = os.path.join(mount_path, "INFO_UF2.TXT")
         if not os.path.isfile(info_path):
             return None
@@ -231,7 +233,7 @@ class Uf2FlashingDialog(WorkDialog):
                         model = parts[1]
                     elif parts[0] == "Board-ID":
                         board_id = parts[1]
-                        if not self._is_relevant_board_id(board_id):
+                        if not cls._is_relevant_board_id(board_id):
                             return None
 
                     if board_id and model:
@@ -239,7 +241,8 @@ class Uf2FlashingDialog(WorkDialog):
 
         return None
 
-    def _is_relevant_board_id(self, board_id):
+    @classmethod
+    def _is_relevant_board_id(cls, board_id):
         return True
 
     def _download_to_the_device(self, download_url, size, target_dir):

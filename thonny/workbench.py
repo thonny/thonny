@@ -854,7 +854,11 @@ class Workbench(tk.Tk):
             desc = proxy.get_clean_description()
             self._backend_conf_variable.set(value=repr(proxy.get_current_switcher_configuration()))
         else:
-            desc = "<no backend>"
+            backend_conf = self._backends.get(self.get_option("run.backend_name"), None)
+            if backend_conf:
+                desc = backend_conf.description
+            else:
+                desc = "<no backend>"
         self._backend_button.configure(text=desc)
 
     def _init_theming(self) -> None:

@@ -96,7 +96,8 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
         else:
             return False
 
-    def find_device_board_id_and_model(self, mount_path):
+    @classmethod
+    def find_device_board_id_and_model(cls, mount_path):
         info_path = os.path.join(mount_path, "DETAILS.TXT")
         if not os.path.isfile(info_path):
             return None

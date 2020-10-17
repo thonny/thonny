@@ -103,24 +103,38 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 self._port = potential[0][0]
             else:
                 self._port = None
-                message = dedent(
-                    """\
-                    Couldn't find the device automatically. 
-                    Check the connection (making sure the device is not in bootloader mode)
-                    or choose "Tools → Options → Interpreter" to select the port manually."""
-                )
+                if not potential and self.device_is_present_in_bootloader_mode():
+                    self._propose_firmware_flasher_in_bootloader_mode()
+                else:
+                    message = dedent(
+                        """\
+                        Couldn't find the device automatically. 
+                        Check the connection (making sure the device is not in bootloader mode)
+                        or choose "Tools → Options → Interpreter" to select the port manually."""
+                    )
 
-                if len(potential) > 1:
-                    _, descriptions = zip(*potential)
-                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
+                    if len(potential) > 1:
+                        _, descriptions = zip(*potential)
+                        message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
 
-                self._show_error(message)
+                    self._show_error(message)
+        elif not port_exists(self._port):
+            if self.device_is_present_in_bootloader_mode():
+                self._port = None
+                self._propose_firmware_flasher_in_bootloader_mode()
 
         super().__init__(clean)
 
         # Following is required for compatibility with older MP plugins (ESP)
         # TODO: remove it later
         self.micropython_upload_enabled = False
+
+    def _propose_firmware_flasher_in_bootloader_mode(self):
+        self._show_error(
+            "Your device seems to be in bootloader mode.\n"
+            "In this mode you can install or upgrade MicroPython firmware.\n\n"
+            "If your device already has MicroPython, then you can start using it after you put it into normal mode."
+        )
 
     def _start_background_process(self, clean=None, extra_args=[]):
         if self._port is None:
@@ -307,7 +321,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return msg
 
     @classmethod
+    def device_is_present_in_bootloader_mode(cls):
+        return False
+
+    @classmethod
     def should_show_in_switcher(cls):
+        if cls.device_is_present_in_bootloader_mode():
+            return True
+
         # Show only if it looks like we can connect using current configuration
         port = get_workbench().get_option(cls.backend_name + ".port")
         if port == "webrepl":
@@ -798,6 +819,14 @@ def list_serial_ports():
         return list(serial.tools.list_ports.comports())
     finally:
         os.path.islink = old_islink
+
+
+def port_exists(device):
+    for port in list_serial_ports():
+        if port.device == device:
+            return True
+
+    return False
 
 
 def list_serial_ports_with_descriptions():

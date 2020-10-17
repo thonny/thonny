@@ -189,6 +189,9 @@ class ShellView(tk.PanedWindow):
     def print_error(self, txt):
         self.text._insert_text_directly(txt, ("io", "stderr"))
 
+    def insert_command_link(self, txt, handler):
+        self.text._insert_command_link(txt, handler)
+
     def focus_set(self):
         self.text.focus_set()
 
@@ -286,6 +289,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def __init__(self, master, view=None, cnf={}, **kw):
         self.view = view
+        self._link_handler_count = 0
         kw["tabstyle"] = "wordprocessor"
         super().__init__(master, cnf, **kw)
 
@@ -1012,6 +1016,13 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             return self.compare(index, ">=", "input_start")
         except Exception:
             return False
+
+    def _insert_command_link(self, txt, handler):
+        self._link_handler_count += 1
+        command_tag = "link_handler_%s" % self._link_handler_count
+
+        self.direct_insert("output_insert", txt, ("io_hyperlink", command_tag))
+        self.tag_bind(command_tag, "<1>", handler)
 
     def _insert_text_directly(self, txt, tags=()):
         def _insert(txt, tags):
