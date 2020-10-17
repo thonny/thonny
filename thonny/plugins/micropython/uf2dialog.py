@@ -63,18 +63,28 @@ class Uf2FlashingDialog(WorkDialog):
     def get_action_text_max_length(self):
         return 15
 
-    def get_missing_device_text(self):
-        return "Can't see your device ..."
-
-    def get_instructions(self) -> Optional[str]:
+    def get_missing_device_instructions(self):
         return (
-            "NB! Installing new firmware will erase all files you may have on your device!\n\n"
-            "1. Plug in your device in the bootloader mode\n"
-            "2. Wait until 'Target location' shows your the location of your device\n"
-            "3. Press 'Install'\n"
+            "This dialog allows you to install or update MicroPython on your device.\n"
+            "\n"
+            "1. Put your device in the bootloader mode\n"
+            "2. Wait until 'Target location' shows the location of your device"
+        )
+
+    def get_bootloader_mode_instructions(self):
+        return (
+            "Your device is in bootloader mode, where you can install or update MicroPython.\n"
+            "\n"
+            "1. Click 'Install'\n"
             "4. Wait until the latest firmware is downloaded and copied onto your device\n"
             "5. Close the dialog and choose suitable 'MicroPython (...)' interpreter"
         )
+
+    def get_instructions(self) -> Optional[str]:
+        if self.get_possible_targets():
+            return self.get_bootloader_mode_instructions()
+        else:
+            return self.get_missing_device_instructions()
 
     def get_ok_text(self):
         return tr("Install")
@@ -122,12 +132,18 @@ class Uf2FlashingDialog(WorkDialog):
         if self._state == "idle":
             self._possible_targets = self.get_possible_targets()
             if not self._possible_targets:
-                set_text_if_different(self.target_label, self.get_missing_device_text())
+                set_text_if_different(self.target_label, "")
                 set_text_if_different(self.model_label, "")
+                set_text_if_different(
+                    self.instructions_label, self.get_missing_device_instructions()
+                )
             else:
                 unpacked = list(zip(*self._possible_targets))
                 set_text_if_different(self.target_label, "\n".join(unpacked[0]))
                 set_text_if_different(self.model_label, "\n".join(unpacked[2]))
+                set_text_if_different(
+                    self.instructions_label, self.get_bootloader_mode_instructions()
+                )
 
             unknown_version_text = tr("Please wait") + "..."
             desc = self.get_firmware_description()

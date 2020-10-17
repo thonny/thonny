@@ -1804,6 +1804,7 @@ class WorkDialog(CommonDialog):
         super(WorkDialog, self).__init__(master)
 
         self._state = "idle"
+        self.success = False
         self._work_events_queue = queue.Queue()
         self.init_instructions_frame()
         self.init_main_frame()
@@ -1961,6 +1962,7 @@ class WorkDialog(CommonDialog):
         assert self._state == "idle"
         if self.start_work() is not False:
             self._state = "working"
+            self.success = False
             self.grid_progress_widgets()
             self._progress_bar.start()
 
@@ -2034,6 +2036,7 @@ class WorkDialog(CommonDialog):
                 self._progress_bar.configure(value=value, maximum=maximum)
         elif type == "done":
             self._state = "idle"
+            self.success = args[0]
             self._progress_bar.stop()
 
 

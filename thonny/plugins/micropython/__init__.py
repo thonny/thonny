@@ -96,32 +96,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._port = get_workbench().get_option(self.backend_name + ".port")
         self._have_stored_pidwid = False
         self._clean_start = clean
-
-        if self._port == "auto":
-            potential = self._detect_potential_ports()
-            if len(potential) == 1:
-                self._port = potential[0][0]
-            else:
-                self._port = None
-                if not potential and self.device_is_present_in_bootloader_mode():
-                    self._propose_firmware_flasher_in_bootloader_mode()
-                else:
-                    message = dedent(
-                        """\
-                        Couldn't find the device automatically. 
-                        Check the connection (making sure the device is not in bootloader mode)
-                        or choose "Tools → Options → Interpreter" to select the port manually."""
-                    )
-
-                    if len(potential) > 1:
-                        _, descriptions = zip(*potential)
-                        message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
-
-                    self._show_error(message)
-        elif not port_exists(self._port):
-            if self.device_is_present_in_bootloader_mode():
-                self._port = None
-                self._propose_firmware_flasher_in_bootloader_mode()
+        self._fix_port()
 
         super().__init__(clean)
 
@@ -129,12 +104,47 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         # TODO: remove it later
         self.micropython_upload_enabled = False
 
-    def _propose_firmware_flasher_in_bootloader_mode(self):
+    def _fix_port(self):
+        if self._port == "webrepl":
+            return
+
+        elif self._port == "auto":
+            potential = self._detect_potential_ports()
+            if len(potential) == 1:
+                self._port = potential[0][0]
+            else:
+                if not potential and self.device_is_present_in_bootloader_mode():
+                    if self._propose_install_firmware():
+                        print("POSITIVE")
+                        return self._fix_port()
+
+                self._port = None
+                message = dedent(
+                    """\
+                    Couldn't find the device automatically. 
+                    Check the connection (making sure the device is not in bootloader mode)
+                    or choose "Tools → Options → Interpreter" to select the port manually."""
+                )
+
+                if len(potential) > 1:
+                    _, descriptions = zip(*potential)
+                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
+
+                self._show_error(message)
+        elif not port_exists(self._port):
+            if self.device_is_present_in_bootloader_mode():
+                self._port = None
+                self._propose_install_firmware()
+
+    def _propose_install_firmware(self):
+        """Subclass may show firmware installation dialog and return True if installation succeeds"""
         self._show_error(
             "Your device seems to be in bootloader mode.\n"
             "In this mode you can install or upgrade MicroPython firmware.\n\n"
             "If your device already has MicroPython, then you can start using it after you put it into normal mode."
         )
+
+        return False
 
     def _start_background_process(self, clean=None, extra_args=[]):
         if self._port is None:

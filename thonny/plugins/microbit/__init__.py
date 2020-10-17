@@ -67,18 +67,20 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
 
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
-    def get_missing_device_text(self):
-        return "Can't see your micro:bit..."
-
-    def get_instructions(self) -> Optional[str]:
+    def get_missing_device_instructions(self) -> Optional[str]:
         return (
-            "NB! Installing a new firmware will erase all files you may have on your micro:bit!\n"
-            "Make sure you have important files backed up!\n\n"
-            "1. Plug in your micro:bit\n"
-            "2. Wait until 'Device location' shows the location of your micro:bit\n"
-            "3. Click 'Install'\n"
-            "4. Wait until the latest firmware is downloaded and copied onto your device\n"
-            "5. Close the dialog and choose 'MicroPython (BBC micro:bit)' interpreter"
+            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            "\n"
+            "Can't see your micro:bit yet.\n"
+            "Please plug it in and wait until the device information appears!"
+        )
+
+    def get_bootloader_mode_instructions(self) -> Optional[str]:
+        return (
+            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            "\n"
+            "NB! Installing a new firmware will erase all files you may have on your\n"
+            "device. Make sure you have important files backed up!"
         )
 
     def _get_release_info_url(self):
