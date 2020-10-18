@@ -1027,8 +1027,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         )
 
     def perform_mkdir(self, parent_dir, name):
+        path = (parent_dir + self.get_dir_separator() + name).replace("//", "/")
         get_runner().send_command_and_wait(
-            InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name),
+            InlineCommand("mkdir", path=path),
             dialog_title=tr("Creating directory"),
         )
 

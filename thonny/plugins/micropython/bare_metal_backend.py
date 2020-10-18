@@ -832,7 +832,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 if "read-only" in str(e).lower():
                     self._delete_via_mount(paths)
 
-            self._sync_all_filesystems()
+            self._sync_remote_filesystem()
 
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
@@ -1060,44 +1060,50 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return bytes_sent
 
-    def _sync_all_filesystems(self):
+    def _sync_remote_filesystem(self):
         self._execute_without_output(
             dedent(
                 """
-            try:
-                from os import sync as __thonny_sync
-                __thonny_sync()
-                del __thonny_sync
-            except ImportError:
-                pass
+            if hasattr(__thonny_helper.os, "sync"):
+                __thonny_helper.os.sync()        
         """
             )
         )
 
-    def _makedirs(self, path):
+    def _sync_local_filesystem(self):
+        if hasattr(os, "sync"):
+            os.sync()
+
+    def _mkdir(self, path):
         if path == "/":
             return
 
         try:
-            super()._makedirs(path)
-        except Exception as e:
-            if "read-only" in str(e).lower():
+            super()._mkdir(path)
+        except ManagementError as e:
+            if "read-only" in e.err.lower():
                 self._makedirs_via_mount(path)
 
-        self._sync_all_filesystems()
+        self._sync_remote_filesystem()
 
     def _makedirs_via_mount(self, path):
         mounted_path = self._internal_path_to_mounted_path(path)
         assert mounted_path is not None, "Couldn't find mounted path for " + path
         os.makedirs(mounted_path, exist_ok=True)
+        self._sync_local_filesystem()
 
     def _delete_via_mount(self, paths):
         for path in paths:
             mounted_path = self._internal_path_to_mounted_path(path)
             assert mounted_path is not None
-            import shutil
+            if os.path.isdir(mounted_path):
+                import shutil
 
-            shutil.rmtree(mounted_path)
+                shutil.rmtree(mounted_path)
+            else:
+                os.remove(mounted_path)
+
+        self._sync_local_filesystem()
 
     def _get_fs_mount_label(self):
         # This method is most likely required with CircuitPython,

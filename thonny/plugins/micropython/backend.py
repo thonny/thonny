@@ -897,7 +897,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _mkdir(self, path: str) -> None:
         # assumes part path exists and path doesn't
-        self._execute("__thonny_helper.os.mkdir(%r)" % path)
+        self._execute_without_output("__thonny_helper.os.mkdir(%r)" % path)
 
     def _delete_sorted_paths(self, paths):
         self._execute_without_output(
@@ -953,6 +953,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
         assert cmd.path.startswith("/")
+        assert not cmd.path.startswith("//")
         self._mkdir(cmd.path)
 
     def _cmd_editor_autocomplete(self, cmd):
