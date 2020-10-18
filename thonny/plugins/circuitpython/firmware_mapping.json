@@ -8,7 +8,7 @@
         "USB_VID": "0x1209",
         "USB_PID": "0x4D44",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/robohatmm1_m4/"
     },
     "SAMD51J19A-PyGamer-M4": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -19,7 +19,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x003D",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pygamer/"
     },
     "SAMD51G19A-USBHub-v0": {
         "VENDOR_NAME": "Capable Robot Components",
@@ -30,7 +30,7 @@
         "USB_VID": "0x04D8",
         "USB_PID": "0xEDB3",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/capablerobot_usbhub/"
     },
     "SAMD21G18A-dadamachines-automat-v0": {
         "VENDOR_NAME": "dadamachines",
@@ -63,7 +63,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0015",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/feather_m0_basic/"
     },
     "SAMR21G18A-Radiofruit-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -93,7 +93,7 @@
         "VOLUME_LABEL": "ZEROBOOT",
         "BOARD_ID": "SAMD21G18A-Zero-v0",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/arduino_zero/"
     },
     "SAMD21G18A-Eitech-Robotics-v0": {
         "VENDOR_NAME": "Eitech",
@@ -115,7 +115,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0031",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/grandcentral_m4_express/"
     },
     "SAMD21G18A-ItsyBitsy-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -126,7 +126,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x000F",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/itsybitsy_m0_express/"
     },
     "SAMD51J19A-Feather-Arcade-D51": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -148,7 +148,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0034",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pewpew_m4/"
     },
     "SAMD21E18A-pIRKey-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -159,7 +159,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0027",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pirkey_m0/"
     },
     "SAMD51G19A-Itsy-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -170,7 +170,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x002B",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/itsybitsy_m0_express/"
     },
     "SAMD51G19A-Trellis-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -181,7 +181,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x002F",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/trellis_m4_express/"
     },
     "SAMD21E18A-Gemma-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -192,7 +192,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x001C",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/gemma_m0/"
     },
     "SAMD21G18A-Grove-Zero-v1.0": {
         "VENDOR_NAME": "Seeed Studio",
@@ -225,7 +225,7 @@
         "USB_VID": "0x1B4F",
         "USB_PID": "0x0D22",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/sparkfun_samd21_mini/"
     },
     "SAMD21G18A-Dev-Sparkfun-v0": {
         "VENDOR_NAME": "Sparkfun",
@@ -236,7 +236,7 @@
         "USB_VID": "0x1B4F",
         "USB_PID": "0x0D23",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/sparkfun_samd21_dev/"
     },
     "SAMD21G18A-crickit-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -258,7 +258,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0021",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/metro_m4_express/"
     },
     "SAMD21G18A-CPlay-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -269,7 +269,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0018",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/circuitplayground_express/"
     },
     "SAMD51G19A-MiniSamM4-v0": {
         "VENDOR_NAME": "Benjamin Shockley",
@@ -280,7 +280,7 @@
         "USB_VID": "0x1209",
         "USB_PID": "0x2017",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/mini_sam_m4/"
     },
     "SAMD51G19A-RoboHATMM1-v24": {
         "VENDOR_NAME": "Robotics Masters",
@@ -291,7 +291,7 @@
         "USB_VID": "0x1209",
         "USB_PID": "0x4D44",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/robohatmm1_m4/"
     },
     "SAMD21G18A-MKR1000-v0": {
         "VENDOR_NAME": "Arduino LLC",
@@ -308,7 +308,7 @@
         "INDEX_URL": "https://xinabox.cc/products/cc11",
         "BOARD_ID": "SAMD21G18A-CS11-v0",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/xinabox_cs11/"
     },
     "SAM32": {
         "VENDOR_NAME": "maholli",
@@ -319,7 +319,7 @@
         "USB_VID": "0x04D8",
         "USB_PID": "0xEDBE",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/sam32/"
     },
     "SAMD21G18A-CC03-v0": {
         "VENDOR_NAME": "XinaBox Limited",
@@ -328,7 +328,7 @@
         "INDEX_URL": "https://xinabox.cc/products/cc03",
         "BOARD_ID": "SAMD21G18A-CC03-v0",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/xinabox_cc03/"
     },
     "SAMD21G18A-MKR1300-v0": {
         "VENDOR_NAME": "Arduino LLC",
@@ -338,7 +338,7 @@
         "USB_VID": "0x2341",
         "USB_PID": "0x8053",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/arduino_mkr1300/"
     },
     "SAMD21E18A-Trinket-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -349,7 +349,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x001E",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/trinket_m0/"
     },
     "SAMD21G18A-MKRZero-v0": {
         "VENDOR_NAME": "Arduino LLC",
@@ -359,7 +359,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0035",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/arduino_mkrzero/"
     },
     "SAMD51J19A-Metro-AirLift-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -370,7 +370,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0037",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/metro_m4_airlift_lite/"
     },
     "SAMD51J19A-PyBadgeLC-M4": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -381,7 +381,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0034",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pybadge/"
     },
     "SAMD21G18A-Metro-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -392,7 +392,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0013",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/metro_m0_express/"
     },
     "SAMD51J19A-PyBadge-M4": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -403,7 +403,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0033",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pybadge/"
     },
     "SAMD51J20A-PyPortal-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -414,7 +414,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0035",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/pyportal/"
     },
     "SAMD21G18A-Generic": {
         "VENDOR_NAME": "Generic Corp.",
@@ -445,7 +445,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0xB000",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/hallowing_m0_express/"
     },
     "SAMD51J19A-FeatherM4-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -456,7 +456,7 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x0022",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/feather_m4_express/"
     },
     "SAMD21G18A-Feather-M0-Express-v0": {
         "VENDOR_NAME": "Adafruit Industries",
@@ -467,6 +467,6 @@
         "USB_VID": "0x239A",
         "USB_PID": "0x001B",
         "FIRMWARE_DOWNLOAD": "",
-        "CP_URL": ""
+        "CP_URL": "https://circuitpython.org/board/feather_m0_express/"
     }
 }
