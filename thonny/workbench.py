@@ -55,8 +55,6 @@ from thonny.ui_utils import (
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    WorkDialog,
-    show_dialog,
 )
 
 logger = logging.getLogger(__name__)

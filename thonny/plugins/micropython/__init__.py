@@ -367,6 +367,8 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
 
+        self._has_opened_firmware_flasher = False
+
         intro_label = ttk.Label(self, text=self._get_intro_text())
         intro_label.grid(row=0, column=0, sticky="nw")
 
@@ -434,11 +436,15 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             firmware_link = ui_utils.create_action_label(
                 last_row,
                 tr("Install or update firmware"),
-                lambda event: self._open_flashing_dialog(),
+                self._on_click_firmware_installer_link,
             )
             firmware_link.grid(row=1, column=1, sticky="e")
 
         self._on_change_port()
+
+    def _on_click_firmware_installer_link(self, event=None):
+        self._open_flashing_dialog()
+        self._has_opened_firmware_flasher = True
 
     def _show_advanced_options(self):
         pass
@@ -519,7 +525,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return self.get_selected_port_name() == "webrepl"
 
     def should_restart(self):
-        return self.is_modified()
+        return self.is_modified() or self._has_opened_firmware_flasher
 
     def apply(self):
         if not self.is_modified():

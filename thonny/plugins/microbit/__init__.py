@@ -67,17 +67,14 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
 
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
-    def get_missing_device_instructions(self) -> Optional[str]:
+    def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            "This dialog allows you to install or update MicroPython firmware on your micro:bit.\n"
             "\n"
-            "Can't see your micro:bit yet.\n"
-            "Please plug it in and wait until the device information appears!"
-        )
-
-    def get_bootloader_mode_instructions(self) -> Optional[str]:
-        return (
-            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            "1. Plug in your micro:bit.\n"
+            "2. Wait until device information appears.\n"
+            "3. Click 'Install' and wait for some seconds until done.\n"
+            "4. Close the dialog and start programming!\n"
             "\n"
             "NB! Installing a new firmware will erase all files you may have on your\n"
             "device. Make sure you have important files backed up!"
@@ -108,6 +105,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
         models = {
             "9900": "BBC micro:bit v1.3",
             "9901": "BBC micro:bit v1.5",
+            "9903": "BBC micro:bit v2.0 (9903)",
             "9904": "BBC micro:bit v2.0",
         }
 
@@ -123,6 +121,9 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
 
     def get_title(self):
         return "Install MicroPython firmware for BBC micro:bit"
+
+    def _get_vid_pids_to_wait_for(self):
+        return MicrobitProxy.get_known_usb_vids_pids()
 
 
 def load_plugin():

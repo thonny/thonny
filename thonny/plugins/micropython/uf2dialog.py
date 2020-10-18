@@ -1,7 +1,10 @@
 import logging
 import threading
 import os.path
+import time
 import traceback
+import tkinter.font as tkfont
+import urllib.request
 from tkinter import ttk, messagebox
 from typing import Optional
 from urllib.request import urlopen
@@ -9,12 +12,16 @@ from urllib.request import urlopen
 from thonny import get_runner
 from thonny.languages import tr
 from thonny.misc_utils import list_volumes
-from thonny.plugins.micropython import BareMetalMicroPythonProxy
+from thonny.plugins.micropython import (
+    BareMetalMicroPythonProxy,
+    list_serial_ports_with_descriptions,
+    list_serial_ports,
+)
 from thonny.ui_utils import (
-    WorkDialog,
     set_text_if_different,
     ems_to_pixels,
 )
+from thonny.workdlg import WorkDialog
 
 logger = logging.getLogger(__name__)
 
@@ -30,61 +37,58 @@ class Uf2FlashingDialog(WorkDialog):
         pad = self.get_padding()
         inpad = self.get_internal_padding()
 
-        version_caption_label = ttk.Label(self.main_frame, text=tr("Latest version") + ":")
+        latest_ver_caption = tr("Latest version")
+        version_caption_label = ttk.Label(self.main_frame, text=latest_ver_caption + ":")
         version_caption_label.grid(
             row=0, column=0, sticky="w", padx=(pad, inpad), pady=(pad, inpad)
         )
         self._version_label = ttk.Label(self.main_frame, text=tr("please wait") + " ...")
         self._version_label.grid(row=0, column=1, padx=(0, pad), pady=(pad, inpad), sticky="w")
 
-        self.target_caption_label = ttk.Label(self.main_frame, text=tr("Device location") + ":")
+        device_location_caption = tr("Device location")
+        self.target_caption_label = ttk.Label(self.main_frame, text=device_location_caption + ":")
         self.target_caption_label.grid(
             row=1, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
         )
 
         # add width, so that this label prescribes the width of the dialog and it doesn't grow
         # when the progressbar and action text are gridded
-        info_width = 40
-
-        self.target_label = ttk.Label(self.main_frame, text="", width=info_width)
+        self.target_label = ttk.Label(self.main_frame, text="", width=self.get_info_text_width())
         self.target_label.grid(row=1, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
 
-        self.model_caption_label = ttk.Label(self.main_frame, text=tr("Device model") + ":")
+        device_model_caption = tr("Device model")
+        self.model_caption_label = ttk.Label(self.main_frame, text=device_model_caption + ":")
         self.model_caption_label.grid(
             row=2, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
         )
-        self.model_label = ttk.Label(self.main_frame, text="", width=info_width)
+        self.model_label = ttk.Label(self.main_frame, text="", width=self.get_info_text_width())
         self.model_label.grid(row=2, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
 
-    def init_action_frame(self):
-        super(Uf2FlashingDialog, self).init_action_frame()
-        self._progress_bar["length"] = ems_to_pixels(10)
+        # Resize progress bar to align with this grid
+        default_font = tkfont.nametofont("TkDefaultFont")
+        max_caption_len = max(
+            [
+                default_font.measure(caption + ":")
+                for caption in [latest_ver_caption, device_location_caption, device_model_caption]
+            ]
+        )
+        self._progress_bar["length"] = max_caption_len
+
+    def get_info_text_width(self):
+        return 40
 
     def get_action_text_max_length(self):
-        return 15
+        return 20
 
-    def get_missing_device_instructions(self):
+    def get_instructions(self) -> Optional[str]:
         return (
             "This dialog allows you to install or update MicroPython on your device.\n"
             "\n"
-            "1. Put your device in the bootloader mode\n"
-            "2. Wait until 'Target location' shows the location of your device"
+            "1. Put your device into bootloader mode.\n"
+            "2. Wait until device information appears.\n"
+            "3. Click 'Install' and wait for some seconds until done.\n"
+            "4. Close the dialog and start programming!"
         )
-
-    def get_bootloader_mode_instructions(self):
-        return (
-            "Your device is in bootloader mode, where you can install or update MicroPython.\n"
-            "\n"
-            "1. Click 'Install'\n"
-            "4. Wait until the latest firmware is downloaded and copied onto your device\n"
-            "5. Close the dialog and choose suitable 'MicroPython (...)' interpreter"
-        )
-
-    def get_instructions(self) -> Optional[str]:
-        if self.get_possible_targets():
-            return self.get_bootloader_mode_instructions()
-        else:
-            return self.get_missing_device_instructions()
 
     def get_ok_text(self):
         return tr("Install")
@@ -96,37 +100,36 @@ class Uf2FlashingDialog(WorkDialog):
         raise NotImplementedError()
 
     def _start_downloading_release_info(self):
+        threading.Thread(target=self._download_release_info, daemon=True).start()
+
+    def _download_release_info(self):
         import json
         from urllib.request import urlopen
 
-        def work():
+        try:
+            with urlopen(self._get_release_info_url()) as fp:
+                self._release_info = json.loads(fp.read().decode("UTF-8"))
+                if not self._release_info.get("tag_name"):
+                    self._release_info = None
+        except Exception as e:
+            logger.warning(
+                "Could not find release info from %s", self._get_release_info_url(), exc_info=e
+            )
+
+        if not self._release_info:
             try:
-                with urlopen(self._get_release_info_url()) as fp:
-                    self._release_info = json.loads(fp.read().decode("UTF-8"))
-                    if not self._release_info.get("assets"):
-                        self._release_info = None
-            except Exception as e:
-                logger.warning(
-                    "Could not find release info from %s", self._get_release_info_url(), exc_info=e
+                self.append_text(
+                    "Warning: Could not find release info from %s, trying %s instead\n"
+                    % (self._get_release_info_url(), self._get_fallback_release_info_url())
                 )
-
-            if not self._release_info:
-                try:
-                    self.append_text(
-                        "Warning: Could not find release info from %s, trying %s instead\n"
-                        % (self._get_release_info_url(), self._get_fallback_release_info_url())
-                    )
-                    with urlopen(self._get_fallback_release_info_url()) as fp:
-                        self._release_info = json.loads(fp.read().decode("UTF-8"))
-                except Exception as e:
-                    self.append_text(
-                        "Could not find release info from %s\n"
-                        % self._get_fallback_release_info_url()
-                    )
-                    self.set_action_text("Error!")
-                    self.grid_progress_widgets()
-
-        threading.Thread(target=work, daemon=True).start()
+                with urlopen(self._get_fallback_release_info_url()) as fp:
+                    self._release_info = json.loads(fp.read().decode("UTF-8"))
+            except Exception as e:
+                self.append_text(
+                    "Could not find release info from %s\n" % self._get_fallback_release_info_url()
+                )
+                self.set_action_text("Error!")
+                self.grid_progress_widgets()
 
     def update_ui(self):
         if self._state == "idle":
@@ -134,16 +137,10 @@ class Uf2FlashingDialog(WorkDialog):
             if not self._possible_targets:
                 set_text_if_different(self.target_label, "")
                 set_text_if_different(self.model_label, "")
-                set_text_if_different(
-                    self.instructions_label, self.get_missing_device_instructions()
-                )
             else:
                 unpacked = list(zip(*self._possible_targets))
                 set_text_if_different(self.target_label, "\n".join(unpacked[0]))
                 set_text_if_different(self.model_label, "\n".join(unpacked[2]))
-                set_text_if_different(
-                    self.instructions_label, self.get_bootloader_mode_instructions()
-                )
 
             unknown_version_text = tr("Please wait") + "..."
             desc = self.get_firmware_description()
@@ -228,9 +225,7 @@ class Uf2FlashingDialog(WorkDialog):
         if isinstance(proxy, BareMetalMicroPythonProxy):
             proxy.disconnect()
 
-        threading.Thread(
-            target=self._download_to_the_device, args=[download_url, size, target_dir]
-        ).start()
+        threading.Thread(target=self._perform_work, args=[download_url, size, target_dir]).start()
         return True
 
     @classmethod
@@ -261,36 +256,17 @@ class Uf2FlashingDialog(WorkDialog):
     def _is_relevant_board_id(cls, board_id):
         return True
 
-    def _download_to_the_device(self, download_url, size, target_dir):
-        """Running in a bg thread"""
+    def _get_vid_pids_to_wait_for(self):
+        """If result is non-empty then the process completes until a device with one of the vid-pid pairs appears"""
+        return set()
+
+    def _perform_work(self, download_url, size, target_dir):
         try:
-            target_path = os.path.join(target_dir, "micropython.hex")
-
-            self.set_action_text("Starting...")
-            self.append_text("Downloading %d bytes from %s\n" % (size, download_url))
-            with urlopen(download_url, timeout=5) as fsrc:
-                bytes_copied = 0
-                self.append_text("Writing to %s\n" % target_path)
-                self.append_text("Starting...")
-                with open(target_path, "wb") as fdst:
-                    while True:
-                        buf = fsrc.read(8 * 1024)
-                        if not buf:
-                            break
-
-                        if self._state == "cancelling":
-                            break
-
-                        fdst.write(buf)
-                        fdst.flush()
-                        os.fsync(fdst.fileno())
-                        bytes_copied += len(buf)
-                        percent_str = "%.0f%%" % (bytes_copied / size * 100)
-                        self.set_action_text("Copying... " + percent_str)
-                        self.report_progress(bytes_copied, size)
-                        self.replace_last_line(percent_str)
+            self._download_to_the_device(download_url, size, target_dir)
+            if self._state == "working" and self._get_vid_pids_to_wait_for():
+                self._wait_for_vid_pids()
         except Exception as e:
-            self.append_text("\n" + "".join(traceback.format_stack()))
+            self.append_text("\n" + "".join(traceback.format_exc()))
             self.set_action_text("Error...")
             self.report_done(False)
             return
@@ -304,6 +280,68 @@ class Uf2FlashingDialog(WorkDialog):
             self.append_text("\nCancelled\n")
             self.set_action_text("Cancelled")
             self.report_done(False)
+
+    def _wait_for_vid_pids(self):
+        target_set = set(self._get_vid_pids_to_wait_for())
+        if not target_set:
+            return
+
+        self.append_text("\nWaiting for the port...\n")
+        self.set_action_text("Waiting for the port...")
+
+        wait_time = 0
+        step = 0.2
+        while wait_time < 10:
+            for p in list_serial_ports():
+                vidpid = (p.vid, p.pid)
+                if vidpid in target_set:
+                    self.append_text("Found %s at %s\n" % ("%04x:%04x" % vidpid, p.device))
+                    self.set_action_text("Found port")
+                    return
+            time.sleep(step)
+            wait_time += step
+        else:
+            self.set_action_text("Warning: Could not find port")
+            self.append_text("Warning: Could not find port in %s seconds\n" % int(wait_time))
+            # leave some time to see the warning
+            time.sleep(2)
+
+    def _download_to_the_device(self, download_url, size, target_dir):
+        """Running in a bg thread"""
+        target_path = os.path.join(target_dir, "firmware")
+
+        self.set_action_text("Starting...")
+        self.append_text("Downloading %d bytes from %s\n" % (size, download_url))
+
+        req = urllib.request.Request(
+            download_url,
+            data=None,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+            },
+        )
+
+        with urlopen(req, timeout=5) as fsrc:
+            bytes_copied = 0
+            self.append_text("Writing to %s\n" % target_path)
+            self.append_text("Starting...")
+            with open(target_path, "wb") as fdst:
+                while True:
+                    buf = fsrc.read(8 * 1024)
+                    if not buf:
+                        break
+
+                    if self._state == "cancelling":
+                        break
+
+                    fdst.write(buf)
+                    fdst.flush()
+                    os.fsync(fdst.fileno())
+                    bytes_copied += len(buf)
+                    percent_str = "%.0f%%" % (bytes_copied / size * 100)
+                    self.set_action_text("Copying... " + percent_str)
+                    self.report_progress(bytes_copied, size)
+                    self.replace_last_line(percent_str)
 
     def get_title(self):
         return "Install MicroPython firmware"
