@@ -2,6 +2,35 @@
 Version history
 ===============
 
+3.3.0b4 (2020-10-18)
+====================
+
+New
+---
+* Statusbar with backend switcher, #1356
+* Firmware flasher for CircuitPython, #1375, #1351
+* Updated firmware flasher for micro:bit, #1351
+
+Changed
+-------
+* Refactor alternative interpreter configuration page, #1079
+
+Fixed
+-----
+* Don't choke when MP management output is wrapped between user input, #1346
+* Include ampersand in URL regex in the Shell, #1323
+* Dialogs may end up behind the main window, #1158, #1133
+* Augment LD_LIBRARY_PATH instead of replacing it, #1008
+* Fix "Install from requirements.txt" error, #1344
+* File dialog should scroll to top when new folder gets selected, #1345
+* Improve MicroPython file write reliability, #1355
+* Fix CircuitPython directory creation
+* Allow selecting venv 'activate' instead of interpreter symlink in the interpreter configuration page, #1079
+
+Technical
+---------
+Improve diagnostic logging, #569
+
 3.3.0b3 (2020-09-07)
 ====================
 * Stop/Restart command now soft-reboots MicroPython device after reaching the prompt
