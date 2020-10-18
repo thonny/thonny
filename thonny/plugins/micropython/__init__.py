@@ -430,7 +430,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         advanced_link = ui_utils.create_action_label(
             last_row, tr("Advanced options"), lambda event: self._show_advanced_options()
         )
-        advanced_link.grid(row=0, column=1, sticky="e")
+        #advanced_link.grid(row=0, column=1, sticky="e")
 
         if self._has_flashing_dialog():
             firmware_link = ui_utils.create_action_label(
