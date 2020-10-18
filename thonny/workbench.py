@@ -137,7 +137,6 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
-        self._exercise_providers = []
         self._commands = []  # type: List[Dict[str, Any]]
         self._toolbar_buttons = {}
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
@@ -158,9 +157,6 @@ class Workbench(tk.Tk):
             ShellView, tr("Shell"), "s", visible_by_default=True, default_position_key="A"
         )
 
-        from thonny.exercises import ExercisesView
-
-        self.add_view(ExercisesView, tr("Exercises"), "ne")
         assistance.init()
         self._runner = Runner()
         self._load_plugins()
@@ -1182,14 +1178,6 @@ class Workbench(tk.Tk):
             warn(tr("Overwriting theme '%s'") % name)
 
         self._syntax_themes[name] = (parent, settings)
-
-    def add_exercise_provider(self, name, title, class_, sort_key=None):
-        self._exercise_providers.append(
-            {"name": name, "title": title, "class": class_, "sort_key": sort_key or title}
-        )
-
-    def get_exercise_providers(self):
-        return self._exercise_providers
 
     def get_usable_ui_theme_names(self) -> Sequence[str]:
         return sorted([name for name in self._ui_themes if self._ui_themes[name][0] is not None])
