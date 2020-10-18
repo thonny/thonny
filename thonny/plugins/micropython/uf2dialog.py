@@ -162,14 +162,14 @@ class Uf2FlashingDialog(WorkDialog):
                 + ")"
             )
 
-    def get_download_url_and_size(self, model_id):
+    def get_download_url_and_size(self, board_id):
         if self._release_info is None:
             return None
 
         candidates = [
             asset
             for asset in self._release_info["assets"]
-            if self._is_suitable_asset(asset, model_id)
+            if self._is_suitable_asset(asset, board_id)
         ]
         if len(candidates) == 0:
             raise RuntimeError(
@@ -294,10 +294,12 @@ class Uf2FlashingDialog(WorkDialog):
         while wait_time < 10:
             for p in list_serial_ports():
                 vidpid = (p.vid, p.pid)
-                if vidpid in target_set:
+                if vidpid in target_set or (p.vid, None) in target_set:
                     self.append_text("Found %s at %s\n" % ("%04x:%04x" % vidpid, p.device))
                     self.set_action_text("Found port")
                     return
+            if self._state == "cancelling":
+                return
             time.sleep(step)
             wait_time += step
         else:
@@ -325,6 +327,10 @@ class Uf2FlashingDialog(WorkDialog):
             bytes_copied = 0
             self.append_text("Writing to %s\n" % target_path)
             self.append_text("Starting...")
+            if fsrc.length:
+                # override (possibly inaccurate) size
+                size = fsrc.length
+
             with open(target_path, "wb") as fdst:
                 while True:
                     buf = fsrc.read(8 * 1024)

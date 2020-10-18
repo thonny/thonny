@@ -91,11 +91,8 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
             "1. Plug in your device into bootloader mode by double-pressing the reset button.\n"
             "2. Wait until device information appears.\n"
             "3. (If nothing happens in 10 seconds, then try shorter or longer pauses between presses.)\n"
-            "3. Click 'Install' and wait until done.\n"
-            "4. Close the dialog and start programming!\n"
-            "\n"
-            "NB! Installing a new firmware will erase all files you may have on your\n"
-            "device. Make sure you have important files backed up!"
+            "4. Click 'Install' and wait until done.\n"
+            "5. Close the dialog and start programming!"
         )
 
     def _get_release_info_url(self):
@@ -122,7 +119,8 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
         # ... and then release
         super(CircuitPythonFlashingDialog, self)._download_release_info()
 
-    def get_download_url_and_size(self, model_id):
+    def get_download_url_and_size(self, board_id):
+        # TODO: should take vid/pid also into account. It looks like different models may have same board_id
         if self._release_info is None or self._devices_info is None:
             return None
 
@@ -131,14 +129,14 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
 
         release = self._release_info["tag_name"]
 
-        if not self._devices_info.get(model_id, {}).get("FIRMWARE_DOWNLOAD", None):
+        if not self._devices_info.get(board_id, {}).get("FIRMWARE_DOWNLOAD", None):
             raise RuntimeError(
                 "Could not find your board (%s) or its download url from %s (consider making a PR). "
-                % (model_id, self._get_devices_info_url())
+                % (board_id, self._get_devices_info_url())
                 + "Please find the firmware from https://circuitpython.org/ and install it manually."
             )
 
-        url = self._devices_info[model_id]["FIRMWARE_DOWNLOAD"].format(
+        url = self._devices_info[board_id]["FIRMWARE_DOWNLOAD"].format(
             lang="en_US", release=release
         )
 
