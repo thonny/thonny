@@ -32,6 +32,7 @@ from thonny.ui_utils import (
     select_sequence,
     show_dialog,
     tr_btn,
+    ems_to_pixels,
 )
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ class ShellView(tk.PanedWindow):
         super().__init__(
             master,
             orient="horizontal",
-            sashwidth=lookup_style_option("Sash", "sashthickness", 4),
+            sashwidth=lookup_style_option("Sash", "sashthickness", ems_to_pixels(0.6)),
             background=lookup_style_option("TPanedWindow", "background"),
             borderwidth=0,
         )

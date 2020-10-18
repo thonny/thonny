@@ -2,6 +2,7 @@ from typing import Callable, Dict, Union  # @UnusedImport
 
 from thonny import get_workbench
 from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.ui_utils import ems_to_pixels
 from thonny.workbench import BasicUiThemeSettings, CompoundUiThemeSettings
 
 
@@ -69,7 +70,7 @@ def _menubutton_settings() -> BasicUiThemeSettings:
 
 
 def _paned_window_settings() -> BasicUiThemeSettings:
-    return {"Sash": {"configure": {"sashthickness": scale(10)}}}
+    return {"Sash": {"configure": {"sashthickness": ems_to_pixels(0.6)}}}
 
 
 def _menu_settings() -> BasicUiThemeSettings:
@@ -304,7 +305,7 @@ def clam() -> BasicUiThemeSettings:
         },
         "TLabelframe": {"configure": {"labeloutside": True, "labelmargins": [0, 0, 0, scale(4)]}},
         "TProgressbar": {"configure": {"background": frame}},
-        "Sash": {"configure": {"sashthickness": scale(6), "gripcount": 10}},
+        "Sash": {"configure": {"sashthickness": ems_to_pixels(0.6), "gripcount": 10}},
     }
 
 

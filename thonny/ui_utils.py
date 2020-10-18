@@ -221,8 +221,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
     """
 
     def __init__(self, master, position_key=None, preferred_size_in_pw=None, **kwargs):
-
-        tk.PanedWindow.__init__(self, master, **kwargs)
+        tk.PanedWindow.__init__(self, master, border=0, **kwargs)
         self._pane_minsize = 100
         self.position_key = position_key
         self._restoring_pane_sizes = False
@@ -423,7 +422,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
             self.master.insert("auto", self)
 
     def _update_appearance(self, event=None):
-        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 10))
+        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", ems_to_pixels(0.6)))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
 
 
