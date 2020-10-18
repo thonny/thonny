@@ -62,8 +62,8 @@
         "BOARD_ID": "SAMD21G18A-Feather-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0015",
-        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m0_basic/{lang}/adafruit-circuitpython-feather_m0_basic-{lang}-{release}.uf2",
-        "CP_URL": "https://circuitpython.org/board/feather_m0_basic/"
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m0_express/{lang}/adafruit-circuitpython-feather_m0_express-{lang}-{release}.uf2",
+        "CP_URL": "https://circuitpython.org/board/feather_m0_express/"
     },
     "SAMR21G18A-Radiofruit-v0": {
         "VENDOR_NAME": "Adafruit Industries",

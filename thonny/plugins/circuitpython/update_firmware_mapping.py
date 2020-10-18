@@ -46,7 +46,7 @@ def update_info(existing_map, name, info_path):
         if combined_record["CP_URL"] and not combined_record["FIRMWARE_DOWNLOAD"]:
             board_key = combined_record["CP_URL"].strip("/").split("/")[-1]
             url = DOWNLOAD_URL_PATTERN.replace("BOARD_KEY", board_key)
-            #print(url.format(lang="en_US", release=CP_LATEST_VER))
+            # print(url.format(lang="en_US", release=CP_LATEST_VER))
             combined_record["FIRMWARE_DOWNLOAD"] = url
 
 
@@ -65,8 +65,9 @@ if __name__ == "__main__":
     with open(file_path, "w", encoding="utf-8") as fp:
         json.dump(existing_map, fp, indent=4)
 
+    by_vid_pid = sorted(
+        existing_map.values(), key=lambda x: (x.get("USB_VID", "?"), x.get("USB_PID", "?"))
+    )
 
-    by_vid_pid = sorted(existing_map.values(), key=lambda x: (x.get("USB_VID", "?"), x.get("USB_PID", "?")))
-
-    #for item in by_vid_pid:
+    # for item in by_vid_pid:
     #    print("(%s, %s), # %s, %s" % (item.get("USB_VID"), item.get("USB_PID"), item.get("VENDOR_NAME"), item.get("PRODUCT_NAME")))
