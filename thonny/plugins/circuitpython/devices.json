@@ -7,7 +7,7 @@
         "BOARD_ID": "SAMD21G18A-RoboHATMM1-v24",
         "USB_VID": "0x1209",
         "USB_PID": "0x4D44",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/robohatmm1_m4/{lang}/adafruit-circuitpython-robohatmm1_m4-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/robohatmm1_m4/"
     },
     "SAMD51J19A-PyGamer-M4": {
@@ -18,7 +18,7 @@
         "BOARD_ID": "SAMD51J19A-PyGamer-M4",
         "USB_VID": "0x239A",
         "USB_PID": "0x003D",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pygamer/{lang}/adafruit-circuitpython-pygamer-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pygamer/"
     },
     "SAMD51G19A-USBHub-v0": {
@@ -29,7 +29,7 @@
         "BOARD_ID": "SAMD51G19A-USBHub-v0",
         "USB_VID": "0x04D8",
         "USB_PID": "0xEDB3",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/capablerobot_usbhub/{lang}/adafruit-circuitpython-capablerobot_usbhub-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/capablerobot_usbhub/"
     },
     "SAMD21G18A-dadamachines-automat-v0": {
@@ -62,7 +62,7 @@
         "BOARD_ID": "SAMD21G18A-Feather-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0015",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m0_basic/{lang}/adafruit-circuitpython-feather_m0_basic-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/feather_m0_basic/"
     },
     "SAMR21G18A-Radiofruit-v0": {
@@ -92,7 +92,7 @@
         "PRODUCT_NAME": "Arduino Zero",
         "VOLUME_LABEL": "ZEROBOOT",
         "BOARD_ID": "SAMD21G18A-Zero-v0",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/arduino_zero/{lang}/adafruit-circuitpython-arduino_zero-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/arduino_zero/"
     },
     "SAMD21G18A-Eitech-Robotics-v0": {
@@ -114,7 +114,7 @@
         "BOARD_ID": "SAMD51P20A-GrandCentral-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0031",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/grandcentral_m4_express/{lang}/adafruit-circuitpython-grandcentral_m4_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/grandcentral_m4_express/"
     },
     "SAMD21G18A-ItsyBitsy-v0": {
@@ -125,7 +125,7 @@
         "BOARD_ID": "SAMD21G18A-ItsyBitsy-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x000F",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/itsybitsy_m0_express/{lang}/adafruit-circuitpython-itsybitsy_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/itsybitsy_m0_express/"
     },
     "SAMD51J19A-Feather-Arcade-D51": {
@@ -147,7 +147,7 @@
         "BOARD_ID": "SAMD51J19A-PewPew-M4",
         "USB_VID": "0x239A",
         "USB_PID": "0x0034",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pewpew_m4/{lang}/adafruit-circuitpython-pewpew_m4-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pewpew_m4/"
     },
     "SAMD21E18A-pIRKey-v0": {
@@ -158,7 +158,7 @@
         "BOARD_ID": "SAMD21E18A-pIRKey-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0027",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pirkey_m0/{lang}/adafruit-circuitpython-pirkey_m0-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pirkey_m0/"
     },
     "SAMD51G19A-Itsy-v0": {
@@ -169,7 +169,7 @@
         "BOARD_ID": "SAMD51G19A-Itsy-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x002B",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/itsybitsy_m0_express/{lang}/adafruit-circuitpython-itsybitsy_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/itsybitsy_m0_express/"
     },
     "SAMD51G19A-Trellis-v0": {
@@ -180,7 +180,7 @@
         "BOARD_ID": "SAMD51G19A-Trellis-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x002F",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/trellis_m4_express/{lang}/adafruit-circuitpython-trellis_m4_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/trellis_m4_express/"
     },
     "SAMD21E18A-Gemma-v0": {
@@ -191,7 +191,7 @@
         "BOARD_ID": "SAMD21E18A-Gemma-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x001C",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/gemma_m0/{lang}/adafruit-circuitpython-gemma_m0-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/gemma_m0/"
     },
     "SAMD21G18A-Grove-Zero-v1.0": {
@@ -224,7 +224,7 @@
         "BOARD_ID": "SAMD21G18A-Mini-Sparkfun-v0",
         "USB_VID": "0x1B4F",
         "USB_PID": "0x0D22",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/sparkfun_samd21_mini/{lang}/adafruit-circuitpython-sparkfun_samd21_mini-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/sparkfun_samd21_mini/"
     },
     "SAMD21G18A-Dev-Sparkfun-v0": {
@@ -235,7 +235,7 @@
         "BOARD_ID": "SAMD21G18A-Dev-Sparkfun-v0",
         "USB_VID": "0x1B4F",
         "USB_PID": "0x0D23",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/sparkfun_samd21_dev/{lang}/adafruit-circuitpython-sparkfun_samd21_dev-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/sparkfun_samd21_dev/"
     },
     "SAMD21G18A-crickit-v0": {
@@ -257,7 +257,7 @@
         "BOARD_ID": "SAMD51J19A-Metro-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0021",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/metro_m4_express/{lang}/adafruit-circuitpython-metro_m4_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/metro_m4_express/"
     },
     "SAMD21G18A-CPlay-v0": {
@@ -268,7 +268,7 @@
         "BOARD_ID": "SAMD21G18A-CPlay-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0018",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/circuitplayground_express/{lang}/adafruit-circuitpython-circuitplayground_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/circuitplayground_express/"
     },
     "SAMD51G19A-MiniSamM4-v0": {
@@ -279,7 +279,7 @@
         "BOARD_ID": "SAMD51G19A-MiniSamM4-v0",
         "USB_VID": "0x1209",
         "USB_PID": "0x2017",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/mini_sam_m4/{lang}/adafruit-circuitpython-mini_sam_m4-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/mini_sam_m4/"
     },
     "SAMD51G19A-RoboHATMM1-v24": {
@@ -290,7 +290,7 @@
         "BOARD_ID": "SAMD51G19A-RoboHATMM1-v24",
         "USB_VID": "0x1209",
         "USB_PID": "0x4D44",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/robohatmm1_m4/{lang}/adafruit-circuitpython-robohatmm1_m4-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/robohatmm1_m4/"
     },
     "SAMD21G18A-MKR1000-v0": {
@@ -307,7 +307,7 @@
         "VOLUME_LABEL": "CS11",
         "INDEX_URL": "https://xinabox.cc/products/cc11",
         "BOARD_ID": "SAMD21G18A-CS11-v0",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/xinabox_cs11/{lang}/adafruit-circuitpython-xinabox_cs11-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/xinabox_cs11/"
     },
     "SAM32": {
@@ -318,7 +318,7 @@
         "BOARD_ID": "SAM32",
         "USB_VID": "0x04D8",
         "USB_PID": "0xEDBE",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/sam32/{lang}/adafruit-circuitpython-sam32-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/sam32/"
     },
     "SAMD21G18A-CC03-v0": {
@@ -327,7 +327,7 @@
         "VOLUME_LABEL": "CC03",
         "INDEX_URL": "https://xinabox.cc/products/cc03",
         "BOARD_ID": "SAMD21G18A-CC03-v0",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/xinabox_cc03/{lang}/adafruit-circuitpython-xinabox_cc03-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/xinabox_cc03/"
     },
     "SAMD21G18A-MKR1300-v0": {
@@ -337,7 +337,7 @@
         "BOARD_ID": "SAMD21G18A-MKR1300-v0",
         "USB_VID": "0x2341",
         "USB_PID": "0x8053",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/arduino_mkr1300/{lang}/adafruit-circuitpython-arduino_mkr1300-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/arduino_mkr1300/"
     },
     "SAMD21E18A-Trinket-v0": {
@@ -348,7 +348,7 @@
         "BOARD_ID": "SAMD21E18A-Trinket-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x001E",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/trinket_m0/{lang}/adafruit-circuitpython-trinket_m0-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/trinket_m0/"
     },
     "SAMD21G18A-MKRZero-v0": {
@@ -358,7 +358,7 @@
         "BOARD_ID": "SAMD21G18A-MKRZero-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0035",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/arduino_mkrzero/{lang}/adafruit-circuitpython-arduino_mkrzero-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/arduino_mkrzero/"
     },
     "SAMD51J19A-Metro-AirLift-v0": {
@@ -369,7 +369,7 @@
         "BOARD_ID": "SAMD51J19A-Metro-AirLift-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0037",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/metro_m4_airlift_lite/{lang}/adafruit-circuitpython-metro_m4_airlift_lite-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/metro_m4_airlift_lite/"
     },
     "SAMD51J19A-PyBadgeLC-M4": {
@@ -380,7 +380,7 @@
         "BOARD_ID": "SAMD51J19A-PyBadgeLC-M4",
         "USB_VID": "0x239A",
         "USB_PID": "0x0034",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pybadge/{lang}/adafruit-circuitpython-pybadge-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pybadge/"
     },
     "SAMD21G18A-Metro-v0": {
@@ -391,7 +391,7 @@
         "BOARD_ID": "SAMD21G18A-Metro-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0013",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/metro_m0_express/{lang}/adafruit-circuitpython-metro_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/metro_m0_express/"
     },
     "SAMD51J19A-PyBadge-M4": {
@@ -402,7 +402,7 @@
         "BOARD_ID": "SAMD51J19A-PyBadge-M4",
         "USB_VID": "0x239A",
         "USB_PID": "0x0033",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pybadge/{lang}/adafruit-circuitpython-pybadge-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pybadge/"
     },
     "SAMD51J20A-PyPortal-v0": {
@@ -413,7 +413,7 @@
         "BOARD_ID": "SAMD51J20A-PyPortal-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0035",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pyportal/{lang}/adafruit-circuitpython-pyportal-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pyportal/"
     },
     "SAMD21G18A-Generic": {
@@ -444,7 +444,7 @@
         "BOARD_ID": "SAMD21G18A-Hallowing-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0xB000",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/hallowing_m0_express/{lang}/adafruit-circuitpython-hallowing_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/hallowing_m0_express/"
     },
     "SAMD51J19A-FeatherM4-v0": {
@@ -455,7 +455,7 @@
         "BOARD_ID": "SAMD51J19A-FeatherM4-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x0022",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m4_express/{lang}/adafruit-circuitpython-feather_m4_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/feather_m4_express/"
     },
     "SAMD21G18A-Feather-M0-Express-v0": {
@@ -466,7 +466,7 @@
         "BOARD_ID": "SAMD21G18A-Feather-M0-Express-v0",
         "USB_VID": "0x239A",
         "USB_PID": "0x001B",
-        "FIRMWARE_DOWNLOAD": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m0_express/{lang}/adafruit-circuitpython-feather_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/feather_m0_express/"
     }
 }

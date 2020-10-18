@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # Assumes https://github.com/microsoft/uf2-samdx1 to be next to thonny dev directory
 
+import re
 import json
 import os.path
+import urllib
+from urllib.request import urlopen
+
+CP_LATEST_VER = "5.3.1"
+DOWNLOAD_URL_PATTERN = "https://downloads.circuitpython.org/bin/BOARD_KEY/{lang}/adafruit-circuitpython-BOARD_KEY-{lang}-{release}.uf2"
 
 relevant_vars = [
     "VENDOR_NAME",
@@ -37,9 +43,15 @@ def update_info(existing_map, name, info_path):
             combined_record["CP_URL"] = ""
         existing_map[info["BOARD_ID"]] = combined_record
 
+        if combined_record["CP_URL"] and not combined_record["FIRMWARE_DOWNLOAD"]:
+            board_key = combined_record["CP_URL"].strip("/").split("/")[-1]
+            url = DOWNLOAD_URL_PATTERN.replace("BOARD_KEY", board_key)
+            #print(url.format(lang="en_US", release=CP_LATEST_VER))
+            combined_record["FIRMWARE_DOWNLOAD"] = url
+
 
 if __name__ == "__main__":
-    file_path = "firmware_mapping.json"
+    file_path = "devices.json"
     with open(file_path, encoding="utf-8") as fp:
         existing_map = json.load(fp)
 
@@ -52,3 +64,9 @@ if __name__ == "__main__":
 
     with open(file_path, "w", encoding="utf-8") as fp:
         json.dump(existing_map, fp, indent=4)
+
+
+    by_vid_pid = sorted(existing_map.values(), key=lambda x: (x.get("USB_VID", "?"), x.get("USB_PID", "?")))
+
+    #for item in by_vid_pid:
+    #    print("(%s, %s), # %s, %s" % (item.get("USB_VID"), item.get("USB_PID"), item.get("VENDOR_NAME"), item.get("PRODUCT_NAME")))
