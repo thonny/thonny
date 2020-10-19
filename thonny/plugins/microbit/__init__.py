@@ -136,3 +136,13 @@ def load_plugin():
         validate_time=False,
         sync_time=False,
     )
+
+    # Don't consider Pico in generic backends
+    # The main reason is to reduce the number of items in the backend switcher menu
+    import thonny.plugins.circuitpython
+    import thonny.plugins.micropython
+
+    thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(MicrobitProxy.get_known_usb_vids_pids())
+    thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )

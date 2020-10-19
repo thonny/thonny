@@ -46,6 +46,8 @@ from thonny.ui_utils import (
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
+VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
+
 
 class MicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
@@ -430,7 +432,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         advanced_link = ui_utils.create_action_label(
             last_row, tr("Advanced options"), lambda event: self._show_advanced_options()
         )
-        #advanced_link.grid(row=0, column=1, sticky="e")
+        # advanced_link.grid(row=0, column=1, sticky="e")
 
         if self._has_flashing_dialog():
             firmware_link = ui_utils.create_action_label(
@@ -577,8 +579,7 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_vids_pids_to_avoid(self):
-        # micro:bit
-        return {(0x0D28, 0x0204)}
+        return VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND
 
 
 class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):

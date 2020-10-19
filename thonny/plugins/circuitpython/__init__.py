@@ -19,6 +19,8 @@ from thonny.ui_utils import askopenfilename, create_url_label, show_dialog
 
 logger = logging.getLogger(__name__)
 
+VIDS_PIDS_TO_AVOID = set()
+
 
 class CircuitPythonProxy(BareMetalMicroPythonProxy):
     @classmethod
@@ -63,8 +65,7 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_vids_pids_to_avoid(self):
-        # micro:bit
-        return {(0x0D28, 0x0204)}
+        return VIDS_PIDS_TO_AVOID
 
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
