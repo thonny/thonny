@@ -141,7 +141,6 @@ def launch():
     import runpy
     import socket
 
-    _configure_frontend_logging()
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
         # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
@@ -156,6 +155,7 @@ def launch():
         pass
 
     _prepare_thonny_user_dir()
+    _configure_frontend_logging()
 
     if not _check_welcome():
         return 0

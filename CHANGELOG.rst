@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.3.0b5 (2020-10-19)
+====================
+
+* Fixed a regression introduced in b4 -- Thonny crashed on launch when data directory didn't exist yet.
+
 3.3.0b4 (2020-10-18)
 ====================
 
