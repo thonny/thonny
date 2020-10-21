@@ -1147,6 +1147,7 @@ class ToolTip:
 def create_tooltip(widget, text, **kw):
     options = get_style_configuration("Tooltip").copy()
     options.setdefault("background", "#ffffe0")
+    options.setdefault("foreground", "#000000")
     options.setdefault("relief", "solid")
     options.setdefault("borderwidth", 1)
     options.setdefault("padx", 1)
