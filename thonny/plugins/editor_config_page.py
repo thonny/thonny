@@ -47,7 +47,6 @@ class EditorConfigurationPage(ConfigurationPage):
             columnspan=2,
         )
 
-
         self.add_checkbox("view.show_line_numbers", tr("Show line numbers"), pady=(20, 0))
         self._line_length_var = get_workbench().get_variable("view.recommended_line_length")
         label = ttk.Label(

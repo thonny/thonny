@@ -71,10 +71,10 @@ class Completer(tk.Listbox):
             self._present_completions(msg.completions)
 
     def _present_completions(self, completions_):
-        if get_workbench().get_option('edit.tab_complete_show_private'):
-          completions = completions_
+        if get_workbench().get_option("edit.tab_complete_show_private"):
+            completions = completions_
         else:
-          completions = [c for c in completions_ if not c.get('name', '_').startswith('_')]
+            completions = [c for c in completions_ if not c.get("name", "_").startswith("_")]
 
         self.completions = completions
 
