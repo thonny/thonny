@@ -70,7 +70,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * Juan Falgueras
 * Kauri Raba
-* M. Burak Kalkan
+* M Burak Kalkan
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
