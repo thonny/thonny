@@ -70,7 +70,12 @@ class Completer(tk.Listbox):
         else:
             self._present_completions(msg.completions)
 
-    def _present_completions(self, completions):
+    def _present_completions(self, completions_):
+        if get_workbench().get_option('edit.tab_complete_show_private'):
+          completions = completions_
+        else:
+          completions = [c for c in completions_ if not c.get('name', '_').startswith('_')]
+
         self.completions = completions
 
         # broadcast logging info
@@ -323,6 +328,7 @@ def load_plugin() -> None:
 
     get_workbench().set_default("edit.tab_complete_in_editor", True)
     get_workbench().set_default("edit.tab_complete_in_shell", True)
+    get_workbench().set_default("edit.tab_complete_show_private", True)
 
     CodeViewText.perform_midline_tab = patched_perform_midline_tab  # type: ignore
     ShellText.perform_midline_tab = patched_perform_midline_tab  # type: ignore
