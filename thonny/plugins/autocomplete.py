@@ -77,10 +77,10 @@ class Completer(tk.Listbox):
         # if it doesn't - don't show names starting with '_'
         source = self.text.get("1.0", "end-1c")
         try:
-            last_source_chunk = re.split(r'\.|\s', source)[-1]
+            last_source_chunk = re.split(r"\.|\s", source)[-1]
         except IndexError:
-            last_source_chunk = ''
-        complete_underscored = last_source_chunk.startswith('_')
+            last_source_chunk = ""
+        complete_underscored = last_source_chunk.startswith("_")
 
         if complete_underscored:
             completions = completions_
