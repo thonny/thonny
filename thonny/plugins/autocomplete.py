@@ -1,3 +1,5 @@
+import re
+
 import tkinter as tk
 from tkinter import messagebox
 
@@ -71,7 +73,16 @@ class Completer(tk.Listbox):
             self._present_completions(msg.completions)
 
     def _present_completions(self, completions_):
-        if get_workbench().get_option("edit.tab_complete_show_private"):
+        # Check if autocompeted name starts with an underscore,
+        # if it doesn't - don't show names starting with '_'
+        source = self.text.get("1.0", "end-1c")
+        try:
+            last_source_chunk = re.split(r'\.|\s', source)[-1]
+        except IndexError:
+            last_source_chunk = ''
+        complete_underscored = last_source_chunk.startswith('_')
+
+        if complete_underscored:
             completions = completions_
         else:
             completions = [c for c in completions_ if not c.get("name", "_").startswith("_")]
@@ -328,7 +339,6 @@ def load_plugin() -> None:
 
     get_workbench().set_default("edit.tab_complete_in_editor", True)
     get_workbench().set_default("edit.tab_complete_in_shell", True)
-    get_workbench().set_default("edit.tab_complete_show_private", True)
 
     CodeViewText.perform_midline_tab = patched_perform_midline_tab  # type: ignore
     ShellText.perform_midline_tab = patched_perform_midline_tab  # type: ignore
