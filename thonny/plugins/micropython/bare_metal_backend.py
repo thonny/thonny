@@ -19,7 +19,7 @@ from thonny.common import (
     ToplevelResponse,
     UserError,
     execute_system_command,
-    serialize_message,
+    serialize_message, EOFCommand,
 )
 from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 from thonny.plugins.micropython.backend import (
@@ -340,6 +340,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         else:
             super()._update_cwd()
 
+    def _handle_eof_command(self, msg: EOFCommand) -> None:
+        self._soft_reboot_for_restarting_user_program()
+
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies. See CalliopeMiniProxy for more details
@@ -382,9 +385,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             sys.exit()
 
-        self._soft_reboot_after_interrupting_to_raw_prompt()
+        self._soft_reboot_in_raw_prompt_without_running_main()
 
-    def _soft_reboot_after_interrupting_to_raw_prompt(self):
+    def _soft_reboot_in_raw_prompt_without_running_main(self):
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
         # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
@@ -399,7 +402,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             discarded_bytes += self._connection.soft_read(1, timeout=1)
             discarded_bytes += self._connection.read_all()
 
-    def _soft_reboot(self):
+    def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
         self._write(NORMAL_MODE_CMD)

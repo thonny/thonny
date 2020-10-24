@@ -144,9 +144,6 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
 
-    def _soft_reboot(self):
-        raise NotImplementedError()
-
     def _execute_with_consumer(
         self, script: str, output_consumer: Callable[[str, str], None]
     ) -> None:
