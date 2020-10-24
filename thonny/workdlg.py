@@ -73,7 +73,11 @@ class WorkDialog(CommonDialog):
         )
 
         self._ok_button = ttk.Button(
-            self.action_frame, text=self.get_ok_text(), command=self.on_ok, state="disabled"
+            self.action_frame,
+            text=self.get_ok_text(),
+            command=self.on_ok,
+            state="disabled",
+            default="active",
         )
         self._ok_button.grid(column=4, row=1, pady=padding, padx=(0, intpad))
 
@@ -252,7 +256,13 @@ class WorkDialog(CommonDialog):
             self.success = args[0]
             if self.success:
                 self._state = "done"
+                self._cancel_button.focus_set()
+                self._cancel_button["default"] = "active"
+                self._ok_button["default"] = "normal"
             else:
                 # allows trying again when failed
                 self._state = "idle"
+                self._ok_button.focus_set()
+                self._ok_button["default"] = "active"
+                self._cancel_button["default"] = "normal"
             self._progress_bar.stop()

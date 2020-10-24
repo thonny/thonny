@@ -37,7 +37,7 @@ class Uf2FlashingDialog(WorkDialog):
         pad = self.get_padding()
         inpad = self.get_internal_padding()
 
-        latest_ver_caption = tr("Latest version")
+        latest_ver_caption = tr("Version to be installed")
         version_caption_label = ttk.Label(self.main_frame, text=latest_ver_caption + ":")
         version_caption_label.grid(
             row=0, column=0, sticky="w", padx=(pad, inpad), pady=(pad, inpad)
@@ -45,7 +45,7 @@ class Uf2FlashingDialog(WorkDialog):
         self._version_label = ttk.Label(self.main_frame, text=tr("please wait") + " ...")
         self._version_label.grid(row=0, column=1, padx=(0, pad), pady=(pad, inpad), sticky="w")
 
-        device_location_caption = tr("Device location")
+        device_location_caption = tr("Target device location")
         self.target_caption_label = ttk.Label(self.main_frame, text=device_location_caption + ":")
         self.target_caption_label.grid(
             row=1, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
@@ -56,7 +56,7 @@ class Uf2FlashingDialog(WorkDialog):
         self.target_label = ttk.Label(self.main_frame, text="", width=self.get_info_text_width())
         self.target_label.grid(row=1, column=1, padx=(0, pad), pady=(0, inpad), sticky="w")
 
-        device_model_caption = tr("Device model")
+        device_model_caption = tr("Target device model")
         self.model_caption_label = ttk.Label(self.main_frame, text=device_model_caption + ":")
         self.model_caption_label.grid(
             row=2, column=0, padx=(pad, inpad), pady=(0, inpad), sticky="w"
