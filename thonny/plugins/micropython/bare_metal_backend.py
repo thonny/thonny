@@ -33,13 +33,10 @@ from thonny.plugins.micropython.backend import (
     WAIT_OR_CRASH_TIMEOUT,
 )
 from thonny.common import ConnectionFailedException
-
-# See https://github.com/dhylands/rshell/blob/master/rshell/main.py
-# for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
-# ampy uses 32 bytes: https://github.com/pycampers/ampy/blob/master/ampy/files.py
-# I'm not worrying so much, because reader thread reads continuously
-# and writer (SerialConnection) has it's own blocks and delays
-BUFFER_SIZE = 512
+from thonny.plugins.micropython.webrepl_connection import (
+    WebReplConnection,
+    WebreplBinaryMsg,
+)
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -66,6 +63,10 @@ FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
 W600_FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\r\n>"
 
 RAW_PROMPT = b">"
+
+WEBREPL_REQ_S = "<2sBBQLH64s"
+WEBREPL_PUT_FILE = 1
+WEBREPL_GET_FILE = 2
 
 
 FALLBACK_BUILTIN_MODULES = [
@@ -806,8 +807,21 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _read_file(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
-        # TODO: Is it better to read from mount when possible? Is the mount up to date when the file
-        # is written via serial? Does the MP API give up to date bytes when the file is written via mount?
+        start_time = time.time()
+
+        if isinstance(self._connection, WebReplConnection):
+            size = self._read_file_via_webrepl_file_protocol(source_path, target_fp, callback)
+        else:
+            # TODO: Is it better to read from mount when possible? Is the mount up to date when the file
+            # is written via serial? Does the MP API give up to date bytes when the file is written via mount?
+            size = self._read_file_via_serial(source_path, target_fp, callback)
+
+        logger.info("Read %s in %.1f seconds", source_path, time.time() - start_time)
+        return size
+
+    def _read_file_via_serial(
+        self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
+    ) -> None:
 
         hex_mode = self._should_hexlify(source_path)
 
@@ -847,6 +861,43 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
         )
 
+    def _read_file_via_webrepl_file_protocol(
+        self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
+    ):
+        """
+        Adapted from https://github.com/micropython/webrepl/blob/master/webrepl_cli.py
+        """
+        assert isinstance(self._connection, WebReplConnection)
+
+        file_size = self._get_file_size(source_path)
+
+        src_fname = source_path.encode("utf-8")
+        rec = struct.pack(
+            WEBREPL_REQ_S, b"WA", WEBREPL_GET_FILE, 0, 0, 0, len(src_fname), src_fname
+        )
+        self._write(WebreplBinaryMsg(rec))
+        assert self._read_websocket_response() == 0
+
+        bytes_read = 0
+        callback(bytes_read, file_size)
+        while True:
+            # report ready
+            self._write(WebreplBinaryMsg(b"\0"))
+
+            (block_size,) = struct.unpack("<H", self._connection.read(2))
+            if block_size == 0:
+                break
+            while block_size:
+                buf = self._connection.read(block_size)
+                if not buf:
+                    raise OSError()
+                bytes_read += len(buf)
+                target_fp.write(buf)
+                block_size -= len(buf)
+                callback(bytes_read, file_size)
+
+        assert self._read_websocket_response() == 0
+
     def _write_file(
         self,
         source_fp: BinaryIO,
@@ -854,11 +905,17 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         file_size: int,
         callback: Callable[[int, int], None],
     ) -> None:
-        try:
-            self._write_file_via_serial(source_fp, target_path, file_size, callback)
-        except ReadOnlyFilesystemError:
-            self._write_file_via_mount(source_fp, target_path, file_size, callback)
+        start_time = time.time()
 
+        if isinstance(self._connection, WebReplConnection):
+            self._write_file_via_webrepl_file_protocol(source_fp, target_path, file_size, callback)
+        else:
+            try:
+                self._write_file_via_serial(source_fp, target_path, file_size, callback)
+            except ReadOnlyFilesystemError:
+                self._write_file_via_mount(source_fp, target_path, file_size, callback)
+
+        logger.info("Wrote %s in %.1f seconds", target_path, time.time() - start_time)
         # self._sync_all_filesystems()
 
     def _write_file_via_mount(
@@ -1009,6 +1066,46 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
         return bytes_sent
+
+    def _write_file_via_webrepl_file_protocol(
+        self,
+        source: BinaryIO,
+        target_path: str,
+        file_size: int,
+        callback: Callable[[int, int], None],
+    ) -> None:
+        """
+        Adapted from https://github.com/micropython/webrepl/blob/master/webrepl_cli.py
+        """
+        assert isinstance(self._connection, WebReplConnection)
+
+        dest_fname = target_path.encode("utf-8")
+        rec = struct.pack(
+            WEBREPL_REQ_S, b"WA", WEBREPL_PUT_FILE, 0, 0, file_size, len(dest_fname), dest_fname
+        )
+        self._write(WebreplBinaryMsg(rec[:10]))
+        self._write(WebreplBinaryMsg(rec[10:]))
+        assert self._read_websocket_response() == 0
+
+        bytes_sent = 0
+        callback(bytes_sent, file_size)
+        while True:
+            block = source.read(1024)
+            if not block:
+                break
+            self._write(WebreplBinaryMsg(block))
+            bytes_sent += len(block)
+            callback(bytes_sent, file_size)
+
+        assert self._read_websocket_response() == 0
+
+        return bytes_sent
+
+    def _read_websocket_response(self):
+        data = self._connection.read(4)
+        sig, code = struct.unpack("<2sH", data)
+        assert sig == b"WB"
+        return code
 
     def _sync_remote_filesystem(self):
         self._execute_without_output(

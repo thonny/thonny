@@ -92,7 +92,9 @@ class WebReplConnection(MicroPythonConnection):
 
         while True:
             try:
-                data = (await self._ws.recv()).encode("UTF-8")
+                data = await self._ws.recv()
+                if isinstance(data, str):
+                    data = data.encode("UTF-8")
                 if len(data) == 0:
                     self._error = "EOF"
                     break
@@ -114,6 +116,7 @@ class WebReplConnection(MicroPythonConnection):
                     payload = data.data
                 else:
                     payload = data.decode("UTF-8")
+                await self._ws.send(payload)
                 debug("Wrote bytes", len(data))
                 self._write_responses.put(len(data))
 
@@ -137,6 +140,14 @@ class WebReplConnection(MicroPythonConnection):
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
+
+
+class WebreplBinaryMsg:
+    def __init__(self, data):
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
 
 
 def debug(*args):
