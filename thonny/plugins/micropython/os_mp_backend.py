@@ -19,6 +19,8 @@ from thonny.plugins.micropython.backend import (
     MicroPythonBackend,
     ends_overlap,
     ManagementError,
+    PASTE_MODE_CMD,
+    PASTE_MODE_LINE_PREFIX,
 )
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
 from thonny.common import ConnectionFailedException
@@ -50,9 +52,6 @@ FALLBACK_BUILTIN_MODULES = [
     "cryptolib",
     "ctypes",
 ]
-
-PASTE_MODE_CMD = b"\x05"
-PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class UnixMicroPythonBackend(MicroPythonBackend, ABC):

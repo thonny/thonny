@@ -85,14 +85,6 @@ EOT = b"\x04"
 MGMT_VALUE_START = b"<thonny>"
 MGMT_VALUE_END = b"</thonny>"
 
-# first prompt when switching to raw mode (or after soft reboot in raw mode)
-# Looks like it's not translatable in CP
-# https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
-FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
-FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
-
-RAW_PROMPT = b">"
-
 # How many seconds to wait for something that should appear quickly.
 # In other words -- how long to wait with reporting a protocol error
 # (hoping that the required piece is still coming)
@@ -105,6 +97,10 @@ Y2000_EPOCH_OFFSET = 946684800
 STAT_KIND_INDEX = 0
 STAT_SIZE_INDEX = 6
 STAT_MTIME_INDEX = 8
+
+PASTE_MODE_CMD = b"\x05"
+PASTE_MODE_LINE_PREFIX = b"=== "
+
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +167,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._report_time("prepared")
         self._check_perform_just_in_case_gc()
+        logger.info("Prepared")
 
     def _configure_write_blocks(self):
         pass
@@ -574,11 +571,6 @@ class MicroPythonBackend(MainBackend, ABC):
         except SyntaxError:
             raise ManagementError(script, out, err)
 
-    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
-        """Used for finding initial prompt or forwarding problematic output
-        in case of protocol errors"""
-        raise NotImplementedError()
-
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         raise NotImplementedError()
@@ -634,8 +626,11 @@ class MicroPythonBackend(MainBackend, ABC):
         # TODO: clear last object inspector requests dictionary
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
+            self._report_time("befexeccc")
             self._execute(source, capture_output=False)
+            self._report_time("affexeccc")
             self._update_cwd()
+            self._report_time("upcd")
         # TODO: assign last value to _
         return {}
 
@@ -1298,6 +1293,9 @@ class MicroPythonBackend(MainBackend, ABC):
         if error:
             result["error"] = error
         return result
+
+    def _decode(self, data: bytes) -> str:
+        return data.decode(encoding="UTF-8", errors="replace")
 
 
 class ManagementError(RuntimeError):

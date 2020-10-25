@@ -1,13 +1,11 @@
 import binascii
 import datetime
 import logging
-import math
 import os
 import queue
 import re
-import sys
+import struct
 import time
-from _ast import Not
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, Optional, Tuple, Union
 
@@ -19,18 +17,20 @@ from thonny.common import (
     ToplevelResponse,
     UserError,
     execute_system_command,
-    serialize_message, EOFCommand,
+    serialize_message,
+    EOFCommand,
 )
 from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 from thonny.plugins.micropython.backend import (
-    WAIT_OR_CRASH_TIMEOUT,
     MicroPythonBackend,
     ManagementError,
     ReadOnlyFilesystemError,
-    _report_internal_error,
     ends_overlap,
-    unix_dirname_basename,
     Y2000_EPOCH_OFFSET,
+    PASTE_MODE_CMD,
+    PASTE_MODE_LINE_PREFIX,
+    EOT,
+    WAIT_OR_CRASH_TIMEOUT,
 )
 from thonny.common import ConnectionFailedException
 
@@ -53,8 +53,6 @@ SOFT_REBOOT_CMD = b"\x04"
 # Output tokens
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
-STX = b"\x02"
-EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
 LF = b"\n"
 OK = b"OK"
@@ -66,7 +64,6 @@ FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
 
 # https://forum.micropython.org/viewtopic.php?f=12&t=7652&hilit=w600#p43640
 W600_FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\r\n>"
-FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
 
 RAW_PROMPT = b">"
 
@@ -106,7 +103,8 @@ FALLBACK_BUILTIN_MODULES = [
     "esp32",
 ]
 
-logger = logging.getLogger(__name__)
+# Can't use __name__, because it will be "__main__"
+logger = logging.getLogger("thonny.plugins.micropython.bare_metal_backend")
 
 
 def debug(msg):
@@ -119,7 +117,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
-        self._raw_prompt_ensured = False
+        self._write_block_size = args.get("write_block_size", 255)
+
+        print("Using block size", self._write_block_size)
 
         MicroPythonBackend.__init__(self, clean, args)
 
@@ -147,35 +147,20 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """
         )
 
-    def _configure_write_blocks(self):
-        block_size = self._args.get("write_block_size", 255)
-        block_delay = self._args.get("write_block_delay", 0.01)
-
-        delay_secs_per_kb = 1000 / block_size * block_delay
-        if delay_secs_per_kb > 0.5:
-            print(
-                "\nNB! Sending 1000 characters to the device will take about %.1f seconds with current configuration.\n"
-                "Please give Thonny some seconds for preparing the session...\n"
-                % delay_secs_per_kb,
-                file=sys.stderr,
-            )
-
-        self._connection.set_write_block_size(block_size)
-        self._connection.set_write_block_delay(block_delay)
-
     def _process_until_initial_prompt(self, clean):
         if clean:
             self._interrupt_to_raw_prompt()
+            self._soft_reboot_in_raw_prompt_without_running_main()
         else:
-            # Order first raw prompt to be output when the code is done.
-            # If the device is already at raw prompt then it gets repeated as first raw prompt.
-            # If it is at normal prompt then outputs first raw prompt
-            self._write(RAW_MODE_CMD)
+            # Order first normal prompt to be output when the code is done.
+            # If the device is already at normal prompt then it gets repeated (together with the banner)
+            # If it is at raw prompt then outputs full normal prompt.
+            # If it is in the middle of input, then it is ignored.
+            self._write(NORMAL_MODE_CMD)
             self._forward_output_until_active_prompt(self._send_output)
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
-        self._raw_prompt_ensured = False
         welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace(b"\r\n", b"\n")
@@ -385,8 +370,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             sys.exit()
 
-        self._soft_reboot_in_raw_prompt_without_running_main()
-
     def _soft_reboot_in_raw_prompt_without_running_main(self):
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
@@ -406,12 +389,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
         self._write(NORMAL_MODE_CMD)
-        self._raw_prompt_ensured = False
         self._connection.read_until(NORMAL_PROMPT)
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
         self._forward_output_until_active_prompt(self._send_output)
-        self._ensure_raw_prompt()
         debug("Restoring helpers")
         self._prepare_helpers()
         self._update_cwd()
@@ -463,49 +444,60 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._connection.unread(echo)
 
     def _submit_code(self, script):
-        assert script  # otherwise EOT produces soft reboot
+        """
+        Code is submitted via paste mode, because this provides echo, which can be used as flow control.
 
-        # assuming we are already in a prompt
+        The echo of a written block must be read before next block is written.
+        Safe USB block size is 64 bytes (may be larger for some devices),
+        but we need to account for b"=== " added by the paste mode in the echo, so each block is sized such that
+        its echo doesn't exceed self._write_block_size (some devices may have problem with outputs bigger than that).
+        (OK, most likely the reading thread will eliminate the problem with output buffer, but just in case...)
+        """
+        assert script
+
+        # assuming we are already in a prompt, but threads may have produced something
         self._forward_unexpected_output()
-        self._ensure_raw_prompt()
 
-        # send command
+        to_be_sent = script.encode("UTF-8")
         with self._interrupt_lock:
-            self._write(script.encode(ENCODING) + EOT)
-            debug("Wrote " + script + "\n--------\n")
+            # Go to paste mode
+            self._connection.write(PASTE_MODE_CMD)
+            self._connection.read_until(PASTE_MODE_LINE_PREFIX)
 
-            # fetch command confirmation
-            confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
+            # Send script
+            while to_be_sent:
+                block = to_be_sent[: self._write_block_size]
+                to_be_sent = to_be_sent[self._write_block_size :]
 
-        if confirmation != OK:
-            data = confirmation + self._connection.read_all()
-            data += self._connection.read(1, timeout=1, timeout_is_soft=True)
-            data += self._connection.read_all()
-            self._report_internal_error(
-                "Could not read command confirmation. Got " + repr(data) + "\n\nSCRIPT:\n" + script
+                # find proper block boundary
+                while True:
+                    expected_echo = block.replace(b"\r\n", b"\r\n" + PASTE_MODE_LINE_PREFIX)
+                    if (
+                        len(expected_echo) > self._write_block_size
+                        or block.endswith(b"\r")
+                        or len(block) > 2
+                        and starts_with_continuation_byte(to_be_sent)
+                    ):
+                        # move last byte to the next block
+                        to_be_sent = block[-1:] + to_be_sent
+                        block = block[:-1]
+                        continue
+                    else:
+                        break
+
+                self._write(block)
+                self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
+
+            # push and read comfirmation
+            self._connection.write(EOT)
+            expected_confirmation = b"\r\n"
+            actual_confirmation = self._connection.read(
+                len(expected_confirmation), timeout=WAIT_OR_CRASH_TIMEOUT
             )
-        else:
-            debug("GOTOK")
-
-    def _ensure_raw_prompt(self):
-        if self._raw_prompt_ensured:
-            return
-
-        debug("Ensuring raw prompt")
-        self._write(RAW_MODE_CMD)
-
-        prompt = (
-            self._connection.read_until(
-                FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
+            assert actual_confirmation == expected_confirmation, "Expected %r, got %r" % (
+                expected_confirmation,
+                actual_confirmation,
             )
-            + self._connection.read_all()
-        )
-
-        if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
-            self._send_output(prompt, "stdout")
-            raise TimeoutError("Could not ensure raw prompt")
-
-        self._raw_prompt_ensured = True
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
@@ -517,43 +509,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         RAW_PROMPT
         """
 
+        self._report_time("befsubcode")
         self._submit_code(script)
-
-        terminator = self._forward_output_until_eot_or_active_propmt(output_consumer, "stdout")
-        if terminator != EOT:
-            # an unexpected prompt
-            return
-
-        terminator = self._forward_output_until_eot_or_active_propmt(output_consumer, "stderr")
-        if terminator != EOT:
-            # an unexpected prompt
-            return
-
-        data = self._connection.read(1) + self._connection.read_all()
-        if data == RAW_PROMPT:
-            # happy path
-            self._raw_prompt_ensured = True
-            return
-        else:
-            self._connection.unread(data)
-            self._forward_output_until_active_prompt(output_consumer, "stdout")
+        self._report_time("affsubcode")
+        self._forward_output_until_active_prompt(output_consumer, "stdout")
+        self._report_time("affforw")
 
     def _forward_output_until_active_prompt(
         self, output_consumer: Callable[[str, str], None], stream_name="stdout"
     ):
-        """Used for finding initial prompt or forwarding problematic output
-        in case of parse errors"""
-        while True:
-            terminator = self._forward_output_until_eot_or_active_propmt(
-                output_consumer, stream_name
-            )
-            if terminator in (NORMAL_PROMPT, RAW_PROMPT, FIRST_RAW_PROMPT):
-                self._raw_prompt_ensured = terminator in (RAW_PROMPT, FIRST_RAW_PROMPT)
-                return terminator
-            else:
-                output_consumer(self._decode(terminator), "stdout")
-
-    def _forward_output_until_eot_or_active_propmt(self, output_consumer, stream_name="stdout"):
         """Meant for incrementally forwarding stdout from user statements,
         scripts and soft-reboots. Also used for forwarding side-effect output from
         expression evaluations and for capturing help("modules") output.
@@ -613,7 +577,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
-            b"|".join(map(re.escape, [FIRST_RAW_PROMPT, NORMAL_PROMPT, LF, EOT]))
+            b"|".join(map(re.escape, [NORMAL_PROMPT, LF]))
         )
 
         pending = b""
@@ -651,21 +615,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
             pending += new_data
 
-            if pending.endswith(EOT):
-                output_consumer(self._decode(pending[: -len(EOT)]), stream_name)
-                return EOT
-
-            elif pending.endswith(LF) and not pending.endswith(FIRST_RAW_PROMPT[:-1]):
+            if pending.endswith(LF):
                 output_consumer(self._decode(pending), stream_name)
                 pending = b""
 
-            elif pending.endswith(NORMAL_PROMPT) or pending.endswith(FIRST_RAW_PROMPT):
+            elif pending.endswith(NORMAL_PROMPT):
                 # This looks like prompt.
                 # Make sure it is not followed by anything.
-                # Note that in this context the prompt usually means something is wrong
-                # (EOT would have been the happy path), so no need to hurry.
-                # The only case where this path is happy path is just after connecting.
-                follow_up = self._connection.soft_read(1, timeout=0.5)
+                follow_up = self._connection.soft_read(1, timeout=0.01)
                 if follow_up:
                     # Nope, the prompt is not active.
                     # (Actually it may be that a background thread has produced this follow up,
@@ -676,25 +633,20 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # read propmt must remain in pending
                 else:
                     # let's hope it is an active prompt
-                    if pending.endswith(NORMAL_PROMPT):
-                        terminator = NORMAL_PROMPT
-                    else:
-                        terminator = FIRST_RAW_PROMPT
+                    terminator = NORMAL_PROMPT
 
                     # Strip all trailing prompts
                     out = pending
                     while True:
                         if out.endswith(NORMAL_PROMPT):
                             out = out[: -len(NORMAL_PROMPT)]
-                        elif out.endswith(FIRST_RAW_PROMPT):
-                            out = out[: -len(FIRST_RAW_PROMPT)]
                         else:
                             break
                     output_consumer(self._decode(out), stream_name)
 
                     return terminator
 
-            elif ends_overlap(pending, NORMAL_PROMPT) or ends_overlap(pending, FIRST_RAW_PROMPT):
+            elif ends_overlap(pending, NORMAL_PROMPT):
                 # Maybe we have a prefix of the prompt and the rest is still coming?
                 # (it's OK to wait a bit, as the user output usually ends with a newline, ie not
                 # with a prompt prefix)
@@ -707,10 +659,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # Let's try the possible prefix again in the next iteration
                     # (I'm unreading otherwise the read_until won't see the whole prompt
                     # and needs to wait for the timeout)
-                    if ends_overlap(pending, NORMAL_PROMPT):
-                        n = ends_overlap(pending, NORMAL_PROMPT)
-                    else:
-                        n = ends_overlap(pending, FIRST_RAW_PROMPT)
+                    n = ends_overlap(pending, NORMAL_PROMPT)
 
                     try_again = pending[-n:]
                     pending = pending[:-n]
@@ -726,8 +675,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         "Invoked between commands"
         data = self._connection.read_all()
         if data:
-            self._raw_prompt_ensured = data.endswith(FIRST_RAW_PROMPT)
-
             met_prompt = False
             while data.endswith(NORMAL_PROMPT) or data.endswith(FIRST_RAW_PROMPT):
                 # looks like the device was resetted
@@ -1213,6 +1160,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return data.decode(ENCODING, errors="replace")
 
 
+def starts_with_continuation_byte(data):
+    return data and (data[0] & 0b11000000) == 0b10000000
+
+
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
 
@@ -1229,7 +1180,6 @@ if __name__ == "__main__":
             while True:
                 time.sleep(1000)
         elif args["port"] == "webrepl":
-            from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
             connection = WebReplConnection(args["url"], args["password"])
         else:

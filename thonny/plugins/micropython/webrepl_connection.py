@@ -31,8 +31,6 @@ class WebReplConnection(MicroPythonConnection):
             sys.exit(-1)
         self._url = url
         self._password = password
-        self._write_block_size = 255
-        self._write_block_delay = 0.5
         self._write_responses = Queue()
 
         # Some tricks are needed to use async library in a sync program.
@@ -112,32 +110,10 @@ class WebReplConnection(MicroPythonConnection):
         while True:
             while not self._write_queue.empty():
                 data = self._write_queue.get(block=False)
-                debug(
-                    "To be written:",
-                    len(data),
-                    self._write_block_size,
-                    self._write_block_delay,
-                    repr(data),
-                )
-
-                # chunk without breaking utf-8 chars
-                start_pos = 0
-                while start_pos < len(data):
-                    if start_pos > 0:
-                        await asyncio.sleep(self._write_block_delay)
-
-                    end_pos = start_pos + self._write_block_size
-                    # make sure next block doesn't start with a continuation char
-                    while end_pos < len(data) and data[end_pos] >= 0x80 and data[end_pos] < 0xC0:
-                        end_pos -= 1
-
-                    block = data[start_pos:end_pos]
-                    str_block = block.decode("UTF-8")
-                    await self._ws.send(str_block)
-                    debug("Wrote chars", len(str_block))
-
-                    start_pos = end_pos
-
+                if isinstance(data, WebreplBinaryMsg):
+                    payload = data.data
+                else:
+                    payload = data.decode("UTF-8")
                 debug("Wrote bytes", len(data))
                 self._write_responses.put(len(data))
 

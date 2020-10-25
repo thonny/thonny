@@ -5,8 +5,7 @@ import threading
 import time
 from textwrap import dedent
 
-from thonny.plugins.micropython.backend import FIRST_RAW_PROMPT
-from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT
+from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, FIRST_RAW_PROMPT
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
@@ -18,11 +17,6 @@ class SerialConnection(MicroPythonConnection):
         from serial.serialutil import SerialException
 
         super().__init__()
-
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        self._write_block_size = 30
-        self._write_block_delay = 0.01
 
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
@@ -66,15 +60,9 @@ class SerialConnection(MicroPythonConnection):
             self._reading_thread.start()
 
     def write(self, data):
-        # delay and block size taken from rshell
-        # https://github.com/dhylands/rshell/blob/master/rshell/pyboard.py#L242
-        for i in range(0, len(data), self._write_block_size):
-            if i > 0:
-                time.sleep(self._write_block_delay)
-            block = data[i : i + self._write_block_size]
-            # self._log_data(b"[" + block + b"]")
-            size = self._serial.write(block)
-            assert size == len(block)
+        size = self._serial.write(data)
+        # print(data.decode(), end="")
+        assert size == len(data)
         return len(data)
 
     def _listen_serial(self):

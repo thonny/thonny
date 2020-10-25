@@ -26,8 +26,6 @@ class MicroPythonConnection:
         self.num_bytes_received = 0
         self.startup_time = time.time()
         self._error = None
-        self._write_block_size = None
-        self._write_block_delay = None
 
     def soft_read(self, size, timeout=1):
         return self.read(size, timeout, True)
@@ -115,6 +113,11 @@ class MicroPythonConnection:
         finally:
             self._read_buffer = bytearray()
 
+    def read_all_expected(self, expected, timeout=None):
+        actual = self.read(len(expected), timeout=timeout)
+        actual += self.read_all()
+        assert expected == actual, "Expected %r, got %r" % (expected, actual)
+
     def _check_for_error(self):
         if self._error is None:
             return
@@ -169,9 +172,3 @@ class MicroPythonConnection:
 
     def close(self):
         raise NotImplementedError()
-
-    def set_write_block_size(self, size):
-        self._write_block_size = size
-
-    def set_write_block_delay(self, delay_sec):
-        self._write_block_delay = delay_sec
