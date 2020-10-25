@@ -75,14 +75,13 @@ class Completer(tk.Listbox):
     def _present_completions(self, completions_):
         # Check if autocompeted name starts with an underscore,
         # if it doesn't - don't show names starting with '_'
-        source = self.text.get("1.0", "end-1c")
+        source = self.text.get("insert linestart", tk.INSERT)
         try:
-            last_source_chunk = re.split(r"\.|\s", source)[-1]
+            current_source_chunk = re.split(r"\W", source)[-1]
         except IndexError:
-            last_source_chunk = ""
-        complete_underscored = last_source_chunk.startswith("_")
+            current_source_chunk = ""
 
-        if complete_underscored:
+        if current_source_chunk.startswith("_"):
             completions = completions_
         else:
             completions = [c for c in completions_ if not c.get("name", "_").startswith("_")]
