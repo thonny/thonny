@@ -1,3 +1,5 @@
+import re
+
 import tkinter as tk
 from tkinter import messagebox
 
@@ -70,7 +72,20 @@ class Completer(tk.Listbox):
         else:
             self._present_completions(msg.completions)
 
-    def _present_completions(self, completions):
+    def _present_completions(self, completions_):
+        # Check if autocompeted name starts with an underscore,
+        # if it doesn't - don't show names starting with '_'
+        source = self.text.get("insert linestart", tk.INSERT)
+        try:
+            current_source_chunk = re.split(r"\W", source)[-1]
+        except IndexError:
+            current_source_chunk = ""
+
+        if current_source_chunk.startswith("_"):
+            completions = completions_
+        else:
+            completions = [c for c in completions_ if not c.get("name", "_").startswith("_")]
+
         self.completions = completions
 
         # broadcast logging info
