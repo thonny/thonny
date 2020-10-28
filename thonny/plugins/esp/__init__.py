@@ -336,7 +336,6 @@ def load_plugin():
         "MicroPython (ESP32)",
         ESP32ConfigPage,
         sort_key="35",
-        write_block_size=255,
     )
     add_micropython_backend(
         "ESP8266", ESP8266Proxy, "MicroPython (ESP8266)", ESP8266ConfigPage, sort_key="36"
