@@ -484,10 +484,8 @@ def get_windows_volumes_info():
                         "size": None,
                         "modified": max(st.st_mtime, st.st_ctime),
                     }
-
-                except PermissionError:
-                    traceback.print_exc()
-                    # probably an empty cardreader slot
+                except OSError as e:
+                    logger.warning("Could not get information for %s", path, exc_info=e)
 
         bitmask >>= 1
 
