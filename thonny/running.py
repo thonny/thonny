@@ -404,6 +404,9 @@ class Runner:
 
     def _cmd_run_current_script_in_terminal(self) -> None:
         filename = get_saved_current_script_filename()
+        if not filename:
+            return
+        
         self._proxy.run_script_in_terminal(
             filename,
             self._get_active_arguments(),
