@@ -1484,6 +1484,11 @@ class Workbench(tk.Tk):
             name: meant to be used as not translatable menu name
             label: translated label, used only when menu with given name doesn't exist yet
         """
+
+        # For compatibility with plug-ins
+        if name in ["device", "tempdevice"] and label is None:
+            label = tr("Device")
+
         if name not in self._menus:
             if running_on_mac_os():
                 conf = {}
