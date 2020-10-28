@@ -197,7 +197,10 @@ class MainBackend(BaseBackend, ABC):
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
-        data = {path: self._get_filtered_dir_children_info(path) for path in cmd["paths"]}
+        data = {
+            path: self._get_filtered_dir_children_info(path, cmd["include_hidden"])
+            for path in cmd["paths"]
+        }
         return {"node_id": cmd["node_id"], "dir_separator": self._get_sep(), "data": data}
 
     def _cmd_prepare_upload(self, cmd):
@@ -222,10 +225,10 @@ class MainBackend(BaseBackend, ABC):
 
         return result
 
-    def _get_dir_descendants_info(self, path: str) -> Dict[str, Dict]:
+    def _get_dir_descendants_info(self, path: str, include_hidden: bool = False) -> Dict[str, Dict]:
         """Assumes path is dir. Dict is keyed by full path"""
         result = {}
-        children_info = self._get_filtered_dir_children_info(path)
+        children_info = self._get_filtered_dir_children_info(path, include_hidden)
         for child_name, child_info in children_info.items():
             full_child_path = path + self._get_sep() + child_name
             result[full_child_path] = child_info
@@ -234,8 +237,10 @@ class MainBackend(BaseBackend, ABC):
 
         return result
 
-    def _get_filtered_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
-        children = self._get_dir_children_info(path)
+    def _get_filtered_dir_children_info(
+        self, path: str, include_hidden: bool = False
+    ) -> Optional[Dict[str, Dict]]:
+        children = self._get_dir_children_info(path, include_hidden)
         if children is None:
             return None
 

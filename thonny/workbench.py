@@ -2321,7 +2321,9 @@ class Workbench(tk.Tk):
                     # was renamed in 2.2b5
                     view_name = "VariablesView"
 
-                if (self.get_ui_mode() != "simple" or view_name in SIMPLE_MODE_VIEWS) and view_name in self._view_records:
+                if (
+                    self.get_ui_mode() != "simple" or view_name in SIMPLE_MODE_VIEWS
+                ) and view_name in self._view_records:
                     self.show_view(view_name)
 
         # make sure VariablesView is at least loaded

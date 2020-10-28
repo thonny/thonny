@@ -120,8 +120,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._interrupt_suggestion_given = False
         self._write_block_size = args.get("write_block_size", 255)
 
-        print("Using block size", self._write_block_size)
-
         MicroPythonBackend.__init__(self, clean, args)
 
     def _get_custom_helpers(self):

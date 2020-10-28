@@ -696,8 +696,10 @@ class MainCPythonBackend(MainBackend):
     def _get_sep(self) -> str:
         return os.path.sep
 
-    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
-        return get_single_dir_child_data(path)
+    def _get_dir_children_info(
+        self, path: str, include_hidden: bool = False
+    ) -> Optional[Dict[str, Dict]]:
+        return get_single_dir_child_data(path, include_hidden)
 
     def _get_path_info(self, path: str) -> Optional[Dict]:
 

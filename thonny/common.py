@@ -385,16 +385,18 @@ def is_hidden_or_system_file(path: str) -> bool:
         return False
 
 
-def get_dirs_children_info(paths: List[str]) -> Dict[str, Optional[Dict[str, Dict]]]:
-    return {path: get_single_dir_child_data(path) for path in paths}
+def get_dirs_children_info(
+    paths: List[str], include_hidden: bool = False
+) -> Dict[str, Optional[Dict[str, Dict]]]:
+    return {path: get_single_dir_child_data(path, include_hidden) for path in paths}
 
 
-def get_single_dir_child_data(path: str) -> Optional[Dict[str, Dict]]:
+def get_single_dir_child_data(path: str, include_hidden: bool = False) -> Optional[Dict[str, Dict]]:
     if path == "":
         if platform.system() == "Windows":
             return {**get_windows_volumes_info(), **get_windows_network_locations()}
         else:
-            return get_single_dir_child_data("/")
+            return get_single_dir_child_data("/", include_hidden)
 
     elif os.path.isdir(path) or os.path.ismount(path):
         result = {}
@@ -406,13 +408,15 @@ def get_single_dir_child_data(path: str) -> Optional[Dict[str, Dict]]:
                     # must be broken link
                     continue
                 full_child_path = normpath_with_actual_case(full_child_path)
-                st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
-                name = os.path.basename(full_child_path)
-                result[name] = {
-                    "size": None if os.path.isdir(full_child_path) else st.st_size,
-                    "modified": st.st_mtime,
-                    "hidden": is_hidden_or_system_file(full_child_path),
-                }
+                hidden = is_hidden_or_system_file(full_child_path)
+                if not hidden or include_hidden:
+                    name = os.path.basename(full_child_path)
+                    st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
+                    result[name] = {
+                        "size": None if os.path.isdir(full_child_path) else st.st_size,
+                        "modified": st.st_mtime,
+                        "hidden": hidden,
+                    }
         except PermissionError:
             result["<not accessible>"] = {
                 "kind": "error",

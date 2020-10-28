@@ -1161,7 +1161,9 @@ class MicroPythonBackend(MainBackend, ABC):
         _, basename = unix_dirname_basename(path)
         return self._expand_stat(stat, basename)
 
-    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+    def _get_dir_children_info(
+        self, path: str, include_hidden: bool = False
+    ) -> Optional[Dict[str, Dict]]:
         """The key of the result dict is simple name"""
         if self._supports_directories():
             raw_data = self._evaluate(
@@ -1174,14 +1176,15 @@ class MicroPythonBackend(MainBackend, ABC):
                     __thonny_helper.print_mgmt_value(None) 
                 else:
                     for __thonny_name in __thonny_names:
-                        try:
-                            __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
-                        except OSError as e:
-                            __thonny_result[__thonny_name] = str(e)
+                        if not __thonny_name.startswith(".") or %r:
+                            try:
+                                __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
+                            except OSError as e:
+                                __thonny_result[__thonny_name] = str(e)
                     __thonny_helper.print_mgmt_value(__thonny_result)
             """
                 )
-                % (path, path.rstrip("/") + "/")
+                % (path, include_hidden, path.rstrip("/") + "/")
             )
             if raw_data is None:
                 return None

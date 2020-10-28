@@ -24,9 +24,11 @@ _dummy_node_text = "..."
 _LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
 ROOT_NODE_ID = ""
 
+HIDDEN_FILES_OPTION = "file.show_hidden_files"
+
 
 class BaseFileBrowser(ttk.Frame):
-    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
+    def __init__(self, master, show_expand_buttons=True):
         self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
         self.path_to_highlight = None
@@ -59,7 +61,6 @@ class BaseFileBrowser(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
 
-        self.show_hidden_files = show_hidden_files
         self.tree["show"] = "tree"
 
         self.tree.bind("<3>", self.on_secondary_click, True)
@@ -618,6 +619,11 @@ class BaseFileBrowser(ttk.Frame):
                 label=tr("Open in system file manager"),
                 command=lambda: self.open_path_with_system_app(selected_path),
             )
+
+            hidden_files_label = (
+                tr("Hide hidden files") if show_hidden_files() else tr("Show hidden files")
+            )
+            self.menu.add_command(label=hidden_files_label, command=self.toggle_hidden_files)
         else:
             if selected_kind == "dir":
                 self.menu.add_command(
@@ -640,6 +646,12 @@ class BaseFileBrowser(ttk.Frame):
                         label=tr("Configure %s files ...") % ext,
                         command=lambda: self.open_extension_dialog(ext),
                     )
+
+    def toggle_hidden_files(self):
+        get_workbench().set_option(
+            HIDDEN_FILES_OPTION, not get_workbench().get_option(HIDDEN_FILES_OPTION)
+        )
+        self.refresh_tree()
 
     def cmd_refresh_tree(self):
         self.refresh_tree()
@@ -849,10 +861,8 @@ class BaseFileBrowser(ttk.Frame):
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
-    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
-        super().__init__(
-            master, show_hidden_files=show_hidden_files, show_expand_buttons=show_expand_buttons
-        )
+    def __init__(self, master, show_expand_buttons=True):
+        super().__init__(master, show_expand_buttons=show_expand_buttons)
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
 
@@ -862,7 +872,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
 
     def request_dirs_child_data(self, node_id, paths):
-        self.cache_dirs_child_data(get_dirs_children_info(paths))
+        self.cache_dirs_child_data(get_dirs_children_info(paths, show_hidden_files()))
         self.render_children_from_cache(node_id)
 
     def split_path(self, path):
@@ -930,10 +940,8 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
-    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
-        super().__init__(
-            master, show_hidden_files=show_hidden_files, show_expand_buttons=show_expand_buttons
-        )
+    def __init__(self, master, show_expand_buttons=True):
+        super().__init__(master, show_expand_buttons=show_expand_buttons)
         self.dir_separator = "/"
 
         get_workbench().bind("get_dirs_children_info_response", self.update_dir_data, True)
@@ -956,7 +964,12 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
             get_runner().send_command(
-                InlineCommand("get_dirs_children_info", node_id=node_id, paths=paths)
+                InlineCommand(
+                    "get_dirs_children_info",
+                    node_id=node_id,
+                    paths=paths,
+                    include_hidden=show_hidden_files(),
+                )
             )
 
     def request_fs_info(self, path):
@@ -1310,3 +1323,7 @@ def open_with_default_app(path):
 
 def get_file_handler_conf_key(extension):
     return "file_default_handlers.%s" % extension
+
+
+def show_hidden_files():
+    return get_workbench().get_option(HIDDEN_FILES_OPTION)

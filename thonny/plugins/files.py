@@ -13,6 +13,7 @@ from thonny.base_file_browser import (
     BaseLocalFileBrowser,
     BaseRemoteFileBrowser,
     get_file_handler_conf_key,
+    HIDDEN_FILES_OPTION,
 )
 from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
 from thonny.languages import tr
@@ -116,8 +117,8 @@ class FilesView(tk.PanedWindow):
 
 
 class ActiveLocalFileBrowser(BaseLocalFileBrowser):
-    def __init__(self, master, show_hidden_files=False):
-        super().__init__(master, show_hidden_files)
+    def __init__(self, master):
+        super().__init__(master)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
     def is_active_browser(self):
@@ -214,8 +215,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
-    def __init__(self, master, show_hidden_files=False):
-        super().__init__(master, show_hidden_files)
+    def __init__(self, master):
+        super().__init__(master)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
         get_workbench().bind("RemoteFilesChanged", self.on_remote_files_changed, True)
 
@@ -477,6 +478,8 @@ def load_plugin() -> None:
     get_workbench().set_default(
         "file.last_browser_folder", normpath_with_actual_case(os.path.expanduser("~"))
     )
+
+    get_workbench().set_default(HIDDEN_FILES_OPTION, False)
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 

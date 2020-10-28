@@ -75,7 +75,7 @@ class WebReplConnection(MicroPythonConnection):
                 # try once more
                 self._ws = await websockets.connect(self._url, ping_interval=None)
         except OSError as e:
-            #print("\nCould not connect:", e, file=sys.stderr)
+            # print("\nCould not connect:", e, file=sys.stderr)
             raise ConnectionFailedException(str(e))
         debug("GOT WS", self._ws)
 
@@ -149,6 +149,7 @@ class WebReplConnection(MicroPythonConnection):
 class WebreplBinaryMsg:
     """This wrapper helps distinguishing between bytes which should
     be decoded and sent as text frame and bytes sent as binary frame"""
+
     def __init__(self, data):
         self.data = data
 
