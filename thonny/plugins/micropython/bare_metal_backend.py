@@ -389,6 +389,32 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         logger.debug("Done soft reboot in raw prompt")
 
+    def _enter_raw_mode(self):
+        logger.debug("_enter_raw_mode")
+        # assuming we are currently on a normal prompt
+        self._write(RAW_MODE_CMD)
+        discarded = self._connection.read_until(b"\r\n>", timeout=2)
+        discarded += self._connection.read_all()
+        if not discarded.endswith(FIRST_RAW_PROMPT) and not discarded.endswith(
+            W600_FIRST_RAW_PROMPT
+        ):
+            raise AssertionError("Could not enter raw prompt, got " + repr(discarded))
+
+    def _enter_normal_mode(self):
+        logger.debug("_enter_normal_mode")
+        self._write(NORMAL_MODE_CMD)
+
+        def ignore_output(data, stream):
+            pass
+
+        self._forward_output_until_active_prompt(ignore_output)
+
+    def _soft_reboot_in_normal_mode_without_running_main(self):
+        logger.debug("_soft_reboot_in_normal_mode_without_running_main")
+        self._enter_raw_mode()
+        self._soft_reboot_in_raw_prompt_without_running_main()
+        self._enter_normal_mode()
+
     def _extra_interrupts_after_soft_reboot(self):
         # To be overridden for CP
         pass
@@ -770,6 +796,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _cmd_write_file(self, cmd):
         self._check_sync_time()
         return super(BareMetalMicroPythonBackend, self)._cmd_write_file(cmd)
+
+    def _reset_environment(self):
+        self._soft_reboot_in_normal_mode_without_running_main()
 
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():

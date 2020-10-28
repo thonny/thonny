@@ -621,10 +621,11 @@ class MicroPythonBackend(MainBackend, ABC):
             raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        """Only for %run $EDITOR_CONTENT. Clean runs will be handled differently."""
-        # TODO: clear last object inspector requests dictionary
+        """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
         if cmd.get("source"):
+            self._reset_environment()
             self._execute(cmd.source, capture_output=False)
+            self._prepare_helpers()
             self._update_cwd()
         return {}
 
@@ -707,6 +708,11 @@ class MicroPythonBackend(MainBackend, ABC):
         self._execute("del __thonny_value")
 
         return {"id": cmd.object_id, "info": info}
+
+    def _reset_environment(self):
+        """For preparing a Run"""
+        # TODO: clear last object inspector requests dictionary
+        pass
 
     def _find_basic_object_info(self, object_id, context_id):
         """If object is found then returns basic info and leaves object reference to __thonny_value"""
