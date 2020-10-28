@@ -29,7 +29,7 @@ LANGUAGES_DICT = {
     "zh_CN": "简体中文 ",
     "ja_JP": "日本語  [ALPHA]",
     "lt_LT": "Lietuvių",
-    "el_GR": "Ελληνικά [BETA]",
+    "el_GR": "Ελληνικά",
 }
 
 # how many spaces to add to button caption in order to make whole text visible
