@@ -136,6 +136,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
+        # Can result either in raw or regular prompt
 
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
@@ -159,7 +160,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._validate_time()
 
         if self._welcome_text:
-            self._send_ready_message()
+            self._send_ready_message(clean)
             self._report_time("sent ready")
 
         self._builtin_modules = self._fetch_builtin_modules()
@@ -471,8 +472,13 @@ class MicroPythonBackend(MainBackend, ABC):
         if "micro:bit" not in self._welcome_text.lower():
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
-    def _send_ready_message(self):
-        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
+    def _send_ready_message(self, include_welcome_text):
+        args = dict(cwd=self._cwd)
+        # if not clean, then welcome text is already printed as output from the last session
+        if include_welcome_text:
+            args["welcome_text"] = self._welcome_text
+
+        self.send_message(ToplevelResponse(**args))
 
     def _write(self, data):
         raise NotImplementedError()
@@ -590,7 +596,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._submit_input(cmd.data)
             elif isinstance(cmd, EOFCommand):
                 # in this context it is not supposed to soft-reboot
-                self._submit_input(EOT.decode())
+                self._write(b"\x04")
             else:
                 postponed.append(cmd)
 

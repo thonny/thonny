@@ -147,6 +147,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
     def _process_until_initial_prompt(self, clean):
+        logger.debug("_process_until_initial_prompt, clean=%s", clean)
         if clean:
             self._interrupt_to_raw_prompt()
             self._soft_reboot_in_raw_prompt_without_running_main()
@@ -330,7 +331,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies. See CalliopeMiniProxy for more details
-
+        logger.debug("_interrupt_to_raw_prompt")
         discarded_bytes = b""
 
         for delay in [0.05, 0.5, 0.1, 1.0, 3.0, 5.0]:
@@ -369,13 +370,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             sys.exit()
 
+        logger.debug("Done _interrupt_to_raw_prompt")
+
     def _soft_reboot_in_raw_prompt_without_running_main(self):
+        logger.debug("_soft_reboot_in_raw_prompt_without_running_main")
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
-        # CP runs code.py after soft-reboot even in raw repl, so I'll send some Ctrl-C to intervene
-        # # (they don't do anything when already in raw repl)
-        self._write(INTERRUPT_CMD)
-        self._write(INTERRUPT_CMD)
+        self._extra_interrupts_after_soft_reboot()
 
         discarded_bytes = b""
         while not discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
@@ -383,6 +384,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         ):
             discarded_bytes += self._connection.soft_read(1, timeout=1)
             discarded_bytes += self._connection.read_all()
+            logger.debug("Discarded bytes when waiting for reboot: %r", discarded_bytes)
+
+        logger.debug("Done soft reboot in raw prompt")
+
+    def _extra_interrupts_after_soft_reboot(self):
+        # To be overridden for CP
+        pass
 
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -392,7 +400,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
         self._forward_output_until_active_prompt(self._send_output)
-        debug("Restoring helpers")
+        logger.debug("Restoring helpers")
         self._prepare_helpers()
         self._update_cwd()
         self.send_message(ToplevelResponse(cwd=self._cwd))
@@ -1286,7 +1294,12 @@ if __name__ == "__main__":
             connection = SerialConnection(args["port"], BAUDRATE)
             # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
-        backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
+        if "circuitpython" in args.get("proxy_class", "").lower():
+            from thonny.plugins.circuitpython.cp_backend import CircuitPythonBackend
+
+            backend = CircuitPythonBackend(connection, clean=args["clean"], args=args)
+        else:
+            backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
 
     except ConnectionFailedException as e:
         text = "\n" + str(e) + "\n"

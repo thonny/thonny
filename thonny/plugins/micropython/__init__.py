@@ -162,6 +162,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "port": self._port,
             "api_stubs_path": self._get_api_stubs_path(),
             "write_block_size": self._get_write_block_size(),
+            "proxy_class": self.__class__.__name__,
         }
         if self._port == "webrepl":
             args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
