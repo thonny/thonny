@@ -68,6 +68,7 @@ WEBREPL_REQ_S = "<2sBBQLH64s"
 WEBREPL_PUT_FILE = 1
 WEBREPL_GET_FILE = 2
 
+TRACEBACK_MARKER = b"Traceback (most recent call last):"
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -599,6 +600,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             new_data = self._connection.soft_read_until(
                 INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
             )
+            if TRACEBACK_MARKER in new_data:
+                stream_name = "stderr"
+
             if not new_data:
                 # In case we are still waiting for the first bits after connecting ...
                 # TODO: this suggestion should be implemented in Shell
