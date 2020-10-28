@@ -36,6 +36,7 @@ class Editor(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
+        self.notebook = master  # type: EditorNotebook
 
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
@@ -239,6 +240,17 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("Save", editor=self, filename=save_filename)
         else:
             save_filename = self.ask_new_path()
+
+            if self.notebook.get_editor(save_filename) is not None:
+                messagebox.showerror(
+                    "File is open",
+                    "This file is already open in Thonny.\n\n"
+                    "If you want to save with this name,\n"
+                    "close the existing editor first!",
+                    master=get_workbench(),
+                )
+                return None
+
             if not save_filename:
                 return None
 
