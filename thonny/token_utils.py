@@ -12,6 +12,11 @@ _builtinlist = [
     str(name) for name in dir(builtins) if not name.startswith("_") and name not in keyword.kwlist
 ]
 
+# Not really built-ins, but special names nevertheless
+_builtinlist.append("self")
+_builtinlist.append("cls")
+
+
 # TODO: move builtin handling to global-local
 BUILTIN = r"([^.'\"\\#]\b|^)" + matches_any("builtin", _builtinlist) + r"\b"
 NUMBER = matches_any("number", [r"\b(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"])
