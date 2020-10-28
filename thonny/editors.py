@@ -241,6 +241,9 @@ class Editor(ttk.Frame):
         else:
             save_filename = self.ask_new_path()
 
+            if not save_filename:
+                return None
+
             if self.notebook.get_editor(save_filename) is not None:
                 messagebox.showerror(
                     "File is open",
@@ -249,9 +252,6 @@ class Editor(ttk.Frame):
                     "close the existing editor first!",
                     master=get_workbench(),
                 )
-                return None
-
-            if not save_filename:
                 return None
 
             get_workbench().event_generate(
