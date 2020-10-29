@@ -971,7 +971,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return None
 
     def get_editor(self, filename, open_when_necessary=False):
-        if not is_remote_path(filename):
+        if not is_remote_path(filename) and os.path.isfile(filename):
             filename = normpath_with_actual_case(os.path.abspath(filename))
         for child in self.winfo_children():
             child_filename = child.get_filename(False)
