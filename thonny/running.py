@@ -1351,6 +1351,7 @@ def generate_command_id():
     _command_id_counter += 1
     return "cmd_" + str(_command_id_counter)
 
+
 class InlineCommandDialog(WorkDialog):
     def __init__(self, master, cmd, title):
         self.response = None

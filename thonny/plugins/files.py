@@ -15,7 +15,12 @@ from thonny.base_file_browser import (
     get_file_handler_conf_key,
     HIDDEN_FILES_OPTION,
 )
-from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS, CommandToBackend
+from thonny.common import (
+    InlineCommand,
+    normpath_with_actual_case,
+    IGNORED_FILES_AND_DIRS,
+    CommandToBackend,
+)
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
 from thonny.running import construct_cd_command, InlineCommandDialog
@@ -256,18 +261,23 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             if not selection:
                 return
 
-            dlg = DownloadDialog(self, selection["paths"], selection["description"],
-                                 self.get_active_directory(), target_dir)
+            dlg = DownloadDialog(
+                self,
+                selection["paths"],
+                selection["description"],
+                self.get_active_directory(),
+                target_dir,
+            )
             ui_utils.show_dialog(dlg)
             if dlg.response is not None:
                 self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=tr("Download to %s") % target_dir, command=download)
 
-
     def add_middle_menu_items(self, context):
         self.add_download_command()
         super().add_middle_menu_items(context)
+
 
 class TransferDialog(InlineCommandDialog):
     def _on_response(self, response):
@@ -317,8 +327,11 @@ class UploadDialog(TransferDialog):
                     source_names.append(os.path.basename(item["source_path"]))
 
         target_paths = [x["target_path"] for x in self.items]
-        cmd = InlineCommand("prepare_upload", target_paths=target_paths,
-                            description=get_transfer_description("Uploading", source_names, target_dir))
+        cmd = InlineCommand(
+            "prepare_upload",
+            target_paths=target_paths,
+            description=get_transfer_description("Uploading", source_names, target_dir),
+        )
 
         super(UploadDialog, self).__init__(master, cmd, "Uploading")
 
@@ -336,6 +349,7 @@ class UploadDialog(TransferDialog):
         else:
             return False
 
+
 class DownloadDialog(TransferDialog):
     def __init__(self, master, paths, description, source_dir, target_dir):
         self._stage = "preparation"
@@ -343,10 +357,10 @@ class DownloadDialog(TransferDialog):
         self._source_dir = source_dir
 
         cmd = InlineCommand(
-                    "prepare_download",
-                    source_paths=paths,
-                    description=tr("Downloading %s to %s") % (description, target_dir),
-                )
+            "prepare_download",
+            source_paths=paths,
+            description=tr("Downloading %s to %s") % (description, target_dir),
+        )
 
         super(DownloadDialog, self).__init__(master, cmd, "Downloading")
 
@@ -467,7 +481,6 @@ def pick_transfer_items(
         return prepared_items
 
 
-
 def format_items(items):
     max_count = 10
     if len(items) == 1:
@@ -516,6 +529,7 @@ def _prepare_upload_items(
                     )
                 )
     return result
+
 
 def get_transfer_description(verb, paths, target_dir):
     if len(paths) == 1:

@@ -733,7 +733,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _cmd_execute_system_command(self, cmd):
         # Can't use stdin, because a thread is draining it
         returncode = execute_system_command(cmd, cwd=self._local_cwd, disconnect_stdin=True)
-        return {"returncode" : returncode}
+        return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
         result = self._evaluate(

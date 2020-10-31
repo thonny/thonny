@@ -452,7 +452,7 @@ class MainCPythonBackend(MainBackend):
     def _cmd_execute_system_command(self, cmd):
         self._check_update_tty_mode(cmd)
         returncode = execute_system_command(cmd)
-        return {"returncode" : returncode}
+        return {"returncode": returncode}
 
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop

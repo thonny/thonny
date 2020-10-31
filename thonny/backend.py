@@ -97,9 +97,7 @@ class BaseBackend(ABC):
         )
         self._last_progress_reporting_time = time.time()
 
-    def _report_current_action(
-        self, cmd, description: str
-    ) -> None:
+    def _report_current_action(self, cmd, description: str) -> None:
         self.send_message(
             BackendEvent(
                 event_type="InlineProgress",
@@ -368,9 +366,7 @@ class UploadDownloadMixin(ABC):
                 completed = completed_cost + completed_bytes
                 desc = str(round(completed / total_cost * 100)) + "%"
 
-                self._report_progress(
-                    cmd, desc, completed, total_cost
-                )
+                self._report_progress(cmd, desc, completed, total_cost)
 
             try:
                 if item["kind"] == "dir":
