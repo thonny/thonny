@@ -1,47 +1,26 @@
-import io
 import logging
 import os
 import platform
-import queue
-import re
-import subprocess
-import sys
-import textwrap
-import threading
-import time
-import traceback
-from queue import Queue
 from textwrap import dedent
-from time import sleep
 from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
-    BackendEvent,
     CommandToBackend,
     EOFCommand,
-    InlineResponse,
     ImmediateCommand,
-    MessageFromBackend,
-    ToplevelCommand,
-    ToplevelResponse,
 )
-from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
-from thonny.misc_utils import TimeHelper, find_volumes_by_name
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
     get_ssh_password,
 )
-from thonny.running import BackendProxy, SubprocessProxy
+from thonny.running import SubprocessProxy
 from thonny.ui_utils import (
-    SubprocessDialog,
-    askopenfilename,
     create_string_var,
     create_url_label,
-    show_dialog,
 )
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"

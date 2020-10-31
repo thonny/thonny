@@ -21,7 +21,6 @@ from thonny.running import get_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
-    SubprocessDialog,
     askopenfilename,
     get_busy_cursor,
     lookup_style_option,
@@ -29,6 +28,7 @@ from thonny.ui_utils import (
     scrollbar_style,
     ems_to_pixels,
 )
+from thonny.workdlg import SubprocessDialog
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
@@ -692,6 +692,7 @@ class PipDialog(CommonDialog):
         install_cmd = self._get_install_command()
 
         if action == "install":
+            title = tr("Installing")
             if not self._confirm_install(self.current_package_data):
                 return False
 
@@ -701,6 +702,7 @@ class PipDialog(CommonDialog):
 
             args.append(name)
         elif action == "uninstall":
+            title = tr("Uninstalling")
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
                 tr("Really uninstall?"),
                 tr(
@@ -713,6 +715,7 @@ class PipDialog(CommonDialog):
                 return False
             args = ["uninstall", "-y", name]
         elif action == "advanced":
+            title = tr("Installing")
             details = _ask_installation_details(
                 self,
                 data,
@@ -734,10 +737,12 @@ class PipDialog(CommonDialog):
             raise RuntimeError("Unknown action")
 
         proc, cmd = self._create_pip_process(args)
-        title = subprocess.list2cmdline(cmd)
+        long_description = get_user_friendly_pip_command_line(cmd)
 
         # following call blocks
-        returncode, _, _ = _show_subprocess_dialog(self, proc, title)
+        returncode, _, _ = _show_subprocess_dialog(
+            self, proc, title=title, long_description=long_description
+        )
         if returncode != 0:
             return False
         else:
@@ -785,10 +790,12 @@ class PipDialog(CommonDialog):
         args.append(filename)
 
         proc, cmd = self._create_pip_process(args)
-        # following call blocks
-        title = subprocess.list2cmdline(cmd)
-
-        _, out, _ = _show_subprocess_dialog(self, proc, title)
+        _, out, _ = _show_subprocess_dialog(
+            self,
+            proc,
+            title=tr("Installing"),
+            long_description=get_user_friendly_pip_command_line(cmd),
+        )
 
         # Try to find out the name of the package we're installing
         name = None
@@ -1284,8 +1291,8 @@ def _get_latest_stable_version(version_strings):
     return str(sorted(versions)[-1])
 
 
-def _show_subprocess_dialog(master, proc, title):
-    dlg = SubprocessDialog(master, proc, title, autoclose=True)
+def _show_subprocess_dialog(master, proc, title, long_description=None):
+    dlg = SubprocessDialog(master, proc, title, long_description=long_description, autoclose=True)
     ui_utils.show_dialog(dlg, master)
     return dlg.returncode, dlg.stdout, dlg.stderr
 
@@ -1410,6 +1417,17 @@ def _extract_click_text(widget, event, tag):
 
 def get_not_supported_translation():
     return tr("Package manager is not available for this interpreter")
+
+
+def get_user_friendly_pip_command_line(cmd):
+    relevant = cmd[:]
+    if "-m" in relevant:
+        relevant = relevant[relevant.index("-m") + 1 :]
+    for switch in ["--disable-pip-version-check"]:
+        if switch in relevant:
+            relevant.remove(switch)
+
+    return subprocess.list2cmdline(relevant)
 
 
 def load_plugin() -> None:

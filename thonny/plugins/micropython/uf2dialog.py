@@ -225,7 +225,9 @@ class Uf2FlashingDialog(WorkDialog):
         if isinstance(proxy, BareMetalMicroPythonProxy):
             proxy.disconnect()
 
-        threading.Thread(target=self._perform_work, args=[download_url, size, target_dir]).start()
+        threading.Thread(
+            target=self._perform_work, args=[download_url, size, target_dir], daemon=True
+        ).start()
         return True
 
     @classmethod

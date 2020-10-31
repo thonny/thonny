@@ -1,11 +1,20 @@
+import logging
+import os
 import queue
+import signal
+import subprocess
+import threading
+import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 from typing import Optional
 
 from thonny import tktextext
 from thonny.languages import tr
+from thonny.misc_utils import running_on_windows
 from thonny.ui_utils import CommonDialog, ems_to_pixels, create_action_label, set_text_if_different
+
+logger = logging.getLogger(__name__)
 
 
 class WorkDialog(CommonDialog):
@@ -72,7 +81,7 @@ class WorkDialog(CommonDialog):
         self._current_action_label = create_action_label(
             self.action_frame,
             text="Please wait...",
-            width=self.get_action_text_max_length(),
+            width=round(self.get_action_text_max_length() * 1.2),
             click_handler=self.toggle_log_frame,
         )
 
@@ -284,5 +293,113 @@ class WorkDialog(CommonDialog):
                 self._cancel_button["default"] = "normal"
 
             self._progress_bar.stop()
+            # need to put to determinate mode, otherwise it looks half done
+            self._progress_bar["mode"] = "determinate"
             if self.success and self._autostart:
                 self.close()
+
+
+class SubprocessDialog(WorkDialog):
+    """Shows incrementally the output of given subprocess.
+    Allows cancelling"""
+
+    def __init__(
+        self, master, proc, title, long_description=None, autoclose=True, conclusion="Done."
+    ):
+        self._proc = proc
+        self.stdout = ""
+        self.stderr = ""
+        self._stdout_thread = None
+        self._stderr_thread = None
+        self._title = title
+        self._long_description = long_description
+        self.returncode = None
+
+        super().__init__(master, autostart=autoclose)
+
+    def is_ready_for_work(self):
+        return True
+
+    def get_title(self):
+        return self._title
+
+    def get_instructions(self) -> Optional[str]:
+        return self._long_description
+
+    def start_work(self):
+        def listen_stream(stream_name):
+            stream = getattr(self._proc, stream_name)
+            while True:
+                data = stream.readline()
+                time.sleep(1)
+                self.append_text(data, stream_name)
+                self._check_set_action_text_from_output_line(data)
+                setattr(self, stream_name, getattr(self, stream_name) + data)
+                if data == "":
+                    logger.debug("Finished reading %s", stream_name)
+                    break
+
+            if stream_name == "stdout":
+                self.returncode = self._proc.wait()
+                logger.debug("Process ended with returncode %s", self.returncode)
+                if self.returncode:
+                    self.set_action_text("Error")
+                    self.append_text("Error: process returned with code %s\n" % self.returncode)
+                else:
+                    self.set_action_text("Done!")
+                    self.append_text("Done!")
+
+                self.report_done(self.returncode == 0)
+
+            logger.debug("Returning from reading %s", stream_name)
+
+        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"], daemon=True)
+        self._stdout_thread.start()
+        if self._proc.stderr is not None:
+            self._stderr_thread = threading.Thread(
+                target=listen_stream, args=["stderr"], daemon=True
+            )
+            self._stderr_thread.start()
+
+    def get_action_text_max_length(self):
+        return 35
+
+    def _check_set_action_text_from_output_line(self, line):
+        if len(line) > self.get_action_text_max_length():
+            line = line[: self.get_action_text_max_length() - 3].strip() + "..."
+        if line:
+            self.set_action_text(line.strip())
+
+    def confirm_cancel(self):
+        if self._proc.poll() is None:
+            return messagebox.askyesno(
+                tr("Cancel the process?"),
+                tr("The process is still running.\nAre you sure you want to cancel?"),
+                parent=self,
+            )
+        else:
+            return True
+
+    def cancel_work(self):
+        super(SubprocessDialog, self).cancel_work()
+        # try gently first
+        try:
+            try:
+                if running_on_windows():
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
+                else:
+                    os.kill(self._proc.pid, signal.SIGINT)
+
+                self._proc.wait(2)
+            except subprocess.TimeoutExpired:
+                if self._proc.poll() is None:
+                    # now let's be more concrete
+                    self._proc.kill()
+        except OSError as e:
+            messagebox.showerror("Error", "Could not kill subprocess: " + str(e), master=self)
+            logger.error("Could not kill subprocess", exc_info=e)
+
+        # Wait for threads to finish
+        self._stdout_thread.join(2)
+        if self._stderr_thread is not None:
+            self._stderr_thread.join(2)

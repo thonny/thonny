@@ -6,7 +6,11 @@ from collections import OrderedDict
 from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench, ui_utils
-from thonny.misc_utils import construct_cmd_line, running_on_mac_os
+from thonny.misc_utils import (
+    construct_cmd_line,
+    running_on_mac_os,
+    user_friendly_python_command_line,
+)
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
@@ -17,10 +21,10 @@ from thonny.plugins.micropython.serial_connection import SerialConnection
 from thonny.running import get_interpreter_for_subprocess
 from thonny.ui_utils import (
     CommonDialogEx,
-    SubprocessDialog,
     ems_to_pixels,
     show_dialog,
 )
+from thonny.workdlg import SubprocessDialog
 
 
 class ESPProxy(BareMetalMicroPythonProxy):
@@ -292,9 +296,6 @@ class ESPFlashingDialog(CommonDialogEx):
             min_left = 0
             min_top = 0
 
-        def long_desc(cmd):
-            return "Command:\n%s\n\nOutput:\n" % construct_cmd_line(cmd)
-
         self.update_idletasks()
         if self._erase_variable.get():
             proc = self._create_subprocess(erase_command)
@@ -302,11 +303,11 @@ class ESPFlashingDialog(CommonDialogEx):
                 self,
                 proc,
                 "Erasing flash",
-                long_description=long_desc(erase_command),
-                autoclose=True,
+                long_description=user_friendly_python_command_line(erase_command),
+                autoclose=False,
             )
             show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)
-            if dlg.cancelled or dlg.returncode:
+            if not dlg.success:
                 return
 
         proc = self._create_subprocess(write_command)
@@ -314,7 +315,7 @@ class ESPFlashingDialog(CommonDialogEx):
             self,
             proc,
             "Installing firmware",
-            long_description=long_desc(write_command),
+            long_description=user_friendly_python_command_line(write_command),
             autoclose=False,
         )
         show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)

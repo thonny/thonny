@@ -230,6 +230,21 @@ def construct_cmd_line(parts, safe_tokens=[]) -> str:
     return " ".join(map(quote, parts))
 
 
+def user_friendly_python_command_line(cmd):
+    if "-m" in cmd:
+        cmd = cmd[cmd.index("-m") + 1 :]
+
+    lines = [""]
+    for item in cmd:
+        if lines[-1] and len(lines[-1] + " " + item) > 60:
+            lines.append("")
+        lines[-1] = (lines[-1] + " " + item).strip()
+
+    return "\n".join(lines)
+
+    return subprocess.list2cmdline(cmd)
+
+
 def parse_cmd_line(s):
     return shlex.split(s, posix=True)
 

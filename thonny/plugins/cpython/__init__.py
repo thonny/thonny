@@ -26,7 +26,7 @@ from thonny.running import (
     WINDOWS_EXE,
 )
 from thonny.terminal import run_in_terminal
-from thonny.ui_utils import SubprocessDialog, askdirectory, askopenfilename, create_string_var
+from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +199,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
         proc = create_frontend_python_process(args)
 
-        from thonny.ui_utils import SubprocessDialog
+        from thonny.workdlg import SubprocessDialog
 
         dlg = SubprocessDialog(
             get_workbench(), proc, "Preparing the backend", long_description=description
@@ -458,6 +458,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             stderr=subprocess.STDOUT,
             universal_newlines=True,
         )
+        from thonny.workdlg import SubprocessDialog
+
         dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"))
         ui_utils.show_dialog(dlg)
 
