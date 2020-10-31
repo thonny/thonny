@@ -255,6 +255,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         cmd_line = cmd.cmd_line[1:]
         # "or None" in order to avoid MP repl to print its value
         self._execute("__thonny_helper.os.system(%r) or None" % cmd_line)
+        # TODO: report returncode
 
     def _cmd_get_fs_info(self, cmd):
         script = """__thonny_helper.os.system("stat -f -c '%b %f %a %S' {path}") or None""".format(

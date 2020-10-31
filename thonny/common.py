@@ -608,6 +608,7 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
 
     copy_out.join()
     copy_err.join()
+    return proc.returncode
 
 
 def universal_dirname(path: str) -> str:
