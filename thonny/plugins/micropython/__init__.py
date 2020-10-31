@@ -124,8 +124,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 message = dedent(
                     """\
                     Couldn't find the device automatically. 
-                    Check the connection (making sure the device is not in bootloader mode)
-                    or choose "Tools → Options → Interpreter" to select the port manually."""
+                    Check the connection (making sure the device is not in bootloader mode) or choose
+                    "Configure interpreter" in the interpreter menu (bottom-right corner of the window)
+                    to select specific port or another interpreter."""
                 )
 
                 if len(potential) > 1:
