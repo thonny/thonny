@@ -144,6 +144,9 @@ class ShellView(tk.PanedWindow):
 
         self.update_plotter_visibility(True)
 
+    def set_ignore_program_output(self, value):
+        self.text._ignore_program_output = value
+
     def toggle_plotter(self):
         self.plotter_visibility_var.set(not self.plotter_visibility_var.get())
         self.update_plotter_visibility()
@@ -290,6 +293,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def __init__(self, master, view=None, cnf={}, **kw):
         self.view = view
+        self._ignore_program_output = False
         self._link_handler_count = 0
         kw["tabstyle"] = "wordprocessor"
         super().__init__(master, cnf, **kw)
@@ -400,6 +404,9 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.see("end")
 
     def _handle_program_output(self, msg):
+        if self._ignore_program_output:
+            # This output will be handled elsewhere
+            return
         # Discard but not too often, as toplevel response will discard anyway
         if int(float(self.index("end"))) > get_workbench().get_option("shell.max_lines") + 100:
             self._discard_old_content()

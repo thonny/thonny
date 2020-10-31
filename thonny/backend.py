@@ -43,6 +43,7 @@ class BaseBackend(ABC):
     """Methods for both MainBackend and forwarding backend"""
 
     def __init__(self):
+        self._current_command = None
         self._incoming_message_queue = queue.Queue()  # populated by the reader thread
         self._interrupt_lock = threading.Lock()
         self._last_progress_reporting_time = 0
@@ -67,6 +68,7 @@ class BaseBackend(ABC):
                         elif isinstance(msg, EOFCommand):
                             self._handle_eof_command(msg)
                         else:
+                            self._current_command = msg
                             self._handle_normal_command(msg)
                 except KeyboardInterrupt:
                     self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
@@ -360,7 +362,7 @@ class UploadDownloadMixin(ABC):
             ensured_dirs.add(path)
 
         for item in sorted(items, key=lambda x: x["source_path"]):
-            self._report_progress(cmd, item["source_path"], completed_cost, total_cost)
+            self._report_progress(cmd, "Starting", completed_cost, total_cost)
 
             def copy_bytes_notifier(completed_bytes, total_bytes):
                 completed = completed_cost + completed_bytes
@@ -377,6 +379,7 @@ class UploadDownloadMixin(ABC):
                 else:
                     if self._supports_directories():
                         ensure_dir(self._get_parent_directory(item["target_path"]))
+                    print("%s (%d bytes)" % (item["source_path"], item["size"]))
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
             except OSError as e:

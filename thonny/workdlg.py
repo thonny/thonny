@@ -119,8 +119,14 @@ class WorkDialog(CommonDialog):
         self.log_text.grid(row=1, column=1, sticky="nsew", padx=padding, pady=(0, padding))
 
     def update_ui(self):
+        if self._state == "closed":
+            return
+
         while not self._work_events_queue.empty():
             self.handle_work_event(*self._work_events_queue.get())
+
+        if self._state == "closed":
+            return
 
         if self._state == "idle":
             if self.is_ready_for_work():
@@ -276,4 +282,7 @@ class WorkDialog(CommonDialog):
                 self._ok_button.focus_set()
                 self._ok_button["default"] = "active"
                 self._cancel_button["default"] = "normal"
+
             self._progress_bar.stop()
+            if self.success and self._autostart:
+                self.close()

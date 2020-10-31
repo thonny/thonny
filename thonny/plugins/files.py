@@ -269,8 +269,42 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
         self.add_download_command()
         super().add_middle_menu_items(context)
 
+class TransferDialog(InlineCommandDialog):
+    def _on_response(self, response):
+        if response.get("command_id") != self._cmd["id"]:
+            return
 
-class UploadDialog(InlineCommandDialog):
+        if self._stage == "preparation":
+            if self._confirm_and_start_main_work(response):
+                self._stage = "main_work"
+            else:
+                self.response = None
+                self.report_done(True)
+
+        elif self._stage == "main_work":
+            self.response = response
+            self.report_done(self._check_success(response))
+
+        self.update_ui()
+
+    def _confirm_and_start_main_work(self, response):
+        raise NotImplementedError()
+
+    def _check_success(self, response):
+        if response.get("error"):
+            self.set_action_text("Error")
+            self.append_text("\nError: %s\n" % response["error"])
+            return False
+        elif response["errors"]:
+            self.set_action_text("Error")
+            self.append_text("\nError: %s\n" % format_items(response["errors"]))
+            return False
+        else:
+            self.set_action_text("Done!")
+            return True
+
+
+class UploadDialog(TransferDialog):
     def __init__(self, master, paths, source_dir, target_dir):
         self._stage = "preparation"
         self.items = []
@@ -288,22 +322,6 @@ class UploadDialog(InlineCommandDialog):
 
         super(UploadDialog, self).__init__(master, cmd, "Uploading")
 
-    def _on_response(self, response):
-        if response.get("command_id") != self._cmd["id"]:
-            return
-
-        if self._stage == "preparation":
-            if self._confirm_and_start_main_work(response):
-                self._stage = "main_work"
-            else:
-                self.response = None
-                self.destroy()
-
-        elif self._stage == "main_work":
-            _check_transfer_errors(response, self)
-            self.response = response
-            self.destroy()
-
     def _confirm_and_start_main_work(self, preparation_response):
         picked_items = list(
             sorted(
@@ -318,7 +336,7 @@ class UploadDialog(InlineCommandDialog):
         else:
             return False
 
-class DownloadDialog(InlineCommandDialog):
+class DownloadDialog(TransferDialog):
     def __init__(self, master, paths, description, source_dir, target_dir):
         self._stage = "preparation"
         self._target_dir = target_dir
@@ -367,22 +385,6 @@ class DownloadDialog(InlineCommandDialog):
                     "size": size,
                 }
         return result
-
-    def _on_response(self, response):
-        if response.get("command_id") != self._cmd["id"]:
-            return
-
-        if self._stage == "preparation":
-            if self._confirm_and_start_main_work(response):
-                self._stage = "main_work"
-            else:
-                self.response = None
-                self.destroy()
-
-        elif self._stage == "main_work":
-            _check_transfer_errors(response, self)
-            self.response = response
-            self.destroy()
 
     def _confirm_and_start_main_work(self, preparation_response):
         prepared_items = self._prepare_download_items(
@@ -464,15 +466,6 @@ def pick_transfer_items(
     else:
         return prepared_items
 
-
-def _check_transfer_errors(response, master):
-    if response.get("error"):
-        showerror(tr("Transfer error"), response["error"], master=master)
-    elif response["errors"]:
-        showerror(
-            tr("Transfer error"),
-            "Got following errors:\n" + format_items(response["errors"], master=master),
-        )
 
 
 def format_items(items):

@@ -1144,9 +1144,7 @@ class FakeOutputStream(FakeStream):
                 data = data.decode(errors="replace")
 
             if data != "":
-                self._backend.send_message(
-                    BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data)
-                )
+                self._backend._send_output(data=data, stream_name=self._stream_name)
                 self._processed_symbol_count += len(data)
         finally:
             self._backend._exit_io_function()

@@ -1356,9 +1356,11 @@ class InlineCommandDialog(WorkDialog):
         self.response = None
         self._title = title
         self._cmd = cmd
+        get_shell().set_ignore_program_output(True)
 
         get_workbench().bind("InlineResponse", self._on_response, True)
         get_workbench().bind("InlineProgress", self._on_progress, True)
+        get_workbench().bind("ProgramOutput", self._on_output, True)
 
         super().__init__(master, autostart="confirmation" not in self._cmd)
 
@@ -1373,15 +1375,18 @@ class InlineCommandDialog(WorkDialog):
             self.response = response
             self.destroy()
 
-    def _on_progress(self, event):
-        if event.get("command_id") != self._cmd["id"]:
+    def _on_progress(self, msg):
+        if msg.get("command_id") != self._cmd["id"]:
             return
 
-        if event.get("value", None) is not None and event.get("maximum", None) is not None:
-            self.report_progress(event["value"], event["maximum"])
-        if event.get("description"):
-            self.set_action_text(event["description"])
+        if msg.get("value", None) is not None and msg.get("maximum", None) is not None:
+            self.report_progress(msg["value"], msg["maximum"])
+        if msg.get("description"):
+            self.set_action_text(msg["description"])
         self.update_ui()
+
+    def _on_output(self, msg):
+        self.append_text(msg["data"], msg.get("stream_name", "stdout"))
 
     def _keep_updating_ui(self):
         # updating in _on_progress, don't need another timer
@@ -1398,6 +1403,7 @@ class InlineCommandDialog(WorkDialog):
         get_workbench().unbind("InlineResponse", self._on_response)
         get_workbench().unbind("InlineProgress", self._on_progress)
         super(InlineCommandDialog, self).close()
+        get_shell().set_ignore_program_output(False)
 
 
 def get_frontend_python():
