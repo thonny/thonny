@@ -43,6 +43,23 @@ def _compute_thonny_user_dir():
         return os.path.join(data_home, "Thonny")
 
 
+def _read_configured_debug_mode():
+    if not os.path.exists(CONFIGURATION_FILE):
+        return False
+
+    try:
+        with open(CONFIGURATION_FILE, encoding="utf-8") as fp:
+            for line in fp:
+                if "debug_mode" in line and "True" in line:
+                    return True
+        return False
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+        return False
+
+
 def is_portable():
     # it can be explicitly declared as portable or shared ...
     portable_marker_path = os.path.join(os.path.dirname(sys.executable), "portable_thonny.ini")
@@ -82,6 +99,7 @@ def get_version():
 
 THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE = os.path.join(THONNY_USER_DIR, "configuration.ini")
+_CONFIGURED_DEBUG = _read_configured_debug_mode()
 
 
 _IPC_FILE = None
@@ -384,13 +402,17 @@ def _choose_logging_level():
 
 def in_debug_mode() -> bool:
     # Value may be something other than string when it is set in Python code
-    return os.environ.get("THONNY_DEBUG", False) in [
-        "1",
-        1,
-        "True",
-        True,
-        "true",
-    ]
+    return (
+        os.environ.get("THONNY_DEBUG", False)
+        in [
+            "1",
+            1,
+            "True",
+            True,
+            "true",
+        ]
+        or _CONFIGURED_DEBUG
+    )
 
 
 def get_runner() -> "Runner":
