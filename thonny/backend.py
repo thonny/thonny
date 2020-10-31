@@ -95,6 +95,17 @@ class BaseBackend(ABC):
         )
         self._last_progress_reporting_time = time.time()
 
+    def _report_current_action(
+        self, cmd, description: str
+    ) -> None:
+        self.send_message(
+            BackendEvent(
+                event_type="InlineProgress",
+                command_id=cmd["id"],
+                description=description,
+            )
+        )
+
     def _read_incoming_messages(self):
         # works in a separate thread
         while self._should_keep_going():
@@ -352,8 +363,11 @@ class UploadDownloadMixin(ABC):
             self._report_progress(cmd, item["source_path"], completed_cost, total_cost)
 
             def copy_bytes_notifier(completed_bytes, total_bytes):
+                completed = completed_cost + completed_bytes
+                desc = str(round(completed / total_cost * 100)) + "%"
+
                 self._report_progress(
-                    cmd, item["source_path"], completed_cost + completed_bytes, total_cost
+                    cmd, desc, completed, total_cost
                 )
 
             try:

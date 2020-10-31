@@ -59,6 +59,7 @@ from thonny.editors import (
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
+from thonny.workdlg import WorkDialog
 
 logger = logging.getLogger(__name__)
 
@@ -281,8 +282,7 @@ class Runner:
             get_workbench().event_generate("BackendRestart", full=False)
 
     def send_command_and_wait(self, cmd: CommandToBackend, dialog_title: str) -> MessageFromBackend:
-        self.send_command(cmd)
-        dlg = BlockingDialog(get_workbench(), cmd, title=dialog_title + " ...")
+        dlg = InlineCommandDialog(get_workbench(), cmd, title=dialog_title + " ...")
         show_dialog(dlg)
         return dlg.response
 
@@ -1351,89 +1351,53 @@ def generate_command_id():
     _command_id_counter += 1
     return "cmd_" + str(_command_id_counter)
 
-
-class BlockingDialog(CommonDialogEx):
-    def __init__(self, master, cmd, title, mode="indeterminate"):
-        super().__init__(master)
-        self.title(title)
+class InlineCommandDialog(WorkDialog):
+    def __init__(self, master, cmd, title):
         self.response = None
-        self._sent_interrupt = False
-        self._mode = mode
+        self._title = title
+        self._cmd = cmd
 
-        self._cmd_id = cmd["id"]
+        get_workbench().bind("InlineResponse", self._on_response, True)
+        get_workbench().bind("InlineProgress", self._on_progress, True)
 
-        description = cmd.get("description", " ")
+        super().__init__(master, autostart="confirmation" not in self._cmd)
 
-        self._description_label = ttk.Label(self.main_frame, text=description)
-        self._description_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+    def get_title(self):
+        return self._title
 
-        self._progress_bar = ttk.Progressbar(self.main_frame, mode=self._mode, length=200)
-        self._progress_bar.grid(row=1, column=0, padx=10, sticky="new")
-        self._progress_bar.start()
+    def get_instructions(self) -> Optional[str]:
+        return self._cmd.get("description", "Working...")
 
-        self._cancel_button = ttk.Button(
-            self.main_frame, text=tr("Cancel"), command=self._on_cancel
-        )
-        self._cancel_button.grid(row=2, column=0, padx=10, pady=10)
-
-        self._start_time = time.time()
-
-        if isinstance(cmd, InlineCommand):
-            get_workbench().bind("InlineResponse", self._on_response, True)
-            get_workbench().bind("InlineProgress", self._on_progress, True)
-        else:
-            raise NotImplementedError()
-
-    def _on_response(self, event):
-        self.response = event
-
-        if event.get("command_id") == self._cmd_id:
+    def _on_response(self, response):
+        if response.get("command_id") == self._cmd["id"]:
+            self.response = response
             self.destroy()
 
     def _on_progress(self, event):
-        if event.get("command_id") != self._cmd_id:
+        if event.get("command_id") != self._cmd["id"]:
             return
 
-        if self._mode == "indeterminate":
-            self._progress_bar.stop()
-            self._mode = "determinate"
-            self._progress_bar.configure(mode=self._mode)
-            if event.get("description"):
-                self._description_label.configure(text=event.get("description"))
-        self._progress_bar.configure(maximum=event["maximum"], value=event["value"])
+        if event.get("value", None) is not None and event.get("maximum", None) is not None:
+            self.report_progress(event["value"], event["maximum"])
+        if event.get("description"):
+            self.set_action_text(event["description"])
+        self.update_ui()
 
-    def _send_interrupt(self):
-        self._sent_interrupt = True
-        self._description_label.configure(text="Cancelling...")
-        self._cancel_button.configure(text=tr("Close"))
+    def _keep_updating_ui(self):
+        # updating in _on_progress, don't need another timer
+        pass
+
+    def start_work(self):
+        get_runner().send_command(self._cmd)
+
+    def cancel_work(self):
+        super(InlineCommandDialog, self).cancel_work()
         get_runner()._cmd_interrupt()
 
-    def on_close(self, event=None):
-        self._on_cancel()
-
-    def _on_cancel(self):
-        if self._sent_interrupt:
-            if messagebox.askyesno(
-                "Interrupt again?",
-                "Do you want to close this dialog without waiting cancelling to complete?",
-                master=self,
-            ):
-                self.destroy()
-            else:
-                self._send_interrupt()
-
-        else:
-            if messagebox.askyesno(
-                "Cancel current operation?",
-                "Do you really want to cancel this operation?",
-                master=self,
-            ):
-                self._send_interrupt()
-
-    def destroy(self):
+    def close(self):
         get_workbench().unbind("InlineResponse", self._on_response)
         get_workbench().unbind("InlineProgress", self._on_progress)
-        super().destroy()
+        super(InlineCommandDialog, self).close()
 
 
 def get_frontend_python():

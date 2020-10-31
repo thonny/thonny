@@ -6,19 +6,19 @@ import tkinter as tk
 from pathlib import PurePath, PureWindowsPath, PurePosixPath
 from tkinter import messagebox
 from tkinter.messagebox import showerror, askokcancel
-from typing import Iterable, Type, List, Dict
+from typing import Iterable, Type, List, Dict, Optional
 
-from thonny import get_runner, get_shell, get_workbench
+from thonny import get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
     BaseLocalFileBrowser,
     BaseRemoteFileBrowser,
     get_file_handler_conf_key,
     HIDDEN_FILES_OPTION,
 )
-from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS
+from thonny.common import InlineCommand, normpath_with_actual_case, IGNORED_FILES_AND_DIRS, CommandToBackend
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
-from thonny.running import construct_cd_command
+from thonny.running import construct_cd_command, InlineCommandDialog
 from thonny.ui_utils import lookup_style_option
 
 minsize = 80
@@ -256,28 +256,81 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             if not selection:
                 return
 
-            response = get_runner().send_command_and_wait(
-                InlineCommand(
-                    "prepare_download",
-                    source_paths=selection["paths"],
-                    description=tr("Downloading %s to %s") % (selection["description"], target_dir),
-                ),
-                dialog_title=tr("Preparing"),
-            )
-            prepared_items = self._prepare_download_items(
-                response["all_items"], self.get_active_directory(), target_dir
-            )
-            existing_target_items = self._get_existing_target_items(prepared_items)
-            picked_items = pick_transfer_items(prepared_items, existing_target_items, self)
-            if picked_items:
-                response = get_runner().send_command_and_wait(
-                    InlineCommand("download", items=picked_items), dialog_title=tr("Copying")
-                )
-                _check_transfer_errors(response, self)
-
+            dlg = DownloadDialog(self, selection["paths"], selection["description"],
+                                 self.get_active_directory(), target_dir)
+            ui_utils.show_dialog(dlg)
+            if dlg.response is not None:
                 self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=tr("Download to %s") % target_dir, command=download)
+
+
+    def add_middle_menu_items(self, context):
+        self.add_download_command()
+        super().add_middle_menu_items(context)
+
+
+class UploadDialog(InlineCommandDialog):
+    def __init__(self, master, paths, source_dir, target_dir):
+        self._stage = "preparation"
+        self.items = []
+        source_names = []
+        for path in paths:
+            for item in _prepare_upload_items(path, source_dir, target_dir):
+                # same path could have been provided directly and also via its parent
+                if item not in self.items:
+                    self.items.append(item)
+                    source_names.append(os.path.basename(item["source_path"]))
+
+        target_paths = [x["target_path"] for x in self.items]
+        cmd = InlineCommand("prepare_upload", target_paths=target_paths,
+                            description=get_transfer_description("Uploading", source_names, target_dir))
+
+        super(UploadDialog, self).__init__(master, cmd, "Uploading")
+
+    def _on_response(self, response):
+        if response.get("command_id") != self._cmd["id"]:
+            return
+
+        if self._stage == "preparation":
+            if self._confirm_and_start_main_work(response):
+                self._stage = "main_work"
+            else:
+                self.response = None
+                self.destroy()
+
+        elif self._stage == "main_work":
+            _check_transfer_errors(response, self)
+            self.response = response
+            self.destroy()
+
+    def _confirm_and_start_main_work(self, preparation_response):
+        picked_items = list(
+            sorted(
+                pick_transfer_items(self.items, preparation_response["existing_items"], self),
+                key=lambda x: x["target_path"],
+            )
+        )
+        if picked_items:
+            self._cmd = InlineCommand("upload", items=picked_items)
+            get_runner().send_command(self._cmd)
+            return True
+        else:
+            return False
+
+class DownloadDialog(InlineCommandDialog):
+    def __init__(self, master, paths, description, source_dir, target_dir):
+        self._stage = "preparation"
+        self._target_dir = target_dir
+        self._source_dir = source_dir
+
+        cmd = InlineCommand(
+                    "prepare_download",
+                    source_paths=paths,
+                    description=tr("Downloading %s to %s") % (description, target_dir),
+                )
+
+        super(DownloadDialog, self).__init__(master, cmd, "Downloading")
 
     def _prepare_download_items(
         self, all_source_items: Dict[str, Dict], source_context_dir: str, target_dir: str
@@ -315,9 +368,34 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 }
         return result
 
-    def add_middle_menu_items(self, context):
-        self.add_download_command()
-        super().add_middle_menu_items(context)
+    def _on_response(self, response):
+        if response.get("command_id") != self._cmd["id"]:
+            return
+
+        if self._stage == "preparation":
+            if self._confirm_and_start_main_work(response):
+                self._stage = "main_work"
+            else:
+                self.response = None
+                self.destroy()
+
+        elif self._stage == "main_work":
+            _check_transfer_errors(response, self)
+            self.response = response
+            self.destroy()
+
+    def _confirm_and_start_main_work(self, preparation_response):
+        prepared_items = self._prepare_download_items(
+            preparation_response["all_items"], self._source_dir, self._target_dir
+        )
+        existing_target_items = self._get_existing_target_items(prepared_items)
+        picked_items = pick_transfer_items(prepared_items, existing_target_items, self)
+        if picked_items:
+            self._cmd = InlineCommand("download", items=picked_items)
+            get_runner().send_command(self._cmd)
+            return True
+        else:
+            return False
 
 
 def transpose_path(
@@ -409,36 +487,9 @@ def format_items(items):
 
 
 def upload(paths, source_dir, target_dir, master) -> bool:
-    items = []
-    for path in paths:
-        for item in _prepare_upload_items(path, source_dir, target_dir):
-            # same path could have been provided directly and also via its parent
-            if item not in items:
-                items.append(item)
-
-    target_paths = [x["target_path"] for x in items]
-    response = get_runner().send_command_and_wait(
-        InlineCommand(
-            "prepare_upload",
-            target_paths=target_paths,
-        ),
-        dialog_title=tr("Preparing"),
-    )
-
-    picked_items = list(
-        sorted(
-            pick_transfer_items(items, response["existing_items"], master),
-            key=lambda x: x["target_path"],
-        )
-    )
-    if picked_items:
-        response = get_runner().send_command_and_wait(
-            InlineCommand("upload", items=picked_items), dialog_title="Copying"
-        )
-        _check_transfer_errors(response, master)
-        return True
-    else:
-        return False
+    dlg = UploadDialog(master, paths, source_dir, target_dir)
+    ui_utils.show_dialog(dlg)
+    return dlg.response is not None
 
 
 def _prepare_upload_items(
@@ -472,6 +523,14 @@ def _prepare_upload_items(
                     )
                 )
     return result
+
+def get_transfer_description(verb, paths, target_dir):
+    if len(paths) == 1:
+        subject = "'%s'" % paths[0]
+    else:
+        subject = "%d items" % len(paths)
+
+    return "%s %s to %s" % (verb, subject, target_dir)
 
 
 def load_plugin() -> None:

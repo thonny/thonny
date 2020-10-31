@@ -9,9 +9,10 @@ from thonny.ui_utils import CommonDialog, ems_to_pixels, create_action_label, se
 
 
 class WorkDialog(CommonDialog):
-    def __init__(self, master):
+    def __init__(self, master, autostart=False):
         super(WorkDialog, self).__init__(master)
 
+        self._autostart = autostart
         self._state = "idle"
         self.success = False
         self._work_events_queue = queue.Queue()
@@ -29,6 +30,9 @@ class WorkDialog(CommonDialog):
 
         self.bind("<Escape>", self.on_cancel, True)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+
+        if self._autostart:
+            self.on_ok()
 
     def populate_main_frame(self):
         pass
@@ -67,7 +71,7 @@ class WorkDialog(CommonDialog):
 
         self._current_action_label = create_action_label(
             self.action_frame,
-            text="Installing",
+            text="Please wait...",
             width=self.get_action_text_max_length(),
             click_handler=self.toggle_log_frame,
         )
@@ -79,7 +83,8 @@ class WorkDialog(CommonDialog):
             state="disabled",
             default="active",
         )
-        self._ok_button.grid(column=4, row=1, pady=padding, padx=(0, intpad))
+        if not self._autostart:
+            self._ok_button.grid(column=4, row=1, pady=padding, padx=(0, intpad))
 
         self._cancel_button = ttk.Button(
             self.action_frame,
@@ -255,6 +260,12 @@ class WorkDialog(CommonDialog):
         elif type == "done":
             self.success = args[0]
             if self.success:
+                self._state = "done"
+                self._cancel_button.focus_set()
+                self._cancel_button["default"] = "active"
+                self._ok_button["default"] = "normal"
+            elif self._autostart:
+                # Can't try again if failed with autostart
                 self._state = "done"
                 self._cancel_button.focus_set()
                 self._cancel_button["default"] = "active"
