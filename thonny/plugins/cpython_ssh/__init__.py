@@ -110,6 +110,11 @@ class SshCPythonProxy(SubprocessProxy):
         else:
             return []
 
+    def get_pip_gui_class(self):
+        from thonny.plugins import pip_gui
+
+        return pip_gui.CPythonBackendPipDialog
+
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
