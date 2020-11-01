@@ -1,15 +1,19 @@
+import logging
 import os
+import signal
 import subprocess
+import threading
 import time
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import messagebox, ttk
+from typing import Optional
 
-from thonny import get_runner, get_workbench, ui_utils
+import serial
+
+from thonny import get_runner, ui_utils
 from thonny.misc_utils import (
-    construct_cmd_line,
-    running_on_mac_os,
-    user_friendly_python_command_line,
+    running_on_windows,
 )
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
@@ -17,14 +21,10 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
-from thonny.plugins.micropython.serial_connection import SerialConnection
 from thonny.running import get_interpreter_for_subprocess
-from thonny.ui_utils import (
-    CommonDialogEx,
-    ems_to_pixels,
-    show_dialog,
-)
-from thonny.workdlg import SubprocessDialog
+from thonny.workdlg import WorkDialog
+
+logger = logging.getLogger(__name__)
 
 
 class ESPProxy(BareMetalMicroPythonProxy):
@@ -102,30 +102,45 @@ class ESP32ConfigPage(ESPConfigPage):
         super().__init__(master, "esp32", "0x1000")
 
 
-class ESPFlashingDialog(CommonDialogEx):
-    def __init__(self, master, chip, start_address, initial_port_desc=""):
-        super().__init__(master)
-
-        self.title("Install %s firmware with esptool" % chip.upper())
-
+class ESPFlashingDialog(WorkDialog):
+    def __init__(self, master, chip, start_address):
         self._chip = chip
         self._start_address = start_address
+
+        super().__init__(master)
+
         self._esptool_command = self._get_esptool_command()
         if not self._esptool_command:
             messagebox.showerror(
                 "Can't find esptool",
-                "esptool not found.\n"
-                + "Install it via 'Tools => Manage plug-ins'\n"
-                + "or using your OP-system package manager.",
+                "esptool not found.\n" + "Install it via 'Tools => Manage plug-ins'\n" + "or "
+                "using your OP-system package manager.",
                 master=self,
             )
-            self._close()
-            return
+            self.close()
 
-        self.main_frame.columnconfigure(2, weight=1)
+    def get_title(self):
+        return "%s firmware installer" % self._chip.upper()
 
-        epadx = ems_to_pixels(2)
-        ipadx = ems_to_pixels(0.5)
+    def get_instructions(self) -> Optional[str]:
+        return (
+            "This dialog allows installing or updating firmware on %s using the most common settings.\n"
+            % self._chip.upper()
+            + "If you need to set other options, then please use 'esptool' on the command line.\n\n"
+            + "Note that there are many variants of MicroPython for ESP devices. If the firmware provided\n"
+            + "at micropython.org/download doesn't work for your device, then there may exist better\n"
+            + "alternatives -- look around in your device's documentation or at MicroPython forum."
+        )
+
+    def is_ready_for_work(self):
+        return self._port_desc_variable.get() and self._firmware_entry.get()
+
+    def get_action_text_max_length(self):
+        return 45
+
+    def populate_main_frame(self):
+        epadx = self.get_padding()
+        ipadx = self.get_internal_padding()
         epady = epadx
         ipady = ipadx
 
@@ -133,7 +148,7 @@ class ESPFlashingDialog(CommonDialogEx):
         port_label = ttk.Label(self.main_frame, text="Port")
         port_label.grid(row=1, column=1, sticky="w", padx=(epadx, 0), pady=(epady, 0))
 
-        self._port_desc_variable = tk.StringVar(value=initial_port_desc)
+        self._port_desc_variable = tk.StringVar(value="")
         self._port_combo = ttk.Combobox(
             self.main_frame, exportselection=False, textvariable=self._port_desc_variable, values=[]
         )
@@ -147,7 +162,7 @@ class ESPFlashingDialog(CommonDialogEx):
         firmware_label = ttk.Label(self.main_frame, text="Firmware")
         firmware_label.grid(row=2, column=1, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
 
-        self._firmware_entry = ttk.Entry(self.main_frame, width=65)
+        self._firmware_entry = ttk.Entry(self.main_frame, width=55)
         self._firmware_entry.grid(row=2, column=2, sticky="nsew", padx=ipadx, pady=(ipady, 0))
 
         browse_button = ttk.Button(self.main_frame, text="Browse...", command=self._browse)
@@ -190,15 +205,6 @@ class ESPFlashingDialog(CommonDialogEx):
             row=6, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady, epady)
         )
 
-        # Buttons
-        install_button = ttk.Button(self.main_frame, text="Install", command=self._install)
-        install_button.grid(row=6, column=2, columnspan=1, sticky="e", padx=ipadx, pady=(0, epady))
-
-        cancel_button = ttk.Button(self.main_frame, text="Close", command=self._close)
-        cancel_button.grid(
-            row=6, column=3, columnspan=1, sticky="e", padx=(0, epadx), pady=(0, epady)
-        )
-
         self._reload_ports()
 
     def _get_esptool_command(self):
@@ -225,44 +231,66 @@ class ESPFlashingDialog(CommonDialogEx):
         self._port_combo.configure(values=list(self._ports_by_desc.keys()))
 
     def _browse(self):
+        initialdir = os.path.normpath(os.path.expanduser("~/Downloads"))
+        if not os.path.isdir(initialdir):
+            initialdir = None
+
         path = ui_utils.askopenfilename(
-            filetypes=[("bin-files", ".bin"), ("all files", ".*")], parent=self.winfo_toplevel()
+            filetypes=[("bin-files", ".bin"), ("all files", ".*")],
+            parent=self.winfo_toplevel(),
+            initialdir=initialdir,
         )
         if path:
             self._firmware_entry.delete(0, "end")
             self._firmware_entry.insert(0, path)
 
     def _check_connection(self, port):
-        proxy = get_runner().get_backend_proxy()
-        if isinstance(proxy, BareMetalMicroPythonProxy):
-            # Most likely it is using the same port
-            proxy.disconnect()
-            time.sleep(1.5)
+        # wait a bit in case existing connection was just closed
+        time.sleep(1.5)
 
         # Maybe another program is connected
         # or the user doesn't have sufficient permissions?
         try:
-            conn = SerialConnection(port, 115200, skip_reader=True)
+            conn = serial.Serial(port)
             conn.close()
-
             return True
         except Exception as e:
             messagebox.showerror("Can't connect", str(e), master=self)
             return False
 
-    def _install(self):
+    def start_work(self):
+        port = self._ports_by_desc[self._port_desc_variable.get()]
         if not self._port_desc_variable.get():
             messagebox.showerror("Select port", "Please select port", parent=self)
-            return
-
-        port = self._ports_by_desc[self._port_desc_variable.get()]
+            return False
 
         firmware_path = self._firmware_entry.get()
         if not os.path.exists(firmware_path):
             messagebox.showerror(
                 "Bad firmware path", "Can't find firmware, please check path", master=self
             )
-            return
+            return False
+
+        flash_mode = self._flashmode.get()
+        erase_flash = self._erase_variable.get()
+
+        proxy = get_runner().get_backend_proxy()
+        port_was_used_in_thonny = (
+            isinstance(proxy, BareMetalMicroPythonProxy) and proxy._port == port
+        )
+        if port_was_used_in_thonny:
+            proxy.disconnect()
+
+        commands = []
+        threading.Thread(
+            target=self.work_in_thread,
+            daemon=True,
+            args=[port, firmware_path, flash_mode, erase_flash, port_was_used_in_thonny],
+        ).start()
+
+    def work_in_thread(self, port, firmware_path, flash_mode, erase_flash, port_was_used_in_thonny):
+        if port_was_used_in_thonny:
+            time.sleep(1.5)
 
         erase_command = self._esptool_command + [
             "--chip",
@@ -279,55 +307,77 @@ class ESPFlashingDialog(CommonDialogEx):
             port,
             "write_flash",
             "--flash_mode",
-            self._flashmode.get(),
+            flash_mode,
             self._start_address,
             firmware_path,
         ]
 
         if not self._check_connection(port):
+            self.set_action_text("Problem")
+            self.append_text("Could not connect to port\n")
+            self.report_done(False)
             return
 
-        # unknown problem with first dialog appearing at 0,0
-        # self.update_idletasks()
-        if self.winfo_screenwidth() >= 1024:
-            min_left = ems_to_pixels(15)
-            min_top = ems_to_pixels(5)
-        else:
-            min_left = 0
-            min_top = 0
-
-        self.update_idletasks()
-        if self._erase_variable.get():
-            proc = self._create_subprocess(erase_command)
-            dlg = SubprocessDialog(
-                self,
-                proc,
-                "Erasing flash",
-                long_description=user_friendly_python_command_line(erase_command),
-                autoclose=False,
-            )
-            show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)
-            if not dlg.success:
+        if erase_flash:
+            self.set_action_text("Erasing flash")
+            self.append_text(subprocess.list2cmdline(erase_command) + "\n")
+            self._proc = self._create_subprocess(erase_command)
+            while True:
+                line = self._proc.stdout.readline()
+                if not line:
+                    break
+                self.append_text(line)
+                self.set_action_text_smart(line)
+            returncode = self._proc.wait()
+            if returncode:
+                self.set_action_text("Error")
+                self.append_text("\nErase command returned with error code %s" % returncode)
+                self.report_done(False)
                 return
+            else:
+                self.append_text("Erasing done\n------------------------------------\n\n")
 
-        proc = self._create_subprocess(write_command)
-        dlg = SubprocessDialog(
-            self,
-            proc,
-            "Installing firmware",
-            long_description=user_friendly_python_command_line(write_command),
-            autoclose=False,
-        )
-        show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)
+        self.set_action_text("Writing firmware")
+        self.append_text(subprocess.list2cmdline(write_command) + "\n")
+        self._proc = self._create_subprocess(write_command)
+        while True:
+            line = self._proc.stdout.readline()
+            if not line:
+                break
+            self.append_text(line)
+            self.set_action_text_smart(line)
+        returncode = self._proc.wait()
+        if returncode:
+            self.set_action_text("Error")
+            self.append_text("\nWrite command returned with error code %s" % returncode)
+        else:
+            self.set_action_text("Done!")
+            self.append_text("Done!")
+        self.report_done(returncode == 0)
 
-    def _create_subprocess(self, cmd):
+    def _create_subprocess(self, cmd) -> subprocess.Popen:
         return subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
         )
 
-    def _close(self):
-        self.closed = True
-        self.destroy()
+    def cancel_work(self):
+        super().cancel_work()
+        # try gently first
+        try:
+            try:
+                if running_on_windows():
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
+                else:
+                    os.kill(self._proc.pid, signal.SIGINT)
+
+                self._proc.wait(2)
+            except subprocess.TimeoutExpired:
+                if self._proc.poll() is None:
+                    # now let's be more concrete
+                    self._proc.kill()
+        except OSError as e:
+            messagebox.showerror("Error", "Could not kill subprocess: " + str(e), master=self)
+            logger.error("Could not kill subprocess", exc_info=e)
 
 
 def load_plugin():

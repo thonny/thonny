@@ -2,9 +2,11 @@
 
 import os.path
 import platform
+import queue
 import shlex
 import subprocess
 import sys
+import threading
 import time
 from typing import Optional, Sequence, Tuple
 
@@ -488,3 +490,25 @@ def get_roaming_appdata_dir():
 
 def get_local_appdata_dir():
     return _get_known_folder(28)
+
+
+class PopenWithOutputQueues(subprocess.Popen):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.stdout_queue = queue.Queue()
+        self.stderr_queue = queue.Queue()
+
+        for stream, target_queue in [
+            (self.stdout, self.stdout_queue),
+            (self.stderr, self.stderr_queue),
+        ]:
+            threading.Thread(
+                target=self._listen_thread, args=[stream, target_queue], daemon=True
+            ).start()
+
+    def _listen_thread(self, stream, target_queue: queue.Queue):
+        while True:
+            data = stream.readline()
+            if data == "":
+                break
+            target_queue.put(data)
