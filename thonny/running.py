@@ -1359,8 +1359,6 @@ class InlineCommandDialog(WorkDialog):
         self._instructions = instructions
         self._output_prelude = output_prelude
         self._cmd = cmd
-        self.stdout = ""
-        self.stderr = ""
         self.returncode = None
 
         get_shell().set_ignore_program_output(True)
@@ -1410,7 +1408,6 @@ class InlineCommandDialog(WorkDialog):
         stream_name = msg.get("stream_name", "stdout")
         self.append_text(msg["data"], stream_name)
         self.set_action_text_smart(msg["data"])
-        setattr(self, stream_name, getattr(self, stream_name) + msg["data"])
 
     def start_work(self):
         logger.debug("Starting command in dialog: %s", self._cmd)

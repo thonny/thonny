@@ -202,7 +202,11 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         from thonny.workdlg import SubprocessDialog
 
         dlg = SubprocessDialog(
-            get_workbench(), proc, "Preparing the backend", long_description=description
+            get_workbench(),
+            proc,
+            "Preparing the backend",
+            long_description=description,
+            autostart=True,
         )
         try:
             ui_utils.show_dialog(dlg)
@@ -460,7 +464,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         )
         from thonny.workdlg import SubprocessDialog
 
-        dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"))
+        dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"), autostart=True)
         ui_utils.show_dialog(dlg)
 
         if running_on_windows():

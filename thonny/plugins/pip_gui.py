@@ -668,6 +668,7 @@ class PipDialog(CommonDialog):
         else:
             raise RuntimeError("Unknown action")
 
+        args.append("--disable-pip-version-check")
         returncode, _, _ = self._run_pip_with_dialog(args, title=title)
         return returncode == 0
 
@@ -711,6 +712,7 @@ class PipDialog(CommonDialog):
         if is_requirements_file:
             args.append("-r")
         args.append(filename)
+        args.append("--disable-pip-version-check")
 
         returncode, out, err = self._run_pip_with_dialog(
             args, title=tr("Installing '%s'") % os.path.basename(filename)
@@ -766,14 +768,6 @@ class PipDialog(CommonDialog):
 
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
         raise NotImplementedError()
-
-    def _create_python_process(self, args):
-        raise NotImplementedError()
-
-    def _create_pip_process(self, args):
-        if "--disable-pip-version-check" not in args:
-            args.append("--disable-pip-version-check")
-        return self._create_python_process(["-m", "pip"] + args)
 
     def _get_interpreter(self):
         raise NotImplementedError()
@@ -957,10 +951,6 @@ class PluginsPipDialog(PipDialog):
             and getattr(sys, "real_prefix") != sys.prefix
         )
 
-    def _create_python_process(self, args):
-        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
-        return proc, proc.cmd
-
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
@@ -1053,6 +1043,14 @@ class PluginsPipDialog(PipDialog):
 
     def _get_title(self):
         return tr("Thonny plug-ins")
+
+    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+        args = ["-m", "pip"] + args
+        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
+        cmd = proc.cmd
+        dlg = SubprocessDialog(self, proc, title, long_description=title, autostart=True)
+        ui_utils.show_dialog(dlg)
+        return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 class DetailsDialog(CommonDialog):
@@ -1219,12 +1217,6 @@ def _get_latest_stable_version(version_strings):
         return None
 
     return str(sorted(versions)[-1])
-
-
-def _show_subprocess_dialog(master, proc, title, long_description=None):
-    dlg = SubprocessDialog(master, proc, title, long_description=long_description, autoclose=True)
-    ui_utils.show_dialog(dlg, master)
-    return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 def _ask_installation_details(master, data, selected_version, support_update_deps_switch):

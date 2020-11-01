@@ -33,6 +33,8 @@ class WorkDialog(CommonDialog):
         self.rowconfigure(4, weight=1)  # log frame
         self.columnconfigure(0, weight=1)
         self.title(self.get_title())
+        self.stdout = ""
+        self.stderr = ""
 
         self._update_scheduler = None
         self._keep_updating_ui()
@@ -239,10 +241,12 @@ class WorkDialog(CommonDialog):
     def append_text(self, text: str, stream_name="stdout") -> None:
         """Appends text to the details box. May be called from another thread."""
         self._work_events_queue.put(("append", (text, stream_name)))
+        setattr(self, stream_name, getattr(self, stream_name) + text)
 
-    def replace_last_line(self, text: str, stream_name="stderr") -> None:
+    def replace_last_line(self, text: str, stream_name="stdout") -> None:
         """Replaces last line in the details box. May be called from another thread."""
         self._work_events_queue.put(("replace", (text, stream_name)))
+        setattr(self, stream_name, getattr(self, stream_name) + text)
 
     def report_progress(self, value: float, maximum: float) -> None:
         """Updates progress bar. May be called from another thread."""
@@ -316,7 +320,7 @@ class SubprocessDialog(WorkDialog):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
 
-    def __init__(self, master, proc, title, long_description=None, autoclose=True):
+    def __init__(self, master, proc, title, long_description=None, autostart=True):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
@@ -326,7 +330,7 @@ class SubprocessDialog(WorkDialog):
         self._long_description = long_description
         self.returncode = None
 
-        super().__init__(master, autostart=autoclose)
+        super().__init__(master, autostart=autostart)
 
     def is_ready_for_work(self):
         return True
@@ -387,7 +391,7 @@ class SubprocessDialog(WorkDialog):
             self.set_action_text(line.strip())
 
     def cancel_work(self):
-        super(SubprocessDialog, self).cancel_work()
+        super().cancel_work()
         # try gently first
         try:
             try:
