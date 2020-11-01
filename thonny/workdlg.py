@@ -47,7 +47,7 @@ class WorkDialog(CommonDialog):
         pass
 
     def is_ready_for_work(self):
-        return False
+        return True
 
     def init_instructions_frame(self):
         instructions = self.get_instructions()
@@ -80,9 +80,12 @@ class WorkDialog(CommonDialog):
 
         self._current_action_label = create_action_label(
             self.action_frame,
-            text="Please wait...",
+            text="",
             width=round(self.get_action_text_max_length() * 1.2),
             click_handler=self.toggle_log_frame,
+        )
+        self._current_action_label.grid(
+            row=1, column=2, sticky="we", pady=padding, padx=(0, intpad)
         )
 
         self._ok_button = ttk.Button(
@@ -105,7 +108,7 @@ class WorkDialog(CommonDialog):
         self.action_frame.columnconfigure(2, weight=1)
 
     def get_action_text_max_length(self):
-        return 20
+        return 35
 
     def init_log_frame(self):
         self.log_frame = ttk.Frame(self)
@@ -122,6 +125,7 @@ class WorkDialog(CommonDialog):
             height=5,
             width=20,
             font=font,
+            read_only=True,
         )
 
         padding = self.get_padding()
@@ -202,14 +206,13 @@ class WorkDialog(CommonDialog):
             self.grid_progress_widgets()
             self._progress_bar["mode"] = "indeterminate"
             self._progress_bar.start()
+            if not self._current_action_label["text"]:
+                self._current_action_label["text"] = tr("Starting") + "..."
 
     def grid_progress_widgets(self):
         padding = self.get_padding()
         intpad = self.get_internal_padding()
         self._progress_bar.grid(row=1, column=1, sticky="w", padx=(padding, intpad), pady=padding)
-        self._current_action_label.grid(
-            row=1, column=2, sticky="we", pady=padding, padx=(0, intpad)
-        )
 
     def on_cancel(self, event=None):
         if self._state in ("idle", "done"):

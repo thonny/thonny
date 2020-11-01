@@ -10,14 +10,14 @@ from logging import exception
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
 from thonny.plugins.cpython import CPythonProxy
-from thonny.running import get_interpreter_for_subprocess
+from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
@@ -252,75 +252,6 @@ class PipDialog(CommonDialog):
 
     def _get_state(self):
         return self._state
-
-    def _handle_outdated_or_missing_pip(self, error):
-        raise NotImplementedError()
-
-    def _install_pip(self):
-        from urllib.request import urlretrieve
-
-        self._clear()
-        self._append_info_text(("Installing pip") + "\n\n", ("caption",))
-        self.info_text.direct_insert(
-            "end",
-            (
-                "pip, a required module for managing packages is missing or too old.\n\n"
-                + "Downloading pip installer (about 1.5 MB), please wait ..."
-            )
-            + "\n",
-        )
-        self.update()
-        self.update_idletasks()
-
-        installer_filename, _ = urlretrieve(PIP_INSTALLER_URL)
-
-        self._append_info_text(("Installing pip, please wait ...") + "\n")
-        self.update()
-        self.update_idletasks()
-
-        proc, _ = self._create_python_process([installer_filename], stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        os.remove(installer_filename)
-
-        if err != "":
-            raise RuntimeError("Error while installing pip:\n" + err)
-
-        self._append_info_text(out + "\n")
-        self.update()
-        self.update_idletasks()
-
-        # update list
-        self._start_update_list()
-
-    def _provide_pip_install_instructions(self, error):
-        self._clear()
-        self._append_info_text(error)
-        self.info_text.direct_insert(
-            "end", ("You seem to have problems with pip" + "\n\n"), ("caption",)
-        )
-        self.info_text.direct_insert(
-            "end",
-            (
-                "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
-                + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
-                + "then you can install newest version by downloading"
-            )
-            + " ",
-        )
-        self._append_info_text(PIP_INSTALLER_URL, ("url",))
-        self.info_text.direct_insert(
-            "end",
-            " "
-            + ("and running it with")
-            + " "
-            + self._get_interpreter()
-            + " "
-            + ("(probably needs admin privileges).")
-            + "\n\n",
-        )
-
-        self._append_info_text(self._instructions_for_command_line_install())
-        self._set_state("disabled", True)
 
     def _instructions_for_command_line_install(self):
         return (
@@ -692,17 +623,18 @@ class PipDialog(CommonDialog):
         install_cmd = self._get_install_command()
 
         if action == "install":
-            title = tr("Installing")
+            title = tr("Installing '%s'") % name
             if not self._confirm_install(self.current_package_data):
                 return False
 
             args = install_cmd
             if self._get_active_version(name) is not None:
+                title = tr("Upgrading '%s'") % name
                 args.append("--upgrade")
 
             args.append(name)
         elif action == "uninstall":
-            title = tr("Uninstalling")
+            title = tr("Uninstalling '%s'") % name
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
                 tr("Really uninstall?"),
                 tr(
@@ -736,17 +668,8 @@ class PipDialog(CommonDialog):
         else:
             raise RuntimeError("Unknown action")
 
-        proc, cmd = self._create_pip_process(args)
-        long_description = get_user_friendly_pip_command_line(cmd)
-
-        # following call blocks
-        returncode, _, _ = _show_subprocess_dialog(
-            self, proc, title=title, long_description=long_description
-        )
-        if returncode != 0:
-            return False
-        else:
-            return True
+        returncode, _, _ = self._run_pip_with_dialog(args, title=title)
+        return returncode == 0
 
     def does_support_update_deps_switch(self):
         return True
@@ -789,12 +712,8 @@ class PipDialog(CommonDialog):
             args.append("-r")
         args.append(filename)
 
-        proc, cmd = self._create_pip_process(args)
-        _, out, _ = _show_subprocess_dialog(
-            self,
-            proc,
-            title=tr("Installing"),
-            long_description=get_user_friendly_pip_command_line(cmd),
+        returncode, out, err = self._run_pip_with_dialog(
+            args, title=tr("Installing '%s'") % os.path.basename(filename)
         )
 
         # Try to find out the name of the package we're installing
@@ -845,13 +764,16 @@ class PipDialog(CommonDialog):
 
         return None
 
-    def _create_python_process(self, args, stderr):
+    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
         raise NotImplementedError()
 
-    def _create_pip_process(self, args, stderr=subprocess.STDOUT):
+    def _create_python_process(self, args):
+        raise NotImplementedError()
+
+    def _create_pip_process(self, args):
         if "--disable-pip-version-check" not in args:
             args.append("--disable-pip-version-check")
-        return self._create_python_process(["-m", "pip"] + args, stderr=stderr)
+        return self._create_python_process(["-m", "pip"] + args)
 
     def _get_interpreter(self):
         raise NotImplementedError()
@@ -924,8 +846,8 @@ class CPythonBackendPipDialog(BackendPipDialog):
     def _get_interpreter(self):
         return get_runner().get_local_executable()
 
-    def _create_python_process(self, args, stderr):
-        proc = running.create_backend_python_process(args, stderr=stderr)
+    def _create_python_process(self, args):
+        proc = running.create_backend_python_process(args, stderr=subprocess.STDOUT)
         return proc, proc.cmd
 
     def _confirm_install(self, package_data):
@@ -947,12 +869,6 @@ class CPythonBackendPipDialog(BackendPipDialog):
         else:
             return True
 
-    def _handle_outdated_or_missing_pip(self, error):
-        if get_runner().using_venv():
-            self._install_pip()
-        else:
-            self._provide_pip_install_instructions(error)
-
     def _get_target_directory(self):
         if self._should_install_to_site_packages():
             return normpath_with_actual_case(self._backend_proxy.get_site_packages())
@@ -966,6 +882,23 @@ class CPythonBackendPipDialog(BackendPipDialog):
 
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
+
+    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+        proxy = get_runner().get_backend_proxy()
+        assert isinstance(proxy, CPythonProxy)
+        sub_cmd = [proxy._reported_executable, "-m", "pip"] + args
+        back_cmd = InlineCommand("execute_system_command", cmd_line=sub_cmd)
+        dlg = InlineCommandDialog(
+            self,
+            back_cmd,
+            title="pip",
+            instructions=title,
+            autostart=True,
+            output_prelude=subprocess.list2cmdline(sub_cmd) + "\n\n",
+        )
+        ui_utils.show_dialog(dlg)
+
+        return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 class PluginsPipDialog(PipDialog):
@@ -1024,8 +957,8 @@ class PluginsPipDialog(PipDialog):
             and getattr(sys, "real_prefix") != sys.prefix
         )
 
-    def _create_python_process(self, args, stderr):
-        proc = running.create_frontend_python_process(args, stderr=stderr)
+    def _create_python_process(self, args):
+        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
         return proc, proc.cmd
 
     def _confirm_install(self, package_data):
@@ -1120,9 +1053,6 @@ class PluginsPipDialog(PipDialog):
 
     def _get_title(self):
         return tr("Thonny plug-ins")
-
-    def _handle_outdated_or_missing_pip(self, error):
-        return self._provide_pip_install_instructions(error)
 
 
 class DetailsDialog(CommonDialog):

@@ -335,7 +335,6 @@ def _configure_logging(filename, console_level=None):
     log_file = os.path.join(THONNY_USER_DIR, filename)
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
     file_handler.setFormatter(logFormatter)
-    # file_handler.setLevel(_choose_logging_level())
     thonny_root_logger.addHandler(file_handler)
 
     console_handler = logging.StreamHandler(sys.stdout)

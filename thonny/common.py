@@ -558,6 +558,7 @@ def get_windows_lnk_target(lnk_file_path):
 
 
 def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
+    logger.debug("execute_system_command, cmd=%r, cwd=%s", cmd, cwd)
     env = dict(os.environ).copy()
     encoding = "utf-8"
     env["PYTHONIOENCODING"] = encoding
@@ -565,9 +566,6 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
     # in PATH
     update_system_path(env, get_augmented_system_path(get_exe_dirs()))
     popen_kw = dict(
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
         env=env,
         universal_newlines=True,
         bufsize=0,
@@ -583,32 +581,16 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
         popen_kw["errors"] = "replace"
         popen_kw["encoding"] = encoding
 
-    assert cmd.cmd_line.startswith("!")
-    cmd_line = cmd.cmd_line[1:]
+    if isinstance(cmd.cmd_line, str) and cmd.cmd_line.startswith("!"):
+        cmd_line = cmd.cmd_line[1:]
+        popen_kw["shell"] = True
+    else:
+        assert isinstance(cmd.cmd_line, list)
+        cmd_line = cmd.cmd_line
+    logger.debug("Popen(%r, ...)", cmd_line)
     proc = subprocess.Popen(cmd_line, **popen_kw)
-
-    def copy_stream(source, target):
-        while True:
-            c = source.readline()
-            if c == "":
-                break
-            else:
-                target.write(c)
-                target.flush()
-
-    copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
-    copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
-
-    copy_out.start()
-    copy_err.start()
-    try:
-        proc.wait()
-    except KeyboardInterrupt as e:
-        print(str(e), file=sys.stderr)
-
-    copy_out.join()
-    copy_err.join()
-    return proc.returncode
+    proc.communicate()
+    return proc.wait()
 
 
 def universal_dirname(path: str) -> str:

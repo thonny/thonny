@@ -1353,28 +1353,49 @@ def generate_command_id():
 
 
 class InlineCommandDialog(WorkDialog):
-    def __init__(self, master, cmd, title):
+    def __init__(self, master, cmd, title, instructions=None, output_prelude=None, autostart=True):
         self.response = None
         self._title = title
+        self._instructions = instructions
+        self._output_prelude = output_prelude
         self._cmd = cmd
+        self.stdout = ""
+        self.stderr = ""
+        self.returncode = None
+
         get_shell().set_ignore_program_output(True)
 
         get_workbench().bind("InlineResponse", self._on_response, True)
         get_workbench().bind("InlineProgress", self._on_progress, True)
         get_workbench().bind("ProgramOutput", self._on_output, True)
 
-        super().__init__(master, autostart="confirmation" not in self._cmd)
+        super().__init__(master, autostart=autostart)
 
     def get_title(self):
         return self._title
 
     def get_instructions(self) -> Optional[str]:
-        return self._cmd.get("description", "Working...")
+        return self._instructions or self._cmd.get("description", "Working...")
 
     def _on_response(self, response):
         if response.get("command_id") == self._cmd["id"]:
             self.response = response
-            self.destroy()
+            self.returncode = response.get("returncode", None)
+            success = not self.returncode and "error" not in response and "errors" not in response
+            if success:
+                self.set_action_text("Done!")
+            else:
+                self.set_action_text("Error")
+                if "error" in response:
+                    self.append_text("Error %s\n" % response["error"], stream_name="stderr")
+                if "errors" in response:
+                    self.append_text("Errors %s\n" % response["errors"], stream_name="stderr")
+                if self.returncode:
+                    self.append_text(
+                        "Process returned with code %s\n" % self.returncode, stream_name="stderr"
+                    )
+
+            self.report_done(success)
 
     def _on_progress(self, msg):
         if msg.get("command_id") != self._cmd["id"]:
@@ -1384,16 +1405,15 @@ class InlineCommandDialog(WorkDialog):
             self.report_progress(msg["value"], msg["maximum"])
         if msg.get("description"):
             self.set_action_text(msg["description"])
-        self.update_ui()
 
     def _on_output(self, msg):
-        self.append_text(msg["data"], msg.get("stream_name", "stdout"))
-
-    def _keep_updating_ui(self):
-        # updating in _on_progress, don't need another timer
-        pass
+        stream_name = msg.get("stream_name", "stdout")
+        self.append_text(msg["data"], stream_name)
+        self.set_action_text_smart(msg["data"])
+        setattr(self, stream_name, getattr(self, stream_name) + msg["data"])
 
     def start_work(self):
+        logger.debug("Starting command in dialog: %s", self._cmd)
         get_runner().send_command(self._cmd)
 
     def cancel_work(self):

@@ -31,10 +31,8 @@ class MicroPythonPipDialog(BackendPipDialog):
         super().__init__(master)
         assert isinstance(self._backend_proxy, MicroPythonProxy)
 
-    def _create_pip_process(self, args, stderr=subprocess.STDOUT):
-        return self._create_python_process(
-            ["-m", "thonny.plugins.micropython.micropip"] + args, stderr=stderr
-        )
+    def _create_pip_process(self, args):
+        return self._create_python_process(["-m", "thonny.plugins.micropython.micropip"] + args)
 
     def _get_active_version(self, name):
         # Don't have dist-level information
@@ -122,8 +120,8 @@ class MicroPythonPipDialog(BackendPipDialog):
 
         return upload(paths, self._current_temp_dir, self._get_target_directory(), master=self)
 
-    def _create_python_process(self, args, stderr):
-        proc = running.create_frontend_python_process(args, stderr=stderr)
+    def _create_python_process(self, args):
+        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
         return proc, proc.cmd
 
     def _on_listbox_select_package(self, name):
