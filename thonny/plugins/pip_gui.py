@@ -432,6 +432,7 @@ class PipDialog(CommonDialog):
             self._append_info_text(tr("Installed version:") + " ", ("caption",))
             self._append_info_text(active_dist["version"] + "\n")
             self._append_info_text(tr("Installed to:") + " ", ("caption",))
+            # TODO: only show link if local backend
             self.info_text.direct_insert(
                 "end", normpath_with_actual_case(active_dist["location"]), ("url",)
             )

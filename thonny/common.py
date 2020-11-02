@@ -231,6 +231,9 @@ def parse_message(msg_string: str) -> Record:
 
 def normpath_with_actual_case(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
+    if not os.path.exists(name):
+        return os.path.normpath(name)
+
     assert os.path.isabs(name) or os.path.ismount(name), "Not abs nor mount: " + name
     assert os.path.exists(name), "Not exists: " + name
 
