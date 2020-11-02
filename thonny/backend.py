@@ -76,6 +76,9 @@ class BaseBackend(ABC):
         except ConnectionClosedException:
             sys.exit(0)
 
+    def _current_command_is_interrupted(self):
+        return getattr(self._current_command, "interrupted", False)
+
     def _fetch_next_incoming_message(self, timeout=None):
         return self._incoming_message_queue.get(timeout=timeout)
 

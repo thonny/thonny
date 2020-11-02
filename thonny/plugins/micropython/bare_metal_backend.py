@@ -874,6 +874,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         file_size = self._get_file_size(source_path)
         num_bytes_read = 0
         while True:
+            if self._current_command_is_interrupted():
+                raise KeyboardInterrupt()
             callback(num_bytes_read, file_size)
             if hex_mode:
                 block = binascii.unhexlify(
