@@ -2,6 +2,23 @@
 Version history
 ===============
 
+3.3.0b7 (2020-11-01)
+====================
+* Add default black fg color to tooltips, #1381, by adzierzanowski
+* Use paste-mode instead of raw repl for executing code on MP devices, #1386
+* Use WebREPL file protocol for uploading files, #1387
+* Hide underscored names from autocomplete suggestions unless user already typed '_', #1382, by adzierzanowski
+* Add command to filebrowser menu for toggling hidden files, #1292
+* Fix Unconnected network drive shorcuts make Files explorer broken #1333
+* Don't allow save as a file which is already opened, #1310
+* Color self and cls like builtins, #1080
+* Soft-reboot MicroPython before "Run current script", #1393
+* Fix error in clearing squeezed boxes, #1091
+* Enhance upload/download dialogs, #1395
+* Make "Open System shell" open ssh with remote back-ends
+* Make "Open System shell" open miniterm with MicroPython back-ends, #1287
+* Better interrupt for download, #1320
+
 3.3.0b6 (2020-10-19)
 ====================
 
