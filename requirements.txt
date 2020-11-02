@@ -1,5 +1,4 @@
 jedi>=0.13
-parso>=0.3
 setuptools>=33.1
 pyserial>=3.4
 pylint>=1.9
