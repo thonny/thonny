@@ -290,30 +290,34 @@ class WorkDialog(CommonDialog):
                     self._progress_bar.stop()
                 self._progress_bar.configure(value=value, maximum=maximum)
         elif type == "done":
-            self.success = args[0]
-            if self.success:
-                self._state = "done"
-                self._cancel_button.focus_set()
-                self._cancel_button["default"] = "active"
-                self._ok_button["default"] = "normal"
-            elif self._autostart:
-                # Can't try again if failed with autostart
-                self._state = "done"
-                self._cancel_button.focus_set()
-                self._cancel_button["default"] = "active"
-                self._ok_button["default"] = "normal"
-            else:
-                # allows trying again when failed
-                self._state = "idle"
-                self._ok_button.focus_set()
-                self._ok_button["default"] = "active"
-                self._cancel_button["default"] = "normal"
+            self.on_done(args[0])
 
-            self._progress_bar.stop()
-            # need to put to determinate mode, otherwise it looks half done
-            self._progress_bar["mode"] = "determinate"
-            if self.success and self._autostart:
-                self.close()
+    def on_done(self, success):
+        """NB! Don't call from non-ui thread!"""
+        self.success = success
+        if self.success:
+            self._state = "done"
+            self._cancel_button.focus_set()
+            self._cancel_button["default"] = "active"
+            self._ok_button["default"] = "normal"
+        elif self._autostart:
+            # Can't try again if failed with autostart
+            self._state = "done"
+            self._cancel_button.focus_set()
+            self._cancel_button["default"] = "active"
+            self._ok_button["default"] = "normal"
+        else:
+            # allows trying again when failed
+            self._state = "idle"
+            self._ok_button.focus_set()
+            self._ok_button["default"] = "active"
+            self._cancel_button["default"] = "normal"
+
+        self._progress_bar.stop()
+        # need to put to determinate mode, otherwise it looks half done
+        self._progress_bar["mode"] = "determinate"
+        if self.success and self._autostart:
+            self.close()
 
 
 class SubprocessDialog(WorkDialog):

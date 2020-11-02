@@ -159,6 +159,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # If it is in the middle of input, then it is ignored.
             self._write(NORMAL_MODE_CMD)
             self._forward_output_until_active_prompt(self._send_output)
+            self._welcome_text_printed = True
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)

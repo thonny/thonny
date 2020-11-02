@@ -2,15 +2,16 @@ import os
 import shutil
 import subprocess
 import tempfile
+import threading
 import tkinter as tk
 from tkinter.messagebox import showerror
 from tkinter import ttk
-from typing import cast
+from typing import cast, Tuple
 
-from thonny import running, get_runner, get_workbench
+from thonny import running, get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
 from thonny.languages import tr
-from thonny.plugins.files import upload
+from thonny.plugins.files import upload, prepare_upload_items
 from thonny.plugins.micropython import MicroPythonProxy, LocalMicroPythonProxy
 from thonny.plugins.micropython.micropip import MICROPYTHON_ORG_JSON
 from thonny.plugins.pip_gui import (
@@ -22,6 +23,8 @@ from thonny.plugins.pip_gui import (
     _fetch_url_future,
     get_not_supported_translation,
 )
+from thonny.running import InlineCommandDialog
+from thonny.workdlg import SubprocessDialog
 
 
 class MicroPythonPipDialog(BackendPipDialog):
@@ -94,15 +97,12 @@ class MicroPythonPipDialog(BackendPipDialog):
 
         self._current_temp_dir = tempfile.mkdtemp()
         try:
-            if super()._perform_pip_action_without_refresh(action):
-                return self._upload_installed_files()
-            else:
-                return False
+            return super()._perform_pip_action_without_refresh(action)
         finally:
             shutil.rmtree(self._current_temp_dir, ignore_errors=True)
             self._current_temp_dir = None
 
-    def _upload_installed_files(self) -> bool:
+    def _create_upload_command(self) -> InlineCommand:
         paths = []
         for (dirpath, dirnames, filenames) in os.walk(self._current_temp_dir):
             if dirpath != self._current_temp_dir:
@@ -112,13 +112,18 @@ class MicroPythonPipDialog(BackendPipDialog):
                 source_path = os.path.join(dirpath, filename)
                 paths.append(source_path)
 
-        if not paths:
-            showerror(
-                "Error", "Did not find anything to upload from micropip target path", master=self
-            )
-            return False
+        items = []
+        for path in paths:
+            for item in prepare_upload_items(
+                path, self._current_temp_dir, self._get_target_directory()
+            ):
+                if item not in items:
+                    items.append(item)
 
-        return upload(paths, self._current_temp_dir, self._get_target_directory(), master=self)
+        if not items:
+            raise RuntimeError("Could not find anything in temp directory")
+
+        return InlineCommand("upload", items=items)
 
     def _create_python_process(self, args):
         proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
@@ -325,6 +330,26 @@ class MicroPythonPipDialog(BackendPipDialog):
     def _get_interpreter(self):
         return self._backend_proxy.get_full_label()
 
+    def _get_extra_switches(self):
+        return []
+
+    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+        args = ["-m", "thonny.plugins.micropython.micropip"] + args
+        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
+        cmd = proc.cmd
+        dlg = InstallAndUploadDialog(
+            self,
+            proc,
+            back_cmd=self._create_upload_command,
+            title="micropip",
+            instructions=title,
+            autostart=True,
+            output_prelude=subprocess.list2cmdline(cmd) + "\n",
+        )
+        ui_utils.show_dialog(dlg)
+        assert dlg.returncode is not None
+        return dlg.returncode, dlg.stdout, dlg.stderr
+
 
 class LocalMicroPythonPipDialog(MicroPythonPipDialog):
     def _get_install_command(self):
@@ -335,8 +360,19 @@ class LocalMicroPythonPipDialog(MicroPythonPipDialog):
 
     def _delete_paths(self, paths):
         # assuming all files are listed if their directory is listed
-        for path in reversed(sorted(paths, key=len, reverse=True)):
-            os.remove(path)
+        for path in sorted(paths, key=len, reverse=True):
+            if os.path.isfile(path):
+                os.remove(path)
+            else:
+                os.removedirs(path)
+
+    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+        args = ["-m", "thonny.plugins.micropython.micropip"] + args
+        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
+        cmd = proc.cmd
+        dlg = SubprocessDialog(self, proc, "micropip", long_description=title, autostart=True)
+        ui_utils.show_dialog(dlg)
+        return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 def _start_fetching_micropython_org_info(name, completion_handler):
@@ -364,3 +400,56 @@ def _start_fetching_micropython_org_info(name, completion_handler):
             tk._default_root.after(200, poll_fetch_complete)
 
     poll_fetch_complete()
+
+
+class InstallAndUploadDialog(InlineCommandDialog):
+    def __init__(
+        self, master, proc, back_cmd, title, instructions=None, output_prelude=None, autostart=True
+    ):
+        self._stage = "install"
+        self._proc = proc
+        super().__init__(
+            master,
+            back_cmd,
+            title,
+            instructions=instructions,
+            output_prelude=output_prelude,
+            autostart=autostart,
+        )
+
+    def start_work(self):
+        threading.Thread(target=self.work_in_thread, daemon=True).start()
+
+    def work_in_thread(self):
+        self.set_action_text("Installing to temp directory")
+        self.append_text("Installing to temp directory\n")
+        while True:
+            line = self._proc.stdout.readline()
+            if not line:
+                break
+            self.append_text(line)
+            self.set_action_text_smart(line)
+        self.returncode = self._proc.wait()
+        if self.returncode:
+            self.set_action_text("Errorww")
+            self.append_text("\nmicropip returned with error code %s\n" % self.returncode)
+        else:
+            self.set_action_text("Copying to the device")
+            self.append_text("Copying to the device\n")
+        self.report_done(self.returncode == 0)
+
+    def on_done(self, success):
+        if not success or self._stage == "upload":
+            super().on_done(success)
+            if self._stage == "upload":
+                # Returcode is required by the superclass
+                if success:
+                    self.returncode = 0
+                else:
+                    self.returncode = -1
+            return
+
+        assert self._stage == "install"
+        # only half of the work is done
+        self._stage = "upload"
+        super().send_command_to_backend()

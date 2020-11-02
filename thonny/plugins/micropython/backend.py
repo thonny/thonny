@@ -118,6 +118,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._local_cwd = None
         self._cwd = args.get("cwd")
         self._progress_times = {}
+        self._welcome_text_printed = False
         self._welcome_text = None
         self._sys_path = None
 
@@ -160,7 +161,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._validate_time()
 
         if self._welcome_text:
-            self._send_ready_message(clean)
+            self._send_ready_message()
             self._report_time("sent ready")
 
         self._builtin_modules = self._fetch_builtin_modules()
@@ -472,10 +473,10 @@ class MicroPythonBackend(MainBackend, ABC):
         if "micro:bit" not in self._welcome_text.lower():
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
-    def _send_ready_message(self, include_welcome_text):
+    def _send_ready_message(self):
         args = dict(cwd=self._cwd)
         # if not clean, then welcome text is already printed as output from the last session
-        if include_welcome_text:
+        if not self._welcome_text_printed:
             args["welcome_text"] = self._welcome_text
 
         self.send_message(ToplevelResponse(**args))

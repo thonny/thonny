@@ -320,7 +320,7 @@ class UploadDialog(TransferDialog):
         self.items = []
         source_names = []
         for path in paths:
-            for item in _prepare_upload_items(path, source_dir, target_dir):
+            for item in prepare_upload_items(path, source_dir, target_dir):
                 # same path could have been provided directly and also via its parent
                 if item not in self.items:
                     self.items.append(item)
@@ -498,7 +498,7 @@ def upload(paths, source_dir, target_dir, master) -> bool:
     return dlg.response is not None
 
 
-def _prepare_upload_items(
+def prepare_upload_items(
     source_path: str, source_context_dir: str, target_dir: str
 ) -> Iterable[Dict]:
     # assuming target system has Posix paths
@@ -524,7 +524,7 @@ def _prepare_upload_items(
         for child in os.listdir(source_path):
             if child not in IGNORED_FILES_AND_DIRS:
                 result.extend(
-                    _prepare_upload_items(
+                    prepare_upload_items(
                         os.path.join(source_path, child), source_context_dir, target_dir
                     )
                 )

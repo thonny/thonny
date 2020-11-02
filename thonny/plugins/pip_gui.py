@@ -39,6 +39,8 @@ UPGRADE = "Upgrade"
 UNINSTALL = "Uninstall"
 DELETE_SELECTED = "Delete selected"
 
+logger = logging.getLogger(__name__)
+
 
 class PipDialog(CommonDialog):
     def __init__(self, master):
@@ -669,7 +671,6 @@ class PipDialog(CommonDialog):
         else:
             raise RuntimeError("Unknown action")
 
-        args.append("--disable-pip-version-check")
         returncode, _, _ = self._run_pip_with_dialog(args, title=title)
         return returncode == 0
 
@@ -713,7 +714,6 @@ class PipDialog(CommonDialog):
         if is_requirements_file:
             args.append("-r")
         args.append(filename)
-        args.append("--disable-pip-version-check")
 
         returncode, out, err = self._run_pip_with_dialog(
             args, title=tr("Installing '%s'") % os.path.basename(filename)
@@ -801,6 +801,9 @@ class PipDialog(CommonDialog):
     def _tweak_search_results(self, results, query):
         return results
 
+    def _get_extra_switches(self):
+        return ["--disable-pip-version-check"]
+
 
 class BackendPipDialog(PipDialog):
     def __init__(self, master):
@@ -815,6 +818,7 @@ class BackendPipDialog(PipDialog):
 
         get_workbench().bind("get_active_distributions_response", self._complete_update_list, True)
         self._last_name_to_show = name_to_show
+        logger.debug("Sending get_active_distributions")
         get_runner().send_command(InlineCommand("get_active_distributions"))
 
     def _complete_update_list(self, msg):
@@ -884,7 +888,7 @@ class CPythonBackendPipDialog(BackendPipDialog):
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
         proxy = get_runner().get_backend_proxy()
         assert isinstance(proxy, CPythonProxy)
-        sub_cmd = [proxy._reported_executable, "-m", "pip"] + args
+        sub_cmd = [proxy._reported_executable, "-m", "pip"] + args + self._get_extra_switches()
         back_cmd = InlineCommand("execute_system_command", cmd_line=sub_cmd)
         dlg = InlineCommandDialog(
             self,
@@ -1049,10 +1053,10 @@ class PluginsPipDialog(PipDialog):
         return tr("Thonny plug-ins")
 
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
-        args = ["-m", "pip"] + args
+        args = ["-m", "pip"] + args + self._get_extra_switches()
         proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
         cmd = proc.cmd
-        dlg = SubprocessDialog(self, proc, title, long_description=title, autostart=True)
+        dlg = SubprocessDialog(self, proc, "pip", long_description=title, autostart=True)
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr
 
@@ -1343,17 +1347,6 @@ def _extract_click_text(widget, event, tag):
 
 def get_not_supported_translation():
     return tr("Package manager is not available for this interpreter")
-
-
-def get_user_friendly_pip_command_line(cmd):
-    relevant = cmd[:]
-    if "-m" in relevant:
-        relevant = relevant[relevant.index("-m") + 1 :]
-    for switch in ["--disable-pip-version-check"]:
-        if switch in relevant:
-            relevant.remove(switch)
-
-    return subprocess.list2cmdline(relevant)
 
 
 def load_plugin() -> None:

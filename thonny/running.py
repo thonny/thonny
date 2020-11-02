@@ -24,7 +24,7 @@ from logging import debug
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
-from typing import Any, List, Optional, Set  # @UnusedImport; @UnusedImport
+from typing import Any, List, Optional, Set, Union, Callable  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
@@ -1353,7 +1353,15 @@ def generate_command_id():
 
 
 class InlineCommandDialog(WorkDialog):
-    def __init__(self, master, cmd, title, instructions=None, output_prelude=None, autostart=True):
+    def __init__(
+        self,
+        master,
+        cmd: Union[InlineCommand, Callable],
+        title,
+        instructions=None,
+        output_prelude=None,
+        autostart=True,
+    ):
         self.response = None
         self._title = title
         self._instructions = instructions
@@ -1376,17 +1384,20 @@ class InlineCommandDialog(WorkDialog):
         return self._instructions or self._cmd.get("description", "Working...")
 
     def _on_response(self, response):
-        if response.get("command_id") == self._cmd["id"]:
+        if response.get("command_id") == getattr(self._cmd, "id"):
+            logger.debug("Dialog got response: %s", response)
             self.response = response
             self.returncode = response.get("returncode", None)
-            success = not self.returncode and "error" not in response and "errors" not in response
+            success = (
+                not self.returncode and not response.get("error") and not response.get("errors")
+            )
             if success:
                 self.set_action_text("Done!")
             else:
                 self.set_action_text("Error")
-                if "error" in response:
+                if response.get("error"):
                     self.append_text("Error %s\n" % response["error"], stream_name="stderr")
-                if "errors" in response:
+                if response.get("errors"):
                     self.append_text("Errors %s\n" % response["errors"], stream_name="stderr")
                 if self.returncode:
                     self.append_text(
@@ -1396,7 +1407,7 @@ class InlineCommandDialog(WorkDialog):
             self.report_done(success)
 
     def _on_progress(self, msg):
-        if msg.get("command_id") != self._cmd["id"]:
+        if msg.get("command_id") != getattr(self._cmd, "id"):
             return
 
         if msg.get("value", None) is not None and msg.get("maximum", None) is not None:
@@ -1410,6 +1421,13 @@ class InlineCommandDialog(WorkDialog):
         self.set_action_text_smart(msg["data"])
 
     def start_work(self):
+        self.send_command_to_backend()
+
+    def send_command_to_backend(self):
+        if not isinstance(self._cmd, CommandToBackend):
+            # it was a lazy definition
+            self._cmd = self._cmd()
+
         logger.debug("Starting command in dialog: %s", self._cmd)
         get_runner().send_command(self._cmd)
 
