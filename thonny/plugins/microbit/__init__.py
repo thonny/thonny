@@ -137,7 +137,7 @@ def load_plugin():
         sync_time=False,
     )
 
-    # Don't consider Pico in generic backends
+    # Don't consider micro:bit in generic backends
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
     import thonny.plugins.micropython
