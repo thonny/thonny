@@ -12,6 +12,7 @@ from typing import Optional
 import serial
 
 from thonny import get_runner, ui_utils
+from thonny.languages import tr
 from thonny.misc_utils import (
     running_on_windows,
 )
@@ -359,6 +360,9 @@ class ESPFlashingDialog(WorkDialog):
         return subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
         )
+
+    def get_ok_text(self):
+        return tr("Install")
 
     def cancel_work(self):
         super().cancel_work()
