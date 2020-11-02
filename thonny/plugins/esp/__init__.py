@@ -136,7 +136,7 @@ class ESPFlashingDialog(WorkDialog):
         return self._port_desc_variable.get() and self._firmware_entry.get()
 
     def get_action_text_max_length(self):
-        return 45
+        return 35
 
     def populate_main_frame(self):
         epadx = self.get_padding()

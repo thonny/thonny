@@ -213,7 +213,10 @@ class Editor(ttk.Frame):
 
         self.update_title()
         response = get_runner().send_command_and_wait(
-            InlineCommand("read_file", path=target_filename), dialog_title=tr("Loading")
+            InlineCommand(
+                "read_file", path=target_filename, description=tr("Loading %s") % target_filename
+            ),
+            dialog_title=tr("Loading"),
         )
 
         if response.get("error"):
@@ -320,15 +323,16 @@ class Editor(ttk.Frame):
         if get_runner().ready_for_remote_file_operations(show_message=True):
             target_filename = extract_target_path(save_filename)
 
-            get_runner().send_command(
+            get_runner().send_command_and_wait(
                 InlineCommand(
                     "write_file",
                     path=target_filename,
                     content_bytes=content_bytes,
                     editor_id=id(self),
                     blocking=True,
-                    description=tr("Saving") + "...",
-                )
+                    description=tr("Saving to %s") % target_filename,
+                ),
+                dialog_title=tr("Saving"),
             )
 
             if not save_copy:

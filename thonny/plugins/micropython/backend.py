@@ -305,7 +305,8 @@ class MicroPythonBackend(MainBackend, ABC):
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         if cmd["name"] == "interrupt":
             with self._interrupt_lock:
-                self._current_command.interrupted = True
+                if self._current_command:
+                    self._current_command.interrupted = True
                 # don't interrupt while command or input is being written
                 self._write(INTERRUPT_CMD)
                 time.sleep(0.1)

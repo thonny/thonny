@@ -83,7 +83,7 @@ class WorkDialog(CommonDialog):
         self._current_action_label = create_action_label(
             self.action_frame,
             text="",
-            width=round(self.get_action_text_max_length() * 1.2),
+            width=round(self.get_action_text_max_length() * 1.1),
             click_handler=self.toggle_log_frame,
         )
         self._current_action_label.grid(
