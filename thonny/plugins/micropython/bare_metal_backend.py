@@ -711,7 +711,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
-        data = self._connection.read_all()
+        data = self._connection.read_all(check_error=False)
         if data:
             met_prompt = False
             while data.endswith(NORMAL_PROMPT) or data.endswith(FIRST_RAW_PROMPT):

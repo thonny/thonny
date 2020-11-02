@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import shutil
+import sys
 from textwrap import dedent
 from tkinter import messagebox, ttk
 from typing import Optional
@@ -339,6 +340,35 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             return [(cls.get_current_switcher_configuration(), cls.backend_description)]
         else:
             return []
+
+    def has_custom_system_shell(self):
+        return self._port and self._port != "webrepl"
+
+    def open_custom_system_shell(self):
+        from thonny import terminal
+
+        self.disconnect()
+
+        terminal.run_in_terminal(
+            [
+                running.get_interpreter_for_subprocess(sys.executable),
+                "-m",
+                # "serial.tools.miniterm",
+                "thonny.plugins.micropython.miniterm_wrapper",
+                "--exit-char",
+                "20",
+                "--menu-char",
+                "29",
+                "--filter",
+                "direct",
+                "--quiet",
+                self._port,
+                "115200",
+            ],
+            cwd=get_workbench().get_local_cwd(),
+            keep_open=False,
+            title=self._port,
+        )
 
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):

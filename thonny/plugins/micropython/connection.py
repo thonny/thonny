@@ -102,10 +102,10 @@ class MicroPythonConnection:
         self._fetch_to_buffer()
         return self._read_buffer
 
-    def read_all(self):
+    def read_all(self, check_error=True):
         self._fetch_to_buffer()
 
-        if len(self._read_buffer) == 0:
+        if len(self._read_buffer) == 0 and check_error:
             self._check_for_error()
 
         try:
