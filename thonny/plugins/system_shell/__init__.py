@@ -18,6 +18,9 @@ def _open_system_shell():
     cwd = get_workbench().get_local_cwd()
 
     proxy = get_runner().get_backend_proxy()
+    if proxy and proxy.has_custom_system_shell():
+        proxy.open_custom_system_shell()
+        return
     if proxy and proxy.get_local_executable():
         target_executable = proxy.get_local_executable()
     else:

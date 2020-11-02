@@ -821,6 +821,12 @@ class BackendProxy:
         """
         return [(cls.get_current_switcher_configuration(), cls.backend_description)]
 
+    def has_custom_system_shell(self):
+        return False
+
+    def open_custom_system_shell(self):
+        raise NotImplementedError()
+
 
 class SubprocessProxy(BackendProxy):
     def __init__(self, clean: bool, executable: Optional[str] = None) -> None:

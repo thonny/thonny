@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import shutil
 from textwrap import dedent
 from tkinter import messagebox, ttk
 from typing import Optional
@@ -791,6 +792,23 @@ class SshMicroPythonProxy(MicroPythonProxy):
             return [(cls.get_current_switcher_configuration(), cls.backend_description)]
         else:
             return []
+
+    def has_custom_system_shell(self):
+        return True
+
+    def open_custom_system_shell(self):
+        if not shutil.which("ssh"):
+            messagebox.showerror(
+                "Command not found", "Command 'ssh' not found", master=get_workbench()
+            )
+            return
+
+        from thonny import terminal
+
+        userhost = "%s@%s" % (self._user, self._host)
+        terminal.run_in_terminal(
+            ["ssh", userhost], cwd=get_workbench().get_local_cwd(), keep_open=False, title=userhost
+        )
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):

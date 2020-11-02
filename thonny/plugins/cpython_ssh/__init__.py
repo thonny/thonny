@@ -1,3 +1,6 @@
+import shutil
+from tkinter import messagebox
+
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
 from thonny.languages import tr
@@ -114,6 +117,23 @@ class SshCPythonProxy(SubprocessProxy):
         from thonny.plugins import pip_gui
 
         return pip_gui.CPythonBackendPipDialog
+
+    def has_custom_system_shell(self):
+        return True
+
+    def open_custom_system_shell(self):
+        if not shutil.which("ssh"):
+            messagebox.showerror(
+                "Command not found", "Command 'ssh' not found", master=get_workbench()
+            )
+            return
+
+        from thonny import terminal
+
+        userhost = "%s@%s" % (self._user, self._host)
+        terminal.run_in_terminal(
+            ["ssh", userhost], cwd=get_workbench().get_local_cwd(), keep_open=False, title=userhost
+        )
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
