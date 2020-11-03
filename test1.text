@@ -1,0 +1,4 @@
+with open('test1.txt','w') as test:
+      test.write('Ich bin Nina\n')
+      test.write('Ich komme vom Himmel\n')
+      test.write('Ich bin ein Engel\n')
