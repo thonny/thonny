@@ -468,7 +468,8 @@ class MicroPythonBackend(MainBackend, ABC):
             return 2000
         else:
             result = self._resolve_unknown_epoch()
-            print("WARNING: Could not determine epoch year (%s), assuming %s" % (val, result))
+            if self._args.get("sync_time") or self._args.get("validate_time"):
+                print("WARNING: Could not determine epoch year (%s), assuming %s" % (val, result))
             return result
 
     def _update_cwd(self):
