@@ -370,6 +370,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             title=self._port,
         )
 
+    def get_supported_features(self):
+        return {"run", "run_in_terminal"}
+
+    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
+        messagebox.showinfo(
+            "Running in terminal",
+            "In order to run your script in terminal, save it on the device\n"
+            "as main script, select 'Tools => Open system shell' and press Ctrl+D",
+        )
+
 
 class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
