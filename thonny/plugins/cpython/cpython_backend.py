@@ -2804,7 +2804,6 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
                         or entry.name != "parse"
                         or etype is not SyntaxError
                     )
-                    or in_debug_mode()
                 ):
                     fmt = '  File "{}", line {}, in {}\n'.format(
                         entry.filename, entry.lineno, entry.name
