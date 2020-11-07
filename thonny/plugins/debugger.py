@@ -641,6 +641,12 @@ class BaseExpressionBox:
         event = frame_info.event
 
         if frame_info.current_root_expression is not None:
+
+            if self._last_root_expression != frame_info.current_root_expression:
+                # can happen, eg. when focus jumps from the last expr in while body
+                # to while test expression
+                self.clear_debug_view()
+
             with open(frame_info.filename, "rb") as fp:
                 whole_source = fp.read()
 
