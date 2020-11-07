@@ -1357,6 +1357,7 @@ class Tracer(Executor):
         self._fresh_exception = None
         self._prev_breakpoints = {}
         self._last_reported_frame_ids = set()
+        self._affected_frame_ids_per_exc_id = {}
         self._canonic_path_cache = {}
         self._file_interest_cache = {}
         self._file_breakpoints_cache = {}
@@ -1488,9 +1489,12 @@ class Tracer(Executor):
                 self._file_breakpoints_cache[self._get_canonic_path(path)] = linenos
 
     def _register_affected_frame(self, exception_obj, frame):
-        if not hasattr(exception_obj, "_affected_frame_ids_"):
-            exception_obj._affected_frame_ids_ = set()
-        exception_obj._affected_frame_ids_.add(id(frame))
+        # I used to store the frame ids in a new field inside exception object,
+        # but Python 3.8 doesn't allow this (https://github.com/thonny/thonny/issues/1403)
+        exc_id = id(exception_obj)
+        if exc_id not in self._affected_frame_ids_per_exc_id:
+            self._affected_frame_ids_per_exc_id[exc_id] = set()
+        self._affected_frame_ids_per_exc_id[exc_id].add(id(frame))
 
     def _get_breakpoints_in_file(self, filename):
         result = self._file_breakpoints_cache.get(filename, None)
@@ -1527,7 +1531,7 @@ class Tracer(Executor):
                 "msg": str(exc[1]),
                 "type_name": exc[0].__name__,
                 "lines_with_frame_info": format_exception_with_frame_info(*exc),
-                "affected_frame_ids": exc[1]._affected_frame_ids_,
+                "affected_frame_ids": self._affected_frame_ids_per_exc_id.get(id(exc[1]), set()),
                 "is_fresh": exc == self._fresh_exception,
             }
 

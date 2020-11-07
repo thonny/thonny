@@ -7,6 +7,7 @@ Version history
 * Make sure expression box for while/for test is located properly, #1134
 * In MicroPython backends only warn about failed epoch dectection if sync or validation is required
 * Don't show ugly traceback in debug mode
+* Internal error while debugging exceptions, #1403
 
 
 3.3.0b7 (2020-11-01)
