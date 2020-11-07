@@ -1946,6 +1946,12 @@ class NiceTracer(Tracer):
             assert "expression" in event
             assert prev_state_frame is not None
 
+            # may need to update current_statement, because the parent statement was
+            # not the last one visited (eg. with test expression of a loop,
+            # starting from 2nd iteration)
+            if hasattr(node, "parent_statement_focus"):
+                custom_frame.current_statement = node.parent_statement_focus
+
             # see whether current_root_expression needs to be updated
             prev_root_expression = prev_state_frame.current_root_expression
             if event == "before_expression" and (
@@ -2387,6 +2393,13 @@ class NiceTracer(Tracer):
                     child.parent_node = node
 
             # TODO: assert (it doesn't evaluate msg when test == True)
+
+            if isinstance(node, ast.stmt):
+                for child in ast.iter_child_nodes(node):
+                    child.parent_node = node
+                    child.parent_statement_focus = TextRange(
+                        node.lineno, node.col_offset, node.end_lineno, node.end_col_offset
+                    )
 
             if isinstance(node, ast.Str):
                 add_tag(node, "skipexport")
