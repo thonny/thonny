@@ -2810,13 +2810,10 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
             tb_temp = tb
             for entry in traceback.extract_tb(tb):
                 assert tb_temp is not None  # actual tb doesn't end before extract_tb
-                if (
-                    "cpython_backend" not in entry.filename
-                    and (
-                        not entry.filename.endswith(os.sep + "ast.py")
-                        or entry.name != "parse"
-                        or etype is not SyntaxError
-                    )
+                if "cpython_backend" not in entry.filename and (
+                    not entry.filename.endswith(os.sep + "ast.py")
+                    or entry.name != "parse"
+                    or etype is not SyntaxError
                 ):
                     fmt = '  File "{}", line {}, in {}\n'.format(
                         entry.filename, entry.lineno, entry.name
