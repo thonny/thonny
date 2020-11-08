@@ -226,8 +226,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 def repr(obj):
                     try:
                         s = repr(obj)
-                        if len(s) > 5000:
-                            s = s[:5000] + "..."
+                        if len(s) > 1000:
+                            s = s[:1000] + "..."
                         return s
                     except Exception as e:
                         return "<could not serialize: " + str(e) + ">"
