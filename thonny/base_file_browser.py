@@ -643,7 +643,7 @@ class BaseFileBrowser(ttk.Frame):
                 if selected_kind == "file":
                     ext = self.get_extension_from_name(self.get_selected_name())
                     self.menu.add_command(
-                        label=tr("Configure %s files ...") % ext,
+                        label=tr("Configure %s files") % ext + "...",
                         command=lambda: self.open_extension_dialog(ext),
                     )
 
@@ -657,8 +657,8 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_tree()
 
     def open_extension_dialog(self, extension: str) -> None:
-        system_choice = tr("Open it in system default application")
-        thonny_choice = tr("Open it in Thonny's text editor")
+        system_choice = tr("Open in system default app")
+        thonny_choice = tr("Open in Thonny's text editor")
 
         current_index = (
             1 if get_workbench().get_option(get_file_handler_conf_key(extension)) == "thonny" else 0

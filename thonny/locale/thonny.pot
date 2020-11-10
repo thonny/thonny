@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-10 10:35+0200\n"
+"POT-Creation-Date: 2020-11-10 10:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,26 +50,17 @@ msgstr ""
 msgid "Open in Thonny"
 msgstr ""
 
-#: thonny/base_file_browser.py:639
+#: thonny/base_file_browser.py:639 thonny/base_file_browser.py:660
 msgid "Open in system default app"
 msgstr ""
 
-#: thonny/base_file_browser.py:646
+#: thonny/base_file_browser.py:646 thonny/base_file_browser.py:668
 #, python-format
-msgid "Configure %s files ..."
-msgstr ""
-
-#: thonny/base_file_browser.py:660
-msgid "Open it in system default application"
+msgid "Configure %s files"
 msgstr ""
 
 #: thonny/base_file_browser.py:661
-msgid "Open it in Thonny's text editor"
-msgstr ""
-
-#: thonny/base_file_browser.py:668
-#, python-format
-msgid "Configure %s files"
+msgid "Open in Thonny's text editor"
 msgstr ""
 
 #: thonny/base_file_browser.py:669
