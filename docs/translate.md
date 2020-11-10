@@ -30,9 +30,7 @@ There, you will find the `pot`, `po` and `mo` files.
 
 **NB! Don't mark new strings for translation without consulting core developers first! Some strings are left unmarked on purpose (to reduce the amount of translation required or because they may change).**
 
-Mark the string to be translated as `_(string_to_be_translated)`.
-
-The shortcut `_()` for `gettext.gettext()` is available everywhere in the project since gettext is installed in `__main__.py` (see [gettext docs](https://docs.python.org/3/library/gettext.html#localizing-your-application)).
+Mark the string to be translated as `tr(string_to_be_translated)` (the function `tr` should be imported from `thonny.languages`).
 
 Once new strings have been marked, one should extract messages and then update catalog files (see below).
 
@@ -43,7 +41,7 @@ We are using Babel command-line interface as documented [here](http://babel.poco
 
 #### Extract messages to update the `pot` template file
 If new strings have been marked you need to extract them to update the `pot` template file:
-`pybabel extract thonny/ --output-file thonny/locale/thonny.pot`
+`pybabel extract thonny/ --keywords=tr --output-file thonny/locale/thonny.pot`
 
 output should be
 ```
