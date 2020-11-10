@@ -17,6 +17,7 @@ Regexes are adapted from idlelib
 
 import re
 
+import tkinter
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
@@ -25,13 +26,14 @@ TODO = "COLOR_TODO"
 
 
 class SyntaxColorer:
-    def __init__(self, text):
+    def __init__(self, text: tkinter.Text):
         self.text = text
         self._compile_regexes()
         self._config_tags()
         self._update_scheduled = False
         self._use_coloring = True
         self._multiline_dirty = True
+        self._highlight_tabs = True
 
     def _compile_regexes(self):
         from thonny.token_utils import (
@@ -45,6 +47,7 @@ class SyntaxColorer:
             STRING3_DELIMITER,
             STRING_CLOSED,
             STRING_OPEN,
+            TAB,
         )
 
         self.uniline_regex = re.compile(
@@ -62,7 +65,9 @@ class SyntaxColorer:
             + "|"
             + STRING_CLOSED
             + "|"
-            + STRING_OPEN,
+            + STRING_OPEN
+            + "|"
+            + TAB,
             re.S,  # @UndefinedVariable
         )
 
@@ -93,6 +98,7 @@ class SyntaxColorer:
         self.text.tag_raise("open_string3")
         # yes, unclosed_expression is another plugin's issue,
         # but it must be higher than *string3
+        self.text.tag_raise("tab")
         self.text.tag_raise("unclosed_expression")
         self.text.tag_raise("sel")
         """
@@ -129,6 +135,7 @@ class SyntaxColorer:
         self.text.tag_add(TODO, start_index, end_index)
 
     def schedule_update(self):
+        self._highlight_tabs = get_workbench().get_option("view.highlight_tabs")
         self._use_coloring = (
             get_workbench().get_option("view.syntax_coloring") and self.text.is_python_text()
         )
@@ -150,32 +157,33 @@ class SyntaxColorer:
         chars = self.text.get(start, end)
 
         # clear old tags
-        for tag in self.uniline_tags:
+        for tag in self.uniline_tags | {"tab"}:
             self.text.tag_remove(tag, start, end)
 
-        if not self._use_coloring:
-            return
+        if self._use_coloring:
+            for match in self.uniline_regex.finditer(chars):
+                for token_type, token_text in match.groupdict().items():
+                    if token_text and token_type in self.uniline_tags:
+                        token_text = token_text.strip()
+                        match_start, match_end = match.span(token_type)
 
-        for match in self.uniline_regex.finditer(chars):
-            for token_type, token_text in match.groupdict().items():
-                if token_text and token_type in self.uniline_tags:
-                    token_text = token_text.strip()
-                    match_start, match_end = match.span(token_type)
+                        self.text.tag_add(
+                            token_type, start + "+%dc" % match_start, start + "+%dc" % match_end
+                        )
 
-                    self.text.tag_add(
-                        token_type, start + "+%dc" % match_start, start + "+%dc" % match_end
-                    )
+                        # Mark also the word following def or class
+                        if token_text in ("def", "class"):
+                            id_match = self.id_regex.match(chars, match_end)
+                            if id_match:
+                                id_match_start, id_match_end = id_match.span(1)
+                                self.text.tag_add(
+                                    "definition",
+                                    start + "+%dc" % id_match_start,
+                                    start + "+%dc" % id_match_end,
+                                )
 
-                    # Mark also the word following def or class
-                    if token_text in ("def", "class"):
-                        id_match = self.id_regex.match(chars, match_end)
-                        if id_match:
-                            id_match_start, id_match_end = id_match.span(1)
-                            self.text.tag_add(
-                                "definition",
-                                start + "+%dc" % id_match_start,
-                                start + "+%dc" % id_match_end,
-                            )
+        if self._highlight_tabs:
+            self._update_tabs(start, end)
 
         self.text.tag_remove(TODO, start, end)
 
@@ -214,6 +222,15 @@ class SyntaxColorer:
 
         self._multiline_dirty = False
         self._raise_tags()
+
+    def _update_tabs(self, start, end):
+        while True:
+            pos = self.text.search("\t", start, end)
+            if pos:
+                self.text.tag_add("tab", pos)
+                start = self.text.index("%s +1 c" % pos)
+            else:
+                break
 
 
 class CodeViewSyntaxColorer(SyntaxColorer):
@@ -259,7 +276,7 @@ class CodeViewSyntaxColorer(SyntaxColorer):
         while True:
             tag_range = self.text.tag_nextrange("open_string", search_start, viewport_end)
             if not tag_range:
-                return
+                break
 
             if "string3" in self.text.tag_names(tag_range[0]):
                 self.text.tag_remove("open_string", tag_range[0], tag_range[1])
@@ -316,6 +333,7 @@ def load_plugin() -> None:
     wb = get_workbench()
 
     wb.set_default("view.syntax_coloring", True)
+    wb.set_default("view.highlight_tabs", True)
     wb.bind("TextInsert", update_coloring_on_event, True)
     wb.bind("TextDelete", update_coloring_on_event, True)
     wb.bind_class("CodeViewText", "<<VerticalScroll>>", update_coloring_on_event, True)

@@ -43,3 +43,5 @@ STRING_OPEN = matches_any("open_string", [SQSTRING_OPEN, DQSTRING_OPEN])
 STRING_CLOSED = matches_any("string", [SQSTRING_CLOSED, DQSTRING_CLOSED])
 STRING3_DELIMITER = matches_any("DELIMITER3", [SQ3DELIMITER, DQ3DELIMITER])
 STRING3 = matches_any("string3", [DQ3STRING, SQ3STRING])
+
+TAB = matches_any("tab", "\t")
