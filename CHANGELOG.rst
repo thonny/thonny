@@ -4,6 +4,16 @@ Version history
 
 3.3.0 (2020-11-??)
 ==================
+
+New and updated languages
+-------------------------
+* Czech by Petr. moses and Radim
+* Romanian by Pop Vasile Alexandru
+* Norwegian (Bokmål and Nynorsk) by Gabriel Slørdahl
+* Updated Portuguese (BR) by Marcelo de Gomensoro Malheiros
+* Updated French
+* Updated Polish
+
 * Make sure expression box for while/for test is located properly, #1134
 * In MicroPython backends only warn about failed epoch dectection if sync or validation is required
 * Don't show ugly traceback in debug mode

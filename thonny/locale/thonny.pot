@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-10 10:57+0200\n"
+"POT-Creation-Date: 2020-11-10 11:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,6 +24,26 @@ msgstr ""
 #: thonny/base_file_browser.py:273
 #, python-format
 msgid "%d items"
+msgstr ""
+
+#: thonny/base_file_browser.py:326
+msgid "Storage space on this drive or filesystem"
+msgstr ""
+
+#: thonny/base_file_browser.py:327
+msgid "total space"
+msgstr ""
+
+#: thonny/base_file_browser.py:328
+msgid "used space"
+msgstr ""
+
+#: thonny/base_file_browser.py:329
+msgid "free space"
+msgstr ""
+
+#: thonny/base_file_browser.py:335
+msgid "Storage info"
 msgstr ""
 
 #: thonny/base_file_browser.py:617

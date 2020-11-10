@@ -64,6 +64,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Filip Schouwenaars
 * Fizban
 * fstengel
+* Gabriel Slørdahl
 * Georges Khaznadar
 * Ivanhercaz
 * Ivan.schamann
@@ -78,8 +79,11 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Miro Hrončok
 * NathanBnm
 * Peter Marshall
+* Petr. moses
 * Phil Duby
 * phr0gger
+* Pop Vasile Alexandru
+* Radim
 * Rene Lehtma
 * Rune Langøy
 * sailslack

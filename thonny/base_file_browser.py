@@ -323,16 +323,16 @@ class BaseFileBrowser(ttk.Frame):
         used_str = "?" if info["used"] is None else sizeof_fmt(info["used"])
         free_str = "?" if info["free"] is None else sizeof_fmt(info["free"])
         text = (
-            "Storage space on this drive or filesystem:\n\n"
-            "    total: %s\n" % total_str
-            + "    used: %s\n" % used_str
-            + "    free: %s\n" % free_str
+            tr("Storage space on this drive or filesystem") + ":\n\n"
+            "    %s: %s\n" % (tr("total space"), total_str)
+            + "    %s: %s\n" % (tr("used space"), used_str)
+            + "    %s: %s\n" % (tr("free space"), free_str)
         )
 
         if info.get("comment"):
             text += "\n" + info["comment"]
 
-        messagebox.showinfo("Storage info", text, master=self)
+        messagebox.showinfo(tr("Storage info"), text, master=self)
 
     def cache_dirs_child_data(self, data):
         from copy import deepcopy
