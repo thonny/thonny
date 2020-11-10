@@ -116,6 +116,25 @@ def _cmd_dedent_selection():
         text.dedent_region()
 
 
+def _cmd_replace_tabs():
+    text = _get_focused_writable_text()
+    if text is not None:
+        orig_lines = text.get("1.0", "end").splitlines(keepends=True)
+        new_lines = []
+        for line in orig_lines:
+            leading_tab_count = 0
+            for char in line:
+                if char == "\t":
+                    leading_tab_count += 1
+                else:
+                    break
+            new_lines.append(leading_tab_count * "    " + line[leading_tab_count:])
+
+        text.delete("1.0", "end")
+
+        text.insert("1.0", "".join(new_lines))
+
+
 def load_plugin() -> None:
 
     get_workbench().add_command(
@@ -135,6 +154,15 @@ def load_plugin() -> None:
         _cmd_dedent_selection,
         tester=_writable_text_is_focused,
         accelerator="Shift+Tab",
+        group=49,
+    )
+
+    get_workbench().add_command(
+        "replace_tabs",
+        "edit",
+        tr("Replace tabs with spaces"),
+        _cmd_replace_tabs,
+        tester=_writable_text_is_focused,
         group=49,
     )
 
