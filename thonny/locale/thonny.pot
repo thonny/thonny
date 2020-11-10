@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-10 10:13+0200\n"
+"POT-Creation-Date: 2020-11-10 10:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -137,7 +137,7 @@ msgstr ""
 msgid "Moving %s to %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:1039 thonny/plugins/micropython/pip_gui.py:81
+#: thonny/base_file_browser.py:1039 thonny/plugins/micropython/pip_gui.py:77
 msgid "Deleting"
 msgstr ""
 
@@ -176,7 +176,7 @@ msgid "OK"
 msgstr ""
 
 #: thonny/config_ui.py:36 thonny/plugins/backend_config_page.py:273
-#: thonny/plugins/pip_gui.py:1128 thonny/ui_utils.py:114
+#: thonny/plugins/pip_gui.py:1141 thonny/ui_utils.py:114
 #: thonny/ui_utils.py:1632 thonny/workdlg.py:157 thonny/workdlg.py:201
 msgid "Cancel"
 msgstr ""
@@ -215,7 +215,7 @@ msgstr ""
 msgid "Recent files"
 msgstr ""
 
-#: thonny/editors.py:586 thonny/plugins/pip_gui.py:219 thonny/ui_utils.py:448
+#: thonny/editors.py:586 thonny/plugins/pip_gui.py:228 thonny/ui_utils.py:448
 #: thonny/ui_utils.py:1770 thonny/workdlg.py:155
 msgid "Close"
 msgstr ""
@@ -925,220 +925,241 @@ msgstr ""
 msgid "Pygame Zero mode"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:120
+#: thonny/plugins/pip_gui.py:67
+msgid "Search on PyPI"
+msgstr ""
+
+#: thonny/plugins/esp/__init__.py:365
+#: thonny/plugins/micropython/uf2dialog.py:94 thonny/plugins/pip_gui.py:70
+msgid "Install"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:73
+msgid "Upgrade"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:76
+msgid "Uninstall"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:79
+msgid "Delete selected"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:129
 msgid "INSTALL"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:324
+#: thonny/plugins/pip_gui.py:333
 msgid "Install from PyPI"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:327
+#: thonny/plugins/pip_gui.py:336
 msgid ""
 "If you don't know where to get the package from, then most likely you'll "
 "want to search the Python Package Index. Start by entering the name of "
 "the package in the search box above and pressing ENTER."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:336
+#: thonny/plugins/pip_gui.py:345
 msgid "Install from requirements file"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:338
+#: thonny/plugins/pip_gui.py:347
 msgid "Click "
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:339 thonny/plugins/pip_gui.py:373
+#: thonny/plugins/pip_gui.py:348 thonny/plugins/pip_gui.py:382
 msgid "here"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:343
+#: thonny/plugins/pip_gui.py:352
 msgid "to locate requirements.txt file and install the packages specified in it."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:356
+#: thonny/plugins/pip_gui.py:365
 msgid "Browse the packages"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:359
+#: thonny/plugins/pip_gui.py:368
 msgid ""
 "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or "
 "uninstalling."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:367
+#: thonny/plugins/pip_gui.py:376
 msgid "Packages' directory"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:371
+#: thonny/plugins/pip_gui.py:380
 msgid "Install from local file"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:372
+#: thonny/plugins/pip_gui.py:381
 msgid "Click"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:377
+#: thonny/plugins/pip_gui.py:386
 msgid ""
 "to locate and install the package file (usually with .whl, .tar.gz or "
 ".zip extension)."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:247 thonny/plugins/pip_gui.py:384
+#: thonny/plugins/micropython/pip_gui.py:243 thonny/plugins/pip_gui.py:393
 msgid "Upgrade or uninstall"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:386
+#: thonny/plugins/pip_gui.py:395
 msgid "Start by selecting the package from the left."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:390
+#: thonny/plugins/pip_gui.py:399
 msgid "Target:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:392
+#: thonny/plugins/pip_gui.py:401
 msgid "virtual environment"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:394
+#: thonny/plugins/pip_gui.py:403
 msgid "user site packages"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:398
+#: thonny/plugins/pip_gui.py:407
 msgid ""
 "This dialog lists all available packages, but allows upgrading and "
 "uninstalling only packages from"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:408
+#: thonny/plugins/pip_gui.py:417
 msgid ""
 "New packages will be also installed into this directory. Other locations "
 "must be managed by alternative means."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:432
+#: thonny/plugins/pip_gui.py:441
 msgid "Installed version:"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:151 thonny/plugins/pip_gui.py:434
+#: thonny/plugins/micropython/pip_gui.py:147 thonny/plugins/pip_gui.py:443
 msgid "Installed to:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:482
+#: thonny/plugins/pip_gui.py:491
 msgid "Could not find the package from PyPI."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:485
+#: thonny/plugins/pip_gui.py:494
 msgid "Please check your spelling!"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:489
+#: thonny/plugins/pip_gui.py:498
 msgid "Could not find the package info from PyPI."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:491 thonny/plugins/pip_gui.py:1182
+#: thonny/plugins/pip_gui.py:500 thonny/plugins/pip_gui.py:1195
 msgid "Error code:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:502
+#: thonny/plugins/pip_gui.py:511
 msgid "Latest stable version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:504
+#: thonny/plugins/pip_gui.py:513
 msgid "Latest version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:505
+#: thonny/plugins/pip_gui.py:514
 msgid "Summary"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:506
+#: thonny/plugins/pip_gui.py:515
 msgid "Author"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:507
+#: thonny/plugins/pip_gui.py:516
 msgid "Homepage"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:509
+#: thonny/plugins/pip_gui.py:518
 msgid "Bugtracker"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:511
+#: thonny/plugins/pip_gui.py:520
 msgid "Documentation"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:513
+#: thonny/plugins/pip_gui.py:522
 msgid "PyPI page"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:517
+#: thonny/plugins/pip_gui.py:526
 msgid "Requires"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:548
+#: thonny/plugins/pip_gui.py:557
 msgid "Search results"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:549
+#: thonny/plugins/pip_gui.py:558
 msgid "Searching"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:592
+#: thonny/plugins/pip_gui.py:601
 msgid "Can't find package name from the list:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:630 thonny/plugins/pip_gui.py:720
+#: thonny/plugins/pip_gui.py:639 thonny/plugins/pip_gui.py:729
 #, python-format
 msgid "Installing '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:636
+#: thonny/plugins/pip_gui.py:645
 #, python-format
 msgid "Upgrading '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:641
+#: thonny/plugins/pip_gui.py:650
 #, python-format
 msgid "Uninstalling '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:643
+#: thonny/plugins/pip_gui.py:652
 msgid "Really uninstall?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:644
+#: thonny/plugins/pip_gui.py:653
 msgid "Package '{}' is required for installing and uninstalling other packages."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:648
+#: thonny/plugins/pip_gui.py:657
 msgid "Are you sure you want to uninstall it?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:654
+#: thonny/plugins/pip_gui.py:663
 msgid "Installing"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:687
+#: thonny/plugins/pip_gui.py:696
 msgid "Package"
 msgstr ""
 
-#: thonny/plugins/cpython/__init__.py:420 thonny/plugins/pip_gui.py:687
-#: thonny/plugins/pip_gui.py:700
+#: thonny/plugins/cpython/__init__.py:420 thonny/plugins/pip_gui.py:696
+#: thonny/plugins/pip_gui.py:709
 msgid "all files"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:787
+#: thonny/plugins/pip_gui.py:796
 #, python-format
 msgid "Manage packages for %s"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:858
+#: thonny/plugins/pip_gui.py:867
 msgid "Confirmation"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:859
+#: thonny/plugins/pip_gui.py:868
 #, python-format
 msgid ""
 "Looks like you are installing a Thonny-related package.\n"
@@ -1148,18 +1169,18 @@ msgid ""
 "Are you sure you want to install %s for the back-end?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:967
+#: thonny/plugins/pip_gui.py:976
 msgid ""
 "NB! There may be another version available which is compatible with "
 "current Thonny version. Click on '...' button to choose the version to "
 "install."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:975
+#: thonny/plugins/pip_gui.py:984
 msgid "Thonny plugin without requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:976
+#: thonny/plugins/pip_gui.py:985
 msgid ""
 "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
@@ -1167,82 +1188,82 @@ msgid ""
 "If you still want it, then please install it from the command line."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:990
+#: thonny/plugins/pip_gui.py:999
 msgid "Unsuitable requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:991
+#: thonny/plugins/pip_gui.py:1000
 msgid "This package requires different Thonny version:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:995
+#: thonny/plugins/pip_gui.py:1004
 msgid "If you still want it, then please install it from the command line."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1024
+#: thonny/plugins/pip_gui.py:1033
 msgid ""
 "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools "
 "→ Manage packages...'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1038
+#: thonny/plugins/pip_gui.py:1047
 msgid ""
 "(In this case Thonny's back-end uses same interpreter, so both dialogs "
 "manage same packages.)"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1044
+#: thonny/plugins/pip_gui.py:1053
 msgid ""
 "NB! You need to restart Thonny after installing / upgrading / "
 "uninstalling a plug-in."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1054
+#: thonny/plugins/pip_gui.py:1063
 msgid "Thonny plug-ins"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1074
+#: thonny/plugins/pip_gui.py:1085
 msgid "Advanced install / upgrade / downgrade"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1083
+#: thonny/plugins/pip_gui.py:1094
 msgid "Desired version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1121
+#: thonny/plugins/pip_gui.py:1132
 msgid "Upgrade dependencies"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1180
+#: thonny/plugins/pip_gui.py:1193
 msgid "Requires:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1184
+#: thonny/plugins/pip_gui.py:1197
 msgid "Error:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1350
+#: thonny/plugins/pip_gui.py:1363
 msgid "Package manager is not available for this interpreter"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1363
+#: thonny/plugins/pip_gui.py:1376
 msgid "Not supported"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:294 thonny/plugins/pip_gui.py:1368
+#: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1381
 msgid "Not available"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1369
+#: thonny/plugins/pip_gui.py:1382
 msgid "You need to stop your program before launching the package manager."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1387
+#: thonny/plugins/pip_gui.py:1400
 msgid "Manage packages..."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1393
+#: thonny/plugins/pip_gui.py:1406
 msgid "Manage plug-ins..."
 msgstr ""
 
@@ -1479,11 +1500,6 @@ msgstr ""
 msgid "Remote Python 3 (SSH)"
 msgstr ""
 
-#: thonny/plugins/esp/__init__.py:365
-#: thonny/plugins/micropython/uf2dialog.py:94
-msgid "Install"
-msgstr ""
-
 #: thonny/plugins/help/__init__.py:64
 msgid "Home"
 msgstr ""
@@ -1552,48 +1568,48 @@ msgstr ""
 msgid "MicroPython (SSH)"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:138
+#: thonny/plugins/micropython/pip_gui.py:134
 msgid "Module"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:163
+#: thonny/plugins/micropython/pip_gui.py:159
 msgid "Shadowed items (not importable):"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:212
+#: thonny/plugins/micropython/pip_gui.py:208
 msgid ""
 "Package is not available at micropython.org. Version at PyPI will be "
 "installed."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:223
+#: thonny/plugins/micropython/pip_gui.py:219
 #, python-format
 msgid ""
 "NB! micropython.org has published version %s of this package and this "
 "will be installed by default."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:249
+#: thonny/plugins/micropython/pip_gui.py:245
 msgid "For upgrading simply install the package again."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:252
+#: thonny/plugins/micropython/pip_gui.py:248
 msgid "For uninstalling delete corresponding files."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:266
+#: thonny/plugins/micropython/pip_gui.py:262
 msgid "Scope"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:279
+#: thonny/plugins/micropython/pip_gui.py:275
 msgid "This dialog lists top-level modules from following directories:\n"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:288
+#: thonny/plugins/micropython/pip_gui.py:284
 msgid "New packages will be installed to"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:296
+#: thonny/plugins/micropython/pip_gui.py:292
 msgid "no absolute lib directory in sys.path"
 msgstr ""
 

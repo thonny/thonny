@@ -33,12 +33,6 @@ from thonny.workdlg import SubprocessDialog
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
-SEARCH_ON_PYPI = "Search on PyPI"
-INSTALL = "Install"
-UPGRADE = "Upgrade"
-UNINSTALL = "Uninstall"
-DELETE_SELECTED = "Delete selected"
-
 logger = logging.getLogger(__name__)
 
 
@@ -69,6 +63,21 @@ class PipDialog(CommonDialog):
 
         self._start_update_list()
 
+    def get_search_button_text(self):
+        return tr("Search on PyPI")
+
+    def get_install_button_text(self):
+        return tr("Install")
+
+    def get_upgrade_button_text(self):
+        return tr("Upgrade")
+
+    def get_uninstall_button_text(self):
+        return tr("Uninstall")
+
+    def get_delete_selected_button_text(self):
+        return tr("Delete selected")
+
     def _create_widgets(self, parent):
 
         header_frame = ttk.Frame(parent)
@@ -87,7 +96,7 @@ class PipDialog(CommonDialog):
         self.search_box.bind("<B1-Motion>", lambda _: self.search_box.focus_set())
 
         self.search_button = ttk.Button(
-            header_frame, text=tr(SEARCH_ON_PYPI), command=self._on_search, width=25
+            header_frame, text=self.get_search_button_text(), command=self._on_search, width=25
         )
         self.search_button.grid(row=1, column=1, sticky="nse", padx=(10, 0))
 
@@ -191,7 +200,7 @@ class PipDialog(CommonDialog):
 
         self.install_button = ttk.Button(
             self.command_frame,
-            text=" " + tr(UPGRADE) + " ",
+            text=" " + self.get_upgrade_button_text() + " ",
             command=self._on_install_click,
             width=20,
         )
@@ -200,7 +209,7 @@ class PipDialog(CommonDialog):
 
         self.uninstall_button = ttk.Button(
             self.command_frame,
-            text=tr(UNINSTALL),
+            text=self.get_uninstall_button_text(),
             command=self._on_uninstall_click,
             width=20,
         )
@@ -424,7 +433,7 @@ class PipDialog(CommonDialog):
         self.title_label["text"] = ""
         self.title_label.grid()
         self.command_frame.grid()
-        self.uninstall_button["text"] = tr(UNINSTALL)
+        self.uninstall_button["text"] = self.get_uninstall_button_text()
 
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
@@ -452,12 +461,12 @@ class PipDialog(CommonDialog):
 
             if active_dist is not None:
                 # existing package in target directory
-                self.install_button["text"] = tr(UPGRADE)
+                self.install_button["text"] = self.get_upgrade_button_text()
                 self.install_button["state"] = "disabled"
                 self.uninstall_button.grid(row=0, column=1)
             else:
                 # new package
-                self.install_button["text"] = tr(INSTALL)
+                self.install_button["text"] = self.get_install_button_text()
                 self.uninstall_button.grid_remove()
 
     def _show_package_info(self, name, data, error_code=None):
@@ -1066,6 +1075,8 @@ class DetailsDialog(CommonDialog):
     def __init__(self, master, package_metadata, selected_version, support_update_deps_switch):
         from distutils.version import StrictVersion
 
+        assert isinstance(master, PipDialog)
+
         super().__init__(master)
         self.result = None
         self._closed = False
@@ -1123,7 +1134,9 @@ class DetailsDialog(CommonDialog):
         if support_update_deps_switch:
             self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
 
-        self.ok_button = ttk.Button(main_frame, text=tr(INSTALL), command=self._ok)
+        self.ok_button = ttk.Button(
+            main_frame, text=master.get_install_button_text(), command=self._ok
+        )
         self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
         self.cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
         self.cancel_button.grid(row=4, column=1, pady=15, padx=(5, 20), sticky="se")

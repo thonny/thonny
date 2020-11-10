@@ -16,10 +16,6 @@ from thonny.plugins.micropython import MicroPythonProxy, LocalMicroPythonProxy
 from thonny.plugins.micropython.micropip import MICROPYTHON_ORG_JSON
 from thonny.plugins.pip_gui import (
     BackendPipDialog,
-    SEARCH_ON_PYPI,
-    DELETE_SELECTED,
-    INSTALL,
-    UNINSTALL,
     _fetch_url_future,
     get_not_supported_translation,
 )
@@ -42,9 +38,9 @@ class MicroPythonPipDialog(BackendPipDialog):
         return None
 
     def _on_install_click(self):
-        if self.install_button["text"] == tr(INSTALL):
+        if self.install_button["text"] == self.get_install_button_text():
             super()._on_install_click()
-        elif self.install_button["text"] == tr(SEARCH_ON_PYPI):
+        elif self.install_button["text"] == self.get_search_button_text():
             self.search_box.delete(0, "end")
             self.search_box.insert(
                 0, "micropython pycopy " + self.current_package_data["info"]["name"]
@@ -56,9 +52,9 @@ class MicroPythonPipDialog(BackendPipDialog):
             )
 
     def _on_uninstall_click(self):
-        if self.uninstall_button["text"] == tr(UNINSTALL):
+        if self.uninstall_button["text"] == self.get_uninstall_button_text():
             super()._on_uninstall_click()
-        elif self.uninstall_button["text"] == tr(DELETE_SELECTED):
+        elif self.uninstall_button["text"] == self.get_delete_selected_button_text():
             self._delete_selected()
         else:
             raise RuntimeError(
@@ -166,8 +162,8 @@ class MicroPythonPipDialog(BackendPipDialog):
 
         self.command_frame.grid()
         self.uninstall_button.grid()
-        self.install_button["text"] = tr(SEARCH_ON_PYPI)
-        self.uninstall_button["text"] = tr(DELETE_SELECTED)
+        self.install_button["text"] = self.get_search_button_text()
+        self.uninstall_button["text"] = self.get_delete_selected_button_text()
         self.uninstall_button["state"] = "normal" if self._checkboxes else "disabled"
         self._select_list_item(msg.module_name)
 
