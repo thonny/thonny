@@ -322,11 +322,12 @@ class BaseFileBrowser(ttk.Frame):
         total_str = "?" if info["total"] is None else sizeof_fmt(info["total"])
         used_str = "?" if info["used"] is None else sizeof_fmt(info["used"])
         free_str = "?" if info["free"] is None else sizeof_fmt(info["free"])
-        text = (
-            tr("Storage space on this drive or filesystem") + ":\n\n"
-            "    %s: %s\n" % (tr("total space"), total_str)
-            + "    %s: %s\n" % (tr("used space"), used_str)
-            + "    %s: %s\n" % (tr("free space"), free_str)
+        text = tr("Storage space on this drive or filesystem") + ":\n\n" "    %s: %s\n" % (
+            tr("total space"),
+            total_str,
+        ) + "    %s: %s\n" % (tr("used space"), used_str) + "    %s: %s\n" % (
+            tr("free space"),
+            free_str,
         )
 
         if info.get("comment"):
