@@ -71,6 +71,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Juan Falgueras
 * Kauri Raba
 * M Burak Kalkan
+* Marcelo de Gomensoro Malheiros
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
