@@ -176,16 +176,7 @@ class EnhancedText(TweakableText):
     Most of the code is adapted from idlelib.EditorWindow.
     """
 
-    def __init__(
-        self,
-        master=None,
-        style="Text",
-        tag_current_line=False,
-        indent_with_tabs=False,
-        replace_tabs=False,
-        cnf={},
-        **kw
-    ):
+    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
         kw["autoseparators"] = False
@@ -195,8 +186,6 @@ class EnhancedText(TweakableText):
         super().__init__(master=master, cnf=cnf, **kw)
         self.tabwidth = 4
         self.indent_width = 4
-        self.indent_with_tabs = indent_with_tabs
-        self.replace_tabs = replace_tabs
 
         self._last_event_kind = None
         self._last_key_time = None
@@ -221,6 +210,9 @@ class EnhancedText(TweakableText):
             self.bind("<<CursorMove>>", self._tag_current_line, True)
             self.bind("<<TextChange>>", self._tag_current_line, True)
             self._tag_current_line()
+
+    def should_indent_with_tabs(self):
+        return True
 
     def _bind_mouse_aids(self):
         if _running_on_mac():
@@ -427,7 +419,7 @@ class EnhancedText(TweakableText):
             self._reindent_to(effective + self.indent_width)
         else:
             # tab to the next 'stop' within or to right of line's text:
-            if self.indent_with_tabs:
+            if self.should_indent_with_tabs():
                 pad = "\t"
             else:
                 effective = len(prefix.expandtabs(self.tabwidth))
@@ -649,7 +641,7 @@ class EnhancedText(TweakableText):
 
     def _make_blanks(self, n):
         # Make string that displays as n leading blanks.
-        if self.indent_with_tabs:
+        if self.should_indent_with_tabs():
             ntabs, nspaces = divmod(n, self.tabwidth)
             return "\t" * ntabs + " " * nspaces
         else:
@@ -752,29 +744,7 @@ class EnhancedText(TweakableText):
         super().destroy()
 
     def direct_insert(self, index, chars, tags=None, **kw):
-        chars = self.check_convert_tabs_to_spaces(chars)
         super().direct_insert(index, chars, tags, **kw)
-
-    def check_convert_tabs_to_spaces(self, chars):
-        if not self.replace_tabs:
-            return chars
-        tab_count = chars.count("\t")
-        if tab_count == 0:
-            return chars
-        else:
-
-            if messagebox.askyesno(
-                "Convert tabs to spaces?",
-                "Thonny (according to Python recommendation) uses spaces for indentation, "
-                + "but the text you are about to insert/open contains %d tab characters. "
-                % tab_count
-                + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n"
-                + "Do you want me to replace each tab with %d spaces?\n\n" % self.indent_width,
-                master=self,
-            ):
-                return chars.expandtabs(self.indent_width)
-            else:
-                return chars
 
 
 class TextFrame(ttk.Frame):

@@ -40,7 +40,7 @@ class Editor(ttk.Frame):
 
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
-            get_workbench(), propose_remove_line_numbers=True, font="EditorFont", replace_tabs=True
+            get_workbench(), propose_remove_line_numbers=True, font="EditorFont"
         )
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -518,6 +518,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.highlight_current_line", False)
         get_workbench().set_default("view.show_line_numbers", True)
         get_workbench().set_default("view.recommended_line_length", 0)
+        get_workbench().set_default("edit.indent_with_tabs", False)
 
         self._recent_menu = tk.Menu(
             get_workbench().get_menu("file"), postcommand=self._update_recent_menu

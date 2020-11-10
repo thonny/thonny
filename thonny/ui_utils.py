@@ -804,24 +804,9 @@ def set_zoomed(toplevel, value):
 
 
 class EnhancedTextWithLogging(tktextext.EnhancedText):
-    def __init__(
-        self,
-        master=None,
-        style="Text",
-        tag_current_line=False,
-        indent_with_tabs=False,
-        replace_tabs=False,
-        cnf={},
-        **kw
-    ):
+    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
         super().__init__(
-            master=master,
-            style=style,
-            tag_current_line=tag_current_line,
-            indent_with_tabs=indent_with_tabs,
-            replace_tabs=replace_tabs,
-            cnf=cnf,
-            **kw
+            master=master, style=style, tag_current_line=tag_current_line, cnf=cnf, **kw
         )
 
         self._last_event_changed_line_count = False

@@ -42,6 +42,11 @@ class EditorConfigurationPage(ConfigurationPage):
             tr("Allow code completion with Tab-key in Shell"),
             columnspan=2,
         )
+        self.add_checkbox(
+            "edit.indent_with_tabs",
+            tr("Indent with tab characters (not recommended for Python)"),
+            columnspan=2,
+        )
 
         self.add_checkbox("view.show_line_numbers", tr("Show line numbers"), pady=(20, 0))
         self._line_length_var = get_workbench().get_variable("view.recommended_line_length")

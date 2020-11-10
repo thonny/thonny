@@ -31,9 +31,6 @@ NON_TEXT_CHARS.remove("\f")
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
-        if "indent_with_tabs" not in kw:
-            kw["indent_with_tabs"] = False
-
         self.file_type = "python"
         self._syntax_options = {}
         super().__init__(master=master, cnf=cnf, **kw)
@@ -94,9 +91,11 @@ class SyntaxText(EnhancedText):
             # let the default action work
             return
 
+    def should_indent_with_tabs(self):
+        return get_workbench().get_option("edit.indent_with_tabs")
+
     def set_file_type(self, file_type):
         self.file_type = file_type
-        self.replace_tabs = file_type == "python"
 
     def is_python_text(self):
         return self.file_type == "python"
@@ -112,9 +111,6 @@ class CodeViewText(EnhancedTextWithLogging, SyntaxText):
     """Provides opportunities for monkey-patching by plugins"""
 
     def __init__(self, master=None, cnf={}, **kw):
-
-        if "replace_tabs" not in kw:
-            kw["replace_tabs"] = False
 
         super().__init__(
             master=master,
