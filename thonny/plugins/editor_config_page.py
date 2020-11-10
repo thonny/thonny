@@ -25,7 +25,7 @@ class EditorConfigurationPage(ConfigurationPage):
 
         self.add_checkbox("view.paren_highlighting", tr("Highlight parentheses"))
         self.add_checkbox("view.syntax_coloring", tr("Highlight syntax elements"))
-        self.add_checkbox("view.highlight_tabs", tr("Highlight tabs"))
+        self.add_checkbox("view.highlight_tabs", tr("Highlight tab characters"))
         self.add_checkbox(
             "view.highlight_current_line",
             tr("Highlight current line (requires reopening the editor)"),
