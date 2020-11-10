@@ -5,6 +5,20 @@ Version history
 3.3.0 (2020-11-??)
 ==================
 
+New & changed
+-------------
+* Removed automatic tabs => spaces conversion and its confirmation dialog, #599
+* Added command for replacing tabs with spaces, #1411
+* Added option for highlighting tabs (Tools => Options => Editor), #1409
+* Added option for indenting with tabs (Tools => Options => Editor), #599
+
+Fixes
+-----
+* Make sure expression box for while/for test is located properly, #1134
+* In MicroPython backends only warn about failed epoch dectection if sync or validation is required
+* Don't show ugly traceback in debug mode
+* Internal error while debugging exceptions, #1403
+
 New and updated languages
 -------------------------
 * Czech by Petr. moses and Radim
@@ -14,10 +28,6 @@ New and updated languages
 * Updated French
 * Updated Polish
 
-* Make sure expression box for while/for test is located properly, #1134
-* In MicroPython backends only warn about failed epoch dectection if sync or validation is required
-* Don't show ugly traceback in debug mode
-* Internal error while debugging exceptions, #1403
 
 
 3.3.0b7 (2020-11-01)

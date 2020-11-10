@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-10 11:10+0200\n"
+"POT-Creation-Date: 2020-11-10 20:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,11 +26,11 @@ msgstr ""
 msgid "%d items"
 msgstr ""
 
-#: thonny/base_file_browser.py:326
+#: thonny/base_file_browser.py:325
 msgid "Storage space on this drive or filesystem"
 msgstr ""
 
-#: thonny/base_file_browser.py:327
+#: thonny/base_file_browser.py:326
 msgid "total space"
 msgstr ""
 
@@ -42,138 +42,138 @@ msgstr ""
 msgid "free space"
 msgstr ""
 
-#: thonny/base_file_browser.py:335
+#: thonny/base_file_browser.py:336
 msgid "Storage info"
 msgstr ""
 
-#: thonny/base_file_browser.py:617
+#: thonny/base_file_browser.py:618
 msgid "Refresh"
 msgstr ""
 
-#: thonny/base_file_browser.py:619
+#: thonny/base_file_browser.py:620
 msgid "Open in system file manager"
 msgstr ""
 
-#: thonny/base_file_browser.py:624
+#: thonny/base_file_browser.py:625
 msgid "Hide hidden files"
 msgstr ""
 
-#: thonny/base_file_browser.py:624
+#: thonny/base_file_browser.py:625
 msgid "Show hidden files"
 msgstr ""
 
-#: thonny/base_file_browser.py:630
+#: thonny/base_file_browser.py:631
 msgid "Focus into"
 msgstr ""
 
-#: thonny/base_file_browser.py:634
+#: thonny/base_file_browser.py:635
 msgid "Open in Thonny"
 msgstr ""
 
-#: thonny/base_file_browser.py:639 thonny/base_file_browser.py:660
+#: thonny/base_file_browser.py:640 thonny/base_file_browser.py:661
 msgid "Open in system default app"
 msgstr ""
 
-#: thonny/base_file_browser.py:646 thonny/base_file_browser.py:668
+#: thonny/base_file_browser.py:647 thonny/base_file_browser.py:669
 #, python-format
 msgid "Configure %s files"
 msgstr ""
 
-#: thonny/base_file_browser.py:661
+#: thonny/base_file_browser.py:662
 msgid "Open in Thonny's text editor"
 msgstr ""
 
-#: thonny/base_file_browser.py:669
+#: thonny/base_file_browser.py:670
 #, python-format
 msgid ""
 "What to do with a %s file when you double-click it in Thonny's file "
 "browser?"
 msgstr ""
 
-#: thonny/base_file_browser.py:691
+#: thonny/base_file_browser.py:692
 msgid "Move to Recycle Bin"
 msgstr ""
 
-#: thonny/base_file_browser.py:693
+#: thonny/base_file_browser.py:694
 msgid "Move to Trash"
 msgstr ""
 
-#: thonny/base_file_browser.py:696
+#: thonny/base_file_browser.py:697
 msgid "Delete"
 msgstr ""
 
-#: thonny/base_file_browser.py:699
+#: thonny/base_file_browser.py:700
 msgid "New directory"
 msgstr ""
 
-#: thonny/base_file_browser.py:702
+#: thonny/base_file_browser.py:703
 msgid "Properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:704
+#: thonny/base_file_browser.py:705
 msgid "Storage space"
 msgstr ""
 
-#: thonny/base_file_browser.py:714
+#: thonny/base_file_browser.py:715
 msgid "Path"
 msgstr ""
 
-#: thonny/base_file_browser.py:716
+#: thonny/base_file_browser.py:717
 msgid "Directory properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:718
+#: thonny/base_file_browser.py:719
 msgid "File properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:720
+#: thonny/base_file_browser.py:721
 msgid "bytes"
 msgstr ""
 
-#: thonny/base_file_browser.py:723
+#: thonny/base_file_browser.py:724
 msgid "Size"
 msgstr ""
 
-#: thonny/base_file_browser.py:734
+#: thonny/base_file_browser.py:735
 msgid "Modified"
 msgstr ""
 
-#: thonny/base_file_browser.py:793
+#: thonny/base_file_browser.py:794
 #, python-format
 msgid "Deleting %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:816
+#: thonny/base_file_browser.py:817
 #, python-format
 msgid "Moving %s to %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:1039 thonny/plugins/micropython/pip_gui.py:77
+#: thonny/base_file_browser.py:1040 thonny/plugins/micropython/pip_gui.py:77
 msgid "Deleting"
 msgstr ""
 
-#: thonny/base_file_browser.py:1046
+#: thonny/base_file_browser.py:1047
 msgid "Creating directory"
 msgstr ""
 
-#: thonny/base_file_browser.py:1161
+#: thonny/base_file_browser.py:1162
 msgid "Error"
 msgstr ""
 
-#: thonny/base_file_browser.py:1161
+#: thonny/base_file_browser.py:1162
 msgid "You need to select a file!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1165
+#: thonny/base_file_browser.py:1166
 msgid "Overwrite?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1165
+#: thonny/base_file_browser.py:1166
 #, python-format
 msgid "Do you want to overwrite '%s' ?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1310
+#: thonny/base_file_browser.py:1311
 msgid "This computer"
 msgstr ""
 
@@ -188,7 +188,7 @@ msgstr ""
 
 #: thonny/config_ui.py:36 thonny/plugins/backend_config_page.py:273
 #: thonny/plugins/pip_gui.py:1141 thonny/ui_utils.py:114
-#: thonny/ui_utils.py:1632 thonny/workdlg.py:157 thonny/workdlg.py:201
+#: thonny/ui_utils.py:1617 thonny/workdlg.py:157 thonny/workdlg.py:201
 msgid "Cancel"
 msgstr ""
 
@@ -210,48 +210,48 @@ msgstr ""
 msgid "Saving"
 msgstr ""
 
-#: thonny/editors.py:551 thonny/editors.py:553
+#: thonny/editors.py:552 thonny/editors.py:554
 msgid "New"
 msgstr ""
 
-#: thonny/editors.py:564
+#: thonny/editors.py:565
 msgid "Open..."
 msgstr ""
 
-#: thonny/editors.py:566
+#: thonny/editors.py:567
 msgid "Load"
 msgstr ""
 
-#: thonny/editors.py:575
+#: thonny/editors.py:576
 msgid "Recent files"
 msgstr ""
 
-#: thonny/editors.py:586 thonny/plugins/pip_gui.py:228 thonny/ui_utils.py:448
-#: thonny/ui_utils.py:1770 thonny/workdlg.py:155
+#: thonny/editors.py:587 thonny/plugins/pip_gui.py:228 thonny/ui_utils.py:448
+#: thonny/ui_utils.py:1755 thonny/workdlg.py:155
 msgid "Close"
 msgstr ""
 
-#: thonny/editors.py:597 thonny/ui_utils.py:450
+#: thonny/editors.py:598 thonny/ui_utils.py:450
 msgid "Close all"
 msgstr ""
 
-#: thonny/editors.py:607 thonny/editors.py:609
+#: thonny/editors.py:608 thonny/editors.py:610
 msgid "Save"
 msgstr ""
 
-#: thonny/editors.py:621 thonny/editors.py:623
+#: thonny/editors.py:622 thonny/editors.py:624
 msgid "Save All files"
 msgstr ""
 
-#: thonny/editors.py:632
+#: thonny/editors.py:633
 msgid "Save as..."
 msgstr ""
 
-#: thonny/editors.py:643
+#: thonny/editors.py:644
 msgid "Save copy..."
 msgstr ""
 
-#: thonny/editors.py:652
+#: thonny/editors.py:653
 msgid "Rename..."
 msgstr ""
 
@@ -347,11 +347,11 @@ msgstr ""
 msgid "Close others"
 msgstr ""
 
-#: thonny/ui_utils.py:1621
+#: thonny/ui_utils.py:1606
 msgid "Copying"
 msgstr ""
 
-#: thonny/ui_utils.py:1624
+#: thonny/ui_utils.py:1609
 #, python-format
 msgid ""
 "Copying\n"
@@ -360,23 +360,23 @@ msgid ""
 "  %s"
 msgstr ""
 
-#: thonny/ui_utils.py:1765
+#: thonny/ui_utils.py:1750
 msgid "Copy to clipboard"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:49 thonny/ui_utils.py:2191
+#: thonny/plugins/common_editing_commands.py:49 thonny/ui_utils.py:2176
 msgid "Cut"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:61 thonny/ui_utils.py:2192
+#: thonny/plugins/common_editing_commands.py:61 thonny/ui_utils.py:2177
 msgid "Copy"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2193
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2178
 msgid "Paste"
 msgstr ""
 
-#: thonny/ui_utils.py:2197
+#: thonny/ui_utils.py:2182
 msgid "Select All"
 msgstr ""
 
@@ -611,23 +611,27 @@ msgstr ""
 msgid "Debug current script (birdseye)"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:124
+#: thonny/plugins/commenting_indenting.py:143
 msgid "Indent selected lines"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:134
+#: thonny/plugins/commenting_indenting.py:153
 msgid "Dedent selected lines"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:144
+#: thonny/plugins/commenting_indenting.py:163
+msgid "Replace tabs with spaces"
+msgstr ""
+
+#: thonny/plugins/commenting_indenting.py:172
 msgid "Toggle comment"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:154
+#: thonny/plugins/commenting_indenting.py:182
 msgid "Comment out"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:164
+#: thonny/plugins/commenting_indenting.py:192
 msgid "Uncomment"
 msgstr ""
 
@@ -739,29 +743,37 @@ msgstr ""
 msgid "Highlight syntax elements"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:30
+#: thonny/plugins/editor_config_page.py:28
+msgid "Highlight tab characters"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:31
 msgid "Highlight current line (requires reopening the editor)"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:35
+#: thonny/plugins/editor_config_page.py:36
 msgid "Allow code completion with Tab-key in editors"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:41
+#: thonny/plugins/editor_config_page.py:42
 msgid "Allow code completion with Tab-key in Shell"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:45
+#: thonny/plugins/editor_config_page.py:47
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:51
 msgid "Show line numbers"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:48
+#: thonny/plugins/editor_config_page.py:54
 msgid ""
 "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
 msgstr ""
 
-#: thonny/plugins/editor_config_page.py:69
+#: thonny/plugins/editor_config_page.py:75
 msgid "Editor"
 msgstr ""
 
