@@ -4,6 +4,7 @@ from tkinter import ttk
 from thonny import get_workbench, languages
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
+from thonny.misc_utils import running_on_linux
 
 
 class GeneralConfigurationPage(ConfigurationPage):
@@ -22,16 +23,25 @@ class GeneralConfigurationPage(ConfigurationPage):
             row=5,
             columnspan=2,
         )
+        if running_on_linux():
+            self.add_checkbox(
+                "file.avoid_zenity",
+                tr("Use Tk file dialogs instead of Zenity"),
+                tooltip=tr("Select if the file dialogs end up behind the main window"),
+                row=6,
+                columnspan=2,
+            )
+
         self.add_checkbox(
             "general.disable_notification_sound",
             tr("Disable notification sound"),
-            row=6,
+            row=7,
             columnspan=2,
         )
         self.add_checkbox(
             "general.debug_mode",
             tr("Debug mode (provides more detailed diagnostic logs)"),
-            row=7,
+            row=8,
             columnspan=2,
         )
 

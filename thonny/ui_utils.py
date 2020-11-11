@@ -1847,7 +1847,7 @@ def open_path_in_system_file_manager(path):
 
 
 def _get_dialog_provider():
-    if platform.system() != "Linux":
+    if platform.system() != "Linux" or get_workbench().get_option("file.avoid_zenity"):
         return filedialog
 
     import shutil

@@ -11,6 +11,7 @@ New & changed
 * Added command for replacing tabs with spaces, #1411
 * Added option for highlighting tabs (Tools => Options => Editor), #1409
 * Added option for indenting with tabs (Tools => Options => Editor), #599
+* Add an option to use Tk file dialogs instead of Zenity in Linux, #1404
 
 Fixes
 -----

@@ -252,6 +252,7 @@ class Workbench(tk.Tk):
         self.set_default("general.scaling", "default")
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
+        self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
         self.update_debug_mode()
 
