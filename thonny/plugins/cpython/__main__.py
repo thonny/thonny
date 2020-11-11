@@ -35,6 +35,7 @@ if __name__ == "__main__":
         )
         sys.exit()
 
+    thonny.prepare_thonny_user_dir()
     thonny.configure_backend_logging()
     thonny.set_dpi_aware()
 

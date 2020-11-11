@@ -172,7 +172,7 @@ def launch():
     except ImportError:
         pass
 
-    _prepare_thonny_user_dir()
+    prepare_thonny_user_dir()
     _configure_frontend_logging()
 
     if not _check_welcome():
@@ -221,7 +221,7 @@ def launch():
     return 0
 
 
-def _prepare_thonny_user_dir():
+def prepare_thonny_user_dir():
     if not os.path.exists(THONNY_USER_DIR):
         os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
 
