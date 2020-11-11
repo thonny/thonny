@@ -19,8 +19,8 @@ Fixes
 * Don't show ugly traceback in debug mode
 * Internal error while debugging exceptions, #1403
 
-New and updated languages
--------------------------
+New and updated translations
+----------------------------
 * Czech by Petr. moses and Radim
 * Romanian by Pop Vasile Alexandru
 * Norwegian (Bokmål and Nynorsk) by Gabriel Slørdahl
