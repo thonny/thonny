@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-11 10:20+0200\n"
+"POT-Creation-Date: 2020-11-11 10:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -711,7 +711,7 @@ msgid "Function call at %s"
 msgstr ""
 
 #: thonny/plugins/debugger.py:959
-msgid "Source"
+msgid "Source code"
 msgstr ""
 
 #: thonny/plugins/debugger.py:980

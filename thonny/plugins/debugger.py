@@ -956,7 +956,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
         self._text_frame = CodeView(
             self._code_book, first_line_number=frame_info.firstlineno, font="EditorFont"
         )
-        self._code_book.add(self._text_frame, text=tr("Source"))
+        self._code_book.add(self._text_frame, text=tr("Source code"))
         self.main_pw.add(self._code_book, minsize=200)
         self._code_book.preferred_size_in_pw = 400
 
