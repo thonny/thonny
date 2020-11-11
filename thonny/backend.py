@@ -232,10 +232,14 @@ class MainBackend(BaseBackend, ABC):
         for path in paths:
             info = self._get_path_info(path)
             if info is not None:
+                info["anchor"] = path
                 result[path] = info
 
             if recurse and info is not None and info["kind"] == "dir":
-                result.update(self._get_dir_descendants_info(path))
+                desc_infos = self._get_dir_descendants_info(path)
+                for key in desc_infos:
+                    desc_infos[key]["anchor"] = path
+                result.update(desc_infos)
 
         return result
 

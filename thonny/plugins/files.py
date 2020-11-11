@@ -20,6 +20,7 @@ from thonny.common import (
     normpath_with_actual_case,
     IGNORED_FILES_AND_DIRS,
     CommandToBackend,
+    universal_dirname,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
@@ -209,7 +210,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     master=self,
                 )
             else:
-                if upload(selection["paths"], self.get_active_directory(), target_dir, master=self):
+                if upload(selection["paths"], target_dir, master=self):
                     self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
@@ -265,7 +266,6 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 self,
                 selection["paths"],
                 selection["description"],
-                self.get_active_directory(),
                 target_dir,
             )
             ui_utils.show_dialog(dlg)
@@ -315,12 +315,13 @@ class TransferDialog(InlineCommandDialog):
 
 
 class UploadDialog(TransferDialog):
-    def __init__(self, master, paths, source_dir, target_dir):
+    def __init__(self, master, paths, target_dir):
         self._stage = "preparation"
         self.items = []
         source_names = []
         for path in paths:
-            for item in prepare_upload_items(path, source_dir, target_dir):
+            source_context_dir = os.path.dirname(path)
+            for item in prepare_upload_items(path, source_context_dir, target_dir):
                 # same path could have been provided directly and also via its parent
                 if item not in self.items:
                     self.items.append(item)
@@ -351,10 +352,9 @@ class UploadDialog(TransferDialog):
 
 
 class DownloadDialog(TransferDialog):
-    def __init__(self, master, paths, description, source_dir, target_dir):
+    def __init__(self, master, paths, description, target_dir):
         self._stage = "preparation"
         self._target_dir = target_dir
-        self._source_dir = source_dir
 
         cmd = InlineCommand(
             "prepare_download",
@@ -365,10 +365,11 @@ class DownloadDialog(TransferDialog):
         super(DownloadDialog, self).__init__(master, cmd, "Downloading")
 
     def _prepare_download_items(
-        self, all_source_items: Dict[str, Dict], source_context_dir: str, target_dir: str
+        self, all_source_items: Dict[str, Dict], target_dir: str
     ) -> List[Dict]:
         result = []
         for source_path, source_item in all_source_items.items():
+            source_context_dir = universal_dirname(source_item["anchor"])
             result.append(
                 {
                     "kind": source_item["kind"],
@@ -402,7 +403,7 @@ class DownloadDialog(TransferDialog):
 
     def _confirm_and_start_main_work(self, preparation_response):
         prepared_items = self._prepare_download_items(
-            preparation_response["all_items"], self._source_dir, self._target_dir
+            preparation_response["all_items"], self._target_dir
         )
         existing_target_items = self._get_existing_target_items(prepared_items)
         picked_items = pick_transfer_items(prepared_items, existing_target_items, self)
@@ -492,8 +493,8 @@ def format_items(items):
     return msg
 
 
-def upload(paths, source_dir, target_dir, master) -> bool:
-    dlg = UploadDialog(master, paths, source_dir, target_dir)
+def upload(paths, target_dir, master) -> bool:
+    dlg = UploadDialog(master, paths, target_dir)
     ui_utils.show_dialog(dlg)
     return dlg.response is not None
 
