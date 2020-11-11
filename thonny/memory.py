@@ -5,6 +5,7 @@ import tkinter.font as tk_font
 
 from thonny import get_workbench, ui_utils
 from thonny.common import ValueInfo
+from thonny.languages import tr
 from thonny.ui_utils import TreeFrame
 
 MAX_REPR_LENGTH_IN_GRID = 100
@@ -59,9 +60,9 @@ class VariablesFrame(MemoryFrame):
         self.tree.column("id", width=450, anchor=tk.W, stretch=True)
         self.tree.column("value", width=450, anchor=tk.W, stretch=True)
 
-        self.tree.heading("name", text="Name", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("name", text=tr("Name"), anchor=tk.W)
+        self.tree.heading("id", text=tr("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=tr("Value"), anchor=tk.W)
 
         get_workbench().bind("ShowView", self._update_memory_model, True)
         get_workbench().bind("HideView", self._update_memory_model, True)

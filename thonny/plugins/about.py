@@ -117,7 +117,7 @@ class AboutDialog(CommonDialog):
         )
         license_label.grid(pady=20)
 
-        ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
+        ok_button = ttk.Button(main_frame, text=tr("OK"), command=self._ok, default="active")
         ok_button.grid(pady=(0, 15))
         ok_button.focus_set()
 

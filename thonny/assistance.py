@@ -576,8 +576,8 @@ class FeedbackDialog(CommonDialog):
         )
         tree_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=padx)
         self.tree = tree_frame.tree
-        self.tree.column("helpful", width=30, anchor=tk.CENTER, stretch=False)
-        self.tree.column("confusing", width=30, anchor=tk.CENTER, stretch=False)
+        self.tree.column("helpful", width=35, anchor=tk.CENTER, stretch=False)
+        self.tree.column("confusing", width=35, anchor=tk.CENTER, stretch=False)
         self.tree.column("title", width=350, anchor=tk.W, stretch=True)
 
         self.tree.heading("helpful", text="H", anchor=tk.CENTER)

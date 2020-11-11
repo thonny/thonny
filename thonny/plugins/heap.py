@@ -19,8 +19,8 @@ class HeapView(MemoryFrame):
         self.tree.column("id", width=100, anchor=tk.W, stretch=False)
         self.tree.column("value", width=150, anchor=tk.W, stretch=True)
 
-        self.tree.heading("id", text="ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("id", text=tr("ID"), anchor=tk.W)
+        self.tree.heading("value", text=tr("Value"), anchor=tk.W)
 
         get_workbench().bind("get_heap_response", self._handle_heap_event, True)
 

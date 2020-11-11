@@ -550,7 +550,7 @@ class FrameVisualizer:
             if self._expression_box.winfo_ismapped():
                 dialog.title(self._expression_box.get_focused_text())
             else:
-                dialog.title("Function call at " + hex(self._frame_id))
+                dialog.title(tr("Function call at %s") % hex(self._frame_id))
 
             return dialog
 
@@ -956,7 +956,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
         self._text_frame = CodeView(
             self._code_book, first_line_number=frame_info.firstlineno, font="EditorFont"
         )
-        self._code_book.add(self._text_frame, text="Source")
+        self._code_book.add(self._text_frame, text=tr("Source"))
         self.main_pw.add(self._code_book, minsize=200)
         self._code_book.preferred_size_in_pw = 400
 
@@ -998,7 +998,7 @@ class FunctionCallDialog(DialogVisualizer):
         self._locals_book = ttk.Notebook(self.main_pw)
         self._locals_frame = VariablesFrame(self._locals_book)
         self._locals_book.preferred_size_in_pw = 200
-        self._locals_book.add(self._locals_frame, text="Local variables")
+        self._locals_book.add(self._locals_frame, text=tr("Local variables"))
         self.main_pw.add(self._locals_book, minsize=100)
 
     def _load_code(self, frame_info):
@@ -1030,8 +1030,8 @@ class StackView(ui_utils.TreeFrame):
         self.tree.column("function", width=120, anchor=tk.W, stretch=False)
         self.tree.column("location", width=450, anchor=tk.W, stretch=True)
 
-        self.tree.heading("function", text="Function", anchor=tk.W)
-        self.tree.heading("location", text="Location", anchor=tk.W)
+        self.tree.heading("function", text=tr("Function"), anchor=tk.W)
+        self.tree.heading("location", text=tr("Location"), anchor=tk.W)
 
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
@@ -1106,7 +1106,8 @@ class ExceptionView(TextFrame):
     def _show_description(self):
         self.text.configure(foreground=get_syntax_options_for_tag("TEXT")["foreground"])
         self.text.direct_insert(
-            "end", "If last command raised an exception then this view will show the stacktrace."
+            "end",
+            tr("If last command raised an exception then this view will show the stacktrace."),
         )
 
     def set_exception(self, exception_lines_with_frame_info):

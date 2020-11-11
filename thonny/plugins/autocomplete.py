@@ -25,7 +25,7 @@ class Completer(tk.Listbox):
         self.completions = []
 
         self.doc_label = tk.Label(
-            master=text, text="Aaappiiiii", bg="#ffffe0", justify="left", anchor="nw"
+            master=text, text="...", bg="#ffffe0", justify="left", anchor="nw"
         )
 
         # Auto indenter will eat up returns, therefore I need to raise the priority

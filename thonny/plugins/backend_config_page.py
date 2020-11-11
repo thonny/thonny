@@ -254,7 +254,7 @@ class PasswordDialog(CommonDialogEx):
         self.save_variable = tk.BooleanVar(value=False)
         self.save_checkbox = ttk.Checkbutton(
             self.main_frame,
-            text="Save password",
+            text=tr("Save password"),
             variable=self.save_variable,
             offvalue=False,
             onvalue=True,

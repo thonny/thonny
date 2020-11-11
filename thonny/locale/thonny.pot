@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-10 20:35+0200\n"
+"POT-Creation-Date: 2020-11-11 10:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,18 @@ msgstr ""
 
 #: thonny/assistance.py:968 thonny/plugins/assistant_config_page.py:89
 msgid "Assistant"
+msgstr ""
+
+#: thonny/base_file_browser.py:81 thonny/memory.py:63
+msgid "Name"
+msgstr ""
+
+#: thonny/base_file_browser.py:83 thonny/base_file_browser.py:735
+msgid "Modified"
+msgstr ""
+
+#: thonny/base_file_browser.py:85
+msgid "Size (bytes)"
 msgstr ""
 
 #: thonny/base_file_browser.py:273
@@ -102,7 +114,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: thonny/base_file_browser.py:700
+#: thonny/base_file_browser.py:700 thonny/base_file_browser.py:834
 msgid "New directory"
 msgstr ""
 
@@ -134,10 +146,6 @@ msgstr ""
 msgid "Size"
 msgstr ""
 
-#: thonny/base_file_browser.py:735
-msgid "Modified"
-msgstr ""
-
 #: thonny/base_file_browser.py:794
 #, python-format
 msgid "Deleting %s"
@@ -148,48 +156,79 @@ msgstr ""
 msgid "Moving %s to %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:1040 thonny/plugins/micropython/pip_gui.py:77
+#: thonny/base_file_browser.py:835
+#, python-format
+msgid ""
+"Enter name for new directory under\n"
+"%s"
+msgstr ""
+
+#: thonny/base_file_browser.py:858
+msgid "Nothing selected"
+msgstr ""
+
+#: thonny/base_file_browser.py:858
+msgid "Select an item and try again!"
+msgstr ""
+
+#: thonny/base_file_browser.py:1042 thonny/plugins/micropython/pip_gui.py:77
 msgid "Deleting"
 msgstr ""
 
-#: thonny/base_file_browser.py:1047
+#: thonny/base_file_browser.py:1049
 msgid "Creating directory"
 msgstr ""
 
-#: thonny/base_file_browser.py:1162
+#: thonny/base_file_browser.py:1105
+#, python-format
+msgid "Open from %s"
+msgstr ""
+
+#: thonny/base_file_browser.py:1108
+#, python-format
+msgid "Save to %s"
+msgstr ""
+
+#: thonny/base_file_browser.py:1120
+msgid "File name:"
+msgstr ""
+
+#: thonny/base_file_browser.py:1130 thonny/config_ui.py:35 thonny/export.py:25
+#: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
+#: thonny/ui_utils.py:111 thonny/ui_utils.py:1699 thonny/workdlg.py:198
+msgid "OK"
+msgstr ""
+
+#: thonny/base_file_browser.py:1133 thonny/config_ui.py:36 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1141
+#: thonny/ui_utils.py:114 thonny/ui_utils.py:1617 thonny/ui_utils.py:1702
+#: thonny/workdlg.py:157 thonny/workdlg.py:201
+msgid "Cancel"
+msgstr ""
+
+#: thonny/base_file_browser.py:1164
 msgid "Error"
 msgstr ""
 
-#: thonny/base_file_browser.py:1162
+#: thonny/base_file_browser.py:1164
 msgid "You need to select a file!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1166
+#: thonny/base_file_browser.py:1168
 msgid "Overwrite?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1166
+#: thonny/base_file_browser.py:1168
 #, python-format
 msgid "Do you want to overwrite '%s' ?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1311
+#: thonny/base_file_browser.py:1313
 msgid "This computer"
 msgstr ""
 
 #: thonny/config_ui.py:19
 msgid "Thonny options"
-msgstr ""
-
-#: thonny/config_ui.py:35 thonny/plugins/backend_config_page.py:268
-#: thonny/ui_utils.py:111 thonny/workdlg.py:198
-msgid "OK"
-msgstr ""
-
-#: thonny/config_ui.py:36 thonny/plugins/backend_config_page.py:273
-#: thonny/plugins/pip_gui.py:1141 thonny/ui_utils.py:114
-#: thonny/ui_utils.py:1617 thonny/workdlg.py:157 thonny/workdlg.py:201
-msgid "Cancel"
 msgstr ""
 
 #: thonny/editors.py:217
@@ -253,6 +292,17 @@ msgstr ""
 
 #: thonny/editors.py:653
 msgid "Rename..."
+msgstr ""
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:510
+#: thonny/plugins/object_inspector.py:589
+msgid "Value ID"
+msgstr ""
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:511
+#: thonny/plugins/object_inspector.py:590
+msgid "Value"
 msgstr ""
 
 #: thonny/misc_utils.py:134
@@ -588,6 +638,10 @@ msgid ""
 "{}"
 msgstr ""
 
+#: thonny/plugins/backend_config_page.py:257
+msgid "Save password"
+msgstr ""
+
 #: thonny/plugins/backend_config_page.py:320
 msgid "Interpreter"
 msgstr ""
@@ -647,8 +701,17 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
-#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1397
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1398
 msgid "Run to cursor"
+msgstr ""
+
+#: thonny/plugins/debugger.py:553
+#, python-format
+msgid "Function call at %s"
+msgstr ""
+
+#: thonny/plugins/debugger.py:959
+msgid "Source"
 msgstr ""
 
 #: thonny/plugins/debugger.py:980
@@ -659,67 +722,85 @@ msgstr ""
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1279
+#: thonny/plugins/debugger.py:1001
+msgid "Local variables"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1033
+msgid "Function"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1034
+msgid "Location"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1110
+msgid ""
+"If last command raised an exception then this view will show the "
+"stacktrace."
+msgstr ""
+
+#: thonny/plugins/debugger.py:1280
 msgid "Resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1295
+#: thonny/plugins/debugger.py:1296
 msgid "Run / resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1310
+#: thonny/plugins/debugger.py:1311
 msgid "Debug current script"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1312
+#: thonny/plugins/debugger.py:1313
 msgid "Debug"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1323
+#: thonny/plugins/debugger.py:1324
 msgid "Debug current script (nicer)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1335
+#: thonny/plugins/debugger.py:1336
 msgid "Debug current script (faster)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1346
+#: thonny/plugins/debugger.py:1347
 msgid "Step over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1348
+#: thonny/plugins/debugger.py:1349
 msgid "Over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1359
+#: thonny/plugins/debugger.py:1360
 msgid "Step into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1361
+#: thonny/plugins/debugger.py:1362
 msgid "Into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1372
+#: thonny/plugins/debugger.py:1373
 msgid "Step out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1374
+#: thonny/plugins/debugger.py:1375
 msgid "Out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1409
+#: thonny/plugins/debugger.py:1410
 msgid "Step back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1411
+#: thonny/plugins/debugger.py:1412
 msgid "Back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1417
+#: thonny/plugins/debugger.py:1418
 msgid "Stack"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1418
+#: thonny/plugins/debugger.py:1419
 msgid "Exception"
 msgstr ""
 
@@ -896,6 +977,10 @@ msgstr ""
 msgid "General"
 msgstr ""
 
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr ""
+
 #: thonny/plugins/heap.py:37
 msgid ""
 "Heap mode is on.\n"
@@ -921,6 +1006,14 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
+#: thonny/plugins/object_inspector.py:87
+msgid "Data"
+msgstr ""
+
+#: thonny/plugins/object_inspector.py:88
+msgid "Attributes"
+msgstr ""
+
 #: thonny/plugins/object_inspector.py:111
 msgid "Previous object"
 msgstr ""
@@ -934,6 +1027,18 @@ msgstr ""
 msgid ""
 "The representation above is an approximate value of this float. The exact"
 " stored value is %s which is about %s"
+msgstr ""
+
+#: thonny/plugins/object_inspector.py:509
+msgid "Index"
+msgstr ""
+
+#: thonny/plugins/object_inspector.py:587
+msgid "Key ID"
+msgstr ""
+
+#: thonny/plugins/object_inspector.py:588
+msgid "Key"
 msgstr ""
 
 #: thonny/plugins/object_inspector.py:704
@@ -1452,6 +1557,14 @@ msgid ""
 "current frame"
 msgstr ""
 
+#: thonny/plugins/variables.py:36
+#, python-format
+msgid ""
+"Back to\n"
+"%s"
+msgstr ""
+
+#: thonny/plugins/variables.py:73 thonny/plugins/variables.py:75
 #: thonny/plugins/variables.py:138
 msgid "Variables"
 msgstr ""
@@ -1551,43 +1664,51 @@ msgstr ""
 msgid "Not connected"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:400
+#: thonny/plugins/micropython/__init__.py:401
+msgid "Port or WebREPL"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:401
 msgid "Port"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:409
+#: thonny/plugins/micropython/__init__.py:411
 msgid "Try to detect port automatically"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:451
+#: thonny/plugins/micropython/__init__.py:453
 msgid "Advanced options"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:458
+#: thonny/plugins/micropython/__init__.py:460
 msgid "Install or update firmware"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:474
+#: thonny/plugins/micropython/__init__.py:476
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:477
+#: thonny/plugins/micropython/__init__.py:479
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:479
+#: thonny/plugins/micropython/__init__.py:481
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:952
+#: thonny/plugins/micropython/__init__.py:518
+msgid "Password"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:954
 msgid "MicroPython (generic)"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:961
+#: thonny/plugins/micropython/__init__.py:963
 msgid "MicroPython (local)"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:971
+#: thonny/plugins/micropython/__init__.py:973
 msgid "MicroPython (SSH)"
 msgstr ""
 

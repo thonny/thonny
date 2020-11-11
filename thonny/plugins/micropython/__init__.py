@@ -397,7 +397,9 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else tr("Port"))
+        port_label = ttk.Label(
+            self, text=tr("Port or WebREPL") if self.allow_webrepl else tr("Port")
+        )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -513,7 +515,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._webrepl_password_var = create_string_var(
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
-        pw_label = ttk.Label(self._webrepl_frame, text="Password")
+        pw_label = ttk.Label(self._webrepl_frame, text=tr("Password"))
         pw_label.grid(row=0, column=1, sticky="nw", pady=(10, 0), padx=(10, 0))
         pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=15)
         pw_entry.grid(row=1, column=1, sticky="nw", padx=(10, 0))

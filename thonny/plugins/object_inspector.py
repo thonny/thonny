@@ -84,8 +84,8 @@ class ObjectInspector(ttk.Frame):
             tab.bind("<1>", on_click)
 
         # create_tab(1, "Overview", self.general_page)
-        create_tab(5, "Data", self.content_page)
-        create_tab(6, "Atts", self.attributes_page)
+        create_tab(5, tr("Data"), self.content_page)
+        create_tab(6, tr("Attributes"), self.attributes_page)
 
         def create_navigation_link(col, image_filename, action, tooltip, padx=0):
             button = ttk.Button(
@@ -506,9 +506,9 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
-        self.tree.heading("index", text="Index", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("index", text=tr("Index"), anchor=tk.W)
+        self.tree.heading("id", text=tr("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=tr("Value"), anchor=tk.W)
 
         self.len_label = ttk.Label(self.statusbar, text="", anchor="w")
         self.len_label.grid(row=0, column=0, sticky="w")
@@ -584,10 +584,10 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
-        self.tree.heading("key_id", text="Key ID", anchor=tk.W)
-        self.tree.heading("key", text="Key", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("key_id", text=tr("Key ID"), anchor=tk.W)
+        self.tree.heading("key", text=tr("Key"), anchor=tk.W)
+        self.tree.heading("id", text=tr("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=tr("Value"), anchor=tk.W)
 
         self.len_label = ttk.Label(self.statusbar, text="", anchor="w")
         self.len_label.grid(row=0, column=0, sticky="w")

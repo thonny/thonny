@@ -33,7 +33,7 @@ class VariablesView(VariablesFrame):
     def _update_back_button(self, visible):
         if visible:
             assert self._last_active_info is not None
-            self.back_button.configure(text="Back to\n" + self._last_active_info[-1])
+            self.back_button.configure(text=tr("Back to\n%s") % self._last_active_info[-1])
             self.back_button.place(relx=1, x=-5, y=5, anchor="ne")
         else:
             self.back_button.place_forget()
@@ -70,9 +70,9 @@ class VariablesView(VariablesFrame):
         # TODO: update only if something has changed
         self.update_variables(globals_)
         if module_name == "__main__":
-            self._set_tab_caption("Variables")
+            self._set_tab_caption(tr("Variables"))
         else:
-            self._set_tab_caption("Variables (%s)" % module_name)
+            self._set_tab_caption(tr("Variables") + " (%s)" % module_name)
 
         if is_active:
             self._last_active_info = (globals_, module_name)
