@@ -15,6 +15,7 @@
 __pycache__
 dist
 venv
+venv-3.9
 packaging/linux/build
 build
 resources_build
