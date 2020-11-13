@@ -997,7 +997,7 @@ class SubprocessProxy(BackendProxy):
                 # Probably backend runs an infinite/long print loop.
                 # Throttle message thougput in order to keep GUI thread responsive.
                 while len(message_queue) > 0:
-                    sleep(0.1)
+                    sleep(0.05)
 
         while self.process_is_alive():
             try:
