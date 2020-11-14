@@ -14,8 +14,6 @@ class MicroPythonConnection:
     to avoid loss of data (because buffer overflow or the device discarding
     unread data).
 
-    Allows writing with delays after each n bytes.
-
     Allows unreading data.
     """
 

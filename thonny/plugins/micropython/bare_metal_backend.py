@@ -622,8 +622,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._check_for_side_commands()
 
             # Prefer whole lines, but allow also incremental output to single line
-            # Note that here I'm not looking for non-first raw prompt, because this
-            # is always preceded by EOT.
             new_data = self._connection.soft_read_until(
                 INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
             )
