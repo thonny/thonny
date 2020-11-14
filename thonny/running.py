@@ -999,7 +999,6 @@ class SubprocessProxy(BackendProxy):
             if "cwd" in msg:
                 self.cwd = msg["cwd"]
             message_queue.append(msg)
-            print("mql", len(message_queue))
 
             if len(message_queue) > 50:
                 # Probably backend runs an infinite/long print loop.
