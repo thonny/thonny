@@ -573,7 +573,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
-            "recents", "file", tr("Recent files"), group=10, submenu=self._recent_menu
+            "recents", 
+            "file",
+            tr("Recent files"),
+            self._cmd_open_recent_files,
+            caption=tr("Recent files"),
+            default_sequence=select_sequence("<Control-m>", "<Command-m>"),
+            group=10, 
+            submenu=self._recent_menu,
         )
 
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -700,6 +707,15 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         return all_saved
 
+    def _cmd_open_recent_files(self):
+        recents = get_workbench().get_option("file.recent_files")
+        relevant_recents = [
+            path for path in recents if os.path.exists(path) and not self.file_is_opened(path)
+        ]
+        if len(relevant_recents):
+            self.show_file(relevant_recents[0], propose_dialog=False)
+        
+
     def remember_recent_file(self, filename):
         recents = get_workbench().get_option("file.recent_files")
         if filename in recents:
@@ -793,7 +809,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
     def close_tab(self, index):
         editor = self.get_child_by_index(index)
-
+        
         if editor:
             self.close_editor(editor)
 
