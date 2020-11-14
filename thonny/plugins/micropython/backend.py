@@ -348,6 +348,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 response = create_error_response()
             except KeyboardInterrupt:
                 response = create_error_response(error="Interrupted", interrupted=True)
+            except ConnectionClosedException as e:
+                self._on_connection_closed(e)
             except ManagementError as e:
                 if "KeyboardInterrupt" in e.err:
                     response = create_error_response(error="Interrupted", interrupted=True)
