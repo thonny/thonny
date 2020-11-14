@@ -509,7 +509,12 @@ class Runner:
         self._polling_after_id = get_workbench().after(20, self._poll_backend_messages)
 
     def _pull_backend_messages(self):
-        while self._proxy is not None:
+        # Don't process too many messages in single batch, allow screen updates
+        # and user actions between batches.
+        # Mostly relevant when backend prints a lot quickly.
+        msg_count = 0
+        max_msg_count = 50
+        while self._proxy is not None and msg_count < max_msg_count:
             try:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
@@ -518,6 +523,7 @@ class Runner:
                     "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
                 )
 
+                msg_count += 1
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
                 self.destroy_backend()
@@ -985,6 +991,7 @@ class SubprocessProxy(BackendProxy):
         # debug("... started listening to stdout")
         # will be called from separate thread
 
+        # allow self._response_queue to be replaced while processing
         message_queue = self._response_queue
 
         def publish_as_msg(data):
@@ -992,10 +999,11 @@ class SubprocessProxy(BackendProxy):
             if "cwd" in msg:
                 self.cwd = msg["cwd"]
             message_queue.append(msg)
+            print("mql", len(message_queue))
 
             if len(message_queue) > 50:
                 # Probably backend runs an infinite/long print loop.
-                # Throttle message thougput in order to keep GUI thread responsive.
+                # Throttle message throughput in order to keep GUI thread responsive.
                 while len(message_queue) > 0:
                     sleep(0.05)
 
@@ -1109,8 +1117,6 @@ class SubprocessProxy(BackendProxy):
 
         msg = self._response_queue.popleft()
         self._store_state_info(msg)
-        if not hasattr(msg, "event_type"):
-            print("gotww", msg)
         if msg.event_type == "ProgramOutput":
             # combine available small output messages to one single message,
             # in order to put less pressure on UI code
