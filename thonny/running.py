@@ -674,7 +674,7 @@ class Runner:
                     "Device is busy -- can't perform this action now."
                     + "\nPlease wait or cancel current work and try again!",
                 )
-            messagebox.showerror("Can't complete", msg, master=self)
+            messagebox.showerror("Can't complete", msg, master=get_workbench())
 
         return ready
 
