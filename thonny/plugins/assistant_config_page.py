@@ -11,21 +11,6 @@ class AssistantConfigPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
 
-        ui_utils.create_url_label(
-            self,
-            "https://github.com/thonny/thonny/wiki/Friendly-traceback",
-            text=tr("Friendly traceback level"),
-        ).grid(row=1, column=0, sticky="w")
-
-        self.add_combobox(
-            "assistance.friendly_traceback_level",
-            values=[0, 1, 2, 3, 4, 5, 6, 7, 9],
-            row=1,
-            column=1,
-            width=3,
-            padx=5,
-        )
-
         self.add_checkbox(
             "assistance.open_assistant_on_errors",
             tr("Open Assistant automatically when program crashes with an exception"),
@@ -85,5 +70,4 @@ class AssistantConfigPage(ConfigurationPage):
 
 
 def load_plugin():
-    get_workbench().set_default("assistance.friendly_traceback_level", 0)
     get_workbench().add_configuration_page("assistant", tr("Assistant"), AssistantConfigPage, 80)

@@ -1433,11 +1433,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             traceback.print_exc()
 
     def _show_user_exception(self, user_exception):
-        fr_tr = user_exception.get("friendly_traceback", None)
-        if fr_tr is not None:
-            self._format_friendly_traceback(fr_tr)
-            return
-
         for line, frame_id, *_ in user_exception["items"]:
 
             tags = ("io", "stderr")
@@ -1452,13 +1447,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 tags += (frame_tag,)
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
 
-            self._insert_text_directly(line, tags)
-
-    def _format_friendly_traceback(self, s):
-        tags = ("io", "stderr")
-
-        lines = s.splitlines(True)
-        for line in lines:
             self._insert_text_directly(line, tags)
 
     def _discard_old_content(self):

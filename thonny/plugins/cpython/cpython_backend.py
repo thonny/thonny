@@ -1068,17 +1068,6 @@ class MainCPythonBackend(MainBackend):
         else:
             msg = str(e_value)
 
-        fr_tr = None
-        try:
-            fr_tr = self._explain_exception_with_friendly_traceback()
-        except ImportError:
-            print(
-                "[Could not import friendly_traceback. You can install it with Tools => Manage packages]\n",
-                file=sys.stderr,
-            )
-        except Exception as e:
-            print("[Could not get friendly traceback. Problem: %s]\n" % e, file=sys.stderr)
-
         return {
             "type_name": e_type.__name__,
             "message": msg,
@@ -1088,33 +1077,7 @@ class MainCPythonBackend(MainBackend):
             "lineno": getattr(e_value, "lineno", processed_tb[-1].lineno),
             "col_offset": getattr(e_value, "offset", None),
             "line": getattr(e_value, "text", processed_tb[-1].line),
-            "friendly_traceback": fr_tr,
         }
-
-    def _explain_exception_with_friendly_traceback(self):
-        ft_level = os.environ.get("FRIENDLY_TRACEBACK_LEVEL", "")
-        try:
-            ft_level = int(ft_level)
-            if ft_level == 0:
-                return None
-        except ValueError:
-            return None
-
-        try:
-            import friendly_traceback
-        except ImportError:
-            raise
-
-        friendly_traceback.set_level(ft_level)
-
-        thonny_lang = os.environ.get("THONNY_LANGUAGE", "")
-        if thonny_lang:
-            friendly_traceback.set_lang(thonny_lang)
-
-        friendly_traceback.exclude_file_from_traceback(__file__)
-
-        friendly_traceback.explain(redirect="capture")
-        return friendly_traceback.get_output()
 
     def _check_update_tty_mode(self, cmd):
         if "tty_mode" in cmd:
