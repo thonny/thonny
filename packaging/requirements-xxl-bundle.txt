@@ -1,3 +1,4 @@
+# update numpy and matplotlib also in create_tarball.sh
 numpy==1.19.*
 guizero==1.1.*
 gpiozero==1.5.*
