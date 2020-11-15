@@ -812,7 +812,12 @@ class PipDialog(CommonDialog):
         return results
 
     def _get_extra_switches(self):
-        return ["--disable-pip-version-check"]
+        result = ["--disable-pip-version-check"]
+        proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
+        if proxy:
+            result.append("--proxy=" + proxy)
+
+        return result
 
 
 class BackendPipDialog(PipDialog):
@@ -1272,6 +1277,10 @@ def _start_fetching_package_info(name, version_str, completion_handler):
             except urllib.error.HTTPError as e:
                 completion_handler(
                     name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
+                )
+            except Exception as e:
+                completion_handler(
+                    name, {"info": {"name": name}, "error": str(e), "releases": {}}, e
                 )
         else:
             tk._default_root.after(200, poll_fetch_complete)

@@ -346,6 +346,11 @@ class SubprocessDialog(WorkDialog):
         return self._long_description
 
     def start_work(self):
+        if hasattr(self._proc, "cmd"):
+            try:
+                self.append_text(subprocess.list2cmdline(self._proc.cmd) + "\n")
+            except:
+                logger.warning("Could not extract cmd (%s)", self._proc.cmd)
         self._start_listening_current_proc()
 
     def _start_listening_current_proc(self):
