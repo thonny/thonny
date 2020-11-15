@@ -19,7 +19,7 @@ class SerialConnection(MicroPythonConnection):
         super().__init__()
 
         try:
-            self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+            self._serial = serial.Serial(port, baudrate=baudrate, timeout=None, exclusive=True)
             # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
             # but in some cases it messes up communication
@@ -41,11 +41,10 @@ class SerialConnection(MicroPythonConnection):
                 (NB! This needs to be followed by reboot or logging out and logging in again!)"""
                 )
 
-            elif "PermissionError" in message:
+            elif "PermissionError" in message or "Could not exclusively lock" in message:
                 message += "\n\n" + dedent(
                     """\
-                If you have serial connection to the device from another program,
-                then disconnect it there."""
+                If you have serial connection to the device from another program, then disconnect it there first."""
                 )
 
             elif error.errno == 16:
