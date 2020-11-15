@@ -12,6 +12,11 @@ New & changed
 * Added option for highlighting tabs (Tools => Options => Editor), #1409
 * Added option for indenting with tabs (Tools => Options => Editor), #599
 * Add an option to use Tk file dialogs instead of Zenity in Linux, #1404
+* Reduce max repr length for MicroPython (1000 instead of 5000)
+* Forward https_proxy or http_proxy variable to pip, #535
+* Allow specifying environment variables for the UI process, #1421
+* Remove special support for Friendly-traceback, #1416
+* Use exclusive access when connecting to a MP device over a serial port, #1418
 
 Fixes
 -----
@@ -19,6 +24,10 @@ Fixes
 * In MicroPython backends only warn about failed epoch dectection if sync or validation is required
 * Don't show ugly traceback in debug mode
 * Internal error while debugging exceptions, #1403
+* Automatically create Thonny user dir in remote machine, #1365
+* Fix MicroPython uploading/downloading when started from an expanded dir, #1398
+* Fix unrensponsive UI when MicroPython is printing in infinite loop, #1419
+* Fix ugly stacktrace, when MicroPython device is disconnected during processing a command, #1420
 
 New and updated translations
 ----------------------------
@@ -26,8 +35,7 @@ New and updated translations
 * Romanian by Pop Vasile Alexandru
 * Norwegian (Bokmål and Nynorsk) by Gabriel Slørdahl
 * Updated Portuguese (BR) by Marcelo de Gomensoro Malheiros
-* Updated French
-* Updated Polish
+* Updated French, Polish, Greek, Spanish, Italian
 
 
 
