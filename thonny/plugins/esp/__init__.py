@@ -309,7 +309,7 @@ class ESPFlashingDialog(WorkDialog):
             "write_flash",
             "--flash_mode",
             flash_mode,
-            "--flash_size", # default changed in esptool 3.0
+            "--flash_size",  # default changed in esptool 3.0
             "detect",
             self._start_address,
             firmware_path,
