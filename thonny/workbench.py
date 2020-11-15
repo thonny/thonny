@@ -120,6 +120,7 @@ class Workbench(tk.Tk):
         self.initializing = True
 
         self._init_configuration()
+        self._tweak_environment()
         self._check_init_server_loop()
 
         tk.Tk.__init__(self, className="Thonny")
@@ -252,9 +253,18 @@ class Workbench(tk.Tk):
         self.set_default("general.scaling", "default")
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
+        self.set_default("general.environment", [])
         self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
         self.update_debug_mode()
+
+    def _tweak_environment(self):
+        for entry in self.get_option("general.environment"):
+            if "=" in entry:
+                key, val = entry.split("=", maxsplit=1)
+                os.environ[key] = os.path.expandvars(val)
+            else:
+                logger.warning("No '=' in environment entry '%s'", entry)
 
     def update_debug_mode(self):
         os.environ["THONNY_DEBUG"] = str(self.get_option("general.debug_mode", False))
