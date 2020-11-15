@@ -8,16 +8,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-11 10:35+0200\n"
+"POT-Creation-Date: 2020-11-15 17:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.9.0\n"
 
-#: thonny/assistance.py:968 thonny/plugins/assistant_config_page.py:89
+#: thonny/assistance.py:968 thonny/plugins/assistant_config_page.py:73
 msgid "Assistant"
 msgstr ""
 
@@ -200,7 +200,7 @@ msgid "OK"
 msgstr ""
 
 #: thonny/base_file_browser.py:1133 thonny/config_ui.py:36 thonny/export.py:28
-#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1141
+#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1146
 #: thonny/ui_utils.py:114 thonny/ui_utils.py:1617 thonny/ui_utils.py:1702
 #: thonny/workdlg.py:157 thonny/workdlg.py:201
 msgid "Cancel"
@@ -323,7 +323,7 @@ msgstr ""
 msgid "Run current script"
 msgstr ""
 
-#: thonny/running.py:122 thonny/workbench.py:349
+#: thonny/running.py:122 thonny/workbench.py:360
 msgid "Run"
 msgstr ""
 
@@ -367,29 +367,29 @@ msgstr ""
 msgid "Show Plotter"
 msgstr ""
 
-#: thonny/shell.py:1584
+#: thonny/shell.py:1572
 msgid ""
 "For performance reasons, Shell avoids showing very long lines in full "
 "(see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
 msgstr ""
 
-#: thonny/shell.py:1595
+#: thonny/shell.py:1583
 msgid "Wrap text (may be slow)"
 msgstr ""
 
-#: thonny/shell.py:1637
+#: thonny/shell.py:1625
 #, python-format
 msgid "Squeezed text (%d characters)"
 msgstr ""
 
-#: thonny/shell.py:1806
+#: thonny/shell.py:1794
 msgid ""
 "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr ""
 
-#: thonny/shell.py:1808
+#: thonny/shell.py:1796
 msgid "See Help for details."
 msgstr ""
 
@@ -430,107 +430,107 @@ msgstr ""
 msgid "Select All"
 msgstr ""
 
-#: thonny/plugins/shell_config_page.py:73 thonny/workbench.py:157
+#: thonny/plugins/shell_config_page.py:73 thonny/workbench.py:158
 msgid "Shell"
 msgstr ""
 
-#: thonny/workbench.py:346
+#: thonny/workbench.py:357
 msgid "File"
 msgstr ""
 
-#: thonny/workbench.py:347
+#: thonny/workbench.py:358
 msgid "Edit"
 msgstr ""
 
-#: thonny/workbench.py:348
+#: thonny/workbench.py:359
 msgid "View"
 msgstr ""
 
-#: thonny/workbench.py:350
+#: thonny/workbench.py:361
 msgid "Tools"
 msgstr ""
 
-#: thonny/plugins/help/__init__.py:74 thonny/workbench.py:351
+#: thonny/plugins/help/__init__.py:74 thonny/workbench.py:362
 msgid "Help"
 msgstr ""
 
-#: thonny/workbench.py:571
+#: thonny/workbench.py:582
 msgid "Exit"
 msgstr ""
 
-#: thonny/workbench.py:581
+#: thonny/workbench.py:592
 msgid "Options..."
 msgstr ""
 
-#: thonny/workbench.py:588
+#: thonny/workbench.py:599
 msgid "Increase font size"
 msgstr ""
 
-#: thonny/workbench.py:598
+#: thonny/workbench.py:609
 msgid "Decrease font size"
 msgstr ""
 
-#: thonny/workbench.py:610
+#: thonny/workbench.py:621
 msgid "Focus editor"
 msgstr ""
 
-#: thonny/workbench.py:619
+#: thonny/workbench.py:630
 msgid "Focus shell"
 msgstr ""
 
-#: thonny/workbench.py:630
+#: thonny/workbench.py:641
 msgid "Maximize view"
 msgstr ""
 
-#: thonny/workbench.py:642
+#: thonny/workbench.py:653
 msgid "Full screen"
 msgstr ""
 
-#: thonny/workbench.py:653
+#: thonny/workbench.py:664
 msgid "Change font size"
 msgstr ""
 
-#: thonny/workbench.py:654
+#: thonny/workbench.py:665
 msgid "Zoom"
 msgstr ""
 
-#: thonny/workbench.py:663
+#: thonny/workbench.py:674
 msgid "Exit Thonny"
 msgstr ""
 
-#: thonny/workbench.py:666
+#: thonny/workbench.py:677
 msgid "Quit"
 msgstr ""
 
-#: thonny/workbench.py:817
+#: thonny/workbench.py:828
 msgid "Configure interpreter..."
 msgstr ""
 
-#: thonny/workbench.py:1170 thonny/workbench.py:1178
+#: thonny/workbench.py:1181 thonny/workbench.py:1189
 #, python-format
 msgid "Overwriting theme '%s'"
 msgstr ""
 
-#: thonny/workbench.py:1337
+#: thonny/workbench.py:1348
 msgid "Program arguments:"
 msgstr ""
 
-#: thonny/workbench.py:1366
+#: thonny/workbench.py:1377
 msgid "Program arguments"
 msgstr ""
 
-#: thonny/workbench.py:1380
+#: thonny/workbench.py:1391
 msgid ""
 "Switch to\n"
 "regular\n"
 "mode"
 msgstr ""
 
-#: thonny/workbench.py:1391
+#: thonny/workbench.py:1402
 msgid "Regular mode"
 msgstr ""
 
-#: thonny/workbench.py:1392
+#: thonny/workbench.py:1403
 msgid ""
 "Configuration has been updated. Restart Thonny to start working in "
 "regular mode.\n"
@@ -538,7 +538,7 @@ msgid ""
 "(See 'Tools → Options → General' if you change your mind later.)"
 msgstr ""
 
-#: thonny/workbench.py:1490
+#: thonny/workbench.py:1501
 msgid "Device"
 msgstr ""
 
@@ -582,27 +582,23 @@ msgstr ""
 msgid "Report problems"
 msgstr ""
 
-#: thonny/plugins/assistant_config_page.py:17
-msgid "Friendly traceback level"
-msgstr ""
-
-#: thonny/plugins/assistant_config_page.py:31
+#: thonny/plugins/assistant_config_page.py:16
 msgid "Open Assistant automatically when program crashes with an exception"
 msgstr ""
 
-#: thonny/plugins/assistant_config_page.py:38
+#: thonny/plugins/assistant_config_page.py:23
 msgid "Open Assistant automatically when it has warnings for your code"
 msgstr ""
 
-#: thonny/plugins/assistant_config_page.py:45
+#: thonny/plugins/assistant_config_page.py:30
 msgid "Perform selected Pylint checks"
 msgstr ""
 
-#: thonny/plugins/assistant_config_page.py:49
+#: thonny/plugins/assistant_config_page.py:34
 msgid "Perform MyPy checks"
 msgstr ""
 
-#: thonny/plugins/assistant_config_page.py:51
+#: thonny/plugins/assistant_config_page.py:36
 msgid "Disabled checks (one id per line)"
 msgstr ""
 
@@ -866,7 +862,7 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: thonny/plugins/files.py:215
+#: thonny/plugins/files.py:216
 #, python-format
 msgid "Upload to %s"
 msgstr ""
@@ -881,7 +877,7 @@ msgstr ""
 msgid "Downloading %s to %s"
 msgstr ""
 
-#: thonny/plugins/files.py:550
+#: thonny/plugins/files.py:551
 msgid "Files"
 msgstr ""
 
@@ -933,47 +929,59 @@ msgstr ""
 msgid "The specified text was not found!"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:14
+#: thonny/plugins/general_config_page.py:15
 msgid "Allow only single Thonny instance"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:17
+#: thonny/plugins/general_config_page.py:18
 msgid "Log program usage events"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:21
+#: thonny/plugins/general_config_page.py:22
 msgid "Reopen all files from previous session"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:27
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:37
 msgid "Disable notification sound"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:33
+#: thonny/plugins/general_config_page.py:43
 msgid "Debug mode (provides more detailed diagnostic logs)"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:43
+#: thonny/plugins/general_config_page.py:53
 msgid "Language"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:57
+#: thonny/plugins/general_config_page.py:67
 msgid "UI mode"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:70
+#: thonny/plugins/general_config_page.py:80
 msgid "UI scaling factor"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:76
+#: thonny/plugins/general_config_page.py:86
 msgid "Font scaling mode"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:89
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:108
 msgid "NB! Restart Thonny after changing these options!"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:104
+#: thonny/plugins/general_config_page.py:129
 msgid "General"
 msgstr ""
 
@@ -1186,7 +1194,7 @@ msgstr ""
 msgid "Could not find the package info from PyPI."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:500 thonny/plugins/pip_gui.py:1195
+#: thonny/plugins/pip_gui.py:500 thonny/plugins/pip_gui.py:1200
 msgid "Error code:"
 msgstr ""
 
@@ -1283,11 +1291,11 @@ msgstr ""
 msgid "Manage packages for %s"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:867
+#: thonny/plugins/pip_gui.py:872
 msgid "Confirmation"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:868
+#: thonny/plugins/pip_gui.py:873
 #, python-format
 msgid ""
 "Looks like you are installing a Thonny-related package.\n"
@@ -1297,18 +1305,18 @@ msgid ""
 "Are you sure you want to install %s for the back-end?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:976
+#: thonny/plugins/pip_gui.py:981
 msgid ""
 "NB! There may be another version available which is compatible with "
 "current Thonny version. Click on '...' button to choose the version to "
 "install."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:984
+#: thonny/plugins/pip_gui.py:989
 msgid "Thonny plugin without requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:985
+#: thonny/plugins/pip_gui.py:990
 msgid ""
 "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
@@ -1316,82 +1324,82 @@ msgid ""
 "If you still want it, then please install it from the command line."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:999
+#: thonny/plugins/pip_gui.py:1004
 msgid "Unsuitable requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1000
+#: thonny/plugins/pip_gui.py:1005
 msgid "This package requires different Thonny version:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1004
+#: thonny/plugins/pip_gui.py:1009
 msgid "If you still want it, then please install it from the command line."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1033
+#: thonny/plugins/pip_gui.py:1038
 msgid ""
 "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools "
 "→ Manage packages...'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1047
+#: thonny/plugins/pip_gui.py:1052
 msgid ""
 "(In this case Thonny's back-end uses same interpreter, so both dialogs "
 "manage same packages.)"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1053
+#: thonny/plugins/pip_gui.py:1058
 msgid ""
 "NB! You need to restart Thonny after installing / upgrading / "
 "uninstalling a plug-in."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1063
+#: thonny/plugins/pip_gui.py:1068
 msgid "Thonny plug-ins"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1085
+#: thonny/plugins/pip_gui.py:1090
 msgid "Advanced install / upgrade / downgrade"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1094
+#: thonny/plugins/pip_gui.py:1099
 msgid "Desired version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1132
+#: thonny/plugins/pip_gui.py:1137
 msgid "Upgrade dependencies"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1193
+#: thonny/plugins/pip_gui.py:1198
 msgid "Requires:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1197
+#: thonny/plugins/pip_gui.py:1202
 msgid "Error:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1363
+#: thonny/plugins/pip_gui.py:1372
 msgid "Package manager is not available for this interpreter"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1376
+#: thonny/plugins/pip_gui.py:1385
 msgid "Not supported"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1381
+#: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1390
 msgid "Not available"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1382
+#: thonny/plugins/pip_gui.py:1391
 msgid "You need to stop your program before launching the package manager."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1400
+#: thonny/plugins/pip_gui.py:1409
 msgid "Manage packages..."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1406
+#: thonny/plugins/pip_gui.py:1415
 msgid "Manage plug-ins..."
 msgstr ""
 
