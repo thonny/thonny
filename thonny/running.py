@@ -997,11 +997,11 @@ class SubprocessProxy(BackendProxy):
                 self.cwd = msg["cwd"]
             message_queue.append(msg)
 
-            if len(message_queue) > 50:
+            if len(message_queue) > 10:
                 # Probably backend runs an infinite/long print loop.
                 # Throttle message throughput in order to keep GUI thread responsive.
                 while len(message_queue) > 0:
-                    sleep(0.05)
+                    sleep(0.005)
 
         while self.process_is_alive():
             try:
