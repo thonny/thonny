@@ -513,7 +513,7 @@ class Runner:
         # and user actions between batches.
         # Mostly relevant when backend prints a lot quickly.
         msg_count = 0
-        max_msg_count = 50
+        max_msg_count = 10
         while self._proxy is not None and msg_count < max_msg_count:
             try:
                 msg = self._proxy.fetch_next_message()
