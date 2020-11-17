@@ -812,31 +812,30 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
         self._last_event_changed_line_count = False
 
     def direct_insert(self, index, chars, tags=None, **kw):
-        try:
-            # try removing line numbers
-            # TODO: shouldn't it take place only on paste?
-            # TODO: does it occur when opening a file with line numbers in it?
-            # if self._propose_remove_line_numbers and isinstance(chars, str):
-            #    chars = try_remove_linenumbers(chars, self)
+        # try removing line numbers
+        # TODO: shouldn't it take place only on paste?
+        # TODO: does it occur when opening a file with line numbers in it?
+        # if self._propose_remove_line_numbers and isinstance(chars, str):
+        #    chars = try_remove_linenumbers(chars, self)
 
-            concrete_index = self.index(index)
-            line_before = self.get(concrete_index + " linestart", concrete_index + " lineend")
-            self._last_event_changed_line_count = "\n" in chars
-            return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
-        finally:
-            line_after = self.get(concrete_index + " linestart", concrete_index + " lineend")
-            trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
-                chars, line_before, line_after
-            )
-            get_workbench().event_generate(
-                "TextInsert",
-                index=concrete_index,
-                text=chars,
-                tags=tags,
-                text_widget=self,
-                trivial_for_coloring=trivial_for_coloring,
-                trivial_for_parens=trivial_for_parens,
-            )
+        concrete_index = self.index(index)
+        line_before = self.get(concrete_index + " linestart", concrete_index + " lineend")
+        self._last_event_changed_line_count = "\n" in chars
+        result = tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
+        line_after = self.get(concrete_index + " linestart", concrete_index + " lineend")
+        trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
+            chars, line_before, line_after
+        )
+        get_workbench().event_generate(
+            "TextInsert",
+            index=concrete_index,
+            text=chars,
+            tags=tags,
+            text_widget=self,
+            trivial_for_coloring=trivial_for_coloring,
+            trivial_for_parens=trivial_for_parens,
+        )
+        return result
 
     def direct_delete(self, index1, index2=None, **kw):
         try:
