@@ -673,12 +673,12 @@ class Runner:
         ready = self._proxy.ready_for_remote_file_operations()
 
         if not ready and show_message:
-            if self._proxy.is_connected():
+            if not self._proxy.is_connected():
                 msg = "Device is not connected"
             else:
                 msg = (
                     "Device is busy -- can't perform this action now."
-                    + "\nPlease wait or cancel current work and try again!",
+                    + "\nPlease wait or cancel current work and try again!"
                 )
             messagebox.showerror("Can't complete", msg, master=get_workbench())
 
