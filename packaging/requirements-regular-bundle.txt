@@ -1,5 +1,5 @@
 jedi==0.17.*
-pyserial==3.5b0
+pyserial==3.5
 pylint==2.6.*
 docutils==0.16.*
 mypy==0.790.*
