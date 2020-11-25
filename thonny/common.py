@@ -599,8 +599,11 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
 def universal_dirname(path: str) -> str:
     if "/" in path:
         sep = "/"
-    else:
+    elif "\\" in path:
         sep = "\\"
+    else:
+        # micro:bit
+        return ""
 
     path = path.rstrip(sep)
     result = path[: path.rindex(sep)]
