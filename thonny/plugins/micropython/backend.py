@@ -630,7 +630,9 @@ class MicroPythonBackend(MainBackend, ABC):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
         if cmd.get("source"):
             self._reset_environment()
-            self._execute(cmd.source, capture_output=False)
+            self._execute(
+                self._avoid_printing_expression_statements(cmd.source), capture_output=False
+            )
             self._prepare_helpers()
             self._update_cwd()
         return {}
@@ -1243,6 +1245,45 @@ class MicroPythonBackend(MainBackend, ABC):
 
             marker_prefix = "__thonny_helper.print_repl_value("
             marker_suffix = ")"
+
+            lines = source.splitlines(keepends=True)
+            for node in reversed(expr_stmts):
+                lines[node.end_lineno - 1] = (
+                    lines[node.end_lineno - 1][: node.end_col_offset]
+                    + marker_suffix
+                    + lines[node.end_lineno - 1][node.end_col_offset :]
+                )
+
+                lines[node.lineno - 1] = (
+                    lines[node.lineno - 1][: node.col_offset]
+                    + marker_prefix
+                    + lines[node.lineno - 1][node.col_offset :]
+                )
+
+            new_source = "".join(lines)
+            # make sure it parses
+            ast.parse(new_source)
+            return new_source
+        except Exception:
+            logger.exception("Problem adding Expr handlers")
+            return source
+
+    def _avoid_printing_expression_statements(self, source):
+        # temporary solution for https://github.com/thonny/thonny/issues/1441
+        try:
+            root = ast.parse(source)
+
+            from thonny.ast_utils import mark_text_ranges
+
+            mark_text_ranges(root, source)
+
+            expr_stmts = []
+            for node in ast.walk(root):
+                if isinstance(node, ast.Expr):
+                    expr_stmts.append(node)
+
+            marker_prefix = ""
+            marker_suffix = " and None or None"
 
             lines = source.splitlines(keepends=True)
             for node in reversed(expr_stmts):
