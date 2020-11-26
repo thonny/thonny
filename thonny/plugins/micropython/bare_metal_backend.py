@@ -726,6 +726,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
             self._send_output(data.decode(ENCODING, "replace"), stream_name)
             if met_prompt:
+                self._prepare_helpers()
                 # ... and recreate Thonny prompt
                 self.send_message(ToplevelResponse())
 
