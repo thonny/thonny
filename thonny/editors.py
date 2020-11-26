@@ -237,12 +237,12 @@ class Editor(ttk.Frame):
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
 
-    def save_file(self, ask_filename=False, save_copy=False):
+    def save_file(self, ask_filename=False, save_copy=False, node=None):
         if self._filename is not None and not ask_filename:
             save_filename = self._filename
             get_workbench().event_generate("Save", editor=self, filename=save_filename)
         else:
-            save_filename = self.ask_new_path()
+            save_filename = self.ask_new_path(node)
 
             if not save_filename:
                 return None
@@ -349,8 +349,9 @@ class Editor(ttk.Frame):
         else:
             return False
 
-    def ask_new_path(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
+    def ask_new_path(self, node=None):
+        if node is None:
+            node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
         if not node:
             return None
 
@@ -648,11 +649,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
-            "rename_file",
+            "move_rename_file",
             "file",
-            tr("Rename..."),
-            self._cmd_rename_file,
-            tester=self._cmd_rename_file_enabled,
+            tr("Move / rename..."),
+            self._cmd_move_rename_file,
+            tester=self._cmd_move_rename_file_enabled,
             group=10,
         )
 
@@ -823,11 +824,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 return True
         return False
 
-    def _cmd_save_file_as(self):
+    def _cmd_save_file_as(self, node=None):
         if not self.get_current_editor():
             return
 
-        self.get_current_editor().save_file(ask_filename=True)
+        self.get_current_editor().save_file(ask_filename=True, node=node)
         self.update_editor_title(self.get_current_editor())
         get_workbench().update_title()
 
@@ -841,17 +842,37 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
 
-    def _cmd_rename_file(self):
+    def _cmd_move_rename_file(self):
         editor = self.get_current_editor()
         old_filename = editor.get_filename()
         assert old_filename is not None
 
-        self._cmd_save_file_as()
+        if is_remote_path(old_filename):
+            node = "remote"
+        else:
+            node = "local"
+
+        self._cmd_save_file_as(node=node)
 
         if editor.get_filename() != old_filename:
-            os.remove(old_filename)
+            if is_remote_path(old_filename):
+                remote_path = extract_target_path(old_filename)
+                get_runner().send_command_and_wait(
+                    InlineCommand(
+                        "delete", paths=[remote_path], description=tr("Deleting" + remote_path)
+                    ),
+                    dialog_title=tr("Deleting"),
+                )
+                get_workbench().event_generate(
+                    "RemoteFileOperation", path=remote_path, operation="delete"
+                )
+            else:
+                os.remove(old_filename)
+                get_workbench().event_generate(
+                    "LocalFileOperation", path=old_filename, operation="delete"
+                )
 
-    def _cmd_rename_file_enabled(self):
+    def _cmd_move_rename_file_enabled(self):
         return self.get_current_editor() and self.get_current_editor().get_filename() is not None
 
     def close_single_untitled_unmodified_editor(self):
