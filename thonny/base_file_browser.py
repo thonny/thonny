@@ -1156,8 +1156,12 @@ class BackendFileDialog(CommonDialog):
         tree = self.browser.tree
         name = self.name_var.get()
 
+        if not name:
+            messagebox.showerror(tr("Error"), tr("You need to select a file!"), master=self)
+            return
+
         for node_id in tree.get_children(""):
-            if name == tree.set(node_id, "name"):
+            if name and name == tree.set(node_id, "name"):
                 break
         else:
             node_id = None
