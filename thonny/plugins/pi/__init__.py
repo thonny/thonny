@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -9,6 +10,8 @@ CONFIGURATION_PATH = os.path.join(
     os.path.expanduser("~"), ".config/lxsession", DESKTOP_SESSION, "desktop.conf"
 )
 GLOBAL_CONFIGURATION_PATH = os.path.join("/etc/xdg/lxsession", DESKTOP_SESSION, "desktop.conf")
+
+logger = logging.getLogger(__name__)
 
 
 def pix():
@@ -193,22 +196,29 @@ def pix():
     for path in [GLOBAL_CONFIGURATION_PATH, CONFIGURATION_PATH]:
         if os.path.exists(path):
             with open(path) as fp:
-                for line in fp:
-                    if "sGtk/ColorScheme" in line:
-                        if "selected_bg_color" in line:
-                            bgr = re.search(r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                                1
-                            )  # @UndefinedVariable
-                            color = "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
-                            if is_good_color(color):
-                                settings["Menu"]["configure"]["activebackground"] = color
-                        if "selected_fg_color" in line:
-                            fgr = re.search(r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                                1
-                            )  # @UndefinedVariable
-                            color = "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
-                            if is_good_color(color):
-                                settings["Menu"]["configure"]["activeforeground"] = color
+                try:
+                    for line in fp:
+                        if "sGtk/ColorScheme" in line:
+                            if "selected_bg_color" in line:
+                                bgr = re.search(
+                                    r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M
+                                ).group(
+                                    1
+                                )  # @UndefinedVariable
+                                color = "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
+                                if is_good_color(color):
+                                    settings["Menu"]["configure"]["activebackground"] = color
+                            if "selected_fg_color" in line:
+                                fgr = re.search(
+                                    r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M
+                                ).group(
+                                    1
+                                )  # @UndefinedVariable
+                                color = "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
+                                if is_good_color(color):
+                                    settings["Menu"]["configure"]["activeforeground"] = color
+                except Exception as e:
+                    logger.error("Could not update colors", exc_info=e)
 
     return settings
 
@@ -228,24 +238,29 @@ def update_fonts():
     options = {}
     for path in [GLOBAL_CONFIGURATION_PATH, CONFIGURATION_PATH]:
         if os.path.exists(path):
-            with open(path) as fp:
-                for line in fp:
-                    if "sGtk/FontName" in line:
-                        result = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M)  # @UndefinedVariable
-                        family = result.group(1)
-                        options["size"] = int(result.group(2))
+            try:
+                with open(path) as fp:
+                    for line in fp:
+                        if "sGtk/FontName" in line:
+                            result = re.search(
+                                r"=([^0-9]*) ([0-9]*)", line, re.M
+                            )  # @UndefinedVariable
+                            family = result.group(1)
+                            options["size"] = int(result.group(2))
 
-                        if re.search(r"\bBold\b", family):
-                            options["weight"] = "bold"
-                        else:
-                            options["weight"] = "normal"
+                            if re.search(r"\bBold\b", family):
+                                options["weight"] = "bold"
+                            else:
+                                options["weight"] = "normal"
 
-                        if re.search(r"\bItalic\b", family):
-                            options["slant"] = "italic"
-                        else:
-                            options["slant"] = "roman"
+                            if re.search(r"\bItalic\b", family):
+                                options["slant"] = "italic"
+                            else:
+                                options["slant"] = "roman"
 
-                        options["family"] = family.replace(" Bold", "").replace(" Italic", "")
+                            options["family"] = family.replace(" Bold", "").replace(" Italic", "")
+            except Exception as e:
+                logger.error("Could not update fonts", exc_info=e)
 
     if options:
         for name in ["TkDefaultFont", "TkMenuFont", "TkTextFont", "TkHeadingFont"]:
