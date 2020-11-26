@@ -1092,6 +1092,10 @@ class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
     def open_file(self, path):
         self.dialog.double_click_file(path)
 
+    def should_open_name_in_thonny(self, name):
+        # In dialog, all file types are to be opened in Thonny
+        return True
+
 
 class BackendFileDialog(CommonDialog):
     def __init__(self, master, kind, initial_dir):
