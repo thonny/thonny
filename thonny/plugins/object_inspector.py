@@ -76,8 +76,10 @@ class ObjectInspector(ttk.Frame):
                     self.active_page = page
                     page.grid(row=1, column=0, sticky="nsew", padx=0)
                     tab.configure(style="Active.ViewTab.TLabel")
-                    if self.active_page == self.attributes_page and (
-                        self.object_info is None or not self.object_info.get("attributes")
+                    if (
+                        self.active_page == self.attributes_page
+                        and (self.object_info is None or not self.object_info.get("attributes"))
+                        and self.object_id is not None
                     ):
                         self.request_object_info()
 
@@ -166,6 +168,7 @@ class ObjectInspector(ttk.Frame):
         self._show_object_by_id(event.object_id)
 
     def _show_object_by_id(self, object_id, via_navigation=False):
+        assert object_id is not None
 
         if self.winfo_ismapped() and self.object_id != object_id:
             if not via_navigation and self.object_id is not None:
