@@ -25,7 +25,7 @@ from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 
-_dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
+_dialog_filetypes = [("Python files", ".py .pyw .pyi"), ("all files", ".*")]
 
 REMOTE_PATH_MARKER = " :: "
 
