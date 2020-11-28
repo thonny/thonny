@@ -9,6 +9,7 @@ import pkgutil
 import platform
 import queue
 import re
+import shutil
 import socket
 import sys
 import tkinter as tk
@@ -2233,6 +2234,12 @@ class Workbench(tk.Tk):
             self._editor_notebook.remember_open_files()
             self.event_generate("WorkbenchClose")
             self._configuration_manager.save()
+            temp_dir = self.get_temp_dir(create_if_doesnt_exist=False)
+            if os.path.exists(temp_dir):
+                try:
+                    shutil.rmtree(temp_dir)
+                except Exception as e:
+                    logger.error("Could not remove temp dir", exc_info=e)
         except Exception:
             self.report_exception()
 
@@ -2467,6 +2474,12 @@ class Workbench(tk.Tk):
 
     def get_toolbar(self):
         return self._toolbar
+
+    def get_temp_dir(self, create_if_doesnt_exist=True):
+        path = os.path.join(THONNY_USER_DIR, "temp")
+        if create_if_doesnt_exist:
+            os.makedirs(path, exist_ok=True)
+        return path
 
 
 class WorkbenchEvent(Record):

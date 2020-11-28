@@ -21,7 +21,9 @@ def print_current_script():
 
     import tempfile
 
-    temp_handle, temp_fn = tempfile.mkstemp(suffix=".html", prefix="thonny_")
+    temp_handle, temp_fn = tempfile.mkstemp(
+        suffix=".html", prefix="thonny_", dir=get_workbench().get_temp_dir()
+    )
     with os.fdopen(temp_handle, "w", encoding="utf-8") as f:
         f.write(full_html)
 

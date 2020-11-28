@@ -719,7 +719,7 @@ class FeedbackDialog(CommonDialog):
         import tempfile
 
         temp_path = os.path.join(
-            tempfile.mkdtemp(),
+            tempfile.mkdtemp(dir=get_workbench().get_temp_dir()),
             "ThonnyAssistantFeedback_"
             + datetime.datetime.now().isoformat().replace(":", ".")[:19]
             + ".txt",
