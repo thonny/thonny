@@ -1,7 +1,7 @@
 Web development with Flask
 ==========================
 
-`Flask <http://flask.pocoo.org/>`__ is a popular framework for building web apps in Python.
+`Flask <https://palletsprojects.com/p/flask/>`__ is a popular framework for building web apps in Python.
 
 Flask tutorials usually instruct running Flask programs by entering some commands in Terminal, 
 but this may intimidate some beginners. Thonny tries make things easeir and allows running Flask programs
@@ -26,7 +26,7 @@ Thonny will start the development server approximately like this:
 
 ``threaded=False`` is used because Thonny's debugger supports only single-threaded programs,
 ``use_reloader=False`` is used because 
-`automatic reloading is not reliable when Flask is started like this <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.run>`_
+`automatic reloading is not reliable when Flask is started like this <https://flask.palletsprojects.com/en/1.0.x/api/#flask.Flask.run>`_
 and ``debug=False`` is used because this seems to cause less "Address already in use" errors.
 
 If you want more control over the settings then you should call the ``run``-method yourself,

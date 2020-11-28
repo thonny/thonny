@@ -38,6 +38,12 @@ class HelpView(TextFrame):
         get_workbench().bind("WorkbenchReady", self.on_workbench_ready, True)
 
     def on_workbench_ready(self, event=None):
+        self.load_index()
+
+    def on_show(self):
+        self.load_index()
+
+    def load_index(self):
         self.load_rst_file("index.rst")
 
     def load_topic(self, topic, fragment=None):

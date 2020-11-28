@@ -25,16 +25,15 @@ Recent versions of most popular scientific Python packages (eg. numpy, pandas an
 matplotlib) have wheels available for popular platforms so you can most likely install 
 them with pip but in case you have troubles, you could try using Thonny with separate 
 Python distribution meant for scientific computing 
-(eg. `Anaconda <https://www.continuum.io/downloads>`_, `Canopy <https://www.enthought.com/products/canopy/>`_ 
+(eg. `Anaconda <https://www.anaconda.com>`_
 or `Pyzo <http://www.pyzo.org/>`_).
 
 
 Example: Using Anaconda
 ------------------------------------
-Go to https://www.continuum.io/downloads and download a suitable binary distribution for 
+Go to https://www.anaconda.com/products/individual and download a suitable binary distribution for
 your platform. Most likely you want graphical installer and 64-bit version (you may need 
-32-bit version if you have very old system). **Note that Thonny supports only on Python 3, 
-so make sure you choose Python 3 version of Anaconda.**
+32-bit version if you have very old system).
 
 Install it and find out where it puts Python executable (*pythonw.exe* in Windows and 
 *python3* or *python* in Linux and Mac).
