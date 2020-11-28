@@ -199,9 +199,9 @@ def launch():
         return 0
 
     except SystemExit as e:
-        from tkinter import messagebox
+        from tkinter import messagebox, _default_root
 
-        messagebox.showerror("System exit", str(e), master=bench)
+        messagebox.showerror("System exit", str(e), master=_default_root)
         return -1
 
     except Exception:
