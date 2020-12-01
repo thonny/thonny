@@ -21,14 +21,16 @@ def start_session():
     # top = StartUpDialog(master=WORKBENCH)
     global session
     #if top.getInfo() == "Host":
-    session = Host()
-    session.start()
+    session = Host(1)
+   # session.start()
+    session.run()
     return (1, "null", 0)
 
 def callback():
     global session
     if session != None:
-        code = session.end()
+        session.kill()
+        code = "done"
         if DEBUG:
             print("end code:", code)
     else:

@@ -7,7 +7,7 @@ import time
 import struct
 import pickle
 
-import context  # Ensures paho is in PYTHONPATH
+#import context  # Ensures paho is in PYTHONPATH
 import paho.mqtt.client as mqtt
 
 #from threading import Thread
@@ -15,7 +15,6 @@ import paho.mqtt.client as mqtt
 
 from thonny import get_workbench
 
-MSGLEN = 2048
 WORKBENCH = get_workbench()
 QOS = 0
 BROKER = 'test.mosquitto.org'
@@ -25,16 +24,17 @@ global workQueue
 workQueue = Queue(30)
 
 # Precursors for Host class methods
-class Host(mqtt.Client, Thread):
+class Host(mqtt.Client):
     def __init__(self, thread_nums):
+        super().__init__()
         print("*****")
         print("Initializing connection...")
         print("*****")
-        self.client = mqtt.Client()
         self.threads = []
-        self.client.connect(BROKER, PORT, 60)
+        self.connect(BROKER, PORT, 60)
+
         for threadID in range(thread_nums):
-            self.threads.append(ProcessThread("Thread"+str(threadID), self.client))
+            self.threads.append(ProcessThread("Thread"+str(threadID), self))
     
     def run(self):
         for t in self.threads:
@@ -42,7 +42,7 @@ class Host(mqtt.Client, Thread):
     
     def on_connect(self, client, userdata, rc, *extra_params):
         print('Connected with result code='+str(rc))
-        self.client.subscribe("Calvin/CodeLive/Change", qos=QOS)
+        self.subscribe("Calvin/CodeLive/Change", qos=QOS)
 
     def on_message(self, client, data, msg):
         if msg.topic == "Calvin/CodeLive/Change":
@@ -55,7 +55,7 @@ class Host(mqtt.Client, Thread):
     #closes client and terminates threads
     def kill(self):
         print("closing")
-        self.client.close()
+        self.close()
         exitFlag.set()
         for t in self.threads:
             t.join()
