@@ -81,19 +81,36 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
         )
 
     def _get_release_info_url(self):
-        return "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
+        return "https://raw.githubusercontent.com/thonny/thonny/master/data/microbit-firmware.json"
 
-    def _is_suitable_asset(self, asset, model_id):
-        if not asset["name"].endswith(".hex") or "micropython" not in asset["name"].lower():
-            return False
+    def get_unknown_version_text(self):
+        return "?"
 
-        # https://tech.microbit.org/latest-revision/editors/
-        if model_id in ("9900", "9901"):
-            return 400000 < asset["size"] < 800000
-        elif model_id in ("9904"):
-            return 1100000 < asset["size"] < 2000000
+    def get_firmware_description(self):
+        info = self._get_latest_firmware_info_for_current_device()
+        if info is None:
+            return None
+        return "%s (%s)" % (info["version"], info["date"])
+
+    def _get_latest_firmware_info_for_current_device(self):
+        if self._possible_targets is None or len(self._possible_targets) != 1:
+            return None
         else:
-            return False
+            board_id = self._possible_targets[0][1]
+            return self._get_latest_firmware_info_for_device(board_id)
+
+    def _get_latest_firmware_info_for_device(self, board_id):
+        if self._release_info is None:
+            return None
+        else:
+            return self._release_info["latest_firmwares"].get(board_id, None)
+
+    def get_download_url_and_size(self, board_id):
+        info = self._get_latest_firmware_info_for_device(board_id)
+        if info is None:
+            return None
+
+        return info["hex_download"], info["size"]
 
     @classmethod
     def find_device_board_id_and_model(cls, mount_path):

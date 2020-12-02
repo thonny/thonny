@@ -25,6 +25,8 @@ from thonny.workdlg import WorkDialog
 
 logger = logging.getLogger(__name__)
 
+FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+
 
 class Uf2FlashingDialog(WorkDialog):
     def __init__(self, master):
@@ -100,6 +102,7 @@ class Uf2FlashingDialog(WorkDialog):
         raise NotImplementedError()
 
     def _start_downloading_release_info(self):
+        self._release_info = None  # invalidate last info if downloading again
         threading.Thread(target=self._download_release_info, daemon=True).start()
 
     def _download_release_info(self):
@@ -107,9 +110,19 @@ class Uf2FlashingDialog(WorkDialog):
         from urllib.request import urlopen
 
         try:
-            with urlopen(self._get_release_info_url()) as fp:
-                self._release_info = json.loads(fp.read().decode("UTF-8"))
-                if not self._release_info.get("tag_name"):
+            req = urllib.request.Request(
+                self._get_release_info_url(),
+                data=None,
+                headers={
+                    "User-Agent": FAKE_USER_AGENT,
+                    "Cache-Control": "no-cache",
+                },
+            )
+            with urlopen(req) as fp:
+                json_str = fp.read().decode("UTF-8")
+                logger.debug("Release info: %r", json_str)
+                self._release_info = json.loads(json_str)
+                if self._release_info.get("message", "") == "Not Found":
                     self._release_info = None
         except Exception as e:
             logger.warning(
@@ -140,16 +153,21 @@ class Uf2FlashingDialog(WorkDialog):
             else:
                 unpacked = list(zip(*self._possible_targets))
                 set_text_if_different(self.target_label, "\n".join(unpacked[0]))
-                set_text_if_different(self.model_label, "\n".join(unpacked[2]))
+                model_changed = set_text_if_different(self.model_label, "\n".join(unpacked[2]))
 
-            unknown_version_text = tr("Please wait") + "..."
             desc = self.get_firmware_description()
             if desc is None:
-                set_text_if_different(self._version_label, unknown_version_text)
+                set_text_if_different(self._version_label, self.get_unknown_version_text())
             else:
                 set_text_if_different(self._version_label, desc)
 
         super(Uf2FlashingDialog, self).update_ui()
+
+    def get_unknown_version_text(self):
+        return tr("Please wait") + "..."
+
+    def model_changed(self):
+        pass
 
     def get_firmware_description(self):
         if self._release_info is None:
@@ -312,6 +330,7 @@ class Uf2FlashingDialog(WorkDialog):
 
     def _download_to_the_device(self, download_url, size, target_dir):
         """Running in a bg thread"""
+        logger.debug("Downloading %d bytes from %s to %s", size, download_url, target_dir)
         target_path = os.path.join(target_dir, "firmware")
 
         self.set_action_text("Starting...")
@@ -333,23 +352,31 @@ class Uf2FlashingDialog(WorkDialog):
                 # override (possibly inaccurate) size
                 size = fsrc.length
 
+            # data = fsrc.read()
+
+            block_size = 8 * 1024
             with open(target_path, "wb") as fdst:
                 while True:
-                    buf = fsrc.read(8 * 1024)
-                    if not buf:
+
+                    block = fsrc.read(8 * 1024)
+                    # block = data[:block_size]
+                    # data = data[block_size:]
+                    if not block:
                         break
 
                     if self._state == "cancelling":
                         break
 
-                    fdst.write(buf)
+                    fdst.write(block)
                     fdst.flush()
                     os.fsync(fdst.fileno())
-                    bytes_copied += len(buf)
+                    bytes_copied += len(block)
                     percent_str = "%.0f%%" % (bytes_copied / size * 100)
                     self.set_action_text("Copying... " + percent_str)
                     self.report_progress(bytes_copied, size)
                     self.replace_last_line(percent_str)
+
+            os.sync()
 
     def get_title(self):
         return "Install MicroPython firmware"

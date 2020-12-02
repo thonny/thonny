@@ -2263,9 +2263,12 @@ def ems_to_pixels(x):
 _btn_padding = None
 
 
-def set_text_if_different(widget, text):
+def set_text_if_different(widget, text) -> bool:
     if widget["text"] != text:
         widget["text"] = text
+        return True
+    else:
+        return False
 
 
 def tr_btn(s):
