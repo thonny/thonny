@@ -421,6 +421,9 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             ]
 
         filename = askopenfilename(**options)
+        if not filename:
+            return
+        
         if filename.endswith("/activate"):
             filename = filename[: -len("activate")] + "python3"
 
