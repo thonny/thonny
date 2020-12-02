@@ -112,6 +112,9 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
 
         return info["hex_download"], info["size"]
 
+    def get_target_filename(self):
+        return "firmware.hex"
+
     @classmethod
     def find_device_board_id_and_model(cls, mount_path):
         info_path = os.path.join(mount_path, "DETAILS.TXT")

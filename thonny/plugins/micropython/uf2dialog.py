@@ -330,8 +330,8 @@ class Uf2FlashingDialog(WorkDialog):
 
     def _download_to_the_device(self, download_url, size, target_dir):
         """Running in a bg thread"""
-        logger.debug("Downloading %d bytes from %s to %s", size, download_url, target_dir)
-        target_path = os.path.join(target_dir, "firmware")
+        target_path = os.path.join(target_dir, self.get_target_filename())
+        logger.debug("Downloading %d bytes from %s to %s", size, download_url, target_path)
 
         self.set_action_text("Starting...")
         self.append_text("Downloading %d bytes from %s\n" % (size, download_url))
@@ -352,15 +352,11 @@ class Uf2FlashingDialog(WorkDialog):
                 # override (possibly inaccurate) size
                 size = fsrc.length
 
-            # data = fsrc.read()
-
             block_size = 8 * 1024
             with open(target_path, "wb") as fdst:
                 while True:
 
-                    block = fsrc.read(8 * 1024)
-                    # block = data[:block_size]
-                    # data = data[block_size:]
+                    block = fsrc.read(block_size)
                     if not block:
                         break
 
@@ -377,6 +373,9 @@ class Uf2FlashingDialog(WorkDialog):
                     self.replace_last_line(percent_str)
 
             os.sync()
+
+    def get_target_filename(self):
+        return "firmware"
 
     def get_title(self):
         return "Install MicroPython firmware"
