@@ -445,7 +445,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._webrepl_frame = None
 
-
         last_row = ttk.Frame(self)
         last_row.grid(row=100, sticky="swe")
         self.rowconfigure(100, weight=1)
