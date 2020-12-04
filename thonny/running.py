@@ -16,6 +16,8 @@ import re
 import shlex
 import signal
 import subprocess
+import traceback
+
 import sys
 import time
 import tkinter as tk
@@ -1434,7 +1436,15 @@ class InlineCommandDialog(WorkDialog):
     def send_command_to_backend(self):
         if not isinstance(self._cmd, CommandToBackend):
             # it was a lazy definition
-            self._cmd = self._cmd()
+            try:
+                self._cmd = self._cmd()
+            except Exception as e:
+                logger.error("Could not produce command for backend", self._cmd)
+                self.set_action_text("Error!")
+                self.append_text("Could not produce command for backend\n")
+                self.append_text("".join(traceback.format_exc()) + "\n")
+                self.report_done(False)
+                return
 
         logger.debug("Starting command in dialog: %s", self._cmd)
         get_runner().send_command(self._cmd)

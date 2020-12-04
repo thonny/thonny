@@ -117,7 +117,7 @@ class MicroPythonPipDialog(BackendPipDialog):
                     items.append(item)
 
         if not items:
-            raise RuntimeError("Could not find anything in temp directory")
+            raise RuntimeError("Could not find anything in temp directory. Was it a dummy package?")
 
         return InlineCommand("upload", items=items)
 
