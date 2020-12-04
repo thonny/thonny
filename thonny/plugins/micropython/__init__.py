@@ -142,6 +142,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         args = {
             "clean": self._clean_start,
             "port": self._port,
+            "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
+            "rts": get_workbench().get_option(self.backend_name + ".rts"),
             "api_stubs_path": self._get_api_stubs_path(),
             "write_block_size": self._get_write_block_size(),
             "proxy_class": self.__class__.__name__,
@@ -922,6 +924,8 @@ def add_micropython_backend(
     validate_time=True,
     sync_time=None,
     write_block_size=None,
+    dtr=None,
+    rts=None,
 ):
     if bare_metal:
         # https://forum.micropython.org/viewtopic.php?f=15&t=3698
@@ -934,6 +938,8 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".webrepl_password", "")
         get_workbench().set_default(name + ".write_block_size", write_block_size)
         get_workbench().set_default(name + ".used_vidpids", set())
+        get_workbench().set_default(name + ".dtr", dtr)
+        get_workbench().set_default(name + ".rts", rts)
 
         if sync_time is None:
             sync_time = True

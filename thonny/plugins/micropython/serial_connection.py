@@ -11,7 +11,7 @@ from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SerialConnection(MicroPythonConnection):
-    def __init__(self, port, baudrate, skip_reader=False):
+    def __init__(self, port, baudrate, dtr=None, rts=None, skip_reader=False):
 
         import serial
         from serial.serialutil import SerialException
@@ -19,12 +19,19 @@ class SerialConnection(MicroPythonConnection):
         super().__init__()
 
         try:
-            self._serial = serial.Serial(port, baudrate=baudrate, timeout=None, exclusive=True)
+            self._serial = serial.Serial(port=None, baudrate=baudrate, timeout=None, exclusive=True)
             # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
-            # but in some cases it messes up communication
-            # self._serial.dtr = 0
-            # self._serial.rts = 0
+            # but in some cases it messes up communication.
+            # At the same time, in some cases it is required
+            # https://github.com/thonny/thonny/issues/1462
+            if dtr is not None:
+                self._serial.dtr = dtr
+            if rts is not None:
+                self._serial.rts = rts
+
+            self._serial.port = port
+            self._serial.open()
         except SerialException as error:
             err_str = str(error)
             if "FileNotFoundError" in err_str:

@@ -1319,7 +1319,6 @@ if __name__ == "__main__":
             while True:
                 time.sleep(1000)
         elif args["port"] == "webrepl":
-
             connection = WebReplConnection(args["url"], args["password"])
         else:
             from thonny.plugins.micropython.serial_connection import (
@@ -1327,7 +1326,9 @@ if __name__ == "__main__":
                 SerialConnection,
             )
 
-            connection = SerialConnection(args["port"], BAUDRATE)
+            connection = SerialConnection(
+                args["port"], BAUDRATE, dtr=args.get("dtr"), rts=args.get("rts")
+            )
             # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         if "circuitpython" in args.get("proxy_class", "").lower():
