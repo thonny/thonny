@@ -444,7 +444,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.columnconfigure(0, weight=1)
 
         self._webrepl_frame = None
-        self._flashing_frame = None
+
 
         last_row = ttk.Frame(self)
         last_row.grid(row=100, sticky="swe")
@@ -569,9 +569,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
             self._get_webrepl_frame().grid(row=6, column=0, sticky="nwe")
-            if self._flashing_frame and self._flashing_frame.winfo_ismapped():
-                self._flashing_frame.grid_forget()
-
         else:
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
