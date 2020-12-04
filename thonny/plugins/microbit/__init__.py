@@ -137,6 +137,13 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                     if board_id in models:
                         return board_id, models[board_id]
 
+            # With older bootloaders, the file may be different
+            fp.seek(0)
+            for line in fp:
+                if "Version: 0234" in line:
+                    board_id = "9900"
+                    return board_id, models[board_id]
+
         return None
 
     def get_title(self):
