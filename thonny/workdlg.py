@@ -319,6 +319,9 @@ class WorkDialog(CommonDialog):
         if self.success and self._autostart:
             self.close()
 
+        if not self.success and not self.log_frame.winfo_ismapped():
+            self.toggle_log_frame()
+
 
 class SubprocessDialog(WorkDialog):
     """Shows incrementally the output of given subprocess.
