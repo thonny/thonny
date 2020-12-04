@@ -316,7 +316,7 @@ class WorkDialog(CommonDialog):
         self._progress_bar.stop()
         # need to put to determinate mode, otherwise it looks half done
         self._progress_bar["mode"] = "determinate"
-        if self.success and self._autostart:
+        if self.success and self._autostart and not self.log_frame.winfo_ismapped():
             self.close()
 
         if not self.success and not self.log_frame.winfo_ismapped():
