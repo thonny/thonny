@@ -372,8 +372,6 @@ class Uf2FlashingDialog(WorkDialog):
                     self.report_progress(bytes_copied, size)
                     self.replace_last_line(percent_str)
 
-            os.sync()
-
     def get_target_filename(self):
         return "firmware"
 
