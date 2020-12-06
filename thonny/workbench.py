@@ -986,7 +986,6 @@ class Workbench(tk.Tk):
         def dispatch(event=None):
             if not tester or tester():
                 denied = False
-                print("hand")
                 handler()
             else:
                 denied = True
@@ -997,7 +996,7 @@ class Workbench(tk.Tk):
             self.event_generate("UICommandDispatched", command_id=command_id, denied=denied)
 
         def dispatch_if_caps_lock_is_on(event):
-            if caps_lock_is_on(event.state):
+            if caps_lock_is_on(event.state) and not shift_is_pressed(event.state):
                 dispatch(event)
 
         sequence_option_name = "shortcuts." + command_id
@@ -1010,8 +1009,11 @@ class Workbench(tk.Tk):
                 # work around caps-lock problem
                 # https://github.com/thonny/thonny/issues/1347
                 # Unfortunately the solution doesn't work with sequences involving Shift
+                # (in Linux with the expected solution Shift sequences did not come through
+                # with Caps Lock, and in Windows, the shift handlers started to react
+                # on non-shift keypresses)
                 parts = sequence.strip("<>").split("-")
-                if len(parts[-1]) == 1 and parts[-1].islower():
+                if len(parts[-1]) == 1 and parts[-1].islower() and "Shift" not in parts:
                     lock_sequence = "<%s-Lock-%s>" % ("-".join(parts[:-1]), parts[-1].upper())
                     self.bind_all(lock_sequence, dispatch_if_caps_lock_is_on, True)
 
