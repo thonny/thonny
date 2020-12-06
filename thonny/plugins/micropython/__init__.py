@@ -533,6 +533,8 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
     def get_selected_port_name(self):
         port_desc = self._port_desc_variable.get()
+        if not port_desc:
+            return None
         return self._ports_by_desc[port_desc]
 
     def is_modified(self):
