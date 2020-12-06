@@ -4,6 +4,27 @@ Version history
 
 3.3.1 (2020-12-06)
 ==================
+* Allow installing MicroPython to micro:bit v2
+* Fix problem with MicroPython programs creating lot of output very quickly, #1419
+* Fix wrong message when saving to MP and device is busy, #1437
+* Bump Pyserial version from 3.5b1 to 3.5, fix problem with some ESP devices, #1443
+* Fix error when trying to download file from microbit, #1440
+* Don't assume anything about conf files in Pi theme, #1436
+* Fix error on reseting MicroPython device, #1442
+* Fix unwanted output from expession statements in MicroPython, #1441
+* Treat double-click in the remote file dialog differently from double-click in the Files view, #1432
+* Fix error when closing MP file dialog without name, #1431
+* Refactor "File => Rename" command (new label "Move / rename" and you can't "rename" a file on MP device to a file on local disc and vice versa), #1446
+* Fix broken links in help pages, #1447
+* Use THONNY_USER_DIR/temp for temp files. Fixes printing when default browser is Snap Chrome, #1435
+* Fix error when clicking on "Attributes" tab on Object Inspector when no object is selected (MP) #1450
+* Updated translations (Spanish an Brasilian Portuguese)
+* Allow specifying DTR/RTS for serial connection (to avoid restarting ESP on connect), #1462
+* Open log window automatically if work dialog encounters error, #1466
+* Don't close work dialog automatically if log window is opened, #1465
+* Fix dummy MicroPython packages giving ugly errors, #1464
+* Fix crashes in Assistant view with Dracula theme, #1463
+* Work around Caps lock problem when binding command shortcuts, #1347
 
 
 3.3.0 (2020-11-15)
