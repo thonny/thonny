@@ -147,7 +147,7 @@ msgstr "Birdseye es un depurador de Python que debe instalarse por separado.\n"
 
 #: thonny/plugins/birdseye_frontend.py:83
 msgid "Debug current script (birdseye)"
-msgstr "Depurar el script actual (birdseye)"
+msgstr "Depura el script actual (birdseye)"
 
 #: thonny/plugins/commenting_indenting.py:172
 msgid "Toggle comment"
@@ -256,7 +256,7 @@ msgstr "Archivos"
 
 #: thonny/plugins/find_replace.py:57 thonny/plugins/find_replace.py:416
 msgid "Find & Replace"
-msgstr "Encontrar y reemplazar"
+msgstr "Encontrar y reemplazar…"
 
 #: thonny/plugins/find_replace.py:63
 msgid "Find:"
@@ -362,7 +362,7 @@ msgstr "Inspector de objetos"
 
 #: thonny/plugins/outline.py:138
 msgid "Outline"
-msgstr "Boceto"
+msgstr "Esquema"
 
 #: thonny/plugins/pgzero_frontend.py:27
 msgid "Pygame Zero mode"
@@ -486,11 +486,11 @@ msgstr "¿Quieres sobreescribir '%s'?"
 
 #: thonny/editors.py:552 thonny/editors.py:554
 msgid "New"
-msgstr "Nuevo"
+msgstr "Nuevo programa"
 
 #: thonny/editors.py:565
 msgid "Open..."
-msgstr "Abrir..."
+msgstr "Abrir fichero..."
 
 #: thonny/editors.py:567
 msgid "Load"
@@ -770,7 +770,7 @@ msgstr "Ejecutar / reanudar"
 
 #: thonny/plugins/debugger.py:1311
 msgid "Debug current script"
-msgstr "Depurar el script actual"
+msgstr "Depura el script actual"
 
 #: thonny/plugins/debugger.py:1313
 msgid "Debug"
@@ -782,7 +782,7 @@ msgstr "Depura el guión actual (mejor)"
 
 #: thonny/plugins/debugger.py:1336
 msgid "Debug current script (faster)"
-msgstr "Depurar el script actual (rápidamente)"
+msgstr "Depura el script actual (rápidamente)"
 
 #: thonny/plugins/debugger.py:1347
 msgid "Step over"
@@ -818,7 +818,7 @@ msgstr "Atrás"
 
 #: thonny/plugins/debugger.py:1418
 msgid "Stack"
-msgstr "Pila"
+msgstr "Pila (stack)"
 
 #: thonny/plugins/debugger.py:1419
 msgid "Exception"
@@ -830,7 +830,7 @@ msgstr "Registra los eventos de uso del programa"
 
 #: thonny/plugins/general_config_page.py:43
 msgid "Debug mode (provides more detailed diagnostic logs)"
-msgstr "Modo de depuración (provee un diagnóstico detallado de los registros)"
+msgstr "Modo de depuración (con diagnóstico detallado de registros)"
 
 #: thonny/plugins/general_config_page.py:67
 msgid "UI mode"
@@ -1039,7 +1039,7 @@ msgstr "Administra plug-ings…"
 
 #: thonny/plugins/replayer.py:365
 msgid "Open replayer..."
-msgstr "Abrir re-ejecución…"
+msgstr "Abrir moviola…"
 
 #: thonny/plugins/run_debug_config_page.py:14
 msgid "Change working directory to script directory on Run / Debug"
@@ -1132,19 +1132,19 @@ msgstr "Terminal"
 
 #: thonny/plugins/theme_and_font_config_page.py:40
 msgid "UI theme"
-msgstr ""
+msgstr "Aspecto"
 
 #: thonny/plugins/theme_and_font_config_page.py:53
 msgid "Syntax theme"
-msgstr ""
+msgstr "Color Sintaxis"
 
 #: thonny/plugins/theme_and_font_config_page.py:85
 msgid "Editor font"
-msgstr ""
+msgstr "Letra editor"
 
 #: thonny/plugins/theme_and_font_config_page.py:108
 msgid "IO font"
-msgstr ""
+msgstr "Letra Ent/Sal"
 
 #: thonny/plugins/theme_and_font_config_page.py:133
 msgid "Preview"
@@ -1180,11 +1180,11 @@ msgstr "Temas y Fuentes"
 
 #: thonny/plugins/thonny_folders.py:19
 msgid "Open Thonny program folder..."
-msgstr ""
+msgstr "Abre la carpeta Thonny program…"
 
 #: thonny/plugins/thonny_folders.py:24
 msgid "Open Thonny data folder..."
-msgstr ""
+msgstr "Abre la carpeta Thonny data…"
 
 #: thonny/plugins/help/__init__.py:64
 msgid "Home"
@@ -1192,7 +1192,7 @@ msgstr "Inicio"
 
 #: thonny/plugins/help/__init__.py:75
 msgid "Help contents"
-msgstr ""
+msgstr "Contenidos de la Ayuda"
 
 #: thonny/plugins/micropython/__init__.py:274
 msgid "CircuitPython device"
@@ -1232,7 +1232,7 @@ msgstr "Imprimir..."
 
 #: thonny/plugins/system_shell/__init__.py:59
 msgid "Open system shell..."
-msgstr ""
+msgstr "Abre el shell del sistema…"
 
 #: thonny/plugins/backend_config_page.py:103
 msgid "Details"
@@ -1257,11 +1257,11 @@ msgstr "CircuitPython (genérico)"
 
 #: thonny/plugins/commenting_indenting.py:143
 msgid "Indent selected lines"
-msgstr "Indentar las líneas seleccionadas."
+msgstr "Indentar las líneas seleccionadas"
 
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Dedent selected lines"
-msgstr "Des-indentar las líneas seleccionadas."
+msgstr "Des-indentar las líneas seleccionadas"
 
 #: thonny/workbench.py:1391
 msgid "Switch to\n"
@@ -1435,7 +1435,7 @@ msgstr ""
 
 #: thonny/editors.py:622 thonny/editors.py:624
 msgid "Save All files"
-msgstr ""
+msgstr "Salvar todos los ficheros"
 
 #: thonny/workbench.py:828
 msgid "Configure interpreter..."
@@ -1523,7 +1523,7 @@ msgstr ""
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
-msgstr ""
+msgstr "NB: El botón de selección de ficheros puede que no funcione bien cuando se seleccionen ejecutables de un entorno virtual.  En este caso elegir el script 'activar' en vez del intérprete (o entrar el path –camino del fichero– directamente en la caja)"
 
 #: thonny/plugins/cpython_ssh/__init__.py:153
 msgid "Remote Python 3 (SSH)"
@@ -1640,11 +1640,11 @@ msgstr ""
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Replace tabs with spaces"
-msgstr ""
+msgstr "Reemplazar los tabuladores por espacios"
 
 #: thonny/plugins/editor_config_page.py:28
 msgid "Highlight tab characters"
-msgstr ""
+msgstr "Resaltar los caracteres tabulador"
 
 #: thonny/plugins/editor_config_page.py:47
 msgid "Indent with tab characters (not recommended for Python)"
@@ -1769,5 +1769,5 @@ msgstr ""
 
 #: thonny/plugins/general_config_page.py:97
 msgid "Environment variables (one KEY=VALUE per line)"
-msgstr ""
+msgstr "Variables de Entorno (una CLAVE=VALOR por línea)"
 

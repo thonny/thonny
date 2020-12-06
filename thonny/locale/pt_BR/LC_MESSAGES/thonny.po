@@ -1785,13 +1785,13 @@ msgstr "Código fonte"
 
 #: thonny/plugins/general_config_page.py:29
 msgid "Use Tk file dialogs instead of Zenity"
-msgstr ""
+msgstr "Usar os seletores de arquivo do Tk em vez do Zenity"
 
 #: thonny/plugins/general_config_page.py:30
 msgid "Select if the file dialogs end up behind the main window"
-msgstr ""
+msgstr "Marque caso os seletores de arquivo estejam aparecendo atrás da janela principal"
 
 #: thonny/plugins/general_config_page.py:97
 msgid "Environment variables (one KEY=VALUE per line)"
-msgstr ""
+msgstr "Variáveis de ambiente (uma CHAVE=VALOR por linha)"
 
