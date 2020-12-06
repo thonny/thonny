@@ -56,6 +56,8 @@ from thonny.ui_utils import (
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
+    caps_lock_is_on,
+    shift_is_pressed,
 )
 
 logger = logging.getLogger(__name__)
@@ -984,6 +986,7 @@ class Workbench(tk.Tk):
         def dispatch(event=None):
             if not tester or tester():
                 denied = False
+                print("hand")
                 handler()
             else:
                 denied = True
@@ -993,6 +996,10 @@ class Workbench(tk.Tk):
 
             self.event_generate("UICommandDispatched", command_id=command_id, denied=denied)
 
+        def dispatch_if_caps_lock_is_on(event):
+            if caps_lock_is_on(event.state):
+                dispatch(event)
+
         sequence_option_name = "shortcuts." + command_id
         self.set_default(sequence_option_name, default_sequence)
         sequence = self.get_option(sequence_option_name)
@@ -1000,6 +1007,14 @@ class Workbench(tk.Tk):
         if sequence:
             if not skip_sequence_binding:
                 self.bind_all(sequence, dispatch, True)
+                # work around caps-lock problem
+                # https://github.com/thonny/thonny/issues/1347
+                # Unfortunately the solution doesn't work with sequences involving Shift
+                parts = sequence.strip("<>").split("-")
+                if len(parts[-1]) == 1 and parts[-1].islower():
+                    lock_sequence = "<%s-Lock-%s>" % ("-".join(parts[:-1]), parts[-1].upper())
+                    self.bind_all(lock_sequence, dispatch_if_caps_lock_is_on, True)
+
             # register shortcut even without binding
             register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
 
