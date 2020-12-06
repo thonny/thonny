@@ -232,7 +232,7 @@ class Editor(ttk.Frame):
         return True
 
     def is_modified(self):
-        return self._code_view.text.edit_modified()
+        return bool(self._code_view.text.edit_modified())
 
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
@@ -633,7 +633,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             "file",
             tr("Save as..."),
             self._cmd_save_file_as,
-            default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
+            default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-s>"),
             extra_sequences=["<Control-Greek_SIGMA>"],
             tester=lambda: self.get_current_editor() is not None,
             group=10,

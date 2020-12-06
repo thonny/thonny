@@ -1012,6 +1012,7 @@ class Workbench(tk.Tk):
                 # (in Linux with the expected solution Shift sequences did not come through
                 # with Caps Lock, and in Windows, the shift handlers started to react
                 # on non-shift keypresses)
+                # Python 3.7 on Mac seems to require lower letters for shift sequences.
                 parts = sequence.strip("<>").split("-")
                 if len(parts[-1]) == 1 and parts[-1].islower() and "Shift" not in parts:
                     lock_sequence = "<%s-Lock-%s>" % ("-".join(parts[:-1]), parts[-1].upper())
