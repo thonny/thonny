@@ -61,11 +61,11 @@ class RstText(TweakableText):
         self.tag_configure("strong", font=bold_font)
 
         # TODO: hyperlink syntax options may require different background as well
-        self.tag_configure(
-            "a",
-            **{**get_syntax_options_for_tag("hyperlink"), "underline": False},
-            font=underline_font
-        )
+        hyperlink_opts = get_syntax_options_for_tag("hyperlink")
+        hyperlink_opts["underline"] = False
+        hyperlink_opts["font"] = underline_font
+        self.tag_configure("a", **hyperlink_opts)
+
         self.tag_configure("small", font=small_font)
         self.tag_configure("light", foreground="gray")
         self.tag_configure("remark", font=small_italic_font)
