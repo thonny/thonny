@@ -1300,7 +1300,15 @@ class Executor:
     def _instrument_repl_code(self, root):
         # modify all expression statements to print and register their non-None values
         for node in ast.walk(root):
-            if isinstance(node, ast.Expr):
+            if (
+                isinstance(node, ast.FunctionDef)
+                or hasattr(ast, "AsyncFunctionDef")
+                and isinstance(node, ast.AsyncFunctionDef)
+            ):
+                first_stmt = node.body[0]
+                if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Str):
+                    first_stmt.contains_docstring = True
+            if isinstance(node, ast.Expr) and not getattr(node, "contains_docstring", False):
                 node.value = ast.Call(
                     func=ast.Name(id=_REPL_HELPER_NAME, ctx=ast.Load()),
                     args=[node.value],
