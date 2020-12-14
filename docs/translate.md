@@ -15,7 +15,7 @@ When you are done with your translation, it is recommended to test it. For this 
 
 If you noticed a problem (eg. some button is too narrow for your translation), then open an issue.
 
-If you are happy with the translation, then please make a pull request with your updates. If you don't know how to do it then open an issue (in this case it may take longer for your translation to end up in Thonny).
+Translations will be pulled from POEditor before each release.
 
 ## More details for code contributors
 
