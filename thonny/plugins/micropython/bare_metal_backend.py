@@ -120,6 +120,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
         self._write_block_size = args.get("write_block_size", 255)
+        logger.debug("Using block size of %s", self._write_block_size)
 
         MicroPythonBackend.__init__(self, clean, args)
 

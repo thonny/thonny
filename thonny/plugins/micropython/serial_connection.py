@@ -9,6 +9,8 @@ from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, FIRST_R
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
+logger = logging.getLogger(__name__)
+
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate, dtr=None, rts=None, skip_reader=False):
@@ -26,11 +28,14 @@ class SerialConnection(MicroPythonConnection):
             # At the same time, in some cases it is required
             # https://github.com/thonny/thonny/issues/1462
             if dtr is not None:
+                logger.debug("Setting DTR to %s", dtr)
                 self._serial.dtr = dtr
             if rts is not None:
+                logger.debug("Setting RTS to %s", rts)
                 self._serial.rts = rts
 
             self._serial.port = port
+            logger.debug("Opening serial port %s", port)
             self._serial.open()
         except SerialException as error:
             err_str = str(error)
