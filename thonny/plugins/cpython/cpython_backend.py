@@ -767,8 +767,10 @@ class MainCPythonBackend(MainBackend):
             try:
                 self._tcl = tkinter.Tcl()
                 self._tcl.updates_without_root = 0
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error("Could not get Tcl", exc_info=e)
+                self._tcl = None
+                return None
 
         self._tcl.has_default_root = tkinter._default_root is not None
         return self._tcl
