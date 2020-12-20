@@ -195,6 +195,9 @@ class MicroPythonBackend(MainBackend, ABC):
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
 
+    def _check_restore_helpers(self):
+        pass  # overridden in bare metal
+
     def _get_all_helpers(self):
         # Can't import functions into class context:
         # https://github.com/micropython/micropython/issues/6198
@@ -643,6 +646,7 @@ class MicroPythonBackend(MainBackend, ABC):
             source = self._add_expression_statement_handlers(cmd.source)
             self._report_time("befexeccc")
             self._execute(source, capture_output=False)
+            self._check_restore_helpers()
             self._report_time("affexeccc")
             self._update_cwd()
             self._report_time("upcd")

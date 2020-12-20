@@ -124,6 +124,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         MicroPythonBackend.__init__(self, clean, args)
 
+    def _check_restore_helpers(self):
+        out, err = self._execute("print('__thonny_helper' in dir())", capture_output=True)
+        if out.strip() == "True":
+            return
+
+        self._prepare_helpers()
+
     def _get_custom_helpers(self):
         if self._connected_to_microbit():
             return ""
@@ -727,7 +734,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
             self._send_output(data.decode(ENCODING, "replace"), stream_name)
             if met_prompt:
-                self._prepare_helpers()
+                self._check_restore_helpers()
                 # ... and recreate Thonny prompt
                 self.send_message(ToplevelResponse())
 
