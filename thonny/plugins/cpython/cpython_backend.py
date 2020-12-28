@@ -225,18 +225,18 @@ class MainCPythonBackend(MainBackend):
         else:
             try:
                 response = handler(cmd)
-            except SystemExit:
+            except SystemExit as e:
                 # Must be caused by Thonny or plugins code
                 if isinstance(cmd, ToplevelCommand):
-                    traceback.print_exc()
+                    logger.exception("Unexpected SystemExit", exc_info=e)
                 response = {"SystemExit": True}
             except UserError as e:
                 sys.stderr.write(str(e) + "\n")
                 response = {}
             except KeyboardInterrupt:
                 response = {"user_exception": self._prepare_user_exception()}
-            except Exception:
-                self._report_internal_exception()
+            except Exception as e:
+                self._report_internal_exception(e)
                 response = {"context_info": "other unhandled exception"}
 
         if response is False:
@@ -319,15 +319,15 @@ class MainCPythonBackend(MainBackend):
         for handler in self._import_handlers.get(module.__name__, []):
             try:
                 handler(module)
-            except Exception:
-                self._report_internal_exception()
+            except Exception as e:
+                self._report_internal_exception(e)
 
         # general handlers
         for handler in self._import_handlers.get("*", []):
             try:
                 handler(module)
-            except Exception:
-                self._report_internal_exception()
+            except Exception as e:
+                self._report_internal_exception(e)
 
         return module
 
@@ -455,8 +455,8 @@ class MainCPythonBackend(MainBackend):
         try:
             returncode = execute_system_command(cmd, disconnect_stdin=True)
             return {"returncode": returncode}
-        except:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Could not execute system command %s", cmd, exc_info=e)
 
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
@@ -1283,8 +1283,8 @@ class Executor:
             return {"user_exception": self._backend._prepare_user_exception()}
         except SystemExit:
             return {"SystemExit": True}
-        except Exception:
-            self._backend._report_internal_exception()
+        except Exception as e:
+            self._backend._report_internal_exception(e)
             return {}
 
     @return_execution_result
@@ -1782,8 +1782,8 @@ class NiceTracer(Tracer):
     def _trace(self, frame, event, arg):
         try:
             return self._trace_and_catch(frame, event, arg)
-        except BaseException:
-            traceback.print_exc()
+        except BaseException as e:
+            logger.exception("Exception in _trace", exc_info=e)
             sys.settrace(None)
             return None
 

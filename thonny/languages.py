@@ -1,9 +1,10 @@
 import gettext
+import logging
 import os
-import traceback
-from logging import warning
 
 from thonny import get_workbench
+
+logger = logging.getLogger(__name__)
 
 BASE_LANGUAGE_CODE = "en_US"
 BASE_LANGUAGE_NAME = "English"
@@ -67,7 +68,6 @@ def set_language(language_code: str) -> None:
     try:
         path = os.path.join(os.path.dirname(__file__), "locale")
         _translation = gettext.translation("thonny", path, [language_code])
-    except Exception:
-        traceback.print_exc()
-        warning("Could not set language to '%s" % language_code)
+    except Exception as e:
+        logger.exception("Could not set language to '%s", language_code, exc_info=e)
         _translation = gettext.NullTranslations()

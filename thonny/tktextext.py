@@ -1,14 +1,15 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-
+import logging
 import platform
 import time
 import tkinter as tk
-import traceback
 from logging import exception
 from tkinter import TclError
 from tkinter import font as tkfont
-from tkinter import messagebox, ttk
+from tkinter import ttk
+
+logger = logging.getLogger(__name__)
 
 
 class TweakableText(tk.Text):
@@ -449,8 +450,8 @@ class EnhancedText(TweakableText):
 
             if row == line_count or row == line_count - 1:  # otherwise tk doesn't show last line
                 self.mark_set("insert", "end")
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Could not perform page down", exc_info=e)
 
     def perform_page_up(self, event):
         # if first line is visible then go there
@@ -460,8 +461,8 @@ class EnhancedText(TweakableText):
             row, _ = map(int, first_visible_idx.split("."))
             if row == 1:
                 self.mark_set("insert", "1.0")
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Could not perform page up", exc_info=e)
 
     def compute_smart_home_destination_index(self):
         """Is overridden in shell"""

@@ -1429,8 +1429,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                     if SIMPLE_URL_SPLIT_REGEX.match(url):
                         webbrowser.open(url)
 
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Could not handle hyperlink click", exc_info=e)
 
     def _show_user_exception(self, user_exception):
         for line, frame_id, *_ in user_exception["items"]:

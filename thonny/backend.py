@@ -174,9 +174,8 @@ class BaseBackend(ABC):
         """Executed when there is no commands in queue"""
         pass
 
-    def _report_internal_exception(self):
-        print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
-        traceback.print_exc()
+    def _report_internal_exception(self, exception=None):
+        logger.exception("PROBLEM WITH THONNY'S BACK-END", exc_info=exception)
 
     def _report_internal_error(self, message):
         print("PROBLEM WITH THONNY'S BACK-END:\n" + message + "\n", file=sys.stderr)

@@ -3,14 +3,17 @@
 import ast
 import configparser
 import datetime
+import logging
 import os.path
 import sys
 import tkinter as tk
-import traceback
 from configparser import ConfigParser
 from logging import exception
 
 from thonny import THONNY_USER_DIR
+
+
+logger = logging.getLogger(__name__)
 
 _manager_cache = {}
 
@@ -77,8 +80,8 @@ class ConfigurationManager:
                             import shutil
 
                             shutil.copytree(old_user_logs, new_user_logs)
-                        except Exception:
-                            traceback.print_exc()
+                        except Exception as e:
+                            logger.exception("Problem migrating user logs", exc_info=e)
 
         if not self.get_option("general.configuration_creation_timestamp"):
             self.set_option(

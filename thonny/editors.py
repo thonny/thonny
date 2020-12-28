@@ -492,8 +492,8 @@ class Editor(ttk.Frame):
     def update_title(self):
         try:
             self.master.update_editor_title(self)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Could not update editor title", exc_info=e)
 
     def _on_text_change(self, event):
         self.update_title()

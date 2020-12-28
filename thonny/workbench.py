@@ -549,8 +549,8 @@ class Workbench(tk.Tk):
                         client_socket.shutdown(socket.SHUT_WR)
                         raise PermissionError("Wrong secret")
 
-                except Exception:
-                    traceback.print_exc()
+                except Exception as e:
+                    logger.exception("Error in ipc server loop", exc_info=e)
 
         Thread(target=server_loop, daemon=True).start()
 
@@ -2174,7 +2174,10 @@ class Workbench(tk.Tk):
                 if tester:
                     try:
                         enabled = tester()
-                    except Exception:
+                    except Exception as e:
+                        logging.exception(
+                            "Could not check command tester for '%s'", item_data, exc_info=e
+                        )
                         traceback.print_exc()
                         enabled = False
 
@@ -2235,8 +2238,8 @@ class Workbench(tk.Tk):
                         if os.path.isfile(filename):
                             self.get_editor_notebook().show_file(filename)
 
-                except Exception:
-                    traceback.print_exc()
+                except Exception as e:
+                    logger.exception("Problem processing ipc request", exc_info=e)
 
             self.become_active_window()
         finally:

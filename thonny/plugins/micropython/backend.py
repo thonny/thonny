@@ -133,7 +133,6 @@ class MicroPythonBackend(MainBackend, ABC):
             self._on_connection_closed(e)
         except Exception:
             logger.exception("Crash in backend")
-            traceback.print_exc()
 
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
@@ -341,10 +340,10 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             try:
                 response = handler(cmd)
-            except SystemExit:
+            except SystemExit as e:
                 # Must be caused by Thonny or plugins code
                 if isinstance(cmd, ToplevelCommand):
-                    traceback.print_exc()
+                    logger.exception("Unexpected SystemExit", exc_info=e)
                 response = create_error_response(SystemExit=True)
             except UserError as e:
                 sys.stderr.write(str(e) + "\n")
@@ -365,8 +364,8 @@ class MicroPythonBackend(MainBackend, ABC):
                     self._show_error("STDERR:\n" + e.err + "\n")
 
                     response = create_error_response(error="ManagementError")
-            except Exception:
-                _report_internal_error()
+            except Exception as e:
+                _report_internal_error(e)
                 response = create_error_response(context_info="other unhandled exception")
 
         if response is None:
@@ -982,8 +981,8 @@ class MicroPythonBackend(MainBackend, ABC):
             script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
             completions = script.completions()
             result["completions"] = self._filter_completions(completions)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            logger.exception("Problem with editor autocomplete", exc_info=e)
             result["error"] = "Autocomplete error"
 
         return result
@@ -1029,8 +1028,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 )
                 completions = script.completions()
                 response["completions"] = self._filter_completions(completions)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                logger.exception("Problem with shell autocomplete", exc_info=e)
                 response["error"] = "Autocomplete error"
 
             return response
@@ -1385,9 +1384,8 @@ class ManagementError(RuntimeError):
         self.err = err
 
 
-def _report_internal_error():
-    print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
-    traceback.print_exc()
+def _report_internal_error(exception=None):
+    logger.exception("PROBLEM WITH THONNY'S BACK-END:", exc_info=e)
 
 
 def parse_api_information(file_path):

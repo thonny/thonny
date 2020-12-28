@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import ast
+import logging
+
 import sys
 import tkinter as tk
-import traceback
 
 from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
 from thonny.languages import tr
+
+logger = logging.getLogger(__name__)
 
 
 class AstView(ui_utils.TreeFrame):
@@ -73,7 +76,7 @@ class AstView(ui_utils.TreeFrame):
 
         except Exception as e:
             self.tree.insert("", "end", text=str(e), open=True)
-            traceback.print_exc()
+            logger.exception("Could not select AST node", exc_info=e)
             return
 
         def _format(key, node, parent_id):

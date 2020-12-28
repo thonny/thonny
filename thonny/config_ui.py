@@ -1,11 +1,13 @@
+import logging
 import tkinter as tk
-import traceback
 from tkinter import ttk
 from typing import Optional
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
 from thonny.ui_utils import CommonDialog, ems_to_pixels
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationDialog(CommonDialog):
@@ -51,8 +53,8 @@ class ConfigurationDialog(CommonDialog):
                 self._page_records.append((key, title, page))
                 page.grid(sticky=tk.NSEW, pady=(15, 10), padx=15)
                 self._notebook.add(spacer, text=title)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                logger.exception("Could not create configuration page %s", key, exc_info=e)
 
         self.bind("<Return>", self._ok, True)
         self.bind("<Escape>", self._cancel, True)

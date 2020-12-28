@@ -1,8 +1,9 @@
 import logging
 import tkinter as tk
-import traceback
 
 from thonny import get_workbench, jedi_utils
+
+logger = logging.getLogger(__name__)
 
 tree = None
 
@@ -94,8 +95,8 @@ class VariablesHighlighter(BaseNameHighlighter):
                 else:
                     try:
                         return jedi_utils.get_statement_of_position(c, pos)
-                    except AttributeError:
-                        traceback.print_exc()
+                    except AttributeError as e:
+                        logger.exception("Could not get statement of position", exc_info=e)
         return None
 
     def _is_global_stmt_with_name(self, node, name_str):
