@@ -38,6 +38,9 @@ from thonny.plugins.micropython.webrepl_connection import (
     WebreplBinaryMsg,
 )
 
+RAW_PASTE_CONFIRMATION = b"R\x01"
+RAW_PASTE_CONTINUE = b"\x01"
+
 BAUDRATE = 115200
 ENCODING = "utf-8"
 
@@ -502,6 +505,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._forward_unexpected_output()
 
         to_be_sent = script.encode("UTF-8")
+        # with self._interrupt_lock:
+        #    self._submit_code_via_raw_paste_mode(to_be_sent)
+        # return
+
         with self._interrupt_lock:
             # Go to paste mode
             self._connection.write(PASTE_MODE_CMD)
@@ -541,6 +548,38 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 expected_confirmation,
                 actual_confirmation,
             )
+
+    def _submit_code_via_raw_paste_mode(self, script: bytes) -> None:
+        self._enter_raw_mode()
+        self._write(b"\x05A\x01")
+        self._connection.set_unicode_guard(False)
+        response = self._connection.soft_read(2)
+        assert response == RAW_PASTE_CONFIRMATION, (
+            "Got %r instead of raw-paste confirmation" % RAW_PASTE_CONFIRMATION
+        )
+
+        block_size_bytes = self._connection.soft_read(2, timeout=1)
+        # \x01 may be already available, don't read it yet
+        assert len(block_size_bytes) == 2, "Got %r instead of block size" % block_size_bytes
+        block_size = struct.unpack("<h", block_size_bytes)[0]
+
+        remaining_script = script
+        while remaining_script:
+            block = remaining_script[:block_size]
+            remaining_script = remaining_script[block_size:]
+            self._write(block)
+            response = self._connection.soft_read(1)
+            if response == EOT:
+                raise AssertionError(
+                    "REPL only accepted %d characters of the script"
+                    % (len(script) - len(remaining_script) - len(block))
+                )
+            else:
+                assert response == RAW_PASTE_CONTINUE
+
+        self._write(EOT)
+        final_response = self._connection.read_until(EOT)
+        self._connection.set_unicode_guard(True)
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
         """Expected output after submitting the command and reading the confirmation is following:
@@ -619,8 +658,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         is from another thread or the main thread is still running.
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
+
+        # Don't want to block on lone EOT (the first EOT), because finding the second EOT
+        # together with raw prompt marker is the most important.
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
-            b"|".join(map(re.escape, [NORMAL_PROMPT, LF]))
+            b"|".join(map(re.escape, [NORMAL_PROMPT, LF, EOT + RAW_PROMPT]))
         )
 
         pending = b""
@@ -633,7 +675,22 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             new_data = self._connection.soft_read_until(
                 INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
             )
-            if TRACEBACK_MARKER in new_data:
+
+            eot_pos = new_data.find(EOT)
+            if (
+                eot_pos >= 0
+                and new_data[eot_pos : eot_pos + 2] != EOT + RAW_PROMPT
+                and stream_name == "stdout"
+            ):
+                # start of stderr in raw mode
+                out, err = new_data.split(EOT, maxsplit=1)
+                pending += out
+                output_consumer(self._decode(pending), stream_name)
+                pending = b""
+                new_data = err
+                stream_name = "stderr"
+            elif TRACEBACK_MARKER in new_data:
+                # start of stderr in normal mode
                 stream_name = "stderr"
 
             if not new_data:
@@ -659,7 +716,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
             pending += new_data
 
-            if pending.endswith(LF):
+            if pending.endswith(EOT + RAW_PROMPT):
+                output_consumer(self._decode(pending[:-2]), stream_name)
+                # assuming
+                pending = b""
+
+                break
+
+            elif pending.endswith(LF):
                 output_consumer(self._decode(pending), stream_name)
                 pending = b""
 

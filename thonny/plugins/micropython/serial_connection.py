@@ -90,7 +90,8 @@ class SerialConnection(MicroPythonConnection):
 
                 # don't publish incomplete utf-8 data
                 try:
-                    data.decode("utf-8")  # testing if data decodes
+                    if self.unicode_guard:
+                        data.decode("utf-8")  # testing if data decodes
                     to_be_published = data
                     data = b""
                 except UnicodeDecodeError as e:

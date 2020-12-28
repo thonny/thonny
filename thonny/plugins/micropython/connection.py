@@ -23,6 +23,7 @@ class MicroPythonConnection:
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
         self.startup_time = time.time()
+        self.unicode_guard = True
         self._error = None
 
     def soft_read(self, size, timeout=1):
@@ -167,6 +168,9 @@ class MicroPythonConnection:
 
     def reset_output_buffer(self):
         pass
+
+    def set_unicode_guard(self, value):
+        self.unicode_guard = value
 
     def close(self):
         raise NotImplementedError()
