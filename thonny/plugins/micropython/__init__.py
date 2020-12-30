@@ -144,6 +144,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "port": self._port,
             "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
             "rts": get_workbench().get_option(self.backend_name + ".rts"),
+            "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
             "api_stubs_path": self._get_api_stubs_path(),
             "write_block_size": self._get_write_block_size(),
             "proxy_class": self.__class__.__name__,
@@ -938,6 +939,7 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".used_vidpids", set())
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
+        get_workbench().set_default(name + ".submit_mode", None)
 
         if sync_time is None:
             sync_time = True

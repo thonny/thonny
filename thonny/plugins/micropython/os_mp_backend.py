@@ -22,7 +22,7 @@ from thonny.plugins.micropython.backend import (
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,
 )
-from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
+from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
 from thonny.common import ConnectionFailedException
 
 FALLBACK_BUILTIN_MODULES = [
@@ -129,6 +129,8 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         )
 
     def _process_until_initial_prompt(self, clean):
+        # This will be called only when the interpreter gets run without script.
+        # (%Run script.py does not create a new instance of this class)
         output = []
 
         def collect_output(data, stream_name):

@@ -23,7 +23,7 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         time.sleep(0.05)
         self._write(INTERRUPT_CMD)
 
-    def _soft_reboot_in_normal_mode_without_running_main(self):
+    def _soft_reboot_without_running_main(self):
         logger.debug("_soft_reboot_in_normal_mode_without_running_main")
         # no point in going to raw mode at all
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)

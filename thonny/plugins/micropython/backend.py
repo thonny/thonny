@@ -118,16 +118,20 @@ class MicroPythonBackend(MainBackend, ABC):
         self._local_cwd = None
         self._cwd = args.get("cwd")
         self._progress_times = {}
-        self._welcome_text_printed = False
         self._welcome_text = None
         self._sys_path = None
-
+        self._epoch_year = None
+        self._builtin_modules = []
         self._api_stubs_path = args.get("api_stubs_path")
+        self._builtins_info = self._fetch_builtins_info()
 
         MainBackend.__init__(self)
         try:
             self._report_time("before prepare")
+            self._process_until_initial_prompt(clean)
             self._prepare(clean)
+            self._send_ready_message()
+            self._report_time("sent ready")
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
@@ -135,14 +139,9 @@ class MicroPythonBackend(MainBackend, ABC):
             logger.exception("Crash in backend")
 
     def _prepare(self, clean):
-        self._process_until_initial_prompt(clean)
-        # Can result either in raw or regular prompt
-
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
             self._report_time("got welcome")
-
-        self._configure_write_blocks()
 
         self._report_time("bef preparing helpers")
         self._prepare_helpers()
@@ -150,33 +149,30 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self._update_cwd()
         self._report_time("got cwd")
+        self._sys_path = self._fetch_sys_path()
 
-        if self._sys_path is None:
-            self._sys_path = self._fetch_sys_path()
+        if self._epoch_year is None:
+            self._epoch_year = self._fetch_epoch_year()
 
-        self._epoch_year = self._fetch_epoch_year()
+        if not self._builtin_modules:
+            self._builtin_modules = self._fetch_builtin_modules()
+
         self._check_sync_time()
         if self._args.get("validate_time"):
             self._validate_time()
-
-        if self._welcome_text:
-            self._send_ready_message()
-            self._report_time("sent ready")
-
-        self._builtin_modules = self._fetch_builtin_modules()
-        self._builtins_info = self._fetch_builtins_info()
 
         self._report_time("prepared")
         self._check_perform_just_in_case_gc()
         logger.info("Prepared")
 
-    def _configure_write_blocks(self):
-        pass
-
     def _check_perform_just_in_case_gc(self):
         if self._connected_to_microbit():
             # May fail to allocate memory without this
             self._perform_gc()
+
+    def _check_sync_time(self):
+        if self._args.get("sync_time"):
+            self._sync_time()
 
     def _perform_gc(self):
         self._execute_without_output(
@@ -194,7 +190,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
 
-    def _check_restore_helpers(self):
+    def _check_prepare(self):
         pass  # overridden in bare metal
 
     def _get_all_helpers(self):
@@ -259,10 +255,6 @@ class MicroPythonBackend(MainBackend, ABC):
         """How many last evaluated REPL values and visited Object inspector values to keep
         in internal lists for the purpose of retrieving them by id for Object inspector"""
         return 5
-
-    def _check_sync_time(self):
-        if self._args.get("sync_time"):
-            self._sync_time()
 
     def _sync_time(self):
         raise NotImplementedError()
@@ -427,17 +419,14 @@ class MicroPythonBackend(MainBackend, ABC):
             )
 
     def _fetch_builtins_info(self):
-        """
-        for p in self._get_api_stubs_path():
-            builtins_file = os.path.join(p, "__builtins__.py")
-            if os.path.exists(builtins_file):
-                return parse_api_information(builtins_file)
-        """
-        path = os.path.join(self._api_stubs_path, "builtins.py")
-        if os.path.exists(path):
-            return parse_api_information(path)
-        else:
-            return {}
+        result = {}
+
+        for name in ["builtins.py", "builtins.pyi"]:
+            path = os.path.join(self._api_stubs_path, name)
+            if os.path.exists(path):
+                result = parse_api_information(path)
+
+        return result
 
     def _fetch_epoch_year(self):
         if self._connected_to_microbit():
@@ -482,9 +471,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _send_ready_message(self):
         args = dict(cwd=self._cwd)
-        # if not clean, then welcome text is already printed as output from the last session
-        if not self._welcome_text_printed:
-            args["welcome_text"] = self._welcome_text
+        args["welcome_text"] = self._welcome_text
 
         self.send_message(ToplevelResponse(**args))
 
@@ -629,15 +616,7 @@ class MicroPythonBackend(MainBackend, ABC):
             raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
-        if cmd.get("source"):
-            self._reset_environment()
-            self._execute(
-                self._avoid_printing_expression_statements(cmd.source), capture_output=False
-            )
-            self._prepare_helpers()
-            self._update_cwd()
-        return {}
+        raise NotImplementedError()
 
     def _cmd_execute_source(self, cmd):
         # TODO: clear last object inspector requests dictionary
@@ -645,10 +624,8 @@ class MicroPythonBackend(MainBackend, ABC):
             source = self._add_expression_statement_handlers(cmd.source)
             self._report_time("befexeccc")
             self._execute(source, capture_output=False)
-            self._check_restore_helpers()
+            self._check_prepare()
             self._report_time("affexeccc")
-            self._update_cwd()
-            self._report_time("upcd")
         # TODO: assign last value to _
         return {}
 
@@ -719,11 +696,6 @@ class MicroPythonBackend(MainBackend, ABC):
         self._execute("del __thonny_value")
 
         return {"id": cmd.object_id, "info": info}
-
-    def _reset_environment(self):
-        """For preparing a Run"""
-        # TODO: clear last object inspector requests dictionary
-        pass
 
     def _find_basic_object_info(self, object_id, context_id):
         """If object is found then returns basic info and leaves object reference to __thonny_value"""
@@ -1385,7 +1357,7 @@ class ManagementError(RuntimeError):
 
 
 def _report_internal_error(exception=None):
-    logger.exception("PROBLEM WITH THONNY'S BACK-END:", exc_info=e)
+    logger.exception("PROBLEM WITH THONNY'S BACK-END:", exc_info=exception)
 
 
 def parse_api_information(file_path):
