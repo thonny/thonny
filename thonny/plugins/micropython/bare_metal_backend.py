@@ -128,6 +128,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._interrupt_suggestion_given = False
         self._write_block_size = args.get("write_block_size", 255)
         self._submit_mode = args.get("submit_mode", None)
+        self._last_prompt = None
         logger.debug("Using block size of %s", self._write_block_size)
 
         MicroPythonBackend.__init__(self, clean, args)
@@ -173,24 +174,26 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # if the REPL is already idle
             discarded = self._connection.read_all()
             self._write(RAW_MODE_CMD)
-            terminator = self._forward_output_until_active_prompt(self._send_output)
+            self._forward_output_until_active_prompt(self._send_output)
 
         if self._submit_mode is None:
-            # at least sometimes, we end up at normal prompt, although we asked for raw prompt
-            self._enter_raw_mode()
-            self._write(RAW_PASTE_COMMAND)
-            response = self._connection.soft_read(2)
-            assert len(response) == 2, "Could not read response for raw paste command: " + response
-            if response == RAW_PASTE_CONFIRMATION:
-                self._submit_mode = RAW_PASTE_SUBMIT_MODE
-                self._write(EOT)
-                self._connection.read_until(RAW_PROMPT)
-            else:
-                self._submit_mode = PASTE_SUBMIT_MODE
-                self._connection.read_until(RAW_PROMPT)
+            self._choose_submit_mode()
 
-        if self._submit_mode == PASTE_SUBMIT_MODE:
-            self._enter_normal_mode()
+    def _choose_submit_mode(self):
+        # at least sometimes, we end up at normal prompt, although we asked for raw prompt
+        self._ensure_raw_mode()
+        self._write(RAW_PASTE_COMMAND)
+        response = self._connection.soft_read(2)
+        assert len(response) == 2, "Could not read response for raw paste command: " + response
+        if response == RAW_PASTE_CONFIRMATION:
+            self._submit_mode = RAW_PASTE_SUBMIT_MODE
+            self._write(EOT)
+            discarding = self._connection.read_until(RAW_PROMPT)
+        else:
+            self._submit_mode = PASTE_SUBMIT_MODE
+            discarding = self._connection.read_until(RAW_PROMPT)
+
+        discarding += self._connection.read_all()
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
@@ -381,6 +384,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
                 W600_FIRST_RAW_PROMPT
             ):
+                if discarded_bytes.endswith(FIRST_RAW_PROMPT):
+                    self._last_prompt = FIRST_RAW_PROMPT
+                else:
+                    self._last_prompt = W600_FIRST_RAW_PROMPT
                 break
         else:
             max_tail_length = 500
@@ -419,10 +426,24 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             discarded_bytes += self._connection.read_all()
             logger.debug("Discarded bytes when waiting for reboot: %r", discarded_bytes)
 
+        if discarded_bytes.endswith(FIRST_RAW_PROMPT):
+            self._last_prompt = FIRST_RAW_PROMPT
+        else:
+            self._last_prompt = W600_FIRST_RAW_PROMPT
+
         logger.debug("Done soft reboot in raw prompt")
 
-    def _enter_raw_mode(self):
-        logger.debug("_enter_raw_mode")
+    def _ensure_raw_mode(self):
+        if self._last_prompt in [
+            RAW_PROMPT,
+            EOT + RAW_PROMPT,
+            FIRST_RAW_PROMPT,
+            W600_FIRST_RAW_PROMPT,
+        ]:
+            return
+        logger.debug("requesting raw mode at %r", self._last_prompt)
+        import traceback
+
         # assuming we are currently on a normal prompt
         self._write(RAW_MODE_CMD)
         discarded = self._connection.read_until(b"\r\n>", timeout=2)
@@ -431,9 +452,18 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             W600_FIRST_RAW_PROMPT
         ):
             raise AssertionError("Could not enter raw prompt, got " + repr(discarded))
+        """
+        if discarded.endswith(FIRST_RAW_PROMPT):
+            self._last_prompt = FIRST_RAW_PROMPT
+        else:
+            self._last_prompt = W600_FIRST_RAW_PROMPT
+        """
+        
+    def _ensure_normal_mode(self):
+        if self._last_prompt == NORMAL_PROMPT:
+            return
 
-    def _enter_normal_mode(self):
-        logger.debug("_enter_normal_mode")
+        logger.debug("requesting normal mode at %r", self._last_prompt)
         self._write(NORMAL_MODE_CMD)
 
         def ignore_output(data, stream):
@@ -443,9 +473,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _soft_reboot_without_running_main(self):
         logger.debug("_soft_reboot_in_normal_mode_without_running_main")
-        self._enter_raw_mode()
+        self._ensure_raw_mode()
         self._soft_reboot_in_raw_prompt_without_running_main()
-        self._enter_normal_mode()
 
     def _extra_interrupts_after_soft_reboot(self):
         # To be overridden for CP
@@ -454,14 +483,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
-        self._write(NORMAL_MODE_CMD)
-        self._connection.read_until(NORMAL_PROMPT)
+        self._ensure_normal_mode()
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
         self._forward_output_until_active_prompt(self._send_output)
         logger.debug("Restoring helpers")
-        self._prepare_helpers()
-        self._update_cwd()
+        self._prepare(False)
         self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _check_reconnect(self):
@@ -533,7 +560,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _submit_code_via_paste_mode(self, script_bytes: bytes) -> None:
         # Go to paste mode
-        self._enter_normal_mode()  # TODO: try to avoid this
+        self._ensure_normal_mode()
         self._connection.write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
 
@@ -573,12 +600,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
     def _submit_code_via_raw_paste_mode(self, script_bytes: bytes) -> None:
-        self._enter_raw_mode()
+        self._ensure_raw_mode()
         self._write(RAW_PASTE_COMMAND)
         self._connection.set_unicode_guard(False)
         response = self._connection.soft_read(2)
         assert response == RAW_PASTE_CONFIRMATION, (
-            "Got %r instead of raw-paste confirmation" % RAW_PASTE_CONFIRMATION
+            "Got %r instead of raw-paste confirmation" % response
         )
 
         block_size_bytes = self._connection.soft_read(2, timeout=1)
@@ -776,6 +803,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                         else:
                             break
                     output_consumer(self._decode(pending), stream_name)
+                    self._last_prompt = current_prompt
                     return current_prompt
 
             if pending.endswith(LF):
@@ -827,15 +855,17 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             met_prompt = False
             while data.endswith(NORMAL_PROMPT) or data.endswith(FIRST_RAW_PROMPT):
                 # looks like the device was resetted
-                met_prompt = True
-
                 if data.endswith(NORMAL_PROMPT):
-                    terminator = NORMAL_PROMPT
+                    prompt = NORMAL_PROMPT
                 else:
-                    terminator = FIRST_RAW_PROMPT
+                    prompt = FIRST_RAW_PROMPT
+
+                if not met_prompt:
+                    met_prompt = True
+                    self._last_prompt = prompt
 
                 # hide the prompt from the output ...
-                data = data[: -len(terminator)]
+                data = data[: -len(prompt)]
 
             self._send_output(data.decode(ENCODING, "replace"), stream_name)
             if met_prompt:
