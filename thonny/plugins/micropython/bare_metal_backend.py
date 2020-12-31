@@ -424,13 +424,23 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         ]:
             return
         logger.debug("requesting raw mode at %r", self._last_prompt)
-        import traceback
 
         # assuming we are currently on a normal prompt
         self._write(RAW_MODE_CMD)
         out, err = self._capture_output_until_active_prompt()
+        if self._last_prompt == NORMAL_PROMPT:
+            # Don't know why this happens sometimes (eg. when interrupting a Ctrl+D or restarted
+            # program, which is outputting text on ESP32)
+            logger.info("Found normal prompt instead of expected raw prompt. Trying again.")
+            self._write(RAW_MODE_CMD)
+            time.sleep(0.5)
+            out, err = self._capture_output_until_active_prompt()
+
         if self._last_prompt not in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
-            raise AssertionError("Could not enter raw prompt, got " + repr(out + err))
+            raise AssertionError(
+                "Could not enter raw prompt, got %r"
+                % ((out + err).encode(ENCODING) + self._last_prompt)
+            )
 
     def _ensure_normal_mode(self):
         if self._last_prompt == NORMAL_PROMPT:
@@ -615,7 +625,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # Adapted from https://github.com/micropython/micropython/commit/a59282b9bfb6928cd68b696258c0dd2280244eb3#diff-cf10d3c1fe676599a983c0ec85b78c56c9a6f21b2d896c69b3e13f34d454153e
 
         # Read initial header, with window size.
-        data = self._connection.soft_read(2, timeout=1)
+        data = self._connection.soft_read(2, timeout=2)
         assert len(data) == 2, "Could not read initial header, got %r" % (
             data + self._connection.read_all()
         )
@@ -760,7 +770,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 pending = b""
                 new_data = err
                 stream_name = "stderr"
-            elif TRACEBACK_MARKER in new_data:
+            elif self._submit_mode == PASTE_SUBMIT_MODE and TRACEBACK_MARKER in new_data:
                 # start of stderr in paste mode
                 stream_name = "stderr"
 
