@@ -144,7 +144,9 @@ class MicroPythonBackend(MainBackend, ABC):
             self._report_time("got welcome")
 
         self._report_time("bef preparing helpers")
-        self._prepare_helpers()
+        script = self._get_all_helpers()
+        self._check_perform_just_in_case_gc()
+        self._execute_without_output(script)
         self._report_time("prepared helpers")
 
         self._update_cwd()
@@ -184,11 +186,6 @@ class MicroPythonBackend(MainBackend, ABC):
         """
             )
         )
-
-    def _prepare_helpers(self):
-        script = self._get_all_helpers()
-        self._check_perform_just_in_case_gc()
-        self._execute_without_output(script)
 
     def _check_prepare(self):
         pass  # overridden in bare metal
@@ -1239,8 +1236,10 @@ class MicroPythonBackend(MainBackend, ABC):
             # make sure it parses
             ast.parse(new_source)
             return new_source
-        except Exception:
-            logger.exception("Problem adding Expr handlers")
+        except SyntaxError:
+            return source
+        except Exception as e:
+            logger.warning("Problem adding Expr handlers", exc_info=e)
             return source
 
     def _avoid_printing_expression_statements(self, source):
@@ -1278,8 +1277,10 @@ class MicroPythonBackend(MainBackend, ABC):
             # make sure it parses
             ast.parse(new_source)
             return new_source
-        except Exception:
-            logger.exception("Problem adding Expr handlers")
+        except SyntaxError:
+            return source
+        except Exception as e:
+            logger.warning("Problem adding Expr handlers", exc_info=e)
             return source
 
     def _report_time(self, caption):

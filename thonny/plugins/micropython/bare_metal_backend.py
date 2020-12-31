@@ -197,11 +197,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
-        welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
+        out, err = self._capture_output_until_active_prompt()
+        welcome_text = out.strip("\r\n >")
         if os.name != "nt":
-            welcome_text = welcome_text.replace(b"\r\n", b"\n")
+            welcome_text = welcome_text.replace("\r\n", "\n")
 
-        return self._decode(welcome_text)
+        return welcome_text
 
     def _fetch_builtin_modules(self):
         script = "help('modules')"
@@ -380,14 +381,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._write(INTERRUPT_CMD)
             self._write(RAW_MODE_CMD)
             time.sleep(delay)
-            discarded_bytes += self._connection.read_all()
-            if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
-                W600_FIRST_RAW_PROMPT
-            ):
-                if discarded_bytes.endswith(FIRST_RAW_PROMPT):
-                    self._last_prompt = FIRST_RAW_PROMPT
-                else:
-                    self._last_prompt = W600_FIRST_RAW_PROMPT
+            self._capture_output_until_active_prompt()
+            if self._last_prompt in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
                 break
         else:
             max_tail_length = 500
@@ -416,20 +411,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("_soft_reboot_in_raw_prompt_without_running_main")
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
-        self._extra_interrupts_after_soft_reboot()
-
-        discarded_bytes = b""
-        while not discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(
-            W600_FIRST_RAW_PROMPT
-        ):
-            discarded_bytes += self._connection.soft_read(1, timeout=1)
-            discarded_bytes += self._connection.read_all()
-            logger.debug("Discarded bytes when waiting for reboot: %r", discarded_bytes)
-
-        if discarded_bytes.endswith(FIRST_RAW_PROMPT):
-            self._last_prompt = FIRST_RAW_PROMPT
-        else:
-            self._last_prompt = W600_FIRST_RAW_PROMPT
+        self._capture_output_until_active_prompt()
 
         logger.debug("Done soft reboot in raw prompt")
 
@@ -446,39 +428,25 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         # assuming we are currently on a normal prompt
         self._write(RAW_MODE_CMD)
-        discarded = self._connection.read_until(b"\r\n>", timeout=2)
-        discarded += self._connection.read_all()
-        if not discarded.endswith(FIRST_RAW_PROMPT) and not discarded.endswith(
-            W600_FIRST_RAW_PROMPT
-        ):
-            raise AssertionError("Could not enter raw prompt, got " + repr(discarded))
-        """
-        if discarded.endswith(FIRST_RAW_PROMPT):
-            self._last_prompt = FIRST_RAW_PROMPT
-        else:
-            self._last_prompt = W600_FIRST_RAW_PROMPT
-        """
-        
+        out, err = self._capture_output_until_active_prompt()
+        if self._last_prompt not in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
+            raise AssertionError("Could not enter raw prompt, got " + repr(out + err))
+
     def _ensure_normal_mode(self):
         if self._last_prompt == NORMAL_PROMPT:
             return
 
         logger.debug("requesting normal mode at %r", self._last_prompt)
         self._write(NORMAL_MODE_CMD)
-
-        def ignore_output(data, stream):
-            pass
-
-        self._forward_output_until_active_prompt(ignore_output)
+        self._capture_output_until_active_prompt()
+        assert self._last_prompt == NORMAL_PROMPT, (
+            "Could not get normal prompt, got %s" % self._last_prompt
+        )
 
     def _soft_reboot_without_running_main(self):
         logger.debug("_soft_reboot_in_normal_mode_without_running_main")
         self._ensure_raw_mode()
         self._soft_reboot_in_raw_prompt_without_running_main()
-
-    def _extra_interrupts_after_soft_reboot(self):
-        # To be overridden for CP
-        pass
 
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -604,14 +572,18 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._write(RAW_PASTE_COMMAND)
         self._connection.set_unicode_guard(False)
         response = self._connection.soft_read(2)
-        assert response == RAW_PASTE_CONFIRMATION, (
-            "Got %r instead of raw-paste confirmation" % response
+        assert response == RAW_PASTE_CONFIRMATION, "Got %r instead of raw-paste confirmation" % (
+            response + self._connection.read_all()
         )
 
+        self._raw_paste_write(script_bytes)
+
+        """
         block_size_bytes = self._connection.soft_read(2, timeout=1)
         # \x01 may be already available, don't read it yet
         assert len(block_size_bytes) == 2, "Got %r instead of block size" % block_size_bytes
         block_size = struct.unpack("<h", block_size_bytes)[0]
+        logger.debug("Using block size %r", block_size)
 
         remaining_script = script_bytes
         while remaining_script:
@@ -625,26 +597,67 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     % (len(script_bytes) - len(remaining_script) - len(block))
                 )
             else:
-                assert response == RAW_PASTE_CONTINUE
+                assert response == RAW_PASTE_CONTINUE, "Got %r instead of %r" % (
+                    response + self._connection.read_all(),
+                    RAW_PASTE_CONTINUE,
+                )
 
         self._write(EOT)
-        final_response = self._connection.read_until(EOT)
+        final_response = self._connection.soft_read(1, timeout=2)
+        assert final_response == EOT, "Expected %r but got %r" % (
+            EOT,
+            final_response + self._connection.read_all(),
+        )
+        """
         self._connection.set_unicode_guard(True)
 
+    def _raw_paste_write(self, command_bytes):
+        # Adapted from https://github.com/micropython/micropython/commit/a59282b9bfb6928cd68b696258c0dd2280244eb3#diff-cf10d3c1fe676599a983c0ec85b78c56c9a6f21b2d896c69b3e13f34d454153e
+
+        # Read initial header, with window size.
+        data = self._connection.soft_read(2, timeout=1)
+        assert len(data) == 2, "Could not read initial header, got %r" % (
+            data + self._connection.read_all()
+        )
+        window_size = data[0] | data[1] << 8
+        window_remain = window_size
+
+        # Write out the command_bytes data.
+        i = 0
+        while i < len(command_bytes):
+            while window_remain == 0 or not self._connection.incoming_is_empty():
+                data = self._connection.soft_read(1, timeout=1)
+                if data == b"\x01":
+                    # Device indicated that a new window of data can be sent.
+                    window_remain += window_size
+                elif data == b"\x04":
+                    # Device indicated abrupt end.  Acknowledge it and finish.
+                    self._connection.write(b"\x04")
+                    raise AssertionError(
+                        "REPL only accepted %r out of %r bytes" % (i, len(command_bytes))
+                    )
+                else:
+                    # Unexpected data from device.
+                    raise AssertionError("Unexpected read during raw paste: {}".format(data))
+            # Send out as much data as possible that fits within the allowed window.
+            b = command_bytes[i : min(i + window_remain, len(command_bytes))]
+            self._write(b)
+            window_remain -= len(b)
+            i += len(b)
+
+        # Indicate end of data.
+        self._write(b"\x04")
+
+        # Wait for device to acknowledge end of data.
+        data = self._connection.soft_read_until(b"\x04", timeout=1)
+        if not data.endswith(b"\x04"):
+            raise AssertionError("could not complete raw paste: {}".format(data))
+
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
-        """Expected output after submitting the command and reading the confirmation is following:
-
-        stdout
-        EOT
-        stderr
-        EOT
-        RAW_PROMPT
-        """
-
         self._report_time("befsubcode")
         self._submit_code(script)
         self._report_time("affsubcode")
-        self._forward_output_until_active_prompt(output_consumer, "stdout")
+        self._forward_output_until_active_prompt(output_consumer)
         self._report_time("affforw")
 
     def _forward_output_until_active_prompt(
@@ -804,6 +817,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                             break
                     output_consumer(self._decode(pending), stream_name)
                     self._last_prompt = current_prompt
+                    # logger.debug("Found prompt %r", current_prompt)
                     return current_prompt
 
             if pending.endswith(LF):
@@ -848,8 +862,19 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 pending = b""
                 continue
 
+    def _capture_output_until_active_prompt(self):
+        output = {"stdout": "", "stderr": ""}
+
+        def collect_output(data, stream):
+            output[stream] += data
+
+        self._forward_output_until_active_prompt(collect_output)
+
+        return output["stdout"], output["stderr"]
+
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
+        # TODO: This should be as careful as _forward_output_until_active_prompt
         data = self._connection.read_all(check_error=False)
         if data:
             met_prompt = False
