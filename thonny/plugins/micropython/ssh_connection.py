@@ -35,7 +35,7 @@ class SshProcessConnection(MicroPythonConnection):
     def _listen_output(self):
         "NB! works in background thread"
         try:
-            while True:
+            while not self._reader_stopped:
                 data = self._stdout.read(1)
                 if len(data) > 0:
                     self._make_output_available(data)

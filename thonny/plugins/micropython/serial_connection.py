@@ -80,7 +80,7 @@ class SerialConnection(MicroPythonConnection):
         "NB! works in background thread"
         try:
             data = b""
-            while True:
+            while not self._reader_stopped:
                 data += self._serial.read(1)  # To avoid busy loop
                 if len(data) == 0:
                     self._error = "EOF"

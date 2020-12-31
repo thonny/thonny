@@ -979,6 +979,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._check_sync_time()
         return super(BareMetalMicroPythonBackend, self)._cmd_write_file(cmd)
 
+    def _cmd_prepare_disconnect(self, cmd):
+        logger.info("Preparing disconnect")
+        # NB! Don't let the mainloop see the prompt and act on it
+        self._connection.stop_reader()
+        self._write(NORMAL_MODE_CMD)
+
     def _delete_sorted_paths(self, paths):
         if not self._supports_directories():
             # micro:bit

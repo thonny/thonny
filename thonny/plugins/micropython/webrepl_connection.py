@@ -94,7 +94,7 @@ class WebReplConnection(MicroPythonConnection):
     async def _ws_keep_reading(self):
         import websockets.exceptions
 
-        while True:
+        while not self._reader_stopped:
             try:
                 data = await self._ws.recv()
                 if isinstance(data, str):

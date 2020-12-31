@@ -25,6 +25,7 @@ class MicroPythonConnection:
         self.startup_time = time.time()
         self.unicode_guard = True
         self._error = None
+        self._reader_stopped = False
 
     def soft_read(self, size, timeout=1):
         return self.read(size, timeout, True)
@@ -171,6 +172,11 @@ class MicroPythonConnection:
 
     def set_unicode_guard(self, value):
         self.unicode_guard = value
+
+    def stop_reader(self):
+        self._reader_stopped = True
+        self._read_queue = Queue()
+        self._read_buffer = bytearray()
 
     def close(self):
         raise NotImplementedError()

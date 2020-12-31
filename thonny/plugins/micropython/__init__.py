@@ -12,6 +12,7 @@ from thonny.common import (
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,
+    InlineCommand,
 )
 from thonny.languages import tr
 from thonny.plugins.backend_config_page import (
@@ -349,6 +350,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def open_custom_system_shell(self):
         from thonny import terminal
+
+        get_runner().send_command_and_wait(InlineCommand("prepare_disconnect"), "Disconnecting")
 
         self.disconnect()
 
