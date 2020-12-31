@@ -139,9 +139,8 @@ class WorkDialog(CommonDialog):
 
         while not self._work_events_queue.empty():
             self.handle_work_event(*self._work_events_queue.get())
-
-        if self._state == "closed":
-            return
+            if self._state == "closed":
+                return
 
         if self._state == "idle":
             if self.is_ready_for_work():
