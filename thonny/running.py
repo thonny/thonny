@@ -853,6 +853,7 @@ class SubprocessProxy(BackendProxy):
         self._welcome_text = ""
 
         self._proc = None
+        self._terminated_readers = 0
         self._response_queue = None
         self._sys_path = []
         self._usersitepackages = None
@@ -929,6 +930,7 @@ class SubprocessProxy(BackendProxy):
         )
 
         # setup asynchronous output listeners
+        self._terminated_readers = 0
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
@@ -1005,8 +1007,9 @@ class SubprocessProxy(BackendProxy):
                 while len(message_queue) > 0:
                     sleep(0.005)
 
-        while self.process_is_alive():
+        while True:
             try:
+                time.sleep(0.1)
                 data = stdout.readline()
             except IOError:
                 sleep(0.1)
@@ -1043,9 +1046,11 @@ class SubprocessProxy(BackendProxy):
                                 )
                             )
 
+        self._terminated_readers += 1
+
     def _listen_stderr(self, stderr):
         # stderr is used only for debugger debugging
-        while self.process_is_alive():
+        while True:
             data = stderr.readline()
             if data == "":
                 break
@@ -1053,6 +1058,8 @@ class SubprocessProxy(BackendProxy):
                 self._response_queue.append(
                     BackendEvent("ProgramOutput", stream_name="stderr", data=data)
                 )
+
+        self._terminated_readers += 1
 
     def _store_state_info(self, msg):
         if "cwd" in msg:
@@ -1108,7 +1115,7 @@ class SubprocessProxy(BackendProxy):
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
-            if self.is_terminated():
+            if self.is_terminated() and self._terminated_readers == 2:
                 raise BackendTerminatedError(self._proc.returncode if self._proc else None)
             else:
                 return None
