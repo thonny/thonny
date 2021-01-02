@@ -53,8 +53,8 @@ class BaseNameHighlighter:
                     for pos in positions:
                         start_index, end_index = pos[0], pos[1]
                         self.text.tag_add("matched_name", start_index, end_index)
-            except Exception:
-                logging.exception("Problem when updating name highlighting")
+            except Exception as e:
+                logger.exception("Problem when updating name highlighting", exc_info=e)
 
 
 class VariablesHighlighter(BaseNameHighlighter):
@@ -166,7 +166,8 @@ class VariablesHighlighter(BaseNameHighlighter):
         try:
             if stmt.children[1].children[0].value == ".":
                 return stmt.children[0], stmt.children[1].children[1]
-        except Exception:
+        except Exception as e:
+            logger.exception("_get_dot_names", exc_info=e)
             return ()
         return ()
 

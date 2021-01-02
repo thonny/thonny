@@ -278,6 +278,9 @@ class ShellCompleter(Completer):
             # check if the response is relevant for current state
             if msg.source != self._get_prefix():
                 self._close()
+            elif msg.get("error"):
+                self._close()
+                messagebox.showerror("Autocomplete error", msg.error, master=self)
             else:
                 self._present_completions(msg.completions)
 

@@ -25,6 +25,7 @@ from typing import Optional, Dict
 import __main__
 
 import thonny
+from thonny import jedi_utils
 from thonny.backend import MainBackend, interrupt_local_process, logger
 from thonny.common import (
     InputSubmission,
@@ -584,8 +585,10 @@ class MainCPythonBackend(MainBackend):
         else:
             try:
                 with warnings.catch_warnings():
-                    interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
-                    completions = self._export_completions(interpreter.completions())
+                    jedi_completions = jedi_utils.get_interpreter_completions(
+                        cmd.source, [__main__.__dict__]
+                    )
+                    completions = self._export_completions(jedi_completions)
             except Exception as e:
                 completions = []
                 error = "Autocomplete error: " + str(e)
@@ -601,8 +604,10 @@ class MainCPythonBackend(MainBackend):
 
             self._debug(jedi.__file__, sys.path)
             with warnings.catch_warnings():
-                script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
-                completions = self._export_completions(script.completions())
+                jedi_completions = jedi_utils.get_script_completions(
+                    cmd.source, cmd.row, cmd.column, cmd.filename
+                )
+                completions = self._export_completions(jedi_completions)
 
         except ImportError:
             jedi = None

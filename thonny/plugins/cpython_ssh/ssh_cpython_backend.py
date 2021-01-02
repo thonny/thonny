@@ -132,6 +132,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         )
 
         import thonny.ast_utils
+        import thonny.jedi_utils
         import thonny.backend
         import thonny.common
         import thonny.plugins.cpython.cpython_backend
@@ -141,6 +142,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             thonny.__file__,
             thonny.common.__file__,
             thonny.ast_utils.__file__,
+            thonny.jedi_utils.__file__,
             thonny.backend.__file__,
             thonny.plugins.cpython.cpython_backend.__file__,
             thonny.plugins.cpython.__file__.replace("__init__", "__main__"),

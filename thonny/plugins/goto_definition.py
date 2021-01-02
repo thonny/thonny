@@ -1,7 +1,11 @@
+import os.path
+import logging
 import tkinter as tk
 
-from thonny import get_workbench
+from thonny import get_workbench, jedi_utils
 from thonny.ui_utils import control_is_pressed
+
+logger = logging.getLogger(__name__)
 
 
 def goto_definition(event):
@@ -15,13 +19,21 @@ def goto_definition(event):
     index = text.index("insert")
     index_parts = index.split(".")
     line, column = int(index_parts[0]), int(index_parts[1])
-    # TODO: find current editor filename
-    from jedi import Script
+    try:
+        editor = text.master.home_widget
+        path = editor.get_filename()
+    except Exception as e:
+        logger.warning("Could not get path", exc_info=e)
+        path = None
 
-    script = Script(source, line=line, column=column, path="")
-    defs = script.goto_definitions()
+    defs = jedi_utils.get_definitions(source, line, column, path)
     if len(defs) > 0:
-        module_path = defs[0].module_path
+        # TODO: handle multiple results like PyCharm
+        module_path = str(defs[0].module_path)
+        if not os.path.isfile(module_path):
+            logger.warning("%s is not a file", module_path)
+            return
+
         module_name = defs[0].module_name
         line = defs[0].line
         if module_path and line is not None:
