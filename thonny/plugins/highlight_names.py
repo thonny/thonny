@@ -164,7 +164,14 @@ class VariablesHighlighter(BaseNameHighlighter):
 
     def _get_dot_names(self, stmt):
         try:
-            if stmt.children[1].children[0].value == ".":
+            if (
+                hasattr(stmt, "children")
+                and len(stmt.children) >= 2
+                and hasattr(stmt.children[1], "children")
+                and len(stmt.children[1].children) >= 1
+                and hasattr(stmt.children[1].children[0], "value")
+                and stmt.children[1].children[0].value == "."
+            ):
                 return stmt.children[0], stmt.children[1].children[1]
         except Exception as e:
             logger.exception("_get_dot_names", exc_info=e)
@@ -297,8 +304,8 @@ class UsagesHighlighter(BaseNameHighlighter):
         # https://github.com/davidhalter/jedi/issues/897
         from jedi import Script
 
-        script = Script(source + ")", line=line, column=column, path="")
-        usages = script.usages()
+        script = Script(source + ")")
+        usages = script.get_references(line, column, include_builtins=False)
 
         result = {
             (

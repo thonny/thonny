@@ -80,7 +80,7 @@ TEST_GROUPS = (
 
 def test_all():
     if sys.version_info >= (3, 8):
-        warnings.warn("Skipping name matcher tests in Python 3.8")
+        warnings.warn("Skipping name matcher tests in Python above 3.7")
         return
 
     import jedi
