@@ -1009,7 +1009,6 @@ class SubprocessProxy(BackendProxy):
 
         while True:
             try:
-                time.sleep(0.1)
                 data = stdout.readline()
             except IOError:
                 sleep(0.1)
