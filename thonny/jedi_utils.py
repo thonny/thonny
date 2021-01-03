@@ -49,12 +49,14 @@ def parse_source(source):
 def get_script_completions(source: str, row: int, column: int, filename: str):
     import jedi
 
-    if using_older_jedi(jedi):
+    if _using_older_jedi(jedi):
         script = jedi.Script(source, row, column, filename)
-        return script.completions()
+        completions = script.completions()
     else:
         script = jedi.Script(code=source, path=filename)
-        return script.complete(line=row, column=column)
+        completions = script.complete(line=row, column=column)
+
+    return _tweak_completions(completions)
 
 
 def get_interpreter_completions(source: str, namespaces: List[Dict]):
@@ -63,15 +65,37 @@ def get_interpreter_completions(source: str, namespaces: List[Dict]):
     interpreter = jedi.Interpreter(source, namespaces)
     if hasattr(interpreter, "completions"):
         # up to jedi 0.17
-        return interpreter.completions()
+        return _tweak_completions(interpreter.completions())
     else:
-        return interpreter.complete()
+        return _tweak_completions(interpreter.complete())
+
+
+def _tweak_completions(completions):
+    # In jedi before 0.16, the name attribute did not contain trailing '=' for argument completions,
+    # since 0.16 it does. Need to ensure similar result for all supported versions.
+    result = []
+    for completion in completions:
+        name = completion.name
+        complete = completion.complete
+        if complete.endswith("=") and not name.endswith("="):
+            name += "="
+
+        result.append(
+            ThonnyCompletion(
+                name=name,
+                complete=complete,
+                type=completion.type,
+                description=completion.description,
+            )
+        )
+
+    return result
 
 
 def get_definitions(source: str, row: int, column: int, filename: str):
     import jedi
 
-    if using_older_jedi(jedi):
+    if _using_older_jedi(jedi):
         script = jedi.Script(source, row, column, filename)
         return script.goto_definitions()
     else:
@@ -79,5 +103,16 @@ def get_definitions(source: str, row: int, column: int, filename: str):
         return script.infer(line=row, column=column)
 
 
-def using_older_jedi(jedi):
+def _using_older_jedi(jedi):
     return jedi.__version__[:4] in ["0.13", "0.14", "0.15", "0.16", "0.17"]
+
+
+class ThonnyCompletion:
+    def __init__(self, name: str, complete: str, type, description):
+        self.name = name
+        self.complete = complete
+        self.type = type
+        self.description = description
+
+    def __getitem__(self, key):
+        return self.__dict__[key]

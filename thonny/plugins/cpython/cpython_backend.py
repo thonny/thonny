@@ -591,6 +591,7 @@ class MainCPythonBackend(MainBackend):
                     completions = self._export_completions(jedi_completions)
             except Exception as e:
                 completions = []
+                logger.info("Autocomplete error", exc_info=e)
                 error = "Autocomplete error: " + str(e)
 
         return InlineResponse(
@@ -615,6 +616,7 @@ class MainCPythonBackend(MainBackend):
             error = "Could not import jedi"
         except Exception as e:
             completions = []
+            logger.info("Autocomplete error", exc_info=e)
             error = "Autocomplete error: " + str(e)
 
         return InlineResponse(
