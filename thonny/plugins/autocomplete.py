@@ -108,7 +108,6 @@ class Completer(tk.Listbox):
             self._show_box(completions)
 
     def _show_box(self, completions):
-        print(completions)
         self.delete(0, self.size())
         self.insert(0, *[c["name"] for c in completions])
         self.activate(0)
