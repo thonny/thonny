@@ -16,7 +16,7 @@ from thonny.common import (
     get_python_version_string,
 )
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, running_on_mac_os
+from thonny.misc_utils import running_on_windows, running_on_mac_os, running_on_linux
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import (
     SubprocessProxy,
@@ -177,6 +177,8 @@ class PrivateVenvCPythonProxy(CPythonProxy):
                 )
 
     def _create_private_venv(self, path, description, clear=False, upgrade=False):
+        if not check_venv_installed(self):
+            return
         # Don't include system site packages
         # This way all students will have similar configuration
         # independently of system Python (if Thonny is used with system Python)
@@ -431,6 +433,9 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             self._configuration_variable.set(filename)
 
     def _create_venv(self, event=None):
+        if not check_venv_installed(self):
+            return
+
         messagebox.showinfo(
             "Creating new virtual environment",
             "After clicking 'OK' you need to choose an empty directory, "
@@ -591,6 +596,16 @@ def _get_interpreters_from_windows_registry():
                 pass
 
     return result
+
+
+def check_venv_installed(parent):
+    try:
+        import venv
+
+        return True
+    except ImportError:
+        messagebox.showerror("Error", "Package 'venv' is not available.", parent=parent)
+        return False
 
 
 def load_plugin():
