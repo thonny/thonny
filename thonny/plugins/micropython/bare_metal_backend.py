@@ -40,6 +40,7 @@ from thonny.plugins.micropython.webrepl_connection import (
 
 PASTE_SUBMIT_MODE = "paste"
 RAW_PASTE_SUBMIT_MODE = "raw_paste"
+RAW_SUBMIT_MODE = "raw"
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
@@ -127,9 +128,21 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
         self._write_block_size = args.get("write_block_size", 255)
+        self._write_block_delay = args.get("write_block_delay", 0.01)
+        if isinstance(connection, WebReplConnection):
+            # ESP-32 needs long delay to work reliably over raw mode WebREPL
+            # TODO: consider removing when this gets fixed
+            self._write_block_delay = 0.5
+
         self._submit_mode = args.get("submit_mode", None)
+        logger.debug(
+            "Initial submit_mode: %s, block_size: %s, block_delay: %s",
+            self._submit_mode,
+            self._write_block_size,
+            self._write_block_delay,
+        )
+
         self._last_prompt = None
-        logger.debug("Using block size of %s", self._write_block_size)
 
         MicroPythonBackend.__init__(self, clean, args)
 
@@ -190,7 +203,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._write(EOT)
             discarding = self._connection.read_until(RAW_PROMPT)
         else:
-            self._submit_mode = PASTE_SUBMIT_MODE
+            self._submit_mode = RAW_SUBMIT_MODE
             discarding = self._connection.read_until(RAW_PROMPT)
 
         discarding += self._connection.read_all()
@@ -530,11 +543,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._forward_unexpected_output()
 
         to_be_sent = script.encode("UTF-8")
+        logger.debug("Submitting via %s: %r", self._submit_mode, to_be_sent[:50])
         with self._interrupt_lock:
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 self._submit_code_via_paste_mode(to_be_sent)
             elif self._submit_mode == RAW_PASTE_SUBMIT_MODE:
                 self._submit_code_via_raw_paste_mode(to_be_sent)
+            else:
+                self._submit_code_via_raw_mode(to_be_sent)
 
     def _submit_code_via_paste_mode(self, script_bytes: bytes) -> None:
         # Go to paste mode
@@ -577,6 +593,32 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             actual_confirmation,
         )
 
+    def _submit_code_via_raw_mode(self, script_bytes: bytes) -> None:
+        self._ensure_raw_mode()
+
+        to_be_written = script_bytes + EOT
+
+        while to_be_written:
+            block = to_be_written[: self._write_block_size]
+            self._write(block)
+            to_be_written = to_be_written[self._write_block_size :]
+            if to_be_written:
+                time.sleep(self._write_block_delay)
+
+        # fetch command confirmation
+        confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
+
+        if confirmation != OK:
+            data = confirmation + self._connection.read_all()
+            data += self._connection.read(1, timeout=1, timeout_is_soft=True)
+            data += self._connection.read_all()
+            raise AssertionError(
+                "Could not read command confirmation. Got "
+                + repr(data)
+                + "\n\nSCRIPT:\n"
+                + repr(script_bytes)
+            )
+
     def _submit_code_via_raw_paste_mode(self, script_bytes: bytes) -> None:
         self._ensure_raw_mode()
         self._write(RAW_PASTE_COMMAND)
@@ -587,38 +629,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
         self._raw_paste_write(script_bytes)
-
-        """
-        block_size_bytes = self._connection.soft_read(2, timeout=1)
-        # \x01 may be already available, don't read it yet
-        assert len(block_size_bytes) == 2, "Got %r instead of block size" % block_size_bytes
-        block_size = struct.unpack("<h", block_size_bytes)[0]
-        logger.debug("Using block size %r", block_size)
-
-        remaining_script = script_bytes
-        while remaining_script:
-            block = remaining_script[:block_size]
-            remaining_script = remaining_script[block_size:]
-            self._write(block)
-            response = self._connection.soft_read(1)
-            if response == EOT:
-                raise AssertionError(
-                    "REPL only accepted %d characters of the script"
-                    % (len(script_bytes) - len(remaining_script) - len(block))
-                )
-            else:
-                assert response == RAW_PASTE_CONTINUE, "Got %r instead of %r" % (
-                    response + self._connection.read_all(),
-                    RAW_PASTE_CONTINUE,
-                )
-
-        self._write(EOT)
-        final_response = self._connection.soft_read(1, timeout=2)
-        assert final_response == EOT, "Expected %r but got %r" % (
-            EOT,
-            final_response + self._connection.read_all(),
-        )
-        """
         self._connection.set_unicode_guard(True)
 
     def _raw_paste_write(self, command_bytes):
@@ -912,10 +922,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
         if cmd.get("source"):
             self._soft_reboot_without_running_main()
-            if self._submit_mode == RAW_PASTE_SUBMIT_MODE:
-                source = cmd.source
-            else:
+            if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)
+            else:
+                source = cmd.source
 
             self._execute(source, capture_output=False)
             self._prepare(False)

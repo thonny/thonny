@@ -148,6 +148,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
             "api_stubs_path": self._get_api_stubs_path(),
             "write_block_size": self._get_write_block_size(),
+            "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
         }
         if self._port == "webrepl":
@@ -165,6 +166,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def _get_write_block_size(self):
         return get_workbench().get_option(self.backend_name + ".write_block_size")
+
+    def _get_write_block_delay(self):
+        return get_workbench().get_option(self.backend_name + ".write_block_delay")
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
@@ -926,6 +930,7 @@ def add_micropython_backend(
     validate_time=True,
     sync_time=None,
     write_block_size=None,
+    write_block_delay=None,
     dtr=None,
     rts=None,
 ):
@@ -934,11 +939,15 @@ def add_micropython_backend(
         # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
         if write_block_size is None:
             write_block_size = 255
+        if write_block_delay is None:
+            write_block_delay = 0.01
 
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")
         get_workbench().set_default(name + ".write_block_size", write_block_size)
+        # write_block_delay is used only with "raw" submit_mode
+        get_workbench().set_default(name + ".write_block_delay", write_block_delay)
         get_workbench().set_default(name + ".used_vidpids", set())
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
