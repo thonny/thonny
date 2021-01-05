@@ -90,6 +90,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * segalion
 * Simon Gijsen
 * Simon Long
+* Stefan Rothe
 * Sven Duzont
 * Syed Nasim
 * Taavi Ilp
