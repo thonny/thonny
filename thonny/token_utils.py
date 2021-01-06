@@ -25,7 +25,7 @@ NUMBER = matches_any(
         r"\b0[bB][_0-1]+",
         r"\b0[oO][_0-7]+",
         r"\b0[xX][_0-9a-fA-F]+",
-        r"\b([_\d]+(\.[_\d]*)?|\.[_\d]+)([eE][+-]?[_\d]+)?j?",
+        r"\b(\d[_\d]*(\.[_\d]*)?|\.[_\d]+)([eE][+-]?[_\d]+)?j?",
     ],
 )
 # TODO: would it make regex too slow? VARIABLE = matches_any("VARIABLE", [...])
