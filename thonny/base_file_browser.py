@@ -906,7 +906,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         if event["operation"] in ["save", "delete"]:
             self.refresh_tree()
             self.select_path_if_visible(event["path"])
-            # TODO: select this file in tree?
 
     def request_fs_info(self, path):
         if path == "":
