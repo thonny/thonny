@@ -629,7 +629,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._ensure_raw_mode()
         self._write(RAW_PASTE_COMMAND)
         self._connection.set_unicode_guard(False)
-        response = self._connection.soft_read(2)
+        response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
         assert response == RAW_PASTE_CONFIRMATION, "Got %r instead of raw-paste confirmation" % (
             response + self._connection.read_all()
         )
@@ -652,7 +652,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         i = 0
         while i < len(command_bytes):
             while window_remain == 0 or not self._connection.incoming_is_empty():
-                data = self._connection.soft_read(1, timeout=1)
+                data = self._connection.soft_read(1, timeout=WAIT_OR_CRASH_TIMEOUT)
                 if data == b"\x01":
                     # Device indicated that a new window of data can be sent.
                     window_remain += window_size
@@ -675,7 +675,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._write(b"\x04")
 
         # Wait for device to acknowledge end of data.
-        data = self._connection.soft_read_until(b"\x04", timeout=1)
+        data = self._connection.soft_read_until(b"\x04", timeout=WAIT_OR_CRASH_TIMEOUT)
         if not data.endswith(b"\x04"):
             raise AssertionError("could not complete raw paste: {}".format(data))
 
