@@ -142,9 +142,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             else:
                 self._write_block_delay = 0.01
 
-
-
-
         self._submit_mode = args.get("submit_mode", None)
         logger.debug(
             "Initial submit_mode: %s, block_size: %s, block_delay: %s",
@@ -520,17 +517,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             cdata = cdata[:-1] + "\r\n"
 
         bdata = cdata.encode(ENCODING)
-
+        to_be_written = bdata
+        echo = b""
         with self._interrupt_lock:
-            self._write(bdata)
-            # Try to consume the echo
-
-            try:
-                echo = self._connection.read(len(bdata))
-            except queue.Empty:
-                # leave it.
-                logging.warning("Timeout when reading input echo")
-                return
+            while to_be_written:
+                block = self._extract_block_without_splitting_chars(to_be_written)
+                self._write(to_be_written)
+                # Try to consume the echo
+                echo += self._connection.soft_read(len(block), timeout=1)
+                to_be_written = to_be_written[len(block) :]
 
         if echo != bdata:
             # because of autoreload? timing problems? interruption?
@@ -1524,9 +1519,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 def starts_with_continuation_byte(data):
     return data and is_continuation_byte(data[0])
 
+
 def is_continuation_byte(byte):
     return (byte & 0b11000000) == 0b10000000
-
 
 
 if __name__ == "__main__":

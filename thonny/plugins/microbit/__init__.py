@@ -162,7 +162,7 @@ def load_plugin():
         sort_key="31",
         validate_time=False,
         sync_time=False,
-        write_block_size=128
+        write_block_size=128,
     )
 
     # Don't consider micro:bit in generic backends
