@@ -158,6 +158,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         if not self._builtin_modules:
             self._builtin_modules = self._fetch_builtin_modules()
+            logger.debug("Built-in modules: %s", self._builtin_modules)
 
         self._check_sync_time()
         if self._args.get("validate_time"):

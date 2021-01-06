@@ -1079,7 +1079,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if hex_mode:
             self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
-        block_size = 1024
+        block_size = self._get_file_operation_block_size()
         file_size = self._get_file_size(source_path)
         num_bytes_read = 0
         while True:
@@ -1266,7 +1266,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
 
         bytes_sent = 0
-        block_size = 512
+        block_size = self._get_file_operation_block_size()
+
         while True:
             callback(bytes_sent, file_size)
             block = source_fp.read(block_size)
@@ -1479,7 +1480,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 return candidates[0]
 
     def _should_hexlify(self, path):
-        if "binascii" not in self._builtin_modules:
+        if "binascii" not in self._builtin_modules and "ubinascii" not in self._builtin_modules:
             return False
 
         for ext in (".py", ".txt", ".csv"):
@@ -1514,6 +1515,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             i -= 1
 
         return source_bytes[:i]
+
+    def _get_file_operation_block_size(self):
+        # don't forget that the size may be expanded up to 4x where converted to Python
+        # bytes literal
+        if self._connected_to_microbit():
+            return 512
+        else:
+            return 1024
 
 
 def starts_with_continuation_byte(data):
