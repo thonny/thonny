@@ -1,4 +1,4 @@
-jedi==0.17.*
+jedi==0.18.*
 pyserial==3.5
 pylint==2.6.*
 docutils==0.16.*
