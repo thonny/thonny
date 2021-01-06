@@ -129,7 +129,17 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             self._report_time("before prepare")
             self._process_until_initial_prompt(clean)
-            self._prepare(clean)
+            if self._welcome_text is None:
+                self._welcome_text = self._fetch_welcome_text()
+                self._report_time("got welcome")
+
+            self._prepare_after_soft_reboot(clean)
+
+            if not self._builtin_modules:
+                self._builtin_modules = self._fetch_builtin_modules()
+                logger.debug("Built-in modules: %s", self._builtin_modules)
+
+            self._prepare_rtc()
             self._send_ready_message()
             self._report_time("sent ready")
             self.mainloop()
@@ -138,11 +148,7 @@ class MicroPythonBackend(MainBackend, ABC):
         except Exception:
             logger.exception("Crash in backend")
 
-    def _prepare(self, clean):
-        if self._welcome_text is None:
-            self._welcome_text = self._fetch_welcome_text()
-            self._report_time("got welcome")
-
+    def _prepare_after_soft_reboot(self, clean):
         self._report_time("bef preparing helpers")
         script = self._get_all_helpers()
         self._check_perform_just_in_case_gc()
@@ -153,20 +159,17 @@ class MicroPythonBackend(MainBackend, ABC):
         self._report_time("got cwd")
         self._sys_path = self._fetch_sys_path()
 
+        self._report_time("prepared")
+        self._check_perform_just_in_case_gc()
+        logger.info("Prepared")
+
+    def _prepare_rtc(self):
         if self._epoch_year is None:
             self._epoch_year = self._fetch_epoch_year()
-
-        if not self._builtin_modules:
-            self._builtin_modules = self._fetch_builtin_modules()
-            logger.debug("Built-in modules: %s", self._builtin_modules)
 
         self._check_sync_time()
         if self._args.get("validate_time"):
             self._validate_time()
-
-        self._report_time("prepared")
-        self._check_perform_just_in_case_gc()
-        logger.info("Prepared")
 
     def _check_perform_just_in_case_gc(self):
         if self._connected_to_microbit():
@@ -307,7 +310,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._write(INTERRUPT_CMD)
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-
+        logger.info("Handling command '%s'", cmd.name)
         self._report_time("before " + cmd.name)
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
@@ -406,15 +409,7 @@ class MicroPythonBackend(MainBackend, ABC):
         if not self._supports_directories():
             return []
         else:
-            return self._evaluate(
-                dedent(
-                    """
-            import sys as __thonny_sys
-            __thonny_helper.print_mgmt_value(__thonny_sys.path)
-            del __thonny_sys
-            """
-                )
-            )
+            return self._evaluate("__thonny_helper.sys.path")
 
     def _fetch_builtins_info(self):
         result = {}
@@ -464,7 +459,7 @@ class MicroPythonBackend(MainBackend, ABC):
             return result
 
     def _update_cwd(self):
-        if "micro:bit" not in self._welcome_text.lower():
+        if not self._connected_to_microbit():
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):

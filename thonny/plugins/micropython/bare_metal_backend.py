@@ -159,7 +159,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if out.strip() == "True":
             return
 
-        self._prepare(False)
+        self._prepare_after_soft_reboot(False)
 
     def _get_custom_helpers(self):
         if self._connected_to_microbit():
@@ -475,7 +475,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
     def _soft_reboot_without_running_main(self):
-        logger.debug("_soft_reboot_in_normal_mode_without_running_main")
+        logger.debug("_soft_reboot_without_running_main")
         self._interrupt_to_raw_prompt()
         self._soft_reboot_in_raw_prompt_without_running_main()
 
@@ -487,7 +487,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._check_reconnect()
         self._forward_output_until_active_prompt(self._send_output)
         logger.debug("Restoring helpers")
-        self._prepare(False)
+        self._prepare_after_soft_reboot(False)
         self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _check_reconnect(self):
@@ -934,7 +934,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 source = cmd.source
 
             self._execute(source, capture_output=False)
-            self._prepare(False)
+            self._prepare_after_soft_reboot(False)
         return {}
 
     def _cmd_execute_system_command(self, cmd):

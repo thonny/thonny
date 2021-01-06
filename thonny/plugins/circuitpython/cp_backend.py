@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
     def _soft_reboot_without_running_main(self):
-        logger.debug("_soft_reboot_in_normal_mode_without_running_main")
+        logger.debug("_soft_reboot_without_running_main")
         # no point in going to raw mode at all
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
 

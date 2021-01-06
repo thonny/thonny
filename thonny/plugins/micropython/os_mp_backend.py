@@ -248,7 +248,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             BackendEvent(event_type="HideTrailingOutput", text=self._original_welcome_text)
         )
         self._report_time("beffhelp")
-        self._prepare()
+        self._prepare_after_soft_reboot()
         self._report_time("affhelp")
 
     def _cmd_execute_system_command(self, cmd):
