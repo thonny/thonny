@@ -935,13 +935,6 @@ def add_micropython_backend(
     rts=None,
 ):
     if bare_metal:
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
-        if write_block_size is None:
-            write_block_size = 255
-        if write_block_delay is None:
-            write_block_delay = 0.01
-
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")

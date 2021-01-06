@@ -127,12 +127,23 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
-        self._write_block_size = args.get("write_block_size", 255)
-        self._write_block_delay = args.get("write_block_delay", 0.01)
-        if isinstance(connection, WebReplConnection):
-            # ESP-32 needs long delay to work reliably over raw mode WebREPL
-            # TODO: consider removing when this gets fixed
-            self._write_block_delay = 0.5
+
+        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
+        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+        self._write_block_size = args.get("write_block_size", None)
+        self._write_block_delay = args.get("write_block_delay", None)
+        if self._write_block_size is None:
+            self._write_block_size = 255
+        if self._write_block_delay is None:
+            if isinstance(connection, WebReplConnection):
+                # ESP-32 needs long delay to work reliably over raw mode WebREPL
+                # TODO: consider removing when this gets fixed
+                self._write_block_delay = 0.5
+            else:
+                self._write_block_delay = 0.01
+
+
+
 
         self._submit_mode = args.get("submit_mode", None)
         logger.debug(
