@@ -476,7 +476,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _soft_reboot_without_running_main(self):
         logger.debug("_soft_reboot_in_normal_mode_without_running_main")
-        self._ensure_raw_mode()
+        self._interrupt_to_raw_prompt()
         self._soft_reboot_in_raw_prompt_without_running_main()
 
     def _soft_reboot_for_restarting_user_program(self):
