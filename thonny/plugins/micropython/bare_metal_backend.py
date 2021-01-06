@@ -610,9 +610,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         to_be_written = script_bytes + EOT
 
         while to_be_written:
-            block = to_be_written[: self._write_block_size]
+            block = self._extract_block_without_splitting_chars(to_be_written)
             self._write(block)
-            to_be_written = to_be_written[self._write_block_size :]
+            to_be_written = to_be_written[len(block) :]
             if to_be_written:
                 time.sleep(self._write_block_delay)
 
@@ -1513,9 +1513,20 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _decode(self, data: bytes) -> str:
         return data.decode(ENCODING, errors="replace")
 
+    def _extract_block_without_splitting_chars(self, source_bytes: bytes) -> bytes:
+        i = self._write_block_size
+        while i > 1 and i < len(source_bytes) and is_continuation_byte(source_bytes[i]):
+            i -= 1
+
+        return source_bytes[:i]
+
 
 def starts_with_continuation_byte(data):
-    return data and (data[0] & 0b11000000) == 0b10000000
+    return data and is_continuation_byte(data[0])
+
+def is_continuation_byte(byte):
+    return (byte & 0b11000000) == 0b10000000
+
 
 
 if __name__ == "__main__":
