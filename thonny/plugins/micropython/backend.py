@@ -632,7 +632,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":
             globs = self._evaluate(
-                "{name : __thonny_helper.repr(value) for (name, value) in globals().items() if not name.startswith('__')}"
+                "{name : (__thonny_helper.repr(value), id(value)) for (name, value) in globals().items() if not name.startswith('__')}"
             )
         else:
             globs = self._evaluate(
@@ -640,7 +640,8 @@ class MicroPythonBackend(MainBackend, ABC):
                     """
                 import %s as __mod_for_globs
                 __thonny_helper.print_mgmt_value(
-                    {name : __thonny_helper.repr(getattr(__mod_for_globs, name)) 
+                    {name : (__thonny_helper.repr(getattr(__mod_for_globs, name)), 
+                             id(getattr(__mod_for_globs, name)))
                         in dir(__mod_for_globs) 
                         if not name.startswith('__')}
                 )
@@ -648,7 +649,12 @@ class MicroPythonBackend(MainBackend, ABC):
             """
                 )
             )
-        return {"module_name": cmd.module_name, "globals": globs}
+
+        value_infos = {}
+        for name, pair in globs.items():
+            value_infos[name] = ValueInfo(pair[1], pair[0])
+
+        return {"module_name": cmd.module_name, "globals": value_infos}
 
     def _cmd_get_fs_info(self, cmd):
         raise NotImplementedError()
