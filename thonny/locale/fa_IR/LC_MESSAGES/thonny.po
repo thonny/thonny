@@ -5,71 +5,71 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: Thonny\n"
-"Language: it\n"
+"Language: fa\n"
 
 #: thonny/workbench.py:357
 msgid "File"
-msgstr "File"
+msgstr "فایل"
 
 #: thonny/workbench.py:358
 msgid "Edit"
-msgstr "Modifica"
+msgstr "ویرایش"
 
 #: thonny/workbench.py:359
 msgid "View"
-msgstr "Mostra"
+msgstr "نما"
 
 #: thonny/running.py:122 thonny/workbench.py:360
 msgid "Run"
-msgstr "Esegui"
+msgstr "اجرا"
 
 #: thonny/workbench.py:361
 msgid "Tools"
-msgstr "Strumenti"
+msgstr "ابزارها"
 
 #: thonny/plugins/help/__init__.py:74 thonny/workbench.py:362
 msgid "Help"
-msgstr "Aiuto"
+msgstr "راهنما"
 
 #: thonny/plugins/cpython/__init__.py:610
 msgid "Alternative Python 3 interpreter or virtual environment"
-msgstr "Interprete Python 3 alternativo o ambiente virtuale"
+msgstr "سایر مفسرهای پایتون 3 و یا محیط مجازی"
 
 #: thonny/plugins/cpython/__init__.py:618
 msgid "A special virtual environment (deprecated)"
-msgstr "Ambiente virtuale speciale (sconsigliato)"
+msgstr "یک محیط مجازی ویژه (منسوخ شده)"
 
 #: thonny/workbench.py:582
 msgid "Exit"
-msgstr "Esci"
+msgstr "خروج"
 
 #: thonny/workbench.py:609
 msgid "Decrease font size"
-msgstr "Riduci dimensione font"
+msgstr "فونت کوچک‌تر شود"
 
 #: thonny/workbench.py:621
 msgid "Focus editor"
-msgstr "Vai all'editor"
+msgstr "برو به ویرایشگر"
 
 #: thonny/workbench.py:630
 msgid "Focus shell"
-msgstr "Vai alla shell"
+msgstr "برو به شِل"
 
 #: thonny/workbench.py:641
 msgid "Maximize view"
-msgstr "Vista massimizzata"
+msgstr "نمای کامل"
 
 #: thonny/workbench.py:653
 msgid "Full screen"
-msgstr "Schermo intero"
+msgstr "تمام صفحه"
 
 #: thonny/workbench.py:1377
 msgid "Program arguments"
-msgstr "Argomenti del programma"
+msgstr "ورودی‌های برنامه"
 
 #: thonny/plugins/about.py:28 thonny/plugins/about.py:163
 msgid "About Thonny"
-msgstr "Su Thonny"
+msgstr "درباره تانی"
 
 #: thonny/plugins/about.py:81
 msgid "Made in\n"
@@ -78,12 +78,11 @@ msgid "Made in\n"
 "open-source community,\n"
 "Raspberry Pi Foundation\n"
 "and Cybernetica AS"
-msgstr "Made in\n"
-"University of Tartu, Estonia,\n"
-"con il contributo della \n"
-"comunità open-source,\n"
-"Raspberry Pi Foundation\n"
-"e Cybernetica AS"
+msgstr "ساخته شده در\n"
+" دانشگاه Tartu، کشور استونی\n"
+" با کمک از جامعه متن باز،\n"
+" بنیاد رزبری پای \n"
+"و Cybernetica AS"
 
 #: thonny/plugins/about.py:107
 msgid "This program comes with\n"
@@ -92,258 +91,255 @@ msgid "This program comes with\n"
 "redistribute it under certain conditions, see\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
-msgstr "Il programma viene fornito\n"
-"SENZA ALCUNA GARANZIA!\n"
-"E' software libero e può essere \n"
-"ridistribuito a determinate condizioni.\n"
-"Per maggiori dettagli visitate\n"
+msgstr "این برنامه بدون \n"
+"هیچگونه ضمانتی است!\n"
+"این نرم افزار رایگان است و می‌توانید آن را تحت شرایط تعیین شده،\n"
+"باز توزیع نمایید. برای جزئیات بیشتر به آدرس زیر مراجعه کنید:\n"
 "https://opensource.org/licenses/MIT"
 
 #: thonny/plugins/about.py:152
 msgid "Version history"
-msgstr "Cronologia delle versioni"
+msgstr "تغییرات نسخه‌‌ها"
 
 #: thonny/plugins/about.py:159
 msgid "Report problems"
-msgstr "Segnalazione di problemi"
+msgstr "گزارش مشکلات"
 
 #: thonny/plugins/assistant_config_page.py:16
 msgid "Open Assistant automatically when program crashes with an exception"
-msgstr "Attiva l'Assistente automaticamente se il programma va in crash per un errore"
+msgstr "اجرای خودکار دستیار در هنگام اجرا نشدن برنامه همرا خطا"
 
 #: thonny/plugins/assistant_config_page.py:23
 msgid "Open Assistant automatically when it has warnings for your code"
-msgstr "Attiva l'assistente automaticamente se ci sono allerte sul tuo codice"
+msgstr "اجرای خودکار دستیار در هنگام داشتن هشدارهایی در برنامه"
 
 #: thonny/plugins/assistant_config_page.py:30
 msgid "Perform selected Pylint checks"
-msgstr "Esegue i controlli Pylint selezionati"
+msgstr "بررسی Pylint انتخابی"
 
 #: thonny/plugins/assistant_config_page.py:34
 msgid "Perform MyPy checks"
-msgstr "Esegue i controlli MyPy"
+msgstr "بررسی MyPy"
 
 #: thonny/plugins/assistant_config_page.py:36
 msgid "Disabled checks (one id per line)"
-msgstr "Disattiva i controlli (una id per linea)"
+msgstr "لغو بررسی (یک شناسه در هر خط)"
 
 #: thonny/assistance.py:968 thonny/plugins/assistant_config_page.py:73
 msgid "Assistant"
-msgstr "Assistente"
+msgstr "دستیار"
 
 #: thonny/plugins/autocomplete.py:333
 msgid "Auto-complete"
-msgstr "Auto-completamento"
+msgstr "تکمیل خودکار"
 
 #: thonny/plugins/backend_config_page.py:84
 msgid "Which interpreter or device should Thonny use for running your code?"
-msgstr "Quale interprete o dispositivo deve essere usato da Thonny per eseguire il tuo codice"
+msgstr "تانی از کدام مفسر یا دستگاه برای اجرای کد شما استفاده کند؟"
 
 #: thonny/plugins/backend_config_page.py:320
 msgid "Interpreter"
-msgstr "Interprete"
+msgstr "مفسر"
 
 #: thonny/plugins/birdseye_frontend.py:54
 msgid "About Birdseye"
-msgstr "Su Birdseye"
+msgstr "درباره Birdseye"
 
 #: thonny/plugins/birdseye_frontend.py:55
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
-msgstr "Birdseye è un debugger Python che deve essere installato separatamente.\n"
+msgstr "Birdseye یک خطایاب پایتون است و بایستی جداگانه نصب شود.\n"
 "\n"
-"Vuoi aprire la pagina di aiuto e saperne di più?"
+"آیا می‌خواهید صفحه راهنمای را باز کنید و بیشتر بدانید؟"
 
 #: thonny/plugins/birdseye_frontend.py:83
 msgid "Debug current script (birdseye)"
-msgstr "Esegue il debug dello script attuale (birdseye)"
+msgstr "خطایابی همین اسکریپت (birdseye)"
 
 #: thonny/plugins/commenting_indenting.py:172
 msgid "Toggle comment"
-msgstr "Attiva commenti"
+msgstr "تغییر وضعیت توضیحات"
 
 #: thonny/plugins/commenting_indenting.py:182
 msgid "Comment out"
-msgstr "Commenta"
+msgstr "کد به توضیح"
 
 #: thonny/plugins/commenting_indenting.py:192
 msgid "Uncomment"
-msgstr "Decommenta"
+msgstr "توضیح به کد"
 
 #: thonny/plugins/common_editing_commands.py:21
 msgid "Undo"
-msgstr "Annulla"
+msgstr "واگرد"
 
-#. Sui software tradotti c'è scritto "Ripristina", NON "Ripeti"
 #: thonny/plugins/common_editing_commands.py:33
-#, fuzzy
 msgid "Redo"
-msgstr "Ripristina"
+msgstr "بازانجام"
 
 #: thonny/plugins/common_editing_commands.py:49 thonny/ui_utils.py:2176
 msgid "Cut"
-msgstr "Taglia"
+msgstr "برش"
 
 #: thonny/plugins/common_editing_commands.py:61 thonny/ui_utils.py:2177
 msgid "Copy"
-msgstr "Copia"
+msgstr "کپی"
 
 #: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2178
 msgid "Paste"
-msgstr "Incolla"
+msgstr "جای‌گذاری"
 
 #: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
 msgid "Select all"
-msgstr "Seleziona tutto"
+msgstr "انتخاب همه"
 
 #: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1398
 msgid "Run to cursor"
-msgstr "Esegui fino al cursore"
+msgstr "اجرا تا نشانگر"
 
 #: thonny/plugins/debugger.py:980
 msgid "Can't close yet"
-msgstr "Impossibile chiudere"
+msgstr "هنوز قابل بستن نیست"
 
 #: thonny/plugins/debugger.py:981
 msgid "Use \"Stop\" command if you want to cancel debugging"
-msgstr "Usa il comando \"Stop\" per annullare il debugging"
+msgstr "برای لغو خطایابی از دستور «Stop» استفاده کنید"
 
 #: thonny/plugins/dock_user_windows_frontend.py:28
 msgid "Dock user windows"
-msgstr "Disponi le finestre utente"
+msgstr "ثابت‌ کردن محل پنجره‌های شما"
 
 #: thonny/plugins/editor_config_page.py:15
 msgid "Highlight matching names"
-msgstr "Evidenzia i nomi che corrispondono"
+msgstr "نمایان کردن نام‌های یکسان"
 
 #: thonny/plugins/editor_config_page.py:21
 msgid "Highlight local variables"
-msgstr "Evidenzia le variabili locali"
+msgstr "نمایان کردن متغیرهای محلی"
 
 #: thonny/plugins/editor_config_page.py:26
 msgid "Highlight parentheses"
-msgstr "Evidenzia le parentesi"
+msgstr "نمایان کردن پرانتزها"
 
 #: thonny/plugins/editor_config_page.py:27
 msgid "Highlight syntax elements"
-msgstr "Evidenzia gli elementi di sintassi"
+msgstr "نمایان کردن اجزای دستور"
 
 #: thonny/plugins/editor_config_page.py:31
 msgid "Highlight current line (requires reopening the editor)"
-msgstr "Evidenzia la riga corrente (richeide il riavvio dell'editor)"
+msgstr "نمایان کردن خط فعلی (باید دوباره ویرایشگر را باز کنید)"
 
 #: thonny/plugins/editor_config_page.py:36
 msgid "Allow code completion with Tab-key in editors"
-msgstr "Permette il completamento del codice con il tasto Tab"
+msgstr "اجازه تکمیل کد با زدن دکمه Tab در ویرایشگر"
 
 #: thonny/plugins/editor_config_page.py:42
 msgid "Allow code completion with Tab-key in Shell"
-msgstr "Permette il completamento del codice con il tasto Tab nella shell"
+msgstr "اجازه تکمیل کد با زدن دکمه Tab در شِل"
 
 #: thonny/plugins/editor_config_page.py:51
 msgid "Show line numbers"
-msgstr "Mostra i numeri di riga"
+msgstr "نمایش شماره خطوط"
 
 #: thonny/plugins/editor_config_page.py:54
 msgid "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
-msgstr "Massima lunghezza di linea raccomandata\n"
-"(0 per eliminare i margini di linea)"
+msgstr "حداکثر طول خط پیشنهادی\n"
+"(برای خاموش کردن خط حاشیه روی 0 تنظیم کنید)"
 
 #: thonny/plugins/editor_config_page.py:75
 msgid "Editor"
-msgstr "Editor"
+msgstr "ویرایشگر"
 
 #: thonny/plugins/event_logging.py:206
 msgid "Export usage logs..."
-msgstr "Esporta i log d'uso..."
+msgstr "ذخیره وقایع ثبت شده..."
 
 #: thonny/plugins/event_view.py:39
 msgid "Events"
-msgstr "Eventi"
+msgstr "رویدادها"
 
 #: thonny/plugins/files.py:551
 msgid "Files"
-msgstr "File"
+msgstr "فایل‌ها"
 
 #: thonny/plugins/find_replace.py:57 thonny/plugins/find_replace.py:416
 msgid "Find & Replace"
-msgstr "Trova & Sostituisci"
+msgstr "یافتن و جایگزینی"
 
 #: thonny/plugins/find_replace.py:63
 msgid "Find:"
-msgstr "Trova:"
+msgstr "یافتن"
 
 #: thonny/plugins/find_replace.py:74
 msgid "Replace with:"
-msgstr "Sostituisci con:"
+msgstr "جایگزین شود با:"
 
 #: thonny/plugins/find_replace.py:92
 msgid "Case sensitive"
-msgstr "Case sensitive"
+msgstr "حساس به حروف کوچک و بزرگ انگلیسی"
 
 #: thonny/plugins/find_replace.py:99
 msgid "Up"
-msgstr "Su"
+msgstr "رو به بالا"
 
 #: thonny/plugins/find_replace.py:103
 msgid "Down"
-msgstr "Giù"
+msgstr "رو به پایین"
 
 #: thonny/plugins/find_replace.py:112
 msgid "Find"
-msgstr "Trova"
+msgstr "یافتن"
 
 #: thonny/plugins/find_replace.py:122
 msgid "Replace"
-msgstr "Sostituisci"
+msgstr "جایگزینی"
 
 #: thonny/plugins/find_replace.py:130
 msgid "Replace+Find"
-msgstr "Sostituisci+Trova"
+msgstr "جایگزین و یافتن بعدی"
 
 #: thonny/plugins/find_replace.py:140
 msgid "Replace all"
-msgstr "Sostituisci tutto"
+msgstr "جایگزینی همه"
 
 #: thonny/plugins/find_replace.py:236
 msgid "Enter string to be replaced."
-msgstr "Immetti la stringa da sostituire."
+msgstr "متنی را جهت جایگزینی وارد کنید."
 
 #: thonny/plugins/find_replace.py:320
 msgid "The specified text was not found!"
-msgstr "Il testo specificato non è stato trovato!"
+msgstr "متن تعیین شده یافت نشد!"
 
 #: thonny/plugins/general_config_page.py:15
 msgid "Allow only single Thonny instance"
-msgstr "Permetti solo una singola istanza di Thonny"
+msgstr "فقط یکبار اجرای تانی مجاز است"
 
 #: thonny/plugins/general_config_page.py:22
 msgid "Reopen all files from previous session"
-msgstr "Riapri tutti i file dalla sessione precedente"
+msgstr "تمام فایلها‌ی اجرای قبلی برنامه را دوباره باز شود"
 
 #: thonny/plugins/general_config_page.py:37
 msgid "Disable notification sound"
-msgstr "Disabilita i suoni di notifica"
+msgstr "هشدارهای صوتی غیرفعال شود"
 
 #: thonny/plugins/general_config_page.py:86
 msgid "Font scaling mode"
-msgstr ""
+msgstr "مقیاس اندازه فونت"
 
 #: thonny/plugins/heap.py:37
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
-msgstr "La modalità Heap è attiva.\n"
-"Chiudi la scheda Heap per disattivarla."
+msgstr "حالت هیپ فعال است.\n"
+"برای بستن آن باید نمای هیپ را ببندید."
 
 #: thonny/plugins/heap.py:86
 msgid "Heap"
-msgstr "Heap"
+msgstr "هیپ"
 
 #: thonny/plugins/general_config_page.py:53
 msgid "Language"
-msgstr "Lingua"
+msgstr "زبان"
 
 #: thonny/plugins/notes.py:35
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
@@ -351,628 +347,626 @@ msgid "This box is meant for your working notes -- assignment instructions, code
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "Questo riquadro serve per le tue note di lavoro -- istruzioni di assegnazione, pezzi di codice, qualunque cosa.\n"
+msgstr "این قسمت برای یادداشت‌های کاری شما، مقداردهی‌ها ، قطعه کد و یا هر یادداشت دلخواه دیگری است.\n"
 "\n"
-"Qualunque cosa sarà salvata automaticamente e ricaricata la prossima volat che aprirai Thonny.\n"
+"هر چیزی در آن به صورت خودکار ذخیره خواهد شد و در اجرای بعدی تانی نمایش داده می‌شود.\n"
 "\n"
-"Puoi cancellare questo testo per fare spazio alle tue note."
+"می‌توانید همین متن را برای داشتن فضای بیشتر، پاک کنید."
 
 #: thonny/plugins/notes.py:63
 msgid "Notes"
-msgstr "Note"
+msgstr "یادداشت‌ها"
 
 #: thonny/plugins/object_inspector.py:111
 msgid "Previous object"
-msgstr "Oggetto precedente"
+msgstr "شیء قبلی"
 
 #: thonny/plugins/object_inspector.py:114
 msgid "Next object"
-msgstr "Prossimo oggetto"
+msgstr "شیء بعدی"
 
 #: thonny/plugins/object_inspector.py:704
 msgid "Object inspector"
-msgstr "Analizzatore di oggetti"
+msgstr "بازرس اشیاء"
 
 #: thonny/plugins/outline.py:138
 msgid "Outline"
-msgstr ""
+msgstr "طرح کلی"
 
 #: thonny/plugins/pgzero_frontend.py:27
 msgid "Pygame Zero mode"
-msgstr "Modalità Pygame Zero"
+msgstr "حالت Pygame Zero"
 
 #: thonny/plugins/pip_gui.py:78
 msgid "Find package from PyPI"
-msgstr "Trova una pacchetto PyPl"
+msgstr "یافتن بسته از PyPI"
 
 #: thonny/plugins/pip_gui.py:76
 msgid "Uninstall"
-msgstr "Disinstalla"
+msgstr "حذف برنامه"
 
 #: thonny/editors.py:587 thonny/plugins/pip_gui.py:228 thonny/ui_utils.py:448
 #: thonny/ui_utils.py:1755 thonny/workdlg.py:155
 msgid "Close"
-msgstr "Chiudi"
+msgstr "بستن"
 
 #: thonny/plugins/pip_gui.py:347
 msgid "Click "
-msgstr "Click"
+msgstr "کلیک"
 
 #: thonny/plugins/pip_gui.py:348 thonny/plugins/pip_gui.py:382
 msgid "here"
-msgstr "qui"
+msgstr "اینجا"
 
 #: thonny/plugins/pip_gui.py:73
 msgid "Upgrade"
-msgstr "Aggiorna"
+msgstr "به روز رسانی"
 
 #: thonny/plugins/esp/__init__.py:365
 #: thonny/plugins/micropython/uf2dialog.py:94 thonny/plugins/pip_gui.py:70
 msgid "Install"
-msgstr "Installa"
+msgstr "نصب برنامه"
 
 #: thonny/plugins/pip_gui.py:491
 msgid "Could not find the package from PyPI."
-msgstr "Impossibile trovare il pacchetto in PyPl"
+msgstr "بسته مورد نظر در PyPI پیدا نشد."
 
 #: thonny/plugins/pip_gui.py:511
 msgid "Latest stable version"
-msgstr "Ultima versione stabile"
+msgstr "آخرین نسخه پایدار"
 
 #: thonny/plugins/pip_gui.py:513
 msgid "Latest version"
-msgstr "Ultima versione"
+msgstr "آخرین نسخه"
 
 #: thonny/plugins/pip_gui.py:514
 msgid "Summary"
-msgstr "Indice"
+msgstr "خلاصه"
 
 #: thonny/plugins/pip_gui.py:515
 msgid "Author"
-msgstr "Autore"
+msgstr "سازنده"
 
 #: thonny/plugins/pip_gui.py:516
 msgid "Homepage"
-msgstr "Pagine Home"
+msgstr "صفحه اصلی سایت"
 
 #: thonny/plugins/pip_gui.py:518
 msgid "Bugtracker"
-msgstr "Bugtracker"
+msgstr "خطایاب"
 
 #: thonny/plugins/pip_gui.py:520
 msgid "Documentation"
-msgstr "Documentazione"
+msgstr "مستندات"
 
 #: thonny/plugins/pip_gui.py:522
 msgid "PyPI page"
-msgstr "Pagina PyPl"
+msgstr "صفحه PyPI"
 
 #: thonny/plugins/pip_gui.py:526
 msgid "Requires"
-msgstr "Richiede"
+msgstr "الزامات"
 
 #: thonny/plugins/pip_gui.py:652
 msgid "Really uninstall?"
-msgstr "Vuoi veramente disinstallare?"
+msgstr "واقعا برنامه را حذف می‌کنید؟"
 
 #: thonny/plugins/pip_gui.py:657
 msgid "Are you sure you want to uninstall it?"
-msgstr "Sei sicuro di voler disinstallare?"
+msgstr "آیا از اینکه می‌خواهید آن برنامه را حذف کنید، مطمئن هستید؟"
 
 #: thonny/plugins/variables.py:19
 msgid "Back to\n"
 "current frame"
-msgstr "Torna al riquadro corrente"
+msgstr "بازگشت به فریم فعلی"
 
 #: thonny/plugins/variables.py:73 thonny/plugins/variables.py:75
 #: thonny/plugins/variables.py:138
 msgid "Variables"
-msgstr "Variabili"
+msgstr "متغیرها"
 
 #: thonny/base_file_browser.py:1313
 msgid "This computer"
-msgstr "Questo computer"
+msgstr "این کامپیوتر"
 
 #: thonny/base_file_browser.py:618
 msgid "Refresh"
-msgstr "Aggiorna"
+msgstr "تازه سازی"
 
 #: thonny/base_file_browser.py:631
 msgid "Focus into"
-msgstr ""
+msgstr "برو به"
 
 #: thonny/base_file_browser.py:1164
 msgid "Error"
-msgstr "Errore"
+msgstr "خطا"
 
 #: thonny/base_file_browser.py:1164
 msgid "You need to select a file!"
-msgstr "Devi selezionare un file!"
+msgstr "باید فایلی را انتخاب کنید!"
 
 #: thonny/base_file_browser.py:1168
 msgid "Overwrite?"
-msgstr "Sovrascrivere?"
+msgstr "جایگزین شود؟"
 
 #: thonny/base_file_browser.py:1168
 msgid "Do you want to overwrite '%s' ?"
-msgstr "Vuoi sovrascrivere '%s'?"
+msgstr "آیا می‌خواهید بر روی «%s» جایگزین شود؟"
 
 #: thonny/editors.py:552 thonny/editors.py:554
 msgid "New"
-msgstr "Nuovo"
+msgstr "جدید"
 
 #: thonny/editors.py:565
 msgid "Open..."
-msgstr "Apri..."
+msgstr "باز کردن..."
 
 #: thonny/editors.py:567
 msgid "Load"
-msgstr "Carica"
+msgstr "بارگذاری"
 
 #: thonny/editors.py:576
 msgid "Recent files"
-msgstr "File recenti"
+msgstr "آخرین فایل‌ها"
 
 #: thonny/editors.py:598 thonny/ui_utils.py:450
 msgid "Close all"
-msgstr "Chiudi tutto"
+msgstr "بستن همه"
 
 #: thonny/editors.py:608 thonny/editors.py:610
 msgid "Save"
-msgstr "Salva"
+msgstr "ذخیره"
 
 #: thonny/editors.py:633
 msgid "Save as..."
-msgstr "Salva come..."
+msgstr "ذخیره با نام..."
 
 #: thonny/editors.py:644
 msgid "Save copy..."
-msgstr "Salva una copia..."
+msgstr "ذخیره یک کپی .."
 
 #: thonny/editors.py:653
 msgid "Rename..."
-msgstr "Rinomina..."
+msgstr "تغییر نام..."
 
 #: thonny/config_ui.py:19
 msgid "Thonny options"
-msgstr "Ozioni di Thonny"
+msgstr "تنظیمات تانی"
 
 #: thonny/running.py:121
 msgid "Run current script"
-msgstr "Esegui lo script corrente"
+msgstr "اجرای این اسکریپت"
 
 #: thonny/running.py:152
 msgid "Run current script in terminal"
-msgstr "Esegui lo script corrente nel terminale"
+msgstr "اجرای این اسکریپت در ترمینال"
 
 #: thonny/running.py:165
 msgid "Stop/Restart backend"
-msgstr "Ferma/Riavvia il backend"
+msgstr "توقف/ اجرای دوباره هسته"
 
 #: thonny/running.py:166
 msgid "Stop"
-msgstr "Ferma"
+msgstr "توقف"
 
 #: thonny/running.py:177
 msgid "Interrupt execution"
-msgstr "Interrompi l'esecuzione"
+msgstr "قطع اجرا"
 
 #: thonny/running.py:190
 msgid "Send EOF / Soft reboot"
-msgstr "Invia un EOF / riavvio soft"
+msgstr "ارسال EOF/ ریبوت نرم"
 
 #: thonny/running.py:201
 msgid "Disconnect"
-msgstr "Disconnetti"
+msgstr "قطع اتصال"
 
 #: thonny/running_config_page.py:23
 msgid "Known interpreters"
-msgstr "Interpreti esistenti"
+msgstr "مفسرهای مشهور"
 
 #: thonny/running_config_page.py:36
 msgid "Your interpreter isn't in the list?"
-msgstr "Il tuo interprete non è nella lista?"
+msgstr "مفسر شما در لیست نیست؟"
 
 #: thonny/plugins/cpython/__init__.py:391
 msgid "NB! Thonny only supports Python 3.5 and later"
-msgstr "NB! Thonny supporta solo Python 3.5 o successivi"
+msgstr "توجه مهم! تانی فقط از پایتون 3.5 به بعد پشتیبانی می‌کند"
 
 #: thonny/running_config_page.py:56
 msgid "Create new virtual environment"
-msgstr "Crea un nuovo ambiente virtuale"
+msgstr "ایجاد محیط مجازی جدید"
 
 #: thonny/running_config_page.py:59
 msgid "Select existing or create a new empty directory"
-msgstr "Seleziona uan directory esistente o creane una nuova"
+msgstr "پوشه‌ای را انتخاب کنید و یا یک پوشه خالی بسازید"
 
 #: thonny/plugins/cpython/__init__.py:419
 msgid "Python interpreters"
-msgstr "Interprete Python"
+msgstr "مفسرهای پایتون"
 
 #: thonny/plugins/cpython/__init__.py:420 thonny/plugins/pip_gui.py:696
 #: thonny/plugins/pip_gui.py:709
 msgid "all files"
-msgstr "tutti i file"
+msgstr "همه فایل‌ها"
 
 #: thonny/plugins/cpython/__init__.py:442
 msgid "Select empty directory for new virtual environment"
-msgstr "Seleziona una directory vuota per un nuovo ambiente virtuale"
+msgstr "برای محیط مجازی جدید بایستی پوشه‌ای خالی را انتخاب کنید"
 
 #: thonny/plugins/cpython/__init__.py:449
 msgid "Bad directory"
-msgstr "Directory errata"
+msgstr "پوشه نامناسب"
 
 #: thonny/plugins/cpython/__init__.py:450
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
-msgstr "La directory selezionata non è vuota.\n"
-"Selezionane un'altra o annulla."
+msgstr "پوشه انتخاب شده خالی نیست.\n"
+"یکی دیگر را انتخاب کنید و یا لغو کنید."
 
 #: thonny/plugins/cpython/__init__.py:467
 msgid "Creating virtual environment"
-msgstr "Sto creando un ambiente virtuale"
+msgstr "ساخت یک محیط مجازی"
 
 #: thonny/shell.py:83
 msgid "Clear shell"
-msgstr "Pulisci la shell"
+msgstr "پاک کردن شِل"
 
 #: thonny/shell.py:138
 msgid "Plotter"
-msgstr "Plotter"
+msgstr "نمودار"
 
 #: thonny/shell.py:269
 msgid "Clear"
-msgstr "Pulisci"
+msgstr "پاک کن"
 
 #: thonny/shell.py:282
 msgid "Show Plotter"
-msgstr "Mostra il plotter"
+msgstr "نمایش نمودار"
 
 #: thonny/shell.py:1572
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
-msgstr "Per raggioni di efficenza, la shell non mostra le righe molto lunghe\n"
-"completamente (vedi Strumenti => Opzioni => Shell).\n"
-"Qui puoi interagire con il frammento di testo originale."
+msgstr "برای بهبود کارآیی، شِل از نمایش خطوط بلند به صورت کامل خودداری می‌کند \n"
+"(به ابزارها ← تنظیمات ← شِل بروید).\n"
+"از اینجا می توانید با قسمتی از متن اصلی کار کنید."
 
 #: thonny/shell.py:1583
 msgid "Wrap text (may be slow)"
-msgstr "A capo automatico (può essere lento)"
+msgstr "شکستن خطوط (ممکن است کمی کند باشد)"
 
 #: thonny/ui_utils.py:1750
 msgid "Copy to clipboard"
-msgstr "Copia nella clipboard"
+msgstr "کپی در حافظه موقت"
 
 #: thonny/shell.py:1431
 msgid "Expand in Shell"
-msgstr "Espande nella Shell"
+msgstr "بسط دادن در شِل"
 
 #: thonny/shell.py:1625
 msgid "Squeezed text (%d characters)"
-msgstr "Testo compresso (%d caratteri)"
+msgstr "متن فشرده شده (شامل %d کاراکتر)"
 
 #: thonny/shell.py:1794
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
-msgstr "Il plotter visualizza una serie\n"
-"di numeri stampati nella Shell."
+msgstr "نموداری به صورت گرافیکی اعدادی که در شِل چاپ می‌شوند را نمایش می‌دهد."
 
 #: thonny/shell.py:1796
 msgid "See Help for details."
-msgstr "Vedi Aiuto per i dettagli."
+msgstr "برای جزئیات، راهنما را ببینید."
 
 #: thonny/ui_utils.py:449
 msgid "Close others"
-msgstr "Chiudi le altre schede"
+msgstr "بستن بقیه"
 
 #: thonny/ui_utils.py:1606
 msgid "Copying"
-msgstr "Sto copiando"
+msgstr "درحال کپی"
 
 #: thonny/ui_utils.py:1609
 msgid "Copying\n"
 "  %s\n"
 "to\n"
 "  %s"
-msgstr "Sto copiando\n"
-" %s\n"
-"su\n"
-" %s"
+msgstr "کپی\n"
+"  %s\n"
+"در\n"
+"  %s"
 
 #: thonny/base_file_browser.py:1133 thonny/config_ui.py:36 thonny/export.py:28
 #: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1146
 #: thonny/ui_utils.py:114 thonny/ui_utils.py:1617 thonny/ui_utils.py:1702
 #: thonny/workdlg.py:157 thonny/workdlg.py:201
 msgid "Cancel"
-msgstr "Annulla"
+msgstr "لغو"
 
 #: thonny/base_file_browser.py:1130 thonny/config_ui.py:35 thonny/export.py:25
 #: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
 #: thonny/ui_utils.py:111 thonny/ui_utils.py:1699 thonny/workdlg.py:198
 msgid "OK"
-msgstr "OK"
+msgstr "تایید"
 
 #: thonny/ui_utils.py:1783
 msgid "Cancel the process?"
-msgstr "Annulla il processo?"
+msgstr "این پردازش لغو شود؟"
 
 #: thonny/ui_utils.py:1784
 msgid "The process is still running.\n"
 "Are you sure you want to cancel?"
-msgstr "Il processo sta ancora girando.\n"
-"Sei sicuro di volerlo annuallare?"
+msgstr "پردازش هنوز در حال اجراست.\n"
+"آیا از لغو آن اطمینان دارید؟"
 
 #: thonny/ui_utils.py:2182
 msgid "Select All"
-msgstr "Seleziona tutto"
+msgstr "انتخاب همه"
 
 #: thonny/plugins/shell_config_page.py:73 thonny/workbench.py:158
 msgid "Shell"
-msgstr "Shell"
+msgstr "شِل"
 
 #: thonny/plugins/cpython/__init__.py:602
 msgid "The same interpreter which runs Thonny (default)"
-msgstr "Lo stesso interprete che gira su Thonny (default)"
+msgstr "همان مفسری که تانی را اجرا می کند (پیش فرض)"
 
 #: thonny/plugins/cpython/__init__.py:350
 msgid "This virtual environment is automatically maintained by Thonny.\n"
 ""
-msgstr "Questo ambiente è mantenuto automaticamente da Thonny."
+msgstr "این محیط مجازی به طور خودکار توسط تانی نگهداری می شود."
 
 #: thonny/plugins/cpython/__init__.py:351
 msgid "Location: "
-msgstr "Posizione: "
+msgstr "محل:"
 
 #: thonny/workbench.py:592
 msgid "Options..."
-msgstr "Opzioni..."
+msgstr "تنظیمات..."
 
 #: thonny/workbench.py:599
 msgid "Increase font size"
-msgstr "Aumenta la dimensione del font"
+msgstr "فونت درشت‌تر شود"
 
 #: thonny/workbench.py:664
 msgid "Change font size"
-msgstr "Cambia la dimensione del font"
+msgstr "تغییر اندازه فونت"
 
 #: thonny/workbench.py:665
 msgid "Zoom"
-msgstr "Zoom"
+msgstr "بزرگنمایی"
 
 #: thonny/workbench.py:674
 msgid "Exit Thonny"
-msgstr "Esci da Thonny"
+msgstr "خروج از Thonny"
 
 #: thonny/workbench.py:677
 msgid "Quit"
-msgstr "Chiudi"
+msgstr "خروج"
 
 #: thonny/workbench.py:1181 thonny/workbench.py:1189
 msgid "Overwriting theme '%s'"
-msgstr "Sovrascrivi il tema '%s'"
+msgstr "در حال بازنویسی قالب «%s»"
 
 #: thonny/workbench.py:1348
 msgid "Program arguments:"
-msgstr "Argomenti del programma:"
+msgstr "ورودی‌های برنامه:"
 
 #: thonny/workbench.py:1402
 msgid "Regular mode"
-msgstr ""
+msgstr "حالت عادی"
 
 #: thonny/workbench.py:1403
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
-msgstr "La configurazione è stata aggiornata. Riavvia Thonny per\n"
-"lavorare in modalità normale.\n"
+msgstr "تنظیمات بروز رسانی شد. برای شروع کار در محیط عادی، تانی را مجدد اجرا کنید.\n"
 "\n"
-"(Vedi 'Strumenti → Opzioni → Generale' se ci ripensi.)"
+"(اگر نظرتان عوض شد، از  «ابزارها ← تنظیمات ← عمومی» را انتخاب کنید)"
 
 #: thonny/plugins/ast_view.py:210
 msgid "Program tree"
-msgstr ""
+msgstr "درخت برنامه"
 
 #: thonny/plugins/backend_config_page.py:323
 msgid "Select interpreter"
-msgstr "Seleziona l'interprete"
+msgstr "انتخاب مفسر"
 
 #: thonny/plugins/debugger.py:1280
 msgid "Resume"
-msgstr "Riprendi"
+msgstr "ادامه"
 
 #: thonny/plugins/debugger.py:1296
 msgid "Run / resume"
-msgstr "Esegui / riprendi"
+msgstr "اجرا / ادامه"
 
 #: thonny/plugins/debugger.py:1311
 msgid "Debug current script"
-msgstr "Debug dello script corrente"
+msgstr "خطایابی این اسکریپت"
 
 #: thonny/plugins/debugger.py:1313
 msgid "Debug"
-msgstr "Debug"
+msgstr "خطایابی"
 
 #: thonny/plugins/debugger.py:1324
 msgid "Debug current script (nicer)"
-msgstr "Debug dello script corrente (più bello)"
+msgstr "خطایابی همین اسکریپت (مبتدی)"
 
 #: thonny/plugins/debugger.py:1336
 msgid "Debug current script (faster)"
-msgstr "Debug dello script corrente (più veloce)"
+msgstr "خطایابی همین اسکریپت (سریع)"
 
 #: thonny/plugins/debugger.py:1347
 msgid "Step over"
-msgstr "Step over"
+msgstr "گام بعدی"
 
 #: thonny/plugins/debugger.py:1349
 msgid "Over"
-msgstr ""
+msgstr "بعدی"
 
 #: thonny/plugins/debugger.py:1360
 msgid "Step into"
-msgstr "Step into"
+msgstr "گامی به داخل"
 
 #: thonny/plugins/debugger.py:1362
 msgid "Into"
-msgstr ""
+msgstr "داخل"
 
 #: thonny/plugins/debugger.py:1373
 msgid "Step out"
-msgstr "Step out"
+msgstr "گامی به خارج"
 
 #: thonny/plugins/debugger.py:1375
 msgid "Out"
-msgstr ""
+msgstr "بیرون"
 
 #: thonny/plugins/debugger.py:1410
 msgid "Step back"
-msgstr "Passo indietro"
+msgstr "گامی به عقب"
 
 #: thonny/plugins/debugger.py:1412
 msgid "Back"
-msgstr "Indietro"
+msgstr "عقب"
 
 #: thonny/plugins/debugger.py:1418
 msgid "Stack"
-msgstr "Stack"
+msgstr "اِستک"
 
 #: thonny/plugins/debugger.py:1419
 msgid "Exception"
-msgstr "Eccezione"
+msgstr "استثناء"
 
 #: thonny/plugins/general_config_page.py:18
 msgid "Log program usage events"
-msgstr ""
+msgstr "ثبت رویداد‌های استفاده از برنامه"
 
 #: thonny/plugins/general_config_page.py:43
 msgid "Debug mode (provides more detailed diagnostic logs)"
-msgstr "Modalità debug (fornisce informazioni diagnostiche più dettagliate)"
+msgstr "حالت خطایابی (ثبت خطایابی‌ها با جزئیات بیشتر)"
 
 #: thonny/plugins/general_config_page.py:67
 msgid "UI mode"
-msgstr "Modalità UI"
+msgstr "حالت ظاهری برنامه"
 
 #: thonny/plugins/general_config_page.py:80
 msgid "UI scaling factor"
-msgstr "Fattore di scala UI"
+msgstr "ضریب اندازه ظاهر برنامه"
 
 #: thonny/plugins/general_config_page.py:108
 msgid "NB! Restart Thonny after changing these options!"
-msgstr "NB! Riavvia Thonny dopo aver cambiato queste opzioni!"
+msgstr "توجه مهم! بعد از تغییر این گزینه‌ها باید تانی را دوباره باز کنید!"
 
 #: thonny/plugins/general_config_page.py:129
 msgid "General"
-msgstr "Generale"
+msgstr "عمومی"
 
 #: thonny/plugins/pip_gui.py:129
 msgid "INSTALL"
-msgstr ""
+msgstr "نصب برنامه"
 
 #: thonny/plugins/pip_gui.py:365
 msgid "Browse the packages"
-msgstr "Sfoglia i pacchetti"
+msgstr "مرور بسته‌ها"
 
 #: thonny/plugins/pip_gui.py:368
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-msgstr "Con l'interprete corrente puoi solo visualizzare i pacchetti. Utilizza 'Strumenti --> Apri la shell di sistema...' per installarli, aggiornarli o disinstallarli."
+msgstr "با مفسر فعلی فقط می توانید بسته‌ها را در اینجا ببینید.\n"
+"برای نصب، ارتقاء و یا حذف به «ابزارها ← باز کردن شِل سیستم» بروید."
 
 #: thonny/plugins/pip_gui.py:376
 msgid "Packages' directory"
-msgstr "Directory dei pacchetti"
+msgstr "پوشه‌ی بسته‌ها"
 
 #: thonny/plugins/pip_gui.py:333
 msgid "Install from PyPI"
-msgstr "Installa da PyPI"
+msgstr "نصب برنامه از PyPI"
 
 #: thonny/plugins/pip_gui.py:336
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr "Se non sai dove prendere i pacchetti, allora dovresti cercare nell'Indice dei Pacchetti Python. Inizia inserendo il nome del pacchetto nella casella di ricerca e premendo INVIO."
+msgstr "اگر نمی دانید بسته  را باید از کجا بگیرید، به احتمال زیاد بخواهید تا فهرست بسته‌های پایتون را جستجو کنید. ابتدا نام بسته را در قسمت جستجو وارد کنید و سپس کلید Enter را بزنید."
 
 #: thonny/plugins/pip_gui.py:352
 msgid "to locate requirements.txt file and install the packages specified in it."
-msgstr "Per cercare il file requirements.txt e installare i pacchetti specificati in esso"
+msgstr "برای مشخص کردن محل فایل requirements.txt و نصب بسته‌های مشخص شده در آن."
 
 #: thonny/plugins/pip_gui.py:381
 msgid "Click"
-msgstr "Clicca"
+msgstr "کلیک"
 
 #: thonny/plugins/pip_gui.py:386
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr "Per cercare e installare il package file (solitamente con estensione .whl, tar.gz, .zip)"
+msgstr "برای مشخص کردن و نصب بسته از فایل (معمولا با پسوندهای whl. یا tar.gz و یا zip.)"
 
 #: thonny/plugins/micropython/pip_gui.py:243 thonny/plugins/pip_gui.py:393
 msgid "Upgrade or uninstall"
-msgstr "Aggiorna o installa"
+msgstr "ارتقاء یا حذف برنامه"
 
 #: thonny/plugins/pip_gui.py:395
 msgid "Start by selecting the package from the left."
-msgstr "Inizia selezioando un pacchetto a sinistra."
+msgstr "با انتخاب بسته‌ای از سمت چپ شروع کنید."
 
 #: thonny/plugins/pip_gui.py:399
 msgid "Target:"
-msgstr ""
+msgstr "مقصد:"
 
 #: thonny/plugins/pip_gui.py:401
 msgid "virtual environment"
-msgstr "ambiente virtuale"
+msgstr "محیط مجازی"
 
 #: thonny/plugins/pip_gui.py:403
 msgid "user site packages"
-msgstr ""
+msgstr "بسته‌های سایت کاربر"
 
 #: thonny/plugins/pip_gui.py:407
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
-msgstr "Questa finestra elenca tutti i pacchetti disponibili, ma permette l'aggiornamento e la disinstallazione solo dei pacchetti da"
+msgstr "این پنجره تمام بسته های موجود را لیست می کند، اما فقط اجازه می‌دهد تا ارتقا و حذف بسته از مسیر زیر انجام شود"
 
 #: thonny/plugins/pip_gui.py:417
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr "Anche i nuovi pacchetti verranno installati in questa cartella. Altre locazioni devono essere gestite con modalità alternative."
+msgstr "بسته‌های جدید در این پوشه نصب خواهند شد. مسیرهای دیگر باید با سایر روش‌ها مدیریت شود."
 
 #: thonny/plugins/pip_gui.py:441
 msgid "Installed version:"
-msgstr "Versione installata:"
+msgstr "نسخه نصب شده:"
 
 #: thonny/plugins/micropython/pip_gui.py:147 thonny/plugins/pip_gui.py:443
 msgid "Installed to:"
-msgstr "Installa su:"
+msgstr "نصب در:"
 
 #: thonny/plugins/pip_gui.py:494
 msgid "Please check your spelling!"
-msgstr "Per favore controlla lo spelling!"
+msgstr "لطفا غلط املائی را بررسی کنید!"
 
 #: thonny/plugins/pip_gui.py:512
 msgid "You need to enter"
-msgstr "Devi inserire"
+msgstr "باید وارد شوید"
 
 #: thonny/plugins/pip_gui.py:498
 msgid "Could not find the package info from PyPI."
-msgstr "Impossibile trovare il pacchetto in PyPl"
+msgstr "این بسته در PyPI یافت نشد."
 
 #: thonny/plugins/pip_gui.py:500 thonny/plugins/pip_gui.py:1200
 msgid "Error code:"
-msgstr "Codice di errore:"
+msgstr "کد خطا:"
 
 #: thonny/plugins/pip_gui.py:601
 msgid "Can't find package name from the list:"
-msgstr "Impossibile trovare il nome del pacchetto nella lista:"
+msgstr "بسته در فهرست زیر یافت نشد:"
 
 #: thonny/plugins/pip_gui.py:653
 msgid "Package '{}' is required for installing and uninstalling other packages."
-msgstr "Il pacchetto '{}' è necessario per installare e disinstallare altri\n"
-"pacchetti."
+msgstr "بسته «{}» برای نصب و یا حذف سایر بسته‌ها مورد نیاز است."
 
 #: thonny/plugins/pip_gui.py:696
 msgid "Package"
-msgstr "Pacchetto"
+msgstr "بسته"
 
 #: thonny/plugins/pip_gui.py:796
 msgid "Manage packages for %s"
-msgstr "Gestisci pacchetti per %s"
+msgstr "مدیریت بسته‌های %s"
 
 #: thonny/plugins/pip_gui.py:872
 msgid "Confirmation"
-msgstr ""
+msgstr "تایید"
 
 #: thonny/plugins/pip_gui.py:873
 msgid "Looks like you are installing a Thonny-related package.\n"
@@ -980,813 +974,818 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr "Sembra che stai installando un pacchetto relativo a Thonny.\n"
-"Se invece desideri installare un plugin di Thonny, allora dovresti scegliere 'Strumenti → Gestisci i plugin...'\n"
+msgstr "به نظر می رسد شما در حال نصب یکی از بسته‌های تانی هستنید.\n"
+"اگر قصد نصب پلاگینی برای تانی را دارید باید از «ابزارهای ← مدیریت افزونه‌ها...» اقدام کنید.\n"
 "\n"
-"Sei sicuro che vuoi installare %s per il back-end?"
+"آیا از نصب %s برای هسته کاملا مطمئن هستید؟"
 
 #: thonny/plugins/pip_gui.py:981
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
-msgstr "NB! Potrebbe essere disponibile un'altra versione che è compatibile con l'attuale versione di Thonny. Clicca sul pulsante '...' per scegliere la versione da installare."
+msgstr "توجه مهم! ممکن است نسخه دیگری موجود باشد که با نسخه فعلی تانی سازگار باشد. برای انتخاب نسخه مورد نظرتان برای نصب، بر روی دکمه «...» کلیک کنید."
 
 #: thonny/plugins/pip_gui.py:989
 msgid "Thonny plugin without requirements"
-msgstr "Plugin Thonny senza requisiti"
+msgstr "افزودنی‌های تانی بدون پیش‌نیاز"
 
 #: thonny/plugins/pip_gui.py:990
 msgid "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
 "\n"
 "If you still want it, then please install it from the command line."
-msgstr "Sembra che stai provando ad installare una versione non aggiornata del plug-in di Thonny (non è specificata la versione di Thonny richiesta).\n"
+msgstr "به نظر می رسد که شما در حال نصب یک افزونه قدیمی تانی هستید (نسخه مورد نیاز تانی را مشخص نمی کند).\n"
 "\n"
-"Se comunque lo vuoi, per favore installalo dalla linea di comando."
+"اگر واقعا آن را می خواهید ، لطفاً توسط خط فرمان آن را نصب کنید."
 
 #: thonny/plugins/pip_gui.py:1004
 msgid "Unsuitable requirements"
-msgstr ""
+msgstr "پیش‌نیازهای نامناسب"
 
 #: thonny/plugins/pip_gui.py:1005
 msgid "This package requires different Thonny version:"
-msgstr "Questo pacchetto richiede una versione differente di Thonny:"
+msgstr "این بسته به نسخه دیگری از تانی نیاز دارد:"
 
 #: thonny/plugins/pip_gui.py:1009
 msgid "If you still want it, then please install it from the command line."
-msgstr "Se ancora lo desideri, allora installalo dalla linea di comando."
+msgstr "اگر کماکان آن را می‌خواهید ، لطفاً آن را از خط فرمان نصب کنید."
 
 #: thonny/plugins/pip_gui.py:1052
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
-msgstr ""
+msgstr "در این حالت هسته تانی از مفسر یکسانی استفاده می کند، بنابراین هر دو پنجره بسته‌های یکسانی را مدیریت می کنند.)"
 
 #: thonny/plugins/pip_gui.py:1058
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
-msgstr "NB! Devi riavviare Thonny dopo aver installato / aggiornato / disinstallato un plug-in."
+msgstr "توجه مهم! بعد از نصب / ارتقاء / حذف افزونه‌ای، باید تانی را دوباره باز کنید."
 
 #: thonny/plugins/pip_gui.py:1068
 msgid "Thonny plug-ins"
-msgstr "plug-in di Thonny"
+msgstr "افزودنی‌های تانی"
 
 #: thonny/plugins/pip_gui.py:1090
 msgid "Advanced install / upgrade / downgrade"
-msgstr "Installazione / aggiornamento / downgrade avanzato"
+msgstr "نصب، ارتقاء یا نصب نسخه‌ قدیمی پیشرفته"
 
 #: thonny/plugins/pip_gui.py:1099
 msgid "Desired version"
-msgstr "Versione desiderata"
+msgstr "نسخه دلخواه"
 
 #: thonny/plugins/pip_gui.py:1137
 msgid "Upgrade dependencies"
-msgstr "Aggiorna le dipendenze"
+msgstr "به‌روزرسانی پیش‌نیازها"
 
 #: thonny/plugins/pip_gui.py:1198
 msgid "Requires:"
-msgstr "Richeide:"
+msgstr "مورد نیاز:"
 
 #: thonny/plugins/pip_gui.py:1202
 msgid "Error:"
-msgstr "Errore:"
+msgstr "خطا:"
 
 #: thonny/plugins/pip_gui.py:1409
 msgid "Manage packages..."
-msgstr "Gestisci i pacchetti:"
+msgstr "مدیریت بسته‌ها..."
 
 #: thonny/plugins/pip_gui.py:1415
 msgid "Manage plug-ins..."
-msgstr "Gestisci i plug-in..."
+msgstr "مدیریت افزودنی‌ها..."
 
 #: thonny/plugins/replayer.py:365
 msgid "Open replayer..."
-msgstr ""
+msgstr "باز کردن «بازپخش کننده»"
 
 #: thonny/plugins/run_debug_config_page.py:14
 msgid "Change working directory to script directory on Run / Debug"
-msgstr "Cambia la directory di lavoro alla directory dello script mentre Esegui / Debug"
+msgstr "پوشه فعلی را به پوشه اسکریپت در اجرا / خطایابی تغییر دهید"
 
 #: thonny/plugins/run_debug_config_page.py:22
 msgid "Show function calls (frames) in separate windows"
-msgstr ""
+msgstr "فراخوانی توابع را در پنجره‌های جداگانه (فریم‌ها) نمایش بده"
 
 #: thonny/plugins/run_debug_config_page.py:23
 msgid "Uncheck if you want more traditional experience."
-msgstr "Deseleziona se desideri un'esperienza più tradizionale."
+msgstr "اگر می خواهید تجربه سنتی‌تری داشته باشید، غیر فعالش کنید."
 
 #: thonny/plugins/run_debug_config_page.py:29
 msgid "Open and close Stack view automatically"
-msgstr "Apri e chiudi la vista Stack automaticamente"
+msgstr "باز و بسته شدن خودکار نمای اِستک"
 
 #: thonny/plugins/run_debug_config_page.py:30
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
-msgstr ""
+msgstr "نمای اِستک را در اولین فراخوانی نمایش داده و بعد از بازگشت\n"
+"برنامه به فریم اصلی آن را خواهد بست."
 
 #: thonny/plugins/run_debug_config_page.py:39
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
-msgstr ""
+msgstr "اجازه قدم گذاشتن به داخل کتابخانه‌ها (مانند مواقعی که خارج از پوشه اسکریپت هستید)"
 
 #: thonny/plugins/run_debug_config_page.py:40
 msgid "May make debugging slower."
-msgstr "Può renderelento il debug. "
+msgstr "ممکن است خطایابی را کندتر کند."
 
 #: thonny/plugins/run_debug_config_page.py:45
 msgid "Preferred debugger"
-msgstr "Debugger preferito"
+msgstr "خطایاب انتخابی"
 
 #: thonny/plugins/run_debug_config_page.py:57
 msgid "(used when clicking Debug toolbar button)"
-msgstr "(usato quando si clicca il bottone Debug nella toolbar)"
+msgstr "(هنگام کلیک کردن روی دکمه خطایابی  استفاده می شود)"
 
 #: thonny/plugins/run_debug_config_page.py:62
 msgid "Birdseye port"
-msgstr "Porta di Birdseye"
+msgstr "پورت Birdseye"
 
 #: thonny/plugins/run_debug_config_page.py:66
 msgid "(restart Thonny after changing this)"
-msgstr "(riavvia Thonny dopo aver cambiato questo)"
+msgstr "(بعد از تغییر این گزینه باید مجدد تانی را اجرا کنید)"
 
 #: thonny/plugins/run_debug_config_page.py:74
 msgid "Run & Debug"
-msgstr "Esegui & Debug"
+msgstr "اجرا و خطایابی"
 
 #: thonny/plugins/shell_config_page.py:17
 msgid "Terminal emulation"
-msgstr "Emulazione di terminale"
+msgstr "شبیه‌ ساز ترمینال"
 
 #: thonny/plugins/shell_config_page.py:19
 msgid "supports basic ANSI-colors and styles"
-msgstr ""
+msgstr "پشتیبانی از استایل‌ها و رنگ‌های ANSI ساده"
 
 #: thonny/plugins/shell_config_page.py:31
 msgid "Maximum number of lines to keep."
-msgstr "Numero massimo di linee da mantenere."
+msgstr "نگهداری حداکثر تعداد سطر ممکن."
 
 #: thonny/plugins/shell_config_page.py:33
 msgid "NB! Large values may cause poor performance!"
-msgstr "NB! Valori maggiori possono causare rallentamenti!"
+msgstr "توجه مهم! مقادیر بزرگ ممکن است باعث کاهش کارآیی شوند!"
 
 #: thonny/plugins/shell_config_page.py:49
 msgid "Maximum length of line fragments before squeezing"
-msgstr ""
+msgstr "حداکثر طول یک قطعه از خط قبل از فشرده شدن"
 
 #: thonny/plugins/terminal_config_page.py:12
 msgid "Running current script in terminal"
-msgstr "Esegui lo script corrente nel terminale"
+msgstr "اجرای این اسکریپ در شِل"
 
 #: thonny/plugins/terminal_config_page.py:17
 msgid "Present Python REPL after program ends"
-msgstr ""
+msgstr "نمایش Python REPL بعد از اتمام برنامه"
 
 #: thonny/plugins/terminal_config_page.py:24
 msgid "Keep terminal window open after Python process ends"
-msgstr "Mantieni aperta la finestra del terminale dopo la fine del processo di Python"
+msgstr "پنجره ترمینال را بعد از اتمام پردازش پایتون باز نگه دار"
 
 #: thonny/plugins/terminal_config_page.py:31
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
-msgstr ""
+msgstr "توجه مهم! بستن خودکار نیاز به فعال سازی تنظیمات ترمینال دارد\n"
+"(پروفایل ← شِل ← هنگام خروج از شِل)"
 
 #: thonny/plugins/terminal_config_page.py:41
 msgid "Terminal"
-msgstr "Terminale"
+msgstr "ترمینال"
 
 #: thonny/plugins/theme_and_font_config_page.py:40
 msgid "UI theme"
-msgstr "Tema UI"
+msgstr "قالب محیط نرم افزار"
 
 #: thonny/plugins/theme_and_font_config_page.py:53
 msgid "Syntax theme"
-msgstr "Tema della sintassi"
+msgstr "قالب نوشتار"
 
 #: thonny/plugins/theme_and_font_config_page.py:85
 msgid "Editor font"
-msgstr "Font dell'editor"
+msgstr "فونت ویرایشگر"
 
 #: thonny/plugins/theme_and_font_config_page.py:108
 msgid "IO font"
-msgstr "font di IO"
+msgstr "فونت IO"
 
 #: thonny/plugins/theme_and_font_config_page.py:133
 msgid "Preview"
-msgstr "Anteprima"
+msgstr "پیش‌نمایش"
 
 #: thonny/plugins/theme_and_font_config_page.py:145
 msgid "This is a comment"
-msgstr "Questo è un commento"
+msgstr "این یک توضیح است"
 
 #: thonny/plugins/theme_and_font_config_page.py:148
 msgid "The answer is"
-msgstr "La risposta è"
+msgstr "پاسخ"
 
 #: thonny/plugins/theme_and_font_config_page.py:152
 msgid "unclosed_string"
-msgstr ""
+msgstr "انتهای متن بسته نیست"
 
 #: thonny/plugins/theme_and_font_config_page.py:154
 msgid "blah, blah"
-msgstr "bla, bla"
+msgstr "و غیره"
 
 #: thonny/plugins/theme_and_font_config_page.py:177
 msgid "NB! Some style elements change only after restarting Thonny!"
-msgstr "NB! Alcuni elementi dello stile cambiano solo dopo aver riavviato Thonny!"
+msgstr "توجه مهم! برخی از تغییرات ظاهری موارد نیاز به اجرای دوباره تانی دارد!"
 
 #: thonny/plugins/theme_and_font_config_page.py:216
 msgid "Enter an integer"
-msgstr "Inserisci un intero"
+msgstr "عددی صحیح را وارد کنید"
 
 #: thonny/plugins/theme_and_font_config_page.py:229
 msgid "Theme & Font"
-msgstr "Temi & Font"
+msgstr "قالب و فونت"
 
 #: thonny/plugins/thonny_folders.py:19
 msgid "Open Thonny program folder..."
-msgstr "Apri la cartella di porogramma di Thonny..."
+msgstr "نمایش فولدر برنامه تانی"
 
 #: thonny/plugins/thonny_folders.py:24
 msgid "Open Thonny data folder..."
-msgstr "Apri la cartella dei dati di Thonny"
+msgstr "نمایش فولدر داده‌های تانی"
 
 #: thonny/plugins/help/__init__.py:64
 msgid "Home"
-msgstr "Home"
+msgstr "خانه"
 
 #: thonny/plugins/help/__init__.py:75
 msgid "Help contents"
-msgstr "Contenuti dell'aiuto"
+msgstr "محتوای راهنما"
 
 #: thonny/plugins/micropython/__init__.py:274
 msgid "CircuitPython device"
-msgstr "Dispositivo CircuitPython"
+msgstr "دستگاه CircuitPython"
 
 #: thonny/plugins/micropython/__init__.py:278
 msgid "MicroPython device"
-msgstr "Dispositivo MicroPython "
+msgstr "دستگاه MicroPython"
 
 #: thonny/plugins/micropython/__init__.py:476
 msgid "Connect your device to the computer and select corresponding port below"
-msgstr "Collega il tuo dispositivo al computer e seleziona la porta corrispondente\n"
-"quì sotto"
+msgstr "دستگاه خود را به رایانه متصل کرده و پورت مربوط را از زیر انتخاب کنید"
 
 #: thonny/plugins/micropython/__init__.py:479
 msgid "look for your device name, \"USB Serial\" or \"UART\""
-msgstr "cerca il nome del tuo dispositivo, \"USB Serial\" o \"UART\""
+msgstr "نام دستگاه خود،  «USB Serial» یا «UART» را مشخص کنید"
 
 #: thonny/plugins/micropython/__init__.py:481
 msgid "If you can't find it, you may need to install proper USB driver first."
-msgstr "Se non riesci a trovarlo potresti aver bisgno di installare un driver USB adatto."
+msgstr "اگر آن را پیدا نکردید،احتمالا لازم است که ابتدا درایور USB مناسب را نصب کنید."
 
 #: thonny/plugins/micropython/__init__.py:401
 msgid "Port"
-msgstr "Porta"
+msgstr "پورت"
 
 #: thonny/plugins/micropython/__init__.py:411
 msgid "Try to detect port automatically"
-msgstr "Prova a determinare la porta automaticamente"
+msgstr "شروع تشخیص خودکار پورت"
 
 #: thonny/plugins/micropython/__init__.py:954
 msgid "MicroPython (generic)"
-msgstr "MicroPython (generico)"
+msgstr "MicroPython (عمومی)"
 
 #: thonny/plugins/printing/__init__.py:82
 msgid "Print..."
-msgstr "Stampa..."
+msgstr "چاپ..."
 
 #: thonny/plugins/system_shell/__init__.py:59
 msgid "Open system shell..."
-msgstr "Apri shell di sistema..."
+msgstr "بازکردن شِل سیستم"
 
 #: thonny/plugins/backend_config_page.py:103
 msgid "Details"
-msgstr "Dettagli"
+msgstr "جزئیات"
 
 #: thonny/plugins/pip_gui.py:345
 msgid "Install from requirements file"
-msgstr "Installa dal file requirements"
+msgstr "نصب از فایل‌های مورد نیاز"
 
 #: thonny/plugins/pip_gui.py:380
 msgid "Install from local file"
-msgstr "Installa da file locale"
+msgstr "نصب با فایل‌های موجود"
 
 #: thonny/plugins/pip_gui.py:1038
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
-msgstr ""
+msgstr "این پنجره برای مدیریت افزونه‌های تانی و وابستگی‌های آنها است.\n"
+"اگر می‌خواهید که یک بسته را برای برنامه‌تان نصب کنید\n"
+" باید اینکار را «ابزارها ← مدیریت بسته‌ها» انجام دهید."
 
 #: thonny/plugins/circuitpython/__init__.py:163
 msgid "CircuitPython (generic)"
-msgstr "CircuitPython (generico)"
+msgstr "CircuitPython (عمومی)"
 
 #: thonny/plugins/commenting_indenting.py:143
 msgid "Indent selected lines"
-msgstr "Indenta le linee selezionate"
+msgstr "تورفتگی خطوط انتخابی"
 
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Dedent selected lines"
-msgstr "Deindenta le linee selezionate"
+msgstr "حذف تورفتگی خطوط انتخابی"
 
 #: thonny/workbench.py:1391
 msgid "Switch to\n"
 "regular\n"
 "mode"
-msgstr "Passa alla modalità regolare"
+msgstr "برگشت\n"
+" به حالت\n"
+"عادی"
 
 #: thonny/plugins/microbit/__init__.py:55
 msgid "Make sure MicroPython has been installed to your micro:bit."
-msgstr "Verifica che MicroPython è stato installato nel tuo micro:bit."
+msgstr "مطمئن شوید که MicroPython بر روی micro:bit شما نصب است..."
 
 #: thonny/plugins/microbit/__init__.py:57
 msgid "Don't forget that main.py only works without embedded main script."
-msgstr ""
+msgstr "دقت کنید که main.py در صورتی کار می‌کند که بدون اسکریپ main باشد."
 
 #: thonny/plugins/micropython/uf2dialog.py:45
 msgid "please wait"
-msgstr "attendere prego"
+msgstr "اندکی صبر..."
 
 #: thonny/plugins/microbit/__init__.py:199
 msgid "Done!"
-msgstr "Fatto!"
+msgstr "انجام شد!"
 
 #: thonny/plugins/micropython/__init__.py:298
 msgid "Firmware"
-msgstr "Firmware"
+msgstr "سفت‌افزار"
 
 #: thonny/misc_utils.py:134
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
-msgstr "Non ho trovato il disco '%s'. Vuoi cercarlo da solo?"
+msgstr "دیسک %s پیدا نشد. آیا مایلید که محل آن را خودتان مشخص کنید؟"
 
 #: thonny/misc_utils.py:137
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
-msgstr ""
+msgstr "چندین دیسک %s پیدا شد. آیا مایلید که خودتان یکی از آنها را انتخاب کنید؟"
 
 #: thonny/misc_utils.py:153
 msgid "Can't find suitable disk"
-msgstr "Non trovo un disco adeguato"
+msgstr "دیسک مناسب یافت نشد"
 
 #: thonny/base_file_browser.py:273
 msgid "%d items"
-msgstr "%d elementi"
+msgstr "تعداد %d مورد"
 
 #: thonny/base_file_browser.py:692
 msgid "Move to Recycle Bin"
-msgstr "Sposta nel cestino"
+msgstr "انتقال به سطل بازیافت"
 
 #: thonny/base_file_browser.py:694
 msgid "Move to Trash"
-msgstr "Elimina definitivamente"
+msgstr "انتقال به سطل زباله"
 
 #: thonny/base_file_browser.py:697
 msgid "Delete"
-msgstr "Cancella"
+msgstr "حذف"
 
 #: thonny/base_file_browser.py:700 thonny/base_file_browser.py:834
 msgid "New directory"
-msgstr "Nuova cartella"
+msgstr "پوشه جدید"
 
 #: thonny/base_file_browser.py:703
 msgid "Properties"
-msgstr "Proprietà"
+msgstr "ویژگی‌ها"
 
 #: thonny/base_file_browser.py:705
 msgid "Storage space"
-msgstr "Spazio di memorizzazione"
+msgstr "فضای ذخیره"
 
 #: thonny/base_file_browser.py:715
 msgid "Path"
-msgstr "Percorso"
+msgstr "مسیر"
 
 #: thonny/base_file_browser.py:717
 msgid "Directory properties"
-msgstr "Proprietà della cartella"
+msgstr "مشخصات پوشه"
 
 #: thonny/base_file_browser.py:719
 msgid "File properties"
-msgstr "Proprietà del file"
+msgstr "مشخصات فایل"
 
 #: thonny/base_file_browser.py:721
 msgid "bytes"
-msgstr "bytes"
+msgstr "بایت‌ها"
 
 #: thonny/base_file_browser.py:724
 msgid "Size"
-msgstr "Grandezza"
+msgstr "اندازه"
 
 #: thonny/base_file_browser.py:83 thonny/base_file_browser.py:735
 msgid "Modified"
-msgstr "Modificato"
+msgstr "ویرایش شده"
 
 #: thonny/base_file_browser.py:794
 msgid "Deleting %s"
-msgstr "Sto cancellando %s"
+msgstr "حذف %s"
 
 #: thonny/base_file_browser.py:817
 msgid "Moving %s to %s"
-msgstr "Sto spostando %s su %s"
+msgstr "انتقال %s به %s"
 
 #: thonny/editors.py:219
 msgid "Loading"
-msgstr "Sto caricando"
+msgstr "در حال بازگذاری"
 
 #: thonny/editors.py:335
 msgid "Saving"
-msgstr "Sto salvando"
+msgstr "در حال ذخیره"
 
 #: thonny/running.py:1408
 msgid "Working..."
-msgstr "Sto lavorando..."
+msgstr "درحال کار کردن..."
 
 #: thonny/plugins/files.py:199
 msgid "Uploading %s to %s"
-msgstr "Sto aggiornando %s su %s"
+msgstr "بارگذاری %s در %s"
 
 #: thonny/plugins/files.py:216
 msgid "Upload to %s"
-msgstr "Sto caricando su %"
+msgstr "آپلود به %s"
 
 #: thonny/plugins/files.py:362
 msgid "Downloading %s to %s"
-msgstr "Sto scaricando %s su %s"
+msgstr "درحال دانلود %s در %s"
 
 #: thonny/plugins/files.py:275
 msgid "Download to %s"
-msgstr "Sto scaricando %s"
+msgstr "دانلود در %s"
 
 #: thonny/base_file_browser.py:620
 msgid "Open in system file manager"
-msgstr "Apri nel file manager di sistema"
+msgstr "بازکردن در برنامه مدیریت فایل سیستم"
 
 #: thonny/base_file_browser.py:625
 msgid "Hide hidden files"
-msgstr "Nascondi i files nascosti"
+msgstr "عدم نمایش فایل‌های مخفی"
 
 #: thonny/base_file_browser.py:625
 msgid "Show hidden files"
-msgstr "Mostra i files nascosti"
+msgstr "نمایش فایل‌های مخفی"
 
 #: thonny/base_file_browser.py:635
 msgid "Open in Thonny"
-msgstr "Apri in Thonny"
+msgstr "بازکردن در تانی"
 
 #: thonny/base_file_browser.py:640 thonny/base_file_browser.py:661
 msgid "Open in system default app"
-msgstr "Apri nell'app di sistema predefinita"
+msgstr "بازکردن با نرم افزار پیش‌فرض سیستم"
 
 #: thonny/base_file_browser.py:647 thonny/base_file_browser.py:669
 msgid "Configure %s files"
-msgstr "Configura i files %s"
+msgstr "%s فایل تنظیم شد"
 
 #: thonny/base_file_browser.py:670
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
-msgstr ""
+msgstr "وقتی که فایل %s را در مرورگر فایل تانی دوبار کلیک شد، چه شود؟"
 
 #: thonny/base_file_browser.py:1042 thonny/plugins/micropython/pip_gui.py:77
 msgid "Deleting"
-msgstr "Sto cancellando"
+msgstr "در حال حذف"
 
 #: thonny/base_file_browser.py:1049
 msgid "Creating directory"
-msgstr "Sto creando la directory"
+msgstr "ساخت پوشه"
 
 #: thonny/editors.py:217
 msgid "Loading %s"
-msgstr "Sto caricando %s"
+msgstr "در حال بارگذاری %s"
 
 #: thonny/editors.py:333
 msgid "Saving to %s"
-msgstr "Sto salvando su %s"
+msgstr "در حال ذخیره %s"
 
 #: thonny/editors.py:622 thonny/editors.py:624
 msgid "Save All files"
-msgstr "Salva tutti i files"
+msgstr "ذخیره تمامی فایل‌ها"
 
 #: thonny/workbench.py:828
 msgid "Configure interpreter..."
-msgstr "Configura l'interprete..."
+msgstr "پیکره‌بندی مفسر..."
 
 #: thonny/workbench.py:1501
 msgid "Device"
-msgstr "Dispotivo"
+msgstr "دستگاه"
 
 #: thonny/workdlg.py:185
 msgid "Cancelling"
-msgstr "Sto cancellando"
+msgstr "درحال لغو"
 
 #: thonny/workdlg.py:212
 msgid "Starting"
-msgstr "Sto iniziando"
+msgstr "درحال شروع"
 
 #: thonny/plugins/backend_config_page.py:234
 msgid "Authentication"
-msgstr "Autenticazione"
+msgstr "احراز هویت"
 
 #: thonny/plugins/backend_config_page.py:236
 msgid "Enter the passphrase of your private key for\n"
 "{}"
-msgstr ""
+msgstr "برای {} عبارت کلید خصوصی خود را وارد کنید"
 
 #: thonny/plugins/backend_config_page.py:239
 msgid "Enter your password for\n"
 "{}"
-msgstr "Inserisci la tua password per\n"
-"{}"
+msgstr "برای {} گذرواژه خود را وارد کنید"
 
 #: thonny/plugins/object_inspector.py:458
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
-msgstr ""
+msgstr "مقدار نمایش داده شده در بالا، مقدار تقریبی این عدد اعشاری است. مقدار دقیق ذخیره شده در %s تقریبا %s است."
 
 #: thonny/plugins/pip_gui.py:557
 msgid "Search results"
-msgstr "Risultati della ricerca"
+msgstr "نتایج جستجو"
 
 #: thonny/plugins/pip_gui.py:558
 msgid "Searching"
-msgstr "Ricerca in corso"
+msgstr "در حال جستجو"
 
 #: thonny/plugins/pip_gui.py:639 thonny/plugins/pip_gui.py:729
 msgid "Installing '%s'"
-msgstr "Sto installando '%s'"
+msgstr "در حال نصب «%s»"
 
 #: thonny/plugins/pip_gui.py:645
 msgid "Upgrading '%s'"
-msgstr "Sto aggiornando'%s'"
+msgstr "در حال ارتقای «%s»"
 
 #: thonny/plugins/pip_gui.py:650
 msgid "Uninstalling '%s'"
-msgstr "Sto disinstallando '%s'"
+msgstr "در حال حذف «%s»"
 
 #: thonny/plugins/pip_gui.py:663
 msgid "Installing"
-msgstr "Installazione in corso"
+msgstr "در حال نصب"
 
 #: thonny/plugins/pip_gui.py:1372
 msgid "Package manager is not available for this interpreter"
-msgstr "Il gestore dei pacchetti non è disponibile per questo interprete"
+msgstr "مدیریت بسته برای این مفسر موجود نیست"
 
 #: thonny/plugins/pip_gui.py:1385
 msgid "Not supported"
-msgstr "Non supportato"
+msgstr "پشتیبانی نمی‌شود"
 
 #: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1390
 msgid "Not available"
-msgstr "Non disponibile"
+msgstr "موجود نیست"
 
 #: thonny/plugins/pip_gui.py:1391
 msgid "You need to stop your program before launching the package manager."
-msgstr "Devi stoppare il tuo programma prima di lanciare il manager dei pacchetti."
+msgstr "قبل از راه‌اندازی مدیریت بسته‌ها، باید برنامه خود را متوقف کنید."
 
 #: thonny/plugins/shell_config_page.py:64
 msgid "Open evaluated values in Object inspector"
-msgstr ""
+msgstr "نمایش مقدار محاسبه شده را در بازرس اشیاء"
 
 #: thonny/plugins/cpython/__init__.py:370
 msgid "Python executable"
-msgstr "Eseguibile Python"
+msgstr "فایل اجرایی پایتون"
 
 #: thonny/plugins/cpython/__init__.py:393
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
-msgstr ""
+msgstr "توجه مهم! دکمه انتخاب فایل در هنگام انتخاب فایل‌های اجرایی در محیط مجازی ممکن است به درستی کار نکند. در این صورت اسکریپت «activate» را به جای مفسر انتخاب کنید (و یا مسیر را در قسمت مسیر مستقیما وارد کنید)!"
 
 #: thonny/plugins/cpython_ssh/__init__.py:153
 msgid "Remote Python 3 (SSH)"
-msgstr ""
+msgstr "دسترسی از راه‌ دور پایتون 3 (SSH)"
 
 #: thonny/plugins/micropython/__init__.py:284
 msgid "Not connected"
-msgstr "Non connesso"
+msgstr "وصل نیست"
 
 #: thonny/plugins/micropython/__init__.py:453
 msgid "Advanced options"
-msgstr "Opzioni avanzate"
+msgstr "تنظیمات پیشرفته"
 
 #: thonny/plugins/micropython/__init__.py:460
 msgid "Install or update firmware"
-msgstr "Installa o aggiorna il firmware"
+msgstr "نصب یا بروز رسانی سفت‌ابزار"
 
 #: thonny/plugins/micropython/__init__.py:963
 msgid "MicroPython (local)"
-msgstr "MicroPython (locale)"
+msgstr "میکروپایتون (محلی)"
 
 #: thonny/plugins/micropython/__init__.py:973
 msgid "MicroPython (SSH)"
-msgstr "MicroPython (SSH)"
+msgstr "میکروپایتون (SSH)"
 
 #: thonny/plugins/micropython/pip_gui.py:134
 msgid "Module"
-msgstr "Modulo"
+msgstr "ماژول"
 
 #: thonny/plugins/micropython/pip_gui.py:159
 msgid "Shadowed items (not importable):"
-msgstr ""
+msgstr "موارد سایه‌دار (وارد نشده‌اند):"
 
 #: thonny/plugins/micropython/pip_gui.py:208
 msgid "Package is not available at micropython.org. Version at PyPI will be installed."
-msgstr "Il pacchetto non è disponibile in micropython.org. Verrà installata la versione di PyPI."
+msgstr "این بسته در micropython.org موجود نبود. نسخه موجود در PyPI نصب خواهد شد."
 
 #: thonny/plugins/micropython/pip_gui.py:219
 msgid "NB! micropython.org has published version %s of this package and this will be installed by default."
-msgstr "NB! micropython.org ha pubblicato la versione %s di questo pacchetto e verrà installata di default."
+msgstr "توجه مهم! micropython.org نسخه %s این بسته را منتشر کرده است و به صورت پیش فرض نصب خواهد شد."
 
 #: thonny/plugins/micropython/pip_gui.py:245
 msgid "For upgrading simply install the package again."
-msgstr "Per aggiornare, reinstalla nuovamente il pacchetto."
+msgstr "برای به روزرسانی ساده‌تر، بسته را دوباره نصب کنید."
 
 #: thonny/plugins/micropython/pip_gui.py:248
 msgid "For uninstalling delete corresponding files."
-msgstr "Per disinstallare, cancella i files corrispondenti"
+msgstr "برای حذف فایلهای مربوطه را حذف کنید."
 
 #: thonny/plugins/micropython/pip_gui.py:262
 msgid "Scope"
-msgstr ""
+msgstr "میدان دید"
 
 #: thonny/plugins/micropython/pip_gui.py:275
 msgid "This dialog lists top-level modules from following directories:\n"
 ""
-msgstr ""
+msgstr "این پنجره ماژول‌های سطح بالا را از پوشه‌های  زیر لیست می کند:"
 
 #: thonny/plugins/micropython/pip_gui.py:284
 msgid "New packages will be installed to"
-msgstr "I nuovi pacchetti verranno installati in"
+msgstr "بسته‌های جدید نصب خواهند شد در"
 
 #: thonny/plugins/micropython/pip_gui.py:292
 msgid "no absolute lib directory in sys.path"
-msgstr ""
+msgstr "بدون پوشه مشخص (مطلق) lib در sys.path"
 
 #: thonny/plugins/micropython/uf2dialog.py:40
 msgid "Version to be installed"
-msgstr "Versione da installare"
+msgstr "نسخه‌ای که نصب خواهد شد"
 
 #: thonny/plugins/micropython/uf2dialog.py:48
 msgid "Target device location"
-msgstr ""
+msgstr "محل دستگاه مقصد"
 
 #: thonny/plugins/micropython/uf2dialog.py:59
 msgid "Target device model"
-msgstr ""
+msgstr "نوع دستگاه مقصد"
 
 #: thonny/plugins/micropython/uf2dialog.py:145
 msgid "Please wait"
-msgstr "Attendere"
+msgstr "اندکی صبر..."
 
 #: thonny/plugins/pip_gui.py:67
 msgid "Search on PyPI"
-msgstr "Cerca in PyPI"
+msgstr "جستجو در PyPI"
 
 #: thonny/plugins/pip_gui.py:79
 msgid "Delete selected"
-msgstr ""
+msgstr "حذف انتخاب شده‌ها"
 
 #: thonny/base_file_browser.py:662
 msgid "Open in Thonny's text editor"
-msgstr "Apri nell'editor di testo di Thonny"
+msgstr "در ویرایشگر متنی تانی باز شود"
 
 #: thonny/base_file_browser.py:325
 msgid "Storage space on this drive or filesystem"
-msgstr "Spazio di memorizzazione in questo drive o filesystem"
+msgstr "فضای ذخیره سازی در این درایو"
 
 #: thonny/base_file_browser.py:326
 msgid "total space"
-msgstr "spazio totale"
+msgstr "فضای کل"
 
 #: thonny/base_file_browser.py:328
 msgid "used space"
-msgstr "spazio usato"
+msgstr "فضای استفاده شده"
 
 #: thonny/base_file_browser.py:329
 msgid "free space"
-msgstr "spazio libero"
+msgstr "فضای آزاد"
 
 #: thonny/base_file_browser.py:336
 msgid "Storage info"
-msgstr "Info sulla memorizzazione"
+msgstr "اطلاعات فضای ذخیره سازی"
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Replace tabs with spaces"
-msgstr "Sostituisci le tabulazioni con gli spazi"
+msgstr "جایگزینی Tabها با فاصله"
 
 #: thonny/plugins/editor_config_page.py:28
 msgid "Highlight tab characters"
-msgstr "Evidenzia i caratteri di tabulazione"
+msgstr "نمایان کردن Tabها"
 
 #: thonny/plugins/editor_config_page.py:47
 msgid "Indent with tab characters (not recommended for Python)"
-msgstr "Indentazione con caratteri di tabulazione (non raccomandato con Python)"
+msgstr "ایجاد تورفتگی با Tab (در پایتون این کار توصیه نمی‌شود)"
 
 #: thonny/base_file_browser.py:81 thonny/memory.py:63
 msgid "Name"
-msgstr "Nome"
+msgstr "نام"
 
 #: thonny/base_file_browser.py:85
 msgid "Size (bytes)"
-msgstr "Grandezza (bytes)"
+msgstr "اندازه (بایت)"
 
 #: thonny/base_file_browser.py:835
 msgid "Enter name for new directory under\n"
 "%s"
-msgstr "Inserisci il nome per la nuova directory in %s"
+msgstr "نام پوشه جدید که در زیر مجموعه پوشه زیر ساخته خواهد شد را وارد کنید.\n"
+"%s"
 
 #: thonny/base_file_browser.py:858
 msgid "Nothing selected"
-msgstr "Non è selezionato niente"
+msgstr "چیزی انتخاب نشده است"
 
 #: thonny/base_file_browser.py:858
 msgid "Select an item and try again!"
-msgstr "Seleziona un elemento e prova di nuovo!"
+msgstr "موردی را انتخاب کنید و دوباره امتحان کنید!"
 
 #: thonny/base_file_browser.py:1105
 msgid "Open from %s"
-msgstr "Apri da %s"
+msgstr "باز کردن از %s"
 
 #: thonny/base_file_browser.py:1108
 msgid "Save to %s"
-msgstr "Salva in %s"
+msgstr "ذخیره در %s"
 
 #: thonny/base_file_browser.py:1120
 msgid "File name:"
-msgstr "Nome del file:"
+msgstr "نام فایل:"
 
 #: thonny/memory.py:64 thonny/plugins/object_inspector.py:510
 #: thonny/plugins/object_inspector.py:589
 msgid "Value ID"
-msgstr "ID del valore"
+msgstr "شناسه مقدار"
 
 #: thonny/memory.py:65 thonny/plugins/heap.py:23
 #: thonny/plugins/object_inspector.py:511
 #: thonny/plugins/object_inspector.py:590
 msgid "Value"
-msgstr "Valore"
+msgstr "مقدار"
 
 #: thonny/plugins/backend_config_page.py:257
 msgid "Save password"
-msgstr "Salva password"
+msgstr "ذخیره گذرواژه"
 
 #: thonny/plugins/debugger.py:553
 msgid "Function call at %s"
-msgstr ""
+msgstr "فراخوانی تابع در %s"
 
 #: thonny/plugins/debugger.py:1001
 msgid "Local variables"
-msgstr "Variabili locali"
+msgstr "متغیرهای محلی"
 
 #: thonny/plugins/debugger.py:1033
 msgid "Function"
-msgstr "Funzione"
+msgstr "تابع"
 
 #: thonny/plugins/debugger.py:1034
 msgid "Location"
-msgstr ""
+msgstr "محل"
 
 #: thonny/plugins/debugger.py:1110
 msgid "If last command raised an exception then this view will show the stacktrace."
-msgstr ""
+msgstr "اگر آخرین دستور یک خطا را ایجاد کند این نما، stacktrace (ردیاب اِستک) را نمایش می‌دهد."
 
 #: thonny/plugins/heap.py:22
 msgid "ID"
-msgstr "ID"
+msgstr "شناسه"
 
 #: thonny/plugins/object_inspector.py:87
 msgid "Data"
-msgstr ""
+msgstr "داده"
 
 #: thonny/plugins/object_inspector.py:88
 msgid "Attributes"
-msgstr "Attributi"
+msgstr "خواص"
 
 #: thonny/plugins/object_inspector.py:509
 msgid "Index"
-msgstr "Indice"
+msgstr "اندیس"
 
 #: thonny/plugins/object_inspector.py:587
 msgid "Key ID"
-msgstr "ID della chiave"
+msgstr "شناسه کلید"
 
 #: thonny/plugins/object_inspector.py:588
 msgid "Key"
-msgstr "Chiave"
+msgstr "کلید"
 
 #: thonny/plugins/variables.py:36
 msgid "Back to\n"
 "%s"
-msgstr "Torna a %s"
+msgstr "برگرد به %s"
 
 #: thonny/plugins/micropython/__init__.py:401
 msgid "Port or WebREPL"
-msgstr ""
+msgstr "پورت WebREPL"
 
 #: thonny/plugins/micropython/__init__.py:518
 msgid "Password"
-msgstr "Password"
+msgstr "گذرواژه"
 
 #: thonny/plugins/debugger.py:959
 msgid "Source code"
-msgstr "Codice sorgente"
+msgstr "کد اصلی"
 
 #: thonny/plugins/general_config_page.py:29
 msgid "Use Tk file dialogs instead of Zenity"
-msgstr ""
+msgstr "به جای پنجره فایل Zenity از Tk استفاده کنید"
 
 #: thonny/plugins/general_config_page.py:30
 msgid "Select if the file dialogs end up behind the main window"
-msgstr ""
+msgstr "اگر پنجره‌ها پشت پنجره اصلی برنامه قرار می‌گیرد، این گزینه را انتخاب کنید"
 
 #: thonny/plugins/general_config_page.py:97
 msgid "Environment variables (one KEY=VALUE per line)"
-msgstr ""
+msgstr "متغیرهای محیطی (در هر سطر یک مقدار=کلید)"
 

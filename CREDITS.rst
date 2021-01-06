@@ -48,6 +48,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Ankith
 * Antonio Carlos
 * Austin Bart
+* Avag. sayan
 * badukaire
 * borpol
 * cefn
@@ -61,6 +62,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Dominik George
 * Eliot Blennerhassett
 * Emanuel Angelo
+* Farshid Meidani
 * Filip Schouwenaars
 * Fizban
 * fstengel
@@ -72,6 +74,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Jarek Miszczak
 * Jens Diemer
 * Juan Falgueras
+* jose1711
 * Kauri Raba
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
