@@ -192,6 +192,7 @@ class ShellView(tk.PanedWindow):
 
     def print_error(self, txt):
         self.text._insert_text_directly(txt, ("io", "stderr"))
+        self.text.see("end")
 
     def insert_command_link(self, txt, handler):
         self.text._insert_command_link(txt, handler)
