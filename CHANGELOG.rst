@@ -2,6 +2,24 @@
 Version history
 ===============
 
+3.3.2 (2021-01-06)
+==================
+* Fix the problem of missing docstrings, #1481
+* Fix MicroPython management error after executing machine.reset(), #1492
+* Add support for MicroPython raw paste mode (usable in MicroPython 1.14+), #1498
+* Restore MicroPython raw mode as fallback, should fix problems with M5Stick and W600, #1516
+* Add syntax highlighting for non-decimal number literals and support underscores, #1482 by Stefan Rothe
+* Make sure all output from the program gets presented, #1504
+* Interrupt current program when running a MicroPython script, #1512
+* Add support for Jedi 0.18, #1497
+* Fix arguments completions for jedi 0.16+, #1511
+* Make micro:bit support a bit more robust, #1515
+* Add Persian (Farsi) translation by Farshid Meidani
+* Add Slovak translation by jose1711
+* Add Armenian translation by Avag. sayan
+* Update Italian and Chinese (TW) translations
+
+
 3.3.1 (2020-12-06)
 ==================
 * Allow installing MicroPython to micro:bit v2
