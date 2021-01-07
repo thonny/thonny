@@ -13,6 +13,15 @@ Supporters
 * Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
 * Since September 2018, development of Thonny is partially supported by Cybernetica AS (https://cyber.ee).
 
+Serveral companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
+
+* Phidgets (https://www.phidgets.com/)
+* Adafruit (https://www.adafruit.com/)
+* Raspberry Pi Foundation (https://www.raspberrypi.org)
+* M5Stack (https://m5stack.com/)
+* Micro:bit educational foundation (https://microbit.org/)
+* Calliope (https://calliope.cc/en)
+
 Python
 ------
 It's a really nice language for teaching programming. It also has some nice technical properties, that made Thonny's program animation features pleasure to implement.
