@@ -15,7 +15,7 @@ Supporters
 
 Serveral companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
 
-* Phidgets (https://www.phidgets.com/)
+* Phidgets Education (https://www.phidgets.com/education/)
 * Adafruit (https://www.adafruit.com/)
 * Raspberry Pi Foundation (https://www.raspberrypi.org)
 * M5Stack (https://m5stack.com/)
