@@ -514,20 +514,33 @@ def _get_interpreters():
                 "C:\\Program Files\\Python 3.%d-64" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
+                "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
+                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d" % minor),
+                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d-32" % minor),
             ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
                     result.add(normpath_with_actual_case(path))
 
         # other locations
-        for dir_ in ["C:\\Anaconda3", os.path.expanduser("~/Anaconda3")]:
+        for dir_ in [
+            "C:\\Anaconda3",
+            "C:\\ProgramData\\Anaconda3",
+            os.path.expanduser("~\\Anaconda3"),
+        ]:
             path = os.path.join(dir_, WINDOWS_EXE)
             if os.path.exists(path):
                 result.add(normpath_with_actual_case(path))
 
     else:
         # Common unix locations
-        dirs = ["/bin", "/usr/bin", "/usr/local/bin", os.path.expanduser("~/.local/bin")]
+        dirs = [
+            "/bin",
+            "/usr/bin",
+            "/usr/local/bin",
+            os.path.expanduser("~/.local/bin"),
+            os.path.expanduser("~/anaconda3/bin"),
+        ]
         for dir_ in dirs:
             # if the dir_ is just a link to another dir_, skip it
             # (not to show items twice)
