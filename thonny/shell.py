@@ -1466,16 +1466,18 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _clear_content(self, cut_idx):
         proposed_cut_float = float(cut_idx)
         for btn in list(self._squeeze_buttons):
-            idx = self.index(btn)
-            if idx is None or float(idx) < proposed_cut_float:
-                self._squeeze_buttons.remove(btn)
-                # looks like the widgets are not fully GC-d.
-                # At least avoid leaking big chunks of texts
-                try:
+            try:
+                idx = self.index(btn)
+                if idx is None or idx == "" or float(idx) < proposed_cut_float:
+                    self._squeeze_buttons.remove(btn)
+                    # looks like the widgets are not fully GC-d.
+                    # At least avoid leaking big chunks of texts
                     btn.contained_text = None
                     btn.destroy()
-                except:
-                    logger.warning("Could not destroy a squeeze button")
+            except Exception as e:
+                logger.warning("Problem with a squeeze button, removing it", exc_info=e)
+                if btn in self._squeeze_buttons:
+                    self._squeeze_buttons.remove(btn)
 
         self.direct_delete("0.1", cut_idx)
 
