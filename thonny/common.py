@@ -9,9 +9,7 @@ import platform
 import site
 import subprocess
 import sys
-import traceback
 from collections import namedtuple
-from threading import Thread
 from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
 
 logger = logging.getLogger(__name__)

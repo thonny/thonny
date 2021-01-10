@@ -41,6 +41,9 @@ class CPythonProxy(SubprocessProxy):
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
 
+    def _get_environment(self):
+        env = super(CPythonProxy, self)._get_environment()
+
     def _get_launch_cwd(self):
         # launch in the directory containing thonny package, so that other interpreters can import it as well
         return os.path.dirname(os.path.dirname(thonny.__file__))
@@ -177,7 +180,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
                 )
 
     def _create_private_venv(self, path, description, clear=False, upgrade=False):
-        if not check_venv_installed(self):
+        if not _check_venv_installed(self):
             return
         # Don't include system site packages
         # This way all students will have similar configuration
@@ -433,7 +436,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             self._configuration_variable.set(filename)
 
     def _create_venv(self, event=None):
-        if not check_venv_installed(self):
+        if not _check_venv_installed(self):
             return
 
         messagebox.showinfo(
@@ -598,7 +601,7 @@ def _get_interpreters_from_windows_registry():
     return result
 
 
-def check_venv_installed(parent):
+def _check_venv_installed(parent):
     try:
         import venv
 

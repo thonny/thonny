@@ -865,11 +865,7 @@ class SubprocessProxy(BackendProxy):
     def _get_initial_cwd(self):
         return None
 
-    def _start_background_process(self, clean=None, extra_args=[]):
-        # deque, because in one occasion I need to put messages back
-        self._response_queue = collections.deque()
-
-        # prepare environment
+    def _get_environment(self):
         env = get_environment_for_python_subprocess(self._executable)
         # variables controlling communication with the back-end process
         env["PYTHONIOENCODING"] = "utf-8"
@@ -888,6 +884,11 @@ class SubprocessProxy(BackendProxy):
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
+        return env
+
+    def _start_background_process(self, clean=None, extra_args=[]):
+        # deque, because in one occasion I need to put messages back
+        self._response_queue = collections.deque()
 
         if not os.path.exists(self._executable):
             raise UserError(
@@ -923,7 +924,7 @@ class SubprocessProxy(BackendProxy):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self._get_launch_cwd(),
-            env=env,
+            env=self._get_environment(),
             universal_newlines=True,
             creationflags=creationflags,
             **extra_params
