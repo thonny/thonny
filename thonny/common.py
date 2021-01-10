@@ -305,6 +305,19 @@ def get_exe_dirs():
     if os.path.dirname(sys.executable) not in result:
         result.append(os.path.dirname(sys.executable))
 
+    # These entries are used by Anaconda
+    for part in [
+        "Library/mingw-w64/bin",
+        "Library/usr/bin",
+        "Library/bin",
+        "Scripts",
+        "bin",
+        "condabin",
+    ]:
+        dirpath = os.path.join(sys.prefix, part.replace("/", os.sep))
+        if os.path.isdir(dirpath) and dirpath not in result:
+            result.append(dirpath)
+
     return result
 
 

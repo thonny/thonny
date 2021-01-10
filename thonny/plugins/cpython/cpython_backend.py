@@ -55,6 +55,8 @@ from thonny.common import (
     range_contains_smaller,
     DebuggerResponse,
     get_python_version_string,
+    update_system_path,
+    get_augmented_system_path,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -117,6 +119,8 @@ class MainCPythonBackend(MainBackend):
         self._io_level = 0
         self._tty_mode = True
         self._tcl = None
+
+        update_system_path(os.environ, get_augmented_system_path(get_exe_dirs()))
 
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
