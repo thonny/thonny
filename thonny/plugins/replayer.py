@@ -173,7 +173,7 @@ class LogFrame(ui_utils.TreeFrame):
                 self.last_event_index += 1
 
         elif event_index < self.last_event_index:
-            # Undo by reseting and replaying again
+            # Undo by resetting and replaying again
             self.reset()
             self.select_event(event_index)
 

@@ -986,7 +986,7 @@ class MainCPythonBackend(MainBackend):
                     0,
                     FrameInfo(
                         # TODO: can this id be reused by a later frame?
-                        # Need to store the refernce to avoid GC?
+                        # Need to store the reference to avoid GC?
                         # I guess it is not required, as id will be required
                         # only for stacktrace inspection, and sys.last_exception
                         # will have the reference anyway

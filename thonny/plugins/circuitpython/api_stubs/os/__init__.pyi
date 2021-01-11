@@ -47,7 +47,7 @@ def stat(path: Any) -> Any:
     ...
 
 def statvfs(path: Any) -> Any:
-    """Get the status of a fileystem.
+    """Get the status of a filesystem.
 
     Returns a tuple with the filesystem information in the following order:
 
@@ -55,10 +55,10 @@ def statvfs(path: Any) -> Any:
          * ``f_frsize`` -- fragment size
          * ``f_blocks`` -- size of fs in f_frsize units
          * ``f_bfree`` -- number of free blocks
-         * ``f_bavail`` -- number of free blocks for unpriviliged users
+         * ``f_bavail`` -- number of free blocks for unprivileged users
          * ``f_files`` -- number of inodes
          * ``f_ffree`` -- number of free inodes
-         * ``f_favail`` -- number of free inodes for unpriviliged users
+         * ``f_favail`` -- number of free inodes for unprivileged users
          * ``f_flag`` -- mount flags
          * ``f_namemax`` -- maximum filename length
 

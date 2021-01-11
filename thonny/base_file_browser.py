@@ -827,7 +827,7 @@ class BaseFileBrowser(ttk.Frame):
             parent = self.current_focus
         else:
             if self.get_selected_kind() == "file":
-                # dirname does the right thing even if parent is Linux path and runnning on Windows
+                # dirname does the right thing even if parent is Linux path and running on Windows
                 parent = os.path.dirname(parent)
 
         name = ask_string(

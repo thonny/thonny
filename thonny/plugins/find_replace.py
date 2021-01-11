@@ -124,7 +124,7 @@ class FindDialog(CommonDialog):
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_button.config(state="disabled")
 
-        # Replace + find button - replaces the current occurence and goes to next
+        # Replace + find button - replaces the current occurrence and goes to next
         self.replace_and_find_button = ttk.Button(
             main_frame,
             text=tr("Replace+Find"),
@@ -228,7 +228,7 @@ class FindDialog(CommonDialog):
         self._perform_replace()
         self._perform_find()
 
-    # replaces all occurences of the search string with the replace string
+    # replaces all occurrences of the search string with the replace string
     def _perform_replace_all(self):
 
         tofind = self.find_entry.get()
@@ -304,7 +304,7 @@ class FindDialog(CommonDialog):
             search_start_index = self.codeview.text.index(
                 "insert"
             )  # start searching from the current insert position
-            self._find_and_tag_all(tofind)  # set the passive tag to ALL found occurences
+            self._find_and_tag_all(tofind)  # set the passive tag to ALL found occurrences
             FindDialog.last_searched_word = tofind  # set the data about last search
             self.last_search_case = self._is_search_case_sensitive()
 
@@ -368,7 +368,7 @@ class FindDialog(CommonDialog):
         self.replace_and_find_button.config(state="disabled")
         self.replace_button.config(state="disabled")
 
-    # finds and tags all occurences of the searched term
+    # finds and tags all occurrences of the searched term
     def _find_and_tag_all(self, tofind, force=False):
         # TODO - to be improved so only whole words are matched - surrounded by whitespace, parentheses, brackets, colons, semicolons, points, plus, minus
 

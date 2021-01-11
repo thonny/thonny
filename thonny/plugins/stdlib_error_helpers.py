@@ -126,7 +126,7 @@ class SyntaxErrorHelper(ErrorHelper):
                         self.tokens[keyword_pos + 1].type not in (token.NEWLINE, tokenize.COMMENT)
                         and t.string == "else"
                     ):
-                        body = "If you want to specify a conditon, then use `elif` or nested `if`."
+                        body = "If you want to specify a condition, then use `elif` or nested `if`."
                     break
 
             i += 1
@@ -420,7 +420,7 @@ class NameErrorHelper(ErrorHelper):
 
         return Suggestion(
             "local-from-global",
-            "Are you trying to acces a local variable outside of the function?",
+            "Are you trying to access a local variable outside of the function?",
             body,
             relevance,
         )

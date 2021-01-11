@@ -290,7 +290,7 @@ class VariablesHighlighter(BaseNameHighlighter):
 
 
 class UsagesHighlighter(BaseNameHighlighter):
-    """Script.usages looks tempting method to use for finding variable ocurrences,
+    """Script.usages looks tempting method to use for finding variable occurrences,
     but it only returns last
     assignments to a variable, not really all usages (with Jedi 0.10).
     But it finds attribute usages quite nicely.
