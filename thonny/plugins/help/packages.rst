@@ -38,7 +38,7 @@ your platform. Most likely you want graphical installer and 64-bit version (you 
 Install it and find out where it puts Python executable (*pythonw.exe* in Windows and 
 *python3* or *python* in Linux and Mac).
 
-In Thonny open "Tools" menu and select "Options...". In the options dialog open "Intepreter" 
+In Thonny open "Tools" menu and select "Options...". In the options dialog open "Interpreter" 
 tab, click "Select executable" and show the location of Anaconda's Python executable.
 
 After you have done this, next time you run your program, it will be run through Anaconda's 

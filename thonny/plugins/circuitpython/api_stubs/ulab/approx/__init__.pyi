@@ -23,7 +23,7 @@ def newton(fun, x0, *, xtol=2.4e-7, rtol=0.0, maxiter=50) -> float:
 
     Find a solution (zero) of the function ``f(x)`` using Newton's Method.
     The result is accurate to within ``xtol * rtol * |f(x)|`` unless more than
-    ``maxiter`` steps are requried."""
+    ``maxiter`` steps are required."""
     ...
 
 def fmin(fun, x0, *, xatol=2.4e-7, fatol=2.4e-7, maxiter=200) -> float:
@@ -36,7 +36,7 @@ def fmin(fun, x0, *, xatol=2.4e-7, fatol=2.4e-7, maxiter=200) -> float:
     Find a minimum of the function ``f(x)`` using the downhill simplex method.
     The located ``x`` is within ``fxtol`` of the actual minimum, and ``f(x)``
     is within ``fatol`` of the actual minimum unless more than ``maxiter``
-    steps are requried."""
+    steps are required."""
     ...
 
 def interp(x: ulab.array, xp:ulab.array, fp:ulab.array, *, left=None, right=None) -> ulab.array:

@@ -13,7 +13,7 @@ Supporters
 * Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
 * Since September 2018, development of Thonny is partially supported by Cybernetica AS (https://cyber.ee).
 
-Serveral companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
+Several companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
 
 * Phidgets Education (https://www.phidgets.com/education/)
 * Adafruit (https://www.adafruit.com/)
@@ -39,7 +39,7 @@ Libraries, resources and tools
 * distro (https://pypi.python.org/pypi/distro) is optionally used for detecting Linux version in About dialog.
 * paramiko (https://pypi.org/project/paramiko) is optionally used for writing and running code on remote machines.
 * websockets (https://pypi.org/project/websockets) is optionally used for communicating with MicroPython devices over WebREPL.
-* Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overriden by Tango icons (http://tango.freedesktop.org/)
+* Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overridden by Tango icons (http://tango.freedesktop.org/)
 * POEditor (https://poeditor.com/) is used for managing translations of UI strings.
 
 Source contributors, advisors, translators and frequent bug-reporters

@@ -424,7 +424,7 @@ class PipDialog(CommonDialog):
         self.current_package_data = None
         # Fetch info from PyPI
         self._set_state("fetching")
-        # Follwing fetches info about latest version.
+        # Following fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
         _start_fetching_package_info(name, None, self._show_package_info)

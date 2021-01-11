@@ -114,7 +114,7 @@ def _patch_intercept_mark():
     Looks like this solution is safe, but I don't dare to include
     it in the main code.
 
-    UPADTE: not safe. Select and delete a block of lines. Write a new
+    UPDATE: not safe. Select and delete a block of lines. Write a new
     line and do Ctrl-Z"""
 
     original_intercept_mark = CodeViewText.intercept_mark

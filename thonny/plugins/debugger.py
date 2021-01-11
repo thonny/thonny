@@ -943,7 +943,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
     def _init_layout_widgets(self, master, frame_info):
         self.main_frame = ttk.Frame(
             self
-        )  # just a backgroud behind padding of main_pw, without this OS X leaves white border
+        )  # just a background behind padding of main_pw, without this OS X leaves white border
         self.main_frame.grid(sticky=tk.NSEW)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)

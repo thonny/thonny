@@ -34,7 +34,7 @@
   specified in valid-classmethod-first-arg option (default to "cls"),
   recommended to easily differentiate them from regular instance methods.
 :bad-mcs-method-argument (C0203): *Metaclass method %s should have %s as first argument*
-  Used when a metaclass method has a first agument named differently than the
+  Used when a metaclass method has a first argument named differently than the
   value specified in valid-classmethod-first-arg option (default to "cls"),
   recommended to easily differentiate them from regular instance methods.
 :bad-mcs-classmethod-argument (C0204): *Metaclass class method %s should have %s as first argument*
@@ -182,7 +182,7 @@
 :bad-except-order (E0701): *Bad except clauses order (%s)*
   Used when except clauses are not in the correct order (from the more specific
   to the more generic). If you don't fix the order, some exceptions may not be
-  catched by the most specific handler.
+  caught by the most specific handler.
 :raising-bad-type (E0702): *Raising %s while only classes or instances are allowed*
   Used when something which is neither a class, an instance or a string is
   raised (i.e. a `TypeError` will be raised).
@@ -305,7 +305,7 @@
   representation. This is usually accompanied by a traceback. Please report such
   errors !
 :parse-error (F0010): *error while code parsing: %s*
-  Used when an exception occured while building the Astroid representation which
+  Used when an exception occurred while building the Astroid representation which
   could be handled by astroid.
 :method-check-failed (F0202): *Unable to check methods signature (%s / %s)*
   Used when Pylint has been unable to check methods signature compatibility for

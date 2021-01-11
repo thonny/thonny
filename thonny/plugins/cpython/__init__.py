@@ -261,7 +261,7 @@ class CustomCPythonProxy(CPythonProxy):
     def __init__(self, clean):
         executable = get_workbench().get_option("CustomInterpreter.path")
 
-        # Rembember the usage of this non-default interpreter
+        # Remember the usage of this non-default interpreter
         used_interpreters = get_workbench().get_option("CustomInterpreter.used_paths")
         if executable not in used_interpreters:
             used_interpreters.append(executable)

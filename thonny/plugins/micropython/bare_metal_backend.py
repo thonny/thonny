@@ -738,7 +738,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         Because ot the special role of EOT and NORMAL_PROMT, we assume user code
         will not output these. If it does, processing may break.
-        It may succceed if the propmt is followed by something (quickly enough)
+        It may succeed if the prompt is followed by something (quickly enough)
         -- that's why we look for *active* prompt, ie. prompt without following text.
         TODO: Experiment with this!
 
@@ -830,7 +830,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # Don't output yet, because the follow up may turn into another prompt
                     # and they can be captured all together.
                     self._connection.unread(follow_up)
-                    # read propmt must remain in pending
+                    # read prompt must remain in pending
                     continue
                 else:
                     # let's hope it is an active prompt

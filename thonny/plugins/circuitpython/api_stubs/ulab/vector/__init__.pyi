@@ -110,7 +110,7 @@ def tanh():
 def vectorize(f, *, otypes=None):
     """
     :param callable f: The function to wrap
-    :param otypes: List of array types that may be returned by the function.  None is intepreted to mean the return value is float.
+    :param otypes: List of array types that may be returned by the function.  None is interpreted to mean the return value is float.
 
     Wrap a Python function ``f`` so that it can be applied to arrays.
 

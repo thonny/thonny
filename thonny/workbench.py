@@ -692,7 +692,7 @@ class Workbench(tk.Tk):
 
         margin = 10
         # Main frame functions as
-        # - a backgroud behind padding of main_pw, without this OS X leaves white border
+        # - a background behind padding of main_pw, without this OS X leaves white border
         # - a container to be hidden, when a view is maximized and restored when view is back home
         main_frame = ttk.Frame(self)  #
         self._main_frame = main_frame

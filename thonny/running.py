@@ -760,7 +760,7 @@ class BackendProxy:
         return None
 
     def interrupt(self):
-        """Tries to interrupt current command without reseting the backend"""
+        """Tries to interrupt current command without resetting the backend"""
         pass
 
     def destroy(self):
