@@ -196,6 +196,7 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title, True)
+        self.get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_toolbar, True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
         self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
@@ -1976,7 +1977,7 @@ class Workbench(tk.Tk):
     def get_toolbar_button(self, command_id):
         return self._toolbar_buttons[command_id]
 
-    def _update_toolbar(self) -> None:
+    def _update_toolbar(self, event=None) -> None:
         if self._destroyed or not hasattr(self, "_toolbar"):
             return
 
