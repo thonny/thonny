@@ -74,6 +74,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Farshid Meidani
 * Filip Schouwenaars
 * Fizban
+* freddii
 * fstengel
 * Gabriel Slørdahl
 * Georges Khaznadar
