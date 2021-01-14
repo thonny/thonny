@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os.path
 import subprocess
 import time
@@ -25,6 +26,8 @@ _LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
 ROOT_NODE_ID = ""
 
 HIDDEN_FILES_OPTION = "file.show_hidden_files"
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFileBrowser(ttk.Frame):
@@ -897,7 +900,15 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().get_editor_notebook().show_file(path)
 
     def open_path_with_system_app(self, path):
-        open_with_default_app(path)
+        try:
+            open_with_default_app(path)
+        except Exception as e:
+            logger.error("Could not open %r in system app", path, exc_info=e)
+            messagebox.showerror(
+                "Error",
+                "Could not open '%s' in system app\nError: %s" % (path, e),
+                parent=self.winfo_toplevel(),
+            )
 
     def on_window_focus_in(self, event=None):
         self.refresh_tree()
