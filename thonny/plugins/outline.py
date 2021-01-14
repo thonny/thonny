@@ -124,7 +124,15 @@ class OutlineView(ttk.Frame):
         editor = get_workbench().get_editor_notebook().get_current_editor()
         if editor:
             code_view = editor.get_code_view()
-            lineno = self.tree.item(self.tree.focus())["values"][0]
+            focus = self.tree.focus()
+            if not focus:
+                return
+
+            values = self.tree.item(focus)["values"]
+            if not values:
+                return
+
+            lineno = values[0]
             index = code_view.text.index(str(lineno) + ".0")
             code_view.text.see(index)  # make sure that the double-clicked item is visible
             code_view.text.select_lines(lineno, lineno)
