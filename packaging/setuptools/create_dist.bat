@@ -11,4 +11,5 @@ python setup.py bdist_wheel -d packaging\setuptools
 python setup.py sdist --formats=gztar -d packaging\setuptools
 
 cd packaging\setuptools
+rm -rf ../../thonny.egg-info
 pause
