@@ -2,6 +2,7 @@ import os.path
 import platform
 import shlex
 import subprocess
+import sys
 
 
 def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
@@ -111,7 +112,11 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
         if env_overrides[key] is None:
             cmds += "; unset " + key
         else:
-            cmds += "; export {key}={value}".format(key=key, value=_shellquote(env_overrides[key]))
+            value = env_overrides[key]
+            if key == "PATH":
+                value = _normalize_path(value)
+
+            cmds += "; export {key}={value}".format(key=key, value=_shellquote(value))
 
     if cmd:
         if isinstance(cmd, list):
@@ -121,10 +126,20 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
     if not keep_open:
         cmds += "; exit"
 
+    # try to shorten to avoid too long line https://github.com/thonny/thonny/issues/1529
+
+    common_prefix = os.path.normpath(sys.prefix).rstrip("/")
+    cmds = (
+        "export THOPR=" + common_prefix + " ; " + cmds.replace(common_prefix + "/", "$THOPR" + "/")
+    )
+    print(cmds)
+
     # The script will be sent to Terminal with 'do script' command, which takes a string.
     # We'll prepare an AppleScript string literal for this
     # (http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string):
-    cmd_as_apple_script_string_literal = '"' + cmds.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    cmd_as_apple_script_string_literal = (
+        '"' + cmds.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$") + '"'
+    )
 
     # When Terminal is not open, then do script opens two windows.
     # do script ... in window 1 would solve this, but if Terminal is already
@@ -191,3 +206,8 @@ def _get_linux_terminal_command():
         return "xterm"
     else:
         raise RuntimeError("Don't know how to open terminal emulator")
+
+
+def _normalize_path(s):
+    parts = s.split(os.pathsep)
+    return os.pathsep.join([os.path.normpath(part) for part in parts])

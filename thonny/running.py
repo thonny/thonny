@@ -845,6 +845,9 @@ class SubprocessProxy(BackendProxy):
         else:
             self._executable = get_interpreter_for_subprocess()
 
+        if ".." in self._executable:
+            self._executable = os.path.normpath(self._executable)
+
         if not os.path.isfile(self._executable):
             raise UserError(
                 "Interpreter '%s' does not exist. Please check the configuration!"
