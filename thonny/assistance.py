@@ -23,6 +23,8 @@ from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
 from thonny.ui_utils import CommonDialog, scrollbar_style
 
+logger = logging.getLogger(__name__)
+
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
 _program_analyzer_classes = []  # type: List[Type[ProgramAnalyzer]]
@@ -159,12 +161,17 @@ class AssistantView(tktextext.TextFrame):
                 self._format_file_url(error_info),
             )
 
-        helpers = [
-            helper_class(error_info)
-            for helper_class in (
-                _error_helper_classes.get(error_info["type_name"], []) + _error_helper_classes["*"]
-            )
-        ]
+        helpers = []
+
+        for helper_class in (
+            _error_helper_classes.get(error_info["type_name"], []) + _error_helper_classes["*"]
+        ):
+            try:
+                helpers.append(helper_class(error_info))
+            except HelperNotSupportedError:
+                pass
+            except Exception as e:
+                logger.exception("Could not create helper %s", helper_class, exc_info=e)
 
         best_intro = helpers[0]
         for helper in helpers:
@@ -959,6 +966,10 @@ def format_file_url(filename, lineno, col_offset):
             s += ":" + str(col_offset)
 
     return s
+
+
+class HelperNotSupportedError(RuntimeError):
+    pass
 
 
 def init():

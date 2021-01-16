@@ -4,7 +4,13 @@ import re
 import token
 
 from thonny import assistance
-from thonny.assistance import ErrorHelper, Suggestion, add_error_helper, name_similarity
+from thonny.assistance import (
+    ErrorHelper,
+    Suggestion,
+    add_error_helper,
+    name_similarity,
+    HelperNotSupportedError,
+)
 from thonny.misc_utils import running_on_windows
 
 
@@ -466,7 +472,11 @@ class AttributeErrorHelper(ErrorHelper):
         super().__init__(error_info)
 
         names = re.findall(r"\'.*?\'", error_info["message"])
-        assert len(names) == 2
+        if len(names) != 2:
+            # Can happen eg. in PGZero
+            # https://github.com/thonny/thonny/issues/1535
+            raise HelperNotSupportedError()
+
         self.type_name = names[0].strip("'")
         self.att_name = names[1].strip("'")
 
