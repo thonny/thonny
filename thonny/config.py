@@ -115,8 +115,10 @@ class ConfigurationManager:
             val = self._ini.get(section, option)
 
             # if option's data type is str (inferred from the default value)
-            # then don't try to parse anything
-            if isinstance(self._defaults.get(name), str):
+            # then don't try to parse anything (unless it's None)
+            if val == "None":
+                return None
+            elif isinstance(self._defaults.get(name), str):
                 return val
             else:
                 return self._parse_value(val)
