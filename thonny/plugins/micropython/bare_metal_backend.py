@@ -207,10 +207,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         response = self._connection.soft_read(2)
         assert len(response) == 2, "Could not read response for raw paste command: " + response
         if response == RAW_PASTE_CONFIRMATION:
+            logger.info("Choosing raw paste submit mode")
             self._submit_mode = RAW_PASTE_SUBMIT_MODE
             self._write(EOT)
             discarding = self._connection.read_until(RAW_PROMPT)
         else:
+            logger.info("Choosing raw submit mode")
             self._submit_mode = RAW_SUBMIT_MODE
             discarding = self._connection.read_until(RAW_PROMPT)
 
@@ -627,8 +629,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _submit_code_via_raw_paste_mode(self, script_bytes: bytes) -> None:
         self._ensure_raw_mode()
-        self._write(RAW_PASTE_COMMAND)
         self._connection.set_unicode_guard(False)
+        self._write(RAW_PASTE_COMMAND)
         response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
         assert response == RAW_PASTE_CONFIRMATION, "Got %r instead of raw-paste confirmation" % (
             response + self._connection.read_all()
