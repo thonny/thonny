@@ -38,7 +38,7 @@ LANGUAGES_DICT = {
     "hy_AM": "Հայերէն [BETA]",
     "fa_IR": "[BETA] فارسی",
     "el_GR": "Ελληνικά",
-    "ko_KR": "한국어 [韓國語] [ALPHA]"
+    "ko_KR": "한국어 [韓國語] [ALPHA]",
 }
 
 # how many spaces to add to button caption in order to make whole text visible
