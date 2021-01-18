@@ -212,9 +212,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._write(EOT)
             discarding = self._connection.read_until(RAW_PROMPT)
         else:
-            logger.info("Choosing raw submit mode")
-            self._submit_mode = RAW_SUBMIT_MODE
             discarding = self._connection.read_until(RAW_PROMPT)
+            logger.info("Choosing raw submit mode (%r)", response + discarding)
+            self._submit_mode = RAW_SUBMIT_MODE
 
         discarding += self._connection.read_all()
 
@@ -556,7 +556,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 self._submit_code_via_paste_mode(to_be_sent)
             elif self._submit_mode == RAW_PASTE_SUBMIT_MODE:
-                self._submit_code_via_raw_paste_mode(to_be_sent)
+                try:
+                    self._submit_code_via_raw_paste_mode(to_be_sent)
+                except RawPasteNotSupportedError:
+                    logger.info("WARNING: Could not use expected raw paste, falling back to raw")
+                    self._submit_code_via_raw_mode(to_be_sent)
             else:
                 self._submit_code_via_raw_mode(to_be_sent)
 
@@ -632,9 +636,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._connection.set_unicode_guard(False)
         self._write(RAW_PASTE_COMMAND)
         response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
-        assert response == RAW_PASTE_CONFIRMATION, "Got %r instead of raw-paste confirmation" % (
-            response + self._connection.read_all()
-        )
+        if response != RAW_PASTE_CONFIRMATION:
+            # Occasionally, the device initially supports raw paste but later doesn't allow it
+            # https://github.com/thonny/thonny/issues/1545
+            time.sleep(0.01)
+            response += self._connection.read_all()
+            if response == FIRST_RAW_PROMPT:
+                self._last_prompt = FIRST_RAW_PROMPT
+                raise RawPasteNotSupportedError()
+            else:
+                raise AssertionError("Got %r instead of raw-paste confirmation" % response)
 
         self._raw_paste_write(script_bytes)
         self._connection.set_unicode_guard(True)
@@ -1533,6 +1544,10 @@ def starts_with_continuation_byte(data):
 
 def is_continuation_byte(byte):
     return (byte & 0b11000000) == 0b10000000
+
+
+class RawPasteNotSupportedError(RuntimeError):
+    pass
 
 
 if __name__ == "__main__":
