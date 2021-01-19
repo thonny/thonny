@@ -316,6 +316,11 @@ def get_exe_dirs():
         if os.path.isdir(dirpath) and dirpath not in result:
             result.append(dirpath)
 
+    if platform.system() != "Windows" and "/usr/local/bin" not in result:
+        # May be missing on macOS, when started as bundle
+        # (yes, more may be missing, but this one is most useful)
+        result.append("/usr/local/bin")
+
     return result
 
 
