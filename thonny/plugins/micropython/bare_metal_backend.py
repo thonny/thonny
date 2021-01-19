@@ -670,11 +670,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # Device indicated that a new window of data can be sent.
                     window_remain += window_size
                 elif data == b"\x04":
-                    # Device indicated abrupt end.  Acknowledge it and finish.
+                    # Device indicated abrupt end, most likely a syntax error.
+                    # Acknowledge it and finish.
                     self._connection.write(b"\x04")
-                    raise AssertionError(
-                        "REPL only accepted %r out of %r bytes" % (i, len(command_bytes))
+                    logger.debug(
+                        "Abrupt end of raw paste submit after submitting %s bytes out of %s",
+                        i,
+                        len(command_bytes),
                     )
+                    return
                 else:
                     # Unexpected data from device.
                     raise AssertionError("Unexpected read during raw paste: {}".format(data))
