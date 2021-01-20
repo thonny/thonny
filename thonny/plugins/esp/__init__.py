@@ -251,6 +251,7 @@ class ESPFlashingDialog(WorkDialog):
         # or the user doesn't have sufficient permissions?
         try:
             import serial
+
             conn = serial.Serial(port)
             conn.close()
             return True
