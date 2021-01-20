@@ -14,6 +14,7 @@ Version history
 * Fix truncated System Shell environment on macOS, #1529
 * Add /usr/local/bin to the PATH of the back-end process if missing, #1131
 * Fix error while parsing Pygame Zero error, #1535
+* Fix MicroPython completion errors with jedi 0.18, #1560
 * Add incomplete Korean language by Augene J. Pak, Fabianus.c, Suk-Hyung Hwang, YEON, $1531
 * Add incomplete Albanian translation by Algent Albrahimi
 * [Technical] Allow older Send2Trash (Fedora doesn't have version 1.5 of this)
