@@ -9,8 +9,6 @@ from collections import OrderedDict
 from tkinter import messagebox, ttk
 from typing import Optional
 
-import serial
-
 from thonny import get_runner, ui_utils
 from thonny.languages import tr
 from thonny.misc_utils import (
@@ -252,6 +250,7 @@ class ESPFlashingDialog(WorkDialog):
         # Maybe another program is connected
         # or the user doesn't have sufficient permissions?
         try:
+            import serial
             conn = serial.Serial(port)
             conn.close()
             return True
