@@ -57,6 +57,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * André Roberge
 * Ankith
 * Antonio Carlos
+* Augene J. Pak
 * Austin Bart
 * Avag. sayan
 * badukaire
@@ -72,6 +73,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Dominik George
 * Eliot Blennerhassett
 * Emanuel Angelo
+* Fabianus.c
 * Farshid Meidani
 * Filip Schouwenaars
 * Fizban
@@ -105,6 +107,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Simon Gijsen
 * Simon Long
 * Stefan Rothe
+* Suk-Hyung Hwang
 * Sven Duzont
 * Syed Nasim
 * Taavi Ilp
@@ -112,6 +115,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Tusamten
 * Vytenis (svajoklis-1)
 * Xin Rong
+* YEON
 * 丁向阳 (Ding-XiangYang)
 * 涂紳騰 (Shen-Teng Tu)
 * 張文宏 (Wen-Hung, Chang)
