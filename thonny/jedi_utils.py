@@ -46,28 +46,42 @@ def parse_source(source):
     return parso.parse(source)
 
 
-def get_script_completions(source: str, row: int, column: int, filename: str):
+def get_script_completions(source: str, row: int, column: int, filename: str, sys_path=None):
     import jedi
 
     if _using_older_jedi(jedi):
-        script = jedi.Script(source, row, column, filename)
+        script = jedi.Script(source, row, column, filename, sys_path=sys_path)
         completions = script.completions()
     else:
-        script = jedi.Script(code=source, path=filename)
+        script = jedi.Script(code=source, path=filename, project=_get_new_jedi_project(sys_path))
         completions = script.complete(line=row, column=column)
 
     return _tweak_completions(completions)
 
 
-def get_interpreter_completions(source: str, namespaces: List[Dict]):
+def get_interpreter_completions(source: str, namespaces: List[Dict], sys_path=None):
     import jedi
 
-    interpreter = jedi.Interpreter(source, namespaces)
+    if _using_older_jedi(jedi):
+        interpreter = jedi.Interpreter(source, namespaces, sys_path=sys_path)
+    else:
+        # NB! Can't send project for Interpreter in 0.18
+        # https://github.com/davidhalter/jedi/pull/1734
+        interpreter = jedi.Interpreter(source, namespaces)
     if hasattr(interpreter, "completions"):
         # up to jedi 0.17
         return _tweak_completions(interpreter.completions())
     else:
         return _tweak_completions(interpreter.complete())
+
+
+def _get_new_jedi_project(sys_path):
+    if not sys_path:
+        return None
+    else:
+        import jedi
+
+        return jedi.Project(path=sys_path[0], added_sys_path=sys_path)
 
 
 def _tweak_completions(completions):
@@ -86,6 +100,8 @@ def _tweak_completions(completions):
                 complete=complete,
                 type=completion.type,
                 description=completion.description,
+                parent=completion.parent,
+                full_name=completion.full_name,
             )
         )
 
@@ -108,11 +124,13 @@ def _using_older_jedi(jedi):
 
 
 class ThonnyCompletion:
-    def __init__(self, name: str, complete: str, type, description):
+    def __init__(self, name: str, complete: str, type, description, parent, full_name):
         self.name = name
         self.complete = complete
         self.type = type
         self.description = description
+        self.parent = parent
+        self.full_name = full_name
 
     def __getitem__(self, key):
         return self.__dict__[key]

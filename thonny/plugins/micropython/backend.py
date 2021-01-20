@@ -947,10 +947,15 @@ class MicroPythonBackend(MainBackend, ABC):
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
 
         try:
-            import jedi
+            from thonny import jedi_utils
 
-            script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
-            completions = script.completions()
+            completions = jedi_utils.get_script_completions(
+                cmd.source,
+                cmd.row,
+                cmd.column,
+                filename=cmd.filename,
+                sys_path=[self._api_stubs_path],
+            )
             result["completions"] = self._filter_completions(completions)
         except Exception as e:
             logger.exception("Problem with editor autocomplete", exc_info=e)
@@ -990,14 +995,13 @@ class MicroPythonBackend(MainBackend, ABC):
             response = {"source": cmd.source}
 
             try:
-                import jedi
+                from thonny import jedi_utils
 
                 # at the moment I'm assuming source is the code before cursor, not whole input
                 lines = source.split("\n")
-                script = jedi.Script(
-                    source, len(lines), len(lines[-1]), sys_path=[self._api_stubs_path]
+                completions = jedi_utils.get_script_completions(
+                    source, len(lines), len(lines[-1]), "<shell>", sys_path=[self._api_stubs_path]
                 )
-                completions = script.completions()
                 response["completions"] = self._filter_completions(completions)
             except Exception as e:
                 logger.exception("Problem with shell autocomplete", exc_info=e)
