@@ -50,6 +50,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Alar Leemet
 * Aleks ANDRÉ
 * Alex Hall
+* Algent Albrahimi
 * Anatoly Techtonik
 * Anders Pamdal
 * Andrew Scheller

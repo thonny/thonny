@@ -30,6 +30,7 @@ LANGUAGES_DICT = {
     "ru_RU": "Русский",
     "sk_SK": "Slovenčina [BETA]",
     "sv_SE": "Svenska [BETA]",
+    "sq_AL": "Shqip [ALPHA]",
     "tr_TR": "Türkçe [BETA]",
     "uk_UA": "Українська",
     "zh_TW": "繁體中文-TW",
