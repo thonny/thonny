@@ -99,7 +99,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         self.env_box = tktextext.TextFrame(
             self, horizontal_scrollbar=False, height=4, borderwidth=1, undo=True, wrap="none"
         )
-        self.env_box.grid(row=91, column=0, sticky="nsew", pady=(0, 10), columnspan=2)
+        self.env_box.grid(row=100, column=0, sticky="nsew", pady=(0, 10), columnspan=2)
         for entry in get_workbench().get_option("general.environment"):
             self.env_box.text.insert("end", entry + "\n")
 
@@ -108,7 +108,7 @@ class GeneralConfigurationPage(ConfigurationPage):
             text=tr("NB! Restart Thonny after changing these options!"),
             font="BoldTkDefaultFont",
         )
-        reopen_label.grid(row=100, column=0, sticky="sw", pady=(20, 0), columnspan=2)
+        reopen_label.grid(row=110, column=0, sticky="sw", pady=(20, 0), columnspan=2)
 
         self.columnconfigure(1, weight=1)
         self.rowconfigure(100, weight=1)
