@@ -2,6 +2,23 @@
 Version history
 ===============
 
+3.3.3 (2021-01-21)
+==================
+* Better support for MicroPython daily builds, #1545, #1553
+* Automatically prepend relevant Anaconda directories to PATH. Fixes problem with importing Anaconda's numpy, #1522
+* Make custom Python chooser see more interpreters, #1522
+* Fix several spelling mistakes, by freddii, #1534
+* Update toolbar buttons, when another editor gets selected, fixes wrong button states, #1536
+* Catch errors when opening file in system app, #1526
+* Fix internal error while using Outline View, #1543
+* Fix truncated System Shell environment on macOS, #1529
+* Add /usr/local/bin to the PATH of the back-end process if missing, #1131
+* Fix error while parsing Pygame Zero error, #1535
+* Add incomplete Korean language by Augene J. Pak, Fabianus.c, Suk-Hyung Hwang, YEON, $1531
+* Add incomplete Albanian translation by Algent Albrahimi
+* [Technical] Allow older Send2Trash (Fedora doesn't have version 1.5 of this)
+* [Technical] Remove erroneous executable flags from some files
+
 3.3.2 (2021-01-06)
 ==================
 * Fix the problem of missing docstrings, #1481
