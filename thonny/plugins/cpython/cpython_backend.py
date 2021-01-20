@@ -1198,7 +1198,9 @@ class FakeInputStream(FakeStream):
                     elif isinstance(msg, InlineCommand):
                         self._backend._handle_normal_command(msg)
                     else:
-                        raise RuntimeError("Wrong type of command when waiting for input")
+                        raise RuntimeError(
+                            "Wrong type of command (%r) when waiting for input" % (msg,)
+                        )
 
             return result
 
