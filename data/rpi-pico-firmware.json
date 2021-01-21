@@ -1,0 +1,13 @@
+{
+  "tag_name": "20210121",
+  "name": "20210121",
+  "published_at": "2021-01-21T09:00:00Z",
+  "assets": [
+    {
+      "name": "pico_micropython_20210121.uf2",
+      "label": null,
+      "size": 465408,
+      "browser_download_url": "https://github.com/raspberrypi/micropython/releases/download/pico-20210120/pico_micropython_20210121.uf2"
+    }
+  ]
+}
