@@ -5,7 +5,8 @@ from thonny import ui_utils, get_shell, get_workbench
 from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
-    add_micropython_backend, BareMetalMicroPythonConfigPage,
+    add_micropython_backend,
+    BareMetalMicroPythonConfigPage,
 )
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import show_dialog
@@ -51,6 +52,7 @@ class RaspberryPiPicoBackendConfigPage(BareMetalMicroPythonConfigPage):
         dlg = PicoFlashingDialog(self.winfo_toplevel())
         ui_utils.show_dialog(dlg)
 
+
 class PicoFlashingDialog(Uf2FlashingDialog):
     def get_instructions(self) -> Optional[str]:
         return (
@@ -86,6 +88,7 @@ class PicoFlashingDialog(Uf2FlashingDialog):
     def _get_vid_pids_to_wait_for(self):
         return RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()
 
+
 def load_plugin():
     add_micropython_backend(
         "RPiPico",
@@ -103,5 +106,7 @@ def load_plugin():
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
     import thonny.plugins.micropython
+
     thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
-        RaspberryPiPicoBackendProxy.get_known_usb_vids_pids())
+        RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()
+    )

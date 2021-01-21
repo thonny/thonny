@@ -4,6 +4,7 @@ Version history
 
 3.3.3 (2021-01-21)
 ==================
+* Add MicroPython support for Raspberry Pi Pico (https://www.raspberrypi.org/blog/raspberry-pi-silicon-pico-now-on-sale/)
 * Better support for MicroPython daily builds, #1545, #1553
 * Automatically prepend relevant Anaconda directories to PATH. Fixes problem with importing Anaconda's numpy, #1522
 * Make custom Python chooser see more interpreters, #1522
