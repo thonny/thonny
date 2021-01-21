@@ -65,7 +65,7 @@ class PicoFlashingDialog(Uf2FlashingDialog):
         )
 
     def _get_release_info_url(self):
-        return "https://thonny.org/45624345807/index.json"
+        return "https://raw.githubusercontent.com/thonny/thonny/master/data/rpi-pico-firmware.json"
 
     def _get_fallback_release_info_url(self):
         return "https://api.github.com/repos/raspberrypi/micropython/releases/latest"

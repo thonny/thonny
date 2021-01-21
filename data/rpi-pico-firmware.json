@@ -1,7 +1,7 @@
 {
-  "tag_name": "20210121",
-  "name": "20210121",
-  "published_at": "2021-01-21T09:00:00Z",
+  "tag_name": "pico-20210120",
+  "name": "Initial MicroPython release for Raspberry Pi Pico/RP2040",
+  "published_at": "2021-01-21T06:05:44Z",
   "assets": [
     {
       "name": "pico_micropython_20210121.uf2",
