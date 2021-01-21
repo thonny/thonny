@@ -1,7 +1,10 @@
 """
 Utils to handle different jedi versions
 """
+import logging
 from typing import List, Dict
+
+logger = logging.getLogger(__name__)
 
 
 def get_statement_of_position(node, pos):
@@ -50,7 +53,12 @@ def get_script_completions(source: str, row: int, column: int, filename: str, sy
     import jedi
 
     if _using_older_jedi(jedi):
-        script = jedi.Script(source, row, column, filename, sys_path=sys_path)
+        try:
+            script = jedi.Script(source, row, column, filename, sys_path=sys_path)
+        except Exception as e:
+            logger.info("Could not get completions with given sys_path", exc_info=e)
+            script = jedi.Script(source, row, column, filename)
+
         completions = script.completions()
     else:
         script = jedi.Script(code=source, path=filename, project=_get_new_jedi_project(sys_path))
@@ -63,7 +71,11 @@ def get_interpreter_completions(source: str, namespaces: List[Dict], sys_path=No
     import jedi
 
     if _using_older_jedi(jedi):
-        interpreter = jedi.Interpreter(source, namespaces, sys_path=sys_path)
+        try:
+            interpreter = jedi.Interpreter(source, namespaces, sys_path=sys_path)
+        except Exception as e:
+            logger.info("Could not get completions with given sys_path", exc_info=e)
+            interpreter = jedi.Interpreter(source, namespaces)
     else:
         # NB! Can't send project for Interpreter in 0.18
         # https://github.com/davidhalter/jedi/pull/1734
