@@ -116,10 +116,11 @@ class Editor(ttk.Frame):
                 self.master.select(self)
 
                 if messagebox.askyesno(
-                    "File is gone",
-                    "Looks like '%s' was deleted or moved outside of the editor.\n\n"
+                    tr("File is gone"),
+                    tr("Looks like '%s' was deleted or moved outside of the editor.")
                     % self._filename
-                    + "Do you want to also close the editor?",
+                    + "\n\n"
+                    + tr("Do you want to also close the editor?"),
                     master=self,
                 ):
                     self.master.close_editor(self)
@@ -131,9 +132,12 @@ class Editor(ttk.Frame):
                 self.master.select(self)
 
                 if messagebox.askyesno(
-                    "External modification",
-                    "Looks like '%s' was modified outside the editor.\n\n" % self._filename
-                    + "Do you want to discard current editor content and reload the file from disk?",
+                    tr("External modification"),
+                    tr("Looks like '%s' was modified outside the editor.") % self._filename
+                    + "\n\n"
+                    + tr(
+                        "Do you want to discard current editor content and reload the file from disk?"
+                    ),
                     master=self,
                 ):
                     self._load_file(self._filename, keep_undo=True)
@@ -1020,12 +1024,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if len(modified_editors) == 0:
             return True
 
-        message = "Do you want to save files before closing?"
+        message = tr("Do you want to save files before closing?")
         if editor:
-            message = "Do you want to save file before closing?"
+            message = tr("Do you want to save file before closing?")
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close", message=message, default=messagebox.YES, master=self
+            title=tr("Save On Close"), message=message, default=messagebox.YES, master=self
         )
 
         if confirm:
