@@ -57,7 +57,7 @@ class SerialConnection(MicroPythonConnection):
                     """\
                 Try adding yourself to the '{group}' group:
                 > sudo usermod -a -G {group} <username>
-                (NB! This needs to be followed by reboot or logging out and logging in again!)""".format(
+                (NB! You may need to reboot your system after this!)""".format(
                         group=group
                     )
                 )
