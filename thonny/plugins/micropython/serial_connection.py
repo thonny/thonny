@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import platform
 import sys
 import threading
@@ -45,12 +46,20 @@ class SerialConnection(MicroPythonConnection):
 
             # TODO: check if these error codes also apply to Linux and Mac
             if error.errno == 13 and platform.system() == "Linux":
+                try:
+                    group = pathlib.Path(self._serial.port).group()
+                except Exception as e:
+                    logger.warning("Could not query group for '%s'", self._serial.port)
+                    group = "dialoutfb"
+
                 # TODO: check if user already has this group
                 message += "\n\n" + dedent(
                     """\
-                Try adding yourself to the 'dialout' group:
-                > sudo usermod -a -G dialout <username>
-                (NB! This needs to be followed by reboot or logging out and logging in again!)"""
+                Try adding yourself to the '{group}' group:
+                > sudo usermod -a -G {group} <username>
+                (NB! This needs to be followed by reboot or logging out and logging in again!)""".format(
+                        group=group
+                    )
                 )
 
             elif "PermissionError" in message or "Could not exclusively lock" in message:
