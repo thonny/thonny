@@ -16,6 +16,7 @@ __pycache__
 dist
 venv
 venv-3.9
+venv39
 venv35/**
 packaging/linux/build
 build
