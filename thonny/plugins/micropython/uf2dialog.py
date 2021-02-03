@@ -189,6 +189,10 @@ class Uf2FlashingDialog(WorkDialog):
             for asset in self._release_info["assets"]
             if self._is_suitable_asset(asset, board_id)
         ]
+        # TODO: it may be actually fallback url
+        logger.info(
+            "Assets from %s: %r", self._get_release_info_url(), self._release_info["assets"]
+        )
         if len(candidates) == 0:
             raise RuntimeError(
                 "Could not find the right file from the release info (%s)"
