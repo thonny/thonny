@@ -1,10 +1,10 @@
 {
   "tag_name": "20210202-v1.14",
-  "name": "MicroPython 20210202-v1.14",
+  "name": "20210202 v1.14",
   "published_at": "2021-02-02T00:00:00Z",
   "assets": [
     {
-      "name": "rp2-pico-20210202-v1.14.uf2",
+      "name": "rp2-pico-micropython-20210202-v1.14.uf2",
       "label": null,
       "size": 497664,
       "browser_download_url": "https://micropython.org/download/rp2-pico/rp2-pico-latest.uf2"
