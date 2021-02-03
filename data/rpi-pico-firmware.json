@@ -7,7 +7,7 @@
       "name": "rp2-pico-20210202-v1.14.uf2",
       "label": null,
       "size": 497664,
-      "browser_download_url": "https://micropython.org/download/rp2-pico/rp2-pico-latest.uf2"
+      "browser_download_url": "https://github.com/thonny/thonny-data/releases/download/MicroPythonMirror/rp2-pico-micropython-20210202-v1.14.uf2"
     }
   ]
 }
