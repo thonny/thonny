@@ -15,7 +15,7 @@ When you are done with your translation, it is recommended to test it. For this 
 
 If you noticed a problem (eg. some button is too narrow for your translation), then open an issue.
 
-Translations will be pulled from POEditor before each release.
+**Translations will be pulled from POEditor before each release, no need to create a PR.**
 
 ## More details for Thonny's maintainers (NB! Not relevant for translators!)
 
