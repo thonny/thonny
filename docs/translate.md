@@ -17,7 +17,7 @@ If you noticed a problem (eg. some button is too narrow for your translation), t
 
 Translations will be pulled from POEditor before each release.
 
-## More details for code contributors
+## More details for Thonny's maintainers (NB! Not relevant for translators!)
 
 Below are some technicals details for how to handle translation process.
 
@@ -53,43 +53,9 @@ extracting messages from thonny/test/plugins/test_paren_matcher.py
 writing PO template file to thonny/locale/thonny.pot
 ```
 
-#### Update messages for an existing language
-Once the `pot` template file have been added, one should update all the `po` catalog files
-This will keep all existing translations and add new strings to be translated.
+### Uploading templates to POEditor
 
-To do this run:
-`pybabel update -D thonny -i thonny/locale/thonny.pot  -d thonny/locale/`
-
-You can also update one `po` catalog file for a language as follow:
-`pybabel update -i locale/<LANGUAGE_CODE>/LC_MESSAGES/thonny.po  -l <LANGUAGE_CODE> -d locale/ -D thonny`
-
-
-#### Add a new language
-You can render a new `po` catalog file for a  new language like that:
-`pybabel init -D thonny -i thonny/locale/thonny.pot -d thonny/locale/ -l <LANGUAGE_CODE>`
-
-output should be:
-`creating catalog thonny/locale/<LANGUAGE_CODE>/LC_MESSAGES/thonny.po based on thonny/locale/thonny.pot`
-
-NB! One should not forget to add a the new language in `thonny/languages.py` so it's available in the configuration page.
-
-#### Compile catalog
-You can compile all `po` catalog files into `mo` files as follow:
-`pybabel compile -d thonny/locale/ -D thonny`
-
-
-### How to update translations
-Translations have move forwards? New language have been added? That's great news!
-
-0. If it's a new language, follow the "Add a new language" paragraphe above. If not, move to next point.
-1. Download the `po` file from POEditor. See this [documentation](https://poeditor.com/kb/importing-and-exporting-strings) if needed.
-2. Replace the proper `po` file in the `thonny/locale/` folder.
-3. Compile it into a `mo` file (see above).
-4. Add both `po` and `mo` files to git and commit or PR.
-5. Done!
-
-### How to push new strings to POEditor
-When new strings have been marked, you have extract it into the `pot` template file and update all existing `po` files, you want to push the new strings to POEditor. Please see this [documentation](https://poeditor.com/kb/importing-and-exporting-strings) on how to import files to POEditor. Just import the `pot` template file.
+Use POEditor's user interface and import thonny.pot
 
 ## Translating Help pages
 
