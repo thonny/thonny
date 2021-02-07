@@ -41,9 +41,6 @@ class CPythonProxy(SubprocessProxy):
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
 
-    def _get_environment(self):
-        env = super(CPythonProxy, self)._get_environment()
-
     def _get_launch_cwd(self):
         # launch in the directory containing thonny package, so that other interpreters can import it as well
         return os.path.dirname(os.path.dirname(thonny.__file__))
