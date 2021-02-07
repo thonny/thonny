@@ -1583,7 +1583,7 @@ if __name__ == "__main__":
             # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
         if "circuitpython" in args.get("proxy_class", "").lower():
-            from thonny.plugins.circuitpython.cp_backend import CircuitPythonBackend
+            from thonny.plugins.circuitpython.cirpy_backend import CircuitPythonBackend
 
             backend = CircuitPythonBackend(connection, clean=args["clean"], args=args)
         else:
