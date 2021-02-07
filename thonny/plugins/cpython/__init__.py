@@ -505,7 +505,7 @@ def _get_interpreters():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
-        for minor in [6, 7, 8, 9]:
+        for minor in [6, 7, 8, 9, 10]:
             for dir_ in [
                 "C:\\Python3%d" % minor,
                 "C:\\Python3%d-32" % minor,
@@ -580,6 +580,7 @@ def _get_interpreters():
 
 def _get_interpreters_from_windows_registry():
     # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
+    # https://www.python.org/dev/peps/pep-0514/#installpath
     import winreg
 
     result = set()
@@ -597,19 +598,22 @@ def _get_interpreters_from_windows_registry():
             "3.9",
             "3.9-32",
             "3.9-64",
+            "3.10",
+            "3.10-32",
+            "3.10-64",
         ]:
-            try:
-                for subkey in [
-                    "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
-                    "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
-                ]:
+            for subkey in [
+                "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
+                "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
+            ]:
+                try:
                     dir_ = winreg.QueryValue(key, subkey)
                     if dir_:
                         path = os.path.join(dir_, WINDOWS_EXE)
                         if os.path.exists(path):
                             result.add(path)
-            except Exception:
-                pass
+                except Exception:
+                    pass
 
     return result
 
