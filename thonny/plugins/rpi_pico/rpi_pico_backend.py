@@ -14,7 +14,7 @@ class RaspberryPiPicoBackend(BareMetalMicroPythonBackend):
         logger.info("Syncing time in Pico")
 
         # RTC works on UTC
-        now = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        now = self._get_time_for_rtc()
 
         specific_script = dedent(
             """

@@ -262,8 +262,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _sync_time(self):
         """Sets the time to match the time on the host."""
 
-        # RTC works on UTC
-        now = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        now = self._get_time_for_rtc()
 
         if self._connected_to_microbit():
             return
