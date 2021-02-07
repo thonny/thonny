@@ -1,8 +1,7 @@
-import os.path
+import logging
 from typing import Optional
 
-from thonny import ui_utils, get_shell, get_workbench
-from thonny.misc_utils import list_volumes
+from thonny import ui_utils, get_workbench
 from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
     add_micropython_backend,
@@ -10,6 +9,8 @@ from thonny.plugins.micropython import (
 )
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import show_dialog
+
+logger = logging.getLogger(__name__)
 
 
 class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
@@ -72,11 +73,23 @@ class PicoFlashingDialog(Uf2FlashingDialog):
     def _get_fallback_release_info_url(self):
         return "https://api.github.com/repos/raspberrypi/micropython/releases/latest"
 
-    def _is_suitable_asset(self, asset, model_id):
-        if not asset["name"].endswith(".uf2") or "micropython" not in asset["name"].lower():
-            return False
+    def get_download_url_and_size(self, board_id):
+        if self._release_info is None:
+            return None
 
-        return True
+        logger.info(
+            "Assets from %s: %r", self._get_release_info_url(), self._release_info["assets"]
+        )
+        candidates = self._release_info["assets"]
+
+        if len(candidates) == 0:
+            raise RuntimeError(
+                "Could not find the right file from the release info (%s)"
+                % self._get_release_info_url()
+            )
+        else:
+            # The json is meant for Thonny, so take the first one for now
+            return (candidates[0]["browser_download_url"], candidates[0]["size"])
 
     @classmethod
     def _is_relevant_board_id(cls, board_id):
