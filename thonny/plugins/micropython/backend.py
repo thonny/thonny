@@ -224,8 +224,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 def repr(obj):
                     try:
                         s = repr(obj)
-                        if len(s) > 1000:
-                            s = s[:1000] + "..."
+                        if len(s) > 50:
+                            s = s[:50] + "..."
                         return s
                     except Exception as e:
                         return "<could not serialize: " + str(e) + ">"
@@ -714,7 +714,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     #print("testing", id(__thonny_value), __thonny_value)
                     if id(__thonny_value) == %d:
                         __thonny_helper.print_mgmt_value({
-                            "repr" : __thonny_helper.repr(__thonny_value),
+                            "repr" : repr(__thonny_value),
                             "type": str(type(__thonny_value))
                         })
                         break

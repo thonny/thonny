@@ -392,7 +392,15 @@ class StringInspector(TextFrame, ContentInspector):
 
     def set_object_info(self, object_info):
         # TODO: don't show too big string
-        content = ast.literal_eval(object_info["repr"])
+        try:
+            content = ast.literal_eval(object_info["repr"])
+        except SyntaxError:
+            try:
+                # can be shortened
+                content = ast.literal_eval(object_info["repr"] + object_info["repr"][0:1])
+            except SyntaxError:
+                content = "<can't show string content>"
+
         line_count_sep = len(content.split("\n"))
         # line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
