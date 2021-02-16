@@ -201,6 +201,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._choose_submit_mode()
 
     def _choose_submit_mode(self):
+        if self._connected_over_webrepl():
+            logger.info("Choosing paste submit mode because of WebREPL")
+            self._submit_mode = PASTE_SUBMIT_MODE
+            return
+
         # at least sometimes, we end up at normal prompt, although we asked for raw prompt
         self._ensure_raw_mode()
         self._write(RAW_PASTE_COMMAND)
