@@ -135,7 +135,7 @@ def install_tar(f, prefix):
     return meta
 
 
-warn_ussl = True
+warn_ussl = False
 
 
 def url_open(url):
@@ -208,7 +208,7 @@ def install_pkg(pkg_spec, install_path):
 
     latest_ver = data["info"]["version"]
     packages = data["releases"][latest_ver]
-    assert len(packages) == 1
+    assert len(packages) == 1, "This doesn't look like MicroPython package"
     package_url = packages[0]["url"]
     print("Installing %s %s from %s" % (pkg_spec, latest_ver, package_url))
     f1 = url_open(package_url)
@@ -251,7 +251,7 @@ def install(to_install):
         return True
     except Exception as e:
         print(
-            "Error installing '{}': {}, packages may be partially installed".format(pkg_spec, e),
+            "Error installing '{}': {}".format(pkg_spec, e),
             file=sys.stderr,
         )
         return False

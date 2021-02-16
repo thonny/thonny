@@ -427,7 +427,7 @@ class InstallAndUploadDialog(InlineCommandDialog):
             self.set_action_text_smart(line)
         self.returncode = self._proc.wait()
         if self.returncode:
-            self.set_action_text("Errorww")
+            self.set_action_text("Error")
             self.append_text("\nmicropip returned with error code %s\n" % self.returncode)
         else:
             self.set_action_text("Copying to the device")
