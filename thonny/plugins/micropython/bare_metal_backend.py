@@ -135,7 +135,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._write_block_size is None:
             self._write_block_size = 255
         if self._write_block_delay is None:
-            if isinstance(connection, WebReplConnection):
+            if self._connected_over_webrepl():
                 # ESP-32 needs long delay to work reliably over raw mode WebREPL
                 # TODO: consider removing when this gets fixed
                 self._write_block_delay = 0.5
@@ -493,11 +493,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _check_reconnect(self):
-        from thonny.plugins.micropython.webrepl_connection import WebReplConnection
-
-        if isinstance(self._connection, WebReplConnection):
+        if self._connected_over_webrepl():
             time.sleep(1)
             self._connection = self._connection.close_and_return_new_connection()
+
+    def _connected_over_webrepl(self):
+        from thonny.plugins.micropython.webrepl_connection import WebReplConnection
+
+        return isinstance(self._connection, WebReplConnection)
 
     def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work
@@ -1076,7 +1079,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     ) -> None:
         start_time = time.time()
 
-        if isinstance(self._connection, WebReplConnection):
+        if self._connected_over_webrepl():
             size = self._read_file_via_webrepl_file_protocol(source_path, target_fp, callback)
         else:
             # TODO: Is it better to read from mount when possible? Is the mount up to date when the file
@@ -1136,7 +1139,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """
         Adapted from https://github.com/micropython/webrepl/blob/master/webrepl_cli.py
         """
-        assert isinstance(self._connection, WebReplConnection)
+        assert self._connected_over_webrepl()
 
         file_size = self._get_file_size(source_path)
 
@@ -1176,7 +1179,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     ) -> None:
         start_time = time.time()
 
-        if isinstance(self._connection, WebReplConnection):
+        if self._connected_over_webrepl():
             self._write_file_via_webrepl_file_protocol(source_fp, target_path, file_size, callback)
         else:
             try:
@@ -1347,7 +1350,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """
         Adapted from https://github.com/micropython/webrepl/blob/master/webrepl_cli.py
         """
-        assert isinstance(self._connection, WebReplConnection)
+        assert self._connected_over_webrepl()
 
         dest_fname = target_path.encode("utf-8")
         rec = struct.pack(
