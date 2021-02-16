@@ -57,6 +57,7 @@ from thonny.common import (
     get_python_version_string,
     update_system_path,
     get_augmented_system_path,
+    try_load_modules_with_frontend_sys_path,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -130,11 +131,6 @@ class MainCPythonBackend(MainBackend):
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
-        if "THONNY_FRONTEND_SYS_PATH" in os.environ:
-            self._frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
-        else:
-            self._frontend_sys_path = []
-        self._load_shared_modules()
         self._load_plugins()
 
         # preceding code was run in the directory containing thonny module, now switch to provided
@@ -336,16 +332,6 @@ class MainCPythonBackend(MainBackend):
 
         return module
 
-    def _load_shared_modules(self):
-        from importlib import import_module
-
-        # these need to be loaded during initialization, because later they may not be in path
-        for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
-            try:
-                import_module(name)
-            except ImportError:
-                pass
-
     def _load_plugins(self):
         # built-in plugins
         try:
@@ -354,6 +340,7 @@ class MainCPythonBackend(MainBackend):
             # May happen eg. in ssh session
             return
 
+        try_load_modules_with_frontend_sys_path("thonnycontrib")
         self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package
@@ -579,6 +566,8 @@ class MainCPythonBackend(MainBackend):
         return InlineResponse("get_heap", heap=result)
 
     def _cmd_shell_autocomplete(self, cmd):
+        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
+
         error = None
         try:
             import jedi
@@ -603,6 +592,8 @@ class MainCPythonBackend(MainBackend):
         )
 
     def _cmd_editor_autocomplete(self, cmd):
+        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
+
         error = None
         try:
             import jedi
@@ -1737,6 +1728,7 @@ class NiceTracer(Tracer):
     def _prepare_ast(self, source, filename, mode):
         # ast_utils need to be imported after asttokens
         # is (custom-)imported
+        try_load_modules_with_frontend_sys_path(["asttokens", "six", "astroid"])
         from thonny import ast_utils
 
         root = ast.parse(source, filename, mode)
@@ -2320,6 +2312,7 @@ class NiceTracer(Tracer):
         """Marks interesting properties of AST nodes"""
         # ast_utils need to be imported after asttokens
         # is (custom-)imported
+        try_load_modules_with_frontend_sys_path(["asttokens", "six", "astroid"])
         from thonny import ast_utils
 
         def add_tag(node, tag):

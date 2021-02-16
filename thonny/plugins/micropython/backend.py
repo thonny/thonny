@@ -112,7 +112,6 @@ def debug(msg):
 
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
-
         self._args = args
         self._prev_time = time.time()
         self._local_cwd = None
@@ -260,8 +259,14 @@ class MicroPythonBackend(MainBackend, ABC):
     def _sync_time(self):
         raise NotImplementedError()
 
+    def _get_time_for_rtc(self):
+        if self._args["utc_clock"]:
+            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        else:
+            return datetime.datetime.now().timetuple()
+
     def _validate_time(self):
-        local = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        this_computer = self._get_time_for_rtc()
         remote = self._get_utc_timetuple_from_device()
         if isinstance(remote, tuple):
             # tweak the format if required
@@ -269,7 +274,7 @@ class MicroPythonBackend(MainBackend, ABC):
             while len(remote) < 8:
                 remote += (0,)
             remote += (-1,)  # unknown DST
-            diff = int(time.mktime(local) - time.mktime(remote))
+            diff = int(time.mktime(this_computer) - time.mktime(remote))
             if abs(diff) > 10:
                 print("WARNING: Device's real-time clock seems to be off by %s seconds" % diff)
         else:
@@ -1295,7 +1300,12 @@ class MicroPythonBackend(MainBackend, ABC):
         self._prev_time = new_time
 
     def _system_time_to_posix_time(self, value: float) -> float:
-        return value + self._get_epoch_offset()
+        result = value + self._get_epoch_offset()
+        if not self._args["utc_clock"]:
+            # convert to UTC
+            result += time.timezone
+
+        return result
 
     def _get_epoch_offset(self) -> int:
         if self._epoch_year == 1970:

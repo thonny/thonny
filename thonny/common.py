@@ -3,6 +3,7 @@
 """
 Classes used both by front-end and back-end
 """
+import ast
 import logging
 import os.path
 import platform
@@ -652,6 +653,28 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
         result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
 
     return result
+
+
+def try_load_modules_with_frontend_sys_path(module_names):
+    try:
+        frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
+        assert isinstance(frontend_sys_path, list)
+    except Exception as e:
+        logger.warning("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
+        return
+
+    from importlib import import_module
+
+    old_sys_path = sys.path.copy()
+    sys.path = sys.path + frontend_sys_path
+    try:
+        for name in module_names:
+            try:
+                import_module(name)
+            except ImportError:
+                pass
+    finally:
+        sys.path = old_sys_path
 
 
 class ConnectionFailedException(Exception):

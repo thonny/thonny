@@ -26,6 +26,8 @@ from thonny.ui_utils import (
     create_url_label,
 )
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
@@ -71,6 +73,7 @@ class MicroPythonProxy(SubprocessProxy):
             "validate_time": get_workbench().get_option(
                 self.backend_name + ".validate_time", False
             ),
+            "utc_clock": get_workbench().get_option(self.backend_name + ".utc_clock", False),
         }
         return result
 
@@ -929,6 +932,7 @@ def add_micropython_backend(
     sort_key=None,
     validate_time=True,
     sync_time=None,
+    utc_clock=False,
     write_block_size=None,
     write_block_delay=None,
     dtr=None,
@@ -948,12 +952,12 @@ def add_micropython_backend(
 
         if sync_time is None:
             sync_time = True
-        get_workbench().set_default(name + ".sync_time", sync_time)
     else:
         if sync_time is None:
             sync_time = False
-        get_workbench().set_default(name + ".sync_time", sync_time)
 
+    get_workbench().set_default(name + ".sync_time", sync_time)
+    get_workbench().set_default(name + ".utc_clock", utc_clock)
     get_workbench().set_default(name + ".validate_time", validate_time)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 

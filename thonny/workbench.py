@@ -84,6 +84,7 @@ OBSOLETE_PLUGINS = [
     "thonnycontrib.circuitpython",
     "thonnycontrib.microbit",
     "thonnycontrib.esp",
+    "thonnycontrib.rpi_pico",
 ]
 
 

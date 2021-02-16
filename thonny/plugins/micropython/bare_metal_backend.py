@@ -260,10 +260,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             return 2000
 
     def _sync_time(self):
-        """Sets the time on the pyboard to match the time on the host."""
+        """Sets the time to match the time on the host."""
 
-        # RTC works on UTC
-        now = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        now = self._get_time_for_rtc()
 
         if self._connected_to_microbit():
             return
@@ -1589,6 +1588,10 @@ if __name__ == "__main__":
             from thonny.plugins.circuitpython.cirpy_backend import CircuitPythonBackend
 
             backend = CircuitPythonBackend(connection, clean=args["clean"], args=args)
+        elif "pipico" in args.get("proxy_class", "").lower():
+            from thonny.plugins.rpi_pico.rpi_pico_backend import RaspberryPiPicoBackend
+
+            backend = RaspberryPiPicoBackend(connection, clean=args["clean"], args=args)
         else:
             backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
 
