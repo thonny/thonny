@@ -98,9 +98,6 @@ class Uf2FlashingDialog(WorkDialog):
     def _get_release_info_url(self):
         raise NotImplementedError()
 
-    def _get_fallback_release_info_url(self):
-        raise NotImplementedError()
-
     def _start_downloading_release_info(self):
         self._release_info = None  # invalidate last info if downloading again
         threading.Thread(target=self._download_release_info, daemon=True).start()
@@ -125,24 +122,9 @@ class Uf2FlashingDialog(WorkDialog):
                 if self._release_info.get("message", "") == "Not Found":
                     self._release_info = None
         except Exception as e:
-            logger.warning(
-                "Could not find release info from %s", self._get_release_info_url(), exc_info=e
-            )
-
-        if not self._release_info:
-            try:
-                self.append_text(
-                    "Warning: Could not find release info from %s, trying %s instead\n"
-                    % (self._get_release_info_url(), self._get_fallback_release_info_url())
-                )
-                with urlopen(self._get_fallback_release_info_url()) as fp:
-                    self._release_info = json.loads(fp.read().decode("UTF-8"))
-            except Exception as e:
-                self.append_text(
-                    "Could not find release info from %s\n" % self._get_fallback_release_info_url()
-                )
-                self.set_action_text("Error!")
-                self.grid_progress_widgets()
+            self.append_text("Could not find release info from %s\n" % self._get_release_info_url())
+            self.set_action_text("Error!")
+            self.grid_progress_widgets()
 
     def update_ui(self):
         if self._state == "idle":
@@ -189,7 +171,7 @@ class Uf2FlashingDialog(WorkDialog):
             for asset in self._release_info["assets"]
             if self._is_suitable_asset(asset, board_id)
         ]
-        # TODO: it may be actually fallback url
+
         logger.info(
             "Assets from %s: %r", self._get_release_info_url(), self._release_info["assets"]
         )

@@ -29,8 +29,7 @@ class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_known_usb_vids_pids(cls):
-        # TODO: first pair is temporary
-        return {(0xF055, 0x9802), (0x2E8A, 0x0005)}
+        return {(0x2E8A, 0x0005)}
 
     @classmethod
     def device_is_present_in_bootloader_mode(cls):
@@ -69,9 +68,6 @@ class PicoFlashingDialog(Uf2FlashingDialog):
 
     def _get_release_info_url(self):
         return "https://raw.githubusercontent.com/thonny/thonny/master/data/rpi-pico-firmware.json"
-
-    def _get_fallback_release_info_url(self):
-        return "https://api.github.com/repos/raspberrypi/micropython/releases/latest"
 
     def get_download_url_and_size(self, board_id):
         if self._release_info is None:
