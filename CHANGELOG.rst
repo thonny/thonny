@@ -2,10 +2,18 @@
 Version history
 ===============
 
-3.3.4 (2021-02-??)
+3.3.4 (2021-02-17)
 ==================
+* CHANGED: MicroPython time synchronization now sets RTC to local time instead of UTC. This can be changed via a hidden configuration option (https://github.com/thonny/thonny/wiki/MicroPython#advanced-configuration), #1603
+* Add time synchronization for RaspberryPi Pico, #1563, #1592
+* Skip loading obsolete thonny-pico plug-in, which is now built in, #1575
+* Get rid of misleading SSL warning in micropip.py and show a warning about non-MicroPython packages, #1621
+* Fix WebREPL connection for MicroPython 1.14 by using regular paste mode instead of the new raw-paste mode, #1613
+* Delay importing jedi and asttokens for improved performance, #1556
+* Don't assume "dialout" group is required when MicroPython connection fails with permission error, #1286
+* Reduce the memory usage of showing global variables by capping object representations to 50 first characters in MicroPython, #1582
 * Add Hungarian translation (by Laszlo Kocsis)
-* Updated tranlsations for German, Korean, Italian, Dutch (by various authors)
+* Updated translations for German, Korean, Italian, Dutch (by various authors)
 
 
 3.3.3 (2021-01-21)
