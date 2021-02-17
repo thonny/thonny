@@ -20,6 +20,7 @@ LANGUAGES_DICT = {
     "fr_FR": "Français",
     "it_IT": "Italiano",
     "lt_LT": "Lietuvių",
+    "hu_HU": "Magyar [BETA]",
     "nb_NO": "Norsk (Bokmål)",
     "nn_NO": "Norsk (Nynorsk)",
     "nl_NL": "Nederlands",

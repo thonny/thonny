@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.3.4 (2021-02-??)
+==================
+* Add Hungarian translation (by Laszlo Kocsis)
+* Updated tranlsations for German, Korean, Italian, Dutch (by various authors)
+
+
 3.3.3 (2021-01-21)
 ==================
 * Add MicroPython support for Raspberry Pi Pico (https://www.raspberrypi.org/blog/raspberry-pi-silicon-pico-now-on-sale/)

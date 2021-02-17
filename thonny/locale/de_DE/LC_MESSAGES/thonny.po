@@ -1426,51 +1426,51 @@ msgstr "Download nach %s"
 
 #: thonny/base_file_browser.py:620
 msgid "Open in system file manager"
-msgstr ""
+msgstr "Im Systemdateimanager öffnen"
 
 #: thonny/base_file_browser.py:625
 msgid "Hide hidden files"
-msgstr ""
+msgstr "Versteckte Dateien ausblenden"
 
 #: thonny/base_file_browser.py:625
 msgid "Show hidden files"
-msgstr ""
+msgstr "Versteckte Dateien anzeigen"
 
 #: thonny/base_file_browser.py:635
 msgid "Open in Thonny"
-msgstr ""
+msgstr "Öffnen in Thonny"
 
 #: thonny/base_file_browser.py:640 thonny/base_file_browser.py:661
 msgid "Open in system default app"
-msgstr ""
+msgstr "Öffnen in der Systemstandard-App"
 
 #: thonny/base_file_browser.py:647 thonny/base_file_browser.py:669
 msgid "Configure %s files"
-msgstr ""
+msgstr "Konfiguriere %s Dateien"
 
 #: thonny/base_file_browser.py:670
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
-msgstr ""
+msgstr "Was mit einer %s Datei machen, wenn Sie in Thonnys Dateibrowser darauf doppelklicken?"
 
 #: thonny/base_file_browser.py:1042 thonny/plugins/micropython/pip_gui.py:77
 msgid "Deleting"
-msgstr ""
+msgstr "Löschen"
 
 #: thonny/base_file_browser.py:1049
 msgid "Creating directory"
-msgstr ""
+msgstr "Erstelle Verzeichnis"
 
 #: thonny/editors.py:217
 msgid "Loading %s"
-msgstr ""
+msgstr "Lade %s"
 
 #: thonny/editors.py:333
 msgid "Saving to %s"
-msgstr ""
+msgstr "Speichern nach %s"
 
 #: thonny/editors.py:622 thonny/editors.py:624
 msgid "Save All files"
-msgstr ""
+msgstr "Speicher Alle Dateien"
 
 #: thonny/workbench.py:828
 msgid "Configure interpreter..."
@@ -1478,19 +1478,19 @@ msgstr ""
 
 #: thonny/workbench.py:1501
 msgid "Device"
-msgstr ""
+msgstr "Gerät"
 
 #: thonny/workdlg.py:185
 msgid "Cancelling"
-msgstr ""
+msgstr "Abbrechen"
 
 #: thonny/workdlg.py:212
 msgid "Starting"
-msgstr ""
+msgstr "Beginnen"
 
 #: thonny/plugins/backend_config_page.py:234
 msgid "Authentication"
-msgstr ""
+msgstr "Authentifizierung"
 
 #: thonny/plugins/backend_config_page.py:236
 msgid "Enter the passphrase of your private key for\n"
@@ -1508,15 +1508,15 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:557
 msgid "Search results"
-msgstr ""
+msgstr "Suchergebnisse"
 
 #: thonny/plugins/pip_gui.py:558
 msgid "Searching"
-msgstr ""
+msgstr "Suchen"
 
 #: thonny/plugins/pip_gui.py:639 thonny/plugins/pip_gui.py:729
 msgid "Installing '%s'"
-msgstr ""
+msgstr "Installiere '%s'"
 
 #: thonny/plugins/pip_gui.py:645
 msgid "Upgrading '%s'"
@@ -1524,11 +1524,11 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:650
 msgid "Uninstalling '%s'"
-msgstr ""
+msgstr "Deinstalliere '%s'"
 
 #: thonny/plugins/pip_gui.py:663
 msgid "Installing"
-msgstr ""
+msgstr "Installiere"
 
 #: thonny/plugins/pip_gui.py:1372
 msgid "Package manager is not available for this interpreter"
@@ -1536,15 +1536,15 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:1385
 msgid "Not supported"
-msgstr ""
+msgstr "Nicht unterstützt"
 
 #: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1390
 msgid "Not available"
-msgstr ""
+msgstr "Nicht verfügbar"
 
 #: thonny/plugins/pip_gui.py:1391
 msgid "You need to stop your program before launching the package manager."
-msgstr ""
+msgstr "Sie müssen ihr Programm stoppen, bevor Sie den Paketmanager starten."
 
 #: thonny/plugins/shell_config_page.py:64
 msgid "Open evaluated values in Object inspector"
@@ -1566,15 +1566,15 @@ msgstr ""
 
 #: thonny/plugins/micropython/__init__.py:284
 msgid "Not connected"
-msgstr ""
+msgstr "Nicht verbunden"
 
 #: thonny/plugins/micropython/__init__.py:453
 msgid "Advanced options"
-msgstr ""
+msgstr "Erweiterte Optionen"
 
 #: thonny/plugins/micropython/__init__.py:460
 msgid "Install or update firmware"
-msgstr ""
+msgstr "Installieren oder aktualisieren Sie die Firmware"
 
 #: thonny/plugins/micropython/__init__.py:963
 msgid "MicroPython (local)"
@@ -1586,7 +1586,7 @@ msgstr ""
 
 #: thonny/plugins/micropython/pip_gui.py:134
 msgid "Module"
-msgstr ""
+msgstr "Modul"
 
 #: thonny/plugins/micropython/pip_gui.py:159
 msgid "Shadowed items (not importable):"
@@ -1594,7 +1594,7 @@ msgstr ""
 
 #: thonny/plugins/micropython/pip_gui.py:208
 msgid "Package is not available at micropython.org. Version at PyPI will be installed."
-msgstr ""
+msgstr "Das Paket ist bei micropython.org nicht verfügbar. Die Version bei PyPI wird installiert."
 
 #: thonny/plugins/micropython/pip_gui.py:219
 msgid "NB! micropython.org has published version %s of this package and this will be installed by default."
@@ -1627,7 +1627,7 @@ msgstr ""
 
 #: thonny/plugins/micropython/uf2dialog.py:40
 msgid "Version to be installed"
-msgstr ""
+msgstr "Zu installierende Version"
 
 #: thonny/plugins/micropython/uf2dialog.py:48
 msgid "Target device location"
@@ -1639,19 +1639,19 @@ msgstr ""
 
 #: thonny/plugins/micropython/uf2dialog.py:145
 msgid "Please wait"
-msgstr ""
+msgstr "Bitte warten"
 
 #: thonny/plugins/pip_gui.py:67
 msgid "Search on PyPI"
-msgstr ""
+msgstr "Suche auf PyPI"
 
 #: thonny/plugins/pip_gui.py:79
 msgid "Delete selected"
-msgstr ""
+msgstr "Ausgewählte Löschen"
 
 #: thonny/base_file_browser.py:662
 msgid "Open in Thonny's text editor"
-msgstr ""
+msgstr "In Thonnys Texteditor öffnen"
 
 #: thonny/base_file_browser.py:325
 msgid "Storage space on this drive or filesystem"
@@ -1671,15 +1671,15 @@ msgstr ""
 
 #: thonny/base_file_browser.py:336
 msgid "Storage info"
-msgstr ""
+msgstr "Speicherinformation"
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Replace tabs with spaces"
-msgstr ""
+msgstr "Ersetze Tabulatoren durch Leerzeichen"
 
 #: thonny/plugins/editor_config_page.py:28
 msgid "Highlight tab characters"
-msgstr ""
+msgstr "Hebe Tabulatorzeichen hervor"
 
 #: thonny/plugins/editor_config_page.py:47
 msgid "Indent with tab characters (not recommended for Python)"
@@ -1687,20 +1687,20 @@ msgstr ""
 
 #: thonny/base_file_browser.py:81 thonny/memory.py:63
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: thonny/base_file_browser.py:85
 msgid "Size (bytes)"
-msgstr ""
+msgstr "Größe (Bytes)"
 
 #: thonny/base_file_browser.py:835
 msgid "Enter name for new directory under\n"
 "%s"
-msgstr ""
+msgstr "Gebe einen Namen für ein neues Verzeichnis ein unter %s"
 
 #: thonny/base_file_browser.py:858
 msgid "Nothing selected"
-msgstr ""
+msgstr "Nichts ausgewählt"
 
 #: thonny/base_file_browser.py:858
 msgid "Select an item and try again!"
@@ -1708,15 +1708,15 @@ msgstr ""
 
 #: thonny/base_file_browser.py:1105
 msgid "Open from %s"
-msgstr ""
+msgstr "Öffnen von %s"
 
 #: thonny/base_file_browser.py:1108
 msgid "Save to %s"
-msgstr ""
+msgstr "Speichern nach %s"
 
 #: thonny/base_file_browser.py:1120
 msgid "File name:"
-msgstr ""
+msgstr "Dateiname:"
 
 #: thonny/memory.py:64 thonny/plugins/object_inspector.py:510
 #: thonny/plugins/object_inspector.py:589
@@ -1731,19 +1731,19 @@ msgstr ""
 
 #: thonny/plugins/backend_config_page.py:257
 msgid "Save password"
-msgstr ""
+msgstr "Passwort Speichern"
 
 #: thonny/plugins/debugger.py:553
 msgid "Function call at %s"
-msgstr ""
+msgstr "Funktionsaufruf bei %s"
 
 #: thonny/plugins/debugger.py:1001
 msgid "Local variables"
-msgstr ""
+msgstr "Lokale Variablen"
 
 #: thonny/plugins/debugger.py:1033
 msgid "Function"
-msgstr ""
+msgstr "Funktion"
 
 #: thonny/plugins/debugger.py:1034
 msgid "Location"
@@ -1755,19 +1755,19 @@ msgstr ""
 
 #: thonny/plugins/heap.py:22
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: thonny/plugins/object_inspector.py:87
 msgid "Data"
-msgstr ""
+msgstr "Daten"
 
 #: thonny/plugins/object_inspector.py:88
 msgid "Attributes"
-msgstr ""
+msgstr "Attribute"
 
 #: thonny/plugins/object_inspector.py:509
 msgid "Index"
-msgstr ""
+msgstr "Index"
 
 #: thonny/plugins/object_inspector.py:587
 msgid "Key ID"
@@ -1780,7 +1780,7 @@ msgstr ""
 #: thonny/plugins/variables.py:36
 msgid "Back to\n"
 "%s"
-msgstr ""
+msgstr "Zurück nach %s"
 
 #: thonny/plugins/micropython/__init__.py:401
 msgid "Port or WebREPL"
@@ -1788,11 +1788,11 @@ msgstr ""
 
 #: thonny/plugins/micropython/__init__.py:518
 msgid "Password"
-msgstr ""
+msgstr "Passwort"
 
 #: thonny/plugins/debugger.py:959
 msgid "Source code"
-msgstr ""
+msgstr "Quellcode"
 
 #: thonny/plugins/general_config_page.py:29
 msgid "Use Tk file dialogs instead of Zenity"
