@@ -214,7 +214,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     if obj is not None:
                         cls.last_repl_values.append(obj)
                         cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
-                        print({start_marker!r}, cls.repr(obj), '@', id(obj), {end_marker!r}, sep='')
+                        print({start_marker!r}, repr(obj), '@', id(obj), {end_marker!r}, sep='')
                 
                 @staticmethod
                 def print_mgmt_value(obj):
