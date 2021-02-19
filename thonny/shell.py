@@ -40,7 +40,10 @@ logger = logging.getLogger(__name__)
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
-OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r])")
+OUTPUT_SPLIT_REGEX = re.compile(
+    r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|%s|%s)"
+    % (re.escape(OBJECT_LINK_START), "\\d+@" + re.escape(OBJECT_LINK_END))
+)
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(
     r"(https?:\/\/[\w\/.:\-\?#=%&]+[\w\/]|data:image\/[a-z]+;base64,[A-Za-z0-9\/=\+]+)"
