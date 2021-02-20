@@ -1939,7 +1939,8 @@ class NiceTracer(Tracer):
             if event == "before_expression" and (
                 id(frame) != id(prev_state_frame.system_frame)
                 or "statement" in prev_state_frame.event
-                or not range_contains_smaller_or_equal(prev_root_expression, focus)
+                or prev_root_expression
+                and not range_contains_smaller_or_equal(prev_root_expression, focus)
             ):
                 custom_frame.current_root_expression = focus
                 custom_frame.current_evaluations = []
