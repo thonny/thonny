@@ -81,6 +81,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * fstengel
 * Gabriel Slørdahl
 * Georges Khaznadar
+* IhorNehrutsa
 * Ivanhercaz
 * Ivan.schamann
 * Илья Кругликов
