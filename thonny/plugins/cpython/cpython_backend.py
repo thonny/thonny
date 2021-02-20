@@ -879,7 +879,7 @@ class MainCPythonBackend(MainBackend):
                         obj_repr = obj_repr[:5000] + "…"
                 except Exception as e:
                     obj_repr = "<repr error: " + str(e) + ">"
-                print("%s%s@%s%s" % (OBJECT_LINK_START, obj_repr, id(obj), OBJECT_LINK_END))
+                print(OBJECT_LINK_START % id(obj), obj_repr, OBJECT_LINK_END, sep="")
                 self._heap[id(obj)] = obj
                 builtins._ = obj
 

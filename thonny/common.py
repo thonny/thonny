@@ -16,7 +16,7 @@ from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
 logger = logging.getLogger(__name__)
 
 MESSAGE_MARKER = "\x02"
-OBJECT_LINK_START = "[object_link_for_thonny]"
+OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
 
 IGNORED_FILES_AND_DIRS = [

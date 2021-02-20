@@ -35,14 +35,16 @@ from thonny.ui_utils import (
     ems_to_pixels,
 )
 
+OBJECT_INFO_START_REGEX = re.escape(OBJECT_LINK_START).replace("%d", r"\d+")
+OBJECT_INFO_END_REGEX = re.escape(OBJECT_LINK_END)
+
 logger = logging.getLogger(__name__)
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 OUTPUT_SPLIT_REGEX = re.compile(
-    r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|%s|%s)"
-    % (re.escape(OBJECT_LINK_START), "\\d+@" + re.escape(OBJECT_LINK_END))
+    r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|%s|%s)" % (OBJECT_INFO_START_REGEX, OBJECT_INFO_END_REGEX)
 )
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(
@@ -376,7 +378,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.mark_set("command_io_start", "1.0")
         self.mark_gravity("command_io_start", "left")
 
-        self.active_object_tags = set()
+        self.active_extra_tags = []
 
         self.update_tabs()
 
@@ -441,33 +443,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._insert_text_directly("\n")
             self._insert_text_directly(welcome_text, ("welcome",))
             self.see("end")
-
-        if "value_info" in msg:
-            num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)
-            if num_stripped_question_marks > 0:
-                # show the value in object inspector
-                get_workbench().event_generate("ObjectSelect", object_id=msg["value_info"].id)
-            else:
-                # show the value in shell
-                value_repr = shorten_repr(msg["value_info"].repr, 10000)
-                if value_repr != "None":
-                    if get_workbench().in_heap_mode():
-                        value_repr = memory.format_object_id(msg["value_info"].id)
-                    object_tag = "object_" + str(msg["value_info"].id)
-                    self._insert_text_directly(value_repr + "\n", ("toplevel", "value", object_tag))
-                    if running_on_mac_os():
-                        sequence = "<Command-Button-1>"
-                    else:
-                        sequence = "<Control-Button-1>"
-                    self.tag_bind(
-                        object_tag,
-                        sequence,
-                        lambda _: get_workbench().event_generate(
-                            "ObjectSelect", object_id=msg["value_info"].id
-                        ),
-                    )
-
-                    self.active_object_tags.add(object_tag)
 
         self.mark_set("output_end", self.index("end-1c"))
         self._discard_old_content()
@@ -538,7 +513,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
 
-    def _apply_io_event(self, data, stream_name, extra_tags=set()):
+    def _apply_io_event(self, data, stream_name):
         if not data:
             return
 
@@ -553,15 +528,30 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._change_io_cursor_offset("line")
             elif data.endswith("D") or data.endswith("C"):
                 self._change_io_cursor_offset_csi(data)
+            elif re.match(OBJECT_INFO_START_REGEX, data):
+                id_str = data[data.index("=") + 1 : data.index("]")]
+                self.active_extra_tags.append("value")
+                self.active_extra_tags.append(id_str)
+                if get_workbench().get_option("shell.auto_inspect_values"):
+                    get_workbench().event_generate("ObjectSelect", object_id=int(id_str))
+            elif re.match(OBJECT_INFO_END_REGEX, data):
+                self.active_extra_tags.pop()
+                self.active_extra_tags.pop()
             elif stream_name == "stdout":
                 # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
                 # codes sent to stderr shouldn't affect later output in stdout
                 # It makes sense, but Ubuntu terminal does not confirm it.
                 # For now I'm just trimming stderr color codes
                 self._update_ansi_attributes(data)
+            else:
+                logger.warning("Don't know what to do with %r" % data)
 
         else:
-            tags = extra_tags | {"io", stream_name}
+            if "value" in self.active_extra_tags:
+                tags = set(self.active_extra_tags)
+            else:
+                tags = set(self.active_extra_tags) | {"io", stream_name}
+
             if stream_name == "stdout" and self.tty_mode:
                 tags |= self._get_ansi_tags()
 
@@ -575,7 +565,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 and not (data.startswith(OBJECT_LINK_START))
             ):
                 self._io_cursor_offset = 0  # ignore the effect of preceding \r and \b
-                actual_text = self._remove_object_link_markers(data)
+                actual_text = data
                 button_text = actual_text[:70] + " …"
                 btn = tk.Label(
                     self,
@@ -640,18 +630,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self._applied_io_events.append((original_data, stream_name))
 
-    def _remove_object_link_markers(self, data):
-        end_pos = data.find(OBJECT_LINK_END)
-        if end_pos < 0:
-            return data
-
-        at_pos = data.rfind("@", 0, end_pos)
-        if at_pos < 0:
-            return data
-
-        data = data[:at_pos] + data[end_pos + len(OBJECT_LINK_END) :]
-        return data.replace(OBJECT_LINK_START, "")
-
     def _render_object_links(self, start):
         closer_start = self.search(
             OBJECT_LINK_END, index=start, stopindex="command_io_start", backwards=True, elide=False
@@ -673,11 +651,14 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             logger.warning("Can't parse object id: " + id_str)
             return
 
+        print("iostart", self.index("command_io_start"))
+
         self.direct_delete(id_start, "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)))
 
         opener_start = self.search(
             OBJECT_LINK_START, index=id_start, stopindex="command_io_start", backwards=True
         )
+        assert opener_start, "Could not find object info opener"
         value_start = "%s + %d chars" % (opener_start, len(OBJECT_LINK_START))
 
         self.tag_remove("io", value_start, closer_start)
@@ -1399,9 +1380,9 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             return
 
         # select whole value unless user has started a partial selection
-        if not self.tag_nextrange("sel", rng[0], rng[1]):
-            self.tag_remove("sel", "1.0", "end")
-            self.tag_add("sel", rng[0], rng[1])
+        # if not self.tag_nextrange("sel", rng[0], rng[1]):
+        #    self.tag_remove("sel", "1.0", "end")
+        #    self.tag_add("sel", rng[0], rng[1])
 
     def _handle_hyperlink(self, event):
         import webbrowser
@@ -1502,8 +1483,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_add("inactive", "1.0", end_index)
         self.tag_remove("value", "1.0", end_index)
 
-        while len(self.active_object_tags) > 0:
-            self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
+        while len(self.active_extra_tags) > 0:
+            self.tag_remove(self.active_extra_tags.pop(), "1.0", "end")
 
     def get_lines_above_viewport_bottom(self, tag_name, n):
         end_index = self.index("@%d,%d lineend" % (self.winfo_height(), self.winfo_height()))
