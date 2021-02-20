@@ -14,13 +14,15 @@ In Shell only current command entry is colored
 
 Regexes are adapted from idlelib
 """
-
+import logging
 import re
 
 import tkinter
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
+
+logger = logging.getLogger(__name__)
 
 TODO = "COLOR_TODO"
 
@@ -308,7 +310,10 @@ def update_coloring_on_event(event):
     else:
         text = event.widget
 
-    update_coloring_on_text(text, event)
+    try:
+        update_coloring_on_text(text, event)
+    except Exception as e:
+        logger.error("Problem with coloring", exc_info=e)
 
 
 def update_coloring_on_text(text, event=None):
