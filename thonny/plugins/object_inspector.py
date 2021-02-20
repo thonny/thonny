@@ -588,7 +588,7 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         thonny.memory.MemoryFrame.__init__(
             self, master, ("key_id", "id", "key", "value"), show_statusbar=True
         )
-        self.configure(border=1)
+        # self.configure(border=1)
         # self.vert_scrollbar.grid_remove()
         self.tree.column("key_id", width=ems_to_pixels(7), anchor=tk.W, stretch=False)
         self.tree.column("key", width=100, anchor=tk.W, stretch=False)
