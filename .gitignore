@@ -1,8 +1,13 @@
 !thonny.exe
 */*.pyc
+*.log
 *.iobj
+*.pdb
+*.ipdb
+*.obj
 *.opensdf
 *.tlog
+*.aps
 *.ipdb
 *.dmg
 .venv
