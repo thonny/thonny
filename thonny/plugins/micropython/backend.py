@@ -681,46 +681,41 @@ class MicroPythonBackend(MainBackend, ABC):
 
         # need to keep the reference corresponding to object_id so that it can be later found as next context object
         # remove non-relevant items
-        relevant = set([cmd.object_id] + cmd.back_links + cmd.forward_links)
+        # TODO: add back links
+        # relevant = set([cmd.object_id] + cmd.back_links + cmd.forward_links)
         self._execute(
             dedent(
                 """
-                if id(__thonny_value) not in __thonny_helper.inspector_values:
-                    __thonny_helper.inspector_values[id(__thonny_value)] = __thonny_value
-                __thonny_relevant = %r
-                #__thonny_helper.inspector_values = {
-                #    obj_id : __thonny_helper.inspector_values[obj_id] for obj_id in __thonny_helper.inspector_values
-                #    if obj_id in __thonny_relevant
-                #}
+                if id(__thonny_helper.object_info) not in __thonny_helper.inspector_values:
+                    __thonny_helper.inspector_values[id(__thonny_helper.object_info)] = __thonny_helper.object_info
             """
-                % relevant
             )
         )
-
-        self._execute("del __thonny_value")
 
         return {"id": cmd.object_id, "info": info}
 
     def _find_basic_object_info(self, object_id, context_id):
-        """If object is found then returns basic info and leaves object reference to __thonny_value"""
+        """If object is found then returns basic info and leaves object reference
+        to __thonny_helper.object_info.
+
+        Can't leave it in a global object, because when querying globals(),
+        repr(globals()) would cause inifite recursion."""
 
         result = self._evaluate(
             dedent(
                 """
-                for __thonny_value in (
+                for __thonny_helper.object_info in (
                         list(globals().values()) 
                         + __thonny_helper.last_repl_values
                         + list(__thonny_helper.inspector_values.values())):
-                    #print("testing", id(__thonny_value), __thonny_value)
-                    if id(__thonny_value) == %d:
+                    if id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
-                            "repr" : repr(__thonny_value),
-                            "type": str(type(__thonny_value))
+                            "repr" : repr(__thonny_helper.object_info),
+                            "type": str(type(__thonny_helper.object_info))
                         })
                         break
                 else:
-                    __thonny_value = None
-                    del __thonny_value
+                    __thonny_helper.object_info = None
                     __thonny_helper.print_mgmt_value(None)
             """
                 % object_id
@@ -733,34 +728,33 @@ class MicroPythonBackend(MainBackend, ABC):
             return self._evaluate(
                 dedent(
                     """
+                __thonny_helper.context_value = __thonny_helper.inspector_values.get(%d, None)
                 
-                __thonny_context_value = __thonny_helper.inspector_values.get(%d, None)
-                
-                if __thonny_context_value is None:
-                    __thonny_value = None
+                if __thonny_helper.context_value is None:
+                    __thonny_helper.object_info = None
                     __thonny_helper.print_mgmt_value(None)
                 else:
-                    __thonny_children = [getattr(__thonny_context_value, name) for name in dir(__thonny_context_value)]
-                    if isinstance(__thonny_context_value, (set, tuple, list)):
-                        __thonny_children += list(__thonny_context_value)
-                    elif isinstance(__thonny_context_value, dict):
-                        __thonny_children += list(__thonny_context_value.values())
+                    __thonny_helper.context_children = [
+                         getattr(__thonny_helper.context_value, name)
+                         for name in dir(__thonny_helper.context_value)
+                    ]
+                    if isinstance(__thonny_helper.context_value, (set, tuple, list)):
+                        __thonny_helper.context_children += list(__thonny_helper.context_value)
+                    elif isinstance(__thonny_helper.context_value, dict):
+                        __thonny_helper.context_children += list(__thonny_helper.context_value.values())
                     
-                    for __thonny_value in __thonny_children:
-                        if id(__thonny_value) == %d:
+                    for __thonny_helper.object_info in __thonny_helper.context_children:
+                        if id(__thonny_helper.object_info) == %d:
                             __thonny_helper.print_mgmt_value({
-                                "repr" : __thonny_helper.repr(__thonny_value),
-                                "type": str(type(__thonny_value))
+                                "repr" : __thonny_helper.repr(__thonny_helper.object_info),
+                                "type": str(type(__thonny_helper.object_info))
                             })
                             break
                     else:
-                        __thonny_value = None
-                        del __thonny_value
-                        __thonny_helper.print_mgmt_value(None)
+                        __thonny_helper.object_info = None
                         
-                    del __thonny_children
-                
-                del __thonny_context_value
+                __thonny_helper.context_value = None
+                __thonny_helper.context_children = None
             """
                     % (context_id, object_id)
                 )
@@ -769,9 +763,12 @@ class MicroPythonBackend(MainBackend, ABC):
             return None
 
     def _get_object_attributes(self, all_attributes):
-        """object is given in __thonny_value """
+        """object is given in __thonny_helper.object_info """
         atts = self._evaluate(
-            "{name : (id(getattr(__thonny_value, name)), __thonny_helper.repr(getattr(__thonny_value, name))) for name in dir(__thonny_value)}"
+            "{name : ("
+            "   id(getattr(__thonny_helper.object_info, name)),"
+            "    __thonny_helper.repr(getattr(__thonny_helper.object_info, name))"
+            ") for name in dir(__thonny_helper.object_info)}"
         )
         return {
             name: ValueInfo(atts[name][0], atts[name][1])
@@ -780,13 +777,16 @@ class MicroPythonBackend(MainBackend, ABC):
         }
 
     def _get_object_info_extras(self, type_name):
-        """object is given in __thonny_value """
+        """object is given in __thonny_helper.object_info """
         if type_name in ("list", "tuple", "set"):
-            items = self._evaluate("[(id(x), __thonny_helper.repr(x)) for x in __thonny_value]")
+            items = self._evaluate(
+                "[(id(x), __thonny_helper.repr(x)) for x in __thonny_helper.object_info]"
+            )
             return {"elements": [ValueInfo(x[0], x[1]) for x in items]}
         elif type_name == "dict":
             items = self._evaluate(
-                "[((id(key), __thonny_helper.repr(key)), (id(__thonny_value[key]), __thonny_helper.repr(__thonny_value[key]))) for key in __thonny_value]"
+                "[((id(key), __thonny_helper.repr(key)), (id(__thonny_helper.object_info[key]), "
+                "__thonny_helper.repr(__thonny_helper.object_info[key]))) for key in __thonny_helper.object_info]"
             )
             return {
                 "entries": [
