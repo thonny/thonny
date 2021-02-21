@@ -35,16 +35,22 @@ from thonny.ui_utils import (
     ems_to_pixels,
 )
 
-OBJECT_INFO_START_REGEX = re.escape(OBJECT_LINK_START).replace("%d", r"\d+")
-OBJECT_INFO_END_REGEX = re.escape(OBJECT_LINK_END)
+OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"\d+")
+OBJECT_INFO_START_REGEX = re.compile(OBJECT_INFO_START_REGEX_STR)
+OBJECT_INFO_END_REGEX_STR = re.escape(OBJECT_LINK_END)
+OBJECT_INFO_END_REGEX = re.compile(OBJECT_INFO_END_REGEX_STR)
 
 logger = logging.getLogger(__name__)
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
+
+TERMINAL_CONTROL_REGEX_STR = r"\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]"
+TERMINAL_CONTROL_REGEX = re.compile(TERMINAL_CONTROL_REGEX_STR)
 OUTPUT_SPLIT_REGEX = re.compile(
-    r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|%s|%s)" % (OBJECT_INFO_START_REGEX, OBJECT_INFO_END_REGEX)
+    "(%s|%s|%s)"
+    % (TERMINAL_CONTROL_REGEX_STR, OBJECT_INFO_START_REGEX_STR, OBJECT_INFO_END_REGEX_STR)
 )
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(
@@ -425,7 +431,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             self.tag_add("before_io", "output_insert -1 line linestart")
 
         self._update_visible_io(None)
-        self._render_object_links("end")
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         if msg.get("error"):
@@ -468,18 +473,15 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return get_workbench().get_option("shell.squeeze_threshold")
 
     def _append_to_io_queue(self, data, stream_name):
-        if self.tty_mode:
-            # Make sure ANSI CSI codes are stored as separate events
-            # TODO: try to complete previously submitted incomplete code
-            parts = re.split(OUTPUT_SPLIT_REGEX, data)
-            for part in parts:
-                if part:  # split may produce empty string in the beginning or start
-                    # split the data so that very long lines separated
-                    for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
-                        if block:
-                            self._queued_io_events.append((block, stream_name))
-        else:
-            self._queued_io_events.append((data, stream_name))
+        # Make sure ANSI CSI codes and object links are stored as separate events
+        # TODO: try to complete previously submitted incomplete code
+        parts = re.split(OUTPUT_SPLIT_REGEX, data)
+        for part in parts:
+            if part:  # split may produce empty string in the beginning or start
+                # split the data so that very long lines separated
+                for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
+                    if block:
+                        self._queued_io_events.append((block, stream_name))
 
     def _update_visible_io(self, target_num_visible_chars):
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
@@ -519,7 +521,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         original_data = data
 
-        if self.tty_mode and re.match(OUTPUT_SPLIT_REGEX, data):
+        if self.tty_mode and re.match(TERMINAL_CONTROL_REGEX, data):
             if data == "\a":
                 get_workbench().bell()
             elif data == "\b":
@@ -528,15 +530,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._change_io_cursor_offset("line")
             elif data.endswith("D") or data.endswith("C"):
                 self._change_io_cursor_offset_csi(data)
-            elif re.match(OBJECT_INFO_START_REGEX, data):
-                id_str = data[data.index("=") + 1 : data.index("]")]
-                self.active_extra_tags.append("value")
-                self.active_extra_tags.append(id_str)
-                if get_workbench().get_option("shell.auto_inspect_values"):
-                    get_workbench().event_generate("ObjectSelect", object_id=int(id_str))
-            elif re.match(OBJECT_INFO_END_REGEX, data):
-                self.active_extra_tags.pop()
-                self.active_extra_tags.pop()
             elif stream_name == "stdout":
                 # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
                 # codes sent to stderr shouldn't affect later output in stdout
@@ -546,6 +539,25 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             else:
                 logger.warning("Don't know what to do with %r" % data)
 
+        elif re.match(OBJECT_INFO_START_REGEX, data):
+            id_str = data[data.index("=") + 1 : data.index("]")]
+            self.active_extra_tags.append("value")
+            self.active_extra_tags.append(id_str)
+            if get_workbench().get_option("shell.auto_inspect_values"):
+                get_workbench().event_generate("ObjectSelect", object_id=int(id_str))
+
+            if get_workbench().in_heap_mode():
+                self._insert_text_directly(
+                    memory.format_object_id(int(id_str)), tuple(self.active_extra_tags)
+                )
+
+        elif re.match(OBJECT_INFO_END_REGEX, data):
+            self.active_extra_tags.pop()
+            self.active_extra_tags.pop()
+
+        elif "value" in self.active_extra_tags and get_workbench().in_heap_mode():
+            # id was already printed and value should be suppressed
+            pass
         else:
             if "value" in self.active_extra_tags:
                 tags = set(self.active_extra_tags)
@@ -629,53 +641,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._insert_text_directly(data, tuple(tags))
 
         self._applied_io_events.append((original_data, stream_name))
-
-    def _render_object_links(self, start):
-        closer_start = self.search(
-            OBJECT_LINK_END, index=start, stopindex="command_io_start", backwards=True, elide=False
-        )
-        if not closer_start:
-            return
-
-        id_start = self.search(
-            "@", index=closer_start, stopindex="command_io_start", backwards=True
-        )
-        if not id_start:
-            logger.warning("Can't find object id")
-            return
-
-        id_str = self.get(id_start, closer_start)[1:]
-        try:
-            int(id_str)
-        except ValueError:
-            logger.warning("Can't parse object id: " + id_str)
-            return
-
-        print("iostart", self.index("command_io_start"))
-
-        self.direct_delete(id_start, "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)))
-
-        opener_start = self.search(
-            OBJECT_LINK_START, index=id_start, stopindex="command_io_start", backwards=True
-        )
-        assert opener_start, "Could not find object info opener"
-        value_start = "%s + %d chars" % (opener_start, len(OBJECT_LINK_START))
-
-        self.tag_remove("io", value_start, closer_start)
-        self.tag_add("value", value_start, closer_start)
-        self.tag_add(id_str, value_start, closer_start)
-
-        if get_workbench().in_heap_mode():
-            id_repr = memory.format_object_id(int(id_str))
-            self.direct_delete(value_start, id_start)
-            self.direct_insert(value_start, id_repr, ("value", id_str))
-
-        self.direct_delete(opener_start, value_start)
-
-        self._render_object_links(opener_start)
-
-        if get_workbench().get_option("shell.auto_inspect_values"):
-            get_workbench().event_generate("ObjectSelect", object_id=int(id_str))
 
     def _show_squeezed_text(self, button):
         dlg = SqueezedTextDialog(self, button)
