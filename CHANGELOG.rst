@@ -2,6 +2,14 @@
 Version history
 ===============
 
+3.3.5 (2021-02-22)
+==================
+* Fix too short reprs at MicroPython REPL (regression introduced in 3.3.4), #1627
+* Fix incorrect presentation of long output lines, #1628
+* Fix error in nicer debugger when stepping in generators, #1631
+* Fix infinite recursion error when evaluating `globals()` in MicroPython REPL while object inspector is open, #1641
+* Update Greek translation
+
 3.3.4 (2021-02-17)
 ==================
 * CHANGED: MicroPython time synchronization now sets RTC to local time instead of UTC. This can be changed via a hidden configuration option (https://github.com/thonny/thonny/wiki/MicroPython#advanced-configuration), #1603
