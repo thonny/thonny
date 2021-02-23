@@ -35,8 +35,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	py_dict = PyModule_GetDict(py_main);
 
 	PyObject* result = PyRun_String(
-		"from runpy import run_module\n"
-		"run_module('thonny')\n",
+		"try:\n"
+		"    from runpy import run_module\n"
+		"    run_module('thonny')\n"
+		"except:\n"
+		"    import traceback\n"
+		"    raise RuntimeError(traceback.format_exc()[:1500])\n",
 		Py_file_input,
 		py_dict,
 		py_dict
