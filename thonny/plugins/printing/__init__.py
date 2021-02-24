@@ -17,7 +17,21 @@ def print_current_script():
 
     script_html = _export_text_as_html(editor.get_text_widget())
     title_html = escape_html(editor.get_title())
-    full_html = template_html.replace("%title%", title_html).replace("%script%", script_html)
+    line_count = last_line = int(float(editor.get_text_widget().index("end-1c")))
+    if line_count < 10:
+        gutter_ems = 1
+    elif line_count < 100:
+        gutter_ems = 1.5
+    elif line_count < 1000:
+        gutter_ems = 2
+    else:
+        gutter_ems = 3
+
+    full_html = (
+        template_html.replace("%title%", title_html)
+        .replace("%script%", script_html)
+        .replace("%gutter_ems%", str(gutter_ems))
+    )
 
     import tempfile
 
