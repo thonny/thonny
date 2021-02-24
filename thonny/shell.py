@@ -1811,7 +1811,7 @@ class PlotterCanvas(tk.Canvas):
                     y,
                     text=marker,
                     anchor="sw",
-                    fill=self.colors[i - 1 % len(self.colors)],
+                    fill=self.colors[(i - 1) % len(self.colors)],
                     tags=("legend",),
                 )
                 x += marker_width
