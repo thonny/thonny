@@ -80,6 +80,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * freddii
 * fstengel
 * Gabriel Slørdahl
+* Gagan Saksena
 * Georges Khaznadar
 * IhorNehrutsa
 * Ivanhercaz
