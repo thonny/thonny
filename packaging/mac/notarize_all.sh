@@ -5,7 +5,7 @@ set -e
 thonny_version=$(<../../thonny/VERSION)
 
 ~/private/notarize-app.sh "dist/thonny-${thonny_version}.pkg"
-~/private/notarize-app.sh "dist/thonny-xxl-${thonny_version}.pkg"
+#~/private/notarize-app.sh "dist/thonny-xxl-${thonny_version}.pkg"
 
 
 # Notarizing #####################################################################
