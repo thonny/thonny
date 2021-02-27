@@ -112,15 +112,15 @@ tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
 
 # XXL ###########################################################
 
-$TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
-
-find $TARGET_DIR -type f -name "*.pyo" -delete
-find $TARGET_DIR -type f -name "*.pyc" -delete
-
-mkdir -p dist
-tar -cvzf dist/$XXL_VERSION_NAME.tar.gz -C build thonny
-
-
+# $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
+#
+# find $TARGET_DIR -type f -name "*.pyo" -delete
+# find $TARGET_DIR -type f -name "*.pyc" -delete
+#
+# mkdir -p dist
+# tar -cvzf dist/$XXL_VERSION_NAME.tar.gz -C build thonny
+#
+#
 # create download + install script
 # normal
 DOWNINSTALL_FILENAME=thonny-$VERSION.bash
