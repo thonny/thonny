@@ -3,7 +3,7 @@
 set -e
 
 # START BUILDING ####################################################
-export PREFIX=$HOME/pythonny37
+export PREFIX=$HOME/pythonny39
 
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt 
 export LD_LIBRARY_PATH=$PREFIX/lib
@@ -35,4 +35,4 @@ $MAIN_DIR/build_python.sh
 cd ..
 
 # check it out ...
-$PREFIX/bin/python3.7 -m idlelib
+$PREFIX/bin/python3.9 -m idlelib

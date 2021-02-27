@@ -6,9 +6,9 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy C:\Pythonny37\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Pythonny39\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
-copy ThonnyRunner37\Release\thonny.exe %BUILDDIR% /Y
+copy ThonnyRunner39\x64\Release\thonny.exe %BUILDDIR% /Y
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
 xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
@@ -42,7 +42,7 @@ del "%BUILDDIR%\Scripts\*" /Q>NUL
 
 copy .\pip.bat "%BUILDDIR%\Scripts\pip.bat"
 copy .\pip.bat "%BUILDDIR%\Scripts\pip3.bat"
-copy .\pip.bat "%BUILDDIR%\Scripts\pip3.7.bat"
+copy .\pip.bat "%BUILDDIR%\Scripts\pip3.9.bat"
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 

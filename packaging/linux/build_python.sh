@@ -25,5 +25,5 @@ export CPPFLAGS="-I$PREFIX/include"
 make altinstall
 
 # check that the newly built Python uses Tk 8.6 for Tkinter
-#$PREFIX/bin/python3.7 -m idlelib
+#$PREFIX/bin/python3.9 -m idlelib
 
