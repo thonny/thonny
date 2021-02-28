@@ -13,3 +13,8 @@ See https://thonny.org and `wiki <https://github.com/thonny/thonny/wiki>`_ for m
 Contributors
 ------------
 Contributions are welcome! See `CONTRIBUTING.rst <https://github.com/thonny/thonny/blob/master/CONTRIBUTING.rst>`_ for more info.
+
+
+Sponsors
+----------
+You can sponsor development of Thonny by sending a donation to Thonny's main author Aivar Annamaa: https://www.paypal.com/donate?business=3RQ3PMGZ6RSG4&item_name=Developing+Thonny+IDE&currency_code=EUR
