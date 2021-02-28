@@ -2251,7 +2251,7 @@ def get_default_theme():
 
 def get_default_basic_theme():
     if running_on_windows():
-        return "xpnative"
+        return "vista"
     else:
         return "clam"
 

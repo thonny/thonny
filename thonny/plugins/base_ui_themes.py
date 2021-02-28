@@ -309,7 +309,7 @@ def clam() -> BasicUiThemeSettings:
     }
 
 
-def xpnative() -> BasicUiThemeSettings:
+def vista() -> BasicUiThemeSettings:
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/xpTheme.tcl
     return {
         ".": {
@@ -442,7 +442,7 @@ def aqua() -> BasicUiThemeSettings:
 def windows() -> CompoundUiThemeSettings:
     tip_background = "#bbbbbb"
     return [
-        xpnative(),
+        vista(),
         _treeview_settings(),
         _menubutton_settings(),
         _paned_window_settings(),
@@ -608,8 +608,8 @@ def load_plugin() -> None:
         settings = {}  # type: Union[Dict, Callable[[], Dict]]
         if name == "clam":
             settings = clam
-        elif name == "xpnative":
-            settings = xpnative
+        elif name == "vista":
+            settings = vista
         elif name == "aqua":
             settings = aqua
 
@@ -622,8 +622,8 @@ def load_plugin() -> None:
         {"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
     )
 
-    if "xpnative" in original_themes:
-        get_workbench().add_ui_theme("Windows", "xpnative", windows)
+    if "vista" in original_themes:
+        get_workbench().add_ui_theme("Windows", "vista", windows)
 
     if "aqua" in original_themes:
         get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
