@@ -14,6 +14,7 @@ We are welcoming all kinds of contributions:
 * creating and maintaining Linux packages (see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=857042) 
 * tests
 * refactorings
+* donations (see https://github.com/thonny/thonny/wiki/Sponsors)
 * ...
 
 NB! For non-trivial contributions you should discuss your plan under a GitHub issue first
