@@ -35,7 +35,7 @@ from thonny.ui_utils import (
     ems_to_pixels,
 )
 
-OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"\d+")
+OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"-?\d+")
 OBJECT_INFO_START_REGEX = re.compile(OBJECT_INFO_START_REGEX_STR)
 OBJECT_INFO_END_REGEX_STR = re.escape(OBJECT_LINK_END)
 OBJECT_INFO_END_REGEX = re.compile(OBJECT_INFO_END_REGEX_STR)
@@ -1333,7 +1333,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         pos = "@%d,%d" % (event.x, event.y)
         tags = self.tag_names(pos)
         for tag in tags:
-            if tag.isnumeric():
+            if tag.isnumeric() or tag[0] == "-" and tag[1:].isnumeric():
                 get_workbench().show_view("ObjectInspector", set_focus=False)
                 get_workbench().update_idletasks()
                 get_workbench().event_generate("ObjectSelect", object_id=int(tag))
