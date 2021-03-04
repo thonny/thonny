@@ -10,7 +10,7 @@ Thonny grew up in University of Tartu (https://www.ut.ee), Institute of Computer
 
 Supporters
 ----------
-* Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
+* Development of several features in Thonny 3.0 and 3.3 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
 * Since September 2018, development of Thonny is partially supported by Cybernetica AS (https://cyber.ee).
 
 Several companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
