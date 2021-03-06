@@ -872,7 +872,8 @@ class ToplevelExpressionBox(BaseExpressionBox, tk.Toplevel):
 
         self.resizable(False, False)
         if get_tk_version_info() >= (8, 6, 10) and running_on_mac_os():
-            self.wm_overrideredirect(1)
+            # self.wm_overrideredirect(1) # Tkinter wrapper can give error in 3.9.2
+            self.tk.call("wm", "overrideredirect", self._w, 1)
         self.wm_transient(codeview.winfo_toplevel())
         self.lift()
 
