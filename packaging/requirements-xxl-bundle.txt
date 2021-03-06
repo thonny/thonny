@@ -6,7 +6,7 @@ requests==2.25.*
 pillow==8.0.*
 scipy==1.5.*
 matplotlib==3.3.*
-pgzero==1.2.*
+pgzero==1.2
 pygame==1.9.*
 flask==1.1.*
 pytest==6.1.*
