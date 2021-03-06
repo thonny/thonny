@@ -61,5 +61,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	
+	<key>LSEnvironment</key>
+	<dict>
+	    <key>PYTHONPATH</key>
+	    <string></string>
+	</dict>
+
 </dict>
 </plist>
