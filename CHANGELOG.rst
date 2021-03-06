@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.3.6 (2021-03-03)
+==================
+* Fix crash in Shell when negative int-s are evaluated in MicroPython (regression introduced in 3.3.4), #1670
+* Fix problems with wm_overrideredirect on macOS with Tk 8.6.11, #1659
+* Fix crash in Plotter when more than 10 numbers are plotted, #1648
+* Hide unsuitable PYTHONPATH environment variable in macOS, #1651
+
 3.3.5 (2021-02-22)
 ==================
 * Fix too short reprs at MicroPython REPL (regression introduced in 3.3.4), #1627
