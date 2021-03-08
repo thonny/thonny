@@ -214,10 +214,18 @@ class InlineResponse(MessageFromBackend):
         self.event_type = self.command_name + "_response"
 
 
-def serialize_message(msg: Record) -> str:
+def serialize_message(msg: Record, max_line_length=65536) -> str:
     # I want to transfer only ASCII chars because encodings are not reliable
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program)
-    return MESSAGE_MARKER + ascii(msg)
+    # The possibility for splitting message into several lines is required because of
+    # default (safe) window size in Paramiko (https://github.com/thonny/thonny/issues/1680)
+    msg_str = ascii(msg)
+
+    lines = []
+    for i in range(0, len(msg_str), max_line_length):
+        lines.append(msg_str[i : i + max_line_length])
+
+    return MESSAGE_MARKER + str(len(lines)) + " " + "\n".join(lines)
 
 
 def parse_message(msg_string: str) -> Record:
@@ -225,7 +233,11 @@ def parse_message(msg_string: str) -> Record:
     # pylint: disable=unused-variable
     nan = float("nan")  # @UnusedVariable
     assert msg_string[0] == MESSAGE_MARKER
-    return eval(msg_string[1:])
+    assert msg_string.strip().endswith(")")
+    msg_start = msg_string.index(" ")
+    line_count = int(msg_string[1:msg_start])
+    assert line_count == msg_string.strip().count("\n") + 1
+    return eval(msg_string[msg_start:].replace("\n", ""))
 
 
 def normpath_with_actual_case(name: str) -> str:
@@ -675,6 +687,24 @@ def try_load_modules_with_frontend_sys_path(module_names):
                 pass
     finally:
         sys.path = old_sys_path
+
+
+def read_one_incoming_message_str(line_reader):
+    msg_str = line_reader()
+
+    if msg_str == "":
+        return ""
+
+    if not msg_str.startswith(MESSAGE_MARKER):
+        return msg_str
+
+    line_count = int(msg_str[1:].split(maxsplit=1)[0])
+    read_lines = 1
+    while read_lines < line_count:
+        msg_str += line_reader()
+        read_lines += 1
+
+    return msg_str
 
 
 class ConnectionFailedException(Exception):

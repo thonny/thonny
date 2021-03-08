@@ -73,7 +73,13 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             super().send_message(msg)
 
     def _forward_incoming_command(self, msg):
-        self._proc.stdin.write(serialize_message(msg) + "\n")
+        msg_str = serialize_message(msg, 1024)
+
+        for line in msg_str.splitlines(keepends=True):
+            self._proc.stdin.write(line)
+            self._proc.stdin.flush()
+
+        self._proc.stdin.write("\n")
 
     def _start_response_forwarder(self):
         self._response_forwarder = Thread(target=self._forward_main_responses, daemon=True)

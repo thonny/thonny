@@ -49,6 +49,7 @@ from thonny.common import (
     update_system_path,
     MessageFromBackend,
     universal_relpath,
+    read_one_incoming_message_str,
 )
 from thonny.editors import (
     get_current_breakpoints,
@@ -1013,7 +1014,7 @@ class SubprocessProxy(BackendProxy):
 
         while True:
             try:
-                data = stdout.readline()
+                data = read_one_incoming_message_str(stdout.readline)
             except IOError:
                 sleep(0.1)
                 continue
@@ -1054,7 +1055,7 @@ class SubprocessProxy(BackendProxy):
     def _listen_stderr(self, stderr):
         # stderr is used only for debugger debugging
         while True:
-            data = stderr.readline()
+            data = read_one_incoming_message_str(stderr.readline)
             if data == "":
                 break
             else:

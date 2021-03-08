@@ -29,6 +29,8 @@ from thonny.common import (
     MessageFromBackend,
     CommandToBackend,
     universal_dirname,
+    MESSAGE_MARKER,
+    read_one_incoming_message_str,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import ConnectionClosedException
@@ -116,10 +118,11 @@ class BaseBackend(ABC):
                 break
 
     def _read_one_incoming_message(self):
-        line = self._read_incoming_msg_line()
-        if line == "":
+        msg_str = read_one_incoming_message_str(self._read_incoming_msg_line)
+        if not msg_str:
             return False
-        msg = parse_message(line)
+
+        msg = parse_message(msg_str)
         if isinstance(msg, ImmediateCommand):
             # This will be handled right away
             self._handle_immediate_command(msg)
