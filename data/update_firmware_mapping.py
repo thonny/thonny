@@ -51,7 +51,7 @@ def update_info(existing_map, name, info_path):
 
 
 if __name__ == "__main__":
-    file_path = "devices.json"
+    file_path = "../thonny/plugins/circuitpython/devices.json"
     with open(file_path, encoding="utf-8") as fp:
         existing_map = json.load(fp)
 
