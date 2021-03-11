@@ -989,7 +989,8 @@ class PluginsPipDialog(PipDialog):
                 tr("Thonny plugin without requirements"),
                 tr(
                     "Looks like you are trying to install an outdated Thonny\n"
-                    + "plug-in (it doesn't specify required Thonny version).\n\n"
+                    + "plug-in (it doesn't specify required Thonny version\n"
+                    + "or hasn't uploaded a whl file before other files).\n\n"
                     + "If you still want it, then please install it from the command line."
                 )
                 + "\n\n"
