@@ -6,4 +6,3 @@ docutils>=0.14
 mypy>=0.670
 asttokens>=1.1
 Send2Trash>=1.4
-packaging>=20.9

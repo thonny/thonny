@@ -12,9 +12,6 @@ from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
 from typing import List, Union, Dict, Tuple
 
-import pyparsing
-import packaging.markers
-
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
@@ -37,6 +34,8 @@ from thonny.workdlg import SubprocessDialog
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
 logger = logging.getLogger(__name__)
+
+_EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
 
 
 class PipDialog(CommonDialog):
@@ -531,9 +530,10 @@ class PipDialog(CommonDialog):
             assert all(isinstance(item, str) for item in requires_dist)
 
             # See https://www.python.org/dev/peps/pep-0345/#environment-markers.
-            # This will filter only the most obvious dependencies marked simply with ``extras == *``.
-            # The other, more complex markings, are accepted as they are also more informative
-            # (*e.g.*, the desired platform).
+            # This will filter only the most obvious dependencies marked simply with
+            # ``extras == *``.
+            # The other, more complex markings, are accepted as they are also
+            # more informative (*e.g.*, the desired platform).
             remaining_requires_dist = []  # type: List[str]
 
             for item in requires_dist:
@@ -543,26 +543,20 @@ class PipDialog(CommonDialog):
 
                 _, marker_text = item.split(";", 1)
 
-                try:
-                    expr = packaging.markers.MARKER.parseString(marker_text, True)
-                except pyparsing.ParseException:
-                    remaining_requires_dist.append(item)
-                    continue
+                # Check if the environment marker matches ``extra == '*'.
+                #
+                # This is easier implemented with ``packaging.markers``, but we want to
+                # avoid introducing a new dependency as Thonny is included in
+                # distributions which might lack a package for it.
+                #
+                # Please see
+                # https://packaging.pypa.io/en/latest/_modules/packaging/markers.html#Marker
+                # for the parsing rules.
 
-                # We want to match only a single expression, not a composite one.
-                if len(expr) != 1:
-                    remaining_requires_dist.append(item)
-                    continue
+                # Match extra == quoted string
+                is_extra = _EXTRA_MARKER_RE.match(marker_text) is not None
 
-                # Match only (variable, op, value) and accept all other expressions
-                if len(expr[0]) != 3:
-                    remaining_requires_dist.append(item)
-                    continue
-
-                variable, op, _ = expr[0]
-
-                if variable.value == "extra" and op.value == "==":
-                    # Ignore these dependencies as they are not going to be installed
+                if is_extra:
                     continue
 
                 remaining_requires_dist.append(item)
