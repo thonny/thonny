@@ -12,6 +12,9 @@ from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
 from typing import List, Union, Dict, Tuple
 
+import pyparsing
+import packaging.markers
+
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
@@ -523,7 +526,48 @@ class PipDialog(CommonDialog):
         if info.get("requires_dist", None):
             # Available only when release is created by a binary wheel
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
-            write_att(tr("Requires"), ", ".join(info["requires_dist"]))
+            requires_dist = info["requires_dist"]
+            assert isinstance(requires_dist, list)
+            assert all(isinstance(item, str) for item in requires_dist)
+
+            # See https://www.python.org/dev/peps/pep-0345/#environment-markers.
+            # This will filter only the most obvious dependencies marked simply with ``extras == *``.
+            # The other, more complex markings, are accepted as they are also more informative
+            # (*e.g.*, the desired platform).
+            remaining_requires_dist = []  # type: List[str]
+
+            for item in requires_dist:
+                if ";" not in item:
+                    remaining_requires_dist.append(item)
+                    continue
+
+                _, marker_text = item.split(";", 1)
+
+                try:
+                    expr = packaging.markers.MARKER.parseString(marker_text, True)
+                except pyparsing.ParseException:
+                    remaining_requires_dist.append(item)
+                    continue
+
+                # We want to match only a single expression, not a composite one.
+                if len(expr) != 1:
+                    remaining_requires_dist.append(item)
+                    continue
+
+                # Match only (variable, op, value) and accept all other expressions
+                if len(expr[0]) != 3:
+                    remaining_requires_dist.append(item)
+                    continue
+
+                variable, op, _ = expr[0]
+
+                if variable.value == "extra" and op.value == "==":
+                    # Ignore these dependencies as they are not going to be installed
+                    continue
+
+                remaining_requires_dist.append(item)
+
+            write_att(tr("Requires"), ", ".join(remaining_requires_dist))
 
         if self._get_active_version(name) != latest_stable_version or not self._get_active_version(
             name
