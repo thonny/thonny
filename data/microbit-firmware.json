@@ -13,16 +13,16 @@
       "size" : 637120
     },
     "9903" : {
-      "version" : "2.0.0-beta.4",
-      "date" : "2021-02-19",
-      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0-beta.4/micropython-microbit-v2.0.0-beta.4.hex",
-      "size" : 1202258
+      "version" : "2.0.0-beta.5",
+      "date" : "2021-03-16",
+      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0-beta.5/micropython-microbit-v2.0.0-beta.5.hex",
+      "size" : 1210486
     },
     "9904" : {
-      "version" : "2.0.0-beta.4",
-      "date" : "2021-02-19",
-      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0-beta.4/micropython-microbit-v2.0.0-beta.4.hex",
-      "size" : 1202258
+      "version" : "2.0.0-beta.5",
+      "date" : "2021-03-16",
+      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0-beta.5/micropython-microbit-v2.0.0-beta.5.hex",
+      "size" : 1210486
     }
   }
 }
