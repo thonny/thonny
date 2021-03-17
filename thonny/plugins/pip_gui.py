@@ -35,6 +35,8 @@ PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
 logger = logging.getLogger(__name__)
 
+_EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
+
 
 class PipDialog(CommonDialog):
     def __init__(self, master):
@@ -523,7 +525,43 @@ class PipDialog(CommonDialog):
         if info.get("requires_dist", None):
             # Available only when release is created by a binary wheel
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
-            write_att(tr("Requires"), ", ".join(info["requires_dist"]))
+            requires_dist = info["requires_dist"]
+            assert isinstance(requires_dist, list)
+            assert all(isinstance(item, str) for item in requires_dist)
+
+            # See https://www.python.org/dev/peps/pep-0345/#environment-markers.
+            # This will filter only the most obvious dependencies marked simply with
+            # ``extras == *``.
+            # The other, more complex markings, are accepted as they are also
+            # more informative (*e.g.*, the desired platform).
+            remaining_requires_dist = []  # type: List[str]
+
+            for item in requires_dist:
+                if ";" not in item:
+                    remaining_requires_dist.append(item)
+                    continue
+
+                _, marker_text = item.split(";", 1)
+
+                # Check if the environment marker matches ``extra == '*'.
+                #
+                # This is easier implemented with ``packaging.markers``, but we want to
+                # avoid introducing a new dependency as Thonny is included in
+                # distributions which might lack a package for it.
+                #
+                # Please see
+                # https://packaging.pypa.io/en/latest/_modules/packaging/markers.html#Marker
+                # for the parsing rules.
+
+                # Match extra == quoted string
+                is_extra = _EXTRA_MARKER_RE.match(marker_text) is not None
+
+                if is_extra:
+                    continue
+
+                remaining_requires_dist.append(item)
+
+            write_att(tr("Requires"), ", ".join(remaining_requires_dist))
 
         if self._get_active_version(name) != latest_stable_version or not self._get_active_version(
             name
