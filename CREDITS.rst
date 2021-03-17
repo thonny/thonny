@@ -94,6 +94,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Laszlo Kocsis
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marko Ristin
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
