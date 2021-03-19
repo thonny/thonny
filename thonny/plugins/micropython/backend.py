@@ -147,7 +147,7 @@ class MicroPythonBackend(MainBackend, ABC):
         except Exception:
             logger.exception("Crash in backend")
 
-    def _prepare_after_soft_reboot(self, clean):
+    def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
         script = self._get_all_helpers()
         self._check_perform_just_in_case_gc()
