@@ -1397,7 +1397,7 @@ msgstr "Sto aggiornando %s su %s"
 
 #: thonny/plugins/files.py:216
 msgid "Upload to %s"
-msgstr "Sto caricando su %"
+msgstr "Sto caricando su %s"
 
 #: thonny/plugins/files.py:362
 msgid "Downloading %s to %s"
