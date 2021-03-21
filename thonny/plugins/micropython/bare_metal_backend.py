@@ -1241,7 +1241,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             capture_output=True,
         )
 
-        if "readonly" in (out + err).replace("-", "").lower():
+        canonic_out = (out + err).replace("-", "").lower()
+        if "readonly" in canonic_out or "errno 30" in canonic_out:
             raise ReadOnlyFilesystemError()
         elif out + err:
             raise RuntimeError(
