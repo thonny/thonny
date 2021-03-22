@@ -839,7 +839,9 @@ class Workbench(tk.Tk):
 
         if running_on_windows():
             # lift it a bit higher
-            post_y -= ems_to_pixels(0.5)
+            post_y -= ems_to_pixels(2)
+        elif running_on_mac_os():
+            post_y -= ems_to_pixels(2)
         elif running_on_linux():
             if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
                 # Most likely several monitors.
@@ -850,7 +852,7 @@ class Workbench(tk.Tk):
                 post_x -= width_diff + menu_font.measure("mmm")
 
         try:
-            self._backend_menu.tk_popup(post_x, post_y, entry=1)
+            self._backend_menu.tk_popup(post_x, post_y, entry="")
         except tk.TclError as e:
             if not 'unknown option "-state"' in str(e):
                 logger.warning("Problem with switcher popup", exc_info=e)
