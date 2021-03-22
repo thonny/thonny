@@ -775,7 +775,12 @@ class Workbench(tk.Tk):
 
         # Set up the menu
         self._backend_conf_variable = tk.StringVar(value="{}")
-        self._backend_menu = tk.Menu(self._statusbar, tearoff=False)
+
+        if running_on_mac_os():
+            menu_conf = {}
+        else:
+            menu_conf = get_style_configuration("Menu")
+        self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button
         self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
