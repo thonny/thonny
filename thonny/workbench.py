@@ -834,7 +834,7 @@ class Workbench(tk.Tk):
             command=lambda: self.show_options("interpreter"),
         )
 
-        post_x = self._backend_button.winfo_rootx()
+        post_x = self._backend_button.winfo_rootx() - self._backend_menu.yposition("end")
         post_y = self._backend_button.winfo_rooty()
 
         if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
@@ -845,15 +845,8 @@ class Workbench(tk.Tk):
             width_diff = max_description_width - button_text_width
             post_x -= width_diff + menu_font.measure("mmm")
 
-        if running_on_mac_os():
-            # won't be good location otherwise
-            popup_entry = num_entries + 4
-        else:
-            popup_entry = ""
-
-        # print(post_x, post_y)
         try:
-            self._backend_menu.tk_popup(post_x, post_y, entry=popup_entry)
+            self._backend_menu.tk_popup(post_x, post_y, entry=1)
         except tk.TclError as e:
             if not 'unknown option "-state"' in str(e):
                 logger.warning("Problem with switcher popup", exc_info=e)
