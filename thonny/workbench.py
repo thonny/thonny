@@ -57,7 +57,7 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
     caps_lock_is_on,
-    shift_is_pressed,
+    shift_is_pressed, ems_to_pixels,
 )
 
 logger = logging.getLogger(__name__)
@@ -834,16 +834,20 @@ class Workbench(tk.Tk):
             command=lambda: self.show_options("interpreter"),
         )
 
-        post_x = self._backend_button.winfo_rootx() - self._backend_menu.yposition("end")
-        post_y = self._backend_button.winfo_rooty()
+        post_x = self._backend_button.winfo_rootx()
+        post_y = self._backend_button.winfo_rooty() - self._backend_menu.yposition("end")
 
-        if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
-            # Most likely several monitors.
-            # Tk will adjust x properly with single monitor, but when Thonny is maximized
-            # on a monitor, which has another monitor to its right, the menu can be partially
-            # displayed on another monitor (at least in Ubuntu).
-            width_diff = max_description_width - button_text_width
-            post_x -= width_diff + menu_font.measure("mmm")
+        if running_on_windows():
+            # lift it a bit higher
+            post_y -= ems_to_pixels(0.5)
+        elif running_on_linux():
+            if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
+                # Most likely several monitors.
+                # Tk will adjust x properly with single monitor, but when Thonny is maximized
+                # on a monitor, which has another monitor to its right, the menu can be partially
+                # displayed on another monitor (at least in Ubuntu).
+                width_diff = max_description_width - button_text_width
+                post_x -= width_diff + menu_font.measure("mmm")
 
         try:
             self._backend_menu.tk_popup(post_x, post_y, entry=1)
