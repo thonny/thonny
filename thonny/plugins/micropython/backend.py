@@ -1220,10 +1220,11 @@ class MicroPythonBackend(MainBackend, ABC):
             from thonny.ast_utils import mark_text_ranges
 
             mark_text_ranges(root, source)
+            self._mark_nodes_to_be_guarded_from_instrumentation(root, False)
 
             expr_stmts = []
             for node in ast.walk(root):
-                if isinstance(node, ast.Expr):
+                if isinstance(node, ast.Expr) and not node.guarded:
                     expr_stmts.append(node)
 
             marker_prefix = "__thonny_helper.print_repl_value("
@@ -1261,10 +1262,11 @@ class MicroPythonBackend(MainBackend, ABC):
             from thonny.ast_utils import mark_text_ranges
 
             mark_text_ranges(root, source)
+            self._mark_nodes_to_be_guarded_from_instrumentation(root, False)
 
             expr_stmts = []
             for node in ast.walk(root):
-                if isinstance(node, ast.Expr):
+                if isinstance(node, ast.Expr) and not node.guarded:
                     expr_stmts.append(node)
 
             marker_prefix = ""
@@ -1293,6 +1295,32 @@ class MicroPythonBackend(MainBackend, ABC):
         except Exception as e:
             logger.warning("Problem adding Expr handlers", exc_info=e)
             return source
+
+    def _mark_nodes_to_be_guarded_from_instrumentation(self, node, guarded_context):
+        if (
+            not guarded_context
+            and isinstance(node, ast.FunctionDef)
+            and node.decorator_list
+            and any(self._is_asm_pio_decorator(decorator) for decorator in node.decorator_list)
+        ):
+            guarded_context = True
+
+        node.guarded = guarded_context
+
+        for child in ast.iter_child_nodes(node):
+            self._mark_nodes_to_be_guarded_from_instrumentation(child, guarded_context)
+
+    def _is_asm_pio_decorator(self, node):
+        if not isinstance(node, ast.Call):
+            return False
+
+        if isinstance(node.func, ast.Attribute) and node.func.attr == "asm_pio":
+            return True
+
+        if isinstance(node.func, ast.Name) and node.func.id == "asm_pio":
+            return True
+
+        return False
 
     def _report_time(self, caption):
         new_time = time.time()
