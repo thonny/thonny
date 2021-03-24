@@ -4,7 +4,7 @@ from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SshProcessConnection(MicroPythonConnection):
-    def __init__(self, client, cwd, executable, args):
+    def __init__(self, client, cwd, cmd):
         super().__init__()
         import threading
 
@@ -13,7 +13,7 @@ class SshProcessConnection(MicroPythonConnection):
         cmd_line_str = (
             "echo $$ ;"
             + ((" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else ""))
-            + (" exec " + " ".join(map(shlex.quote, [executable] + args)))
+            + (" exec " + " ".join(map(shlex.quote, cmd)))
         )
         self._stdin, self._stdout, _ = self._client.exec_command(
             cmd_line_str, bufsize=0, timeout=None, get_pty=True

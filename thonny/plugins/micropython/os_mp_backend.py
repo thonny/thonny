@@ -355,6 +355,7 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
         SshMixin.__init__(
             self, args["host"], args["user"], args["password"], args["interpreter"], args.get("cwd")
         )
+        self._interpreter_launcher = args.get("interpreter_launcher", [])
         UnixMicroPythonBackend.__init__(self, args)
 
     def _which(self, executable):
@@ -366,7 +367,11 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
         # NB! It's connection to the micropython process, not to the host
         from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
-        return SshProcessConnection(self._client, self._cwd, self._interpreter, ["-i"] + run_args)
+        return SshProcessConnection(
+            self._client,
+            self._cwd,
+            self._interpreter_launcher + [self._interpreter] + ["-i"] + run_args,
+        )
 
     def _tweak_welcome_text(self, original):
         return (

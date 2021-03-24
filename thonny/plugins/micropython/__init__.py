@@ -762,12 +762,16 @@ class SshMicroPythonProxy(MicroPythonProxy):
         }
 
         args.update(self._get_time_args())
+        args.update(self._get_extra_launcher_args())
 
         cmd = [
             thonny.plugins.micropython.os_mp_backend.__file__,
             repr(args),
         ]
         return cmd
+
+    def _get_extra_launcher_args(self):
+        return {}
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to the device
