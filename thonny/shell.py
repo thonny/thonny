@@ -552,8 +552,13 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 )
 
         elif re.match(OBJECT_INFO_END_REGEX, data):
-            self.active_extra_tags.pop()
-            self.active_extra_tags.pop()
+            try:
+                self.active_extra_tags.pop()
+                self.active_extra_tags.pop()
+            except Exception as e:
+                # This may fail, when the source code of Thonny's MP helper is printed
+                # because of an error.
+                logger.exception("Could not close object info", exc_info=e)
 
         elif "value" in self.active_extra_tags and get_workbench().in_heap_mode():
             # id was already printed and value should be suppressed
