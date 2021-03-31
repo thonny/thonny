@@ -56,7 +56,9 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             args.insert(3, "--no-error-summary")
 
         env = os.environ.copy()
-        env["MYPYPATH"] = os.path.join(os.path.dirname(__file__), "typeshed_extras")
+        mypypath = get_workbench().get_option("assistance.mypypath")
+        if mypypath:
+            env["MYPYPATH"] = mypypath
 
         self._proc = ui_utils.popen_with_ui_thread_callback(
             args,
@@ -112,3 +114,4 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 def load_plugin():
     add_program_analyzer(MyPyAnalyzer)
     get_workbench().set_default("assistance.use_mypy", True)
+    get_workbench().set_default("assistance.mypypath", None)
