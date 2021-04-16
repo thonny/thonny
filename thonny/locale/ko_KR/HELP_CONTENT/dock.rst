@@ -1,15 +1,15 @@
 사용자 윈도우 도킹에 대해
 ====================
-When developing your Turtle (or other Tkinter) programs, you may want to look at the window
-from last run while fixing something in the code. If you have large or several screens, 
-it's not hard to fit your window next to Thonny's, 
-but on the next run the window manager may position it somewhere else and you need
-to arrange the windows again. 
+Turtle (혹은 다른 Tkinter) 프로그램을 개발할 때 코드에서 무언가를 수정하는 동안
+마지막 실행에서 윈도우를 보고 싶을 수 있습니다. 화면이 크거나 여러 개인 경우,
+Thonny의 옆에 윈도우를 맞추는 것이 어렵지 않지만
+다음 실행시 윈도우 매니저가 창을 다른 곳에 배치 할 수도 있어서
+다시 창을 정렬해야 합니다.
  
-**Dock user windows** in the **Run menu** is meant to help you in this situation. If you 
-check it and run your Tkinter program, Thonny performs following magic tricks:
+**실행**의 **사용자 창 붙이기**는 이러한 상황에 도움을 줄 수 있습니다. 만약
+이것을 체크하고 Tkinter 프로그램을 실행하면 Thonny는 다음과 같은 트릭을 사용합니다:
 
-* It remembers where you position your window. Next time it places the window at the same position.
-* It makes your window stay on top even if you click on Thonny window to start modifying the code. In fact, after your Tkinter window becomes visible, Thonny automatically focuses its own window so that you can continue editing the script without grabbing the mouse. When you're done, just press F5 again and old window gets replaced with the new one.
- 
-*Staying on top currently does not work with turtle programs on macOS (https://github.com/thonny/thonny/issues/798)*
+* 윈도우 위치를 기억합니다. 다음에 윈도우를 같은 위치에 배치합니다.
+* Thonny 윈도우를 클릭하여 코드 수정을 시작 하더라도 창이 가장 앞에 유지됩니다. Tkinter 창이 표시되면, Thonny는 자동으로 소유 윈도우에 초점을 맞추므로 마우스를 잡지 않고도 계속 스크립트를 편집 할 수 있습니다. 작업이 끝나면 F5를 눌러 이전 윈도우를 새 윈도우로 바꿉니다.
+
+*현재 macOS 에서 turtle 프로그램은 상단 유지가 작동하지 않습니다.(https://github.com/thonny/thonny/issues/798)*
