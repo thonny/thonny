@@ -1,15 +1,15 @@
 커맨드 라인 인자(아규먼트)들을 이용해 실행하는 것에 대해
 =================================================
 
-When you are editing *my_program.py* and press F5, Thonny constructs a magic command 
-``%Run my_program.py`` and sends it to the shell, which asks Thonny's back-end to run
-that script.
+*my_program.py*를 편집하고 F5 키를 누르면 Thonny는 매직 커맨드
+``% Run my_program.py``를 쉘로 전송하여 Thonny의 백엔드에서 해당 스크립트를
+실행하도록 요청합니다.
 
-When you go to shell and take the ``%Run`` command back (with up-arrow), you can add
-*command line arguments* to it. For example change the command to 
-``%Run my_program.py first second`` and press ENTER.
+쉘로 이동하여 ``% Run`` 명령을 다시 불러오면 (키보드의 위쪽 방향키)
+*명령 줄 인수*를 추가 할 수 있습니다. 예를 들어 명령을
+``% Run my_program.py first second`` 로 변경하고 Enter 키를 누릅니다.
 
-When you run your program like this, you can access the arguments from ``sys.argv``:
+다음과 같은 프로그램을 실행하면 ``sys.argv``를 이용해 인자에 접근 할 수 있습니다:
 
 .. code::
 
@@ -18,7 +18,7 @@ When you run your program like this, you can access the arguments from ``sys.arg
 
 커맨드라인 인자들을 수정하는 방법
 ---------------------------------
-If you need to use same set of arguments several times, it may become tedious to construct
-the ``%Run`` by hand. In this case check **Program arguments** in the **View menu**. This 
-opens a small entry box next to the toolbar buttons. From now on, everything you type in this
-box gets appended to ``%Run <script name>`` each time you press F5.
+동일한 아규먼트 집합을 여러 번 사용해야하는 경우, ``% Run``을 직접 구성하는 것이
+지루할 수 있습니다. 그런 경우 **보기**에서 **프로그램 인자**를 체크하세요. 그러면
+도구 모음 버튼 옆에 작은 입력 상자가 열립니다. 이제부터 F5를 누를 때마다
+이 상자에 입력된 모든 내용이 ``% Run <script name>`` 에 추가됩니다.
