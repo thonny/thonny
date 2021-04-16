@@ -90,6 +90,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * Juan Falgueras
 * jose1711
+* José Carlos García
 * Kauri Raba
 * Laszlo Kocsis
 * M Burak Kalkan
