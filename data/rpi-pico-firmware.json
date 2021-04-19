@@ -1,13 +1,13 @@
 {
-  "tag_name": "v1.14-0205",
-  "name": "20210205 v1.14",
-  "published_at": "2021-02-05T00:00:00Z",
+  "tag_name": "v1.15",
+  "name": "v1.15",
+  "published_at": "2021-04-18T00:00:00Z",
   "assets": [
     {
-      "name": "rp2-pico-micropython-20210205-v1.14.uf2",
+      "name": "rp2-pico-micropython-20210418-v1.15.uf2",
       "label": null,
-      "size": 497664,
-      "browser_download_url": "https://www.raspberrypi.org/documentation/rp2040/getting-started/static/f70cc2e37832cde5a107f6f2af06b4bc/rp2-pico-20210205-unstable-v1.14-8-g1f800cac3.uf2"
+      "size": 556032,
+      "browser_download_url": "https://micropython.org/resources/firmware/rp2-pico-20210418-v1.15.uf2"
     }
   ]
 }
