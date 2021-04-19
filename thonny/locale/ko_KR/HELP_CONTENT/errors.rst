@@ -37,5 +37,4 @@ Thonny의 에러 메시지에는 오류를 일으킨 코드 위치로
 
 프로그램이 그 상태에 어떻게 도달했나요?
 ---------------------------------------
-See `the page about debugging <debugging.rst>`_ or `the page about using Thonny's debuggers <debuggers.rst>`_.
 `the page about debugging <debugging.rst>`_ 혹은 `the page about using Thonny's debuggers <debuggers.rst>`_ 참조하세요.
