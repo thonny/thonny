@@ -1,24 +1,24 @@
 버드아이에 대해
 ==========================
 
-Birdseye is a cool Python debugger by Alex Hall, which records the values of expressions 
-when the program runs and lets you explore them after the program completes. See
-`https://birdseye.readthedocs.io <https://birdseye.readthedocs.io>`_ for more info.
+Birdseye는 Alex Hall이 만든 멋진 Python 디버거로, 프로그램이 실행될 때 표현식의 값들을 기록하고
+프로그램이 완료된 후 이 값들을 탐색 할 수 있습니다. 더 많은 정보는
+`https://birdseye.readthedocs.io <https://birdseye.readthedocs.io>`_ 에서 확인하세요.
 
-Birdseye is not installed by default, but it is easy to install via *Tools → Manage plug-ins*. You need 
-to install the package named ``birdseye``.
+Birdseye는 기본적으로 설치되지 않으며 *도구 → 플러그인 관리...*를 통해 간단하게 설치할 수 있습니다.
+``birdseye`` 라는 이름의 패키지를 설치하면 됩니다.
 
-Birdseye works differently than `Thonny's built-in debuggers <debuggers.rst>`_. 
-When you execute your program with *Run → Debug current script (Birdseye)*, the execution takes a bit 
-longer than usual, but otherwise your program should run just as if you executed it with 
-*Run current script*. This means breakpoints are ignored and you can't step through the program.
-But when the program completes, Thonny opens a webpage (served by a local server provided 
-by Birdseye), which allows you to dig into the execution process and learn how final results were composed
-of intermediate values. 
+Birdseye는`Thonny의 내장 디버거 <debuggers.rst>`_ 와는 다르게 작동합니다.
+*실행 → 현재 스크립트 디버그(Birdseye)*로 프로그램을 실행하면 실행 시간이 평소보다 약간 더 걸립니다.
+그러나 *Run current script*로 실행 한 것처럼 프로그램이 실행됩니다.
+다시 말해, 브레이크 포인트가 무시되고 프로그램을 단계별로 실행할 수 없습니다.
+그러나 프로그램의 실행이 완료되면 Thonny는 웹 페이지 (Birdseye에서 제공하는 로컬 서버에서 제공)
+를 열어 실행 프로세스를 자세히 살펴보고 최종 결과가
+어떻게 중간값으로 구성되는지를 확인 할 수 있습니다.
 
-NB! When using Birdseye in Thonny you don't need to import ``birdseye.eye`` or use it 
-for decorating your functions. Thonny executes Birdseye such that it records information about all
-functions.
+주의! Thonny에서 Birdseye를 사용할 때``birdseye.eye``를 가져오거나
+함수를 데코레이팅할 필요가 없습니다. Thonny는 모든 기능에 대한 정보를 기록하도록
+Birdseye를 실행합니다.
 
-The local server uses port 7777 by default. If this is used by another application, then configure
-another port (Tools → Options → Debugger) and restart Thonny.
+로컬 서버는 기본적으로 포트 7777을 사용합니다. 만약 다른 응용 프로그램에서 사용하는 경우 다른 포트
+(도구 → 옵션 → 실행 & 디버그)를 설정하고 Thonny를 다시 시작하면 됩니다.
