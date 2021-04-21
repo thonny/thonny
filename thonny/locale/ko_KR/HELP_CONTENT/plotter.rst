@@ -1,15 +1,14 @@
 플로터에 대해
 ==========================
-Plotter is an add-on for the Shell, which extracts numbers from 
-the program output and displays them as line chart. It can be useful for 
-observing live sensor data coming from attached devices or even for analyzing 
-static data (if you don't bother using more serious tools). It is inspired
-by `Mu Python editor <https://codewith.mu/>`__. 
+플로터는 프로그램 출력에서 숫자를 추출하여 선형 차트로
+표시하는 Shell의 추가 기능입니다. 연결된 장치에서 오는 라이브 센서 데이터를 관찰하거나
+정적 데이터를 분석하는데 유용할 수 있습니다 (더 강력한 도구를 사용하지 않는 경우).
+`Mu Python 편집기 <https://codewith.mu/>`__ 에서 영감을 얻었습니다.
 
-You can open it from the "View" menu or from the Shell's context menu.
+"보기" 메뉴 또는 셸의 컨텍스트 메뉴에서 열 수 있습니다.
 
-For an examply try following program (you can stop it with Ctrl+C or with 
-"Stop / reset" button on the toolbar):
+예제로 다음 프로그램을 한 번 실행해보세요. (Ctrl + C 또는 도구 모음의
+"정지/재시작" 버튼으로 중지 할 수 있음):
 
 .. code::
 
@@ -23,30 +22,30 @@ For an examply try following program (you can stop it with Ctrl+C or with
 	    print("Random walk:", p1, " just random:", p2)
 	    sleep(0.05)
 
-When you run it with Plotter opened, you'll see a line chart with two series forming.
-Each column on the chart corresponds to one line in the Shell. 
-The rightmost column on the chart always corresponds the bottom-most visible line in the shell,
-even if you stop the program and scroll the text in the shell.
+플로터를 연 상태에서 실행하면 두 개의 시리즈로 구성된 꺾은 선형 차트가 표시됩니다.
+차트의 각 열은 쉘의 한 줄에 해당합니다.
+차트의 가장 오른쪽 열은 쉘에서 가장 아래에 보이는 줄에 해당하며
+프로그램을 중지했을 때에도 마찬가지 입니다.
 
-Plotter starts drawing when it detects at least two consecutive lines containing same pattern
-of numbers and surrounding text. The numbers get plotted and the surrounding
-text becomes the legend in the lower-right corner of the Plotter.
+플로터는 동일한 패턴의 숫자와 주변 텍스트를 포함하는 두 개 이상의 연속된 선을 감지하면
+그리기를 시작합니다. 숫자가 플로팅되고 주변 텍스트가
+플로터의 오른쪽 아래 모서리에 있는 범례가 됩니다.
 
 애니메이션의 속도
 --------------------------------
-Unless you are plotting a fixed number of lines, it is good idea not to flood the 
-shell and plotter with data. This is why the example above makes a little pause 
-(``sleep(0.05)``) before outputting next line.
+고정된 수의 선을 플로팅하지 않는 한 쉘과 플로터에 데이터가
+넘치지 않도록 하는 것이 좋습니다. 위의 예제에서 다음 줄을 출력하기 전에 약간의 멈춤
+(``sleep (0.05)``)을 만드는 이유입니다.
 
 Y축의 범위
 -------------------
-Plotter tries to detect a suitable range for your plot without having to 
-change it too often. For this reason it extends the range if required, but only
-shrinks it at the start of a new series. 
+플로터는 너무 자주 변경하지 않도록 플롯에 적합한 범위를 감지하려고 합니다.
+이러한 이유로 필요한 경우 범위를 확장하지만
+새 시리즈를 시작할 때는 축소된 형태입니다.
 
-If some outliers have made the range too large, then you can manually shrink 
-it by waiting until the outliers are out of the picture and clicking on the Plotter. 
+일부 이상치가 범위를 너무 크게 만든 경우 이상치가 그림에서 벗어날 때까지 기다렸다가
+플로터를 클릭하여 수동으로 축소 할 수 있습니다.
 
-If you want make the range larger (or just compare your data against certain values),
-then simply include suitable constant(s) in your data lines, eg: 
+범위를 더 크게 만들고 싶다면 (혹은 데이터를 특정 값과 비교하기만 할 거라면)
+데이터 라인에 적절한 상수를 넣어주기만 하면 됩니다. 예 :
 ``print(0, measure1, measure2, 100)``.
