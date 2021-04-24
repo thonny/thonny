@@ -1,64 +1,63 @@
 디버거를 사용하는 방법에 대해
 ==========================
-If you want to see how Python executes your program step-by-step then you 
-should run it in "nicer" or "faster" *debug-mode*. You can also run it with `Birdseye <birdseye.rst>`_ and
-explore the execution steps later.
+Python이 프로그램을 단계별로 실행하는 방법을 확인하려면 "nicer"또는
+"faster" *debug-mode* 에서 실행해야합니다. `Birdseye <birdseye.rst>`_ 로 실행하고
+나중에 실행 단계를 탐색 할 수도 있습니다.
 
 "Nicer" 모드
 ------------
-This mode is recommended for total beginners.
+이 모드는 모든 초보자에게 권장됩니다.
 
-Start by selecting *Debug current script (nicer)* from the *Run* menu or by pressing 
-Ctrl+F5 (`in XFCE you need to use Shift+Ctrl+F5 <https://askubuntu.com/questions/92759/ctrlf5-in-google-chrome-in-xfce>`__). 
-You'll see that first statement of the program gets highlighted and nothing more happens. 
-In this mode you need to notify Thonny that you're ready to let Python make the next step. 
-For this you have two main options:
+*실행* 메뉴에서 *현재 스크립트 디버그(똑똑하게)*를 선택하거나 Ctrl + F5를 눌러 시작합니다.
+(`XFCE에서는 Shift + Ctrl + F5 <https://askubuntu.com/questions/92759/ctrlf5-in-google-chrome-in-xfce>`__ 를 사용하세요)
+프로그램의 첫 번째 문장이 강조 표시되고 더 이상 아무 일도 일어나지 않는 것을 볼 수 있습니다.
+이 모드에서는 Python이 다음 단계를 수행 할 준비가 되었음을 Thonny에 알려주는 게 필요합니다.
+이를 위해 두 가지 주요 옵션이 있습니다:
 
-* *Run → Step over* (or F6) makes big steps, ie. it executes the highlighted code and highlights the next part of the code.
-* *Run → Step into* (or F7) tries to make smaller steps. If the highlighted code is made of smaller parts (statements or expressions), then first of these gets highlighted and Thonny waits for next command. If you have reached to a program component which doesn't have any sub-parts (eg. variable name) then *Step into* works like *Step over*, ie. executes (or evaluates) the code.
+* *실행 → 스텝 나가기* (또는 F6)는 큰 단계를 수행합니다. 강조 표시된 코드를 실행하고 코드의 다음 부분을 강조 표시합니다.
+* *실행 → 단계 들어가기* (또는 F7)는 더 작은 단계를 수행합니다. 강조 표시된 코드가 더 작은 부분 (문 또는 표현식)으로 구성된 경우 먼저 강조 표시되고 Thonny는 다음 명령을 기다립니다. 하위 부분 (예 : 변수 이름)이없는 프로그램 구성 요소에 도달 한 경우 *단계 들어가기*는 *스텝 나가기* 처럼 작동합니다. 코드를 실행 (또는 평가)합니다.
 
-If you have stepped into the depths of a statement or expression and want to 
-move on faster, then you can use *Run → Step out*, which executes 
-currently highlighted code and all following program parts on the same level.
-There is a bit similar command called *Resume*, which will run the command without stepping
-till it completes (or till next breakpoint, see below).
+실행문이나 표현식의 깊이에 들어갔고 더 빨리 진행하려면
+*실행 → 단계 나가기를 사용하여 현재 강조 표시된 코드와
+다음 모든 프로그램 부분을 동일한 수준에서 실행할 수 있습니다.
+*다시 실행* 이라는 약간 유사한 명령이 있습니다. 이 명령은 완료 될 때까지
+(또는 다음 중단 점까지, 아래 참조) 단계 없이 명령을 실행합니다.
 
-If you accidentally made a big step and stepped over an interesting piece of code,
-you can **take back the step** by selecting *Run → Step back*. Thonny will show
-the state of program as it was before the last step. Now you can continue with small steps
-and zoom into this piece of code. (How does it work? Even when you take a big step, Thonny
-saves all intermediate program states, which it can replay after you take the step back.) 
+실수로 조사해야할 코드에서 많은 단계를 지나쳤다면
+*실행 → 뒤로 가기*를 선택하여 **단계를 되돌리기** 를 할 수 있습니다. Thonny는
+마지막 단계 이전의 프로그램 상태를 보여줍니다. 이제 작은 단계를 계속 진행하고
+코드를 자세히 살펴 볼 수 있습니다. (어떻게 작동하냐구요? 큰 단계를 진행해도 Thonny는
+모든 중간 프로그램 상태를 저장하므로 한 단계 전 상태를 재생할 수 있습니다.)
 
-If you want to reach a specific part of the code, then you can speed up the 
-process by placing your cursor on that line and selecting *Run → Run to cursor*. 
-This makes Thonny automatically step until this line. You can take the command from there.
+코드의 특정 부분에 도달하려면 해당 줄에 커서를 놓고
+*실행 → 커서까지 실행*를 선택하여 디버깅 속도를 높일 수 있습니다.
+이렇게 하면 Thonny가 커서 위치의 줄까지 자동으로 진행합니다. 거기에서 다른 명령을 시작하시면 됩니다.
 
-If you have editor line numbers enabled (Tools → Options → Editor), then you can 
-also use **breakpoints**. When you double click next to a statement in the editor left margin, a dot
-appears. When you now start the debugger, it doesn't stop before first statement but runs to the 
-statement marked with the dot a.k.a breakpoint. You can place as many breakpoints to your programs as 
-required. Breakpoints can be removed by double clicking on the dots.
+편집기 줄 번호를 활성화 한 경우 (도구 → 옵션 → 편집기) **중단점**을
+사용할 수도 있습니다. 편집기 왼쪽 여백에서 문 옆을 두 번 클릭하면 점이 나타납니다.
+이제 디버거를 시작하면 첫 번째 실행문 앞에서 멈추지 않고 점(중단점이라고도 함)으로
+표시된 실행문까지 실행됩니다. 프로그램에 필요한 만큼 중단점을 배치 할 수 있습니다.
+점을 두 번 클릭하여 중단점을 제거 할 수도 있습니다.
 
 
 "Faster" 모드
 -------------
-When your programs grow bigger, you may notice that taking big steps with nicer debugger take sometimes long time.
-It is because the niceties (eg. possibility of stepping through expression evaluation and taking back steps) 
-require heavy and slow machinery.
+프로그램이 커지면 똑똑한 디버거로는 큰 단계를 수행하는 데 시간이 오래 걸리는 것을 알 수 있습니다.
+똑똑한 기능들(예를 들어, 표현식 평가를 위해 한 스텝 더 나아가고 뒤로 돌아갈 가능성이 있기 때문에)
+에는 크고 느린 장비가 필요하기 때문입니다.
 
-With *Debug current script (faster)* you lose the niceties but you can step through your program much faster.
-You can use same commands (except "Step back") as with nicer debugger. This is the debugging style most professional
-programmers are accustomed with.
-
+*현재 스크립트 디버그(빠르게)*를 사용하면 똑똑하지는 않지만 디버깅을 훨씬 빠르게 진행할 수 있습니다.
+똑똑한 디버거에서와 동일한 명령 ("단계 뒤로가기" 제외)을 사용할 수 있습니다.
+대부분의 전문 프로그래머가 익숙한 디버깅 스타일입니다.
 
 콜 스택을 표시하는 다양한 스타일
 -------------------------------------------
-By default Thonny uses stacked windows for presenting the call stack. This gives good intuition about 
-the concept, but it may become cumbersome to use. Therefore, since version 3.0 one can choose between 
-two different styles for presenting call stack. In “Tools → Options → Debugger” you can switch to more 
-traditional style with a separate view for presenting and switching call frames. Note that both 
-styles can be used with both debugging modes.
+기본적으로 Thonny는 스택 창을 사용하여 호출 스택을 표시합니다. 이것은 개념에 대한 좋은 직관을
+제공하지만 사용하기는 번거로울 수 있습니다. 따라서 버전 3.0부터 호출 스택을 표시하기 위해
+두 가지 다른 스타일 중에서 선택할 수 있습니다. "도구 → 옵션 → 디버거"에서 호출 프레임을 표시하고
+전환하기 위한 별도의 보기 옵션을 사용하여 보다 전통적인 스타일로 전환 할 수 있습니다. 두 스타일
+모두 두 디버깅 모드에서 사용할 수 있습니다.
 
 버드아이
 --------
-Command *Debug current script (Birdseye)* is explained at a `separate page <birdseye.rst>`_
+*현재 스크립트 디버그(Birdseye)*는 별도의 `<birdseye.rst> 페이지`_ 에 설명되어 있습니다.
