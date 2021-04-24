@@ -1,93 +1,91 @@
 디버깅 기술
 ====================
 
-If your program is not working properly then don't panic. You have several
-possibilities for fixing the situation. For example: 
+프로그램이 제대로 작동하지 않더라도 당황하지 마세요. 여기에 몇 가지 상황을
+나아지게 할 수 있는 방법이 있습니다. 예를 들어:
 
-* Let somebody else fix it.
-* Change *something* in the code and try again. 
-* Approach the problem in two phases: 1) diagnosing the problem and 2) fixing it.
+* 다른 사람이 문제를 해결하도록 하세요.
+* 코드에서 *뭔가*를 변경하고 다시 시도해보세요.
+* 두 단계로 문제에 접근하세요: 1) 문제 진단 2) 수정
 
-Asking for help may be a very good idea, but it won't give you this sweet sense of accomplishment.
-Anyway, it's better not to use this without first putting in some effort on your own.
+도움을 요청하는 것은 매우 좋은 생각 일 수 있지만 달콤한 성취감을 느낄 수는 없습니다.
+어쨌든 먼저 자신의 노력을 기울이지 않고 도움을 요청하지 않는 것이 좋습니다.
 
-If your programs are small, then you may hit the jackpot by changing something randomly and 
-trying again (repeat many times), but you'll lose even if you win as you won't learn anything.
+프로그램이 작을 때는 무작위로 변경하고 다시 시도 (여러 번 반복)하다가 성공에 다다를 수는 있지만
+아무것도 배우지 못할수도 있기 때문에 성공이 별 의미가 없을 수 있습니다.
 
-If you want to become good in programming, then you really need to approach the problem more
-systematically. Among other things, this means that you need to pinpoint the reason your program misbehaves
-before attempting to fix it. The process of finding the source of the problem is called *debugging*.
+프로그래밍에 능숙해지려면 문제에 더 체계적으로 접근해야 합니다.
+이는 프로그램을 수정하기 전에 프로그램이 오작동하는 이유를 정확히 찾아내야 함을 의미합니다.
+문제의 원인을 찾는 과정을 *디버깅* 이라고 합니다.
 
 프로그램 흐름 트레이스 / 파이썬과 같이 생각하기
 ------------------------------------------------------
-Most likely your program isn't entirely wrong. There may be a typo somewhere or you overlooked 
-or misunderstood something. *NB! Don't get into the habit of thinking that Python misunderstood you -- it
-is a machine that doesn't even try to understand you.* The key to debugging is finding out precisely where
-and when your assumptions about program behavior diverge from the actual behavior.
+대부분의 경우 프로그램이 완전히 잘못되지는 않습니다. 어딘가에 오타가 있거나 무언가를 간과하거나
+오해했을 수 있습니다. *주의! 파이썬이 당신을 오해했다고는 생각하지 마세요. -- 당신을 이해하려고 시도조차
+하지 않는 기계니까요. 디버깅의 핵심은 프로그램 동작에 대한 가정이 실제 동작과 다른 부분과
+타이밍을 정확하게 파악하는 것입니다.
 
-If your program prints out wrong final answer then this tells you something about
-the program behavior, but it is usually not enough to locate the problem precisely. You need to also check 
-which of the **intermediate steps** align with your assumptions and which don't.
+프로그램이 잘못된 최종 답을 출력하는 것으로 프로그램 동작을 파악 할 수 있지만
+일반적으로 문제를 정확하게 찾을 때 사용하기에는 충분하지 않습니다. 또한 **중간 단계** 중 어느 것이 가정과 일치하고
+어떤 것이 일치하지 않는지도 확인해야 합니다.
 
-One obvious (and very useful) technique is to add **extra print statements** into the code, which tell you
-where Python is and what it has accomplished so far, eg. 
+한 가지 명백하면서도 매우 유용한 기술은 코드에 **부가적인 print 문**을 추가하는 것입니다. 이는
+Python이 어디까지 실행되었고 지금까지 수행한 작업을 파악하는데 도움이 됩니다. 예를 들어
 
 .. code::
 
 	print("friends before for-loop", friends)
 
-NB! Sometimes you need to introduce new variables and break complex expressions into smaller parts in order
-to print out more detailed information.
+주의! 때로는 더 자세한 정보를 출력하기 위해 새로운 변수를 도입하고 복잡한 표현식을
+더 작은 부분으로 분할해야 할 수 있습니다.
 
-Although print-debugging is used even by the professionals (they may call it *logging*), there is an alternative,
-which is more comfortable in most cases. It's called **stepping through the code** and it is Thonny's bread and
-butter. Move on to the chapter `Using debuggers <debuggers.rst>`_ to learn more.
-
+전문가들도 출력-디버깅을 사용하지만 (*로깅*이라고 부름) 대부분의 경우 더 편리한 방법이 있습니다.
+**코드를 단계별로 실행**이라고 하며 Thonny의 빵과 버터(핵심 기능)입니다.
+자세한 내용은 `디버거 사용 <debuggers.rst>`_ 장을 참고하세요.
 
 코드 리뷰
 ---------------------
-Another useful technique is code review. It is somewhat similar to tracing the program flow, but you do it in your
-head and you are trying to see the bigger picture instead of following small steps.
+또 다른 유용한 기술 중 하나는 코드 리뷰입니다. 이것은 프로그램 흐름을 추적하는 것과 다소 유사하지만
+머리 속에서 수행하며 작은 단계를 따르는 대신 더 큰 그림을 보려고 하는 부분이 있습니다.
 
-Look at each of the statements in your code and try understand its purpose and how it relates to your task.
+코드의 각 문장을 보고 그 목적과 작업과의 관계를 이해하세요.
 
-For each **variable** ask yourself:
+각 **변수**에 대해 다음과 같이 자문해보세요:
 
-* Does the name of the variable reaveal its purpose? Is it better to name it in singular or in plural?
-* Which type of values can end up in this variable? Strings, integers, lists of strings, lists of floats, ...?
-* What is the role of the variable? Is it meant to updated repeatedly so that it eventually contain useful information? Is it meant to use same information in several places and reduce copy-pasting? Anything else? 
+* 변수의 이름이 그 목적을 나타내고 있나요? 단수나 복수 중 어떤것으로 이름을 지정하는 것이 더 낫나요?
+* 어떤 유형의 값이 이 변수에 포함될 수 있나요? 문자열, 정수, 문자열 목록, 부동 소수점 목록 ?
+* 변수의 역할은 무엇인가요? 결국 유용한 정보를 포함하도록 반복적으로 업데이트 되야 하나요? 여러 위치에서 동일한 정보를 사용하고 복사-붙여 넣기를 줄이기 위한 것인가요? 또 다른 건 없나요?
 
-For each **loop** ask yourself:
+각 **반복문**에 대해 다음과 같이 자문해보세요:
 
-* How do you know the loop is required?
-* How many times should the body of the loop be executed? What does this depend of?
-* Which code should be inside the loop and which should be outside?
-* What must be done before loop and what must be done after it?
+* 반복문이 정말 필요한가요?
+* 반복문은 몇 번 실행해야 하나요? 이것은 어떤것과 연관이 있나요?
+* 어떤 코드가 반복문 내부에 있어야 하고 어떤 코드가 외부에 있어야 하나요?
+* 루프 전에 수행해야 하는 작업과 이후 수행해야 하는 작업은 무엇인가요?
 
-For each complex **expression** ask yourself:
+각 복잡한 **표현식**에 대해 다음과 같이 자문해보세요:
 
-* In which order should be the steps of evaluating this expression? Does Python agree with this? When in doubt, use the debugger or introduce helper variables and break the expression into smaller parts.
-* What type of value should come out of this expression? String? List of strings?
+* 이 표현을 평가하는 단계는 어느 순서로 해야 하나요? 파이썬에서 실행 가능한가요? 확실하지 않은 경우, 디버거를 사용하거나 도우미 변수를 도입하고 식을 더 작은 부분으로 나누세요.
+* 이 표현에서 어떤 타입의 값이 나올까요? 문자열? 문자열 목록?
 
-You may be also missing some important parts in your program:
+프로그램에서 몇 가지 중요한 부분이 누락되었을 수도 있으니 확인해보세요:
 
-* Does your task require treating different situations differently? If yes, then you probably need an if-statement.
-* Does the task require doing something several times? If yes, then you probably need a loop.
+* 작업이 다른 상황을 다르게 처리해야 하나요? 그렇다면 아마 if 문이 필요할 겁니다.
+* 작업을 수행하려면 여러 번 수행해야 하나요? 그렇다면 아마 반복문이 필요할 겁니다.
 
 트랙킹을 하다가 놓치셨나요?
 ------------------------------
-"Find you the place where your assumptions break" -- this is definitely easier said than done. In case of 
-complex programs it's easy to arrive to the situation where you're not sure anymore what do you assume
-and why did you start with this programming thing at all.
+"당신이 했던 가정이 깨지는 곳을 찾으세요" -- 이것은 생각보다 쉽지 않은 일입니다. 복잡한 프로그램의 경우
+더 이상 당신이 무엇을 가정하고 왜 이 프로그래밍 작업을 시작했는지
+확신 할 수 없는 상황에 도달하기 쉽습니다.
 
-In this case it's useful to simplify your task as much as possible and try to implement the simpler problem
-first. Take a new editor and either start from scratch or copy existing code and throw out everything that 
-is not essential to the problem. For example, you can assume that user is cooperative and always inputs "good" data.
-If the task requires doing something repeatedly, then throw out the "repeatedly" part, if the task involves
-a complex condition for doing something, make the condition simpler etc.
+이 경우 가능한 한 작업을 단순화하고 더 간단한 문제를 먼저 구현하는 것이 유용합니다.
+새 편집기를 사용하여 처음부터 시작하거나 기존 코드를 복사하고 문제에 필수적이지 않은
+모든 것을 정리하세요. 예를 들어, 사용자가 협조적이며 항상 "좋은" 데이터를 입력한다고 가정 할 수 있습니다.
+작업에 반복적으로 수행해야 하는 작업이 있으면 "반복" 부분을 버리고 작업에 복잡한 조건이 포함되어 있으면
+조건을 더 단순하게 만드는 등의 작업을 수행하면 됩니다.
 
-After solving the simplified problem you are much better equipped to solve the original task as well.
-
+단순화된 문제를 해결 한 후에는 원래 작업을 해결할 수 있는 능력이 훨씬 더 좋아집니다.
  
 
 
