@@ -469,8 +469,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 % ((out + err).encode(ENCODING) + self._last_prompt)
             )
 
-    def _ensure_normal_mode(self):
-        if self._last_prompt == NORMAL_PROMPT:
+    def _ensure_normal_mode(self, force=False):
+        if self._last_prompt == NORMAL_PROMPT and not force:
             return
 
         logger.debug("requesting normal mode at %r", self._last_prompt)
@@ -484,6 +484,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("_soft_reboot_without_running_main")
         self._interrupt_to_raw_prompt()
         self._soft_reboot_in_raw_prompt_without_running_main()
+        logger.debug("Done _soft_reboot_without_running_main")
 
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -499,6 +500,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _check_reconnect(self):
         if self._connected_over_webrepl():
             time.sleep(1)
+            logger.info("Reconnecting to WebREPL")
             self._connection = self._connection.close_and_return_new_connection()
 
     def _connected_over_webrepl(self):
@@ -950,10 +952,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _cmd_Run(self, cmd):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
+        reset_environment_before_run = True  # TODO: make it configurable
         if cmd.get("source"):
-            self._soft_reboot_without_running_main()
+            if reset_environment_before_run:
+                self._soft_reboot_without_running_main()
+
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)
+                if reset_environment_before_run:
+                    logger.debug("Ensuring normal mode after soft reboot")
+                    self._ensure_normal_mode(force=True)
             else:
                 source = cmd.source
 
