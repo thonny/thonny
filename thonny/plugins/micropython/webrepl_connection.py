@@ -17,9 +17,9 @@ class WebReplConnection(MicroPythonConnection):
     Client may later reduce it for better efficiency
     """
 
-    def __init__(self, url, password):
+    def __init__(self, url, password, num_bytes_received=0):
 
-        self.num_bytes_received = 0
+        self.num_bytes_received = num_bytes_received
         super().__init__()
 
         try:
@@ -136,7 +136,7 @@ class WebReplConnection(MicroPythonConnection):
 
     def close_and_return_new_connection(self):
         self.close()
-        return WebReplConnection(self._url, self._password)
+        return WebReplConnection(self._url, self._password, self.num_bytes_received)
 
     def close(self):
         """
