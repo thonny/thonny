@@ -88,7 +88,9 @@ class OutlineView(ttk.Frame):
                 while indent <= active_node[1]:
                     active_node = active_node[0]
 
-                t = re.match(r"[ ]*(?P<type>(def|class){1})[ ]+(?P<name>[\w]+)", line)
+                t = re.match(
+                    r"[ \t]*(async[ \t]+)?(?P<type>(def|class){1})[ ]+(?P<name>[\w]+)", line
+                )
                 if t:
                     current = (active_node, indent, [], t.group("name"), t.group("type"), lineno)
                     active_node[2].append(current)
