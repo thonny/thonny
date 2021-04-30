@@ -655,6 +655,7 @@ class MicroPythonBackend(MainBackend, ABC):
         for name, pair in globs.items():
             value_infos[name] = ValueInfo(pair[1], pair[0])
 
+        logger.debug("Returning %d globals", len(value_infos))
         return {"module_name": cmd.module_name, "globals": value_infos}
 
     def _cmd_get_fs_info(self, cmd):

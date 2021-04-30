@@ -489,6 +489,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
+        logger.debug("_soft_reboot_for_restarting_user_program")
         self._ensure_normal_mode()
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
@@ -496,6 +497,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("Restoring helpers")
         self._prepare_after_soft_reboot(False)
         self.send_message(ToplevelResponse(cwd=self._cwd))
+        logger.debug("_soft_reboot_for_restarting_user_program")
 
     def _check_reconnect(self):
         if self._connected_over_webrepl():
@@ -560,7 +562,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._forward_unexpected_output()
 
         to_be_sent = script.encode("UTF-8")
-        logger.debug("Submitting via %s: %r", self._submit_mode, to_be_sent[:50])
+        logger.debug("Submitting via %s: %r", self._submit_mode, to_be_sent[:70])
         with self._interrupt_lock:
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 self._submit_code_via_paste_mode(to_be_sent)
@@ -966,7 +968,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 source = cmd.source
 
             self._execute(source, capture_output=False)
-            self._prepare_after_soft_reboot(False)
+            if reset_environment_before_run:
+                self._prepare_after_soft_reboot(False)
         return {}
 
     def _cmd_execute_system_command(self, cmd):
