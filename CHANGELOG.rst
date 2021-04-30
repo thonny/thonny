@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.3.7 (2021-04-30)
+==================
+* Add first draft of Finnish translation by Lrasinen
+
 3.3.6 (2021-03-03)
 ==================
 * Fix crash in Shell when negative int-s are evaluated in MicroPython (regression introduced in 3.3.4), #1670

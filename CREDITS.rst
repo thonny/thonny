@@ -91,6 +91,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * jose1711
 * Kauri Raba
 * Laszlo Kocsis
+* Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
 * Matt Iversen
