@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
 from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
 from thonny.languages import tr
 from thonny.memory import VariablesFrame
+
+logger = logging.getLogger(__name__)
 
 
 class VariablesView(VariablesFrame):
@@ -51,13 +54,16 @@ class VariablesView(VariablesFrame):
 
     def _handle_get_globals_response(self, event):
         if "error" in event:
-            self._clear_tree()
-            messagebox.showerror("Error querying global variables", event["error"], master=self)
+            self._handle_error_response(event["error"])
         elif "globals" not in event:
-            self._clear_tree()
-            messagebox.showerror("Error querying global variables", str(event), master=self)
+            self._handle_error_response(str(event))
         else:
             self.show_globals(event["globals"], event["module_name"])
+
+    def _handle_error_response(self, error_msg):
+        self._clear_tree()
+        logger.error("Error querying globals: %s", error_msg)
+        self.show_error("Could not query global variables: " + str(error_msg))
 
     def _handle_toplevel_response(self, event):
         if "globals" in event:
@@ -67,6 +73,7 @@ class VariablesView(VariablesFrame):
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
 
     def show_globals(self, globals_, module_name, is_active=True):
+        self.clear_error()
         # TODO: update only if something has changed
         self.update_variables(globals_)
         if module_name == "__main__":
