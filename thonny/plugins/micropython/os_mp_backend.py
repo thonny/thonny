@@ -164,9 +164,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         self._connection.read_until(end_marker.encode("ascii"))
         self._connection.write(EOT)
         self._connection.read_until(b"\n")
-
-        out = self._connection.read_until(NORMAL_PROMPT)[: -len(NORMAL_PROMPT)]
-        output_consumer(self._decode(out), "stdout")
+        self._forward_output_until_active_prompt(output_consumer)
 
     def _forward_output_until_active_prompt(
         self, output_consumer: Callable[[str, str], None], stream_name="stdout"
@@ -302,6 +300,31 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             return tuple(time.gmtime(secs))
         except Exception as e:
             return str(e)
+
+    def _submit_input(self, cdata: str) -> None:
+        # TODO: what if there is a previous unused data waiting
+        assert self._connection.outgoing_is_empty()
+
+        assert cdata.endswith("\n")
+        if not cdata.endswith("\r\n"):
+            # submission is done with CRLF
+            cdata = cdata[:-1] + "\r\n"
+
+        bdata = cdata.encode(ENCODING)
+        to_be_written = bdata
+        echo = b""
+        with self._interrupt_lock:
+            self._write(to_be_written)
+            # Try to consume the echo
+            echo += self._connection.soft_read(len(to_be_written), timeout=1)
+
+        if echo.replace(b"\r", b" ").replace(b"\n", b" ") != bdata.replace(b"\r", b" ").replace(
+            b"\n", b" "
+        ):
+            # because of autoreload? timing problems? interruption?
+            # Leave it.
+            logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
+            self._connection.unread(echo)
 
 
 class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):

@@ -531,7 +531,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         with self._interrupt_lock:
             while to_be_written:
                 block = self._extract_block_without_splitting_chars(to_be_written)
-                self._write(to_be_written)
+                self._write(block)
                 # Try to consume the echo
                 echo += self._connection.soft_read(len(block), timeout=1)
                 to_be_written = to_be_written[len(block) :]
