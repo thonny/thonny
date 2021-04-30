@@ -351,16 +351,34 @@ class MicroPythonBackend(MainBackend, ABC):
             except ConnectionClosedException as e:
                 self._on_connection_closed(e)
             except ManagementError as e:
+                logger.info("Caught ManagementError", exc_info=e)
                 if "KeyboardInterrupt" in e.err:
                     response = create_error_response(error="Interrupted", interrupted=True)
                 else:
-                    self._send_output("THONNY FAILED TO EXECUTE COMMAND %s\n" % cmd.name, "stderr")
+                    self._show_error("\nNB! Thonny could not execute '%s'." % cmd.name)
                     # traceback.print_exc() # I'll know the trace from command
-                    self._show_error("\n")
-                    self._show_error("SCRIPT:\n" + e.script + "\n")
-                    self._show_error("STDOUT:\n" + e.out + "\n")
-                    self._show_error("STDERR:\n" + e.err + "\n")
+                    if self._management_error_is_not_thonnys_fault(e):
+                        self._show_error(
+                            (
+                                "It looks like %s has arrived to an unexpected state"
+                                " or there have been communication problems."
+                                " See Thonny's backend.log for more information."
+                            )
+                            % (
+                                "CircuitPython"
+                                if self._connected_to_circuitpython()
+                                else "MicroPython"
+                            )
+                        )
+                    else:
+                        self._show_error("\n")
+                        self._show_error("SCRIPT:\n" + e.script + "\n")
+                        self._show_error("STDOUT:\n" + e.out + "\n")
+                        self._show_error("STDERR:\n" + e.err + "\n")
 
+                    self._show_error(
+                        "You may need to reconnect, Stop/Restart or hard-reset your device.\n"
+                    )
                     response = create_error_response(error="ManagementError")
             except Exception as e:
                 _report_internal_error(e)
@@ -573,6 +591,21 @@ class MicroPythonBackend(MainBackend, ABC):
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         raise NotImplementedError()
+
+    def _management_error_is_not_thonnys_fault(self, e):
+        outerr = ""
+        if e.out:
+            outerr += e.out
+        if e.err:
+            outerr += e.err
+        # https://github.com/micropython/micropython/issues/7171
+        # https://github.com/micropython/micropython/issues/6899
+        return (
+            "NameError: name '__thonny_helper' isn't defined" in outerr
+            or "SyntaxError" in outerr
+            or "IndentationError" in outerr
+            or "UnicodeDecodeError" in outerr
+        )
 
     def _check_for_side_commands(self):
         # NB! EOFCommand gets different treatment depending whether it is read during processing a command
