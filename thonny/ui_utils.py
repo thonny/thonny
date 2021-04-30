@@ -719,6 +719,8 @@ class TreeFrame(ttk.Frame):
         self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
         self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
 
+        self.error_label = ttk.Label(self.tree)
+
         if show_statusbar:
             self.statusbar = ttk.Frame(self)
             self.statusbar.grid(row=1, column=0, sticky="nswe")
@@ -737,6 +739,13 @@ class TreeFrame(ttk.Frame):
 
     def on_double_click(self, event):
         pass
+
+    def show_error(self, error_text):
+        self.error_label.configure(text=error_text)
+        self.error_label.grid()
+
+    def clear_error(self):
+        self.error_label.grid_remove()
 
 
 def scrollbar_style(orientation):
