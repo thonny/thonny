@@ -1523,7 +1523,7 @@ msgstr "Python 可執行檔"
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
-msgstr ""
+msgstr "注意！ 當選擇來自虛擬環境的可執行檔案時，檔案選擇按鈕可能無法正常工作。在這種情況下，請選擇“activate”腳本而不是直譯器（或直接在框中輸入路徑）！"
 
 #: thonny/plugins/cpython_ssh/__init__.py:153
 msgid "Remote Python 3 (SSH)"
