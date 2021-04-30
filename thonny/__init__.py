@@ -183,8 +183,10 @@ def launch():
             _delegate_to_existing_instance(sys.argv[1:])
             print("Delegated to an existing Thonny instance. Exiting now.")
             return 0
-        except (ConnectionRefusedError, socket.timeout):
-            pass
+        except Exception:
+            import traceback
+
+            traceback.print_exc()
 
     # Did not or could not delegate
 
@@ -273,9 +275,14 @@ def _delegate_to_existing_instance(args):
 
     try:
         sock, secret = _create_client_socket()
-    except (ConnectionRefusedError, socket.timeout):
-        # Maybe the lock is abandoned
-        os.remove(get_ipc_file_path())
+    except Exception:
+        # Maybe the lock is abandoned or the content is corrupted
+        try:
+            os.remove(get_ipc_file_path())
+        except Exception:
+            import traceback
+
+            traceback.print_exc()
         raise
 
     data = repr((secret, transformed_args)).encode(encoding="utf_8")
