@@ -22,6 +22,7 @@ dist
 venv
 venv-3.9
 venv39
+venv38
 venv37
 venv35/**
 packaging/linux/build
