@@ -1254,6 +1254,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         canonic_out = (out + err).replace("-", "").lower()
         if "readonly" in canonic_out or "errno 30" in canonic_out:
+            logger.info(
+                "Could not write via serial, got '%s'. Assuming read-only filesystem.", out + err
+            )
             raise ReadOnlyFilesystemError()
         elif out + err:
             raise RuntimeError(
