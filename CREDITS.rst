@@ -10,7 +10,7 @@ Thonny grew up in University of Tartu (https://www.ut.ee), Institute of Computer
 
 Supporters
 ----------
-* Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
+* Development of several features in Thonny 3.0 and 3.3 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
 * Since September 2018, development of Thonny is partially supported by Cybernetica AS (https://cyber.ee).
 
 Several companies and organizations have provided us with free hardware for testing Thonny (and for having fun):
@@ -42,8 +42,8 @@ Libraries, resources and tools
 * Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overridden by Tango icons (http://tango.freedesktop.org/)
 * POEditor (https://poeditor.com/) is used for managing translations of UI strings.
 
-Source contributors, advisors, translators and frequent bug-reporters
----------------------------------------------------------------------
+Source contributors, sponsors, advisors, translators and frequent bug-reporters
+-------------------------------------------------------------------------------
 * adzierzanowski
 * Aivar Annamaa
 * Albin
@@ -80,7 +80,9 @@ Source contributors, advisors, translators and frequent bug-reporters
 * freddii
 * fstengel
 * Gabriel Slørdahl
+* Gagan Saksena
 * Georges Khaznadar
+* Hyungseok Choi
 * IhorNehrutsa
 * Ivanhercaz
 * Ivan.schamann
@@ -89,11 +91,13 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * Juan Falgueras
 * jose1711
+* José Carlos García
 * Kauri Raba
 * Laszlo Kocsis
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marko Ristin
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
@@ -109,6 +113,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * segalion
 * Simon Gijsen
 * Simon Long
+* sourceperl
 * Stefan Rothe
 * Suk-Hyung Hwang
 * Sven Duzont
