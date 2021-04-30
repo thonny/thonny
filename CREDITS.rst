@@ -94,6 +94,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * José Carlos García
 * Kauri Raba
 * Laszlo Kocsis
+* Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
 * Marko Ristin
