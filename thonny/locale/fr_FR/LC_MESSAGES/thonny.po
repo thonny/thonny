@@ -1210,11 +1210,11 @@ msgstr "Contenu de l'aide"
 
 #: thonny/plugins/micropython/__init__.py:274
 msgid "CircuitPython device"
-msgstr "appareil CircuitPyhton"
+msgstr "appareil CircuitPython"
 
 #: thonny/plugins/micropython/__init__.py:278
 msgid "MicroPython device"
-msgstr "appareil MicroPyhton"
+msgstr "appareil MicroPython"
 
 #: thonny/plugins/micropython/__init__.py:476
 msgid "Connect your device to the computer and select corresponding port below"
@@ -1779,13 +1779,13 @@ msgstr "Code source"
 
 #: thonny/plugins/general_config_page.py:29
 msgid "Use Tk file dialogs instead of Zenity"
-msgstr ""
+msgstr "Utiliser les boîtes de dialogue fichier de Tk au lieu de Zenity"
 
 #: thonny/plugins/general_config_page.py:30
 msgid "Select if the file dialogs end up behind the main window"
-msgstr ""
+msgstr "Boîtes de dialogue de fichier derrière la fenêtre principale"
 
 #: thonny/plugins/general_config_page.py:97
 msgid "Environment variables (one KEY=VALUE per line)"
-msgstr ""
+msgstr "Variables d'environnement (une paire clé=valeur par ligne)"
 
