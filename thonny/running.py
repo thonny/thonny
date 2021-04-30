@@ -608,6 +608,7 @@ class Runner:
             start_time = time.time()
             while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
                 # self._pull_backend_messages()
+                # TODO: update in a loop can be slow on Mac https://core.tcl-lang.org/tk/tktview/f642d7c0f4
                 get_workbench().update()
                 sleep(0.01)
 
