@@ -58,6 +58,7 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
     caps_lock_is_on,
     shift_is_pressed,
+    ems_to_pixels,
 )
 
 logger = logging.getLogger(__name__)
@@ -774,7 +775,12 @@ class Workbench(tk.Tk):
 
         # Set up the menu
         self._backend_conf_variable = tk.StringVar(value="{}")
-        self._backend_menu = tk.Menu(self._statusbar, tearoff=False)
+
+        if running_on_mac_os():
+            menu_conf = {}
+        else:
+            menu_conf = get_style_configuration("Menu")
+        self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button
         self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
@@ -835,7 +841,11 @@ class Workbench(tk.Tk):
         )
 
         post_x = self._backend_button.winfo_rootx()
-        post_y = self._backend_button.winfo_rooty()
+        post_y = (
+            self._backend_button.winfo_rooty()
+            - self._backend_menu.yposition("end")
+            - self._backend_menu.yposition(1)
+        )
 
         if self.winfo_screenwidth() / self.winfo_screenheight() > 2:
             # Most likely several monitors.
@@ -845,15 +855,8 @@ class Workbench(tk.Tk):
             width_diff = max_description_width - button_text_width
             post_x -= width_diff + menu_font.measure("mmm")
 
-        if running_on_mac_os():
-            # won't be good location otherwise
-            popup_entry = num_entries + 4
-        else:
-            popup_entry = ""
-
-        # print(post_x, post_y)
         try:
-            self._backend_menu.tk_popup(post_x, post_y, entry=popup_entry)
+            self._backend_menu.tk_popup(post_x, post_y)
         except tk.TclError as e:
             if not 'unknown option "-state"' in str(e):
                 logger.warning("Problem with switcher popup", exc_info=e)
