@@ -2,7 +2,7 @@ jedi==0.18.*
 pyserial==3.5
 pylint==2.6.*
 docutils==0.16.*
-mypy==0.790.*
+mypy==0.812.*
 asttokens==2.0.*
 Send2Trash==1.5.*
 esptool==3.0.*
