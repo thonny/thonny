@@ -205,6 +205,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 except ImportError:
                     import os
                 import sys
+                import builtins
                 
                 # for object inspector
                 inspector_values = dict()
@@ -214,11 +215,11 @@ class MicroPythonBackend(MainBackend, ABC):
                     if obj is not None:
                         cls.last_repl_values.append(obj)
                         cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
-                        print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
+                        cls.builtins.print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
                 
-                @staticmethod
-                def print_mgmt_value(obj):
-                    print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
+                @classmethod
+                def print_mgmt_value(cls, obj):
+                    cls.builtins.print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
                     
                 @staticmethod
                 def repr(obj):
