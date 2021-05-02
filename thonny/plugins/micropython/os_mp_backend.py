@@ -269,8 +269,8 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
                 "free": available * block_size,
                 "used": (total - free) * block_size,
             }
-        except Exception:
-            raise ManagementError(script, out, err)
+        except Exception as e:
+            raise ManagementError("Could not parse disk information", script, out, err) from e
 
     def _is_connected(self):
         return not self._connection._error
