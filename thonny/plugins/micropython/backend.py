@@ -209,13 +209,12 @@ class MicroPythonBackend(MainBackend, ABC):
                 
                 # for object inspector
                 inspector_values = dict()
-                last_repl_values = []
                 @classmethod
                 def print_repl_value(cls, obj):
+                    global _
                     if obj is not None:
-                        cls.last_repl_values.append(obj)
-                        cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
                         cls.builtins.print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
+                        _ = obj
                 
                 @classmethod
                 def print_mgmt_value(cls, obj):
@@ -239,7 +238,6 @@ class MicroPythonBackend(MainBackend, ABC):
                         return [rec[0] for rec in cls.os.ilistdir(x) if rec[0] not in ('.', '..')]
             """
             ).format(
-                num_values_to_keep=self._get_num_values_to_keep(),
                 start_marker=OBJECT_LINK_START,
                 end_marker=OBJECT_LINK_END,
                 mgmt_start=MGMT_VALUE_START.decode(ENCODING),
@@ -251,11 +249,6 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _get_custom_helpers(self):
         return ""
-
-    def _get_num_values_to_keep(self):
-        """How many last evaluated REPL values and visited Object inspector values to keep
-        in internal lists for the purpose of retrieving them by id for Object inspector"""
-        return 5
 
     def _sync_time(self):
         raise NotImplementedError()
@@ -741,7 +734,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 """
                 for __thonny_helper.object_info in (
                         list(globals().values()) 
-                        + __thonny_helper.last_repl_values
                         + list(__thonny_helper.inspector_values.values())):
                     if id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
