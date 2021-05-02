@@ -786,6 +786,7 @@ class MicroPythonBackend(MainBackend, ABC):
                             break
                     else:
                         __thonny_helper.object_info = None
+                        __thonny_helper.print_mgmt_value(None)
                         
                 __thonny_helper.context_value = None
                 __thonny_helper.context_children = None
