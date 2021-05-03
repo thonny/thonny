@@ -147,12 +147,17 @@ class MicroPythonBackend(MainBackend, ABC):
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
+        except ManagementError as e:
+            logger.exception("ManagementError")
+            self._log_management_error_details(e)
         except Exception as e:
             logger.exception("Crash in backend", exc_info=e)
 
     def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
-        script = self._get_all_helpers()
+        logger.info("Preparing helpers")
+        script = self._get_helper_code()
+        logger.debug("Helper code:\n%s", script)
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
         self._report_time("prepared helpers")
@@ -183,6 +188,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._sync_time()
 
     def _perform_gc(self):
+        logger.debug("Performing gc")
         self._execute_without_output(
             dedent(
                 """
@@ -196,7 +202,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _check_prepare(self):
         pass  # overridden in bare metal
 
-    def _get_all_helpers(self):
+    def _get_helper_code(self):
         # Can't import functions into class context:
         # https://github.com/micropython/micropython/issues/6198
         return (
@@ -247,11 +253,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 mgmt_end=MGMT_VALUE_END.decode(ENCODING),
             )
             + "\n"
-            + textwrap.indent(self._get_custom_helpers(), "    ")
-        )
-
-    def _get_custom_helpers(self):
-        return ""
+        ).lstrip()
 
     def _sync_time(self):
         raise NotImplementedError()
@@ -364,6 +366,8 @@ class MicroPythonBackend(MainBackend, ABC):
                     self._show_error(
                         "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
                     )
+                    if isinstance(e, ManagementError):
+                        self._log_management_error_details(e)
                     if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
                         self._show_error(
                             (
@@ -486,6 +490,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _update_cwd(self):
         if not self._connected_to_microbit():
+            logger.debug("Updating cwd")
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
@@ -594,9 +599,7 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             value = ast.literal_eval(value_str)
         except Exception as e:
-            raise ManagementError(
-                "Could not parse management response" % e, script, out, err
-            ) from e
+            raise ManagementError("Could not parse management response", script, out, err) from e
 
         self._send_output(prefix, "stdout")
         self._send_output(suffix, "stdout")
@@ -1412,6 +1415,14 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _decode(self, data: bytes) -> str:
         return data.decode(encoding="UTF-8", errors="replace")
+
+    def _log_management_error_details(self, e):
+        logger.error(
+            "ManagementError details:\n" + "SCRIPT: %s\n\n" + "STDOUT: %s\n\n" + "STDERR: %s\n\n",
+            e.script,
+            e.out,
+            e.err,
+        )
 
 
 class ProtocolError(RuntimeError):

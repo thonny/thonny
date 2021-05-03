@@ -6,7 +6,12 @@ import threading
 import time
 from textwrap import dedent
 
-from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, FIRST_RAW_PROMPT
+from thonny.plugins.micropython.bare_metal_backend import (
+    NORMAL_PROMPT,
+    FIRST_RAW_PROMPT,
+    OUTPUT_ENQ,
+    OUTPUT_ACK,
+)
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
@@ -96,10 +101,20 @@ class SerialConnection(MicroPythonConnection):
                     # print("LISTEN EOFFFFFFFFFF")
                     break
                 data += self._serial.read_all()
+                # logger.debug("GOT %r", data)
+
+                if data.endswith(OUTPUT_ENQ) and self.text_mode:
+                    # Flow control.
+                    logger.debug("Read ENQ, responding with ACK")
+                    # Assuming connection is idle and it is safe to write in this thread
+                    self._serial.write(OUTPUT_ACK)
+                    self._serial.flush()
+                    data = data[:-1]
+                    continue
 
                 # don't publish incomplete utf-8 data
                 try:
-                    if self.unicode_guard:
+                    if self.text_mode:
                         data.decode("utf-8")  # testing if data decodes
                     to_be_published = data
                     data = b""

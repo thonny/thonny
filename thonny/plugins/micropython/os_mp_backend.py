@@ -92,8 +92,8 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             + ")\n"
         )
 
-    def _get_custom_helpers(self):
-        return textwrap.dedent(
+    def _get_helper_code(self):
+        extra = textwrap.dedent(
             """
             # https://github.com/pfalcon/pycopy-lib/blob/master/os/os/__init__.py
             
@@ -127,6 +127,8 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
                 cls.check_error(e)                                    
             """
         )
+
+        result = super()._get_helper_code() + textwrap.indent(extra, "    ")
 
     def _process_until_initial_prompt(self, clean):
         # This will be called only when the interpreter gets run without script.
