@@ -4,7 +4,7 @@ Version history
 
 3.3.7 (2021-04-30)
 ==================
-* Make confugration dialog larger to find French strings, by sourceperl, #1694
+* Make confugration dialog larger to fit French strings, by sourceperl, #1694
 * Fix "_prepare_after_soft_reboot" error in Unix MicroPython mode, #1715
 * Support interactive programs with Unix MicroPython, #1725
 * Fix read-only filesystem error for CircuitPython in non-English variants of CircuitPython, #1662
