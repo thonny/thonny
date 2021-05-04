@@ -31,9 +31,8 @@ if [ `getconf LONG_BIT` = "32" ]
 then
 #    $TARGET_DIR/bin/python3.9 -s -m pip install setuptools-scm
 
-    # newer cryptography versions require rust and don't publish binary 32-bit wheels
-    # and installing rust to 16.04 doesn't help
-    $TARGET_DIR/bin/python3.9 -s -m pip install cryptography==3.3.*
+    # newer cryptography versions can't be (easily?) built on Ubuntu 16.04
+    $TARGET_DIR/bin/python3.9 -s -m pip install cryptography==3.2.*
 fi
 
 $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir wheel
