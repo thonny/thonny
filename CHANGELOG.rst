@@ -4,7 +4,24 @@ Version history
 
 3.3.7 (2021-04-30)
 ==================
-* Add first draft of Finnish translation by Lrasinen
+* Make confugration dialog larger to fit French strings, by sourceperl, #1694
+* Fix "_prepare_after_soft_reboot" error in Unix MicroPython mode, #1715
+* Support interactive programs with Unix MicroPython, #1725
+* Fix read-only filesystem error for CircuitPython in non-English variants of CircuitPython, #1662
+* Fix error on right clicking in local file explorer with Italian translation, #1713
+* Fix back-end switcher menu position and theme, #1719, #1720
+* Fix "pop from empty list" error when MicroPython is having problems, #1586
+* Fix MYPYPATH / MyPy not working, #1124
+* Highlight unclosed strings even inside unclosed parens, #1770
+* Fix problem running code via WebREPL, #1762
+* Make Outline show also async, defs #1787
+* Don't show full error info when ManagementError doesn't seem to be Thonny's fault, #1788
+* Don't show error dialog when querying globals fails (error is shown on the variables table instead), #1789
+* Recover from corrupted rpc.sock ("invalid literal for int() with base 10" error), #1745
+* Add 3 translated Help files for Spanish, by José Carlos García, #1759
+* Add Korean translations of Help files, by Hyungseok Choi, #1758
+* Add first version of Finnish translation by Lrasinen
+* Update translations for Albanian, French, Korean
 
 3.3.6 (2021-03-03)
 ==================

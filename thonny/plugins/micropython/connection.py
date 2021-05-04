@@ -23,7 +23,7 @@ class MicroPythonConnection:
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
         self.startup_time = time.time()
-        self.unicode_guard = True
+        self.text_mode = True
         self._error = None
         self._reader_stopped = False
 
@@ -170,8 +170,8 @@ class MicroPythonConnection:
     def reset_output_buffer(self):
         pass
 
-    def set_unicode_guard(self, value):
-        self.unicode_guard = value
+    def set_text_mode(self, value):
+        self.text_mode = value
 
     def stop_reader(self):
         self._reader_stopped = True

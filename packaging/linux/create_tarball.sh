@@ -27,10 +27,13 @@ export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL DEPS ###################################
 
-#if [ `getconf LONG_BIT` = "32" ]
-#then
+if [ `getconf LONG_BIT` = "32" ]
+then
 #    $TARGET_DIR/bin/python3.9 -s -m pip install setuptools-scm
-#fi
+
+    # newer cryptography versions can't be (easily?) built on Ubuntu 16.04
+    $TARGET_DIR/bin/python3.9 -s -m pip install cryptography==3.2.*
+fi
 
 $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir wheel
 $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
@@ -108,7 +111,7 @@ cp ../../*LICENSE.txt $TARGET_DIR
 
 # put it together
 mkdir -p dist
-tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
+tar -cvzf dist/${VERSION_NAME}-alt.tar.gz -C build thonny
 
 # XXL ###########################################################
 
@@ -123,10 +126,10 @@ tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
 #
 # create download + install script
 # normal
-DOWNINSTALL_FILENAME=thonny-$VERSION.bash
+DOWNINSTALL_FILENAME=thonny-${VERSION}-alt.bash
 DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
 cp downinstall_template.sh $DOWNINSTALL_TARGET
-sed -i "s/_VERSION_/$VERSION/g" $DOWNINSTALL_TARGET
+sed -i "s/_VERSION_/${VERSION}-alt/g" $DOWNINSTALL_TARGET
 sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
 
 # xxl

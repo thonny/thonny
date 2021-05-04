@@ -434,7 +434,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         if msg.get("error"):
-            self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
             self._ensure_visible()
 
         if "user_exception" in msg:

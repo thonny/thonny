@@ -6,6 +6,7 @@ import traceback
 from typing import TYPE_CHECKING, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
+BACKEND_LOG_MARKER = "Thonny's backend.log"
 
 
 def _compute_thonny_user_dir():
@@ -324,14 +325,22 @@ def _create_client_socket():
 
 
 def _configure_frontend_logging() -> None:
-    _configure_logging("frontend.log")
+    _configure_logging(get_frontend_log_file(), _choose_logging_level())
 
 
 def configure_backend_logging() -> None:
-    _configure_logging("backend.log", logging.WARNING)
+    _configure_logging(get_backend_log_file(), None)
 
 
-def _configure_logging(filename, console_level=None):
+def get_backend_log_file():
+    return os.path.join(THONNY_USER_DIR, "backend.log")
+
+
+def get_frontend_log_file():
+    return os.path.join(THONNY_USER_DIR, "frontend.log")
+
+
+def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter("%(levelname)-7s %(name)s: %(message)s")
 
     # NB! Don't mess with the root logger, because (CPython) backend runs user code
@@ -339,17 +348,15 @@ def _configure_logging(filename, console_level=None):
     thonny_root_logger.setLevel(_choose_logging_level())
     thonny_root_logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
 
-    log_file = os.path.join(THONNY_USER_DIR, filename)
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
     file_handler.setFormatter(logFormatter)
     thonny_root_logger.addHandler(file_handler)
 
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(logFormatter)
-    if console_level is None:
-        console_level = _choose_logging_level()
-    console_handler.setLevel(console_level)
-    thonny_root_logger.addHandler(console_handler)
+    if console_level is not None:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logFormatter)
+        console_handler.setLevel(console_level)
+        thonny_root_logger.addHandler(console_handler)
 
     thonny_root_logger.info("Thonny version: %s", get_version())
 

@@ -50,6 +50,7 @@ from textwrap import dedent
 from threading import Lock
 from typing import Optional, Dict, Union, Tuple, List
 
+from thonny import get_backend_log_file, BACKEND_LOG_MARKER
 from thonny.backend import MainBackend
 from thonny.common import (
     OBJECT_LINK_END,
@@ -122,6 +123,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._epoch_year = None
         self._builtin_modules = []
         self._api_stubs_path = args.get("api_stubs_path")
+        self._suppressed_internal_error = None
+
         self._builtins_info = self._fetch_builtins_info()
 
         MainBackend.__init__(self)
@@ -144,12 +147,17 @@ class MicroPythonBackend(MainBackend, ABC):
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
-        except Exception:
-            logger.exception("Crash in backend")
+        except ManagementError as e:
+            logger.exception("ManagementError")
+            self._log_management_error_details(e)
+        except Exception as e:
+            logger.exception("Crash in backend", exc_info=e)
 
     def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
-        script = self._get_all_helpers()
+        logger.info("Preparing helpers")
+        script = self._get_helper_code()
+        logger.debug("Helper code:\n%s", script)
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
         self._report_time("prepared helpers")
@@ -180,6 +188,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._sync_time()
 
     def _perform_gc(self):
+        logger.debug("Performing gc")
         self._execute_without_output(
             dedent(
                 """
@@ -193,7 +202,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _check_prepare(self):
         pass  # overridden in bare metal
 
-    def _get_all_helpers(self):
+    def _get_helper_code(self):
         # Can't import functions into class context:
         # https://github.com/micropython/micropython/issues/6198
         return (
@@ -205,20 +214,20 @@ class MicroPythonBackend(MainBackend, ABC):
                 except ImportError:
                     import os
                 import sys
+                import builtins
                 
                 # for object inspector
                 inspector_values = dict()
-                last_repl_values = []
                 @classmethod
                 def print_repl_value(cls, obj):
+                    global _
                     if obj is not None:
-                        cls.last_repl_values.append(obj)
-                        cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
-                        print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
+                        cls.builtins.print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
+                        _ = obj
                 
-                @staticmethod
-                def print_mgmt_value(obj):
-                    print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
+                @classmethod
+                def print_mgmt_value(cls, obj):
+                    cls.builtins.print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
                     
                 @staticmethod
                 def repr(obj):
@@ -238,23 +247,13 @@ class MicroPythonBackend(MainBackend, ABC):
                         return [rec[0] for rec in cls.os.ilistdir(x) if rec[0] not in ('.', '..')]
             """
             ).format(
-                num_values_to_keep=self._get_num_values_to_keep(),
                 start_marker=OBJECT_LINK_START,
                 end_marker=OBJECT_LINK_END,
                 mgmt_start=MGMT_VALUE_START.decode(ENCODING),
                 mgmt_end=MGMT_VALUE_END.decode(ENCODING),
             )
             + "\n"
-            + textwrap.indent(self._get_custom_helpers(), "    ")
-        )
-
-    def _get_custom_helpers(self):
-        return ""
-
-    def _get_num_values_to_keep(self):
-        """How many last evaluated REPL values and visited Object inspector values to keep
-        in internal lists for the purpose of retrieving them by id for Object inspector"""
-        return 5
+        ).lstrip()
 
     def _sync_time(self):
         raise NotImplementedError()
@@ -315,7 +314,8 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._write(INTERRUPT_CMD)
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        logger.info("Handling command '%s'", cmd.name)
+        self._suppressed_internal_error = None
+        logger.info("Handling command '%s' (%r) ", cmd.name, cmd)
         self._report_time("before " + cmd.name)
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
@@ -338,57 +338,61 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             try:
                 response = handler(cmd)
-            except SystemExit as e:
+                if self._suppressed_internal_error:
+                    raise SuppressedInternalError(
+                        "Suppressed internal error: %s" % self._suppressed_internal_error
+                    )
+            except SystemExit:
                 # Must be caused by Thonny or plugins code
+                # TODO: Does the process get closed?
                 if isinstance(cmd, ToplevelCommand):
-                    logger.exception("Unexpected SystemExit", exc_info=e)
+                    logger.exception("Unexpected SystemExit while handling %s", cmd.name)
                 response = create_error_response(SystemExit=True)
             except UserError as e:
-                sys.stderr.write(str(e) + "\n")
+                self._show_error(str(e))
                 response = create_error_response()
             except KeyboardInterrupt:
                 response = create_error_response(error="Interrupted", interrupted=True)
             except ConnectionClosedException as e:
+                response = False
                 self._on_connection_closed(e)
-            except ManagementError as e:
-                logger.info("Caught ManagementError", exc_info=e)
-                if "KeyboardInterrupt" in e.err:
+            except OSError as e:
+                response = create_error_response(error="OSError: " + str(e))
+            except Exception as e:
+                logger.exception("%s while handling %s", type(e).__name__, cmd.name)
+                if isinstance(e, ManagementError) and "KeyboardInterrupt" in e.err:
                     response = create_error_response(error="Interrupted", interrupted=True)
                 else:
-                    self._show_error("\nNB! Thonny could not execute '%s'." % cmd.name)
-                    # traceback.print_exc() # I'll know the trace from command
-                    if self._management_error_is_not_thonnys_fault(e):
+                    self._show_error(
+                        "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
+                    )
+                    if isinstance(e, ManagementError):
+                        self._log_management_error_details(e)
+                    if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
                         self._show_error(
                             (
                                 "It looks like %s has arrived to an unexpected state"
                                 " or there have been communication problems."
-                                " See Thonny's backend.log for more information."
                             )
-                            % (
-                                "CircuitPython"
-                                if self._connected_to_circuitpython()
-                                else "MicroPython"
-                            )
+                            % self._get_interpreter_kind(),
+                            end=" ",
                         )
                     else:
-                        self._show_error("\n")
-                        self._show_error("SCRIPT:\n" + e.script + "\n")
-                        self._show_error("STDOUT:\n" + e.out + "\n")
-                        self._show_error("STDERR:\n" + e.err + "\n")
+                        traceback.print_exc()
 
+                    self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
                     self._show_error(
-                        "You may need to reconnect, Stop/Restart or hard-reset your device.\n"
+                        'You may need to press "Stop/Restart" or hard-reset your '
+                        "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
                     )
-                    response = create_error_response(error="ManagementError")
-            except Exception as e:
-                _report_internal_error(e)
-                response = create_error_response(context_info="other unhandled exception")
+                    response = create_error_response(error="Internal error")
 
         if response is None:
             response = {}
 
         if response is False:
             # Command doesn't want to send any response
+            logger.debug("Not sending any response for %s", cmd.name)
             return
 
         elif isinstance(response, dict):
@@ -397,7 +401,7 @@ class MicroPythonBackend(MainBackend, ABC):
             elif isinstance(cmd, InlineCommand):
                 response = InlineResponse(cmd.name, **response)
 
-        debug("cmd: " + str(cmd) + ", respin: " + str(response))
+        logger.debug("Sending response %r for %s", response, cmd.name)
         self.send_message(self._prepare_command_response(response, cmd))
 
         self._check_perform_just_in_case_gc()
@@ -418,6 +422,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _connected_to_circuitpython(self):
         return "circuitpython" in self._welcome_text.lower()
+
+    def _get_interpreter_kind(self):
+        return "CircuitPython" if self._connected_to_circuitpython() else "MicroPython"
 
     def _connected_to_pycom(self):
         return "pycom" in self._welcome_text.lower()
@@ -483,6 +490,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _update_cwd(self):
         if not self._connected_to_microbit():
+            logger.debug("Updating cwd")
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
@@ -511,6 +519,13 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _send_error_message(self, msg):
         self._send_output("\n" + msg + "\n", "stderr")
+
+    def _send_output(self, data, stream_name):
+        super(MicroPythonBackend, self)._send_output(data, stream_name)
+
+        if "NameError: name '__thonny_helper' isn't defined" in data:
+            # Don't want to raise error here and disturb the protocol
+            self._suppressed_internal_error = "Missing __thonny_helper"
 
     def _execute(self, script, capture_output=False) -> Tuple[str, str]:
         if capture_output:
@@ -548,7 +563,7 @@ class MicroPythonBackend(MainBackend, ABC):
         """Meant for management tasks."""
         out, err = self._execute(script, capture_output=True)
         if out or err:
-            raise ManagementError(script, out, err)
+            raise ManagementError("Command output was not empty", script, out, err)
 
     def _evaluate(self, script):
         """Evaluate the output of the script or raise ManagementError, if anything looks wrong.
@@ -565,12 +580,13 @@ class MicroPythonBackend(MainBackend, ABC):
             pass
 
         out, err = self._execute(script, capture_output=True)
-        if (
-            err
-            or MGMT_VALUE_START.decode(ENCODING) not in out
+        if err:
+            raise ManagementError("Script produced errors", script, out, err)
+        elif (
+            MGMT_VALUE_START.decode(ENCODING) not in out
             or MGMT_VALUE_END.decode(ENCODING) not in out
         ):
-            raise ManagementError(script, out, err)
+            raise ManagementError("Management markers missing", script, out, err)
 
         start_token_pos = out.index(MGMT_VALUE_START.decode(ENCODING))
         end_token_pos = out.index(MGMT_VALUE_END.decode(ENCODING))
@@ -582,30 +598,16 @@ class MicroPythonBackend(MainBackend, ABC):
 
         try:
             value = ast.literal_eval(value_str)
-            self._send_output(prefix, "stdout")
-            self._send_output(suffix, "stdout")
-            return value
-        except SyntaxError:
-            raise ManagementError(script, out, err)
+        except Exception as e:
+            raise ManagementError("Could not parse management response", script, out, err) from e
+
+        self._send_output(prefix, "stdout")
+        self._send_output(suffix, "stdout")
+        return value
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         raise NotImplementedError()
-
-    def _management_error_is_not_thonnys_fault(self, e):
-        outerr = ""
-        if e.out:
-            outerr += e.out
-        if e.err:
-            outerr += e.err
-        # https://github.com/micropython/micropython/issues/7171
-        # https://github.com/micropython/micropython/issues/6899
-        return (
-            "NameError: name '__thonny_helper' isn't defined" in outerr
-            or "SyntaxError" in outerr
-            or "IndentationError" in outerr
-            or "UnicodeDecodeError" in outerr
-        )
 
     def _check_for_side_commands(self):
         # NB! EOFCommand gets different treatment depending whether it is read during processing a command
@@ -740,7 +742,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 """
                 for __thonny_helper.object_info in (
                         list(globals().values()) 
-                        + __thonny_helper.last_repl_values
                         + list(__thonny_helper.inspector_values.values())):
                     if id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
@@ -786,6 +787,7 @@ class MicroPythonBackend(MainBackend, ABC):
                             break
                     else:
                         __thonny_helper.object_info = None
+                        __thonny_helper.print_mgmt_value(None)
                         
                 __thonny_helper.context_value = None
                 __thonny_helper.context_children = None
@@ -1179,7 +1181,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _get_file_size(self, path: str) -> int:
         stat = self._get_stat(path)
         if stat is None:
-            raise RuntimeError("Path '%s' does not exist" % path)
+            raise OSError("Path '%s' does not exist" % path)
 
         return stat[STAT_SIZE_INDEX]
 
@@ -1236,6 +1238,7 @@ class MicroPythonBackend(MainBackend, ABC):
         return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
     def _on_connection_closed(self, error=None):
+        logger.info("Handling closed connection")
         self._forward_unexpected_output("stderr")
         message = "Connection lost"
         if error:
@@ -1244,8 +1247,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
         sys.exit(EXPECTED_TERMINATION_CODE)
 
-    def _show_error(self, msg):
-        self._send_output(msg + "\n", "stderr")
+    def _show_error(self, msg, end="\n"):
+        self._send_output(msg + end, "stderr")
 
     def _add_expression_statement_handlers(self, source):
         try:
@@ -1413,22 +1416,25 @@ class MicroPythonBackend(MainBackend, ABC):
     def _decode(self, data: bytes) -> str:
         return data.decode(encoding="UTF-8", errors="replace")
 
-
-class ManagementError(RuntimeError):
-    def __init__(self, script, out, err):
-        msg = (
-            "Problem with a management command\n\n"
-            + "SCRIPT:\n"
-            + script
-            + "\n\n"
-            + "STDOUT:\n"
-            + out
-            + "\n\n"
-            + "STDERR:\n"
-            + err
-            + "\n\n"
+    def _log_management_error_details(self, e):
+        logger.error(
+            "ManagementError details:\n" + "SCRIPT: %s\n\n" + "STDOUT: %s\n\n" + "STDERR: %s\n\n",
+            e.script,
+            e.out,
+            e.err,
         )
 
+
+class ProtocolError(RuntimeError):
+    pass
+
+
+class SuppressedInternalError(RuntimeError):
+    pass
+
+
+class ManagementError(ProtocolError):
+    def __init__(self, msg, script, out, err):
         RuntimeError.__init__(self, msg)
         self.script = script
         self.out = out
@@ -1496,7 +1502,7 @@ def ends_overlap(left, right) -> int:
     return 0
 
 
-class ReadOnlyFilesystemError(RuntimeError):
+class ReadOnlyFilesystemError(OSError):
     pass
 
 

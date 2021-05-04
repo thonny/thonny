@@ -1,22 +1,21 @@
-# update numpy and matplotlib also in create_tarball.sh
 numpy==1.20.*
 guizero==1.1.*
-gpiozero==1.5.*
+gpiozero==1.6.*
 requests==2.25.*
-pillow==8.1.*
+pillow==8.2.*
 scipy==1.6.*
-matplotlib==3.3.*
+matplotlib==3.4.*
 pygame==2.0.*
 pgzero==1.2.*
 flask==1.1.*
 pytest==6.2.*
 colorama==0.4.*
-birdseye==0.8.*
+birdseye==0.9.*
 beautifulsoup4==4.9.*
 pandas==1.2.*
 lxml==4.6.*
 openpyxl==3.0.*
-XlsxWriter==1.3.*
+XlsxWriter==1.4.*
 xlrd==2.0.*
 xlwt==1.3.*
 html5lib==1.1.*

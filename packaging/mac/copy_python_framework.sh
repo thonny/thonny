@@ -6,7 +6,7 @@ set -e
 # LOCAL_FRAMEWORKS=$HOME/thonny_template_build_39/Thonny.app/Contents/Frameworks
 
 VERSION=3.9
-OTHER_VERSION=3.7
+OTHER_VERSION=3.10
 ORIGINAL_FRAMEWORK_PATH=/Library/Frameworks/Python.framework
 NEW_FRAMEWORK_PATH=$LOCAL_FRAMEWORKS/Python.framework
 
