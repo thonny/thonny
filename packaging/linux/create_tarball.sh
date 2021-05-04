@@ -27,10 +27,13 @@ export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL DEPS ###################################
 
-#if [ `getconf LONG_BIT` = "32" ]
-#then
+if [ `getconf LONG_BIT` = "32" ]
+then
 #    $TARGET_DIR/bin/python3.9 -s -m pip install setuptools-scm
-#fi
+
+    # newer cryptography versions require rust
+    $TARGET_DIR/bin/python3.9 -s -m pip install cryptography>=3.3.2
+fi
 
 $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir wheel
 $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
