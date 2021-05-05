@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2020 Aivar Annamaa <aivar.annamaa@gmail.com> -->
+<!-- Copyright 2021 Aivar Annamaa <aivar.annamaa@gmail.com> -->
 <component type="desktop-application">
   <id>org.thonny.Thonny.desktop</id>
   <metadata_license>MIT</metadata_license>
