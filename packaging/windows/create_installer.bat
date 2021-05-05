@@ -9,6 +9,7 @@ mkdir %BUILDDIR%
 xcopy C:\Pythonny39\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
 copy ThonnyRunner39\x64\Release\thonny.exe %BUILDDIR% /Y
+@rem NB! ucrt_redist not required in Windows 10
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
 xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
