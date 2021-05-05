@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\workspaces\python_stuff\thonny\packaging\windows\ThonnyRunner39-64\x64\Release\thonny.exe</FullPath>
+      <FullPath>C:\workspaces\python_stuff\thonny\packaging\windows\ThonnyRunner39\x64\Release\thonny.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

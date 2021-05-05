@@ -1,2 +1,2 @@
 
-"C:\Program Files (x86)\kSign\signtool.exe" sign /f "cert.p12" /p PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 /d "Thonny, Python IDE for beginners" /du "https://thonny.org" thonny.exe
+"C:\Program Files (x86)\Windows Kits\10\App Certification Kit\signtool.exe" sign /f "cert.p12" /p PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 /d "Thonny, Python IDE for beginners" /du "https://thonny.org" thonny.exe
