@@ -135,6 +135,9 @@ class SshCPythonProxy(SubprocessProxy):
             ["ssh", userhost], cwd=get_workbench().get_local_cwd(), keep_open=False, title=userhost
         )
 
+    def get_supported_features(self):
+        return {"run", "debug"}
+
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
