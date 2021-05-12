@@ -10,5 +10,5 @@ tar -xvzf openssl-$OPENSSL_VERSION.tar.gz
 cd openssl-$OPENSSL_VERSION
 ./config shared --prefix=$PREFIX --openssldir=$PREFIX/openssl
 make
-make install
+make install_sw
 cd ..
