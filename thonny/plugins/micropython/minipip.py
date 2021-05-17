@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import textwrap
 from typing import Union, List, Dict, Any, Optional
 from urllib.error import HTTPError
 from urllib.request import urlopen
@@ -324,7 +325,13 @@ def _resolve_version(req: Requirement, main_meta: Dict[str, Any]) -> Optional[st
 def main(raw_args):
     import argparse
 
-    parser = argparse.ArgumentParser()
+    description = textwrap.dedent("""
+        Meant for installing both upip and pip compatible distribution packages from 
+        PyPI and micropython.org/pi to a local directory, USB volume or directly to 
+        MicroPython filesystem over serial connection (requires rshell).    
+    """).strip()
+
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "command", help="Currently the only supported command is 'install'", choices=["install"]
     )
