@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+
 import io
 import json
 import os.path
+import shlex
 import shutil
 import subprocess
 import tarfile
+import tempfile
 from typing import Union, List, Dict, Any, Optional
 from urllib.error import HTTPError
 from urllib.request import urlopen
@@ -26,35 +30,88 @@ class NotUpipCompatible(RuntimeError):
     pass
 
 
-class DistributionNotFoundError(RuntimeError):
-    pass
-
-
 def install(
-    spec: Union[List[str], str], install_dir: str = None, index_urls: List[str] = None
+    spec: Union[List[str], str],
+    target_dir: str,
+    index_urls: List[str] = None,
+    port: Optional[str] = None,
+):
+    if not index_urls:
+        index_urls = DEFAULT_INDEX_URLS
+
+    temp_dir = tempfile.mkdtemp()
+    try:
+        _install_to_local_temp_dir(spec, temp_dir, index_urls)
+        if port is not None:
+            _copy_to_micropython_over_serial(temp_dir, port, target_dir)
+        else:
+            _copy_to_local_target_dir(temp_dir, target_dir)
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def _copy_to_local_target_dir(source_dir: str, target_dir: str):
+    logger.info("Copying files to %s", os.path.abspath(target_dir))
+    # Copying manually in order to be able to use os.fsync
+    # see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
+    for root, dirs, files in os.walk(source_dir):
+        relative_dir = root[len(source_dir) :]
+        full_target_dir = target_dir + relative_dir
+        for dir_name in dirs:
+            full_path = os.path.join(full_target_dir, dir_name)
+            if os.path.isdir(full_path):
+                logger.info("Directory %s already exists", os.path.join(relative_dir, dir_name))
+            elif os.path.isfile(full_path):
+                raise UserError("Can't treat existing file %s as directory", full_path)
+            else:
+                logger.info("Creating %s", os.path.join(relative_dir, dir_name))
+                os.makedirs(full_path, 0o700)
+
+        for file_name in files:
+            full_source_path = os.path.join(root, file_name)
+            full_target_path = os.path.join(full_target_dir, file_name)
+            logger.debug("Preparing %s => %s", full_source_path, full_target_path)
+
+            if os.path.isfile(full_target_path):
+                logger.info("Overwriting %s", os.path.join(relative_dir, file_name))
+            elif os.path.isdir(full_target_path):
+                raise UserError("Can't treat existing directory %s as file", full_target_path)
+            else:
+                logger.info("Copying %s", os.path.join(relative_dir, file_name))
+
+            with open(full_source_path, "rb") as in_fp, open(full_target_path, "wb") as out_fp:
+                out_fp.write(in_fp.read())
+                out_fp.flush()
+                os.fsync(out_fp)
+
+
+def _copy_to_micropython_over_serial(source_dir: str, port: str, target_dir: str):
+    assert target_dir.startswith("/")
+
+    cmd = _get_rshell_command() + ["-p", port, "rsync", source_dir, "/pyboard" + target_dir]
+    logger.debug("Uploading with rsync: %s", shlex.join(cmd))
+    subprocess.check_call(cmd)
+
+
+def _get_rshell_command() -> Optional[List[str]]:
+    if shutil.which("rshell"):
+        return ["rshell"]
+    else:
+        return None
+
+
+def _install_to_local_temp_dir(
+    spec: Union[List[str], str], temp_install_dir: str, index_urls: List[str]
 ) -> None:
     if isinstance(spec, str):
         specs = [spec]
     else:
         specs = spec
 
-    if not install_dir:
-        install_dir = os.getcwd()
+    pip_specs = _install_all_upip_compatible(specs, temp_install_dir, index_urls)
 
-    if not index_urls:
-        index_urls = DEFAULT_INDEX_URLS
-
-    try:
-        pip_specs = _install_all_upip_compatible(specs, install_dir, index_urls)
-
-        if pip_specs:
-            _install_with_pip(pip_specs, install_dir, index_urls)
-    except UserError as e:
-        print("ERROR:", e, file=sys.stderr)
-        exit(1)
-    except subprocess.CalledProcessError:
-        # assuming pip already printed the error
-        exit(1)
+    if pip_specs:
+        _install_with_pip(pip_specs, temp_install_dir, index_urls)
 
 
 def _install_all_upip_compatible(
@@ -187,9 +244,15 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
         + specs
     )
 
-    for name in os.listdir(target_dir):
-        if name.endswith(".dist-info"):
-            shutil.rmtree(os.path.join(target_dir, name))
+    # delete files not required for MicroPython
+    for root, dirs, files in os.walk(target_dir):
+        for dir_name in dirs:
+            if dir_name.endswith(".dist-info") or dir_name == "__pycache__":
+                shutil.rmtree(os.path.join(root, dir_name))
+
+        for file_name in files:
+            if file_name.endswith(".pyc"):
+                os.remove(os.path.join(root, file_name))
 
 
 def _fetch_metadata(req: Requirement, index_urls: List[str]) -> Dict[str, Any]:
@@ -282,12 +345,18 @@ def main(raw_args):
     )
     parser.add_argument(
         "-p",
+        "--port",
+        help="Serial port of the device",
+        nargs="?",
+    )
+    parser.add_argument(
         "-t",
         "--target",
-        help="Target directory",
+        help="Target directory (on device, if port is given, otherwise local)",
         default=".",
         dest="target_dir",
         metavar="TARGET_DIR",
+        required=True,
     )
     parser.add_argument(
         "-i",
@@ -334,7 +403,25 @@ def main(raw_args):
     console_handler.setLevel(logging_level)
     logger.addHandler(console_handler)
 
-    install(all_specs, install_dir=args.target_dir, index_urls=index_urls)
+    if args.port and not _get_rshell_command():
+        print(
+            "Could not find rshell (required for uploading when serial port is given)",
+            file=sys.stderr,
+        )
+        exit(1)
+
+    if args.port and not args.target_dir.startswith("/"):
+        print("If port is given then target dir must be absolute Unix-style path")
+        exit(1)
+
+    try:
+        install(all_specs, target_dir=args.target_dir, index_urls=index_urls, port=args.port)
+    except UserError as e:
+        print("ERROR:", e, file=sys.stderr)
+        exit(1)
+    except subprocess.CalledProcessError:
+        # assuming the subprocess (pip or rshell) already printed the error
+        exit(1)
 
 
 if __name__ == "__main__":
