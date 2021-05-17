@@ -13,7 +13,6 @@ from thonny.common import InlineCommand
 from thonny.languages import tr
 from thonny.plugins.files import upload, prepare_upload_items
 from thonny.plugins.micropython import MicroPythonProxy, LocalMicroPythonProxy
-from thonny.plugins.micropython.micropip import MICROPYTHON_ORG_JSON
 from thonny.plugins.pip_gui import (
     BackendPipDialog,
     _fetch_url_future,
@@ -21,6 +20,8 @@ from thonny.plugins.pip_gui import (
 )
 from thonny.running import InlineCommandDialog
 from thonny.workdlg import SubprocessDialog
+
+MICROPYTHON_ORG_JSON = "https://micropython.org/pi/%s/json"
 
 
 class MicroPythonPipDialog(BackendPipDialog):
@@ -31,7 +32,7 @@ class MicroPythonPipDialog(BackendPipDialog):
         assert isinstance(self._backend_proxy, MicroPythonProxy)
 
     def _create_pip_process(self, args):
-        return self._create_python_process(["-m", "thonny.plugins.micropython.micropip"] + args)
+        return self._create_python_process(["-m", "thonny.plugins.micropython.minipip"] + args)
 
     def _get_active_version(self, name):
         # Don't have dist-level information
@@ -78,7 +79,7 @@ class MicroPythonPipDialog(BackendPipDialog):
         )
 
     def _get_install_command(self):
-        return ["install", "-p", self._current_temp_dir]
+        return ["install", "--target", self._current_temp_dir]
 
     def _perform_pip_action(self, action: str) -> bool:
         if self._perform_pip_action_without_refresh(action):
@@ -330,14 +331,14 @@ class MicroPythonPipDialog(BackendPipDialog):
         return []
 
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
-        args = ["-m", "thonny.plugins.micropython.micropip"] + args
+        args = ["-m", "thonny.plugins.micropython.minipip"] + args
         proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
         cmd = proc.cmd
         dlg = InstallAndUploadDialog(
             self,
             proc,
             back_cmd=self._create_upload_command,
-            title="micropip",
+            title="minipip",
             instructions=title,
             autostart=True,
             output_prelude=subprocess.list2cmdline(cmd) + "\n",
@@ -352,7 +353,7 @@ class LocalMicroPythonPipDialog(MicroPythonPipDialog):
         return ["install", "-p", self._get_target_directory()]
 
     def _upload_installed_files(self) -> bool:
-        "nothing to do -- micropip installed files directly to the right directory"
+        "nothing to do -- minipip installed files directly to the right directory"
 
     def _delete_paths(self, paths):
         # assuming all files are listed if their directory is listed
@@ -363,10 +364,10 @@ class LocalMicroPythonPipDialog(MicroPythonPipDialog):
                 os.removedirs(path)
 
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
-        args = ["-m", "thonny.plugins.micropython.micropip"] + args
+        args = ["-m", "thonny.plugins.micropython.minipip"] + args
         proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
         cmd = proc.cmd
-        dlg = SubprocessDialog(self, proc, "micropip", long_description=title, autostart=True)
+        dlg = SubprocessDialog(self, proc, "minipip", long_description=title, autostart=True)
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr
 
@@ -428,7 +429,7 @@ class InstallAndUploadDialog(InlineCommandDialog):
         self.returncode = self._proc.wait()
         if self.returncode:
             self.set_action_text("Error")
-            self.append_text("\nmicropip returned with error code %s\n" % self.returncode)
+            self.append_text("\nminipip returned with error code %s\n" % self.returncode)
         else:
             self.set_action_text("Copying to the device")
             self.append_text("Copying to the device\n")
