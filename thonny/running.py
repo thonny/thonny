@@ -932,7 +932,7 @@ class SubprocessProxy(BackendProxy):
             env=self._get_environment(),
             universal_newlines=True,
             creationflags=creationflags,
-            **extra_params
+            **extra_params,
         )
 
         # setup asynchronous output listeners

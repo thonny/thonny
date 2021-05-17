@@ -20,7 +20,7 @@ class RstText(TweakableText):
                 "font": "TkDefaultFont",
                 # "cursor" : "",
                 **kw,
-            }
+            },
         )
         self.configure_tags()
         self._visitor = None

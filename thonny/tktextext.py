@@ -763,7 +763,7 @@ class TextFrame(ttk.Frame):
         horizontal_scrollbar_style=None,
         borderwidth=0,
         relief="sunken",
-        **text_options
+        **text_options,
     ):
         ttk.Frame.__init__(self, master=master, borderwidth=borderwidth, relief=relief)
 
@@ -856,7 +856,7 @@ class EnhancedTextFrame(TextFrame):
         relief="sunken",
         gutter_background="#e0e0e0",
         gutter_foreground="#999999",
-        **text_options
+        **text_options,
     ):
         self._gutter = None
 
@@ -871,7 +871,7 @@ class EnhancedTextFrame(TextFrame):
             horizontal_scrollbar_style=horizontal_scrollbar_style,
             borderwidth=borderwidth,
             relief=relief,
-            **text_options
+            **text_options,
         )
 
         self._recommended_line_length = line_length_margin

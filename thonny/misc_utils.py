@@ -423,7 +423,7 @@ def copy_to_clipboard(data):
         env=env,
         universal_newlines=True,
         close_fds=True,
-        **extra
+        **extra,
     )
     proc.communicate(input=data, timeout=0.1)
 
