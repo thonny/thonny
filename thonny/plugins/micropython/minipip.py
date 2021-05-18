@@ -256,7 +256,11 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
     # delete files not required for MicroPython
     for root, dirs, files in os.walk(target_dir):
         for dir_name in dirs:
-            if dir_name.endswith(".dist-info") or dir_name == "__pycache__":
+            if (
+                dir_name.endswith(".dist-info")
+                or dir_name.endswith(".egg-info")
+                or dir_name == "__pycache__"
+            ):
                 shutil.rmtree(os.path.join(root, dir_name))
 
         for file_name in files:
