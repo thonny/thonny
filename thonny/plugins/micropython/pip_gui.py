@@ -5,7 +5,7 @@ import tempfile
 import threading
 import tkinter as tk
 from tkinter.messagebox import showerror
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from typing import cast, Tuple
 
 from thonny import running, get_runner, get_workbench, ui_utils
@@ -40,6 +40,16 @@ class MicroPythonPipDialog(BackendPipDialog):
 
     def _on_install_click(self):
         if self.install_button["text"] == self.get_install_button_text():
+            if not self._looks_like_micropython_package():
+                if not messagebox.askyesno(
+                    title=tr("Confirmation"),
+                    message=tr(
+                        "This doesn't look like MicroPython/CircuitPython package.\n"
+                        "Are you sure you want to install it?"
+                    ),
+                    parent=self,
+                ):
+                    return
             super()._on_install_click()
         elif self.install_button["text"] == self.get_search_button_text():
             self.search_box.delete(0, "end")
@@ -51,6 +61,24 @@ class MicroPythonPipDialog(BackendPipDialog):
             raise RuntimeError(
                 "Unexpected text '%s' on install button" % self.install_button["text"]
             )
+
+    def _looks_like_micropython_package(self):
+        assert self.current_package_data is not None
+        name = self.current_package_data["info"]["name"]
+        classifiers = self.current_package_data["info"].get("classifiers", [])
+        print(classifiers)
+        for token in ["micropython", "circuitpython", "pycopy"]:
+            if token in name.lower():
+                return True
+
+        for mp_class in [
+            "Programming Language :: Python :: Implementation :: MicroPython",
+            "Programming Language :: Python :: Implementation :: CircuitPython",
+        ]:
+            if mp_class in classifiers:
+                return True
+
+        return False
 
     def _on_uninstall_click(self):
         if self.uninstall_button["text"] == self.get_uninstall_button_text():
