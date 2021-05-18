@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.3.10 (2021-05-18)
+===================
+* Restore Python 3.6 compatibility of minipip, #1541
+
 3.3.9 (2021-05-18)
 ==================
 * Don't copy egg-info directories to target location when installing pip-compatible packages for MicroPython, #1541
