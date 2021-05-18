@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.3.9 (2021-05-18)
+==================
+* Don't copy egg-info directories to target location when installing pip-compatible packages for MicroPython, #1541
+
 3.3.8 (2021-05-18)
 ==================
 * Support installing regular pip-compatible packages to MicroPython or CircuitPython (so far only upip-compatible packages were supported), #1541
