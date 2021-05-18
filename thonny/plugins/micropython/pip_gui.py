@@ -4,7 +4,6 @@ import subprocess
 import tempfile
 import threading
 import tkinter as tk
-from tkinter.messagebox import showerror
 from tkinter import ttk, messagebox
 from typing import cast, Tuple
 
@@ -378,7 +377,7 @@ class MicroPythonPipDialog(BackendPipDialog):
 
 class LocalMicroPythonPipDialog(MicroPythonPipDialog):
     def _get_install_command(self):
-        return ["install", "-p", self._get_target_directory()]
+        return ["install", "--target", self._get_target_directory()]
 
     def _upload_installed_files(self) -> bool:
         "nothing to do -- minipip installed files directly to the right directory"
