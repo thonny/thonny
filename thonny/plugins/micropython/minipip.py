@@ -10,7 +10,7 @@ import subprocess
 import tarfile
 import tempfile
 import textwrap
-from typing import Union, List, Dict, Any, Optional
+from typing import Union, List, Dict, Any, Optional, Tuple
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import pkg_resources
@@ -60,8 +60,8 @@ def _copy_to_local_target_dir(source_dir: str, target_dir: str):
     # Copying manually in order to be able to use os.fsync
     # see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
     for root, dirs, files in os.walk(source_dir):
-        relative_dir = root[len(source_dir) :]
-        full_target_dir = target_dir + relative_dir
+        relative_dir = root[len(source_dir) :].lstrip("/\\")
+        full_target_dir = os.path.join(target_dir, relative_dir)
         for dir_name in dirs:
             full_path = os.path.join(full_target_dir, dir_name)
             if os.path.isdir(full_path):
@@ -135,8 +135,7 @@ def _install_all_upip_compatible(
         req = pkg_resources.Requirement.parse(spec)
 
         logger.info("Processing '%s'", req)
-        meta = _fetch_metadata(req, index_urls)
-        version = meta["info"]["version"]
+        meta, version = _fetch_metadata_and_resolve_version(req, index_urls)
         logger.info("Inspecting version %s", version)
         assets = meta["releases"][version]
 
@@ -265,7 +264,9 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
                 os.remove(os.path.join(root, file_name))
 
 
-def _fetch_metadata(req: Requirement, index_urls: List[str]) -> Dict[str, Any]:
+def _fetch_metadata_and_resolve_version(
+    req: Requirement, index_urls: List[str]
+) -> Tuple[Dict[str, Any], str]:
 
     ver_specs = req.specs
 
@@ -274,26 +275,18 @@ def _fetch_metadata(req: Requirement, index_urls: List[str]) -> Dict[str, Any]:
             url = "%s/%s/json" % (index_url, req.project_name)
             logger.info("Querying package metadata from %s", url)
             with urlopen(url) as fp:
-                main_meta = json.load(fp)
-            current_version = main_meta["info"]["version"]
+                meta = json.load(fp)
+            current_version = meta["info"]["version"]
 
             if not ver_specs:
-                ver_specs = ["==" + current_version]
+                return meta, current_version
 
-            ver = _resolve_version(req, main_meta)
+            ver = _resolve_version(req, meta)
             if ver is None:
                 logger.info("Could not find suitable version from %s", index_url)
                 continue
 
-            if ver == current_version:
-                # micropython.org only has main meta
-                return main_meta
-            else:
-                url = "%s/%s/%s/json" % (index_url, req.project_name, ver)
-                logger.debug("Querying version metadata from %s", url)
-                with urlopen(url) as fp:
-                    logger.info("Found '%s' from %s", req, index_url)
-                    return json.load(fp)
+            return meta, ver
         except HTTPError as e:
             if e.code == 404:
                 logger.info("Could not find '%s' from %s", req.project_name, index_url)
@@ -396,6 +389,11 @@ def main(raw_args: Optional[List[str]] = None) -> int:
         help="Don't show non-error output",
         action="store_true",
     )
+    parser.add_argument(
+        "--version",
+        help="Show program version and exit",
+        action="store_true",
+    )
     args = parser.parse_args(args=raw_args)
 
     all_specs = args.specs
@@ -434,6 +432,10 @@ def main(raw_args: Optional[List[str]] = None) -> int:
     if args.port and not args.target_dir.startswith("/"):
         print("If port is given then target dir must be absolute Unix-style path")
         return 1
+
+    if args.version:
+        print(__version__)
+        return 0
 
     try:
         install(all_specs, target_dir=args.target_dir, index_urls=index_urls, port=args.port)
