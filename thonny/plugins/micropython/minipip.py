@@ -16,6 +16,14 @@ from urllib.request import urlopen
 import pkg_resources
 import logging
 
+try:
+    from shlex import join as shlex_join
+except ImportError:
+    # before Python 3.8
+    def shlex_join(split_command):
+        """Return a shell-escaped string from *split_command*."""
+        return ' '.join(shlex.quote(arg) for arg in split_command)
+
 from pkg_resources import Requirement
 
 logger = logging.getLogger(__name__)
@@ -94,7 +102,7 @@ def _copy_to_micropython_over_serial(source_dir: str, port: str, target_dir: str
     assert target_dir.startswith("/")
 
     cmd = _get_rshell_command() + ["-p", port, "rsync", source_dir, "/pyboard" + target_dir]
-    logger.debug("Uploading with rsync: %s", shlex.join(cmd))
+    logger.debug("Uploading with rsync: %s", shlex_join(cmd))
     subprocess.check_call(cmd)
 
 
@@ -250,7 +258,7 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
         + args
         + specs
     )
-    logger.debug("Calling pip: %s", shlex.join(pip_cmd))
+    logger.debug("Calling pip: %s", shlex_join(pip_cmd))
     subprocess.check_call(pip_cmd)
 
     # delete files not required for MicroPython
