@@ -2,6 +2,23 @@
 Version history
 ===============
 
+3.3.10 (2021-05-18)
+===================
+* Restore Python 3.6 compatibility of minipip, #1541
+* Fix missing libffi6 error in Linux builds, #767
+
+3.3.9 (2021-05-18)
+==================
+* Don't copy egg-info directories to target location when installing pip-compatible packages for MicroPython, #1541
+
+3.3.8 (2021-05-18)
+==================
+* Support installing regular pip-compatible packages to MicroPython or CircuitPython (so far only upip-compatible packages were supported), #1541
+* Fix "error 403" problems when installing MicroPython packages from PyPI, #1822
+* Fix error when Object inspector is open and a MicroPython object can't be found by id, #1796
+* Reduce memory usage by Thonny's MicroPython helper (store last REPL value in global _ instead of storing N last values in a list), #1797, #1798
+* Upgraded several dependencies in binary bundles
+
 3.3.7 (2021-04-30)
 ==================
 * Make confugration dialog larger to fit French strings, by sourceperl, #1694

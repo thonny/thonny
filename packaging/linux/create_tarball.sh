@@ -103,7 +103,16 @@ cd $SCRIPT_DIR
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $TARGET_DIR/bin 
 
-
+# copy libffi6, which is not present in newer Linuxes
+if [ `getconf LONG_BIT` = "32" ]
+then
+  cp /usr/lib/i386-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+else
+  cp /usr/lib/x86_64-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+fi
+cd $TARGET_DIR/lib
+ln -s libffi.so.6.0.4 libffi.so.6
+cd $SCRIPT_DIR
 
 
 # copy licenses
