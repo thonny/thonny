@@ -37,6 +37,10 @@ class MicroPythonPipDialog(BackendPipDialog):
         # Don't have dist-level information
         return None
 
+    def _get_active_dist(self, name):
+        # Don't have dist-level information
+        return None
+
     def _on_install_click(self):
         if self.install_button["text"] == self.get_install_button_text():
             if not self._looks_like_micropython_package():
