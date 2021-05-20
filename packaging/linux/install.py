@@ -137,7 +137,7 @@ try:
             print("Installation is cancelled", file=sys.stderr)
             exit(1)
 
-    shutil.copytree(source_dir, target_dir)  # Copy everything
+    shutil.copytree(source_dir, target_dir, symlinks=True)  # Copy everything
     shutil.rmtree(target_dir + "/templates")  # ... except templates
     os.remove(target_dir + "/install")  # ... and installer
     print("Done!")
