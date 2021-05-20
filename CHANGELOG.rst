@@ -5,6 +5,7 @@ Version history
 3.3.10 (2021-05-18)
 ===================
 * Restore Python 3.6 compatibility of minipip, #1541
+* Fix missing libffi6 error in Linux builds, #767
 
 3.3.9 (2021-05-18)
 ==================
