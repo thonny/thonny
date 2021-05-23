@@ -83,8 +83,38 @@ class ESPConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = ESPFlashingDialog(self.winfo_toplevel(), self._chip, self._firmware_start_address)
+        esptool_command = self._get_esptool_command()
+        if not esptool_command:
+            messagebox.showerror(
+                "Can't find esptool",
+                "esptool not found.\n" + "Install it via 'Tools => Manage plug-ins'\n" + "or "
+                "using your OP-system package manager.",
+                master=self,
+            )
+            return
+
+        dlg = ESPFlashingDialog(
+            self.winfo_toplevel(), self._chip, self._firmware_start_address, esptool_command
+        )
         ui_utils.show_dialog(dlg)
+
+    def _get_esptool_command(self):
+        try:
+            import esptool
+
+            return [get_interpreter_for_subprocess(), "-u", "-m", "esptool"]
+        except ImportError:
+            import shutil
+
+            result = shutil.which("esptool")
+            if result:
+                return [result]
+            else:
+                result = shutil.which("esptool.py")
+                if result:
+                    return [result]
+                else:
+                    return None
 
     @property
     def allow_webrepl(self):
@@ -102,21 +132,13 @@ class ESP32ConfigPage(ESPConfigPage):
 
 
 class ESPFlashingDialog(WorkDialog):
-    def __init__(self, master, chip, start_address):
+    def __init__(self, master, chip, start_address, esptool_command):
         self._chip = chip
         self._start_address = start_address
 
         super().__init__(master)
 
-        self._esptool_command = self._get_esptool_command()
-        if not self._esptool_command:
-            messagebox.showerror(
-                "Can't find esptool",
-                "esptool not found.\n" + "Install it via 'Tools => Manage plug-ins'\n" + "or "
-                "using your OP-system package manager.",
-                master=self,
-            )
-            self.close()
+        self._esptool_command = esptool_command
 
     def get_title(self):
         return "%s firmware installer" % self._chip.upper()
@@ -205,24 +227,6 @@ class ESPFlashingDialog(WorkDialog):
         )
 
         self._reload_ports()
-
-    def _get_esptool_command(self):
-        try:
-            import esptool
-
-            return [get_interpreter_for_subprocess(), "-u", "-m", "esptool"]
-        except ImportError:
-            import shutil
-
-            result = shutil.which("esptool")
-            if result:
-                return [result]
-            else:
-                result = shutil.which("esptool.py")
-                if result:
-                    return [result]
-                else:
-                    return None
 
     def _reload_ports(self):
         pairs = list_serial_ports_with_descriptions()
