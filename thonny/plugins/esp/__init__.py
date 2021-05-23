@@ -298,16 +298,12 @@ class ESPFlashingDialog(WorkDialog):
             time.sleep(1.5)
 
         erase_command = self._esptool_command + [
-            "--chip",
-            self._chip,
             "--port",
             port,
             "erase_flash",
         ]
 
         write_command = self._esptool_command + [
-            "--chip",
-            self._chip,
             "--port",
             port,
             "write_flash",
