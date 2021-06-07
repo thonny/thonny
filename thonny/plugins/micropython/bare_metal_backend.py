@@ -155,7 +155,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         MicroPythonBackend.__init__(self, clean, args)
 
     def _check_prepare(self):
-        out, err = self._execute("print('__thonny_helper' in dir())", capture_output=True)
+        out, err = self._execute(
+            "__thonny_helper.builtins.print('__thonny_helper' in __thonny_helper.builtins.dir())",
+            capture_output=True,
+        )
         if out.strip() == "True":
             return
 
@@ -167,7 +170,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return dedent(
             """
-            @classmethod
+            @builtins.classmethod
             def getcwd(cls):
                 if hasattr(cls, "getcwd"):
                     return cls.os.getcwd()
@@ -175,11 +178,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # micro:bit
                     return ""
             
-            @classmethod
+            @builtins.classmethod
             def chdir(cls, x):
                 return cls.os.chdir(x)
             
-            @classmethod
+            @builtins.classmethod
             def rmdir(cls, x):
                 return cls.os.rmdir(x)
         """
@@ -311,7 +314,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             %s
                 __thonny_helper.print_mgmt_value(True)
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
             % indent(specific_script, "    ")
@@ -354,7 +357,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
             %s
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
             % indent(specific_script, "    ")
@@ -377,7 +380,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime))
                     del __thonny_RTC
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
         )
 
@@ -1246,7 +1249,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 __thonny_written = 0
                 __thonny_fp = open(__thonny_path, 'wb')
             except Exception as e:
-                print(str(e))
+                __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
             capture_output=True,
