@@ -166,7 +166,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         MicroPythonBackend.__init__(self, clean, args)
 
     def _check_prepare(self):
-        out, err = self._execute("print('__thonny_helper' in dir())", capture_output=True)
+        out, err = self._execute(
+            "__thonny_helper.builtins.print('__thonny_helper' in __thonny_helper.builtins.dir())",
+            capture_output=True,
+        )
         if out.strip() == "True":
             return
 
@@ -182,15 +185,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         result += indent(
             dedent(
                 """
-            @classmethod
+            @builtins.classmethod
             def getcwd(cls):
                 return cls.os.getcwd()
             
-            @classmethod
+            @builtins.classmethod
             def chdir(cls, x):
                 return cls.os.chdir(x)
             
-            @classmethod
+            @builtins.classmethod
             def rmdir(cls, x):
                 return cls.os.rmdir(x)
         """
@@ -206,14 +209,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     """
                 _print_block_size = {print_block_size}
             
-                @classmethod
+                @builtins.classmethod
                 def controlled_print(cls, *args, sep=" ", end="\\n"):
                     for arg_i, arg in enumerate(args):
                         if sep and arg_i > 0:
                             cls.builtins.print(end=sep)
-                        data = str(arg)
+                        data = __thonny_helper.builtins.str(arg)
                         
-                        for i in range(0, len(data), cls._print_block_size):
+                        for i in __thonny_helper.builtins.range(0, __thonny_helper.builtins.len(data), cls._print_block_size):
                             cls.builtins.print(end=data[i:i+cls._print_block_size])
                             cls.builtins.print(end={out_enq!r})
                             cls.sys.stdin.read(1)
@@ -369,7 +372,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             %s
                 __thonny_helper.print_mgmt_value(True)
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
             % indent(specific_script, "    ")
@@ -412,7 +415,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
             %s
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
             % indent(specific_script, "    ")
@@ -435,7 +438,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime))
                     del __thonny_RTC
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
         )
 
@@ -1308,7 +1311,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 __thonny_written = 0
                 __thonny_fp = open(__thonny_path, 'wb')
             except Exception as e:
-                print(str(e))
+                __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
             capture_output=True,

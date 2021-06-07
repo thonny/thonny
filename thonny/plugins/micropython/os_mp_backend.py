@@ -103,25 +103,25 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
                 "libc.so.6" if sys.platform == "linux" else "libc.dylib"
             )
             
-            @classmethod
+            @builtins.classmethod
             def check_error(cls, ret):
                 if ret == -1:
                     raise OSError(cls.os.errno())
             
             _getcwd = libc.func("s", "getcwd", "si")
-            @classmethod
+            @builtins.classmethod
             def getcwd(cls):
                 buf = bytearray(512)
                 return cls._getcwd(buf, 512)
 
             _chdir = libc.func("i", "chdir", "s")
-            @classmethod
+            @builtins.classmethod
             def chdir(cls, dir):
                 r = cls._chdir(dir)
                 cls.check_error(r)
             
             _rmdir = libc.func("i", "rmdir", "s")
-            @classmethod
+            @builtins.classmethod
             def rmdir(cls, name):
                 e = cls._rmdir(name)
                 cls.check_error(e)                                    

@@ -217,29 +217,29 @@ class MicroPythonBackend(MainBackend, ABC):
                 import builtins
                 
                 # for object inspector
-                inspector_values = dict()
-                @classmethod
+                inspector_values = builtins.dict()
+                @builtins.classmethod
                 def print_repl_value(cls, obj):
                     global _
                     if obj is not None:
-                        cls.builtins.print({start_marker!r} % id(obj), repr(obj), {end_marker!r}, sep='')
+                        cls.builtins.print({start_marker!r} % cls.builtins.id(obj), cls.builtins.repr(obj), {end_marker!r}, sep='')
                         _ = obj
                 
-                @classmethod
+                @builtins.classmethod
                 def print_mgmt_value(cls, obj):
-                    cls.builtins.print({mgmt_start!r}, repr(obj), {mgmt_end!r}, sep='', end='')
+                    cls.builtins.print({mgmt_start!r}, cls.builtins.repr(obj), {mgmt_end!r}, sep='', end='')
                     
-                @staticmethod
-                def repr(obj):
+                @builtins.classmethod
+                def repr(cls, obj):
                     try:
-                        s = repr(obj)
-                        if len(s) > 50:
+                        s = cls.builtins.repr(obj)
+                        if cls.builtins.len(s) > 50:
                             s = s[:50] + "..."
                         return s
                     except Exception as e:
-                        return "<could not serialize: " + str(e) + ">"
+                        return "<could not serialize: " + __thonny_helper.builtins.str(e) + ">"
                     
-                @classmethod
+                @builtins.classmethod
                 def listdir(cls, x):
                     if hasattr(cls.os, "listdir"):
                         return cls.os.listdir(x)
@@ -468,7 +468,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 __thonny_helper.print_mgmt_value(tuple(__thonny_localtime(%d)))
                 del __thonny_localtime
             except Exception as e:
-                __thonny_helper.print_mgmt_value(str(e))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
                 % Y2000_EPOCH_OFFSET
             )
@@ -668,7 +668,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":
             globs = self._evaluate(
-                "{name : (__thonny_helper.repr(value), id(value)) for (name, value) in globals().items() if not name.startswith('__')}"
+                "{name : (__thonny_helper.repr(value), __thonny_helper.builtins.id(value)) for (name, value) in __thonny_helper.builtins.globals().items() if not name.startswith('__')}"
             )
         else:
             globs = self._evaluate(
@@ -676,9 +676,9 @@ class MicroPythonBackend(MainBackend, ABC):
                     """
                 import %s as __mod_for_globs
                 __thonny_helper.print_mgmt_value(
-                    {name : (__thonny_helper.repr(getattr(__mod_for_globs, name)), 
-                             id(getattr(__mod_for_globs, name)))
-                        in dir(__mod_for_globs) 
+                    {name : (__thonny_helper.repr(__thonny_helper.builtins.getattr(__mod_for_globs, name)), 
+                             __thonny_helper.builtins.id(__thonny_helper.builtins.getattr(__mod_for_globs, name)))
+                        in __thonny_helper.builtins.dir(__mod_for_globs) 
                         if not name.startswith('__')}
                 )
                 del __mod_for_globs
@@ -722,8 +722,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._execute(
             dedent(
                 """
-                if id(__thonny_helper.object_info) not in __thonny_helper.inspector_values:
-                    __thonny_helper.inspector_values[id(__thonny_helper.object_info)] = __thonny_helper.object_info
+                if __thonny_helper.builtins.id(__thonny_helper.object_info) not in __thonny_helper.inspector_values:
+                    __thonny_helper.inspector_values[__thonny_helper.builtins.id(__thonny_helper.object_info)] = __thonny_helper.object_info
             """
             )
         )
@@ -735,18 +735,18 @@ class MicroPythonBackend(MainBackend, ABC):
         to __thonny_helper.object_info.
 
         Can't leave it in a global object, because when querying globals(),
-        repr(globals()) would cause inifite recursion."""
+        repr(globals()) would cause infinite recursion."""
 
         result = self._evaluate(
             dedent(
                 """
                 for __thonny_helper.object_info in (
-                        list(globals().values()) 
-                        + list(__thonny_helper.inspector_values.values())):
-                    if id(__thonny_helper.object_info) == %d:
+                        __thonny_helper.builtins.list(__thonny_helper.builtins.globals().values()) 
+                        + __thonny_helper.builtins.list(__thonny_helper.inspector_values.values())):
+                    if __thonny_helper.builtins.id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
-                            "repr" : repr(__thonny_helper.object_info),
-                            "type": str(type(__thonny_helper.object_info))
+                            "repr" : __thonny_helper.builtins.repr(__thonny_helper.object_info),
+                            "type": __thonny_helper.builtins.str(__thonny_helper.builtins.type(__thonny_helper.object_info))
                         })
                         break
                 else:
@@ -770,19 +770,19 @@ class MicroPythonBackend(MainBackend, ABC):
                     __thonny_helper.print_mgmt_value(None)
                 else:
                     __thonny_helper.context_children = [
-                         getattr(__thonny_helper.context_value, name)
-                         for name in dir(__thonny_helper.context_value)
+                         __thonny_helper.builtins.getattr(__thonny_helper.context_value, name)
+                         for name in __thonny_helper.builtins.dir(__thonny_helper.context_value)
                     ]
-                    if isinstance(__thonny_helper.context_value, (set, tuple, list)):
-                        __thonny_helper.context_children += list(__thonny_helper.context_value)
-                    elif isinstance(__thonny_helper.context_value, dict):
-                        __thonny_helper.context_children += list(__thonny_helper.context_value.values())
+                    if __thonny_helper.builtins.isinstance(__thonny_helper.context_value, (set, tuple, list)):
+                        __thonny_helper.context_children += __thonny_helper.builtins.list(__thonny_helper.context_value)
+                    elif __thonny_helper.builtins.isinstance(__thonny_helper.context_value, __thonny_helper.builtins.dict):
+                        __thonny_helper.context_children += __thonny_helper.builtins.list(__thonny_helper.context_value.values())
                     
                     for __thonny_helper.object_info in __thonny_helper.context_children:
-                        if id(__thonny_helper.object_info) == %d:
+                        if __thonny_helper.builtins.id(__thonny_helper.object_info) == %d:
                             __thonny_helper.print_mgmt_value({
                                 "repr" : __thonny_helper.repr(__thonny_helper.object_info),
-                                "type": str(type(__thonny_helper.object_info))
+                                "type": __thonny_helper.builtins.str(__thonny_helper.builtins.type(__thonny_helper.object_info))
                             })
                             break
                     else:
@@ -802,9 +802,9 @@ class MicroPythonBackend(MainBackend, ABC):
         """object is given in __thonny_helper.object_info """
         atts = self._evaluate(
             "{name : ("
-            "   id(getattr(__thonny_helper.object_info, name)),"
-            "    __thonny_helper.repr(getattr(__thonny_helper.object_info, name))"
-            ") for name in dir(__thonny_helper.object_info)}"
+            "   __thonny_helper.builtins.id(__thonny_helper.builtins.getattr(__thonny_helper.object_info, name)),"
+            "    __thonny_helper.repr(__thonny_helper.builtins.getattr(__thonny_helper.object_info, name))"
+            ") for name in __thonny_helper.builtins.dir(__thonny_helper.object_info)}"
         )
         return {
             name: ValueInfo(atts[name][0], atts[name][1])
@@ -816,12 +816,12 @@ class MicroPythonBackend(MainBackend, ABC):
         """object is given in __thonny_helper.object_info """
         if type_name in ("list", "tuple", "set"):
             items = self._evaluate(
-                "[(id(x), __thonny_helper.repr(x)) for x in __thonny_helper.object_info]"
+                "[(__thonny_helper.builtins.id(x), __thonny_helper.repr(x)) for x in __thonny_helper.object_info]"
             )
             return {"elements": [ValueInfo(x[0], x[1]) for x in items]}
         elif type_name == "dict":
             items = self._evaluate(
-                "[((id(key), __thonny_helper.repr(key)), (id(__thonny_helper.object_info[key]), "
+                "[((__thonny_helper.builtins.id(key), __thonny_helper.repr(key)), (__thonny_helper.builtins.id(__thonny_helper.object_info[key]), "
                 "__thonny_helper.repr(__thonny_helper.object_info[key]))) for key in __thonny_helper.object_info]"
             )
             return {
@@ -1059,12 +1059,12 @@ class MicroPythonBackend(MainBackend, ABC):
                 if "." in prefix:
                     obj, prefix = prefix.rsplit(".", 1)
                     names = self._evaluate(
-                        "dir({obj}) if '{obj}' in locals() or '{obj}' in globals() else []".format(
+                        "__thonny_helper.builtins.dir({obj}) if '{obj}' in __thonny_helper.builtins.locals() or '{obj}' in __thonny_helper.builtins.globals() else []".format(
                             obj=obj
                         )
                     )
                 else:
-                    names = self._evaluate("dir()")
+                    names = self._evaluate("__thonny_helper.builtins.dir()")
             else:
                 names = []
                 prefix = ""
@@ -1089,10 +1089,10 @@ class MicroPythonBackend(MainBackend, ABC):
             def __get_object_atts(obj):
                 result = []
                 errors = []
-                for name in dir(obj):
+                for name in __thonny_helper.builtins.dir(obj):
                     try:
-                        val = getattr(obj, name)
-                        result.append((name, repr(val), repr(type(val))))
+                        val = __thonny_helper.builtins.getattr(obj, name)
+                        result.append((name, __thonny_helper.builtins.repr(val), __thonny_helper.builtins.repr(__thonny_helper.builtins.type(val))))
                     except BaseException as e:
                         errors.append("Couldn't get attr '%s' from object '%r', Err: %r" % (name, obj, e))
                 return (result, errors)
@@ -1219,7 +1219,7 @@ class MicroPythonBackend(MainBackend, ABC):
                             try:
                                 __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
                             except OSError as e:
-                                __thonny_result[__thonny_name] = str(e)
+                                __thonny_result[__thonny_name] = __thonny_helper.builtins.str(e)
                     __thonny_helper.print_mgmt_value(__thonny_result)
             """
                 )
