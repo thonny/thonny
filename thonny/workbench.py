@@ -34,7 +34,7 @@ from thonny import (
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
-from thonny.editors import EditorNotebook
+from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
@@ -2420,10 +2420,17 @@ class Workbench(tk.Tk):
             title_text = "Portable Thonny"
         else:
             title_text = "Thonny"
-        if editor != None:
+        if editor is not None:
             title_text += "  -  " + editor.get_long_description()
 
         self.title(title_text)
+
+        if running_on_mac_os() and editor is not None:
+            current_file = editor.get_filename()
+            if current_file and is_local_path(current_file) and os.path.exists(current_file):
+                self.wm_attributes("-titlepath", current_file)
+            else:
+                self.wm_attributes("-titlepath", "")
 
     def become_active_window(self, force=True) -> None:
         # Looks like at least on Windows all following is required
