@@ -209,6 +209,7 @@ def launch():
 
     except Exception:
         from logging import exception
+        import traceback
 
         exception("Internal launch or mainloop error")
         from thonny import ui_utils
