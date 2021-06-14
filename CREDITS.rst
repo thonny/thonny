@@ -71,6 +71,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Curtis Wang
 * Dominic Twyman
 * Dominik George
+* Donald Butt
 * Eliot Blennerhassett
 * Emanuel Angelo
 * Fabianus.c
