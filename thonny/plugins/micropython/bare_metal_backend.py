@@ -294,7 +294,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return welcome_text
 
     def _fetch_builtin_modules(self):
-        script = "help('modules')"
+        script = "__thonny_helper.builtins.help('modules')"
         out, err = self._execute(script, capture_output=True)
         if err or not out:
             self._send_error_message(
@@ -373,7 +373,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
             %s
                 __thonny_helper.print_mgmt_value(True)
-            except Exception as e:
+            except __thonny_helper.builtins.Exception as e:
                 __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
@@ -391,7 +391,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             specific_script = dedent(
                 """
                 from rtc import RTC as __thonny_RTC
-                __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime)[:6])
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.tuple(__thonny_RTC().datetime)[:6])
                 del __thonny_RTC
                 """
             )
@@ -401,12 +401,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 from machine import RTC as __thonny_RTC
                 try:
                     # now() on some devices also gives weekday, so prefer datetime
-                    __thonny_temp = tuple(__thonny_RTC().datetime())
+                    __thonny_temp = __thonny_helper.builtins.tuple(__thonny_RTC().datetime())
                     # remove weekday from index 3
                     __thonny_helper.print_mgmt_value(__thonny_temp[0:3] + __thonny_temp[4:7])
                     del __thonny_temp
                 except:
-                    __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().now())[:6])
+                    __thonny_helper.print_mgmt_value(__thonny_helper.builtins.tuple(__thonny_RTC().now())[:6])
                 del __thonny_RTC
                 """
             )
@@ -416,7 +416,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 """
             try:
             %s
-            except Exception as e:
+            except __thonny_helper.builtins.Exception as e:
                 __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
             )
@@ -432,14 +432,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
                 try:
                     from time import localtime as __thonny_localtime
-                    __thonny_helper.print_mgmt_value(tuple(__thonny_localtime()))
+                    __thonny_helper.print_mgmt_value(__thonny_helper.builtins.tuple(__thonny_localtime()))
                     del __thonny_localtime
                 except:
                     # some CP boards
                     from rtc import RTC as __thonny_RTC
-                    __thonny_helper.print_mgmt_value(tuple(__thonny_RTC().datetime))
+                    __thonny_helper.print_mgmt_value(__thonny_helper.builtins.tuple(__thonny_RTC().datetime))
                     del __thonny_RTC
-            except Exception as e:
+            except __thonny_helper.builtins.Exception as e:
                 __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
         )
@@ -1057,7 +1057,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 __thonny_sizes = None
                 del __thonny_statvfs
                 del __thonny_stat 
-            except ImportError:
+            except __thonny_helper.builtins.ImportError:
                 __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()]
                 __thonny_used = None
                 __thonny_total = None
@@ -1177,7 +1177,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         hex_mode = self._should_hexlify(source_path)
 
-        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % source_path)
+        self._execute_without_output(
+            "__thonny_fp = __thonny_helper.builtins.open(%r, 'rb')" % source_path
+        )
         if hex_mode:
             self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
@@ -1311,8 +1313,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
                 __thonny_path = '{path}'
                 __thonny_written = 0
-                __thonny_fp = open(__thonny_path, 'wb')
-            except Exception as e:
+                __thonny_fp = __thonny_helper.builtins.open(__thonny_path, 'wb')
+            except __thonny_helper.builtins.Exception as e:
                 __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
@@ -1338,7 +1340,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     global __thonny_written
                     __thonny_written += __thonny_fp.write(__thonny_unhex(x))
                     __thonny_fp.flush()
-                    if hasattr(__thonny_helper.os, "sync"):
+                    if __thonny_helper.builtins.hasattr(__thonny_helper.os, "sync"):
                         __thonny_helper.os.sync()
             """
                 )
@@ -1362,7 +1364,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     global __thonny_written
                     __thonny_written += __thonny_fp.write(x)
                     __thonny_fp.flush()
-                    if hasattr(__thonny_helper.os, "sync"):
+                    if __thonny_helper.builtins.hasattr(__thonny_helper.os, "sync"):
                         __thonny_helper.os.sync()
             """
                 )
@@ -1467,7 +1469,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._execute_without_output(
             dedent(
                 """
-            if hasattr(__thonny_helper.os, "sync"):
+            if __thonny_helper.builtins.hasattr(__thonny_helper.os, "sync"):
                 __thonny_helper.os.sync()        
         """
             )
@@ -1521,9 +1523,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     __thonny_result = __thonny_getmount("/").label
                 finally:
                     del __thonny_getmount
-            except ImportError:
+            except __thonny_helper.builtins.ImportError:
                 __thonny_result = None 
-            except OSError:
+            except __thonny_helper.builtins.OSError:
                 __thonny_result = None 
             
             __thonny_helper.print_mgmt_value(__thonny_result)

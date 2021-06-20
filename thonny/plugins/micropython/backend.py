@@ -209,12 +209,12 @@ class MicroPythonBackend(MainBackend, ABC):
             dedent(
                 """
             class __thonny_helper:
+                import builtins
                 try:
                     import uos as os
-                except ImportError:
+                except builtins.ImportError:
                     import os
                 import sys
-                import builtins
                 
                 # for object inspector
                 inspector_values = builtins.dict()
@@ -236,12 +236,12 @@ class MicroPythonBackend(MainBackend, ABC):
                         if cls.builtins.len(s) > 50:
                             s = s[:50] + "..."
                         return s
-                    except Exception as e:
+                    except cls.builtins.Exception as e:
                         return "<could not serialize: " + __thonny_helper.builtins.str(e) + ">"
                     
                 @builtins.classmethod
                 def listdir(cls, x):
-                    if hasattr(cls.os, "listdir"):
+                    if cls.builtins.hasattr(cls.os, "listdir"):
                         return cls.os.listdir(x)
                     else:
                         return [rec[0] for rec in cls.os.ilistdir(x) if rec[0] not in ('.', '..')]
@@ -465,9 +465,9 @@ class MicroPythonBackend(MainBackend, ABC):
                 """
             try:
                 from time import localtime as __thonny_localtime
-                __thonny_helper.print_mgmt_value(tuple(__thonny_localtime(%d)))
+                __thonny_helper.print_mgmt_value(__thonny_helper.builtins.tuple(__thonny_localtime(%d)))
                 del __thonny_localtime
-            except Exception as e:
+            except __thonny_helper.builtins.Exception as e:
                 __thonny_helper.print_mgmt_value(__thonny_helper.builtins.str(e))
         """
                 % Y2000_EPOCH_OFFSET
@@ -963,7 +963,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 """
             try:
                 __thonny_helper.print_mgmt_value(__thonny_helper.os.%s(%r))
-            except Exception:
+            except __thonny_helper.builtins.Exception:
                 __thonny_helper.print_mgmt_value(None)
             """
             )
@@ -1093,7 +1093,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     try:
                         val = __thonny_helper.builtins.getattr(obj, name)
                         result.append((name, __thonny_helper.builtins.repr(val), __thonny_helper.builtins.repr(__thonny_helper.builtins.type(val))))
-                    except BaseException as e:
+                    except __thonny_helper.builtins.BaseException as e:
                         errors.append("Couldn't get attr '%s' from object '%r', Err: %r" % (name, obj, e))
                 return (result, errors)
         """
@@ -1211,14 +1211,14 @@ class MicroPythonBackend(MainBackend, ABC):
                 __thonny_result = {} 
                 try:
                     __thonny_names = __thonny_helper.listdir(%r)
-                except OSError:
+                except __thonny_helper.builtins.OSError:
                     __thonny_helper.print_mgmt_value(None) 
                 else:
                     for __thonny_name in __thonny_names:
                         if not __thonny_name.startswith(".") or %r:
                             try:
                                 __thonny_result[__thonny_name] = __thonny_helper.os.stat(%r + __thonny_name)
-                            except OSError as e:
+                            except __thonny_helper.builtins.OSError as e:
                                 __thonny_result[__thonny_name] = __thonny_helper.builtins.str(e)
                     __thonny_helper.print_mgmt_value(__thonny_result)
             """
