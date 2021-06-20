@@ -152,6 +152,9 @@ class MicroPythonBackend(MainBackend, ABC):
         script = self._get_all_helpers()
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
+        #self._execute_without_output(
+        #    "for key in __thonny_helper.builtins.dir(__thonny_helper.builtins): __thonny_helper.builtins.globals()[key] = None"
+        #)
         self._report_time("prepared helpers")
 
         self._update_cwd()
