@@ -14,6 +14,7 @@ from thonny.common import (
     is_same_path,
     normpath_with_actual_case,
     get_python_version_string,
+    InlineResponse,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os, running_on_linux
@@ -35,6 +36,7 @@ class CPythonProxy(SubprocessProxy):
     "abstract class"
 
     def __init__(self, clean: bool, executable: str) -> None:
+        self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)
         self._send_msg(ToplevelCommand("get_environment_info"))
 
@@ -85,12 +87,15 @@ class CPythonProxy(SubprocessProxy):
 
     def _loop_gui_update(self, force=False):
         if force or get_runner().is_waiting_toplevel_command():
-            try:
-                self.send_command(InlineCommand("process_gui_events"))
-            except OSError:
-                # the backend process may have been closed already
-                # https://github.com/thonny/thonny/issues/966
-                logger.exception("Could not send process_gui_events")
+            # Don't send command if response for the last one hasn't arrived yet
+            if not self._expecting_response_for_gui_update:
+                try:
+                    self.send_command(InlineCommand("process_gui_events"))
+                    self._expecting_response_for_gui_update = True
+                except OSError:
+                    # the backend process may have been closed already
+                    # https://github.com/thonny/thonny/issues/966
+                    logger.exception("Could not send process_gui_events")
 
         self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)
 
@@ -135,6 +140,18 @@ class CPythonProxy(SubprocessProxy):
 
     def can_run_local_files(self):
         return True
+
+    def fetch_next_message(self):
+        while True:
+            msg = super(CPythonProxy, self).fetch_next_message()
+            if isinstance(msg, InlineResponse) and msg.command_name == "process_gui_events":
+                # Only wanted to know that the command was processed
+                # Don't pass upstream
+                self._expecting_response_for_gui_update = False
+            else:
+                break
+
+        return msg
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
