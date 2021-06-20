@@ -341,6 +341,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             """
             ).format(ts=tuple(now))
         else:
+            # RTC.init is used in PyCom, RTC.datetime is used by the rest
             specific_script = dedent(
                 """
                 from machine import RTC as __thonny_RTC
@@ -348,7 +349,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     __thonny_RTC().datetime({datetime_ts})
                 except:
                     __thonny_RTC().init({init_ts})
-                del __thonny_RTC
+                finally:
+                    del __thonny_RTC
 
             """
             ).format(
@@ -356,7 +358,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     now.tm_year,
                     now.tm_mon,
                     now.tm_mday,
-                    now.tm_wday + 1,
+                    now.tm_wday,
                     now.tm_hour,
                     now.tm_min,
                     now.tm_sec,
