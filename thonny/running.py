@@ -1387,7 +1387,6 @@ class InlineCommandDialog(WorkDialog):
         self.response = None
         self._title = title
         self._instructions = instructions
-        self._output_prelude = output_prelude
         self._cmd = cmd
         self.returncode = None
 
@@ -1398,6 +1397,9 @@ class InlineCommandDialog(WorkDialog):
         get_workbench().bind("ProgramOutput", self._on_output, True)
 
         super().__init__(master, autostart=autostart)
+
+        if output_prelude:
+            self.append_text(output_prelude)
 
     def get_title(self):
         return self._title
