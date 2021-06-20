@@ -799,7 +799,7 @@ class MicroPythonBackend(MainBackend, ABC):
             return None
 
     def _get_object_attributes(self, all_attributes):
-        """object is given in __thonny_helper.object_info """
+        """object is given in __thonny_helper.object_info"""
         atts = self._evaluate(
             "{name : ("
             "   __thonny_helper.builtins.id(__thonny_helper.builtins.getattr(__thonny_helper.object_info, name)),"
@@ -813,7 +813,7 @@ class MicroPythonBackend(MainBackend, ABC):
         }
 
     def _get_object_info_extras(self, type_name):
-        """object is given in __thonny_helper.object_info """
+        """object is given in __thonny_helper.object_info"""
         if type_name in ("list", "tuple", "set"):
             items = self._evaluate(
                 "[(__thonny_helper.builtins.id(x), __thonny_helper.repr(x)) for x in __thonny_helper.object_info]"
