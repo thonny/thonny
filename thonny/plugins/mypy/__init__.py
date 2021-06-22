@@ -17,7 +17,6 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         return get_workbench().get_option("assistance.use_mypy")
 
     def start_analysis(self, main_file_path, imported_file_paths: Iterable[str]) -> None:
-
         self.interesting_files = [main_file_path] + list(imported_file_paths)
 
         args = [
@@ -31,6 +30,8 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             "--show-column-numbers",
             main_file_path,
         ] + list(imported_file_paths)
+
+        logger.debug("Running mypy: %s", " ".join(args))
 
         # TODO: ignore "... need type annotation" messages
 
