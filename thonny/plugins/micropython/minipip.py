@@ -56,7 +56,7 @@ MP_ORG_INDEX = "https://micropython.org/pi"
 PYPI_INDEX = "https://pypi.org/pypi"
 DEFAULT_INDEX_URLS = [MP_ORG_INDEX, PYPI_INDEX]
 
-__version__ = "0.1b2"
+__version__ = "0.1b3"
 
 
 class UserError(RuntimeError):
@@ -266,6 +266,7 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
 
     args = [
         "--no-input",
+        "--no-compile",
         "--disable-pip-version-check",
         "install",
         "--upgrade",
@@ -336,7 +337,7 @@ def _fetch_metadata_and_resolve_version(
 
 def _read_requirements(req_file: str) -> List[str]:
     if not os.path.isfile(req_file):
-        raise UserError("Can't find '%s'" % req_file)
+        raise UserError("Can't find file '%s'" % req_file)
 
     result = []
     with open(req_file, "r", errors="replace") as fp:
@@ -361,6 +362,7 @@ def _resolve_version(req: Requirement, main_meta: Dict[str, Any]) -> Optional[st
 
 
 def error(msg):
+    msg = "ERROR: " + msg
     if sys.stderr.isatty():
         print("\x1b[31m", msg, "\x1b[0m", sep="", file=sys.stderr)
     else:
@@ -375,25 +377,35 @@ def main(raw_args: Optional[List[str]] = None) -> int:
 
     import argparse
 
-    description = textwrap.dedent(
-        """
+    parser = argparse.ArgumentParser(
+        description="Tool for managing MicroPython and CircuitPython packages"
+    )
+    subparsers = parser.add_subparsers(
+        dest="command",
+        title="commands",
+        description='Use "minipip <command> -h" for usage help of a command ',
+        required=True,
+    )
+
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Install a package",
+        description=textwrap.dedent(
+            """
         Meant for installing both upip and pip compatible distribution packages from 
         PyPI and micropython.org/pi to a local directory, USB volume or directly to 
         MicroPython filesystem over serial connection (requires rshell).    
     """
-    ).strip()
-
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument(
-        "command", help="Currently the only supported command is 'install'", choices=["install"]
+        ).strip(),
     )
-    parser.add_argument(
+
+    install_parser.add_argument(
         "specs",
         help="Package specification, eg. 'micropython-os' or 'micropython-os>=0.6'",
         nargs="*",
         metavar="package_spec",
     )
-    parser.add_argument(
+    install_parser.add_argument(
         "-r",
         "--requirement",
         help="Install from the given requirements file.",
@@ -402,14 +414,14 @@ def main(raw_args: Optional[List[str]] = None) -> int:
         metavar="REQUIREMENT_FILE",
         default=[],
     )
-    parser.add_argument(
+    install_parser.add_argument(
         "-p",
         "--port",
         help="Serial port of the device "
         "(specify if you want minipip to upload the result to the device)",
         nargs="?",
     )
-    parser.add_argument(
+    install_parser.add_argument(
         "-t",
         "--target",
         help="Target directory (on device, if port is given, otherwise local)",
@@ -418,31 +430,42 @@ def main(raw_args: Optional[List[str]] = None) -> int:
         metavar="TARGET_DIR",
         required=True,
     )
-    parser.add_argument(
-        "-i",
-        "--index-url",
-        help="Custom index URL",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        help="Show more details about the process",
-        action="store_true",
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        help="Don't show non-error output",
-        action="store_true",
-    )
+
+    list_parser = subparsers.add_parser("list", help="List installed packages")
+
+    for p in [install_parser, list_parser]:
+        p.add_argument(
+            "-i",
+            "--index-url",
+            help="Custom index URL",
+        )
+        p.add_argument(
+            "-v",
+            "--verbose",
+            help="Show more details about the process",
+            action="store_true",
+        )
+        p.add_argument(
+            "-q",
+            "--quiet",
+            help="Don't show non-error output",
+            action="store_true",
+        )
+
     parser.add_argument(
         "--version", help="Show program version and exit", action="version", version=__version__
     )
     args = parser.parse_args(args=raw_args)
 
+    if args.command != "install":
+        sys.exit(error("Sorry, only 'install' command is supported at the moment"))
+
     all_specs = args.specs
-    for req_file in args.requirement_files:
-        all_specs.extend(_read_requirements(req_file))
+    try:
+        for req_file in args.requirement_files:
+            all_specs.extend(_read_requirements(req_file))
+    except UserError as e:
+        sys.exit(error(str(e)))
 
     if args.index_url:
         index_urls = [args.index_url]
