@@ -1254,7 +1254,7 @@ class BackendTerminatedError(Exception):
 
 def is_venv_interpreter_of_current_interpreter(executable):
     for location in [".", ".."]:
-        cfg_path = os.path.join(location, "pyvenv.cfg")
+        cfg_path = os.path.join(os.path.dirname(executable), location, "pyvenv.cfg")
         if os.path.isfile(cfg_path):
             with open(cfg_path) as fp:
                 content = fp.read()
@@ -1262,7 +1262,10 @@ def is_venv_interpreter_of_current_interpreter(executable):
                 if line.replace(" ", "").startswith("home="):
                     _, home = line.split("=", maxsplit=1)
                     home = home.strip()
-                    if os.path.isdir(home) and os.path.samefile(home, sys.prefix):
+                    if os.path.isdir(home) and (
+                        os.path.samefile(home, sys.prefix)
+                        or os.path.samefile(home, os.path.join(sys.prefix, "bin"))
+                    ):
                         return True
     return False
 
