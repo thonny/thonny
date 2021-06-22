@@ -169,8 +169,8 @@ class Editor(ttk.Frame):
                 result = self._load_remote_file(filename)
             else:
                 result = self._load_local_file(filename, keep_undo)
-                if not result:
-                    return False
+            if not result:
+                return False
         except BinaryFileException:
             messagebox.showerror(
                 "Problem", "%s doesn't look like a text file" % filename, master=self
