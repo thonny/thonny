@@ -1,6 +1,6 @@
 jedi==0.18.*
 pyserial==3.5
-pylint==2.7.*
+pylint==2.8.*
 docutils==0.17.*
 mypy==0.902.*
 asttokens==2.0.*
