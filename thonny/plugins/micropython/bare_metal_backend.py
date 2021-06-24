@@ -983,59 +983,46 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
-        result = self._evaluate(
-            dedent(
-                """
-            try:
-                from os import statvfs as __thonny_statvfs
-                __thonny_stat = __thonny_statvfs(%r)
+        if self._connected_to_microbit():
+            used = self._evaluate(
+                dedent(
+                    """
+                    __thonny_helper.print_mgmt_value(
+                        __thonny_helper.builtins.sum([__thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()])
+                    )  
+                    """
+                )
+            )
+            return {
+                "total": None,
+                "used": used,
+                "free": None,
+                "comment": "Assuming around 30 kB of storage space for user files.",
+            }
+
+        else:
+            result = self._evaluate(
+                dedent(
+                    """
+                __thonny_stat = __thonny_helper.os.statvfs(%r)
                 __thonny_total = __thonny_stat[2] * __thonny_stat[0]
                 __thonny_free = __thonny_stat[3] * __thonny_stat[0]
-                __thonny_used = __thonny_total - __thonny_free
-                __thonny_sizes = None
-                del __thonny_statvfs
+
+                __thonny_helper.print_mgmt_value({
+                    "total" : __thonny_total,
+                    "used" : __thonny_total - __thonny_free,
+                    "free": __thonny_free,
+                })  
+
                 del __thonny_stat 
-            except __thonny_helper.builtins.ImportError:
-                __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()]
-                __thonny_used = None
-                __thonny_total = None
-                __thonny_free = None
-            
-            __thonny_helper.print_mgmt_value({
-                "total" : __thonny_total,
-                "used" : __thonny_used,
-                "free": __thonny_free,
-                "sizes": __thonny_sizes
-            })  
-                
-            del __thonny_total
-            del __thonny_free
-            del __thonny_used
-            del __thonny_sizes
-            """
-            )
-            % cmd.path
-        )
-
-        if result["sizes"] is not None:
-            if self._connected_to_microbit():
-                comment = "Assuming around 30 kB of storage space for user files."
-            else:
-                comment = "Don't know the size of storage space on this device."
-
-            files_total_size = sum(result["sizes"])
-
-            # TODO: compute number of used blocks
-            if files_total_size > 0:
-                comment += "\n\n" + "At least %s of it is used by %d file(s)." % (
-                    sizeof_fmt(files_total_size),
-                    len(result["sizes"]),
+                del __thonny_total
+                del __thonny_free
+                """
                 )
+                % cmd.path
+            )
 
-            result["comment"] = comment
-            del result["sizes"]
-
-        return result
+            return result
 
     def _cmd_upload(self, cmd):
         self._check_sync_time()
