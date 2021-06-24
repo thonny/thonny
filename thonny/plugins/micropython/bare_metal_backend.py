@@ -172,7 +172,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             """
             @builtins.classmethod
             def getcwd(cls):
-                if hasattr(cls, "getcwd"):
+                if cls.builtins.hasattr(cls, "getcwd"):
                     return cls.os.getcwd()
                 else:
                     # micro:bit
