@@ -266,7 +266,6 @@ def _install_with_pip(specs: List[str], target_dir: str, index_urls: List[str]):
 
     args = [
         "--no-input",
-        "--no-compile",
         "--disable-pip-version-check",
         "install",
         "--upgrade",
