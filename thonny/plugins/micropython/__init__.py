@@ -978,6 +978,7 @@ def load_plugin():
             tr("MicroPython (local)"),
             LocalMicroPythonConfigPage,
             bare_metal=False,
+            utc_clock=True,
             sort_key="21",
         )
         get_workbench().set_default("LocalMicroPython.executable", "micropython")
@@ -988,6 +989,7 @@ def load_plugin():
         tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
+        utc_clock=True,
         sort_key="22",
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")
