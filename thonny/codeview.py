@@ -12,6 +12,7 @@ from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.tktextext import EnhancedText
 from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style, ask_string
+from thonny.text_edit_finger_print import insert_finger_print, extract_finger_print, FingerPrintError
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
@@ -206,8 +207,14 @@ class CodeView(tktextext.EnhancedTextFrame):
     def set_file_type(self, file_type):
         self.text.set_file_type(file_type)
 
-    def get_content_as_bytes(self):
+    def get_content_as_bytes(self, with_finger_print=False):
         content = self.get_content()
+
+        if with_finger_print:
+            content = insert_finger_print(
+                content,
+                self.text._edit_history.history,
+                newline=self._original_newlines)
 
         # convert all linebreaks to original format
         content = OLD_MAC_LINEBREAK.sub(self._original_newlines, content)
@@ -251,6 +258,16 @@ class CodeView(tktextext.EnhancedTextFrame):
 
     def set_content(self, content, keep_undo=False):
         content, self._original_newlines = tweak_newlines(content)
+
+        if get_workbench().get_option("edit.sign"):
+            try:
+                content, self.text._edit_history.history, _ = extract_finger_print(content)
+            except FingerPrintError as e:
+                messagebox.showerror(
+                    "Finger print error",
+                    "Failed to extract finger print.\n\n" + str(e),
+                    master=self,
+                )
 
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)

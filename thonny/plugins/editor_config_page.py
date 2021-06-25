@@ -64,6 +64,10 @@ class EditorConfigurationPage(ConfigurationPage):
         )
         self._line_length_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
+        self.add_checkbox("edit.sign",
+                          tr("Sign files with finger print"),
+                          pady=(20, 0))
+
         self.columnconfigure(1, weight=1)
 
     def apply(self):

@@ -265,7 +265,7 @@ class Editor(ttk.Frame):
                 "SaveAs", editor=self, filename=save_filename, save_copy=save_copy
             )
 
-        content_bytes = self._code_view.get_content_as_bytes()
+        content_bytes = self._code_view.get_content_as_bytes(with_finger_print=get_workbench().get_option("edit.sign"))
 
         if is_remote_path(save_filename):
             result = self.write_remote_file(save_filename, content_bytes, save_copy)
@@ -524,6 +524,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.show_line_numbers", True)
         get_workbench().set_default("view.recommended_line_length", 0)
         get_workbench().set_default("edit.indent_with_tabs", False)
+        get_workbench().set_default("edit.sign", False)
 
         self._recent_menu = tk.Menu(
             get_workbench().get_menu("file"), postcommand=self._update_recent_menu

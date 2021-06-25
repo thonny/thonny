@@ -9,6 +9,8 @@ from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
 
+from thonny.text_edit_finger_print import TextEditHistory
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,6 +31,8 @@ class TweakableText(tk.Text):
         self._original_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
         self._original_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
         self._original_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
+        if not self._read_only:
+            self._edit_history = TextEditHistory()
 
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
@@ -104,6 +108,9 @@ class TweakableText(tk.Text):
     def intercept_mark(self, *args):
         self.direct_mark(*args)
 
+    def get_index_position(self, index):
+        return tuple(map(int, self.index(index).split(".")))
+
     def intercept_insert(self, index, chars, tags=None, **kw):
         assert isinstance(chars, str)
         if chars >= "\uf704" and chars <= "\uf70d":  # Function keys F1..F10 in Mac cause these
@@ -111,6 +118,8 @@ class TweakableText(tk.Text):
         elif self.is_read_only():
             self.bell()
         else:
+            # print(f"intercept_insert({self.index(index)}, {chars=}, {tags=}, {kw=})")
+            self._edit_history.insert(self.get_index_position(index), chars)
             self.direct_insert(index, chars, tags, **kw)
 
     def intercept_delete(self, index1, index2=None, **kw):
@@ -122,6 +131,13 @@ class TweakableText(tk.Text):
         elif self._is_erroneous_delete(index1, index2):
             pass
         else:
+            # print(f"intercept_delete({index1=}, {index2=}, {kw=})")
+            # print(f"intercept_delete({self.index(index1)}, {self.index(index2) if index2 is not None else index2}, {kw=})")
+            if index2 is None:
+                self._edit_history.single_delete(self.get_index_position(index1))
+            else:
+                self._edit_history.delete(self.get_index_position(index1),
+                                          self.get_index_position(index2))
             self.direct_delete(index1, index2, **kw)
 
     def _is_erroneous_delete(self, index1, index2):
