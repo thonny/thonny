@@ -13,6 +13,7 @@ Version history
 * Make esptool auto-detect chip type, #1838
 * Fix Unix MicroPython time validation (misdiagnosed time offset)
 * Update dependencies in Thonny+Python bundles
+* Update Spanish, Polish, Chinese (TW) translations
 
 3.3.10 (2021-05-18)
 ===================
