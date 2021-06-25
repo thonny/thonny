@@ -804,13 +804,10 @@ class BaseFileBrowser(ttk.Frame):
         if not selection:
             return
 
-        trash = "Recycle Bin" if running_on_windows() else "Trash"
+        trash = tr("Recycle Bin") if running_on_windows() else tr("Trash")
         if not messagebox.askokcancel(
-            "Moving to %s" % trash,
-            "I'll try to move %s to %s,\n" % (selection["description"], trash)
-            + "but my method is not always reliable —\n"
-            + "in some cases the files will be deleted\n"
-            + "without the possibility to restore.",
+            tr("Moving to %s") % trash,
+            tr("Move %s to %s?") % (selection["description"], trash),
             icon="info",
             master=self,
         ):
