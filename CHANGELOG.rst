@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.3.11 (2021-06-??)
+3.3.11 (2021-06-25)
 ===================
 * Fix MicroPython management errors when user code shadows built-in names, #1856
 * Fix package manager getting frozen when installing packages, #1871
@@ -11,7 +11,8 @@ Version history
 * Fix Tkinter error when using venv created from bundled Python, #1835
 * Use 0..6 for weekday when synchronizing RTC via machine, #1868
 * Make esptool auto-detect chip type, #1838
-* Update various dependencies in Thonny+Python bundles
+* Fix Unix MicroPython time validation (misdiagnosed time offset)
+* Update dependencies in Thonny+Python bundles
 
 3.3.10 (2021-05-18)
 ===================
