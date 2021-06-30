@@ -608,7 +608,6 @@ class Runner:
             start_time = time.time()
             while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
                 # self._pull_backend_messages()
-                # TODO: update in a loop can be slow on Mac https://core.tcl-lang.org/tk/tktview/f642d7c0f4
                 get_workbench().update()
                 sleep(0.01)
 
@@ -1254,7 +1253,7 @@ class BackendTerminatedError(Exception):
 
 
 def is_venv_interpreter_of_current_interpreter(executable):
-    for location in [".", ".."]:
+    for location in ["..", "."]:
         cfg_path = os.path.join(os.path.dirname(executable), location, "pyvenv.cfg")
         if os.path.isfile(cfg_path):
             with open(cfg_path) as fp:
@@ -1264,8 +1263,9 @@ def is_venv_interpreter_of_current_interpreter(executable):
                     _, home = line.split("=", maxsplit=1)
                     home = home.strip()
                     if os.path.isdir(home) and (
-                        os.path.samefile(home, sys.prefix)
-                        or os.path.samefile(home, os.path.join(sys.prefix, "bin"))
+                        is_same_path(home, sys.prefix)
+                        or is_same_path(home, os.path.join(sys.prefix, "bin"))
+                        or is_same_path(home, os.path.join(sys.prefix, "Scripts"))
                     ):
                         return True
     return False

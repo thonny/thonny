@@ -106,12 +106,12 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             @builtins.classmethod
             def check_error(cls, ret):
                 if ret == -1:
-                    raise OSError(cls.os.errno())
+                    raise cls.builtins.OSError(cls.os.errno())
             
             _getcwd = libc.func("s", "getcwd", "si")
             @builtins.classmethod
             def getcwd(cls):
-                buf = bytearray(512)
+                buf = cls.builtins.bytearray(512)
                 return cls._getcwd(buf, 512)
 
             _chdir = libc.func("i", "chdir", "s")

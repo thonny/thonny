@@ -33,7 +33,7 @@ msgstr "說明"
 
 #: thonny/plugins/cpython/__init__.py:610
 msgid "Alternative Python 3 interpreter or virtual environment"
-msgstr "另外的 Python 3 直譯器或虛擬環境"
+msgstr "其他的 Python 3 直譯器或虛擬環境"
 
 #: thonny/plugins/cpython/__init__.py:618
 msgid "A special virtual environment (deprecated)"
@@ -103,7 +103,7 @@ msgstr "程式異常而崩潰時自動開啓協助功能"
 
 #: thonny/plugins/assistant_config_page.py:23
 msgid "Open Assistant automatically when it has warnings for your code"
-msgstr "有代碼警告時自動開啓協助功能"
+msgstr "程式碼發生警告時自動開啓協助功能"
 
 #: thonny/plugins/assistant_config_page.py:30
 msgid "Perform selected Pylint checks"
@@ -222,11 +222,11 @@ msgstr "標示當前行 (需重啓編輯器)"
 
 #: thonny/plugins/editor_config_page.py:36
 msgid "Allow code completion with Tab-key in editors"
-msgstr "允許在編輯器中使用 Tab 鍵完成代碼"
+msgstr "允許在編輯器中使用 Tab 鍵自動補上完整程式碼"
 
 #: thonny/plugins/editor_config_page.py:42
 msgid "Allow code completion with Tab-key in Shell"
-msgstr "允許在互動環境 (Shell) 中使用 Tab 鍵完成代碼"
+msgstr "允許在互動環境 (Shell) 中使用 Tab 鍵自動補上完整程式碼"
 
 #: thonny/plugins/editor_config_page.py:51
 msgid "Show line numbers"
@@ -337,11 +337,11 @@ msgid "This box is meant for your working notes -- assignment instructions, code
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "您可以在這裡撰寫工作筆記 (指派說明，代碼片段...等等)。\n"
+msgstr "您可以在這裡撰寫工作筆記 (指派說明，程式碼片段...等等)。\n"
 "\n"
-"所有內容都會自動保存，並在下次打開 Thonny 時載入。\n"
+"所有內容都會自動儲存，並在下次打開 Thonny 時載入。\n"
 "\n"
-"隨意刪除此文本，為您自己的筆記騰出空間。"
+"您可隨意刪除文字，以便為您自己的筆記騰出空間。"
 
 #: thonny/plugins/notes.py:63
 msgid "Notes"
@@ -591,8 +591,8 @@ msgstr "不合適的資料夾"
 #: thonny/plugins/cpython/__init__.py:450
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
-msgstr "選取的資料夾不是空的.\n"
-"請選取另一個或是取消."
+msgstr "選取的並不是空的資料夾.\n"
+"請選取其他資料夾或是取消."
 
 #: thonny/plugins/cpython/__init__.py:467
 msgid "Creating virtual environment"
@@ -968,7 +968,7 @@ msgstr "看來你正要安裝 Thonny 相關套件。如果你想要安裝 Thonny
 
 #: thonny/plugins/pip_gui.py:981
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
-msgstr "注意! 可能有另一個與目前 Thonny 相容的版本。點選 '...' 按鈕來選擇要安裝的版本"
+msgstr "注意！可能有與目前 Thonny 相容的其他版本, 請按一下 '...' 按鈕來選擇要安裝的版本."
 
 #: thonny/plugins/pip_gui.py:989
 msgid "Thonny plugin without requirements"

@@ -605,7 +605,9 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
         """Return set of pairs of USB device (VID, PID)"""
         return {
             # Generic MicroPython Board, see http://pid.codes/org/MicroPython/
-            (0x1209, 0xADDA)
+            (0x1209, 0xADDA),
+            (0x0694, 0x0009),  # SPIKE Prime
+            (0x0694, 0x0010),  # Robot Inventor
         } | cls.get_uart_adapter_vids_pids()
 
     @classmethod
@@ -982,6 +984,7 @@ def load_plugin():
             tr("MicroPython (local)"),
             LocalMicroPythonConfigPage,
             bare_metal=False,
+            utc_clock=True,
             sort_key="21",
         )
         get_workbench().set_default("LocalMicroPython.executable", "micropython")
@@ -992,6 +995,7 @@ def load_plugin():
         tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
+        utc_clock=True,
         sort_key="22",
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")

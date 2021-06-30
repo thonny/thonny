@@ -161,7 +161,13 @@ class MicroPythonBackend(MainBackend, ABC):
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
         # self._execute_without_output(
-        #    "for key in __thonny_helper.builtins.dir(__thonny_helper.builtins): __thonny_helper.builtins.globals()[key] = None"
+        #     dedent(
+        #         """
+        #     for key in __thonny_helper.builtins.dir(__thonny_helper.builtins):
+        #         if not key.startswith("__"):
+        #             __thonny_helper.builtins.globals()[key] = None
+        #     """
+        #     ).strip()
         # )
         self._report_time("prepared helpers")
 
