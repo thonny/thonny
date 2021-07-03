@@ -50,6 +50,8 @@ class SyntaxColorer:
             STRING_CLOSED,
             STRING_OPEN,
             TAB,
+            FUNCTIONS,
+            METHODS,
         )
 
         self.uniline_regex = re.compile(
@@ -69,7 +71,11 @@ class SyntaxColorer:
             + "|"
             + STRING_OPEN
             + "|"
-            + TAB,
+            + TAB
+            + "|"
+            + FUNCTIONS
+            + "|"
+            + METHODS,
             re.S,  # @UndefinedVariable
         )
 
@@ -91,6 +97,8 @@ class SyntaxColorer:
             "number",
             "builtin",
             "definition",
+            "functions",
+            "methods",
         }
         self.multiline_tags = {"string3", "open_string3"}
         self._raise_tags()
