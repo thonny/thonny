@@ -30,8 +30,8 @@ NUMBER = matches_any(
 )
 # TODO: would it make regex too slow? VARIABLE = matches_any("VARIABLE", [...])
 
-METHODS = matches_any("methods", [r"(?<=\.)([a-zA-Z_]+)(?=\()"])
-FUNCTIONS = matches_any("functions", [r"(?<=[^.a-zA-Z_])([a-zA-Z_]+)(?=\()"])
+METHOD_CALL = matches_any("method_call", [r"(?<=\.)([\w_]+)(?=\()"])
+FUNCTION_CALL = matches_any("function_call", [r"(?<=[^._\w])([\w_]+)(?=\()"])
 
 COMMENT = matches_any("comment", [r"#[^\n]*"])
 MAGIC_COMMAND = matches_any("magic", [r"^%[^\n]*"])  # used only in shell
