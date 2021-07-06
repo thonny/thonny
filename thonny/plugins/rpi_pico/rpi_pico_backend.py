@@ -9,22 +9,16 @@ logger = logging.getLogger(__name__)
 
 class RaspberryPiPicoBackend(BareMetalMicroPythonBackend):
     def _sync_time(self):
-        """Sets the time to match the time on the host."""
-
         logger.info("Syncing time in Pico")
 
-        # RTC works on UTC
-        now = datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
+        now = self._get_time_for_rtc()
 
         specific_script = dedent(
             """
             try:
                 __th_dt_ts = {datetime_ts}
                 from machine import RTC as __thonny_RTC
-                try:
-                    __thonny_RTC().datetime(__th_dt_ts)
-                except:
-                    __thonny_RTC().init({init_ts})
+                __thonny_RTC().datetime(__th_dt_ts)
                 del __thonny_RTC
             except __thonny_helper.builtins.ImportError:
                 assert __thonny_helper.os.uname().sysname == 'rp2'
@@ -47,8 +41,7 @@ class RaspberryPiPicoBackend(BareMetalMicroPythonBackend):
                 now.tm_min,
                 now.tm_sec,
                 0,
-            ),
-            init_ts=tuple(now)[:6] + (0, 0),
+            )
         )
 
         script = (
