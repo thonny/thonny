@@ -506,6 +506,9 @@ class Editor(ttk.Frame):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
         ttk.Frame.destroy(self)
+        get_workbench().event_generate(
+            "EditorTextDestroyed", editor=self, text_widget=self.get_text_widget()
+        )
 
 
 class EditorNotebook(ui_utils.ClosableNotebook):
