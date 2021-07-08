@@ -30,6 +30,9 @@ NUMBER = matches_any(
 )
 # TODO: would it make regex too slow? VARIABLE = matches_any("VARIABLE", [...])
 
+METHOD_CALL = matches_any("method_call", [r"(?<=\.)([\w_]+)(?=\()"])
+FUNCTION_CALL = matches_any("function_call", [r"(?:(?<=^)|(?<=[^._\w]))([\w_]+)(?=\()"])
+
 COMMENT = matches_any("comment", [r"#[^\n]*"])
 MAGIC_COMMAND = matches_any("magic", [r"^%[^\n]*"])  # used only in shell
 STRINGPREFIX = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB|f|F|fr|Fr|fR|FR|rf|rF|Rf|RF)?"
