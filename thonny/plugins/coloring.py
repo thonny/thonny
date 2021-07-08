@@ -50,6 +50,8 @@ class SyntaxColorer:
             STRING_CLOSED,
             STRING_OPEN,
             TAB,
+            FUNCTION_CALL,
+            METHOD_CALL,
         )
 
         self.uniline_regex = re.compile(
@@ -69,7 +71,11 @@ class SyntaxColorer:
             + "|"
             + STRING_OPEN
             + "|"
-            + TAB,
+            + TAB
+            + "|"
+            + FUNCTION_CALL
+            + "|"
+            + METHOD_CALL,
             re.S,  # @UndefinedVariable
         )
 
@@ -91,6 +97,10 @@ class SyntaxColorer:
             "number",
             "builtin",
             "definition",
+            "function_call",
+            "method_call",
+            "class_definition",
+            "function_definition",
         }
         self.multiline_tags = {"string3", "open_string3"}
         self._raise_tags()
@@ -104,6 +114,7 @@ class SyntaxColorer:
         self.text.tag_raise("open_string3")
         self.text.tag_raise("open_string")
         self.text.tag_raise("sel")
+        self.text.tag_raise("builtin", "function_call")
         """
         tags = self.text.tag_names()
         # take into account that without themes some tags may be undefined
@@ -181,6 +192,15 @@ class SyntaxColorer:
                                 id_match_start, id_match_end = id_match.span(1)
                                 self.text.tag_add(
                                     "definition",
+                                    start + "+%dc" % id_match_start,
+                                    start + "+%dc" % id_match_end,
+                                )
+                                if token_text == "def":
+                                    tag_type = "function_definition"
+                                else:
+                                    tag_type = "class_definition"
+                                self.text.tag_add(
+                                    tag_type,
                                     start + "+%dc" % id_match_start,
                                     start + "+%dc" % id_match_end,
                                 )
