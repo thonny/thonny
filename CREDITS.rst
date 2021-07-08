@@ -91,6 +91,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jarek Miszczak
 * Jens Diemer
 * Juan Falgueras
+* Jonathan Campbell
 * jose1711
 * José Carlos García
 * Kauri Raba
