@@ -698,7 +698,7 @@ class PipDialog(CommonDialog):
             parent=self.winfo_toplevel(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
-            self._install_local_file(filename, False)
+            self._install_file(filename, False)
 
     def _handle_install_requirements_click(self, event):
         if self._get_state() != "idle":
@@ -711,19 +711,14 @@ class PipDialog(CommonDialog):
             parent=self.winfo_toplevel(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
-            self._install_local_file(filename, True)
+            self._install_file(filename, True)
 
     def _handle_target_directory_click(self, event):
         if self._get_target_directory():
             open_path_in_system_file_manager(self._get_target_directory())
 
-    def _install_local_file(self, filename, is_requirements_file):
-        args = ["install"]
-        if self._use_user_install():
-            args.append("--user")
-        if is_requirements_file:
-            args.append("-r")
-        args.append(filename)
+    def _install_file(self, filename, is_requirements_file):
+        args = self._get_install_file_command(filename, is_requirements_file)
 
         returncode, out, err = self._run_pip_with_dialog(
             args, title=tr("Installing '%s'") % os.path.basename(filename)
@@ -743,6 +738,14 @@ class PipDialog(CommonDialog):
             name = elements[-1].strip()
 
         self._start_update_list(name)
+
+    def _get_install_file_command(self, filename, is_requirements_file):
+        args = ["install"]
+        if self._use_user_install():
+            args.append("--user")
+        if is_requirements_file:
+            args.append("-r")
+        args.append(filename)
 
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
