@@ -165,6 +165,7 @@ class Workbench(tk.Tk):
 
         assistance.init()
         self._runner = Runner()
+        self._init_hooks()  # Plugins may register hooks, so initialized them before to load plugins.
         self._load_plugins()
 
         self._editor_notebook = None  # type: Optional[EditorNotebook]
@@ -2513,6 +2514,22 @@ class Workbench(tk.Tk):
         if create_if_doesnt_exist:
             os.makedirs(path, exist_ok=True)
         return path
+
+    def _init_hooks(self):
+        self._save_hooks = []
+        self._load_hooks = []
+
+    def append_save_hook(self, callback):
+        self._save_hooks.append(callback)
+
+    def append_load_hook(self, callback):
+        self._load_hooks.append(callback)
+
+    def iter_save_hooks(self):
+        return iter(self._save_hooks)
+
+    def iter_load_hooks(self):
+        return iter(self._load_hooks)
 
 
 class WorkbenchEvent(Record):
