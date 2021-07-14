@@ -103,6 +103,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
+* Nicolas Despres
 * Pavel Minaev
 * Peter Marshall
 * Petr. moses
