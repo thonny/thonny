@@ -209,6 +209,9 @@ class CodeView(tktextext.EnhancedTextFrame):
     def get_content_as_bytes(self):
         content = self.get_content()
 
+        for callback in get_workbench().iter_save_hooks():
+            content = callback(self, content=content)
+
         # convert all linebreaks to original format
         content = OLD_MAC_LINEBREAK.sub(self._original_newlines, content)
         content = WINDOWS_LINEBREAK.sub(self._original_newlines, content)
@@ -251,6 +254,9 @@ class CodeView(tktextext.EnhancedTextFrame):
 
     def set_content(self, content, keep_undo=False):
         content, self._original_newlines = tweak_newlines(content)
+
+        for callback in get_workbench().iter_load_hooks():
+            content = callback(self, content=content)
 
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)
