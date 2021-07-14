@@ -41,6 +41,7 @@ class EventLogger:
             "SaveAs",
             "NewFile",
             "EditorTextCreated",
+            "EditorTextDestroyed",
             # "ShellTextCreated", # Too bad, this event happens before event_logging is loaded
             "ShellCommand",
             "ShellInput",
