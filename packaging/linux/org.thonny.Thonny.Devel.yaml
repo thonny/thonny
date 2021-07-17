@@ -1,0 +1,36 @@
+---
+id: org.thonny.Thonny.Devel
+branch: stable
+runtime: org.freedesktop.Platform
+runtime-version: "20.08"
+sdk: org.freedesktop.Sdk
+command: thonny
+finish-args:
+  # Thonny requires access to serial / USB devices for embedded development.
+  - --device=all
+
+  - --filesystem=home
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+modules:
+  - python3-modules.json
+  - name: thonny
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app --no-deps .
+
+      # The icon files are renamed to match the Flatpak's id here.
+      # A couple of additional post-install steps rename the app to accommodate having both this development version and the release version installed simultaneously.
+      # post-install:
+      - cp packaging/linux/org.thonny.Thonny.desktop /app/share/applications/org.thonny.Thonny.Devel.desktop
+      - sed -i 's/Icon=thonny/Icon=org.thonny.Thonny.Devel/' /app/share/applications/org.thonny.Thonny.Devel.desktop
+      - for size in 16x16 22x22 32x32 48x48 64x64 128x128 192x192 256x256; do cp packaging/icons/thonny-$size.png /app/share/icons/hicolor/$size/apps/org.thonny.Thonny.Devel.png; end
+      - cp packaging/linux/org.thonny.Thonny.appdata.xml /app/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
+      - sed -i 's/org.thonny.Thonny.desktop/org.thonny.Thonny.Devel.desktop/g' /app/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
+
+    sources:
+      - type: git
+        # url: https://github.com/jwillikers/thonny.git
+        path: ../..
+        branch: master

@@ -10,6 +10,7 @@
 *.aps
 *.ipdb
 *.dmg
+.flatpak-builder/
 .venv
 .vs
 .idea
@@ -33,6 +34,7 @@ MANIFEST
 RemoteSystemsTempFiles
 installer_building.log
 xxl_installer_building.log
+packaging/linux/thonny-flatpak-build-dir/
 packaging/windows/freezing.log
 packaging/setuptools/*.whl
 packaging/setuptools/thonny.egg-info
