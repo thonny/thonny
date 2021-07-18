@@ -35,6 +35,6 @@ specified in pyproject.toml in the root of the repository and will be picked up 
 In recent PyDev versions you can select Black as your formatter (Preferences => PyDev => Editor => 
 Code Style => Code Formatter) and make it run on each save (Preferences => PyDev => Editor => 
 Save Actions). See 
-`Black's documentation about configuring other IDE-s <https://black.readthedocs.io/en/stable/editor_integration.html>`_.    
+`Black's documentation about configuring other IDE-s <https://black.readthedocs.io/en/stable/integrations/editors.html>`_.    
 
 
