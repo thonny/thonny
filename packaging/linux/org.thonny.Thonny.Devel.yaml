@@ -15,6 +15,7 @@ finish-args:
 
   - --filesystem=home
   - --share=ipc
+  - --share=network
   - --socket=x11
   - --socket=wayland
 modules:
