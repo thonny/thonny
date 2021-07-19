@@ -93,7 +93,12 @@ msgid "This program comes with\n"
 "redistribute it under certain conditions, see\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
-msgstr "Diese Programm wird ohne Gewährleistung zu Verfügungen gestellt. Es ist freie Software, die du unter bestimmte Bedingungen weiterverbreiten kannst, sehe https://opensource.org/licenses/MIT für weitere Information"
+msgstr "Diese Programm wird ohne Gewährleistung\n"
+"zu Verfügungen gestellt! \n"
+"Es ist freie Software, die du unter bestimmte \n"
+"Bedingungen weiterverbreiten kannst,\n"
+"sehe https://opensource.org/licenses/MIT\n"
+"für weitere Information"
 
 #: thonny/plugins/about.py:152
 msgid "Version history"
@@ -985,7 +990,10 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
 msgstr "Es scheint Sie wollen ein Thonny zugehöriges Paket installieren.\n"
-"Falls es ein Thonny Plug-in ist, dann wählen Sie bitte \"Extras | Verwaltung Plug-ins ... "
+"Falls es ein Thonny Plug-in ist, dann wählen Sie bitte\n"
+"'Extras | Verwaltung Plug-ins...'\n"
+"\n"
+"Sind Sie sicher, sie wollen %s für Backend installieren?"
 
 #: thonny/plugins/pip_gui.py:981
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
@@ -1000,9 +1008,10 @@ msgid "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
 "\n"
 "If you still want it, then please install it from the command line."
-msgstr "Möglicherweise versuchen Sie ein veraltetes Thonny Plug-in zu installieren (die erforderliche Thonny Version ist nicht angegeben).\n"
+msgstr "Möglicherweise versuchen Sie ein veraltetes Thonny Plug-in \n"
+"zu installieren (die erforderliche Thonny Version ist nicht angegeben).\n"
 "\n"
-"Falls Sie das trotzdem möchten, dann benutzen Sie bitte die Kommandozeile. "
+"Falls Sie das trotzdem möchten, dann benutzen Sie bitte die Kommandozeile."
 
 #: thonny/plugins/pip_gui.py:1004
 msgid "Unsuitable requirements"
@@ -1410,7 +1419,7 @@ msgstr "wird verarbeitet ..."
 
 #: thonny/plugins/files.py:199
 msgid "Uploading %s to %s"
-msgstr "Uploading %s nach 5s"
+msgstr "Uploading %s nach %s"
 
 #: thonny/plugins/files.py:216
 msgid "Upload to %s"

@@ -1386,7 +1386,7 @@ msgstr "Feltöltés ide: %s"
 
 #: thonny/plugins/files.py:362
 msgid "Downloading %s to %s"
-msgstr "Letöltés: % ide: %s"
+msgstr "Letöltés: %s ide: %s"
 
 #: thonny/plugins/files.py:275
 msgid "Download to %s"

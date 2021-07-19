@@ -980,8 +980,10 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
 msgstr "Parece que você está instalando um pacote relacionado ao Thonny.\n"
-"Se você pretende instalar um plugin do Thonny, então você deve\n"
-"escolher 'Ferramentas → Gerenciar plugins ...'"
+"Se você pretende instalar um plugin do Thonny,\n"
+"então você deve escolher 'Ferramentas → Gerenciar plugins ...'\n"
+"\n"
+"Tem certeza que deseja instalar %s para seus programas?"
 
 #: thonny/plugins/pip_gui.py:981
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
