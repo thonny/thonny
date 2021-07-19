@@ -37,11 +37,11 @@ msgstr "Alternatywny interpreter Python 3 lub środowisko wirtualne"
 
 #: thonny/plugins/cpython/__init__.py:618
 msgid "A special virtual environment (deprecated)"
-msgstr "Dedykowane środowisko wirtualne (nie zalecane)"
+msgstr "Dedykowane środowisko wirtualne (niezalecane)"
 
 #: thonny/workbench.py:582
 msgid "Exit"
-msgstr "Wyjśćie"
+msgstr "Wyjście"
 
 #: thonny/workbench.py:609
 msgid "Decrease font size"
@@ -287,7 +287,7 @@ msgstr "W górę"
 
 #: thonny/plugins/find_replace.py:103
 msgid "Down"
-msgstr "Do dołu"
+msgstr "W dół"
 
 #: thonny/plugins/find_replace.py:112
 msgid "Find"
@@ -443,7 +443,7 @@ msgstr "Dokumentacja"
 
 #: thonny/plugins/pip_gui.py:522
 msgid "PyPI page"
-msgstr "Strona PyPi"
+msgstr "Strona PyPI"
 
 #: thonny/plugins/pip_gui.py:526
 msgid "Requires"
@@ -1467,33 +1467,35 @@ msgstr "Zapisz wszystkie pliki"
 
 #: thonny/workbench.py:828
 msgid "Configure interpreter..."
-msgstr ""
+msgstr "Skonfiguruj interpreter..."
 
 #: thonny/workbench.py:1501
 msgid "Device"
-msgstr ""
+msgstr "Urządzenie"
 
 #: thonny/workdlg.py:185
 msgid "Cancelling"
-msgstr ""
+msgstr "Anuluję"
 
 #: thonny/workdlg.py:212
 msgid "Starting"
-msgstr ""
+msgstr "Startuję"
 
 #: thonny/plugins/backend_config_page.py:234
 msgid "Authentication"
-msgstr ""
+msgstr "Uwierzytelnienie"
 
 #: thonny/plugins/backend_config_page.py:236
 msgid "Enter the passphrase of your private key for\n"
 "{}"
-msgstr ""
+msgstr "Wpisz hasło klucza prywatnego dla\n"
+"{}"
 
 #: thonny/plugins/backend_config_page.py:239
 msgid "Enter your password for\n"
 "{}"
-msgstr ""
+msgstr "Wpisz hasło dla\n"
+"{}"
 
 #: thonny/plugins/object_inspector.py:458
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
@@ -1501,27 +1503,27 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:557
 msgid "Search results"
-msgstr ""
+msgstr "Szukaj wyników"
 
 #: thonny/plugins/pip_gui.py:558
 msgid "Searching"
-msgstr ""
+msgstr "Wyszukuję"
 
 #: thonny/plugins/pip_gui.py:639 thonny/plugins/pip_gui.py:729
 msgid "Installing '%s'"
-msgstr ""
+msgstr "Instaluję '%s'"
 
 #: thonny/plugins/pip_gui.py:645
 msgid "Upgrading '%s'"
-msgstr ""
+msgstr "Aktualizuję '%s'"
 
 #: thonny/plugins/pip_gui.py:650
 msgid "Uninstalling '%s'"
-msgstr ""
+msgstr "Odinstalowuję '%s'"
 
 #: thonny/plugins/pip_gui.py:663
 msgid "Installing"
-msgstr ""
+msgstr "Instaluję"
 
 #: thonny/plugins/pip_gui.py:1372
 msgid "Package manager is not available for this interpreter"
@@ -1529,11 +1531,11 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:1385
 msgid "Not supported"
-msgstr ""
+msgstr "Brak wsparcia"
 
 #: thonny/plugins/micropython/pip_gui.py:290 thonny/plugins/pip_gui.py:1390
 msgid "Not available"
-msgstr ""
+msgstr "Niedostępne"
 
 #: thonny/plugins/pip_gui.py:1391
 msgid "You need to stop your program before launching the package manager."
