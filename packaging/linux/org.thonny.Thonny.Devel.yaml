@@ -14,23 +14,58 @@ finish-args:
   - --socket=x11
   - --socket=wayland
 modules:
+  - name: tcl
+    buildsystem: autotools
+    subdir: unix
+    build-options:
+      no-debuginfo: true
+    cleanup:
+      - /bin
+      - /man
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tcl8.6.11-src.tar.gz
+        sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
+  - name: tk
+    buildsystem: autotools
+    subdir: unix
+    build-options:
+      no-debuginfo: true
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
+        sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
+  - name: python
+    buildsystem: autotools
+    config-opts:
+      - --enable-optimizations
+      - --with-ensurepip=install
+      - --enable-shared
+      - --with-system-expat
+      - --with-system-ffi
+      - --enable-loadable-sqlite-extensions
+      - --with-dbmliborder=gdbm
+    sources:
+      - type: archive
+        url: https://www.python.org/ftp/python/3.8.8/Python-3.8.8.tar.xz
+        sha256: 7c664249ff77e443d6ea0e4cf0e587eae918ca3c48d081d1915fe2a1f1bcc5cc
+  - python3-wheel.json
   - python3-modules.json
   - name: thonny
     buildsystem: simple
     build-commands:
-      - pip3 install --prefix=/app --no-deps .
+      - python3 setup.py install --prefix=${FLATPAK_DEST}
 
       # The icon files are renamed to match the Flatpak's id here.
-      # A couple of additional post-install steps rename the app to accommodate having both this development version and the release version installed simultaneously.
-      # post-install:
-      - cp packaging/linux/org.thonny.Thonny.desktop /app/share/applications/org.thonny.Thonny.Devel.desktop
-      - sed -i 's/Icon=thonny/Icon=org.thonny.Thonny.Devel/' /app/share/applications/org.thonny.Thonny.Devel.desktop
-      - for size in 16x16 22x22 32x32 48x48 64x64 128x128 192x192 256x256; do cp packaging/icons/thonny-$size.png /app/share/icons/hicolor/$size/apps/org.thonny.Thonny.Devel.png; end
-      - cp packaging/linux/org.thonny.Thonny.appdata.xml /app/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
-      - sed -i 's/org.thonny.Thonny.desktop/org.thonny.Thonny.Devel.desktop/g' /app/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
+      # A couple of additional steps rename the app to accommodate having both this development version and the release version installed simultaneously.
+      - install -Dm644 -T packaging/linux/org.thonny.Thonny.desktop ${FLATPAK_DEST}/share/applications/org.thonny.Thonny.Devel.desktop
+      - sed -i 's/Icon=thonny/Icon=org.thonny.Thonny.Devel/' ${FLATPAK_DEST}/share/applications/org.thonny.Thonny.Devel.desktop
+      - sed -i 's|Exec=/usr/bin/thonny|Exec=thonny|g' ${FLATPAK_DEST}/share/applications/org.thonny.Thonny.Devel.desktop
+      - for size in 16x16 22x22 32x32 48x48 64x64 128x128 192x192 256x256; do install -Dm644 -T packaging/icons/thonny-$size.png ${FLATPAK_DEST}/share/icons/hicolor/$size/apps/org.thonny.Thonny.Devel.png; done
+      - install -Dm644 -T packaging/linux/org.thonny.Thonny.appdata.xml ${FLATPAK_DEST}/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
+      - sed -i 's/org.thonny.Thonny.desktop/org.thonny.Thonny.Devel.desktop/g' ${FLATPAK_DEST}/share/metainfo/org.thonny.Thonny.Devel.appdata.xml
 
     sources:
       - type: git
-        # url: https://github.com/jwillikers/thonny.git
         path: ../..
         branch: master

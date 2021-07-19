@@ -2,6 +2,8 @@
 
 ## Flatpak
 
+The instructions here describe how to build and update the development version of the Thonny Flatpak.
+
 ### Build
 
 Get the source code.
@@ -32,26 +34,30 @@ Run the Flatpak.
 ### Update
 
 The Python dependencies for the Flatpak are generated with the [Flatpak Pip Generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/pip).
-This tool produces the output file `python3-modules.json`, which is included in the Flatpak manifest.
-In order to update the dependencies, this file should be regenerated.
+This tool is used to produces the `python3-modules.json` and `python3-wheel.json` files, which are included in the Flatpak manifest.
+In order to update the dependencies used in the Flatpak, these files must be regenerated.
 Follow the instructions here to do so.
 
-Install the Python dependency `requirements-parser`.
+First, install the Python dependency `requirements-parser`.
 
-    python -m pip install requirements-parser
+    python3 -m pip install requirements-parser
 
 Clone the [Flatpak Builder Tools](https://github.com/flatpak/flatpak-builder-tools) repository.
+Currently, it's necessary to use [a fork](https://github.com/nanonyme/flatpak-builder-tools) of the project which allows building all the Python dependencies without throwing errors.
 
-    git clone https://github.com/flatpak/flatpak-builder-tools.git
+    git clone https://github.com/nanonyme/flatpak-builder-tools.git
+    git -C flatpak-builder-tools switch support-build-isolation
 
-Run the Flatpak Pip Generator script in the `packaging/linux` directory to produce an updated `python3-modules.json` manifest.
-The dependencies are taken from the `requirements-regular-bundle.txt` and `requirements-xxl-bundle.txt` files.
+Run the Flatpak Pip Generator script in the `packaging/linux` directory to produce an updated `python3-modules.json` manifest and an updated `python3-wheel.json` manifest.
+The dependencies for the `python3-modules.json` manifest are retrieved from the `requirements-regular-bundle.txt` and `requirements-xxl-bundle.txt` files.
 
-    python flatpak-builder-tools/pip/flatpak-pip-generator \
+    python3 flatpak-builder-tools/pip/flatpak-pip-generator \
+        --runtime org.freedesktop.Sdk//20.08 \
+        wheel
+    python3 flatpak-builder-tools/pip/flatpak-pip-generator \
+        --runtime org.freedesktop.Sdk//20.08 \
         $(cat ../requirements-regular-bundle.txt) \
-        outdated==0.2.0 \
         $(cat ../requirements-xxl-bundle.txt)
 
-This command currently workarounds an issue in the latest version of the `outdated` package, pulled in by the `birdseye` package.
-Version 0.2.1 of the `outdated` package doesn't provide a tarball URL, so the above command overrides this dependency to be version 2.0.0.
-In the future, this should be fixed upstream and the command shown here updated.
+If you have `org.freedesktop.Sdk//20.08` installed in *both* the user and system installations, the Flatpak Pip Generator will choke generating the manifest.
+The best option at the moment is to temporarily remove either the user or the system installation until this issue is fixed upstream.
