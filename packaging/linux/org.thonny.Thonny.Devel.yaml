@@ -5,6 +5,10 @@ runtime: org.freedesktop.Platform
 runtime-version: "20.08"
 sdk: org.freedesktop.Sdk
 command: thonny
+cleanup:
+  - /man
+  - /share/man
+  - /lib/debug
 finish-args:
   # Thonny requires access to serial / USB devices for embedded development.
   - --device=all
@@ -21,6 +25,8 @@ modules:
       no-debuginfo: true
     cleanup:
       - /bin
+      - /lib/debug
+      - /lib/pkgconfig
       - /man
     sources:
       - type: archive
@@ -31,10 +37,16 @@ modules:
     subdir: unix
     build-options:
       no-debuginfo: true
+    cleanup:
+      - /bin
+      - /lib/debug
+      - /lib/pkgconfig
+      - /man
     sources:
       - type: archive
         url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
         sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
+  # Derived from how the Freedesktop Sdk bundles Python: https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/elements/components/python3.bst
   - name: python
     buildsystem: autotools
     config-opts:
@@ -45,6 +57,17 @@ modules:
       - --with-system-ffi
       - --enable-loadable-sqlite-extensions
       - --with-dbmliborder=gdbm
+    cleanup:
+      - /bin/idle*
+      - /lib/pkgconfig
+      - /lib/python3.8/idlelib
+      - /lib/python3.8/test
+      - /lib/python3.8/turtle*
+      - /lib/python3.8/__pycache__/turtle.*
+      - /lib/python3.8/*/test
+      - /lib/python3.8/*/tests
+    cleanup-commands:
+      - find "/lib" -name "lib*.a" -exec rm {} ";"
     sources:
       - type: archive
         url: https://www.python.org/ftp/python/3.8.8/Python-3.8.8.tar.xz
