@@ -115,6 +115,8 @@ class SyntaxColorer:
         self.text.tag_raise("open_string")
         self.text.tag_raise("sel")
         self.text.tag_raise("builtin", "function_call")
+        self.text.tag_raise("class_definition", "definition")
+        self.text.tag_raise("function_definition", "definition")
         """
         tags = self.text.tag_names()
         # take into account that without themes some tags may be undefined
