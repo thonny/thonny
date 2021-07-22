@@ -1,0 +1,14 @@
+{
+    "name": "python3-wheel",
+    "buildsystem": "simple",
+    "build-commands": [
+        "pip3 install --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} wheel"
+    ],
+    "sources": [
+        {
+            "type": "file",
+            "url": "https://files.pythonhosted.org/packages/65/63/39d04c74222770ed1589c0eaba06c05891801219272420b40311cd60c880/wheel-0.36.2-py2.py3-none-any.whl",
+            "sha256": "78b5b185f0e5763c26ca1e324373aadd49182ca90e825f7853f4b2509215dc0e"
+        }
+    ]
+}
