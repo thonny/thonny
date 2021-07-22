@@ -21,6 +21,8 @@ def default_light() -> SyntaxThemeSettings:
         "breakpoint": {"foreground": "crimson"},
         "current_line": {"background": "#f5f5f5"},
         "definition": {"foreground": "DarkBlue", "font": "BoldEditorFont"},
+        "class_definition": {},
+        "function_definition": {},
         "string": {"foreground": string_fg},
         "string3": {"foreground": string_fg, "background": None, "font": "EditorFont"},
         "open_string": {"foreground": string_fg, "background": open_string_bg},
@@ -41,6 +43,8 @@ def default_light() -> SyntaxThemeSettings:
         "stdout": {"foreground": "Black"},
         "stderr": {"foreground": "#CC0000"},  # same as ANSI red
         "value": {"foreground": "DarkBlue"},
+        "function_call": {},
+        "method_call": {},
         "hyperlink": {"foreground": "#3A66DD", "underline": True},
         # paren matcher
         "surrounding_parens": {"foreground": "Blue", "font": "BoldEditorFont"},
@@ -146,6 +150,8 @@ def default_dark() -> SyntaxThemeSettings:
         "current_line": {"background": "#363636"},
         "sel": {"foreground": "#eeeeee", "background": "#6E6E6E"},
         "definition": {"foreground": default_fg},
+        "class_definition": {},
+        "function_definition": {},
         "string": {"foreground": string_fg},
         "string3": {"foreground": string_fg, "background": None, "font": "EditorFont"},
         "open_string": {"foreground": string_fg, "background": open_string_bg},
@@ -167,6 +173,8 @@ def default_dark() -> SyntaxThemeSettings:
         "stdout": {"foreground": "LightGray"},
         "stderr": {"foreground": "#EB5B83"},
         "value": {"foreground": "#EBEB5B"},
+        "function_call": {},
+        "method_call": {},
         "hyperlink": {"foreground": "#619DC7", "underline": True},
         # paren matcher
         "surrounding_parens": {"foreground": "#F0995B", "font": "BoldEditorFont"},
