@@ -65,6 +65,14 @@ class MicroPythonPipDialog(BackendPipDialog):
                 "Unexpected text '%s' on install button" % self.install_button["text"]
             )
 
+    def _install_file(self, filename, is_requirements_file):
+        self._current_temp_dir = tempfile.mkdtemp()
+        try:
+            super(MicroPythonPipDialog, self)._install_file(filename, is_requirements_file)
+        finally:
+            shutil.rmtree(self._current_temp_dir, ignore_errors=True)
+            self._current_temp_dir = None
+
     def _looks_like_micropython_package(self):
         assert self.current_package_data is not None
         name = self.current_package_data["info"]["name"]
@@ -267,6 +275,16 @@ class MicroPythonPipDialog(BackendPipDialog):
     def _get_target_directory(self):
         target_dir = self._backend_proxy.get_pip_target_dir()
         return target_dir
+
+    def _get_install_file_command(self, filename, is_requirements_file):
+        args = ["install"]
+        if is_requirements_file:
+            args.append("-r")
+        args.append(filename)
+        args.append("--target")
+        args.append(self._current_temp_dir)
+
+        return args
 
     def _read_only(self):
         return self._get_target_directory() is None

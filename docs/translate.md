@@ -15,7 +15,9 @@ When you are done with your translation, it is recommended to test it. For this 
 
 If you noticed a problem (eg. some button is too narrow for your translation), then open an issue.
 
-**Translations will be pulled from POEditor before each release, no need to create a PR.**
+**NB! Do test your translations! If you mess up placeholders (omit one, add one too many or use wrong type), then the user will see a crash, not just a broken translation!**
+
+Translations will be pulled from POEditor before each release, no need to create a PR.
 
 ## More details for Thonny's maintainers (NB! Not relevant for translators!)
 
