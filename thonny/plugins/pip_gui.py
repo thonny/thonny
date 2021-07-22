@@ -747,6 +747,8 @@ class PipDialog(CommonDialog):
             args.append("-r")
         args.append(filename)
 
+        return args
+
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
         if url is not None:

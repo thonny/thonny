@@ -284,6 +284,8 @@ class MicroPythonPipDialog(BackendPipDialog):
         args.append("--target")
         args.append(self._current_temp_dir)
 
+        return args
+
     def _read_only(self):
         return self._get_target_directory() is None
 
