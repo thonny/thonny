@@ -71,6 +71,7 @@ from thonny.common import (
     ValueInfo,
 )
 from thonny.common import ConnectionClosedException
+from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.running import EXPECTED_TERMINATION_CODE
 
 ENCODING = "utf-8"
@@ -258,6 +259,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _get_custom_helpers(self):
         return ""
+
+    def get_connection(self) -> MicroPythonConnection:
+        raise NotImplementedError()
 
     def _sync_time(self):
         raise NotImplementedError()
@@ -498,7 +502,38 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _submit_input(self, cdata: str) -> None:
-        raise NotImplementedError()
+        # TODO: what if there is a previous unused data waiting
+        assert self.get_connection().outgoing_is_empty()
+
+        assert cdata.endswith("\n")
+        if not cdata.endswith("\r\n"):
+            # submission is done with CRLF
+            cdata = cdata[:-1] + "\r\n"
+
+        bdata = cdata.encode(ENCODING)
+        to_be_written = bdata
+        echo = b""
+        with self._interrupt_lock:
+            while to_be_written:
+                block = self._extract_block_without_splitting_chars(to_be_written)
+                self._write(block)
+                # Try to consume the echo
+                echo += self.get_connection().soft_read(len(block), timeout=1)
+                to_be_written = to_be_written[len(block) :]
+
+        if echo.replace(b"\r", b"").replace(b"\n", b"") != bdata.replace(b"\r", b"").replace(
+            b"\n", b""
+        ):
+            if any(ord(c) > 127 for c in cdata):
+                print(
+                    "WARNING: MicroPython ignores non-ascii characters of the input",
+                    file=sys.stderr,
+                )
+            else:
+                # because of autoreload? timing problems? interruption?
+                # Leave it.
+                logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
+            self._connection.unread(echo)
 
     def send_message(self, msg: MessageFromBackend) -> None:
         if "cwd" not in msg:
@@ -1388,6 +1423,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _decode(self, data: bytes) -> str:
         return data.decode(encoding="UTF-8", errors="replace")
 
+    def _extract_block_without_splitting_chars(self, source_bytes: bytes) -> bytes:
+        raise NotImplementedError()
+
 
 class ManagementError(RuntimeError):
     def __init__(self, script, out, err):
@@ -1473,6 +1511,14 @@ def ends_overlap(left, right) -> int:
 
 class ReadOnlyFilesystemError(RuntimeError):
     pass
+
+
+def starts_with_continuation_byte(data):
+    return data and is_continuation_byte(data[0])
+
+
+def is_continuation_byte(byte):
+    return (byte & 0b11000000) == 0b10000000
 
 
 if __name__ == "__main__":

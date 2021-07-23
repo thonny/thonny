@@ -24,6 +24,7 @@ from thonny.plugins.micropython.backend import (
 )
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
 from thonny.common import ConnectionFailedException
+from thonny.plugins.micropython.connection import MicroPythonConnection
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -67,6 +68,9 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             return
 
         MicroPythonBackend.__init__(self, None, args)
+
+    def get_connection(self) -> MicroPythonConnection:
+        return self._connection
 
     def _resolve_executable(self, executable):
         result = self._which(executable)
@@ -301,30 +305,8 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         except Exception as e:
             return str(e)
 
-    def _submit_input(self, cdata: str) -> None:
-        # TODO: what if there is a previous unused data waiting
-        assert self._connection.outgoing_is_empty()
-
-        assert cdata.endswith("\n")
-        if not cdata.endswith("\r\n"):
-            # submission is done with CRLF
-            cdata = cdata[:-1] + "\r\n"
-
-        bdata = cdata.encode(ENCODING)
-        to_be_written = bdata
-        echo = b""
-        with self._interrupt_lock:
-            self._write(to_be_written)
-            # Try to consume the echo
-            echo += self._connection.soft_read(len(to_be_written), timeout=1)
-
-        if echo.replace(b"\r", b" ").replace(b"\n", b" ") != bdata.replace(b"\r", b" ").replace(
-            b"\n", b" "
-        ):
-            # because of autoreload? timing problems? interruption?
-            # Leave it.
-            logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
-            self._connection.unread(echo)
+    def _extract_block_without_splitting_chars(self, source_bytes: bytes) -> bytes:
+        return source_bytes
 
 
 class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):

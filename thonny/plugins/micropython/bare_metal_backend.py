@@ -4,6 +4,7 @@ import logging
 import os
 import queue
 import re
+import sys
 import struct
 import time
 from textwrap import dedent, indent
@@ -31,8 +32,11 @@ from thonny.plugins.micropython.backend import (
     PASTE_MODE_LINE_PREFIX,
     EOT,
     WAIT_OR_CRASH_TIMEOUT,
+    starts_with_continuation_byte,
+    is_continuation_byte,
 )
 from thonny.common import ConnectionFailedException
+from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.webrepl_connection import (
     WebReplConnection,
     WebreplBinaryMsg,
@@ -153,6 +157,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._last_prompt = None
 
         MicroPythonBackend.__init__(self, clean, args)
+
+    def get_connection(self) -> MicroPythonConnection:
+        return self._connection
 
     def _check_prepare(self):
         out, err = self._execute(
@@ -524,32 +531,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _write(self, data):
         self._connection.write(data)
-
-    def _submit_input(self, cdata: str) -> None:
-        # TODO: what if there is a previous unused data waiting
-        assert self._connection.outgoing_is_empty()
-
-        assert cdata.endswith("\n")
-        if not cdata.endswith("\r\n"):
-            # submission is done with CRLF
-            cdata = cdata[:-1] + "\r\n"
-
-        bdata = cdata.encode(ENCODING)
-        to_be_written = bdata
-        echo = b""
-        with self._interrupt_lock:
-            while to_be_written:
-                block = self._extract_block_without_splitting_chars(to_be_written)
-                self._write(block)
-                # Try to consume the echo
-                echo += self._connection.soft_read(len(block), timeout=1)
-                to_be_written = to_be_written[len(block) :]
-
-        if echo != bdata:
-            # because of autoreload? timing problems? interruption?
-            # Leave it.
-            logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
-            self._connection.unread(echo)
 
     def _submit_code(self, script):
         """
@@ -1542,13 +1523,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _decode(self, data: bytes) -> str:
         return data.decode(ENCODING, errors="replace")
 
-    def _extract_block_without_splitting_chars(self, source_bytes: bytes) -> bytes:
-        i = self._write_block_size
-        while i > 1 and i < len(source_bytes) and is_continuation_byte(source_bytes[i]):
-            i -= 1
-
-        return source_bytes[:i]
-
     def _get_file_operation_block_size(self):
         # don't forget that the size may be expanded up to 4x where converted to Python
         # bytes literal
@@ -1557,13 +1531,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         else:
             return 1024
 
+    def _extract_block_without_splitting_chars(self, source_bytes: bytes) -> bytes:
+        i = self._write_block_size
+        while i > 1 and i < len(source_bytes) and is_continuation_byte(source_bytes[i]):
+            i -= 1
 
-def starts_with_continuation_byte(data):
-    return data and is_continuation_byte(data[0])
-
-
-def is_continuation_byte(byte):
-    return (byte & 0b11000000) == 0b10000000
+        return source_bytes[:i]
 
 
 class RawPasteNotSupportedError(RuntimeError):
