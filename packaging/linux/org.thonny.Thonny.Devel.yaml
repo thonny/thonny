@@ -17,7 +17,6 @@ finish-args:
   - --share=ipc
   - --share=network
   - --socket=x11
-  - --socket=wayland
 modules:
   - name: tcl
     buildsystem: autotools
