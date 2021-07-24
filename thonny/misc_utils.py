@@ -512,3 +512,9 @@ class PopenWithOutputQueues(subprocess.Popen):
             if data == "":
                 break
             target_queue.put(data)
+
+
+def inside_flatpak():
+    import shutil
+
+    return shutil.which("flatpak-spawn") and os.path.isfile("/app/manifest.json")

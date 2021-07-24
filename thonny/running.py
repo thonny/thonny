@@ -60,7 +60,12 @@ from thonny.editors import (
     extract_target_path,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
+from thonny.misc_utils import (
+    construct_cmd_line,
+    inside_flatpak,
+    running_on_mac_os,
+    running_on_windows,
+)
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
@@ -149,18 +154,19 @@ class Runner:
             show_extra_sequences=True,
         )
 
-        get_workbench().add_command(
-            "run_current_script_in_terminal",
-            "run",
-            tr("Run current script in terminal"),
-            caption="RunT",
-            handler=self._cmd_run_current_script_in_terminal,
-            default_sequence="<Control-t>",
-            extra_sequences=["<<CtrlTInText>>"],
-            tester=self._cmd_run_current_script_in_terminal_enabled,
-            group=35,
-            image="terminal",
-        )
+        if not inside_flatpak():
+            get_workbench().add_command(
+                "run_current_script_in_terminal",
+                "run",
+                tr("Run current script in terminal"),
+                caption="RunT",
+                handler=self._cmd_run_current_script_in_terminal,
+                default_sequence="<Control-t>",
+                extra_sequences=["<<CtrlTInText>>"],
+                tester=self._cmd_run_current_script_in_terminal_enabled,
+                group=35,
+                image="terminal",
+            )
 
         get_workbench().add_command(
             "restart",
