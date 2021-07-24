@@ -5,6 +5,12 @@ runtime: org.freedesktop.Platform
 runtime-version: "20.08"
 sdk: org.freedesktop.Sdk
 command: thonny
+tags:
+  - devel
+  - development
+  - nightly
+# todo Better distinguish between the release and development installations by using a dedicated icon to represent the development Flatpak instead of prefixing the name.
+desktop-file-name-prefix: "(Development) "
 cleanup:
   - /man
   - /share/man
