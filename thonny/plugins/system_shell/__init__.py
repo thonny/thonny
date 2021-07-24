@@ -52,12 +52,20 @@ def _open_system_shell():
     return terminal.run_in_terminal(cmd, cwd, env_overrides, True)
 
 
+def _inside_flatpak():
+    import os
+    import shutil
+
+    return shutil.which("flatpak-spawn") and os.path.isfile("/app/manifest.json")
+
+
 def load_plugin() -> None:
-    get_workbench().add_command(
-        "OpenSystemShell",
-        "tools",
-        tr("Open system shell..."),
-        _open_system_shell,
-        group=80,
-        image="terminal",
-    )
+    if not _inside_flatpak:
+        get_workbench().add_command(
+            "OpenSystemShell",
+            "tools",
+            tr("Open system shell..."),
+            _open_system_shell,
+            group=80,
+            image="terminal",
+        )
