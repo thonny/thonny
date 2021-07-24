@@ -13,6 +13,11 @@ finish-args:
   # Thonny requires access to serial / USB devices for embedded development.
   - --device=all
 
+  - --filesystem=xdg-config/Thonny
+  - --filesystem=~/.local/lib
+  - --filesystem=xdg-desktop
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-downloads
   - --filesystem=home
   - --share=ipc
   - --share=network
