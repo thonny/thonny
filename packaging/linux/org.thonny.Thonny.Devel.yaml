@@ -13,14 +13,13 @@ finish-args:
   # Thonny requires access to serial / USB devices for embedded development.
   - --device=all
 
+  # Thonny stores Python plugins in subdirectories under ~/.local/lib corresponding to the Python / Thonny version.
   - --filesystem=~/.local/lib
-  - --filesystem=xdg-desktop
-  - --filesystem=xdg-documents
-  - --filesystem=xdg-download
-  - --filesystem=home
+
   - --share=ipc
   - --share=network
   - --socket=x11
+  - --talk-name=org.freedesktop.FileManager1
 modules:
   - name: tcl
     buildsystem: autotools
