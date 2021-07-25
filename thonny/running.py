@@ -59,7 +59,13 @@ from thonny.editors import (
     extract_target_path,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
+from thonny.misc_utils import (
+    construct_cmd_line,
+    inside_flatpak,
+    running_on_mac_os,
+    running_on_windows,
+    show_command_not_available_in_flatpak_message,
+)
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
@@ -405,6 +411,10 @@ class Runner:
         self.execute_current("Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
+        if inside_flatpak():
+            show_command_not_available_in_flatpak_message()
+            return
+
         filename = get_saved_current_script_filename()
         if not filename:
             return

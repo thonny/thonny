@@ -15,6 +15,12 @@ With pip on command line
 #. Reset interpreter by selecting "Stop/Reset" from "Run menu" (this is required only first time you do pip install)
 #. Start using the package
 
+.. NOTE::
+   The "Open system shell..." menu is not available when running from the Flatpak on Linux.
+   Flatpak applications are sandboxed to protect the user's host system and data.
+   Allowing Thonny to open a shell on the host system would circumvent these protections.
+   To install Python packages from the command-line, please open your system's terminal application directly.
+
 
 Using scientific Python packages
 ================================
