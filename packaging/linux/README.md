@@ -1,5 +1,12 @@
 # Linux
 
+## Release
+
+On Linux, the AppData file, i.e. `org.thonny.Thonny.appdata.xml` for Thonny, contains information presented users in app stores.
+This includes information about each release.
+Thus, before cutting a release, it's important to add at least the version of the release and the date to the top of the `releases` section of the AppData file.
+It's also helpful to add a description of the changes the new release brings with it.
+
 ## Flatpak
 
 The instructions here describe how to build and update the development version of the Thonny Flatpak.
