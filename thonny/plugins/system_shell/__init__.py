@@ -7,7 +7,7 @@ from thonny import get_runner, get_workbench, terminal
 from thonny.common import get_augmented_system_path, get_exe_dirs
 from thonny.editors import get_saved_current_script_filename
 from thonny.languages import tr
-from thonny.misc_utils import inside_flatpak
+from thonny.misc_utils import inside_flatpak, show_command_not_available_in_flatpak_message
 from thonny.running import get_environment_overrides_for_python_subprocess
 
 
@@ -15,6 +15,10 @@ def _open_system_shell():
     """Main task is to modify path and open terminal window.
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
+
+    if inside_flatpak():
+        show_command_not_available_in_flatpak_message()
+        return
 
     cwd = get_workbench().get_local_cwd()
 
@@ -54,12 +58,11 @@ def _open_system_shell():
 
 
 def load_plugin() -> None:
-    if not inside_flatpak():
-        get_workbench().add_command(
-            "OpenSystemShell",
-            "tools",
-            tr("Open system shell..."),
-            _open_system_shell,
-            group=80,
-            image="terminal",
-        )
+    get_workbench().add_command(
+        "OpenSystemShell",
+        "tools",
+        tr("Open system shell..."),
+        _open_system_shell,
+        group=80,
+        image="terminal",
+    )

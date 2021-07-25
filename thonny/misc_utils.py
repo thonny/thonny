@@ -518,3 +518,13 @@ def inside_flatpak():
     import shutil
 
     return shutil.which("flatpak-spawn") and os.path.isfile("/app/manifest.json")
+
+
+def show_command_not_available_in_flatpak_message():
+    from tkinter import messagebox
+    from thonny.languages import tr
+
+    messagebox.showinfo(
+        tr("Command not available"),
+        tr("This command is not available if Thonny is run via Flatpak"),
+    )
