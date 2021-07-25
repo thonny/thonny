@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.3.13 (2021-07-25)
+===================
+* Update org.thonny.Thonny.appdata.xml
+
 3.3.12 (2021-07-25)
 ===================
 * Restore syncing to localtime for RPi Pico (fixed regression introduced in 3.3.11), #1886

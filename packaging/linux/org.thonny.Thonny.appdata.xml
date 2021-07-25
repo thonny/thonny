@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2020 Aivar Annamaa <aivar.annamaa@gmail.com> -->
+<!-- Copyright 2021 Aivar Annamaa <aivar.annamaa@gmail.com> -->
 <component type="desktop-application">
   <id>org.thonny.Thonny.desktop</id>
   <metadata_license>MIT</metadata_license>
@@ -40,5 +40,47 @@
   <provides>
     <binary>thonny</binary>
   </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="3.3.13" date="2021-07-25">
+      <description>
+        <p>
+          This is minor technical update over 3.3.12.
+          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
+        </p>
+      </description>
+    </release>
+    <release version="3.3.12" date="2021-07-25">
+      <description>
+        <p>
+          This is a bug-fix release.
+          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
+        </p>
+      </description>
+    </release>
+    <release version="3.3.11" date="2021-06-25">
+      <description>
+        <p>
+          This is a bug-fix release.
+        </p>
+      </description>
+    </release>
+    <release version="3.3.10" date="2021-05-18">
+      <description>
+        <p>
+          This is mainly a bug-fix release with one new feature -- the ability to install pip-compatible packages for MicroPython.
+        </p>
+      </description>
+    </release>
+    <release version="3.3.7" date="2021-04-30">
+      <description>
+        <p>
+          This is mainly a bug-fix release.
+        </p>
+      </description>
+    </release>
+  </releases>
 
 </component>
