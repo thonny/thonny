@@ -523,8 +523,10 @@ def inside_flatpak():
 def show_command_not_available_in_flatpak_message():
     from tkinter import messagebox
     from thonny.languages import tr
+    from thonny import get_workbench
 
     messagebox.showinfo(
         tr("Command not available"),
         tr("This command is not available if Thonny is run via Flatpak"),
+        parent=get_workbench(),
     )

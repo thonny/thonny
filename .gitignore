@@ -58,6 +58,7 @@ packaging/setuptools/*.zip
 packaging/setuptools/*.tar.gz
 packaging/setuptools/*.whl
 packaging/mac/freezing.log
+packaging/linux/repo
 thonny.egg-info
 temp_build_dir
 thonnyapp/thonnyapp.egg-info
