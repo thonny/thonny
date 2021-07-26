@@ -9,7 +9,7 @@ We are welcoming all kinds of contributions:
 * documentation
 * fixes for the language in GUI and web (Thonny's main developers don't speak English natively)
 * translations (consult docs/translate.md first)
-* plug-ins (a guide is in the works, see https://bitbucket.org/KauriRaba/thonny-microbit for now)
+* plug-ins (https://github.com/thonny/thonny/wiki/Plugins)
 * bug fixes
 * creating and maintaining Linux packages (see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=857042) 
 * tests
