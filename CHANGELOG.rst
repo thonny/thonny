@@ -2,6 +2,22 @@
 Version history
 ===============
 
+3.3.13 (2021-07-25)
+===================
+* Update org.thonny.Thonny.appdata.xml
+
+3.3.12 (2021-07-25)
+===================
+* Restore syncing to localtime for RPi Pico (fixed regression introduced in 3.3.11), #1886
+* Fix installing from requirements.txt in MicroPython, #1879
+* Allow specifying different colors for method and function calls, by Jonathan Campbell, #1884
+* Extend editor API for plug-ins (close event and content load/save hooks), by Nicolas Despres, #1891
+* Fix technical errors in some translations, by Karolina Surma, #1895
+* Warn when inputting non-ascii chars in MicroPython, #1911
+* Fix installing for all users in Windows installer, #1119 and #1909
+* Prepare Thonny for Flatpak, by Jordan Williams, #1900 and #1912
+* Update Polish translation
+
 3.3.11 (2021-06-25)
 ===================
 * Fix MicroPython management errors when user code shadows built-in names, #1856
