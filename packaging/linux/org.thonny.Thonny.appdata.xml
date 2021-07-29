@@ -47,27 +47,36 @@
     <release version="3.3.13" date="2021-07-25">
       <description>
         <p>
-            This version adds a small metadata update relevant only for Linux packagers.
+            This is minor technical update over 3.3.12.
         </p>
       </description>
+    </release>
+    <release version="3.3.12" date="2021-07-25">
+      <description>
+        <p>
+            This is a bug-fix release.
+        </p>
+      </description>
+    </release>
+
     <release version="3.3.11" date="2021-06-25">
       <description>
         <p>
-          This is a bug-fix release.
+            This is a bug-fix release.
         </p>
       </description>
     </release>
     <release version="3.3.10" date="2021-05-18">
       <description>
         <p>
-          This is mainly a bug-fix release with one new feature -- the ability to install pip-compatible packages for MicroPython.
+            This is mainly a bug-fix release with one new feature -- the ability to install pip-compatible packages for MicroPython.
         </p>
       </description>
     </release>
     <release version="3.3.7" date="2021-04-30">
       <description>
         <p>
-          This is mainly a bug-fix release.
+            This is mainly a bug-fix release.
         </p>
       </description>
     </release>
