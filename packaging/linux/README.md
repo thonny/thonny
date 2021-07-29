@@ -6,6 +6,17 @@ On Linux, the AppData file, i.e. `org.thonny.Thonny.appdata.xml` for Thonny, con
 This includes information about each release.
 Thus, before cutting a release, it's important to add at least the version of the release and the date to the top of the `releases` section of the AppData file.
 It's also helpful to add a description of the changes the new release brings with it.
+Make sure to validate this file before a release using `appstreamcli validate`.
+This can be done as follows.
+
+    sudo apt install appstream
+    appstreamcli packaging/linux/org.thonny.Thonny.appdata.xml
+
+Flatpak users may find using the dedicated Flatpak more convenient.
+
+    flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpak install --user flathub org.freedesktop.appstream-glib
+    flatpak run org.freedesktop.appstream-glib validate org.thonny.Thonny.appdata.xml
 
 ## Flatpak
 
