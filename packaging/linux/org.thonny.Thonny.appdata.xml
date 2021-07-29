@@ -47,18 +47,19 @@
     <release version="3.3.13" date="2021-07-25">
       <description>
         <p>
-            This is minor technical update over 3.3.12.
+          This is minor technical update over 3.3.12.
+          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
         </p>
       </description>
     </release>
     <release version="3.3.12" date="2021-07-25">
       <description>
         <p>
-            This is a bug-fix release.
+          This is a bug-fix release.
+          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
         </p>
       </description>
     </release>
-
     <release version="3.3.11" date="2021-06-25">
       <description>
         <p>
