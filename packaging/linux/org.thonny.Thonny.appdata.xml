@@ -48,7 +48,6 @@
       <description>
         <p>
           This is minor technical update over 3.3.12.
-          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
         </p>
       </description>
     </release>
@@ -56,7 +55,6 @@
       <description>
         <p>
           This is a bug-fix release.
-          See https://github.com/thonny/thonny/releases/tag/v3.3.13 for more info
         </p>
       </description>
     </release>
