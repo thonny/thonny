@@ -10,7 +10,7 @@ Make sure to validate this file before a release using `appstreamcli validate`.
 This can be done as follows.
 
     sudo apt install appstream
-    appstreamcli packaging/linux/org.thonny.Thonny.appdata.xml
+    appstreamcli org.thonny.Thonny.appdata.xml
 
 Flatpak users may find using the dedicated Flatpak more convenient.
 
