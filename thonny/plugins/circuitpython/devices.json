@@ -468,5 +468,16 @@
         "USB_PID": "0x001B",
         "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/feather_m0_express/{lang}/adafruit-circuitpython-feather_m0_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/feather_m0_express/"
+    },
+    "nRF52840-Clue-revA": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "Adafruit CLUE - nRF52840 Express with Bluetooth LE",
+        "VOLUME_LABEL": "CLUEBOOT",
+        "INDEX_URL": "http://adafru.it/4500",
+        "BOARD_ID": "nRF52840-Clue-revA",
+        "USB_VID": "0x239A",
+        "USB_PID": "",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/clue_nrf52840_express/{lang}/adafruit-circuitpython-clue_nrf52840_express-{lang}-{release}.uf2",
+        "CP_URL": "https://circuitpython.org/board/clue_nrf52840_express/"
     }
 }
