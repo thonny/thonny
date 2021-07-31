@@ -26,64 +26,75 @@ finish-args:
   - --share=network
   - --socket=x11
 modules:
-  - name: tcl
-    buildsystem: autotools
-    subdir: unix
-    build-options:
-      no-debuginfo: true
-    cleanup:
-      - /bin
-      - /lib/debug
-      - /lib/pkgconfig
-      - /man
+  - name: tkinter
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} .
     sources:
-      - type: archive
-        url: https://prdownloads.sourceforge.net/tcl/tcl8.6.11-src.tar.gz
-        sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
-  - name: tk
-    buildsystem: autotools
-    subdir: unix
-    build-options:
-      no-debuginfo: true
-    cleanup:
-      - /bin
-      - /lib/debug
-      - /lib/pkgconfig
-      - /man
+      - type: git
+        url: https://github.com/iwalton3/tkinter-standalone
+        commit: ba946536054f9d27a08aafde21aa18330ce05729
+    modules:
+      - name: tcl
+        buildsystem: autotools
+        subdir: unix
+        build-options:
+          no-debuginfo: true
+        cleanup:
+          - /bin
+          - /lib/debug
+          - /lib/pkgconfig
+          - /man
+        sources:
+          - type: archive
+            url: https://prdownloads.sourceforge.net/tcl/tcl8.6.11-src.tar.gz
+            sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
+      - name: tk
+        buildsystem: autotools
+        subdir: unix
+        build-options:
+          no-debuginfo: true
+        cleanup:
+          - /bin
+          - /lib/debug
+          - /lib/pkgconfig
+          - /man
+        sources:
+          - type: archive
+            url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
+            sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
+  - name: python3-setuptools_scm
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "setuptools_scm" --no-build-isolation
     sources:
-      - type: archive
-        url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
-        sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
-  # Derived from how the Freedesktop Sdk bundles Python: https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/elements/components/python3.bst
-  - name: python
-    buildsystem: autotools
-    config-opts:
-      - --enable-optimizations
-      - --with-ensurepip=install
-      - --enable-shared
-      - --with-system-expat
-      - --with-system-ffi
-      - --enable-loadable-sqlite-extensions
-      - --with-dbmliborder=gdbm
-    cleanup:
-      - /bin/idle*
-      - /lib/pkgconfig
-      - /lib/python3.8/idlelib
-      - /lib/python3.8/test
-      - /lib/python3.8/turtle*
-      - /lib/python3.8/__pycache__/turtle.*
-      - /lib/python3.8/*/test
-      - /lib/python3.8/*/tests
-    cleanup-commands:
-      - find "/lib" -name "lib*.a" -exec rm {} ";"
+      - type: file
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+  - name: python3-poetry-core
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "poetry-core" --no-build-isolation
     sources:
-      - type: archive
-        url: https://www.python.org/ftp/python/3.8.8/Python-3.8.8.tar.xz
-        sha256: 7c664249ff77e443d6ea0e4cf0e587eae918ca3c48d081d1915fe2a1f1bcc5cc
-  - python3-wheel.json
+      - type: file
+        url: https://files.pythonhosted.org/packages/d0/b3/1017f2f6d801f1e3e4ffee3f058a10d20df1a9560aba9c5b49e92cdd9912/poetry-core-1.0.3.tar.gz
+        sha256: 2315c928249fc3207801a81868b64c66273077b26c8d8da465dccf8f488c90c5
+  - name: pytest-runner
+    buildsystem: simple
+    build-commands:
+      - python3 setup.py install --prefix=${FLATPAK_DEST}
+    sources:
+      - type: git
+        url: https://github.com/pytest-dev/pytest-runner.git
+        tag: v5.3.1
+        commit: 592d891f99371664387e319eb45c3d28ba485afc
   - python3-modules.json
   - name: thonny
     buildsystem: simple
+    ensure-writable:
+      - /lib/python3.8/site-packages/easy-install.pth
     build-commands:
       - python3 setup.py install --prefix=${FLATPAK_DEST}
 
