@@ -35,7 +35,7 @@ Add the Flathub repository.
 
 Install the FreeDesktop SDK and Platform.
 
-    flatpak install --user flathub org.freedesktop.Sdk//20.08 org.freedesktop.Platform//20.08
+    flatpak install --user flathub org.freedesktop.Sdk//20.08
 
 Install Flatpak Builder.
 
@@ -51,10 +51,9 @@ Run the Flatpak.
 
 ### Update
 
-The Python dependencies for the Flatpak are generated with the [Flatpak Pip Generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/pip).
-This tool is used to produces the `python3-modules.json` file, which are included in the Flatpak manifest.
-In order to update the dependencies used in the Flatpak, these file can be regenerated.
-Follow the instructions here to do so.
+The Python dependencies for the Flatpak are generated with the help of the [Flatpak Pip Generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/pip).
+This tool produces `json` files for Python packages to be included in the Flatpak manifest's `modules` section.
+In order to update or add dependencies in the Flatpak, these dependencies can be generated using the following instructions.
 
 First, install the Python dependency `requirements-parser`.
 
@@ -64,8 +63,10 @@ Clone the [Flatpak Builder Tools](https://github.com/flatpak/flatpak-builder-too
 
     git clone https://github.com/flatpak/flatpak-builder-tools.git
 
-Run the Flatpak Pip Generator script in the produce an updated `python3-modules.json` manifest.
-The dependencies for the `python3-modules.json` manifest are retrieved from Thonny's `requirements.txt` file.
+Now run the Flatpak Pip Generator script for the necessary packages.
+The necessary packages are listed in the files `packaging/requirements-regular-bundle.txt` and `packaging/requirements-xxl-bundle.txt` in Thonny's repository.
+The following command shows how to retrieve packages from Thonny's `requirements.txt` file by producing a `python3-modules.json` file.
+I usually convert these to YAML and place them directly in the Flatpak manifest for readability.
 
     python3 flatpak-builder-tools/pip/flatpak-pip-generator --runtime org.freedesktop.Sdk//20.08 $(cat ../../requirements.txt)
 
