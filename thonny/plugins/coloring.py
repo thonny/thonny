@@ -153,7 +153,9 @@ class SyntaxColorer:
     def schedule_update(self):
         self._highlight_tabs = get_workbench().get_option("view.highlight_tabs")
         self._use_coloring = (
-            get_workbench().get_option("view.syntax_coloring") and self.text.is_python_text()
+            get_workbench().get_option("view.syntax_coloring")
+            and self.text.is_python_text()
+            or self.text.is_pythonlike_text()
         )
 
         if not self._update_scheduled:

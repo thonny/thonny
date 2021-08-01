@@ -28,6 +28,8 @@ from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 _dialog_filetypes = [("Python files", ".py .pyw .pyi"), ("all files", ".*")]
 
 REMOTE_PATH_MARKER = " :: "
+PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
+PYTHONLIKE_EXTENSIONS = set()
 
 logger = logging.getLogger(__name__)
 
@@ -314,8 +316,10 @@ class Editor(ttk.Frame):
             self._code_view.set_file_type(None)
         else:
             ext = self._filename.split(".")[-1].lower()
-            if ext in ["py", "pyw", "pyi"]:
+            if ext in PYTHON_EXTENSIONS:
                 file_type = "python"
+            elif ext in PYTHONLIKE_EXTENSIONS:
+                file_type = "pythonlike"
             else:
                 file_type = None
 

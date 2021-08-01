@@ -100,6 +100,9 @@ class SyntaxText(EnhancedText):
     def is_python_text(self):
         return self.file_type == "python"
 
+    def is_pythonlike_text(self):
+        return self.file_type == "pythonlike"
+
     def update_tabs(self):
         tab_chars = 4
         tab_pixels = tk.font.nametofont(self["font"]).measure("n" * tab_chars)
