@@ -19,9 +19,6 @@ finish-args:
   # Thonny requires access to serial / USB devices for embedded development.
   - --device=all
 
-  # Ensure that extra Python packages, such as Thonny plugins, are installed to a location inside the Flatpak.
-  - --persist=.local/lib
-
   - --share=ipc
   - --share=network
   - --socket=x11
