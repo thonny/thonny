@@ -26,6 +26,7 @@ finish-args:
   - --share=network
   - --socket=x11
 modules:
+  # The `tkinter` module is missing from the Freedesktop Sdk's Python installation.
   - name: tkinter
     buildsystem: simple
     build-commands:
@@ -63,36 +64,145 @@ modules:
           - type: archive
             url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
             sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
-  - name: python3-setuptools_scm
+
+  - name: python3-jedi
     buildsystem: simple
     build-commands:
       - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
-        --prefix=${FLATPAK_DEST} "setuptools_scm" --no-build-isolation
+        --prefix=${FLATPAK_DEST} "jedi>=0.13" --no-build-isolation
     sources:
       - type: file
-        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
-        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
-  - name: python3-poetry-core
+        url: https://files.pythonhosted.org/packages/5e/61/d119e2683138a934550e47fc8ec023eb7f11b194883e9085dca3af5d4951/parso-0.8.2.tar.gz
+        sha256: 12b83492c6239ce32ff5eed6d3639d6a536170723c6f3f1506869f1ace413398
+      - type: file
+        url: https://files.pythonhosted.org/packages/ac/11/5c542bf206efbae974294a61febc61e09d74cb5d90d8488793909db92537/jedi-0.18.0.tar.gz
+        sha256: 92550a404bad8afed881a137ec9a461fed49eca661414be45059329614ed0707
+  - name: python3-pyserial
     buildsystem: simple
     build-commands:
       - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
-        --prefix=${FLATPAK_DEST} "poetry-core" --no-build-isolation
+        --prefix=${FLATPAK_DEST} "pyserial>=3.4" --no-build-isolation
     sources:
       - type: file
-        url: https://files.pythonhosted.org/packages/d0/b3/1017f2f6d801f1e3e4ffee3f058a10d20df1a9560aba9c5b49e92cdd9912/poetry-core-1.0.3.tar.gz
-        sha256: 2315c928249fc3207801a81868b64c66273077b26c8d8da465dccf8f488c90c5
-  - name: pytest-runner
+        url: https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz
+        sha256: 3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb
+  - name: python3-pylint
     buildsystem: simple
     build-commands:
-      - python3 setup.py install --prefix=${FLATPAK_DEST}
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "pylint>=1.9" --no-build-isolation
     sources:
-      - type: git
-        url: https://github.com/pytest-dev/pytest-runner.git
-        tag: v5.3.1
-        commit: 592d891f99371664387e319eb45c3d28ba485afc
+      - type: file
+        url: https://files.pythonhosted.org/packages/82/f7/e43cefbe88c5fd371f4cf0cf5eb3feccd07515af9fd6cf7dbf1d1793a797/wrapt-1.12.1.tar.gz
+        sha256: b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7
+      - type: file
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        url: https://files.pythonhosted.org/packages/bb/f5/646893a04dcf10d4acddb61c632fd53abb3e942e791317dcdd57f5800108/lazy-object-proxy-1.6.0.tar.gz
+        sha256: 489000d368377571c6f982fba6497f2aa13c6d1facc40660963da62f5c379726
+      - type: file
+        url: https://files.pythonhosted.org/packages/89/e7/69f2b466eaf494f90f9aee9f802ab9305e2af1b9cd6aebdfdf36800706c8/astroid-2.6.5.tar.gz
+        sha256: 83e494b02d75d07d4e347b27c066fd791c0c74fc96c613d1ea3de0c82c48168f
+      - type: file
+        url: https://files.pythonhosted.org/packages/47/18/d148ae88f254cbb9a8763beae34027bc603dc6f57b29c48f7cb3f2e28cde/pylint-2.9.6.tar.gz
+        sha256: 8b838c8983ee1904b2de66cce9d0b96649a91901350e956d78f289c3bc87b48e
+    modules:
+      - name: python3-isort
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "isort" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/1c/34/ed9178b5b23ade4561bf77b91856e0e3bc094620fd81bd74d535817a0f0d/isort-5.9.3.tar.gz
+            sha256: 9c2ea1e62d871267b78307fe511c0838ba0da28698c5732d54e2790bf3ba9899
+        modules:
+          - name: python3-poetry-core
+            buildsystem: simple
+            build-commands:
+              - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+                --prefix=${FLATPAK_DEST} "poetry-core" --no-build-isolation
+            sources:
+              - type: file
+                url: https://files.pythonhosted.org/packages/d0/b3/1017f2f6d801f1e3e4ffee3f058a10d20df1a9560aba9c5b49e92cdd9912/poetry-core-1.0.3.tar.gz
+                sha256: 2315c928249fc3207801a81868b64c66273077b26c8d8da465dccf8f488c90c5
+      - name: python3-mccabe
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "mccabe" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/06/18/fa675aa501e11d6d6ca0ae73a101b2f3571a565e0f7d38e062eec18a91ee/mccabe-0.6.1.tar.gz
+            sha256: dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f
+        modules:
+          - name: pytest-runner
+            buildsystem: simple
+            build-commands:
+              - python3 setup.py install --prefix=${FLATPAK_DEST}
+            sources:
+              - type: git
+                url: https://github.com/pytest-dev/pytest-runner.git
+                tag: v5.3.1
+                commit: 592d891f99371664387e319eb45c3d28ba485afc
+            modules:
+              - name: python3-setuptools_scm
+                buildsystem: simple
+                build-commands:
+                  - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+                    --prefix=${FLATPAK_DEST} "setuptools_scm" --no-build-isolation
+                sources:
+                  - type: file
+                    url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+                    sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+  - name: python3-docutils
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "docutils>=0.14" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/4c/17/559b4d020f4b46e0287a2eddf2d8ebf76318fd3bd495f1625414b052fdc9/docutils-0.17.1.tar.gz
+        sha256: 686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125
+  - name: python3-mypy
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "mypy>=0.670" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        url: https://files.pythonhosted.org/packages/aa/55/62e2d4934c282a60b4243a950c9dbfa01ae7cac0e8d6c0b5315b87432c81/typing_extensions-3.10.0.0.tar.gz
+        sha256: 50b6f157849174217d0656f99dc82fe932884fb250826c18350e159ec6cdf342
+      - type: file
+        url: https://files.pythonhosted.org/packages/63/60/0582ce2eaced55f65a4406fc97beba256de4b7a95a0034c6576458c6519f/mypy_extensions-0.4.3.tar.gz
+        sha256: 2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8
+      - type: file
+        url: https://files.pythonhosted.org/packages/33/46/b5d01f8844c84772e950bfc6adcaaa94cd22fedeb7c01776fd6effb3c2f6/mypy-0.910.tar.gz
+        sha256: 704098302473cb31a218f1775a873b376b30b4c18229421e9e9dc8916fd16150
+  - name: python3-asttokens
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "asttokens>=1.1" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/aa/51/59965dead3960a97358f289c7c11ebc1f6c5d28710fab5d421000fe60353/asttokens-2.0.5.tar.gz
+        sha256: 9a54c114f02c7a9480d56550932546a3f1fe71d8a02f1bc7ccd0ee3ee35cf4d5
+  - name: python3-Send2Trash
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "Send2Trash>=1.4" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/6c/9d/d66cc2adbe7643b3ce8bc100a0e5283ca97aba40630763fabe76d4f7bbfc/Send2Trash-1.7.1.tar.gz
+        sha256: 17730aa0a33ab82ed6ca76be3bb25f0433d0014f1ccf63c979bab13a5b9db2b2
 
-  - python3-modules.json
-
+  # Regular Bundle Packages
   - name: python3-esptool
     buildsystem: simple
     build-commands:
@@ -124,6 +234,7 @@ modules:
         url: https://files.pythonhosted.org/packages/9c/c8/28f21b3d3b5e1f1d249be52cdd91793c8c3f7c4f4f255ece7d50984fb05d/esptool-3.1.tar.gz
         sha256: ec6b943c53b4d71f87f98776333d5b4b99905766898a7002c28a9090b92b2de4
     modules:
+      # Install an older version of the cryptography module until we have time to figure out how to package the newer versions that use Rust here.
       - name: python3-cryptography
         buildsystem: simple
         build-commands:
@@ -139,7 +250,6 @@ modules:
           - type: file
             url: https://files.pythonhosted.org/packages/b7/82/f7a4ddc1af185936c1e4fa000942ffa8fb2d98cff26b75afa7b3c63391c4/cryptography-3.3.1.tar.gz
             sha256: 7e177e4bea2de937a584b13645cab32f25e3d96fc0bc4a4cf99c27dc77682be6
-
   - name: python3-paramiko
     buildsystem: simple
     build-commands:
@@ -163,7 +273,6 @@ modules:
       - type: file
         url: https://files.pythonhosted.org/packages/cf/a1/20d00ce559a692911f11cadb7f94737aca3ede1c51de16e002c7d3a888e0/paramiko-2.7.2.tar.gz
         sha256: 7f36f4ba2c0d81d219f4595e35f70d56cc94f9ac40a6acdf51d6ca210ce65035
-
   - name: python3-ptyprocess
     buildsystem: simple
     build-commands:
@@ -186,7 +295,6 @@ modules:
           - type: file
             url: https://files.pythonhosted.org/packages/a7/06/700a2ae25c67bf3722c9b01788f43808ebc94b6a544b5008770e19406f6a/flit_core-3.2.0.tar.gz
             sha256: ff87f25c5dbc24ef30ea334074e35030e4885e4c5de3bf4e21f15746f6d99431
-
   - name: python3-websockets
     buildsystem: simple
     build-commands:
@@ -196,6 +304,529 @@ modules:
       - type: file
         url: https://files.pythonhosted.org/packages/0d/bd/5262054455ab2067e51de331bfbc53a1dfa9071af7c424cf7c0793c4349a/websockets-9.1.tar.gz
         sha256: 276d2339ebf0df4f45df453923ebd2270b87900eda5dfd4a6b0cfa15f82111c3
+
+  # XXL Bundle Packages
+  - name: python3-numpy
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "numpy==1.21.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+        sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+  - name: python3-guizero
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "guizero==1.2.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/c1/33/eb8a73d8c78383c640b97af6bb4731fb849bc34731d6cd0214b1c5ea7905/guizero-1.2.0.tar.gz
+        sha256: 0d8fbb0d4fc5e2aaf59e7633ba4119eb4811b58ef45328177aae7f2fc810b086
+  - name: python3-gpiozero
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "gpiozero==1.6.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/b3/ca/688824a06e8c4d04c7d2fd2af2d8da27bed51af20ee5f094154e1d680334/colorzero-2.0.tar.gz
+        sha256: e7d5a5c26cd0dc37b164ebefc609f388de24f8593b659191e12d85f8f9d5eb58
+      - type: file
+        url: https://files.pythonhosted.org/packages/86/e1/88d1fde5ce042a12e231ff032ae1aace89670ad15497672b28a6eb5699e9/gpiozero-1.6.2.tar.gz
+        sha256: 0eb95a9db372146813276f92de7f43c883a3e9fe69597fc3d29c04ef3d5d5f9e
+  - name: python3-requests
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "requests==2.25.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/4f/5a/597ef5911cb8919efe4d86206aa8b2658616d676a7088f0825ca08bd7cb8/urllib3-1.26.6.tar.gz
+        sha256: f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f
+      - type: file
+        url: https://files.pythonhosted.org/packages/ea/b7/e0e3c1c467636186c39925827be42f16fee389dc404ac29e930e9136be70/idna-2.10.tar.gz
+        sha256: b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6
+      - type: file
+        url: https://files.pythonhosted.org/packages/ee/2d/9cdc2b527e127b4c9db64b86647d567985940ac3698eeabc7ffaccb4ea61/chardet-4.0.0.tar.gz
+        sha256: 0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa
+      - type: file
+        url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+      - type: file
+        url: https://files.pythonhosted.org/packages/6b/47/c14abc08432ab22dc18b9892252efaf005ab44066de871e72a38d6af464b/requests-2.25.1.tar.gz
+        sha256: 27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804
+  - name: python3-pillow
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "pillow==8.2.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/21/23/af6bac2a601be6670064a817273d4190b79df6f74d8012926a39bc7aa77f/Pillow-8.2.0.tar.gz
+        sha256: a787ab10d7bb5494e5f76536ac460741788f1fbce851068d73a87ca7c35fc3e1
+  - name: python3-scipy
+    buildsystem: simple
+    build-options:
+      env:
+        ATLAS: None
+        BLAS: "/app/lib"
+        LAPACK: "/app/lib"
+        LDFLAGS: "-shared"
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "scipy==1.7.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+        sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+      - type: file
+        url: https://files.pythonhosted.org/packages/bb/bb/944f559d554df6c9adf037aa9fc982a9706ee0e96c0d5beac701cb158900/scipy-1.7.0.tar.gz
+        sha256: 998c5e6ea649489302de2c0bc026ed34284f531df89d2bdc8df3a0d44d165739
+    modules:
+      - name: python3-pybind11
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "pybind11" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/d5/7c/29581ced92db0e1092d745f832ec89fd37c0c20ac6dfee271bcc1fca733d/pybind11-2.7.0.tar.gz
+            sha256: 3e2a9a94396fbb27e75acf28d3de26e029576be1d4b38acc846ae08ef0eb3033
+      - name: python3-pythran
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "pythran" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+            sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+          - type: file
+            url: https://files.pythonhosted.org/packages/e5/69/882ee5c9d017149285cab114ebeab373308ef0f874fcdac9beb90e0ac4da/ply-3.11.tar.gz
+            sha256: 00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3
+          - type: file
+            url: https://files.pythonhosted.org/packages/b7/9c/45b706be126aebf3491b07450f3ba419039b6d0b5a9cc0991b5598eedddd/gast-0.5.1.tar.gz
+            sha256: b00e63584db482ffe6107b5832042bbe5c5bf856e3c7279b6e93201b3dcfcb46
+          - type: file
+            url: https://files.pythonhosted.org/packages/36/09/a4a6a967ca5bcfc0bd6162df4ee93017301fa7d9671483c849300bdba0db/beniget-0.4.0.tar.gz
+            sha256: 72bbd47b1ae93690f5fb2ad3902ce1ae61dcd868ce6cfbf33e9bad71f9ed8749
+          - type: file
+            url: https://files.pythonhosted.org/packages/c6/e6/986a967dcca91d89e36f4d4a2f69a052030bce01a7cd48a6b7fba1a50189/pythran-0.9.12.post1.tar.gz
+            sha256: e7589cf83b0befa9a1b55e98223caf89aff887d9e3f14be912cf8703a717f185
+      - name: lapack
+        buildsystem: cmake-ninja
+        builddir: true
+        config-opts:
+          - -DCMAKE_INSTALL_PREFIX=/app
+          - -DCMAKE_INSTALL_LIBDIR=lib
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DBUILD_SHARED_LIBS=ON
+          - -DBUILD_TESTING=OFF
+          - -DLAPACKE=ON
+          - -DCBLAS=ON
+        sources:
+          - type: git
+            url: https://github.com/Reference-LAPACK/lapack
+            tag: v3.10.0
+            commit: aa631b4b4bd13f6ae2dbab9ae9da209e1e05b0fc
+        cleanup:
+          - /lib/cmake
+  - name: python3-matplotlib
+    buildsystem: simple
+    build-commands:
+      - python3 setup.py install --prefix=${FLATPAK_DEST} --root=/
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/60/d3/286925802edaeb0b8834425ad97c9564ff679eb4208a184533969aa5fc29/matplotlib-3.4.2.tar.gz
+        sha256: d8d994cefdff9aaba45166eb3de4f5211adb4accac85cbf97137e98f26ea0219
+      - type: archive
+        url: https://downloads.sourceforge.net/project/freetype/freetype2/2.6.1/freetype-2.6.1.tar.gz
+        dest: build/freetype-2.6.1
+        sha256: 0a3c7dfbda6da1e8fce29232e8e96d987ababbbf71ebc8c75659e4132c367014
+      - type: archive
+        url: http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz
+        dest: build/qhull-2020.2
+        sha256: b5c2d7eb833278881b952c8a52d20179eab87766b00b865000469a45c1838b7e
+    modules:
+      - name: python3-cycler
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "cycler" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/c2/4b/137dea450d6e1e3d474e1d873cd1d4f7d3beed7e0dc973b06e8e10d32488/cycler-0.10.0.tar.gz
+            sha256: cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8
+      - name: python3-numpy
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "numpy" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+            sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+      - name: python3-pillow
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "Pillow" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/21/23/af6bac2a601be6670064a817273d4190b79df6f74d8012926a39bc7aa77f/Pillow-8.2.0.tar.gz
+            sha256: a787ab10d7bb5494e5f76536ac460741788f1fbce851068d73a87ca7c35fc3e1
+      - name: python3-pyparsing
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "pyparsing" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz
+            sha256: c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1
+      - name: python3-python-dateutil
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "python-dateutil" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz
+            sha256: 0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86
+      - name: python3-kiwisolver
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "kiwisolver" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/90/55/399ab9f2e171047d28933ae4b686d9382d17e6c09a01bead4a6f6b5038f4/kiwisolver-1.3.1.tar.gz
+            sha256: 950a199911a8d94683a6b10321f9345d5a3a8433ec58b217ace979e18f16e248
+        modules:
+          - name: python3-cppy
+            buildsystem: simple
+            build-commands:
+              - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+                --prefix=${FLATPAK_DEST} "cppy" --no-build-isolation
+            sources:
+              - type: file
+                url: https://files.pythonhosted.org/packages/36/64/be592e84c443a70ea5dcfb1c30bfe6f10ba7d8eb05c2264c7ceca8498548/cppy-1.1.0.tar.gz
+                sha256: 4eda6f1952054a270f32dc11df7c5e24b259a09fddf7bfaa5f33df9fb4a29642
+  - name: python3-flask
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "flask==2.0.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/e3/bd/a49e5f756b2f29010b5be321fe02478660dbf8fefea3f078493c86011b5f/Werkzeug-2.0.1.tar.gz
+        sha256: 1de1db30d010ff1af14a009224ec49ab2329ad2cde454c8a708130642d579c42
+      - type: file
+        url: https://files.pythonhosted.org/packages/bf/10/ff66fea6d1788c458663a84d88787bae15d45daa16f6b3ef33322a51fc7e/MarkupSafe-2.0.1.tar.gz
+        sha256: 594c67807fb16238b30c44bdf74f36c02cdf22d1c8cda91ef8a0ed8dabf5620a
+      - type: file
+        url: https://files.pythonhosted.org/packages/39/11/8076571afd97303dfeb6e466f27187ca4970918d4b36d5326725514d3ed3/Jinja2-3.0.1.tar.gz
+        sha256: 703f484b47a6af502e743c9122595cc812b0271f661722403114f71a79d0f5a4
+      - type: file
+        url: https://files.pythonhosted.org/packages/58/66/d6c5859dcac92b442626427a8c7a42322068c5cd5d4a463ce78b93f730b7/itsdangerous-2.0.1.tar.gz
+        sha256: 9e724d68fc22902a1435351f84c3fb8623f303fffcc566a4cb952df8c572cff0
+      - type: file
+        url: https://files.pythonhosted.org/packages/21/83/308a74ca1104fe1e3197d31693a7a2db67c2d4e668f20f43a2fca491f9f7/click-8.0.1.tar.gz
+        sha256: 8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a
+      - type: file
+        url: https://files.pythonhosted.org/packages/c0/df/c516b5f38a670b6b0de604c2637ed5860db03692c2f8542fd1f60c2552a7/Flask-2.0.1.tar.gz
+        sha256: 1c4c257b1892aec1398784c63791cbaa43062f1f7aeb555c4da961b20ee68f55
+  - name: python3-pytest
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "pytest==6.2.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        url: https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz
+        sha256: c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1
+      - type: file
+        url: https://files.pythonhosted.org/packages/df/86/aef78bab3afd461faecf9955a6501c4999933a48394e90f03cd512aad844/packaging-21.0.tar.gz
+        sha256: 7dc96269f53a4ccec5c0670940a4281106dd0bb343f47b7471f779df49c2fbe7
+      - type: file
+        url: https://files.pythonhosted.org/packages/23/a2/97899f6bd0e873fed3a7e67ae8d3a08b21799430fb4da15cfedf10d6e2c2/iniconfig-1.1.1.tar.gz
+        sha256: bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32
+      - type: file
+        url: https://files.pythonhosted.org/packages/0d/8c/50e9f3999419bb7d9639c37e83fa9cdcf0f601a9d407162d6c37ad60be71/py-1.10.0.tar.gz
+        sha256: 21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3
+      - type: file
+        url: https://files.pythonhosted.org/packages/f8/04/7a8542bed4b16a65c2714bf76cf5a0b026157da7f75e87cc88774aa10b14/pluggy-0.13.1.tar.gz
+        sha256: 15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0
+      - type: file
+        url: https://files.pythonhosted.org/packages/ed/d6/3ebca4ca65157c12bd08a63e20ac0bdc21ac7f3694040711f9fd073c0ffb/attrs-21.2.0.tar.gz
+        sha256: ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb
+      - type: file
+        url: https://files.pythonhosted.org/packages/5b/98/92bbda5f83ed995ef8953349ef30c77c934abcc251c42ab3d7787a40c49c/pytest-6.2.4.tar.gz
+        sha256: 50bcad0a0b9c5a72c8e4e7c9855a3ad496ca6a881a3641b4260605450772c54b
+  - name: python3-colorama
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "colorama==0.4.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/1f/bb/5d3246097ab77fa083a61bd8d3d527b7ae063c7d8e8671b1cf8c4ec10cbe/colorama-0.4.4.tar.gz
+        sha256: 5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b
+  - name: python3-birdseye
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "birdseye" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/47/6d/be10df2b141fcb1020c9605f7758881b5af706fb09a05b737e8eb7540387/greenlet-1.1.0.tar.gz
+        sha256: c87df8ae3f01ffb4483c796fe1b15232ce2b219f0b18126948616224d3f658ee
+      - type: file
+        url: https://files.pythonhosted.org/packages/98/cb/88d6c5f72a15180e2c0c4c04fd42d038e52287ad97ac21fa9503d20ddb82/SQLAlchemy-1.4.22.tar.gz
+        sha256: ec1be26cdccd60d180359a527d5980d959a26269a2c7b1b327a1eea0cab37ed8
+      - type: file
+        url: https://files.pythonhosted.org/packages/4f/5a/597ef5911cb8919efe4d86206aa8b2658616d676a7088f0825ca08bd7cb8/urllib3-1.26.6.tar.gz
+        sha256: f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f
+      - type: file
+        url: https://files.pythonhosted.org/packages/cb/38/4c4d00ddfa48abe616d7e572e02a04273603db446975ab46bbcd36552005/idna-3.2.tar.gz
+        sha256: 467fbad99067910785144ce333826c71fb0e63a425657295239737f7ecd125f3
+      - type: file
+        url: https://files.pythonhosted.org/packages/e7/4e/2af0238001648ded297fb54ceb425ca26faa15b341b4fac5371d3938666e/charset-normalizer-2.0.4.tar.gz
+        sha256: f23667ebe1084be45f6ae0538e4a5a865206544097e4e8bbcacf42cd02a348f3
+      - type: file
+        url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+      - type: file
+        url: https://files.pythonhosted.org/packages/e7/01/3569e0b535fb2e4a6c384bdbed00c55b9d78b5084e0fb7f4d0bf523d7670/requests-2.26.0.tar.gz
+        sha256: b8aa58f8cf793ffd8782d3d8cb19e66ef36f7aba4353eec859e74678b01b07a7
+      - type: file
+        url: https://files.pythonhosted.org/packages/b3/db/ee41b30c1779eda170d5af6c3df4d2ac8c8b65b9f3b9477bfab60ac26e54/outdated-0.2.1.tar.gz
+        sha256: d92921a3d77bc56a6d39c0af321aad44b223906ebb6e8139996d26116baec573
+      - type: file
+        url: https://files.pythonhosted.org/packages/d4/1e/d1057df6928e817e2b77ec2ac5581a6c3f7c5c332cf112a645db4d4c6f71/humanize-3.10.0.tar.gz
+        sha256: b2413730ce6684f85e0439a5b80b8f402e09f03e16ab8023d1da758c6ff41148
+      - type: file
+        url: https://files.pythonhosted.org/packages/32/65/556648b9f83e08b8e482873028d4ed5b5d0dd1adcc7dc84351f6aa738fed/Flask-Humanize-0.3.0.tar.gz
+        sha256: f65a7b4cfcdeee1b1987f40af0f0e10f99f95423bf04e04720e7c086ea9f3d49
+      - type: file
+        url: https://files.pythonhosted.org/packages/e3/bd/a49e5f756b2f29010b5be321fe02478660dbf8fefea3f078493c86011b5f/Werkzeug-2.0.1.tar.gz
+        sha256: 1de1db30d010ff1af14a009224ec49ab2329ad2cde454c8a708130642d579c42
+      - type: file
+        url: https://files.pythonhosted.org/packages/bf/10/ff66fea6d1788c458663a84d88787bae15d45daa16f6b3ef33322a51fc7e/MarkupSafe-2.0.1.tar.gz
+        sha256: 594c67807fb16238b30c44bdf74f36c02cdf22d1c8cda91ef8a0ed8dabf5620a
+      - type: file
+        url: https://files.pythonhosted.org/packages/39/11/8076571afd97303dfeb6e466f27187ca4970918d4b36d5326725514d3ed3/Jinja2-3.0.1.tar.gz
+        sha256: 703f484b47a6af502e743c9122595cc812b0271f661722403114f71a79d0f5a4
+      - type: file
+        url: https://files.pythonhosted.org/packages/58/66/d6c5859dcac92b442626427a8c7a42322068c5cd5d4a463ce78b93f730b7/itsdangerous-2.0.1.tar.gz
+        sha256: 9e724d68fc22902a1435351f84c3fb8623f303fffcc566a4cb952df8c572cff0
+      - type: file
+        url: https://files.pythonhosted.org/packages/21/83/308a74ca1104fe1e3197d31693a7a2db67c2d4e668f20f43a2fca491f9f7/click-8.0.1.tar.gz
+        sha256: 8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a
+      - type: file
+        url: https://files.pythonhosted.org/packages/c0/df/c516b5f38a670b6b0de604c2637ed5860db03692c2f8542fd1f60c2552a7/Flask-2.0.1.tar.gz
+        sha256: 1c4c257b1892aec1398784c63791cbaa43062f1f7aeb555c4da961b20ee68f55
+      - type: file
+        url: https://files.pythonhosted.org/packages/b6/f9/309963de44b20c7f343e39f00e35477a863bc38aa75a0aa2a831f98d2f15/cheap_repr-0.4.5.tar.gz
+        sha256: 5b8cde6babbe953bd8b83be18ba13d24f7f1f845b052c365c10c54d9da11aab4
+      - type: file
+        url: https://files.pythonhosted.org/packages/61/2c/d21c1c23c2895c091fa7a91a54b6872098fea913526932d21902088a7c41/cached-property-1.5.2.tar.gz
+        sha256: 9fa5755838eecbb2d234c3aa390bd80fbd3ac6b6869109bfc1b499f7bd89a130
+      - type: file
+        url: https://files.pythonhosted.org/packages/aa/51/59965dead3960a97358f289c7c11ebc1f6c5d28710fab5d421000fe60353/asttokens-2.0.5.tar.gz
+        sha256: 9a54c114f02c7a9480d56550932546a3f1fe71d8a02f1bc7ccd0ee3ee35cf4d5
+      - type: file
+        url: https://files.pythonhosted.org/packages/4e/b1/bb4e06f010947d67349f863b6a2ad71577f85590180a935f60543f622652/littleutils-0.2.2.tar.gz
+        sha256: e6cae3a4203e530d51c9667ed310ffe3b1948f2876e3d69605b3de4b7d96916f
+      - type: file
+        url: https://files.pythonhosted.org/packages/4f/98/98bf3cee5eb869d20e826319278407de6cec2250303fe8e3d941870a89cf/birdseye-0.9.1.tar.gz
+        sha256: 2cc50b702b6de0944628ba64b3eb04dec11fce3d266c3a769b7cab3bb1d14cc6
+  - name: python3-beautifulsoup4
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "beautifulsoup4==4.9.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/c8/3f/e71d92e90771ac2d69986aa0e81cf0dfda6271e8483698f4847b861dd449/soupsieve-2.2.1.tar.gz
+        sha256: "052774848f448cf19c7e959adf5566904d525f33a3f8b6ba6f6f8f26ec7de0cc"
+      - type: file
+        url: https://files.pythonhosted.org/packages/6b/c3/d31704ae558dcca862e4ee8e8388f357af6c9d9acb0cad4ba0fbbd350d9a/beautifulsoup4-4.9.3.tar.gz
+        sha256: 84729e322ad1d5b4d25f805bfa05b902dd96450f43842c4e99067d5e1369eb25
+  - name: python3-pandas
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "pandas==1.2.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/b0/61/eddc6eb2c682ea6fd97a7e1018a6294be80dba08fa28e7a3570148b4612d/pytz-2021.1.tar.gz
+        sha256: 83a4a90894bf38e243cf052c8b58f381bfe9a7a483f6a9cab140bc7f702ac4da
+      - type: file
+        url: https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz
+        sha256: 0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+        sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+      - type: file
+        url: https://files.pythonhosted.org/packages/ab/5c/b38226740306fd73d0fea979d10ef0eda2c7956f4b59ada8675ec62edba7/pandas-1.2.5.tar.gz
+        sha256: 14abb8ea73fce8aebbb1fb44bec809163f1c55241bcc1db91c2c780e97265033
+  - name: python3-lxml
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "lxml==4.6.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/e5/21/a2e4517e3d216f0051687eea3d3317557bde68736f038a3b105ac3809247/lxml-4.6.3.tar.gz
+        sha256: 39b78571b3b30645ac77b95f7c69d1bffc4cf8c3b157c435a34da72e78c82468
+  - name: python3-openpyxl
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "openpyxl==3.0.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/3d/5d/0413a31d184a20c763ad741cc7852a659bf15094c24840c5bdd1754765cd/et_xmlfile-1.1.0.tar.gz
+        sha256: 8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c
+      - type: file
+        url: https://files.pythonhosted.org/packages/f1/7d/fb475cd963bd9d244f95a90c98f518f5c834fefe749f25f9f479ca2d8a51/openpyxl-3.0.7.tar.gz
+        sha256: 6456a3b472e1ef0facb1129f3c6ef00713cebf62e736cd7a75bcc3247432f251
+  - name: python3-XlsxWriter
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "XlsxWriter==1.4.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/15/72/75b6c904ebabb3fc22965dd78e080252d5950af652a34cd3e0ed538ab1ff/XlsxWriter-1.4.5.tar.gz
+        sha256: "0956747859567ec01907e561a7d8413de18a7aae36860f979f9da52b9d58bc19"
+  - name: python3-xlrd
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "xlrd==2.0.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/a6/b3/19a2540d21dea5f908304375bd43f5ed7a4c28a370dc9122c565423e6b44/xlrd-2.0.1.tar.gz
+        sha256: f72f148f54442c6b056bf931dbc34f986fd0c3b0b6b5a58d013c9aef274d0c88
+  - name: python3-xlwt
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "xlwt==1.3.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/06/97/56a6f56ce44578a69343449aa5a0d98eefe04085d69da539f3034e2cd5c1/xlwt-1.3.0.tar.gz
+        sha256: c59912717a9b28f1a3c2a98fd60741014b06b043936dcecbc113eaaada156c88
+  - name: python3-html5lib
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "html5lib==1.1.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/02/ae6ceac1baeda530866a85075641cec12989bd8d31af6d5ab4a3e8c92f47/webencodings-0.5.1.tar.gz
+        sha256: b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923
+      - type: file
+        url: https://files.pythonhosted.org/packages/ac/b6/b55c3f49042f1df3dcd422b7f224f939892ee94f22abcf503a9b7339eaf2/html5lib-1.1.tar.gz
+        sha256: b2e5b40261e20f354d198eae92afc10d750afb487ed5e50f9c4eaf07c184146f
+  - name: python3-odfpy
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "odfpy==1.4.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz
+        sha256: 1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69
+      - type: file
+        url: https://files.pythonhosted.org/packages/97/73/8ade73f6749177003f7ce3304f524774adda96e6aaab30ea79fd8fda7934/odfpy-1.4.1.tar.gz
+        sha256: db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec
+  - name: python3-pgzero
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "pgzero==1.2.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/a7/e724c8df240687b5fd62d8c71f1a6709d455c4c09432c7412e3e64f4cbe5/numpy-1.21.1.zip
+        sha256: dff4af63638afcc57a3dfb9e4b26d434a7a602d225b42d746ea7fe2edf1342fd
+      - type: file
+        url: https://files.pythonhosted.org/packages/be/76/972af9c4ad453ecdb22115fcfaa9fca7147207aa73a93caab8a7a23c5b6a/pgzero-1.2.1.tar.gz
+        sha256: 8cadc020f028cbac3e0cbd3bb9311a1c045f1deedac7917ff433f986c38e6106
+    modules:
+      - name: pygame
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --ignore-installed --no-deps --prefix=${FLATPAK_DEST} --no-build-isolation .
+        build-options:
+          env:
+            PORTMIDI_INC_PORTTIME: "1"
+            PYGAME_EXTRA_BASE: /app
+          arch:
+            aarch64:
+              env:
+                ORIGLIBDIRS: /lib:/lib64:/lib/aarch64-linux-gnu
+            arm:
+              env:
+                ORIGLIBDIRS: /lib:/lib/arm-linux-gnueabihf
+            i386:
+              env:
+                ORIGLIBDIRS: /lib:/lib/i386-linux-gnu
+            x86_64:
+              env:
+                ORIGLIBDIRS: /lib:/lib64:/lib/x86_64-linux-gnu
+        sources:
+          - type: archive
+            url: https://files.pythonhosted.org/packages/c7/b8/06e02c7cca7aec915839927a9aa19f749ac17a3d2bb2610b945d2de0aa96/pygame-2.0.1.tar.gz
+            sha256: 8b1e7b63f47aafcdd8849933b206778747ef1802bd3d526aca45ed77141e4001
+        modules:
+          - shared-modules/SDL/SDL-1.2.15.json
+          - shared-modules/SDL/SDL_image-1.2.12.json
+          - shared-modules/SDL/SDL_ttf-2.0.11.json
+          - shared-modules/smpeg/smpeg-0.4.5.json
+          - shared-modules/SDL/SDL_mixer-1.2.12.json
+          - name: audiofile
+            sources:
+              - type: archive
+                url: http://audiofile.68k.org/audiofile-0.3.6.tar.gz
+                sha256: cdc60df19ab08bfe55344395739bb08f50fc15c92da3962fac334d3bff116965
+              - type: patch
+                path: shared-modules/pygame/audiofile-gcc6.patch
+          - name: libmikmod
+            sources:
+              - type: archive
+                url: https://sourceforge.net/projects/mikmod/files/libmikmod/3.3.11.1/libmikmod-3.3.11.1.tar.gz
+                sha256: ad9d64dfc8f83684876419ea7cd4ff4a41d8bcd8c23ef37ecb3a200a16b46d19
+          - name: fluidsynth
+            buildsystem: cmake-ninja
+            config-opts:
+              - -DCMAKE_BUILD_TYPE=Release
+            sources:
+              - type: archive
+                url: https://downloads.sourceforge.net/project/fluidsynth/fluidsynth-1.1.6/fluidsynth-1.1.6.tar.bz2
+                sha256: d28b47dfbf7f8e426902ae7fa2981d821fbf84f41da9e1b85be933d2d748f601
+              - type: patch
+                path: shared-modules/pygame/fluidsynth-no-rawmidi.patch
+          - name: portmidi
+            buildsystem: cmake-ninja
+            config-opts:
+              - -DCMAKE_BUILD_TYPE=Release
+              - -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:STRING=/app/lib
+              - -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:STRING=/app/lib
+              - -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:STRING=/app/bin
+            sources:
+              - type: archive
+                url: http://downloads.sourceforge.net/project/portmedia/portmidi/217/portmidi-src-217.zip
+                sha256: "08e9a892bd80bdb1115213fb72dc29a7bf2ff108b378180586aa65f3cfd42e0f"
+              - type: patch
+                path: shared-modules/pygame/portmidi-no-java.patch
 
   - name: thonny
     buildsystem: simple
