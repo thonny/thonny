@@ -41,10 +41,6 @@ Install Flatpak Builder.
 
     sudo apt install flatpak-builder
 
-Clone the [Flathub shared-modules](https://github.com/flathub/shared-modules) repository.
-
-    git clone https://github.com/flathub/shared-modules.git
-
 Build the Flatpak.
 
     flatpak-builder --user --install --force-clean --repo=repo thonny-flatpak-build-dir org.thonny.Thonny.Devel.yaml
