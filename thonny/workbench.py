@@ -285,7 +285,7 @@ class Workbench(tk.Tk):
         self.title("Thonny")
 
         self.set_default("layout.zoomed", False)
-        self.set_default("layout.top", 15)
+        self.set_default("layout.top", 50)
         self.set_default("layout.left", 150)
         if self.in_simple_mode():
             self.set_default("layout.width", 1050)
