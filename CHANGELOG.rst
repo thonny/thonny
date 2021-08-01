@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.3.14 (2021-08-01)
+===================
+* Fix problems in org.thonny.Thonny.appdata.xml
+* Allow assigning Python coloring for Python-like files, #1927
+* Increase the initial top coordinate of Thonny's main window. Fixes problem of Thonny's title bar being hidden by the system menubar, #1925
+
 3.3.13 (2021-07-25)
 ===================
 * Update org.thonny.Thonny.appdata.xml
