@@ -1,7 +1,7 @@
 ---
 id: org.thonny.Thonny.Devel
 branch: stable
-runtime: org.freedesktop.Platform
+runtime: org.freedesktop.Sdk
 runtime-version: "20.08"
 sdk: org.freedesktop.Sdk
 command: thonny

@@ -35,7 +35,7 @@ Add the Flathub repository.
 
 Install the FreeDesktop SDK and Platform.
 
-    flatpak install --user flathub org.freedesktop.Sdk//20.08 org.freedesktop.Platform//20.08
+    flatpak install --user flathub org.freedesktop.Sdk//20.08
 
 Install Flatpak Builder.
 
