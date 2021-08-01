@@ -44,6 +44,13 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="3.3.14" date="2021-08-01">
+      <description>
+        <p>
+          This release fixes some minor bugs.
+        </p>
+      </description>
+    </release>
     <release version="3.3.13" date="2021-07-25">
       <description>
         <p>
