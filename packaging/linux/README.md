@@ -52,8 +52,8 @@ Run the Flatpak.
 ### Update
 
 The Python dependencies for the Flatpak are generated with the [Flatpak Pip Generator](https://github.com/flatpak/flatpak-builder-tools/tree/master/pip).
-This tool is used to produces the `python3-modules.json` and `python3-wheel.json` files, which are included in the Flatpak manifest.
-In order to update the dependencies used in the Flatpak, these files must be regenerated.
+This tool is used to produces the `python3-modules.json` file, which are included in the Flatpak manifest.
+In order to update the dependencies used in the Flatpak, these file can be regenerated.
 Follow the instructions here to do so.
 
 First, install the Python dependency `requirements-parser`.
@@ -61,21 +61,16 @@ First, install the Python dependency `requirements-parser`.
     python3 -m pip install requirements-parser
 
 Clone the [Flatpak Builder Tools](https://github.com/flatpak/flatpak-builder-tools) repository.
-Currently, it's necessary to use [a fork](https://github.com/nanonyme/flatpak-builder-tools) of the project which allows building all the Python dependencies without throwing errors.
 
-    git clone https://github.com/nanonyme/flatpak-builder-tools.git
-    git -C flatpak-builder-tools switch support-build-isolation
+    git clone https://github.com/flatpak/flatpak-builder-tools.git
 
-Run the Flatpak Pip Generator script in the `packaging/linux` directory to produce an updated `python3-modules.json` manifest and an updated `python3-wheel.json` manifest.
-The dependencies for the `python3-modules.json` manifest are retrieved from the `requirements-regular-bundle.txt` and `requirements-xxl-bundle.txt` files.
+Run the Flatpak Pip Generator script in the produce an updated `python3-modules.json` manifest.
+The dependencies for the `python3-modules.json` manifest are retrieved from Thonny's `requirements.txt` file.
 
-    python3 flatpak-builder-tools/pip/flatpak-pip-generator \
-        --runtime org.freedesktop.Sdk//20.08 \
-        wheel
-    python3 flatpak-builder-tools/pip/flatpak-pip-generator \
-        --runtime org.freedesktop.Sdk//20.08 \
-        $(cat ../requirements-regular-bundle.txt) \
-        $(cat ../requirements-xxl-bundle.txt)
+    python3 flatpak-builder-tools/pip/flatpak-pip-generator --runtime org.freedesktop.Sdk//20.08 $(cat ../../requirements.txt)
 
 If you have `org.freedesktop.Sdk//20.08` installed in *both* the user and system installations, the Flatpak Pip Generator will choke generating the manifest.
 The best option at the moment is to temporarily remove either the user or the system installation until this issue is fixed upstream.
+
+Note that dependencies may have to be manually updated in order for things to work when the application is built within the Flatpak.
+Most often, more dependencies just need to be installed by adding entries to the `modules` section to the Flatpak manifest.

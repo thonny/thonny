@@ -26,64 +26,181 @@ finish-args:
   - --share=network
   - --socket=x11
 modules:
-  - name: tcl
-    buildsystem: autotools
-    subdir: unix
-    build-options:
-      no-debuginfo: true
-    cleanup:
-      - /bin
-      - /lib/debug
-      - /lib/pkgconfig
-      - /man
+  - name: tkinter
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} .
     sources:
-      - type: archive
-        url: https://prdownloads.sourceforge.net/tcl/tcl8.6.11-src.tar.gz
-        sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
-  - name: tk
-    buildsystem: autotools
-    subdir: unix
-    build-options:
-      no-debuginfo: true
-    cleanup:
-      - /bin
-      - /lib/debug
-      - /lib/pkgconfig
-      - /man
+      - type: git
+        url: https://github.com/iwalton3/tkinter-standalone
+        commit: ba946536054f9d27a08aafde21aa18330ce05729
+    modules:
+      - name: tcl
+        buildsystem: autotools
+        subdir: unix
+        build-options:
+          no-debuginfo: true
+        cleanup:
+          - /bin
+          - /lib/debug
+          - /lib/pkgconfig
+          - /man
+        sources:
+          - type: archive
+            url: https://prdownloads.sourceforge.net/tcl/tcl8.6.11-src.tar.gz
+            sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
+      - name: tk
+        buildsystem: autotools
+        subdir: unix
+        build-options:
+          no-debuginfo: true
+        cleanup:
+          - /bin
+          - /lib/debug
+          - /lib/pkgconfig
+          - /man
+        sources:
+          - type: archive
+            url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
+            sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
+  - name: python3-setuptools_scm
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "setuptools_scm" --no-build-isolation
     sources:
-      - type: archive
-        url: https://prdownloads.sourceforge.net/tcl/tk8.6.11.1-src.tar.gz
-        sha256: 006cab171beeca6a968b6d617588538176f27be232a2b334a0e96173e89909be
-  # Derived from how the Freedesktop Sdk bundles Python: https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/elements/components/python3.bst
-  - name: python
-    buildsystem: autotools
-    config-opts:
-      - --enable-optimizations
-      - --with-ensurepip=install
-      - --enable-shared
-      - --with-system-expat
-      - --with-system-ffi
-      - --enable-loadable-sqlite-extensions
-      - --with-dbmliborder=gdbm
-    cleanup:
-      - /bin/idle*
-      - /lib/pkgconfig
-      - /lib/python3.8/idlelib
-      - /lib/python3.8/test
-      - /lib/python3.8/turtle*
-      - /lib/python3.8/__pycache__/turtle.*
-      - /lib/python3.8/*/test
-      - /lib/python3.8/*/tests
-    cleanup-commands:
-      - find "/lib" -name "lib*.a" -exec rm {} ";"
+      - type: file
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+  - name: python3-poetry-core
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "poetry-core" --no-build-isolation
     sources:
-      - type: archive
-        url: https://www.python.org/ftp/python/3.8.8/Python-3.8.8.tar.xz
-        sha256: 7c664249ff77e443d6ea0e4cf0e587eae918ca3c48d081d1915fe2a1f1bcc5cc
-  - python3-wheel.json
+      - type: file
+        url: https://files.pythonhosted.org/packages/d0/b3/1017f2f6d801f1e3e4ffee3f058a10d20df1a9560aba9c5b49e92cdd9912/poetry-core-1.0.3.tar.gz
+        sha256: 2315c928249fc3207801a81868b64c66273077b26c8d8da465dccf8f488c90c5
+  - name: pytest-runner
+    buildsystem: simple
+    build-commands:
+      - python3 setup.py install --prefix=${FLATPAK_DEST}
+    sources:
+      - type: git
+        url: https://github.com/pytest-dev/pytest-runner.git
+        tag: v5.3.1
+        commit: 592d891f99371664387e319eb45c3d28ba485afc
+
   - python3-modules.json
+
+  - name: python3-esptool
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "esptool==3.1.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0f/86/e19659527668d70be91d0369aeaa055b4eb396b0f387a4f92293a20035bd/pycparser-2.20.tar.gz
+        sha256: 2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0
+      - type: file
+        url: https://files.pythonhosted.org/packages/c8/cb/bb2ddbd00c9b4215dd57a2abf7042b0ae222b44522c5eb664a8fd9d786da/reedsolo-1.5.4.tar.gz
+        sha256: b8b25cdc83478ccb06361a0e8fadc27b376a3dfabbb1dc6bb583a998a22c0127
+      - type: file
+        url: https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz
+        sha256: 3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb
+      - type: file
+        url: https://files.pythonhosted.org/packages/bf/3d/3d909532ad541651390bf1321e097404cbd39d1d89c2046f42a460220fb3/ecdsa-0.17.0.tar.gz
+        sha256: b9f500bb439e4153d0330610f5d26baaf18d17b8ced1bc54410d189385ea68aa
+      - type: file
+        url: https://files.pythonhosted.org/packages/2e/92/87bb61538d7e60da8a7ec247dc048f7671afe17016cd0008b3b710012804/cffi-1.14.6.tar.gz
+        sha256: c9a875ce9d7fe32887784274dd533c57909b7b1dcadcc128a2ac21331a9765dd
+      - type: file
+        url: https://files.pythonhosted.org/packages/9b/77/461087a514d2e8ece1c975d8216bc03f7048e6090c5166bc34115afdaa53/cryptography-3.4.7.tar.gz
+        sha256: 3d10de8116d25649631977cb37da6cbdd2d6fa0e0281d014a5b7d337255ca713
+      - type: file
+        url: https://files.pythonhosted.org/packages/4c/b1/80d58eeb21c9d4ca739770558d61f6adacb13aa4908f4f55e0974cbd25ee/bitstring-3.1.9.tar.gz
+        sha256: a5848a3f63111785224dca8bb4c0a75b62ecdef56a042c8d6be74b16f7e860e7
+      - type: file
+        url: https://files.pythonhosted.org/packages/9c/c8/28f21b3d3b5e1f1d249be52cdd91793c8c3f7c4f4f255ece7d50984fb05d/esptool-3.1.tar.gz
+        sha256: ec6b943c53b4d71f87f98776333d5b4b99905766898a7002c28a9090b92b2de4
+    modules:
+      - name: python3-cryptography
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "cryptography" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/0f/86/e19659527668d70be91d0369aeaa055b4eb396b0f387a4f92293a20035bd/pycparser-2.20.tar.gz
+            sha256: 2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0
+          - type: file
+            url: https://files.pythonhosted.org/packages/2e/92/87bb61538d7e60da8a7ec247dc048f7671afe17016cd0008b3b710012804/cffi-1.14.6.tar.gz
+            sha256: c9a875ce9d7fe32887784274dd533c57909b7b1dcadcc128a2ac21331a9765dd
+          - type: file
+            url: https://files.pythonhosted.org/packages/b7/82/f7a4ddc1af185936c1e4fa000942ffa8fb2d98cff26b75afa7b3c63391c4/cryptography-3.3.1.tar.gz
+            sha256: 7e177e4bea2de937a584b13645cab32f25e3d96fc0bc4a4cf99c27dc77682be6
+
+  - name: python3-paramiko
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} "paramiko==2.7.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0f/86/e19659527668d70be91d0369aeaa055b4eb396b0f387a4f92293a20035bd/pycparser-2.20.tar.gz
+        sha256: 2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0
+      - type: file
+        url: https://files.pythonhosted.org/packages/cf/5a/25aeb636baeceab15c8e57e66b8aa930c011ec1c035f284170cacb05025e/PyNaCl-1.4.0.tar.gz
+        sha256: 54e9a2c849c742006516ad56a88f5c74bf2ce92c9f67435187c3c5953b346505
+      - type: file
+        url: https://files.pythonhosted.org/packages/9b/77/461087a514d2e8ece1c975d8216bc03f7048e6090c5166bc34115afdaa53/cryptography-3.4.7.tar.gz
+        sha256: 3d10de8116d25649631977cb37da6cbdd2d6fa0e0281d014a5b7d337255ca713
+      - type: file
+        url: https://files.pythonhosted.org/packages/2e/92/87bb61538d7e60da8a7ec247dc048f7671afe17016cd0008b3b710012804/cffi-1.14.6.tar.gz
+        sha256: c9a875ce9d7fe32887784274dd533c57909b7b1dcadcc128a2ac21331a9765dd
+      - type: file
+        url: https://files.pythonhosted.org/packages/d8/ba/21c475ead997ee21502d30f76fd93ad8d5858d19a3fad7cd153de698c4dd/bcrypt-3.2.0.tar.gz
+        sha256: 5b93c1726e50a93a033c36e5ca7fdcd29a5c7395af50a6892f5d9e7c6cfbfb29
+      - type: file
+        url: https://files.pythonhosted.org/packages/cf/a1/20d00ce559a692911f11cadb7f94737aca3ede1c51de16e002c7d3a888e0/paramiko-2.7.2.tar.gz
+        sha256: 7f36f4ba2c0d81d219f4595e35f70d56cc94f9ac40a6acdf51d6ca210ce65035
+
+  - name: python3-ptyprocess
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "ptyprocess==0.7.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz
+        sha256: 5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220
+    modules:
+      - name: python3-flit_core
+        buildsystem: simple
+        build-commands:
+          - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+            --prefix=${FLATPAK_DEST} "flit_core" --no-build-isolation
+        sources:
+          - type: file
+            url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+            sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+          - type: file
+            url: https://files.pythonhosted.org/packages/a7/06/700a2ae25c67bf3722c9b01788f43808ebc94b6a544b5008770e19406f6a/flit_core-3.2.0.tar.gz
+            sha256: ff87f25c5dbc24ef30ea334074e35030e4885e4c5de3bf4e21f15746f6d99431
+
+  - name: python3-websockets
+    buildsystem: simple
+    build-commands:
+      - pip3 install --verbose --exists-action=i --no-index --find-links="file://${PWD}"
+        --prefix=${FLATPAK_DEST} "websockets==9.1.*" --no-build-isolation
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0d/bd/5262054455ab2067e51de331bfbc53a1dfa9071af7c424cf7c0793c4349a/websockets-9.1.tar.gz
+        sha256: 276d2339ebf0df4f45df453923ebd2270b87900eda5dfd4a6b0cfa15f82111c3
+
   - name: thonny
     buildsystem: simple
+    ensure-writable:
+      - /lib/python3.8/site-packages/easy-install.pth
     build-commands:
       - python3 setup.py install --prefix=${FLATPAK_DEST}
 
