@@ -873,7 +873,7 @@ class Workbench(tk.Tk):
                 desc = backend_conf.description
             else:
                 desc = "<no backend>"
-        self._backend_button.configure(text=desc)
+        self._backend_button.configure(text=desc + " ☰")
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
