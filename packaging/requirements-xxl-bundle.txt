@@ -2,7 +2,7 @@ numpy==1.21.*
 guizero==1.2.*
 gpiozero==1.6.*
 requests==2.25.*
-pillow==8.2.*
+pillow==8.3.*
 scipy==1.7.*
 matplotlib==3.4.*
 pgzero==1.2.*
