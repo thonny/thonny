@@ -83,7 +83,7 @@ def can_use_ansi_codes():
     if platform.system() == "Windows":
         ver = platform.win32_ver()
         try:
-            return int(ver[0]) >= 10
+            return float(ver[0]) >= 10
         except Exception:
             warnings.warn("Can't determine Windows version %s" % (ver,))
             return False
