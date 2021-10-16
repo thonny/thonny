@@ -4,7 +4,7 @@ import os.path
 import subprocess
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, simpledialog
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_children_info
@@ -702,6 +702,9 @@ class BaseFileBrowser(ttk.Frame):
         if self.supports_directories():
             self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
 
+        if self.supports_rename():
+            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
+
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
         if context == "button":
@@ -862,6 +865,32 @@ class BaseFileBrowser(ttk.Frame):
         ext = self.get_extension_from_name(name)
         return get_workbench().get_option(get_file_handler_conf_key(ext), "system") == "thonny"
 
+    def get_selected_file(self):
+        selection = self.get_selection_info(True)
+        if not selection or len(selection["paths"]) > 1:
+            return
+        return selection["paths"][0]
+
+    def supports_rename(self):
+        return False
+
+    def rename_file(self):
+        old_name = self.get_selected_file()
+        if old_name is None:
+            return
+        file_name = os.path.basename(old_name)
+
+        new_name = simpledialog.askstring(
+            tr("Rename '%s'") % file_name, tr("Enter new name"), initialvalue=file_name, parent=self
+        )
+        if new_name:
+            rc = self.perform_rename(old_name, new_name)
+            if rc:
+                messagebox.showerror(tr("Rename of '%s' failed") % old_name, rc, parent=self)
+
+    def perform_rename(self, old_name, new_name):
+        raise Exception("overload this in subclass")
+
 
 class BaseLocalFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_expand_buttons=True):
@@ -947,6 +976,21 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             return True
         except ImportError:
             return False
+
+    def supports_rename(self):
+        return self.get_selected_file()
+
+    def perform_rename(self, old_name, new_name):
+        basepath = os.path.dirname(old_name)
+        full_path = os.path.join(basepath, new_name)
+        logger.debug("rename %s to %s" % (old_name, full_path))
+
+        if old_name == full_path:
+            return
+        if os.path.exists(full_path):
+            return tr("File already exists")
+
+        os.rename(old_name, full_path)
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
