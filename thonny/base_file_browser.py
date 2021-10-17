@@ -74,7 +74,7 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.bind("<Double-Button-1>", self.on_double_click, True)
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
 
-        self.copypaste = CopyPaste(self)
+        self.copypaste = None
 
         wb = get_workbench()
         self.folder_icon = wb.get_image("folder")
@@ -903,15 +903,18 @@ class BaseFileBrowser(ttk.Frame):
         raise Exception("overload this in subclass")
 
     def supports_copypaste(self):
-        return False
+        return self.copypaste
 
     def cut_files(self):
+        assert self.copypaste
         self.copypaste.cut()
 
     def copy_files(self):
+        assert self.copypaste
         self.copypaste.copy()
 
     def paste_files(self):
+        assert self.copypaste
         target = self.get_selected_file()
         assert target
         if os.path.isfile(target):
@@ -952,12 +955,12 @@ class CopyPaste(object):
     def cut(self):
         self.paths = self.get_selection_paths()
         self.mode = "X"
-        print(self.mode, self.paths)
+        # print(self.mode, self.paths)
 
     def copy(self):
         self.paths = self.get_selection_paths()
         self.mode = "C"
-        print(self.mode, self.paths)
+        # print(self.mode, self.paths)
 
     def paste(self, target):
         # https://docs.python.org/3/library/shutil.html#shutil.move
@@ -979,7 +982,7 @@ class CopyPaste(object):
                         shutil.copytree(f, folder_target, dirs_exist_ok=True)
                 elif self.mode == "X":
                     dest = shutil.move(f, target)
-                    print(dest)
+                    # print(dest)
                 else:
                     raise Exception("unsupported mode")
 
@@ -992,6 +995,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         super().__init__(master, show_expand_buttons=show_expand_buttons)
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
+        self.copypaste = CopyPaste(self)
 
     def destroy(self):
         super().destroy()
@@ -1086,9 +1090,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             return tr("File already exists")
 
         os.rename(old_name, full_path)
-
-    def supports_copypaste(self):
-        return True
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
