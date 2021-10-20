@@ -471,7 +471,7 @@ class Editor(ttk.Frame):
     def _shift_control_tab(self, event):
         self.master.select_next_prev_editor(-1)
         return "break"
-    
+
     def _goto_source_line(self, event):
         rc = simpledialog.askinteger(tr("Enter"), tr("Line number"))
         if rc:
