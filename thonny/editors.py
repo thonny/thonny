@@ -5,7 +5,7 @@ import sys
 import tkinter as tk
 import traceback
 from logging import exception
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, simpledialog
 
 from _tkinter import TclError
 
@@ -62,6 +62,7 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
+        self._code_view.text.bind("<Control-Key-g>", self._goto_source_line, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
@@ -470,6 +471,11 @@ class Editor(ttk.Frame):
     def _shift_control_tab(self, event):
         self.master.select_next_prev_editor(-1)
         return "break"
+    
+    def _goto_source_line(self, event):
+        rc = simpledialog.askinteger(tr("Enter"), tr("Line number"))
+        if rc:
+            self.select_line(rc)
 
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
