@@ -705,6 +705,9 @@ class BaseFileBrowser(ttk.Frame):
         if self.supports_directories():
             self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
 
+        if self.supports_new_file():
+            self.menu.add_command(label=tr("New file"), command=self.create_new_file)
+
         if self.supports_rename():
             self.menu.add_command(label=tr("Rename"), command=self.rename_file)
 
@@ -875,6 +878,12 @@ class BaseFileBrowser(ttk.Frame):
     def should_open_name_in_thonny(self, name):
         ext = self.get_extension_from_name(name)
         return get_workbench().get_option(get_file_handler_conf_key(ext), "system") == "thonny"
+
+    def supports_new_file(self):
+        return False
+
+    def create_new_file(self):
+        raise NotImplementedError()
 
     def get_selected_file(self):
         selection = self.get_selection_info(True)
@@ -1075,6 +1084,22 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             return True
         except ImportError:
             return False
+
+    def supports_new_file(self):
+        return True
+
+    def create_new_file(self):
+        path = self.get_selected_file()
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        n = 0
+        while True:
+            fnam = os.path.join(path, "new_file{}.py".format("_" + str(n) if n > 0 else ""))
+            if not os.path.exists(fnam):
+                break
+            n += 1
+        with open(fnam, "a") as f:
+            pass
 
     def supports_rename(self):
         return self.get_selected_file()
