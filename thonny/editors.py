@@ -62,7 +62,6 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
-        self._code_view.text.bind("<Control-Key-g>", self._goto_source_line, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
@@ -472,11 +471,6 @@ class Editor(ttk.Frame):
         self.master.select_next_prev_editor(-1)
         return "break"
 
-    def _goto_source_line(self, event):
-        rc = simpledialog.askinteger(tr("Enter"), tr("Line number"))
-        if rc:
-            self.select_line(rc)
-
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
 
@@ -672,6 +666,18 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self._cmd_move_rename_file,
             tester=self._cmd_move_rename_file_enabled,
             group=10,
+        )
+
+        get_workbench().add_command(
+            "goto_source_line",
+            "edit",
+            tr("Go to line ..."),
+            self._cmd_goto_source_line,
+            default_sequence=select_sequence("<Control-g>", "<Command-g>"),
+            # tester=,
+            # no global switch, or cross plugin switch?
+            # todo use same as find and replace -> plugins/find_replace.py
+            group=60,
         )
 
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
@@ -896,6 +902,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         editors = self.winfo_children()
         if len(editors) == 1 and not editors[0].is_modified() and not editors[0].get_filename():
             self._cmd_close_file()
+
+    def _cmd_goto_source_line(self):
+        editor = self.get_current_editor()
+        if editor:
+            line_no = simpledialog.askinteger(tr("Goto"), tr("Line number"))
+            if line_no:
+                editor.select_line(line_no)
 
     def _mac_open_document(self, *args):
         for arg in args:
