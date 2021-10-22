@@ -8,7 +8,7 @@ import os.path
 from tkinter import font
 
 import thonny
-from thonny import get_workbench, jedi_utils
+from thonny import get_workbench
 from thonny.codeview import get_syntax_options_for_tag
 
 
@@ -147,7 +147,7 @@ def clear_tags(text):
 def add_tags(text):
     source = text.get("1.0", "end")
     clear_tags(text)
-    tree = jedi_utils.parse_source(source)
+    # tree = jedi_ utils.parse_source(source)
 
     print_tree(tree)
     last_line = 0
@@ -258,4 +258,4 @@ def _load_plugin() -> None:
     wb.set_default("view.program_structure", False)
     wb.bind("Save", handle_editor_event, True)
     wb.bind("Open", handle_editor_event, True)
-    wb.bind_class("CodeViewText", "<<TextChange>>", handle_events, True)
+    wb.bind_class("EditorCodeViewText", "<<TextChange>>", handle_events, True)
