@@ -50,6 +50,7 @@ from thonny.common import (
     MessageFromBackend,
     universal_relpath,
     read_one_incoming_message_str,
+    InlineResponse,
 )
 from thonny.editors import (
     get_current_breakpoints,
@@ -270,6 +271,10 @@ class Runner:
 
         cmd["local_cwd"] = get_workbench().get_local_cwd()
 
+        if self._proxy.running_inline_command and isinstance(cmd, InlineCommand):
+            self._postpone_command(cmd)
+            return
+
         # Offer the command
         logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
@@ -282,6 +287,8 @@ class Runner:
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
+            if isinstance(cmd, InlineCommand):
+                self._proxy.running_inline_command = True
 
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
@@ -532,9 +539,9 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
-                logging.debug(
-                    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
-                )
+                # logger.debug(
+                #    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
+                # )
 
                 msg_count += 1
             except BackendTerminatedError as exc:
@@ -551,6 +558,9 @@ class Runner:
                 self._set_state("waiting_toplevel_command")
             elif isinstance(msg, DebuggerResponse):
                 self._set_state("waiting_debugger_command")
+            elif isinstance(msg, InlineResponse):
+                # next inline command won't be sent before response from the last has arrived
+                self._proxy.running_inline_command = False
             else:
                 "other messages don't affect the state"
 
@@ -744,6 +754,7 @@ class BackendProxy:
         Backend is considered ready when the runner gets a ToplevelResponse
         with attribute "welcome_text" from fetch_next_message.
         """
+        self.running_inline_command = False
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
