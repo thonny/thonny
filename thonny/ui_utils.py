@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-import collections
 import logging
 import os
 import platform
-import queue
 import re
-import signal
 import subprocess
 import sys
 import textwrap
@@ -14,7 +11,6 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
-import warnings
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
@@ -1409,6 +1405,10 @@ def control_is_pressed(event_state):
     # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
     return event_state & 0x0004
+
+
+def modifier_is_pressed(event_state: int) -> bool:
+    return event_state != 0 and event_state != 0b10000
 
 
 def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, int]]:

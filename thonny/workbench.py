@@ -195,9 +195,9 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         self._try_action(self._open_views)
 
-        self.bind_class("CodeViewText", "<<CursorMove>>", self.update_title, True)
-        self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
-        self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<CursorMove>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<Modified>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_toolbar, True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
@@ -226,8 +226,9 @@ class Workbench(tk.Tk):
         self.after_idle(self.advertise_ready)
 
     def advertise_ready(self):
-        self.event_generate("WorkbenchReady")
         self.ready = True
+        self.event_generate("WorkbenchReady")
+        self._editor_notebook.update_appearance()
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
