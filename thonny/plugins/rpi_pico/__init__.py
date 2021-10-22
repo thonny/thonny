@@ -43,6 +43,11 @@ class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
         show_dialog(dlg)
         return dlg.success
 
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.rpi_pico.rpi_pico_backend
+
+        return thonny.plugins.rpi_pico.rpi_pico_backend.__file__
+
 
 class RaspberryPiPicoBackendConfigPage(BareMetalMicroPythonConfigPage):
     def _has_flashing_dialog(self):

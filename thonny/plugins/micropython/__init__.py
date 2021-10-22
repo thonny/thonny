@@ -141,15 +141,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         super()._start_background_process(clean=clean, extra_args=extra_args)
 
     def _get_launcher_with_args(self):
-        import thonny.plugins.micropython.bare_metal_backend
-
         args = {
             "clean": self._clean_start,
             "port": self._port,
             "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
             "rts": get_workbench().get_option(self.backend_name + ".rts"),
             "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
-            "api_stubs_path": self._get_api_stubs_path(),
             "write_block_size": self._get_write_block_size(),
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
@@ -161,11 +158,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         args.update(self._get_time_args())
 
         cmd = [
-            thonny.plugins.micropython.bare_metal_backend.__file__,
+            self._get_backend_launcher_path(),
             repr(args),
         ]
 
         return cmd
+
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.micropython.bare_metal_backend
+
+        return thonny.plugins.micropython.bare_metal_backend.__file__
 
     def _get_write_block_size(self):
         return get_workbench().get_option(self.backend_name + ".write_block_size")
@@ -250,11 +252,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     @classmethod
     def get_known_port_descriptions(cls):
         return set()
-
-    def _get_api_stubs_path(self):
-        import inspect
-
-        return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     def supports_remote_files(self):
         return self.is_connected()
@@ -634,7 +631,6 @@ class LocalMicroPythonProxy(MicroPythonProxy):
             repr(
                 {
                     "interpreter": self._mp_executable,
-                    "api_stubs_path": self._get_api_stubs_path(),
                     "cwd": self.get_cwd(),
                 }
             ),
@@ -650,11 +646,6 @@ class LocalMicroPythonProxy(MicroPythonProxy):
             get_shell().restart()  # Runner doesn't notice restart
 
         return super().send_command(cmd)
-
-    def _get_api_stubs_path(self):
-        import inspect
-
-        return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
@@ -757,7 +748,6 @@ class SshMicroPythonProxy(MicroPythonProxy):
         args = {
             "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
             "interpreter": self._mp_executable,
-            "api_stubs_path": self._get_api_stubs_path(),
             "host": self._host,
             "user": self._user,
             "password": get_ssh_password("SshMicroPython"),
@@ -784,11 +774,6 @@ class SshMicroPythonProxy(MicroPythonProxy):
             get_shell().restart()  # Runner doesn't notice restart
 
         return super().send_command(cmd)
-
-    def _get_api_stubs_path(self):
-        import inspect
-
-        return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     def _get_initial_cwd(self):
         return get_workbench().get_option("SshMicroPython.cwd")

@@ -1,148 +1,414 @@
 """
 Utils to handle different jedi versions
 """
+import jedi.api.classes
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+try:
+    # Since 0.17
+    from jedi.api.classes import ParamName
+except ImportError:
+    try:
+        # Since 0.15
+        from jedi.api.classes import ParamDefinition as ParamName
+    except ImportError:
+        from jedi.api.classes import Definition as ParamName
+
+try:
+    # Since 0.16
+    from jedi.api.classes import BaseSignature
+except ImportError:
+    try:
+        # Since 0.15
+        from jedi.api.classes import Signature as BaseSignature
+    except ImportError:
+        from jedi.api.classes import Definition as BaseSignature
+
+
+from thonny.common import SignatureParameter, SignatureInfo, CompletionInfo, NameReference
 
 logger = logging.getLogger(__name__)
 
-
-def get_statement_of_position(node, pos):
-    import jedi.parser_utils
-
-    func = getattr(
-        jedi.parser_utils, "get_statement_of_position", _copy_of_get_statement_of_position
-    )
-    return func(node, pos)
+_last_jedi_completions: Optional[List[jedi.api.classes.Completion]] = None
 
 
-# TODO: try to get rid of this
-def _copy_of_get_statement_of_position(node, pos):
-    # https://github.com/davidhalter/jedi/commit/9f3a2f93c48eda24e2dcc25e54eb7cc10aa73848
-    from parso.python import tree
+def get_script_completions(
+    source: str, row: int, column: int, filename: str, sys_path=None
+) -> List[CompletionInfo]:
+    _check_patch_jedi_typesheds(sys_path)
+    global _last_jedi_completions
+    try:
+        script = _create_script(source, row, column, filename, sys_path)
 
-    for c in node.children:
-        if c.start_pos <= pos <= c.end_pos:
-            if (
-                c.type
-                not in (
-                    "decorated",
-                    "simple_stmt",
-                    "suite",
-                    "async_stmt",
-                    "async_funcdef",
-                )
-                and not isinstance(c, (tree.Flow, tree.ClassOrFunc))
-            ):
-                return c
+        if _using_older_api():
+            completions = script.completions()
+        else:
+            completions = script.complete(line=row, column=column, fuzzy=False)
+    except Exception:
+        logger.exception("Jedi error")
+        completions = []
+
+    completions = _filter_completions(completions, sys_path)
+    _last_jedi_completions = completions
+    return _export_completions(completions)
+
+
+def get_interpreter_completions(
+    source: str, namespaces: List[Dict], sys_path=None
+) -> List[CompletionInfo]:
+    _check_patch_jedi_typesheds(sys_path)
+    global _last_jedi_completions
+    try:
+        interpreter = _create_interpreter(source, namespaces, sys_path)
+        # assuming cursor is at the end of the source
+        if hasattr(interpreter, "completions"):
+            # up to jedi 0.17
+            completions = interpreter.completions()
+        else:
+            completions = interpreter.complete()
+    except Exception:
+        logger.exception("Jedi error")
+        completions = []
+
+    completions = _filter_completions(completions, sys_path)
+    _last_jedi_completions = completions
+    return _export_completions(completions)
+
+
+def get_completion_details(full_name: str) -> Optional[CompletionInfo]:
+    if not _last_jedi_completions:
+        return None
+
+    # assuming this name can be found in the list of last completions
+    try:
+        for completion in _last_jedi_completions:
+            if _jedi_verion_is_at_least("0.15"):
+                signatures = [_export_signature(s) for s in completion.get_signatures()]
+                raw_docstring = True
             else:
-                try:
-                    return _copy_of_get_statement_of_position(c, pos)
-                except AttributeError:
-                    pass  # Must be a non-scope
+                # Too much hassle...
+                signatures = None
+                raw_docstring = False
+
+            if completion.full_name == full_name:
+                return CompletionInfo(
+                    name=completion.name,
+                    name_with_symbols=_get_completion_name_with_symbols(completion, signatures),
+                    full_name=completion.full_name,
+                    type=completion.type,
+                    prefix_length=_get_completion_prefix_length(completion),
+                    signatures=signatures,
+                    docstring=completion.docstring(raw=raw_docstring),
+                )
+    except Exception:
+        logger.exception("Jedi error")
+
     return None
 
 
-def parse_source(source):
-    import parso
+def get_script_signatures(
+    source: str, row: int, column: int, filename: str, sys_path=None
+) -> List[SignatureInfo]:
+    _check_patch_jedi_typesheds(sys_path)
 
-    return parso.parse(source)
+    if not _jedi_verion_is_at_least("0.15"):
+        # Too much hassle
+        return []
+
+    try:
+        script = _create_script(source, row, column, filename, sys_path)
+        if _using_older_api():
+            sigs = script.call_signatures()
+        else:
+            sigs = script.get_signatures(line=row, column=column)
+    except Exception:
+        sigs = []
+
+    return [_export_signature(sig) for sig in sigs]
 
 
-def get_script_completions(source: str, row: int, column: int, filename: str, sys_path=None):
-    import jedi
+def get_interpreter_signatures(
+    source: str, namespaces: List[Dict], sys_path=None
+) -> List[SignatureInfo]:
+    _check_patch_jedi_typesheds(sys_path)
 
-    if _using_older_jedi(jedi):
+    if not _jedi_verion_is_at_least("0.15"):
+        # Too much hassle
+        return []
+
+    try:
+        # assuming cursor is at the end of the source
+        interpreter = _create_interpreter(source, namespaces, sys_path)
+
+        if _using_older_api():
+            sigs = interpreter.call_signatures()
+        else:
+            sigs = interpreter.get_signatures()
+    except Exception:
+        logger.exception("Jedi error")
+        sigs = []
+
+    return [_export_signature(sig) for sig in sigs]
+
+
+def get_definitions(
+    source: str, row: int, column: int, filename: str, sys_path: List[str] = None
+) -> List[NameReference]:
+    _check_patch_jedi_typesheds(sys_path)
+
+    try:
+        script = _create_script(source, row, column, filename, sys_path)
+        if _using_older_api():
+            defs = script.goto_assignments(follow_imports=True)
+        else:
+            defs = script.goto(line=row, column=column, follow_imports=True)
+    except Exception:
+        logger.exception("Jedi error")
+        defs = []
+
+    return [_export_reference(d) for d in defs]
+
+
+def get_references(
+    source: str,
+    row: int,
+    column: int,
+    filename: str,
+    scope: str,
+    sys_path: Optional[List[str]] = None,
+) -> List[NameReference]:
+    _check_patch_jedi_typesheds(sys_path)
+
+    if scope == "file" and (
+        _jedi_verion_is_at_least("0.16") and not _jedi_verion_is_at_least("0.17.1")
+    ):
+        # no means for asking for file scope and can be too slow otherwise in 0.16.* and 0.17.0
+        return []
+
+    try:
+        script = _create_script(source + ")", row, column, filename, sys_path)
+        if _using_older_api():
+            try:
+                references = script.usages(include_builtins=False)
+            except Exception as e:
+                logger.exception("Could not compute usages")
+                return []
+        else:
+            # scope parameter was introduced in 0.17.1
+            if _jedi_verion_is_at_least("0.17.1"):
+                references = script.get_references(row, column, include_builtins=False, scope=scope)
+            else:
+                references = script.get_references(row, column, include_builtins=False)
+    except Exception:
+        logger.exception("Jedi error")
+        return []
+
+    # post-processing
+    if scope == "file" and not _jedi_verion_is_at_least("0.17.1"):
+        references = [
+            ref
+            for ref in references
+            if ref.module_path == filename or ref.module_name == "__main__"
+        ]
+
+    # some refs (eg. in Jedi 0.16) may lack line and column
+    references = [ref for ref in references if ref.line is not None and ref.column is not None]
+
+    return [_export_reference(ref) for ref in references]
+
+
+def _create_script(
+    source: str, row: int, column: int, filename: str, sys_path: List[str]
+) -> jedi.api.Script:
+    if _jedi_verion_is_at_least("0.17"):
+        if sys_path:
+            project = jedi.Project(path=sys_path[0], sys_path=sys_path, smart_sys_path=False)
+        else:
+            project = None
+
+        return jedi.Script(
+            code=source,
+            path=filename,
+            project=project,
+        )
+    else:
         try:
-            script = jedi.Script(source, row, column, filename, sys_path=sys_path)
+            return jedi.Script(source, row, column, filename, sys_path=sys_path)
+        except Exception as e:
+            logger.info("Could not create Script with given sys_path", exc_info=e)
+            return jedi.Script(source, row, column, filename)
+
+
+def _create_interpreter(
+    source: str, namespaces: List[Dict], sys_path: Optional[List[str]]
+) -> jedi.api.Interpreter:
+    if _using_older_api():
+        try:
+            return jedi.Interpreter(source, namespaces, sys_path=sys_path)
         except Exception as e:
             logger.info("Could not get completions with given sys_path", exc_info=e)
-            script = jedi.Script(source, row, column, filename)
-
-        completions = script.completions()
+            return jedi.Interpreter(source, namespaces)
     else:
-        script = jedi.Script(code=source, path=filename, project=_get_new_jedi_project(sys_path))
-        completions = script.complete(line=row, column=column)
-
-    return _tweak_completions(completions)
-
-
-def get_interpreter_completions(source: str, namespaces: List[Dict], sys_path=None):
-    import jedi
-
-    if _using_older_jedi(jedi):
-        try:
-            interpreter = jedi.Interpreter(source, namespaces, sys_path=sys_path)
-        except Exception as e:
-            logger.info("Could not get completions with given sys_path", exc_info=e)
-            interpreter = jedi.Interpreter(source, namespaces)
-    else:
-        # NB! Can't send project for Interpreter in 0.18
+        # NB! Can't set project for Interpreter in 0.18
         # https://github.com/davidhalter/jedi/pull/1734
-        interpreter = jedi.Interpreter(source, namespaces)
-    if hasattr(interpreter, "completions"):
-        # up to jedi 0.17
-        return _tweak_completions(interpreter.completions())
-    else:
-        return _tweak_completions(interpreter.complete())
+        return jedi.Interpreter(source, namespaces)
 
 
-def _get_new_jedi_project(sys_path):
-    if not sys_path:
-        return None
-    else:
-        import jedi
-
-        return jedi.Project(path=sys_path[0], added_sys_path=sys_path)
+def _export_completions(completions: List[jedi.api.classes.Completion]) -> List[CompletionInfo]:
+    return [_export_completion(comp) for comp in completions]
 
 
-def _tweak_completions(completions):
-    # In jedi before 0.16, the name attribute did not contain trailing '=' for argument completions,
-    # since 0.16 it does. Need to ensure similar result for all supported versions.
+def _filter_completions(
+    completions: List[jedi.api.classes.Completion], sys_path: Optional[List[str]]
+) -> List[jedi.api.classes.Completion]:
+
+    if sys_path is None:
+        return completions
+
     result = []
     for completion in completions:
-        name = completion.name
-        complete = completion.complete
-        if complete.endswith("=") and not name.endswith("="):
-            name += "="
+        if completion.name.startswith("__"):
+            continue
 
-        result.append(
-            ThonnyCompletion(
-                name=name,
-                complete=complete,
-                type=completion.type,
-                description=completion.description,
-                parent=completion.parent,
-                full_name=completion.full_name,
-            )
-        )
+        #print(completion.name, completion.module_path)
+        for path in sys_path:
+            result.append(completion)
+            break
 
     return result
 
 
-def get_definitions(source: str, row: int, column: int, filename: str):
-    import jedi
+def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInfo:
+    # In jedi before 0.16, the name attribute did not contain trailing '=' for argument completions,
+    # since 0.16 it does. Need to ensure similar result for all supported versions.
 
-    if _using_older_jedi(jedi):
-        script = jedi.Script(source, row, column, filename)
-        return script.goto_definitions()
+    return CompletionInfo(
+        name=completion.name and completion.name.strip("="),
+        name_with_symbols=_get_completion_name_with_symbols(completion),
+        full_name=completion.full_name and completion.full_name.strip("="),
+        type=completion.type,
+        prefix_length=_get_completion_prefix_length(completion),
+        signatures=None,  # must be queried separately
+        docstring=None,  # must be queried separately
+    )
+
+
+def _export_signature(sig: BaseSignature) -> SignatureInfo:
+    as_string = sig.to_string()
+    if "->" in as_string:
+        # No documented API for getting the return type in 0.18
+        return_type = as_string.split("->")[-1].strip()
     else:
-        script = jedi.Script(code=source, path=filename)
-        return script.infer(line=row, column=column)
+        return_type = None
+
+    current_param_index = None
+    call_bracket_start = None
+    if hasattr(sig, "index"):
+        # only in subclass (Signature or CallSignature)
+        current_param_index = sig.index
+    if hasattr(sig, "bracket_start"):
+        # only in subclass (Signature or CallSignature)
+        call_bracket_start = sig.bracket_start
+
+    return SignatureInfo(
+        name=sig.name,
+        params=[_export_param(p) for p in sig.params],
+        return_type=return_type,
+        current_param_index=current_param_index,
+        call_bracket_start=call_bracket_start,
+    )
 
 
-def _using_older_jedi(jedi):
-    return jedi.__version__[:4] in ["0.13", "0.14", "0.15", "0.16", "0.17"]
+def _export_param(param: ParamName) -> SignatureParameter:
+    # No documented API for getting separate annotation and default, need to parse
+    s = param.to_string()
+
+    if s.count("=") == 1:
+        without_default, default = s.split("=")
+    else:
+        without_default = (s,)
+        default = None
+
+    if without_default.count(":") == 1:
+        annotation = without_default.split(":")[-1].strip()
+    else:
+        annotation = None
+
+    if hasattr(param, "kind"):
+        # Since 0.15
+        kind = param.kind
+    else:
+        kind = "unknown"
+
+    return SignatureParameter(
+        kind=str(kind), name=param.name, annotation=annotation, default=default
+    )
 
 
-class ThonnyCompletion:
-    def __init__(self, name: str, complete: str, type, description, parent, full_name):
-        self.name = name
-        self.complete = complete
-        self.type = type
-        self.description = description
-        self.parent = parent
-        self.full_name = full_name
+def _export_reference(ref) -> NameReference:
+    return NameReference(
+        module_name=ref.module_name,
+        module_path=None if not ref.module_path else str(ref.module_path),
+        row=ref.line,
+        column=ref.column,
+        length=len(ref.name),
+    )
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
+
+def _get_completion_name_with_symbols(
+    completion: jedi.api.classes.Completion,
+    signatures: Optional[List[BaseSignature]] = None,
+) -> str:
+    if completion.type == "param":
+        # some versions of jedi already add '=' to name, some don't
+        return completion.name.rstrip("=") + "="
+    elif completion.type == "function":
+        if not signatures:
+            # signatures not found or haven't been computed yet
+            return completion.name + "("
+
+    if signatures:
+        # logger.info("name: %s, type: %s, sigs: %s", completion.name, completion.type, signatures)
+        # assuming type=instance can also have signature
+        # if it can only be called with 0 params, then add closing paren as well
+        different_param_counts = {len(sig.params) for sig in signatures}
+        if different_param_counts == {0}:
+            return completion.name + "()"
+        else:
+            return completion.name + "("
+
+    return completion.name_with_symbols
+
+
+def _get_completion_prefix_length(completion: jedi.api.classes.Completion) -> int:
+    if hasattr(completion, "get_completion_prefix_length"):
+        # since 0.18.0
+        return completion.get_completion_prefix_length()
+    else:
+        return completion._like_name_length
+
+
+def _jedi_verion_is_at_least(ver: str) -> bool:
+    return list(map(int, jedi.__version__.split(".")[:3])) >= list(map(int, ver.split(".")))
+
+
+def _check_patch_jedi_typesheds(sys_path: Optional[List[str]]) -> None:
+    if sys_path is None:
+        return
+
+    if not _jedi_verion_is_at_least("0.17"):
+        return
+
+    from jedi.inference.gradual import typeshed
+
+    def _patched_get_typeshed_directories(version_info):
+        for path in sys_path:
+            if "api_stubs" in path:
+                yield typeshed.PathInfo(path, False)
+
+    typeshed._get_typeshed_directories = _patched_get_typeshed_directories
+
+
+def _using_older_api():
+    return jedi.__version__[:4] in ["0.13", "0.14", "0.15"]

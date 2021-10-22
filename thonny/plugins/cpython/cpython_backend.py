@@ -25,7 +25,6 @@ from typing import Optional, Dict
 import __main__
 
 import thonny
-from thonny import jedi_utils
 from thonny.backend import MainBackend, interrupt_local_process, logger
 from thonny.common import (
     InputSubmission,
@@ -58,6 +57,7 @@ from thonny.common import (
     update_system_path,
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
+    CompletionInfo,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -238,7 +238,7 @@ class MainCPythonBackend(MainBackend):
                 response = {"user_exception": self._prepare_user_exception()}
             except Exception as e:
                 self._report_internal_exception(e)
-                response = {"context_info": "other unhandled exception"}
+                response = {"context_info": "other unhandled exception", "error": str(e)}
 
         if response is False:
             # Command doesn't want to send any response
@@ -565,65 +565,6 @@ class MainCPythonBackend(MainBackend):
 
         return InlineResponse("get_heap", heap=result)
 
-    def _cmd_shell_autocomplete(self, cmd):
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
-
-        error = None
-        try:
-            import jedi
-        except ImportError:
-            jedi = None
-            completions = []
-            error = "Could not import jedi"
-        else:
-            try:
-                with warnings.catch_warnings():
-                    jedi_completions = jedi_utils.get_interpreter_completions(
-                        cmd.source, [__main__.__dict__]
-                    )
-                    completions = self._export_completions(jedi_completions)
-            except Exception as e:
-                completions = []
-                logger.info("Autocomplete error", exc_info=e)
-                error = "Autocomplete error: " + str(e)
-
-        return InlineResponse(
-            "shell_autocomplete", source=cmd.source, completions=completions, error=error
-        )
-
-    def _cmd_editor_autocomplete(self, cmd):
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
-
-        error = None
-        try:
-            import jedi
-
-            self._debug(jedi.__file__, sys.path)
-            with warnings.catch_warnings():
-                jedi_completions = jedi_utils.get_script_completions(
-                    cmd.source, cmd.row, cmd.column, cmd.filename
-                )
-                completions = self._export_completions(jedi_completions)
-
-        except ImportError:
-            jedi = None
-            completions = []
-            error = "Could not import jedi"
-        except Exception as e:
-            completions = []
-            logger.info("Autocomplete error", exc_info=e)
-            error = "Autocomplete error: " + str(e)
-
-        return InlineResponse(
-            "editor_autocomplete",
-            source=cmd.source,
-            row=cmd.row,
-            column=cmd.column,
-            filename=cmd.filename,
-            completions=completions,
-            error=error,
-        )
-
     def _cmd_get_object_info(self, cmd):
         if isinstance(self._current_executor, NiceTracer) and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
@@ -733,29 +674,6 @@ class MainCPythonBackend(MainBackend):
                 "modified": None,
                 "error": str(e),
             }
-
-    def _export_completions(self, jedi_completions):
-        result = []
-        for c in jedi_completions:
-            if not c.name.startswith("__"):
-                record = {
-                    "name": c.name,
-                    "complete": c.complete,
-                    "type": c.type,
-                    "description": c.description,
-                }
-                """ TODO: 
-                try:
-                    if c.type in ["class", "module", "function"]:
-                        if c.type == "function":
-                            record["docstring"] = c.docstring()
-                        else:
-                            record["docstring"] = c.description + "\n" + c.docstring()
-                except Exception:
-                    pass
-                """
-                result.append(record)
-        return result
 
     def _get_tcl(self):
         if self._tcl is not None:

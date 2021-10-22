@@ -8,7 +8,7 @@ import sys
 import struct
 import time
 from textwrap import dedent, indent
-from typing import BinaryIO, Callable, Optional, Tuple, Union
+from typing import BinaryIO, Callable, Optional, Tuple, Union, Dict, Any
 
 import thonny
 from thonny.backend import UploadDownloadMixin
@@ -1598,13 +1598,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return source_bytes[:i]
 
 
+class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
+    pass
+
+
 class RawPasteNotSupportedError(RuntimeError):
     pass
 
 
-if __name__ == "__main__":
-    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
-
+def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonBackend]) -> None:
     thonny.configure_backend_logging()
 
     import ast
@@ -1630,19 +1632,14 @@ if __name__ == "__main__":
             )
             # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
-        if "circuitpython" in args.get("proxy_class", "").lower():
-            from thonny.plugins.circuitpython.cirpy_backend import CircuitPythonBackend
-
-            backend = CircuitPythonBackend(connection, clean=args["clean"], args=args)
-        elif "pipico" in args.get("proxy_class", "").lower():
-            from thonny.plugins.rpi_pico.rpi_pico_backend import RaspberryPiPicoBackend
-
-            backend = RaspberryPiPicoBackend(connection, clean=args["clean"], args=args)
-        else:
-            backend = BareMetalMicroPythonBackend(connection, clean=args["clean"], args=args)
+        backend = backend_class(connection, clean=args["clean"], args=args)
 
     except ConnectionFailedException as e:
         text = "\n" + str(e) + "\n"
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
+
+
+if __name__ == "__main__":
+    launch_bare_metal_backend(GenericBareMetalMicroPythonBackend)

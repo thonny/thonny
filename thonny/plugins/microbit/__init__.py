@@ -65,6 +65,11 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
         dlg = MicrobitFlashingDialog(self)
         ui_utils.show_dialog(dlg)
 
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.microbit.microbit_backend
+
+        return thonny.plugins.microbit.microbit_backend.__file__
+
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
     def get_instructions(self) -> Optional[str]:

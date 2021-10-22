@@ -67,6 +67,11 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID
 
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.circuitpython.cirpy_backend
+
+        return thonny.plugins.circuitpython.cirpy_backend.__file__
+
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
     def _get_usb_driver_url(self):
