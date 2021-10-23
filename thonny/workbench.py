@@ -2349,6 +2349,9 @@ class Workbench(tk.Tk):
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
+        if isinstance(val, KeyboardInterrupt):
+            # no need to report this, just let it close
+            return
         self.report_exception()
 
     def report_exception(self, title: str = "Internal error") -> None:
