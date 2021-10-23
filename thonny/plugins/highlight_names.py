@@ -67,7 +67,11 @@ class OccurrencesHighlighter:
     def _request(self):
         self._clear()
         row, column = map(int, self.text.index("insert").split("."))
-        get_runner().send_command(
+        runner = get_runner()
+        if not runner:
+            return
+
+        runner.send_command(
             InlineCommand(
                 "highlight_occurrences",
                 filename=get_text_filename(self.text),

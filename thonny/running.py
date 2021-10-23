@@ -983,6 +983,10 @@ class SubprocessProxy(BackendProxy):
             self._send_msg(cmd)
 
     def _send_msg(self, msg):
+        if not self._proc:
+            logger.warning("Ignoring command without active backend process")
+            return
+
         self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
 
