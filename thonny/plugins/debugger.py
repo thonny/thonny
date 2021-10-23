@@ -50,7 +50,7 @@ class Debugger:
         self._last_debugger_command = cmd
 
         if get_runner().is_waiting_debugger_command():
-            logging.debug("_check_issue_debugger_command: %s", cmd)
+            logger.debug("_check_issue_debugger_command: %s", cmd)
 
             # tell MainCPythonBackend the state we are seeing
             cmd.setdefault(
@@ -70,7 +70,7 @@ class Debugger:
             if command == "resume":
                 self.clear_last_frame()
         else:
-            logging.debug("Bad state for sending debugger command " + str(command))
+            logger.debug("Bad state for sending debugger command " + str(command))
 
     def get_run_to_cursor_breakpoint(self):
         return None
@@ -461,7 +461,7 @@ class FrameVisualizer:
             if frame_info.current_statement is not None:
                 self._tag_range(frame_info.current_statement, stmt_tag)
             else:
-                logging.warning("Missing current_statement: %s", frame_info)
+                logger.warning("Missing current_statement: %s", frame_info)
 
         self._expression_box.update_expression(msg, frame_info)
 
@@ -734,7 +734,7 @@ class BaseExpressionBox:
         main_node = ast_utils.find_expression(root, text_range)
 
         source = ast_utils.extract_text_range(whole_source, text_range)
-        logging.debug("EV.load_exp: %s", (text_range, main_node, source))
+        logger.debug("EV.load_exp: %s", (text_range, main_node, source))
 
         self._clear_expression()
 
@@ -782,7 +782,7 @@ class BaseExpressionBox:
         )
 
     def _highlight_range(self, text_range, state, has_exception):
-        logging.debug("EV._highlight_range: %s", text_range)
+        logger.debug("EV._highlight_range: %s", text_range)
         self.text.tag_remove("after", "1.0", "end")
         self.text.tag_remove("before", "1.0", "end")
         self.text.tag_remove("exception", "1.0", "end")

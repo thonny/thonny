@@ -220,7 +220,7 @@ class Runner:
 
     def _set_state(self, state: str) -> None:
         if self._state != state:
-            logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
+            logger.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
 
     def is_running(self):
@@ -257,7 +257,7 @@ class Runner:
             and not self.is_waiting_debugger_command()
         ):
             get_workbench().bell()
-            logging.warning(
+            logger.warning(
                 "RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state())
             )
             return
@@ -276,7 +276,7 @@ class Runner:
             return
 
         # Offer the command
-        logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
+        logger.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
 
         if response == "discard":
@@ -310,7 +310,7 @@ class Runner:
                     self._postponed_commands.remove(older_cmd)
 
         if len(self._postponed_commands) > 10:
-            logging.warning("Can't pile up too many commands. This command will be just ignored")
+            logger.warning("Can't pile up too many commands. This command will be just ignored")
         else:
             self._postponed_commands.append(cmd)
 
@@ -319,7 +319,7 @@ class Runner:
         self._postponed_commands = []
 
         for cmd in todo:
-            logging.debug("Sending postponed command: %s", cmd)
+            logger.debug("Sending postponed command: %s", cmd)
             self.send_command(cmd)
 
     def send_program_input(self, data: str) -> None:
@@ -445,7 +445,7 @@ class Runner:
                     master=self,
                 )
         else:
-            logging.warning("User tried interrupting without proxy")
+            logger.warning("User tried interrupting without proxy")
 
     def _cmd_interrupt_with_shortcut(self, event=None):
         if not self._cmd_interrupt_enabled():
@@ -679,7 +679,7 @@ class Runner:
             result = kernel32.AttachConsole(child.pid)
             if not result:
                 err = ctypes.get_last_error()
-                logging.info("Could not allocate console. Error code: " + str(err))
+                logger.info("Could not allocate console. Error code: " + str(err))
             child.stdin.write(b"\n")
             try:
                 child.stdin.flush()

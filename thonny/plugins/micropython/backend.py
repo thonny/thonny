@@ -544,7 +544,7 @@ class MicroPythonBackend(MainBackend, ABC):
             else:
                 # because of autoreload? timing problems? interruption?
                 # Leave it.
-                logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
+                logger.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
             self._connection.unread(echo)
 
     def send_message(self, msg: MessageFromBackend) -> None:

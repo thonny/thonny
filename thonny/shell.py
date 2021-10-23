@@ -653,14 +653,14 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
         if len(ints) != 1:
-            logging.warning("bad CSI cursor positioning: %s", marker)
+            logger.warning("bad CSI cursor positioning: %s", marker)
             # do nothing
             return
 
         try:
             delta = int(ints[0])
         except ValueError:
-            logging.warning("bad CSI cursor positioning: %s", marker)
+            logger.warning("bad CSI cursor positioning: %s", marker)
             return
 
         if marker.endswith("D"):
@@ -1148,7 +1148,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return True
 
     def _submit_input(self, text_to_be_submitted):
-        logging.debug(
+        logger.debug(
             "SHELL: submitting %r in state %s", text_to_be_submitted, get_runner().get_state()
         )
         if get_runner().is_waiting_toplevel_command():

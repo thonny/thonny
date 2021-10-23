@@ -390,7 +390,7 @@ class Workbench(tk.Tk):
         modules = []
         for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
             if module_name in OBSOLETE_PLUGINS:
-                logging.debug("Skipping plug-in %s", module_name)
+                logger.debug("Skipping plug-in %s", module_name)
             else:
                 try:
                     m = importlib.import_module(module_name)
@@ -533,7 +533,7 @@ class Workbench(tk.Tk):
 
         def server_loop():
             while True:
-                logging.debug("Waiting for next client")
+                logger.debug("Waiting for next client")
                 (client_socket, _) = server_socket.accept()
                 try:
                     data = bytes()
@@ -549,7 +549,7 @@ class Workbench(tk.Tk):
                         # respond OK
                         client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
                         client_socket.shutdown(socket.SHUT_WR)
-                        logging.debug("AFTER NEW REQUEST %s", client_socket)
+                        logger.debug("AFTER NEW REQUEST %s", client_socket)
                     else:
                         client_socket.shutdown(socket.SHUT_WR)
                         raise PermissionError("Wrong secret")
@@ -996,7 +996,7 @@ class Workbench(tk.Tk):
                 handler()
             else:
                 denied = True
-                logging.debug("Command '" + command_id + "' execution denied")
+                logger.debug("Command '" + command_id + "' execution denied")
                 if bell_when_denied:
                     self.bell()
 
@@ -1723,7 +1723,7 @@ class Workbench(tk.Tk):
         # pylint: disable=signature-differs
 
         if not add:
-            logging.warning(
+            logger.warning(
                 "Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(
                     sequence, add
                 )
