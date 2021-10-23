@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 import signal
 import subprocess
@@ -23,7 +23,7 @@ from thonny.plugins.micropython import (
 from thonny.running import get_interpreter_for_subprocess
 from thonny.workdlg import WorkDialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ESPProxy(BareMetalMicroPythonProxy):

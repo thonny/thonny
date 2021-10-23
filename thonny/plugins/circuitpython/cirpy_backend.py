@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import time
 
 from thonny.plugins.micropython.backend import INTERRUPT_CMD
@@ -8,7 +8,7 @@ from thonny.plugins.micropython.bare_metal_backend import (
     launch_bare_metal_backend,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):

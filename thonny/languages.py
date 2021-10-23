@@ -1,10 +1,10 @@
 import gettext
-import logging
+from logging import getLogger
 import os
 
 from thonny import get_workbench
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 BASE_LANGUAGE_CODE = "en_US"
 BASE_LANGUAGE_NAME = "English"

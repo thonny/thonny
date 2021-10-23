@@ -1,6 +1,6 @@
 import ast
 import datetime
-import logging
+from logging import getLogger
 import os.path
 import subprocess
 import sys
@@ -23,7 +23,7 @@ from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
 from thonny.ui_utils import CommonDialog, scrollbar_style
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
@@ -772,14 +772,14 @@ class FeedbackDialog(CommonDialog):
 
             submission["mypy_version"] = str(mypy.version.__version__)
         except ImportError:
-            logging.exception("Could not get MyPy version")
+            logger.exception("Could not get MyPy version")
 
         try:
             import pylint
 
             submission["pylint_version"] = str(pylint.__version__)
         except ImportError:
-            logging.exception("Could not get Pylint version")
+            logger.exception("Could not get Pylint version")
 
         if self.include_snapshots_var.get():
             submission["snapshots"] = self.snapshots

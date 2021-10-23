@@ -3,7 +3,7 @@
 import ast
 import configparser
 import datetime
-import logging
+from logging import getLogger
 import os.path
 import sys
 import tkinter as tk
@@ -13,7 +13,7 @@ from logging import exception
 from thonny import THONNY_USER_DIR
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 _manager_cache = {}
 

@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional
@@ -7,7 +7,7 @@ from thonny import get_workbench, ui_utils
 from thonny.languages import tr
 from thonny.ui_utils import CommonDialog, ems_to_pixels
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ConfigurationDialog(CommonDialog):

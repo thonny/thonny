@@ -1,5 +1,5 @@
 import ast
-import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -325,7 +325,7 @@ class FileHandleInspector(TextFrame, ContentInspector):
     def set_object_info(self, object_info):
 
         if "file_content" not in object_info:
-            logging.exception("File error: " + object_info["file_error"])
+            logger.exception("File error: " + object_info["file_error"])
             return
 
         assert "file_content" in object_info

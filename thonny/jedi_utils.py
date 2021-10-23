@@ -2,7 +2,7 @@
 Utils to handle different jedi versions
 """
 import jedi.api.classes
-import logging
+from logging import getLogger
 from typing import List, Dict, Optional
 
 try:
@@ -28,7 +28,7 @@ except ImportError:
 
 from thonny.common import SignatureParameter, SignatureInfo, CompletionInfo, NameReference
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 _last_jedi_completions: Optional[List[jedi.api.classes.Completion]] = None
 
@@ -271,7 +271,7 @@ def _filter_completions(
         if completion.name.startswith("__"):
             continue
 
-        #print(completion.name, completion.module_path)
+        # print(completion.name, completion.module_path)
         for path in sys_path:
             result.append(completion)
             break

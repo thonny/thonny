@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os.path
 from tkinter import messagebox
 from typing import cast, Set
@@ -10,7 +10,7 @@ from thonny.editor_helpers import get_text_filename, get_relevant_source_and_cur
 from thonny.languages import tr
 from thonny.ui_utils import control_is_pressed
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class GotoHandler:

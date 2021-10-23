@@ -14,7 +14,7 @@ In Shell only current command entry is colored
 
 Regexes are adapted from idlelib
 """
-import logging
+from logging import getLogger
 import re
 
 import tkinter
@@ -22,7 +22,7 @@ from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 TODO = "COLOR_TODO"
 

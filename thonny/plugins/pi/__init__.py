@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 import re
 
@@ -11,7 +11,7 @@ CONFIGURATION_PATH = os.path.join(
 )
 GLOBAL_CONFIGURATION_PATH = os.path.join("/etc/xdg/lxsession", DESKTOP_SESSION, "desktop.conf")
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def pix():

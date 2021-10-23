@@ -4,7 +4,7 @@
 Classes used both by front-end and back-end
 """
 import ast
-import logging
+from logging import getLogger
 import os.path
 import platform
 import site
@@ -15,7 +15,7 @@ import sys
 from collections import namedtuple
 from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"

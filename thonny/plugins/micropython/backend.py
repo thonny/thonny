@@ -36,7 +36,7 @@ CP 5.0
 import ast
 import datetime
 import io
-import logging
+from logging import getLogger
 import os
 import re
 import sys
@@ -104,7 +104,7 @@ PASTE_MODE_CMD = b"\x05"
 PASTE_MODE_LINE_PREFIX = b"=== "
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def debug(msg):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from logging import getLogger
 import os
 import platform
 import re
@@ -29,7 +29,7 @@ from thonny.tktextext import TweakableText
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
@@ -482,7 +482,7 @@ class ClosableNotebook(ttk.Notebook):
             self._popup_index = index
             self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
         except Exception:
-            logging.exception("Opening tab menu")
+            logger.exception("Opening tab menu")
 
     def _close_tab_from_menu(self):
         self.close_tab(self._popup_index)

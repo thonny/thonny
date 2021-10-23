@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import messagebox
 from typing import Optional, List
@@ -11,7 +11,7 @@ from thonny.languages import tr
 from thonny.shell import ShellText
 from thonny.ui_utils import modifier_is_pressed, ems_to_pixels
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 """
 Completions get computed on the backend, therefore getting the completions is

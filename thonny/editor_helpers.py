@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 import traceback
 from typing import Optional, Tuple, List
@@ -16,7 +16,7 @@ all_boxes = []
 
 a_box_is_appearing = False
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class EditorInfoBox(tk.Toplevel):

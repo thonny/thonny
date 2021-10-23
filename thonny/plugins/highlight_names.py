@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import messagebox
 
@@ -10,7 +10,7 @@ from thonny.common import InlineCommand
 from thonny.editor_helpers import get_text_filename
 from thonny.languages import tr
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class OccurrencesHighlighter:

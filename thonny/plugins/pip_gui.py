@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from logging import getLogger
 import os
 import re
 import subprocess
@@ -33,7 +33,7 @@ from thonny.workdlg import SubprocessDialog
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 _EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
 
@@ -999,7 +999,7 @@ class PluginsPipDialog(PipDialog):
 
             return conflicts
         except Exception:
-            logging.exception("Problem computing conflicts")
+            logger.exception("Problem computing conflicts")
             return None
 
     def _get_interpreter(self):
@@ -1407,7 +1407,7 @@ def _extract_click_text(widget, event, tag):
             if widget.compare(start, "<=", index) and widget.compare(index, "<", end):
                 return widget.get(start, end)
     except Exception:
-        logging.exception("extracting click text")
+        logger.exception("extracting click text")
 
     return None
 

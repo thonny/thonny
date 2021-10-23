@@ -3,7 +3,7 @@
 import ast
 import collections
 import importlib
-import logging
+from logging import getLogger
 import os.path
 import pkgutil
 import platform
@@ -61,7 +61,7 @@ from thonny.ui_utils import (
     ems_to_pixels,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 SERVER_SUCCESS = "OK"
 SIMPLE_MODE_VIEWS = ["ShellView"]
@@ -397,7 +397,7 @@ class Workbench(tk.Tk):
                     if hasattr(m, load_function_name):
                         modules.append(m)
                 except Exception:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
+                    logger.exception("Failed loading plugin '" + module_name + "'")
 
         def module_sort_key(m):
             return getattr(m, "load_order_key", m.__name__)
@@ -2182,7 +2182,7 @@ class Workbench(tk.Tk):
                     try:
                         enabled = tester()
                     except Exception as e:
-                        logging.exception(
+                        logger.exception(
                             "Could not check command tester for '%s'", item_data, exc_info=e
                         )
                         traceback.print_exc()
@@ -2322,7 +2322,7 @@ class Workbench(tk.Tk):
                 pass
 
         except Exception:
-            logging.exception("Error while destroying workbench")
+            logger.exception("Error while destroying workbench")
 
         finally:
             try:
@@ -2355,7 +2355,7 @@ class Workbench(tk.Tk):
         self.report_exception()
 
     def report_exception(self, title: str = "Internal error") -> None:
-        logging.exception(title)
+        logger.exception(title)
         if tk._default_root and not self._closing:  # type: ignore
             (typ, value, _) = sys.exc_info()
             assert typ is not None

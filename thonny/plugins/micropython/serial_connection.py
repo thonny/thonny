@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import pathlib
 import platform
 import sys
@@ -15,7 +15,7 @@ from thonny.plugins.micropython.bare_metal_backend import (
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class SerialConnection(MicroPythonConnection):
@@ -154,7 +154,7 @@ class SerialConnection(MicroPythonConnection):
                     self._serial.close()
                     self._serial = None
                 except Exception:
-                    logging.exception("Couldn't close serial")
+                    logger.exception("Couldn't close serial")
 
 
 class DifficultSerialConnection(SerialConnection):

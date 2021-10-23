@@ -10,7 +10,7 @@ shell becomes kind of title for the execution.
 
 
 import collections
-import logging
+from logging import getLogger
 import os.path
 import re
 import shlex
@@ -71,7 +71,7 @@ from thonny.misc_utils import (
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
@@ -257,9 +257,7 @@ class Runner:
             and not self.is_waiting_debugger_command()
         ):
             get_workbench().bell()
-            logger.warning(
-                "RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state())
-            )
+            logger.warning("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
 
         # Attach extra info
@@ -592,7 +590,7 @@ class Runner:
                 with open(faults_file, encoding="ASCII") as fp:
                     err += fp.read()
         except Exception:
-            logging.exception("Failed retrieving backend faults")
+            logger.exception("Failed retrieving backend faults")
 
         err = err.strip() + " Use 'Stop/Restart' to restart.\n"
 
@@ -1384,7 +1382,7 @@ def get_environment_overrides_for_python_subprocess(target_executable):
                 result["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
                 result["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
         except Exception:
-            logging.exception("Can't compute Tcl/Tk library location")
+            logger.exception("Can't compute Tcl/Tk library location")
 
     return result
 

@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from typing import Optional
 
 from thonny import ui_utils, get_workbench
@@ -10,7 +10,7 @@ from thonny.plugins.micropython import (
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import show_dialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):

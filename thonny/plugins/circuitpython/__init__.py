@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os.path
 import threading
 import tkinter as tk
@@ -17,7 +17,7 @@ from thonny.plugins.micropython import (
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import askopenfilename, create_url_label, show_dialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 VIDS_PIDS_TO_AVOID = set()
 

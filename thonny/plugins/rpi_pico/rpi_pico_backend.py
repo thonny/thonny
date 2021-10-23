@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-import logging
+from logging import getLogger
 import os.path
 
 from thonny.plugins.micropython.bare_metal_backend import (
@@ -8,7 +8,7 @@ from thonny.plugins.micropython.bare_metal_backend import (
     launch_bare_metal_backend,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class RaspberryPiPicoBackend(BareMetalMicroPythonBackend):

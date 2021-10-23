@@ -1,5 +1,5 @@
 import datetime
-import logging
+from logging import getLogger
 import os.path
 import subprocess
 import time
@@ -27,7 +27,7 @@ ROOT_NODE_ID = ""
 
 HIDDEN_FILES_OPTION = "file.show_hidden_files"
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class BaseFileBrowser(ttk.Frame):

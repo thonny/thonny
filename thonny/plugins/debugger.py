@@ -5,7 +5,7 @@ Adds debugging commands and features.
 """
 
 import ast
-import logging
+from logging import getLogger
 import os.path
 import tkinter as tk
 from tkinter import ttk

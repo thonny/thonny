@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os.path
 import re
 import subprocess
@@ -9,7 +9,7 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_interpreter_for_subprocess
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):

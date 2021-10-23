@@ -1,6 +1,6 @@
 import binascii
 import datetime
-import logging
+from logging import getLogger
 import os
 import queue
 import re
@@ -122,7 +122,7 @@ FALLBACK_BUILTIN_MODULES = [
 ]
 
 # Can't use __name__, because it will be "__main__"
-logger = logging.getLogger("thonny.plugins.micropython.bare_metal_backend")
+logger = getLogger("thonny.plugins.micropython.bare_metal_backend")
 
 
 def debug(msg):

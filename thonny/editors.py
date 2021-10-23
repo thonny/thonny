@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from logging import getLogger
 import os.path
 import sys
 import tkinter as tk
@@ -31,7 +31,7 @@ REMOTE_PATH_MARKER = " :: "
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
 PYTHONLIKE_EXTENSIONS = set()
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class EditorCodeViewText(CodeViewText):
@@ -988,7 +988,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         try:
             self.indicate_modification()
         except Exception:
-            logging.exception("Could not update modification indication")
+            logger.exception("Could not update modification indication")
 
     def indicate_modification(self):
         if not running_on_mac_os():

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from logging import getLogger
 import os.path
 import re
 import tkinter as tk
@@ -40,7 +40,7 @@ OBJECT_INFO_START_REGEX = re.compile(OBJECT_INFO_START_REGEX_STR)
 OBJECT_INFO_END_REGEX_STR = re.escape(OBJECT_LINK_END)
 OBJECT_INFO_END_REGEX = re.compile(OBJECT_INFO_END_REGEX_STR)
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 

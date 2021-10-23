@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 import platform
 import shutil
@@ -26,7 +26,7 @@ from thonny.ui_utils import (
     create_url_label,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 

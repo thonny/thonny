@@ -1,6 +1,6 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-import logging
+from logging import getLogger
 import platform
 from typing import Optional
 
@@ -11,7 +11,7 @@ from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class TweakableText(tk.Text):

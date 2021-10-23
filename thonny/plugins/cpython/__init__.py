@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os.path
 import subprocess
 import sys
@@ -29,7 +29,7 @@ from thonny.running import (
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class CPythonProxy(SubprocessProxy):
@@ -114,7 +114,7 @@ class CPythonProxy(SubprocessProxy):
                 try:
                     os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # pylint: disable=no-member
                 except Exception:
-                    logging.exception("Could not interrupt backend process")
+                    logger.exception("Could not interrupt backend process")
             else:
                 self._proc.send_signal(signal.SIGINT)
 
@@ -232,7 +232,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         except Exception:
             # if using --without-pip the dialog may close very quickly
             # and for some reason wait_window would give error then
-            logging.exception("Problem with waiting for venv creation dialog")
+            logger.exception("Problem with waiting for venv creation dialog")
         get_workbench().become_active_window()  # Otherwise focus may get stuck somewhere
 
         bindir = os.path.dirname(get_private_venv_executable())

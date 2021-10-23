@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 
 from thonny import get_workbench
@@ -99,7 +99,7 @@ class LocalsHighlighter:
                 highlight_positions = self.get_positions()
                 self._highlight(highlight_positions)
             except Exception:
-                logging.exception("Problem when updating local variable tags")
+                logger.exception("Problem when updating local variable tags")
 
 
 def update_highlighting(event):
