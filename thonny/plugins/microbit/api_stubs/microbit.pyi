@@ -2,9 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from typing import (
-    Any,
     List,
-    NewType,
     Optional,
     Union, Final, Tuple, overload, NoReturn,
 )
@@ -907,3 +905,95 @@ class _MicroBitSPI(object):
 
 
 spi : _MicroBitSPI = ...
+
+class _MicroBitSpeaker:
+    """
+    Available since V2.
+    """
+    def off(self) -> None:
+        """
+        Turn off the speaker. This does not disable sound output to an edge connector pin.
+        """
+    def on(self) -> None:
+        """
+        Turn on the speaker.
+        """
+
+speaker: _MicroBitSpeaker = ...
+
+
+class SoundEvent:
+    """
+    Enum for describing sound events. Available since V2.
+    """
+    LOUD: "SoundEvent" = ...
+    QUIET: "SoundEvent" = ...
+
+class _MicroBitMicrophone:
+    """
+    Available since V2.
+
+    This object lets you access the built-in microphone available on the micro:bit V2. It can be used to respond to sound. The microphone input is located on the front of the board alongside a microphone activity LED, which is lit when the microphone is in use.
+
+    The microphone can respond to a pre-defined set of sound events that are based on the amplitude and wavelength of the sound.
+
+    These sound events are represented by instances of the SoundEvent class, accessible via variables in microbit.SoundEvent:
+
+    microbit.SoundEvent.QUIET: Represents the transition of sound events, from loud to quiet like speaking or background music.
+    microbit.SoundEvent.LOUD: Represents the transition of sound events, from quiet to loud like clapping or shouting.
+    """
+
+    def current_event(self) -> Optional[SoundEvent]:
+        """
+        return: the name of the last recorded sound event, SoundEvent('loud') or SoundEvent('quiet').
+        """
+
+    def was_event(self, event: SoundEvent) -> bool:
+        """
+        * event: a sound event, such as SoundEvent.LOUD or SoundEvent.QUIET.
+        * return: true if sound was heard at least once since the last call, otherwise false. was_event() also clears the sound event history before returning.
+        """
+    def is_event(self, event: SoundEvent) -> bool:
+        """
+        * event: a sound event, such as SoundEvent.LOUD or SoundEvent.QUIET.
+        * return: true if sound event is the most recent since the last call, otherwise false. It does not clear the sound event history.
+        """
+
+    def get_events(self) -> Tuple[SoundEvent]:
+        """
+        Return a tuple of the event history. The most recent is listed last. get_events() also clears the sound event history before returning.
+        """
+
+    def set_threshold(self, event: SoundEvent, value: int) -> None:
+        """
+        * event: a sound event, such as SoundEvent.LOUD or SoundEvent.QUIET.
+        * value: The threshold level in the range 0-255. For example, set_threshold(SoundEvent.LOUD, 250) will only trigger if the sound is very loud (>= 250).
+        """
+
+    def sound_level(self) -> int:
+        """
+        Return a representation of the sound pressure level in the range 0 to 255.
+        """
+
+def set_volume(value: int) -> None:
+    """
+    sets the output volume (0-255) of the micro:bit speaker (V2) and
+    external speaker or headphones connected to the edge connector pins.
+    """
+
+def ws2812_write(pin, buffer) -> None:
+    ...
+
+class Sound:
+    """Enum for sound constants. Since V2. Can be used in audio.play"""
+
+    GIGGLE: "Sound" = ...
+    HAPPY: "Sound" = ...
+    HELLO: "Sound" = ...
+    MYSTERIOUS: "Sound" = ...
+    SAD: "Sound" = ...
+    SLIDE: "Sound" = ...
+    SOARING: "Sound" = ...
+    SPRING: "Sound" = ...
+    TWINKLE: "Sound" = ...
+    YAWN: "Sound" = ...
