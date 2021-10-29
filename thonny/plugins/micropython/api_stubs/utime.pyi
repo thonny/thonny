@@ -43,7 +43,8 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import Final, TypeVar
+from typing import Final, TypeVar, Tuple, Optional
+
 
 class _TicksMs: ...
 class _TicksUs: ...
@@ -51,7 +52,7 @@ class _TicksCPU: ...
 
 _Ticks: Final = TypeVar("_Ticks", _TicksMs, _TicksUs, _TicksCPU, int)
 
-def gmtime(secs: int | None = None, /) -> tuple[int, int, int, int, int, int, int, int]:
+def gmtime(secs: Optional[int] = None, /) -> Tuple[int, int, int, int, int, int, int, int]:
     """
    Convert the time *secs* expressed in seconds since the Epoch (see above) into an
    8-tuple which contains: ``(year, month, mday, hour, minute, second, weekday, yearday)``
@@ -73,8 +74,8 @@ def gmtime(secs: int | None = None, /) -> tuple[int, int, int, int, int, int, in
    """
 
 def localtime(
-    secs: int | None = None, /
-) -> tuple[int, int, int, int, int, int, int, int]:
+    secs: Optional[int] = None, /
+) -> Tuple[int, int, int, int, int, int, int, int]:
     """
    Convert the time *secs* expressed in seconds since the Epoch (see above) into an
    8-tuple which contains: ``(year, month, mday, hour, minute, second, weekday, yearday)``
@@ -95,7 +96,7 @@ def localtime(
    * yearday is 1-366
    """
 
-def mktime(local_time: tuple[int, int, int, int, int, int, int, int], /) -> int:
+def mktime(local_time: Tuple[int, int, int, int, int, int, int, int], /) -> int:
     """
    This is inverse function of localtime. It's argument is a full 8-tuple
    which expresses a time as per localtime. It returns an integer which is

@@ -1803,7 +1803,7 @@ class Flash(AbstractBlockDev):
        <block-device-interface>` block protocol defined by
        :class:`os.AbstractBlockDev`.
       """
-    def ioctl(self, op: int, arg: int) -> int | None:
+    def ioctl(self, op: int, arg: int) -> Optional[int]:
         """
        These methods implement the simple and :ref:`extended
        <block-device-interface>` block protocol defined by
@@ -3367,7 +3367,7 @@ set the first bit to be the least or most significant bit
         bits: int = 8,
         firstbit: int = MSB,
         ti: bool = False,
-        crc: int | None = None,
+        crc: Optional[int] = None,
     ):
         """
       Construct an SPI object on the given bus.  ``bus`` can be 1 or 2, or
@@ -3397,7 +3397,7 @@ set the first bit to be the least or most significant bit
         bits: int = 8,
         firstbit: int = MSB,
         ti: bool = False,
-        crc: int | None = None,
+        crc: Optional[int] = None,
     ):
         """
       Construct an SPI object on the given bus.  ``bus`` can be 1 or 2, or
@@ -3429,7 +3429,7 @@ set the first bit to be the least or most significant bit
         bits: int = 8,
         firstbit: int = MSB,
         ti: bool = False,
-        crc: int | None = None,
+        crc: Optional[int] = None,
     ):
         """
       Initialise the SPI bus with the given parameters:
@@ -3467,7 +3467,7 @@ set the first bit to be the least or most significant bit
         bits: int = 8,
         firstbit: int = MSB,
         ti: bool = False,
-        crc: int | None = None,
+        crc: Optional[int] = None,
     ):
         """
       Initialise the SPI bus with the given parameters:
@@ -4619,7 +4619,7 @@ to select the flow control type.
         baudrate: int,
         /,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         *,
         timeout: int = 0,
@@ -4666,7 +4666,7 @@ to select the flow control type.
         baudrate: int,
         /,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         *,
         timeout: int = 0,
@@ -4744,7 +4744,7 @@ to select the flow control type.
       Return value: The character read, as an integer.  Returns -1 on timeout.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, /) -> Optional[int]:
         """
       Read bytes into the ``buf``.  If ``nbytes`` is specified then read at most
       that many bytes.  Otherwise, read at most ``len(buf)`` bytes.
@@ -4753,7 +4753,7 @@ to select the flow control type.
       timeout.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> Optional[int]:
         """
       Read bytes into the ``buf``.  If ``nbytes`` is specified then read at most
       that many bytes.  Otherwise, read at most ``len(buf)`` bytes.
@@ -4761,7 +4761,7 @@ to select the flow control type.
       Return value: number of bytes read and stored into ``buf`` or ``None`` on
       timeout.
       """
-    def readline(self) -> str | None:
+    def readline(self) -> Optional[str]:
         """
       Read a line, ending in a newline character. If such a line exists, return is
       immediate. If the timeout elapses, all available data is returned regardless
@@ -4769,7 +4769,7 @@ to select the flow control type.
       
       Return value: the line read or ``None`` on timeout if no data is available.
       """
-    def write(self, buf: AnyWritableBuf, /) -> int | None:
+    def write(self, buf: AnyWritableBuf, /) -> Optional[int]:
         """
       Write the buffer of bytes to the bus.  If characters are 7 or 8 bits wide
       then each byte is one character.  If characters are 9 bits wide then two
@@ -4916,7 +4916,7 @@ to select the flow control type.
       with ``None`` value.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, /) -> Optional[int]:
         """
       Read bytes from the serial device and store them into ``buf``, which
       should be a buffer-like object.  At most ``len(buf)`` bytes are read.
@@ -4927,7 +4927,7 @@ to select the flow control type.
       if no pending data available.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, maxlen: int, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, maxlen: int, /) -> Optional[int]:
         """
       Read bytes from the serial device and store them into ``buf``, which
       should be a buffer-like object.  At most ``len(buf)`` bytes are read.
@@ -4971,7 +4971,7 @@ to select the flow control type.
       otherwise the number of bytes read into ``data`` is returned.
       """
     @overload
-    def recv(self, data: AnyWritableBuf, /, *, timeout: int = 5000) -> int | None:
+    def recv(self, data: AnyWritableBuf, /, *, timeout: int = 5000) -> Optional[int]:
         """
       Receive data on the bus:
       

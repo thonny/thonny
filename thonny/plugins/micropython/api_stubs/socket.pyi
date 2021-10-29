@@ -306,7 +306,7 @@ class Socket:
       socket module (SO_* etc.). The *value* can be an integer or a bytes-like object representing
       a buffer.
       """
-    def settimeout(self, value: float | None, /) -> None:
+    def settimeout(self, value: Optional[float], /) -> None:
         """
       **Note**: Not every port supports this method, see below.
       
@@ -409,7 +409,7 @@ class Socket:
       non-blocking socket though, and then less data will be returned.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, /) -> Optional[int]:
         """
       Read bytes into the *buf*.  If *nbytes* is specified then read at most
       that many bytes.  Otherwise, read at most *len(buf)* bytes. Just as
@@ -418,7 +418,7 @@ class Socket:
       Return value: number of bytes read and stored into *buf*.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> Optional[int]:
         """
       Read bytes into the *buf*.  If *nbytes* is specified then read at most
       that many bytes.  Otherwise, read at most *len(buf)* bytes. Just as
@@ -432,7 +432,7 @@ class Socket:
       
       Return value: the line read.
       """
-    def write(self, buf: AnyReadableBuf, /) -> int | None:
+    def write(self, buf: AnyReadableBuf, /) -> Optional[int]:
         """
       Write the buffer of bytes to the socket. This function will try to
       write all data to a socket (no "short writes"). This may be not possible

@@ -564,7 +564,7 @@ class AbstractBlockDev(Protocol):
            argument is specified, even if it is zero.
       """
     @overload
-    def ioctl(self, op: int, arg: int) -> int | None:
+    def ioctl(self, op: int, arg: int) -> Optional[int]:
         """
            Control the block device and query its parameters.  The operation to
            perform is given by *op* which is one of the following integers:
@@ -628,7 +628,7 @@ class AbstractBlockDev(Protocol):
            for failure, with the value returned being an ``OSError`` errno code.
       """
     @overload
-    def ioctl(self, op: Literal[1, 2, 3, 6], arg: int) -> int | None:
+    def ioctl(self, op: Literal[1, 2, 3, 6], arg: int) -> Optional[int]:
         """
            Control the block device and query its parameters.  The operation to
            perform is given by *op* which is one of the following integers:

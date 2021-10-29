@@ -238,7 +238,7 @@ class IOBase(Protocol[AnyStr, _Self]):
         
         This method does nothing for read-only and non-blocking streams.
         """
-    def read(self, size: int | None = -1) -> AnyStr | None:
+    def read(self, size: Optional[int] = -1) -> AnyOptional[str]:
         """
         Read up to `size` bytes from the object and return them as a `str` (text file) or `bytes` (binary file). 
         As a convenience, if `size` is unspecified or -1, all bytes until EOF are returned. 
@@ -248,7 +248,7 @@ class IOBase(Protocol[AnyStr, _Self]):
         If 0 bytes are returned, and `size` was not 0, this indicates end of file. 
         If `self` is in non-blocking mode and no bytes are available, `None` is returned.
         """
-    def readinto(self, b: AnyWritableBuf) -> int | None:
+    def readinto(self, b: AnyWritableBuf) -> Optional[int]:
         """
         Read bytes into a pre-allocated, writable bytes-like object b, and return the number of bytes read. 
         For example, b might be a bytearray. 
@@ -264,7 +264,7 @@ class IOBase(Protocol[AnyStr, _Self]):
 '` for binary files; 
         for text files, the newline argument to `open()` can be used to select the line terminator(s) recognized.
         """
-    def readlines(self, hint: int | None = -1) -> list[AnyStr]:
+    def readlines(self, hint: Optional[int] = -1) -> list[AnyStr]:
         """
         Read and return a list of lines, as a `list[str]` (text file) or `list[bytes]` (binary file), from the stream. 
         `hint` can be specified to control the number of lines read: 
@@ -278,7 +278,7 @@ class IOBase(Protocol[AnyStr, _Self]):
         *Note* that it’s already possible to iterate on file objects using `for line in file: ...` 
         without calling `file.readlines()`.
         """
-    def write(self, b: AnyReadableBuf) -> int | None:
+    def write(self, b: AnyReadableBuf) -> Optional[int]:
         """
         Write the given bytes-like object, `b`, to the underlying raw stream, and return the number of bytes written. 
         This can be less than the length of `b` in bytes, depending on specifics of the underlying raw stream, 

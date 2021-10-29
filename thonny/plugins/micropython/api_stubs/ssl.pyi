@@ -32,7 +32,7 @@ def wrap_socket(
     keyfile: StrOrBytesPath | None = None,
     certfile: StrOrBytesPath | None = None,
     cert_reqs: int = "CERT_NONE",
-    ca_certs: str | None = None,
+    ca_certs: Optional[str] = None,
     do_handshake: bool = True,
     /,
 ) -> Socket:

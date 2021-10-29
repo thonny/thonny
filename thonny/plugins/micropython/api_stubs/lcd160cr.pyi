@@ -241,8 +241,8 @@ The width and height of the display, respectively, in pixels.  These
         buf: AnyWritableBuf,
         x: int = 0,
         y: int = 0,
-        w: int | None = None,
-        h: int | None = None,
+        w: Optional[int] = None,
+        h: Optional[int] = None,
         /,
     ) -> None:
         """

@@ -1,7 +1,7 @@
 """
 time related functions
 
-Descriptions taken from 
+Descriptions taken from
 `https://raw.githubusercontent.com/micropython/micropython/master/docs/library/time.rst`, etc.
 =====================================
 
@@ -43,7 +43,8 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import Final, TypeVar
+from typing import Final, TypeVar, Tuple, Optional
+
 
 class _TicksMs: ...
 class _TicksUs: ...
@@ -51,56 +52,6 @@ class _TicksCPU: ...
 
 _Ticks: Final = TypeVar("_Ticks", _TicksMs, _TicksUs, _TicksCPU, int)
 
-def gmtime(secs: Optional[int] = None, /) -> tuple[int, int, int, int, int, int, int, int]:
-    """
-   Convert the time *secs* expressed in seconds since the Epoch (see above) into an
-   8-tuple which contains: ``(year, month, mday, hour, minute, second, weekday, yearday)``
-   If *secs* is not provided or None, then the current time from the RTC is used.
-   
-   The `gmtime()` function returns a date-time tuple in UTC, and `localtime()` returns a
-   date-time tuple in local time.
-   
-   The format of the entries in the 8-tuple are:
-   
-   * year includes the century (for example 2014).
-   * month   is 1-12
-   * mday    is 1-31
-   * hour    is 0-23
-   * minute  is 0-59
-   * second  is 0-59
-   * weekday is 0-6 for Mon-Sun
-   * yearday is 1-366
-   """
-
-def localtime(
-    secs: Optional[int] = None, /
-) -> tuple[int, int, int, int, int, int, int, int]:
-    """
-   Convert the time *secs* expressed in seconds since the Epoch (see above) into an
-   8-tuple which contains: ``(year, month, mday, hour, minute, second, weekday, yearday)``
-   If *secs* is not provided or None, then the current time from the RTC is used.
-   
-   The `gmtime()` function returns a date-time tuple in UTC, and `localtime()` returns a
-   date-time tuple in local time.
-   
-   The format of the entries in the 8-tuple are:
-   
-   * year includes the century (for example 2014).
-   * month   is 1-12
-   * mday    is 1-31
-   * hour    is 0-23
-   * minute  is 0-59
-   * second  is 0-59
-   * weekday is 0-6 for Mon-Sun
-   * yearday is 1-366
-   """
-
-def mktime(local_time: tuple[int, int, int, int, int, int, int, int], /) -> int:
-    """
-   This is inverse function of localtime. It's argument is a full 8-tuple
-   which expresses a time as per localtime. It returns an integer which is
-   the number of seconds since Jan 1, 2000.
-   """
 
 def sleep(seconds: float, /) -> None:
     """
@@ -113,7 +64,7 @@ def sleep(seconds: float, /) -> None:
 def sleep_ms(ms: int, /) -> None:
     """
    Delay for given number of milliseconds, should be positive or 0.
-   
+
    This function will delay for at least the given number of milliseconds, but
    may take longer than that if other processing must take place, for example
    interrupt handlers or other threads.  Passing in 0 for *ms* will still allow
@@ -123,7 +74,7 @@ def sleep_ms(ms: int, /) -> None:
 def sleep_us(us: int, /) -> None:
     """
    Delay for given number of microseconds, should be positive or 0.
-   
+
    This function attempts to provide an accurate delay of at least *us*
    microseconds, but it may take longer if the system has other higher priority
    processing to perform.
@@ -133,7 +84,7 @@ def ticks_ms() -> _TicksMs:
     """
     Returns an increasing millisecond counter with an arbitrary reference point, that
     wraps around after some value.
-    
+
     The wrap-around value is not explicitly exposed, but we will
     refer to it as *TICKS_MAX* to simplify discussion. Period of the values is
     *TICKS_PERIOD = TICKS_MAX + 1*. *TICKS_PERIOD* is guaranteed to be a power of
@@ -144,7 +95,7 @@ def ticks_ms() -> _TicksMs:
     non-negative values are used. For the most part, you should treat values returned
     by these functions as opaque. The only operations available for them are
     `ticks_diff()` and `ticks_add()` functions described below.
-    
+
     Note: Performing standard mathematical operations (+, -) or relational
     operators (<, <=, >, >=) directly on these value will lead to invalid
     result. Performing mathematical operations and then passing their results
@@ -157,19 +108,6 @@ def ticks_us() -> _TicksUs:
    Just like `ticks_ms()` above, but in microseconds.
    """
 
-def ticks_cpu() -> _TicksCPU:
-    """
-   Similar to `ticks_ms()` and `ticks_us()`, but with the highest possible resolution
-   in the system. This is usually CPU clocks, and that's why the function is named that
-   way. But it doesn't have to be a CPU clock, some other timing source available in a
-   system (e.g. high-resolution timer) can be used instead. The exact timing unit
-   (resolution) of this function is not specified on ``time`` module level, but
-   documentation for a specific port may provide more specific information. This
-   function is intended for very fine benchmarking or very tight real-time loops.
-   Avoid using it in portable code.
-   
-   Availability: Not every port implements this function.
-   """
 
 def ticks_add(ticks: _Ticks, delta: int, /) -> _Ticks:
     """
@@ -182,17 +120,17 @@ def ticks_add(ticks: _Ticks, delta: int, /) -> _Ticks:
    or numeric expression. `ticks_add()` is useful for calculating deadlines for
    events/tasks. (Note: you must use `ticks_diff()` function to work with
    deadlines.)
-   
+
    Examples::
-   
+
         # Find out what ticks value there was 100ms ago
         print(ticks_add(time.ticks_ms(), -100))
-   
+
         # Calculate deadline for operation and test for it
         deadline = ticks_add(time.ticks_ms(), 200)
         while ticks_diff(deadline, time.ticks_ms()) > 0:
             do_a_little_of_something()
-   
+
         # Find out TICKS_MAX used by this port
         print(ticks_add(0, -1))
    """
@@ -201,7 +139,7 @@ def ticks_diff(ticks1: _Ticks, ticks2: _Ticks, /) -> int:
     """
    Measure ticks difference between values returned from `ticks_ms()`, `ticks_us()`,
    or `ticks_cpu()` functions, as a signed value which may wrap around.
-   
+
    The argument order is the same as for subtraction
    operator, ``ticks_diff(ticks1, ticks2)`` has the same meaning as ``ticks1 - ticks2``.
    However, values returned by `ticks_ms()`, etc. functions may wrap around, so
@@ -219,7 +157,7 @@ def ticks_diff(ticks1: _Ticks, ticks2: _Ticks, /) -> int:
    However, if *TICKS_PERIOD/2* of real-time ticks has passed between them, the
    function will return *-TICKS_PERIOD/2* instead, i.e. result value will wrap around
    to the negative range of possible values.
-   
+
    Informal rationale of the constraints above: Suppose you are locked in a room with no
    means to monitor passing of time except a standard 12-notch clock. Then if you look at
    dial-plate now, and don't look again for another 13 hours (e.g., if you fall for a
@@ -228,21 +166,21 @@ def ticks_diff(ticks1: _Ticks, ticks2: _Ticks, /) -> int:
    should do the same. "Too long sleep" metaphor also maps directly to application
    behaviour: don't let your application run any single task for too long. Run tasks
    in steps, and do time-keeping inbetween.
-   
+
    `ticks_diff()` is designed to accommodate various usage patterns, among them:
-   
+
    * Polling with timeout. In this case, the order of events is known, and you will deal
      only with positive results of `ticks_diff()`::
-   
+
         # Wait for GPIO pin to be asserted, but at most 500us
         start = time.ticks_us()
         while pin.value() == 0:
             if time.ticks_diff(time.ticks_us(), start) > 500:
                 raise TimeoutError
-   
+
    * Scheduling events. In this case, `ticks_diff()` result may be negative
      if an event is overdue::
-   
+
         # This code snippet is not optimized
         now = time.ticks_ms()
         scheduled_time = task.scheduled_time()
@@ -256,41 +194,9 @@ def ticks_diff(ticks1: _Ticks, ticks2: _Ticks, /) -> int:
         elif ticks_diff(scheduled_time, now) < 0:
             print("Oops, running late, tell task to run faster!")
             task.run(run_faster=true)
-   
+
    Note: Do not pass `time()` values to `ticks_diff()`, you should use
    normal mathematical operations on them. But note that `time()` may (and will)
    also overflow. This is known as https://en.wikipedia.org/wiki/Year_2038_problem .
    """
 
-def time() -> int:
-    """
-   Returns the number of seconds, as an integer, since the Epoch, assuming that
-   underlying RTC is set and maintained as described above. If an RTC is not set, this
-   function returns number of seconds since a port-specific reference point in time (for
-   embedded boards without a battery-backed RTC, usually since power up or reset). If you
-   want to develop portable MicroPython application, you should not rely on this function
-   to provide higher than second precision.  If you need higher precision, absolute
-   timestamps, use `time_ns()`.  If relative times are acceptable then use the
-   `ticks_ms()` and `ticks_us()` functions.  If you need calendar time, `gmtime()` or
-   `localtime()` without an argument is a better choice.
-   
-   .. admonition:: Difference to CPython
-      :class: attention
-   
-      In CPython, this function returns number of
-      seconds since Unix epoch, 1970-01-01 00:00 UTC, as a floating-point,
-      usually having microsecond precision. With MicroPython, only Unix port
-      uses the same Epoch, and if floating-point precision allows,
-      returns sub-second precision. Embedded hardware usually doesn't have
-      floating-point precision to represent both long time ranges and subsecond
-      precision, so they use integer value with second precision. Some embedded
-      hardware also lacks battery-powered RTC, so returns number of seconds
-      since last power-up or from other relative, hardware-specific point
-      (e.g. reset).
-   """
-
-def time_ns() -> int:
-    """
-    Similar to `time()` but returns nanoseconds since the Epoch, as an integer (usually
-    a big integer, so will allocate on the heap).
-   """

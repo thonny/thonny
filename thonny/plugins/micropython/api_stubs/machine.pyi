@@ -416,8 +416,8 @@ Selects the IRQ trigger type.
         pull: int = -1,
         *,
         value: Any = None,
-        drive: int | None = None,
-        alt: int | None = None,
+        drive: Optional[int] = None,
+        alt: Optional[int] = None,
     ):
         """
       Access the pin peripheral (GPIO pin) associated with the given ``id``.  If
@@ -485,8 +485,8 @@ Selects the IRQ trigger type.
         pull: int = -1,
         *,
         value: Any = None,
-        drive: int | None = None,
-        alt: int | None = None,
+        drive: Optional[int] = None,
+        alt: Optional[int] = None,
     ) -> None:
         """
       Re-initialise the pin using the given parameters.  Only those arguments that
@@ -590,7 +590,7 @@ Selects the IRQ trigger type.
         trigger: int = (IRQ_FALLING | IRQ_RISING),
         *,
         priority: int = 1,
-        wake: int | None = None,
+        wake: Optional[int] = None,
         hard: bool = False,
     ) -> Callable[[Pin], None] | None:
         """
@@ -792,8 +792,8 @@ class Signal:
         pull: int = -1,
         *,
         value: Any = None,
-        drive: int | None = None,
-        alt: int | None = None,
+        drive: Optional[int] = None,
+        alt: Optional[int] = None,
         invert: bool = False,
     ):
         """
@@ -933,17 +933,17 @@ IRQ trigger sources
         id: int | str,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
         tx: Pin | None = None,
         rx: Pin | None = None,
-        txbuf: int | None = None,
-        rxbuf: int | None = None,
-        timeout: int | None = None,
-        timeout_char: int | None = None,
-        invert: int | None = None,
+        txbuf: Optional[int] = None,
+        rxbuf: Optional[int] = None,
+        timeout: Optional[int] = None,
+        timeout_char: Optional[int] = None,
+        invert: Optional[int] = None,
     ):
         """
       Construct a UART object of the given id.
@@ -954,7 +954,7 @@ IRQ trigger sources
         id: int | str,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
@@ -969,7 +969,7 @@ IRQ trigger sources
         id: int | str,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
@@ -983,17 +983,17 @@ IRQ trigger sources
         self,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
         tx: Pin | None = None,
         rx: Pin | None = None,
-        txbuf: int | None = None,
-        rxbuf: int | None = None,
-        timeout: int | None = None,
-        timeout_char: int | None = None,
-        invert: int | None = None,
+        txbuf: Optional[int] = None,
+        rxbuf: Optional[int] = None,
+        timeout: Optional[int] = None,
+        timeout_char: Optional[int] = None,
+        invert: Optional[int] = None,
     ) -> None:
         """
       Initialise the UART bus with the given parameters:
@@ -1037,7 +1037,7 @@ IRQ trigger sources
         self,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
@@ -1085,7 +1085,7 @@ IRQ trigger sources
         self,
         baudrate: int = 9600,
         bits: int = 8,
-        parity: int | None = None,
+        parity: Optional[int] = None,
         stop: int = 1,
         /,
         *,
@@ -1166,7 +1166,7 @@ IRQ trigger sources
       on timeout.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, /) -> Optional[int]:
         """
       Read bytes into the ``buf``.  If ``nbytes`` is specified then read at most
       that many bytes.  Otherwise, read at most ``len(buf)`` bytes. It may return sooner if a timeout
@@ -1176,7 +1176,7 @@ IRQ trigger sources
       timeout.
       """
     @overload
-    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, nbytes: int, /) -> Optional[int]:
         """
       Read bytes into the ``buf``.  If ``nbytes`` is specified then read at most
       that many bytes.  Otherwise, read at most ``len(buf)`` bytes. It may return sooner if a timeout
@@ -1192,7 +1192,7 @@ IRQ trigger sources
       
       Return value: the line read or ``None`` on timeout.
       """
-    def write(self, buf: AnyReadableBuf, /) -> int | None:
+    def write(self, buf: AnyReadableBuf, /) -> Optional[int]:
         """
       Write the buffer of bytes to the bus.
       
@@ -1404,7 +1404,7 @@ set the first bit to be the least significant bit
        the single byte given by ``write``.
        Returns a ``bytes`` object with the data that was read.
       """
-    def readinto(self, buf: AnyWritableBuf, write: int = 0x00, /) -> int | None:
+    def readinto(self, buf: AnyWritableBuf, write: int = 0x00, /) -> Optional[int]:
         """
        Read into the buffer specified by ``buf`` while continuously writing the
        single byte given by ``write``.
@@ -1412,7 +1412,7 @@ set the first bit to be the least significant bit
        
        Note: on WiPy this function returns the number of bytes read.
       """
-    def write(self, buf: AnyReadableBuf, /) -> int | None:
+    def write(self, buf: AnyReadableBuf, /) -> Optional[int]:
         """
        Write the bytes contained in ``buf``.
        Returns ``None``.
@@ -1421,7 +1421,7 @@ set the first bit to be the least significant bit
       """
     def write_readinto(
         self, write_buf: AnyReadableBuf, read_buf: AnyWritableBuf, /
-    ) -> int | None:
+    ) -> Optional[int]:
         """
        Write the bytes from ``write_buf`` while reading into ``read_buf``.  The
        buffers can be the same or different, but both buffers must have the
@@ -2258,4 +2258,4 @@ class SDCard(AbstractBlockDev):
       """
     def readblocks(self, blocknum: int, buf: bytes, offset: int = 0, /) -> None: ...
     def writeblocks(self, blocknum: int, buf: bytes, offset: int = 0, /) -> None: ...
-    def ioctl(self, op: int, arg: int) -> int | None: ...
+    def ioctl(self, op: int, arg: int) -> Optional[int]: ...

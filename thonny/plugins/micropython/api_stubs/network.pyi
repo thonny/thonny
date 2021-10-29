@@ -130,7 +130,7 @@ class AbstractNIC(Protocol):
       """
     @overload
     @abstractmethod
-    def connect(self, key: str | None = None, /, **kwargs: Any) -> None:
+    def connect(self, key: Optional[str] = None, /, **kwargs: Any) -> None:
         """
           Connect the interface to a network. This method is optional, and
           available only for interfaces which are not "always connected".
@@ -149,7 +149,7 @@ class AbstractNIC(Protocol):
     @overload
     @abstractmethod
     def connect(
-        self, service_id: Any, key: str | None = None, /, **kwargs: Any
+        self, service_id: Any, key: Optional[str] = None, /, **kwargs: Any
     ) -> None:
         """
           Connect the interface to a network. This method is optional, and
@@ -322,8 +322,8 @@ class WLAN:
       """
     def connect(
         self,
-        ssid: str | None = None,
-        password: str | None = None,
+        ssid: Optional[str] = None,
+        password: Optional[str] = None,
         /,
         *,
         bssid: bytes | None = None,
@@ -628,7 +628,7 @@ selects the antenna type
         *,
         auth: tuple[str, str] | None = None,
         bssid: bytes | None = None,
-        timeout: int | None = None,
+        timeout: Optional[int] = None,
     ) -> None:
         """
       Connect to a WiFi access point using the given SSID, and other security
@@ -642,7 +642,7 @@ selects the antenna type
            APs with the same ssid.
          - *timeout* is the maximum time in milliseconds to wait for the connection to succeed.
       """
-    def scan(self) -> tuple[str, bytes, int, int | None, int]:
+    def scan(self) -> tuple[str, bytes, int, Optional[int], int]:
         """
       Performs a network scan and returns a list of named tuples with (ssid, bssid, sec, channel, rssi).
       Note that channel is always ``None`` since this info is not provided by the WiPy.
@@ -816,7 +816,7 @@ security type to use
     def connect(
         self,
         ssid: str,
-        key: str | None = None,
+        key: Optional[str] = None,
         /,
         *,
         security: int = WPA2,

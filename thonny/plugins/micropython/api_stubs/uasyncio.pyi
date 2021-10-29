@@ -118,7 +118,7 @@ StreamReader = "Stream"
 StreamWriter = "Stream"
 
 def open_connection(
-    host: str | None, port: str | int | None, /,
+    host: Optional[str], port: str | Optional[int], /,
 ) -> Awaitable[tuple[StreamReader, StreamWriter]]:
     """
     Open a TCP connection to the given *host* and *port*.  The *host* address will be
@@ -133,8 +133,8 @@ def open_connection(
 
 def start_server(
     callback: Callable[[StreamReader, StreamWriter], None],
-    host: str | None,
-    port: str | int | None,
+    host: Optional[str],
+    port: str | Optional[int],
     backlog: int = 5,
     /,
 ) -> Awaitable[Server]:

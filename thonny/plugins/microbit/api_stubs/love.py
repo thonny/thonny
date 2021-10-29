@@ -1,2 +1,0 @@
-def badaboom():
-    pass

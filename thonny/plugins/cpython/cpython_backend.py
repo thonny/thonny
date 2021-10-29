@@ -20,7 +20,7 @@ import types
 import warnings
 from collections import namedtuple
 from importlib.machinery import SourceFileLoader, PathFinder
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import __main__
 
@@ -640,6 +640,9 @@ class MainCPythonBackend(MainBackend):
                     shutil.rmtree(path)
             except Exception as e:
                 print("Could not delete %s: %s" % (path, str(e)), file=sys.stderr)
+
+    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        return ["/home/annamaa/python_stuff/thonny/thonny/plugins/micropython/api_stubs"]
 
     def _get_sep(self) -> str:
         return os.path.sep
