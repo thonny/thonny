@@ -85,6 +85,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Georges Khaznadar
 * Hyungseok Choi
 * IhorNehrutsa
+* Ingo Blechschmidt
 * Ivanhercaz
 * Ivan.schamann
 * Илья Кругликов
