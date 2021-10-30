@@ -27,7 +27,9 @@ class SerialConnection(MicroPythonConnection):
         super().__init__()
 
         try:
-            self._serial = serial.Serial(port=None, baudrate=baudrate, timeout=None, exclusive=True)
+            self._serial = serial.Serial(
+                port=None, baudrate=baudrate, timeout=None, write_timeout=2, exclusive=True
+            )
             # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
             # but in some cases it messes up communication.

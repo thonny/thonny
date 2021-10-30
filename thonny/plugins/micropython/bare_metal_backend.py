@@ -10,6 +10,8 @@ import time
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, Optional, Tuple, Union, Dict, Any
 
+from serial import SerialTimeoutException
+
 import thonny
 from thonny.backend import UploadDownloadMixin
 from thonny.common import (
@@ -262,8 +264,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # Discard what's printed by now and order a prompt, so that we get to know
             # if the REPL is already idle
             discarded = self._connection.read_all()
-            self._write(RAW_MODE_CMD)
+            logger.debug("Asked for raw mode")
+            try:
+                self._write(RAW_MODE_CMD)
+            except SerialTimeoutException:
+                logger.warning("Got timeout when asking for raw mode")
+
+            logger.debug("Forwarding output")
             self._forward_output_until_active_prompt(self._send_output)
+            logger.debug("Done forwarding output")
 
         if self._submit_mode is None:
             self._choose_submit_mode()

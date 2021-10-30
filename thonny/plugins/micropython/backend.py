@@ -50,6 +50,8 @@ from textwrap import dedent
 from threading import Lock
 from typing import Optional, Dict, Union, Tuple, List
 
+from serial import SerialTimeoutException
+
 from thonny import get_backend_log_file, BACKEND_LOG_MARKER
 from thonny.backend import MainBackend
 from thonny.common import (
@@ -147,11 +149,9 @@ class MicroPythonBackend(MainBackend, ABC):
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
-        except ManagementError as e:
-            logger.exception("ManagementError")
-            self._log_management_error_details(e)
         except Exception as e:
             logger.exception("Crash in backend", exc_info=e)
+            self._report_likely_communication_error(e)
 
     def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
@@ -378,25 +378,8 @@ class MicroPythonBackend(MainBackend, ABC):
                     self._show_error(
                         "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
                     )
-                    if isinstance(e, ManagementError):
-                        self._log_management_error_details(e)
-                    if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
-                        self._show_error(
-                            (
-                                "It looks like %s has arrived to an unexpected state"
-                                " or there have been communication problems."
-                            )
-                            % self._get_interpreter_kind(),
-                            end=" ",
-                        )
-                    else:
-                        traceback.print_exc()
 
-                    self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
-                    self._show_error(
-                        'You may need to press "Stop/Restart" or hard-reset your '
-                        "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
-                    )
+                    self._report_likely_communication_error(e)
                     response = create_error_response(error="Internal error")
 
         if response is None:
@@ -427,18 +410,30 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _connected_to_microbit(self):
+        if not self._welcome_text:
+            return None
+
         return "micro:bit" in self._welcome_text.lower()
 
     def _connected_to_pyboard(self):
+        if not self._welcome_text:
+            return None
+
         return "pyb" in self._welcome_text.lower() or "pyb" in self._builtin_modules
 
     def _connected_to_circuitpython(self):
+        if not self._welcome_text:
+            return None
+
         return "circuitpython" in self._welcome_text.lower()
 
     def _get_interpreter_kind(self):
         return "CircuitPython" if self._connected_to_circuitpython() else "MicroPython"
 
     def _connected_to_pycom(self):
+        if not self._welcome_text:
+            return None
+
         return "pycom" in self._welcome_text.lower()
 
     def _fetch_welcome_text(self) -> str:
@@ -1381,6 +1376,30 @@ class MicroPythonBackend(MainBackend, ABC):
             e.script,
             e.out,
             e.err,
+        )
+
+    def _show_unexpected_condition_message(self):
+        self._show_error(
+            (
+                "It looks like %s has arrived to an unexpected state"
+                " or there have been communication problems."
+            )
+            % self._get_interpreter_kind(),
+            end=" ",
+        )
+
+    def _report_likely_communication_error(self, e):
+        if isinstance(e, ManagementError):
+            self._log_management_error_details(e)
+        if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
+            self._show_unexpected_condition_message()
+        else:
+            self._show_error("Internal error (%s)" % e)
+
+        self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
+        self._show_error(
+            'You may need to press "Stop/Restart" or hard-reset your '
+            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
         )
 
 
