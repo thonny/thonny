@@ -1406,6 +1406,7 @@ def control_is_pressed(event_state):
     # http://stackoverflow.com/q/32426250/261181
     return event_state & 0x0004
 
+
 def command_is_pressed(event_state):
     # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
@@ -1414,6 +1415,13 @@ def command_is_pressed(event_state):
 
 def modifier_is_pressed(event_state: int) -> bool:
     return event_state != 0 and event_state != 0b10000
+
+
+def get_hyperlink_cursor() -> str:
+    if running_on_mac_os():
+        return "pointinghand"
+    else:
+        return "hand2"
 
 
 def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, int]]:
@@ -2244,7 +2252,7 @@ def create_action_label(master, text, click_handler, **kw):
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
     url_label = ttk.Label(
-        master, text=text, style="Url.TLabel", cursor="hand2", font=url_font, **kw
+        master, text=text, style="Url.TLabel", cursor=get_hyperlink_cursor(), font=url_font, **kw
     )
     url_label.bind("<Button-1>", click_handler)
     return url_label

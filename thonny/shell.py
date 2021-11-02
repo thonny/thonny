@@ -33,6 +33,7 @@ from thonny.ui_utils import (
     show_dialog,
     tr_btn,
     ems_to_pixels,
+    get_hyperlink_cursor,
 )
 
 OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"-?\d+")
@@ -1437,8 +1438,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _on_mouse_move(self, event=None):
         tags = self.tag_names("@%d,%d" % (event.x, event.y))
         if "value" in tags or "io_hyperlink" in tags:
-            if self.cget("cursor") != "hand2":
-                self.config(cursor="hand2")
+            if self.cget("cursor") != get_hyperlink_cursor():
+                self.config(cursor=get_hyperlink_cursor())
         else:
             if self.cget("cursor"):
                 self.config(cursor="")

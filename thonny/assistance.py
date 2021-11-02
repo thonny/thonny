@@ -21,7 +21,7 @@ from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import ToplevelResponse, read_source
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import CommonDialog, scrollbar_style
+from thonny.ui_utils import CommonDialog, scrollbar_style, get_hyperlink_cursor
 
 logger = getLogger(__name__)
 
@@ -645,7 +645,7 @@ class FeedbackDialog(CommonDialog):
             main_frame,
             text="(Preview the data to be sent)",
             style="Url.TLabel",
-            cursor="hand2",
+            cursor=get_hyperlink_cursor(),
             font=url_font,
         )
         preview_link.bind("<1>", self._preview_submission_data, True)

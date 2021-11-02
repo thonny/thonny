@@ -11,7 +11,7 @@ import thonny
 from thonny import get_workbench, ui_utils
 from thonny.common import get_python_version_string
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog
+from thonny.ui_utils import CommonDialog, get_hyperlink_cursor
 
 
 class AboutDialog(CommonDialog):
@@ -43,7 +43,7 @@ class AboutDialog(CommonDialog):
         url_font = tkinter.font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
         url_label = ttk.Label(
-            main_frame, text=url, style="Url.TLabel", cursor="hand2", font=url_font
+            main_frame, text=url, style="Url.TLabel", cursor=get_hyperlink_cursor(), font=url_font
         )
         url_label.grid()
         url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
@@ -87,7 +87,7 @@ class AboutDialog(CommonDialog):
                 + "and Cybernetica AS"
             ),
             style="Url.TLabel",
-            cursor="hand2",
+            cursor=get_hyperlink_cursor(),
             font=url_font,
             justify="center",
         )

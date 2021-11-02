@@ -18,6 +18,7 @@ from thonny.ui_utils import (
     show_dialog,
     ask_string,
     ask_one_from_choices,
+    get_hyperlink_cursor,
 )
 
 _dummy_node_text = "..."
@@ -137,7 +138,7 @@ class BaseFileBrowser(ttk.Frame):
                 self.path_bar.tag_add("underline", range_start, range_end)
 
         def dir_tag_enter(event):
-            self.path_bar.config(cursor="hand2")
+            self.path_bar.config(cursor=get_hyperlink_cursor())
 
         def dir_tag_leave(event):
             self.path_bar.config(cursor="")

@@ -5,6 +5,7 @@ import traceback
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.tktextext import TweakableText
+from thonny.ui_utils import get_hyperlink_cursor
 
 logger = getLogger(__name__)
 
@@ -467,7 +468,7 @@ class RstText(TweakableText):
         return self._visitor
 
     def _hyperlink_enter(self, event):
-        self.config(cursor="hand2")
+        self.config(cursor=get_hyperlink_cursor())
 
     def _hyperlink_leave(self, event):
         self.config(cursor="")

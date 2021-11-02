@@ -130,7 +130,6 @@ class CompletionsBox(EditorInfoBox):
             self._listbox.grid_remove()
             self._listbox.grid()
 
-
     def _get_current_completion_index(self):
         selected = self._listbox.curselection()
         if len(selected) == 0:

@@ -59,6 +59,7 @@ from thonny.ui_utils import (
     caps_lock_is_on,
     shift_is_pressed,
     ems_to_pixels,
+    get_hyperlink_cursor,
 )
 
 logger = getLogger(__name__)
@@ -1418,7 +1419,7 @@ class Workbench(tk.Tk):
             justify="right",
             font="SmallLinkFont",
             style="Url.TLabel",
-            cursor="hand2",
+            cursor=get_hyperlink_cursor(),
         )
         label.grid(row=0, column=1001, sticky="ne")
 

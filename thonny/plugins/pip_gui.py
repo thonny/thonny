@@ -28,6 +28,7 @@ from thonny.ui_utils import (
     open_path_in_system_file_manager,
     scrollbar_style,
     ems_to_pixels,
+    get_hyperlink_cursor,
 )
 from thonny.workdlg import SubprocessDialog
 
@@ -165,14 +166,18 @@ class PipDialog(CommonDialog):
         link_color = lookup_style_option("Url.TLabel", "foreground", "red")
         self.info_text.tag_configure("url", foreground=link_color, underline=True)
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
-        self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind(
+            "url", "<Enter>", lambda e: self.info_text.config(cursor=get_hyperlink_cursor())
+        )
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
         self.info_text.tag_configure("install_reqs", foreground=link_color, underline=True)
         self.info_text.tag_bind(
             "install_reqs", "<ButtonRelease-1>", self._handle_install_requirements_click
         )
         self.info_text.tag_bind(
-            "install_reqs", "<Enter>", lambda e: self.info_text.config(cursor="hand2")
+            "install_reqs",
+            "<Enter>",
+            lambda e: self.info_text.config(cursor=get_hyperlink_cursor()),
         )
         self.info_text.tag_bind(
             "install_reqs", "<Leave>", lambda e: self.info_text.config(cursor="")
@@ -182,7 +187,9 @@ class PipDialog(CommonDialog):
             "install_file", "<ButtonRelease-1>", self._handle_install_file_click
         )
         self.info_text.tag_bind(
-            "install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2")
+            "install_file",
+            "<Enter>",
+            lambda e: self.info_text.config(cursor=get_hyperlink_cursor()),
         )
         self.info_text.tag_bind(
             "install_file", "<Leave>", lambda e: self.info_text.config(cursor="")

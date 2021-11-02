@@ -50,7 +50,6 @@ class GotoHandler:
         else:
             return control_is_pressed(event_state)
 
-
     def handle_definitions_response(self, msg):
         defs = msg.definitions
         if len(defs) != 1:
@@ -97,7 +96,7 @@ class GotoHandler:
                 )
             ):
                 text.tag_add("name_link", start_index, end_index)
-                text["cursor"] = "hand2"
+                text["cursor"] = get_hyperlink_cursor()
                 text.underlined = True
         else:
             if getattr(text, "underlined", False):
