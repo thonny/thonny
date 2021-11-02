@@ -22,6 +22,7 @@ logger = getLogger(__name__)
 class EditorInfoBox(tk.Toplevel):
     def __init__(self):
         super().__init__(master=get_workbench())
+        self._has_shown_on_screen: bool = False
         all_boxes.append(self)
         self._target_text_widget: Optional[SyntaxText] = None
 
@@ -156,10 +157,14 @@ class EditorInfoBox(tk.Toplevel):
                 self._set_window_attributes()
                 self._check_update_size()
                 self.deiconify()
+                if not self._has_shown_on_screen:
+                    self.tweak_first_appearance()
             else:
                 self._check_update_size()
         finally:
             a_box_is_appearing = False
+
+        self._has_shown_on_screen = True
 
     def _check_update_size(self) -> None:
         if hasattr(self, "_update_size"):
@@ -188,6 +193,9 @@ class EditorInfoBox(tk.Toplevel):
 
     def is_visible(self) -> bool:
         return self.winfo_ismapped()
+
+    def tweak_first_appearance(self):
+        pass
 
 
 class DocuBoxBase(EditorInfoBox):

@@ -8,6 +8,7 @@ from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.common import InlineCommand, CompletionInfo
 from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
+from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.ui_utils import modifier_is_pressed, ems_to_pixels
 
@@ -121,6 +122,14 @@ class CompletionsBox(EditorInfoBox):
 
     def _get_related_box(self) -> Optional["EditorInfoBox"]:
         return self._details_box
+
+    def tweak_first_appearance(self):
+        super().tweak_first_appearance()
+        if running_on_mac_os():
+            self.update()
+            self._listbox.grid_remove()
+            self._listbox.grid()
+
 
     def _get_current_completion_index(self):
         selected = self._listbox.curselection()
