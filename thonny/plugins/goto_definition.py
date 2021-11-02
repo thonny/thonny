@@ -8,7 +8,8 @@ from thonny.codeview import CodeViewText, SyntaxText
 from thonny.common import InlineCommand
 from thonny.editor_helpers import get_text_filename, get_relevant_source_and_cursor_position
 from thonny.languages import tr
-from thonny.ui_utils import control_is_pressed
+from thonny.misc_utils import running_on_mac_os
+from thonny.ui_utils import control_is_pressed, command_is_pressed, get_hyperlink_cursor
 
 logger = getLogger(__name__)
 
@@ -19,11 +20,14 @@ class GotoHandler:
         wb.bind_class("EditorCodeViewText", "<1>", self.request_definitions, True)
         wb.bind_class("EditorCodeViewText", "<Any-Motion>", self.on_motion, True)
         wb.bind_class("EditorCodeViewText", "<Any-Leave>", self.remove_underline, True)
-        wb.bind_class("EditorCodeViewText", "<Control-KeyRelease>", self.remove_underline, True)
+        if running_on_mac_os():
+            wb.bind_class("EditorCodeViewText", "<Command-KeyRelease>", self.remove_underline, True)
+        else:
+            wb.bind_class("EditorCodeViewText", "<Control-KeyRelease>", self.remove_underline, True)
         wb.bind("get_definitions_response", self.handle_definitions_response, True)
 
     def request_definitions(self, event=None):
-        if not control_is_pressed(event.state):
+        if not self.proper_modifier_is_pressed(event.state):
             return
 
         assert isinstance(event.widget, CodeViewText)
@@ -39,6 +43,13 @@ class GotoHandler:
                 "get_definitions", source=source, row=row, column=column, filename=filename
             )
         )
+
+    def proper_modifier_is_pressed(self, event_state: int) -> bool:
+        if running_on_mac_os():
+            return command_is_pressed(event_state)
+        else:
+            return control_is_pressed(event_state)
+
 
     def handle_definitions_response(self, msg):
         defs = msg.definitions
@@ -64,7 +75,7 @@ class GotoHandler:
 
     def on_motion(self, event):
         text = cast(SyntaxText, event.widget)
-        if control_is_pressed(event.state):
+        if self.proper_modifier_is_pressed(event.state):
             self.remove_underline(event)
             start_index = text.index(f"@{event.x},{event.y} wordstart")
             end_index = text.index(f"@{event.x},{event.y} wordend")

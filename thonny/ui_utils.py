@@ -1406,6 +1406,11 @@ def control_is_pressed(event_state):
     # http://stackoverflow.com/q/32426250/261181
     return event_state & 0x0004
 
+def command_is_pressed(event_state):
+    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # http://stackoverflow.com/q/32426250/261181
+    return event_state & 0x0008
+
 
 def modifier_is_pressed(event_state: int) -> bool:
     return event_state != 0 and event_state != 0b10000
