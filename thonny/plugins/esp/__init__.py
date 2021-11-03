@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 import signal
 import subprocess
@@ -23,7 +23,7 @@ from thonny.plugins.micropython import (
 from thonny.running import get_interpreter_for_subprocess
 from thonny.workdlg import WorkDialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class ESPProxy(BareMetalMicroPythonProxy):
@@ -51,6 +51,11 @@ class ESPProxy(BareMetalMicroPythonProxy):
         # micro:bit
         return {(0x0D28, 0x0204)}
 
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.esp.esp_backend
+
+        return thonny.plugins.esp.esp_backend.__file__
+
 
 class ESP8266Proxy(ESPProxy):
     description = "MicroPython on ESP8266"
@@ -60,17 +65,11 @@ class ESP8266Proxy(ESPProxy):
     def get_known_usb_vids_pids(cls):
         return cls.get_uart_adapter_vids_pids()
 
-    def _get_api_stubs_path(self):
-        return os.path.join(os.path.dirname(__file__), "esp8266_api_stubs")
-
 
 class ESP32Proxy(ESPProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
         return cls.get_uart_adapter_vids_pids()
-
-    def _get_api_stubs_path(self):
-        return os.path.join(os.path.dirname(__file__), "esp32_api_stubs")
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):

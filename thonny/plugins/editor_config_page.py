@@ -1,27 +1,30 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
+from thonny.ui_utils import ems_to_pixels
 
 
 class EditorConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
 
+        group_spacing = ems_to_pixels(2)
+
         try:
             self.add_checkbox("view.name_highlighting", tr("Highlight matching names"))
         except Exception:
             # name matcher may have been disabled
-            logging.warning("Couldn't create name matcher checkbox")
+            logger.warning("Couldn't create name matcher checkbox")
 
         try:
             self.add_checkbox("view.locals_highlighting", tr("Highlight local variables"))
         except Exception:
             # locals highlighter may have been disabled
-            logging.warning("Couldn't create name locals highlighter checkbox")
+            logger.warning("Couldn't create name locals highlighter checkbox")
 
         self.add_checkbox("view.paren_highlighting", tr("Highlight parentheses"))
         self.add_checkbox("view.syntax_coloring", tr("Highlight syntax elements"))
@@ -32,20 +35,37 @@ class EditorConfigurationPage(ConfigurationPage):
         )
 
         self.add_checkbox(
-            "edit.tab_complete_in_editor",
-            tr("Allow code completion with Tab-key in editors"),
+            "edit.automatic_calltips",
+            tr("Automatically show parameter info after typing '('"),
             columnspan=2,
-            pady=(20, 0),
+            pady=(group_spacing, 0),
         )
         self.add_checkbox(
-            "edit.tab_complete_in_shell",
-            tr("Allow code completion with Tab-key in Shell"),
+            "edit.automatic_completions",
+            tr("Automatically propose completions while typing"),
             columnspan=2,
         )
+        self.add_checkbox(
+            "edit.automatic_completion_details",
+            tr("Automatically show documentation for completions"),
+            columnspan=2,
+        )
+        self.add_checkbox(
+            "edit.tab_request_completions_in_editors",
+            tr("Request completions with Tab-key in editors"),
+            columnspan=2,
+        )
+        self.add_checkbox(
+            "edit.tab_request_completions_in_shell",
+            tr("Request completions with Tab-key in Shell"),
+            columnspan=2,
+        )
+
         self.add_checkbox(
             "edit.indent_with_tabs",
             tr("Indent with tab characters (not recommended for Python)"),
             columnspan=2,
+            pady=(group_spacing, 0),
         )
 
         self.add_checkbox("view.show_line_numbers", tr("Show line numbers"), pady=(20, 0))

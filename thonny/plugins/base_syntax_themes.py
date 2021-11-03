@@ -46,6 +46,7 @@ def default_light() -> SyntaxThemeSettings:
         "function_call": {},
         "method_call": {},
         "hyperlink": {"foreground": "#3A66DD", "underline": True},
+        "name_link": {"underline": True},
         # paren matcher
         "surrounding_parens": {"foreground": "Blue", "font": "BoldEditorFont"},
         "unclosed_expression": {"background": "LightGray"},
@@ -176,6 +177,7 @@ def default_dark() -> SyntaxThemeSettings:
         "function_call": {},
         "method_call": {},
         "hyperlink": {"foreground": "#619DC7", "underline": True},
+        "name_link": {"underline": True},
         # paren matcher
         "surrounding_parens": {"foreground": "#F0995B", "font": "BoldEditorFont"},
         "unclosed_expression": {"background": "#000000"},

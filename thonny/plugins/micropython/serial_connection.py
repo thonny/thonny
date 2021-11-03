@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import pathlib
 import platform
 import sys
@@ -15,7 +15,7 @@ from thonny.plugins.micropython.bare_metal_backend import (
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class SerialConnection(MicroPythonConnection):
@@ -27,7 +27,9 @@ class SerialConnection(MicroPythonConnection):
         super().__init__()
 
         try:
-            self._serial = serial.Serial(port=None, baudrate=baudrate, timeout=None, exclusive=True)
+            self._serial = serial.Serial(
+                port=None, baudrate=baudrate, timeout=None, write_timeout=2, exclusive=True
+            )
             # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
             # but in some cases it messes up communication.
@@ -154,7 +156,7 @@ class SerialConnection(MicroPythonConnection):
                     self._serial.close()
                     self._serial = None
                 except Exception:
-                    logging.exception("Couldn't close serial")
+                    logger.exception("Couldn't close serial")
 
 
 class DifficultSerialConnection(SerialConnection):

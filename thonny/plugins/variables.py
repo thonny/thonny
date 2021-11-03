@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import logging
+from logging import getLogger
 from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench
@@ -7,7 +7,7 @@ from thonny.common import InlineCommand
 from thonny.languages import tr
 from thonny.memory import VariablesFrame
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class VariablesView(VariablesFrame):

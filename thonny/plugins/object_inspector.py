@@ -1,5 +1,6 @@
 import ast
 import logging
+from logging import getLogger
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -11,6 +12,8 @@ from thonny.memory import MemoryFrame
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import ems_to_pixels
+
+logger = logging.getLogger(__name__)
 
 
 class ObjectInspector(ttk.Frame):
@@ -267,12 +270,12 @@ class ObjectInspector(ttk.Frame):
         if self.back_links == []:
             self.back_label.config(foreground="lightgray", cursor="arrow")
         else:
-            self.back_label.config(foreground="blue", cursor="hand2")
+            self.back_label.config(foreground="blue", cursor=get_hyperlink_cursor())
 
         if self.forward_links == []:
             self.forward_label.config(foreground="lightgray", cursor="arrow")
         else:
-            self.forward_label.config(foreground="blue", cursor="hand2")
+            self.forward_label.config(foreground="blue", cursor=get_hyperlink_cursor())
         """
 
     def update_type_specific_info(self, object_info):
@@ -325,7 +328,7 @@ class FileHandleInspector(TextFrame, ContentInspector):
     def set_object_info(self, object_info):
 
         if "file_content" not in object_info:
-            logging.exception("File error: " + object_info["file_error"])
+            logger.exception("File error: " + object_info["file_error"])
             return
 
         assert "file_content" in object_info

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import logging
+from logging import getLogger
 
 import sys
 import tkinter as tk
@@ -10,7 +10,7 @@ from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
 from thonny.languages import tr
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class AstView(ui_utils.TreeFrame):

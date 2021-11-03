@@ -1,7 +1,9 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-import logging
+from logging import getLogger
 import platform
+from typing import Optional
+
 import time
 import tkinter as tk
 from logging import exception
@@ -9,7 +11,7 @@ from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class TweakableText(tk.Text):
@@ -20,6 +22,8 @@ class TweakableText(tk.Text):
 
         self._read_only = read_only
         self._suppress_events = False
+        self._edit_count: int = 0
+        self._last_operation_time: float = time.time()
 
         self._original_widget_name = self._w + "_orig"
         self.tk.call("rename", self._w, self._original_widget_name)
@@ -76,6 +80,14 @@ class TweakableText(tk.Text):
     def is_read_only(self):
         return self._read_only
 
+    def get_edit_count(self) -> int:
+        return self._edit_count
+
+    def get_last_operation_time(self) -> float:
+        """Returns the timestamp of the widget creation or time or the last time
+        the text or cursor location was changed"""
+        return self._last_operation_time
+
     def set_content(self, chars):
         self.direct_delete("1.0", tk.END)
         self.direct_insert("1.0", chars)
@@ -130,7 +142,7 @@ class TweakableText(tk.Text):
 
     def direct_mark(self, *args):
         self._original_mark(*args)
-
+        self._last_operation_time = time.time()
         if args[:2] == ("set", "insert") and not self._suppress_events:
             self.event_generate("<<CursorMove>>")
 
@@ -160,11 +172,15 @@ class TweakableText(tk.Text):
 
     def direct_insert(self, index, chars, tags=None, **kw):
         self._original_insert(index, chars, tags, **kw)
+        self._edit_count += 1
+        self._last_operation_time = time.time()
         if not self._suppress_events:
             self.event_generate("<<TextChange>>")
 
     def direct_delete(self, index1, index2=None, **kw):
         self._original_delete(index1, index2, **kw)
+        self._edit_count += 1
+        self._last_operation_time = time.time()
         if not self._suppress_events:
             self.event_generate("<<TextChange>>")
 
@@ -236,6 +252,7 @@ class EnhancedText(TweakableText):
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
         self.bind("<Control-d>", self._redirect_ctrld, True)
         self.bind("<Control-t>", self._redirect_ctrlt, True)
+        self.bind("<Shift-Control-space>", self._redirect_shift_control_space, True)
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
         self.bind("<KP_Enter>", if_not_readonly(self.perform_return), True)
@@ -309,6 +326,12 @@ class EnhancedText(TweakableText):
         # I want to disable the deletion effect of Ctrl-D in the text but still
         # keep the event for other purposes
         self.event_generate("<<CtrlDInText>>")
+        return "break"
+
+    def _redirect_shift_control_space(self, event):
+        # I want to disable the effect of Shift-Control-space in the text but still
+        # keep the event for other purposes
+        self.event_generate("<<ShiftControlSpaceInText>>")
         return "break"
 
     def _redirect_ctrlt(self, event):

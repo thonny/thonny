@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 
 from thonny import get_runner
@@ -273,7 +273,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
         try:
             sys_path = proxy.get_sys_path()
         except Exception:
-            logging.exception("Can't get sys path from proxy")
+            logger.exception("Can't get sys path from proxy")
             return []
 
         module_names = set()

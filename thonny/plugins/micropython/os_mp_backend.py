@@ -1,6 +1,6 @@
 import datetime
 import io
-import logging
+from logging import getLogger
 import os
 import re
 import shlex

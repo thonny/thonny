@@ -1,7 +1,7 @@
-import logging
+from logging import getLogger
 import tkinter as tk
 
-from thonny import get_workbench, jedi_utils
+from thonny import get_workbench
 
 
 class LocalsHighlighter:
@@ -11,6 +11,7 @@ class LocalsHighlighter:
         self._update_scheduled = False
 
     def get_positions(self):
+        import parso
         from jedi import parser_utils
         from parso.python import tree
 
@@ -59,7 +60,7 @@ class LocalsHighlighter:
                     process_node(child, local_names, global_names)
 
         source = self.text.get("1.0", "end")
-        module = jedi_utils.parse_source(source)
+        module = parso.parse(source)
         for child in module.children:
             if isinstance(child, tree.BaseNode) and parser_utils.is_scope(child):
                 process_scope(child)
@@ -98,12 +99,12 @@ class LocalsHighlighter:
                 highlight_positions = self.get_positions()
                 self._highlight(highlight_positions)
             except Exception:
-                logging.exception("Problem when updating local variable tags")
+                logger.exception("Problem when updating local variable tags")
 
 
 def update_highlighting(event):
     if not get_workbench().ready:
-        # don't slow down loading process
+        # don't slow down initial loading process by importing parso and jedi
         return
 
     assert isinstance(event.widget, tk.Text)

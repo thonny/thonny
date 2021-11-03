@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from typing import Optional
 
 from thonny import ui_utils, get_workbench
@@ -10,7 +10,7 @@ from thonny.plugins.micropython import (
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import show_dialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
@@ -42,6 +42,11 @@ class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
         dlg = PicoFlashingDialog(get_workbench())
         show_dialog(dlg)
         return dlg.success
+
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.rpi_pico.rpi_pico_backend
+
+        return thonny.plugins.rpi_pico.rpi_pico_backend.__file__
 
 
 class RaspberryPiPicoBackendConfigPage(BareMetalMicroPythonConfigPage):

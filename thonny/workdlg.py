@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import os
 import queue
 import signal
@@ -14,7 +14,7 @@ from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
 from thonny.ui_utils import CommonDialog, ems_to_pixels, create_action_label, set_text_if_different
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class WorkDialog(CommonDialog):

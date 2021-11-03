@@ -144,15 +144,18 @@ class CodeViewText(EnhancedTextWithLogging, SyntaxText):
 
 class CodeView(tktextext.EnhancedTextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
+        frame_args = text_frame_args.copy()
+        if "text_class" not in frame_args:
+            frame_args["text_class"] = CodeViewText
+
         super().__init__(
             master,
-            text_class=CodeViewText,
             undo=True,
             wrap=tk.NONE,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
-            **text_frame_args,
+            **frame_args,
         )
 
         # TODO: propose_remove_line_numbers on paste??

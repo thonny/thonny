@@ -158,10 +158,10 @@ def run_enabled():
 
 def _load_plugin():
     wb = get_workbench()
-    wb.bind_class("CodeViewText", "<<CursorMove>>", update_editor_cells, True)
-    wb.bind_class("CodeViewText", "<<TextChange>>", update_editor_cells, True)
-    wb.bind_class("CodeViewText", "<FocusIn>", update_editor_cells, True)
-    wb.bind_class("CodeViewText", "<FocusOut>", update_editor_cells, True)
+    wb.bind_class("EditorCodeViewText", "<<CursorMove>>", update_editor_cells, True)
+    wb.bind_class("EditorCodeViewText", "<<TextChange>>", update_editor_cells, True)
+    wb.bind_class("EditorCodeViewText", "<FocusIn>", update_editor_cells, True)
+    wb.bind_class("EditorCodeViewText", "<FocusOut>", update_editor_cells, True)
 
     _patch_perform_return()
     # TODO: try changing insertwidth in keyup/mouseup events

@@ -37,7 +37,7 @@ from typing import Union, List, Dict, Any, Optional, Tuple
 from urllib.error import HTTPError
 from urllib.request import urlopen
 import pkg_resources
-import logging
+from logging import getLogger
 
 try:
     from shlex import join as shlex_join
@@ -50,7 +50,7 @@ except ImportError:
 
 from pkg_resources import Requirement
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 MP_ORG_INDEX = "https://micropython.org/pi"
 PYPI_INDEX = "https://pypi.org/pypi"

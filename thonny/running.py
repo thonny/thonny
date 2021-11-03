@@ -10,7 +10,7 @@ shell becomes kind of title for the execution.
 
 
 import collections
-import logging
+from logging import getLogger
 import os.path
 import re
 import shlex
@@ -50,6 +50,7 @@ from thonny.common import (
     MessageFromBackend,
     universal_relpath,
     read_one_incoming_message_str,
+    InlineResponse,
 )
 from thonny.editors import (
     get_current_breakpoints,
@@ -70,7 +71,7 @@ from thonny.misc_utils import (
 from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
@@ -219,7 +220,7 @@ class Runner:
 
     def _set_state(self, state: str) -> None:
         if self._state != state:
-            logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
+            logger.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
 
     def is_running(self):
@@ -256,9 +257,7 @@ class Runner:
             and not self.is_waiting_debugger_command()
         ):
             get_workbench().bell()
-            logging.warning(
-                "RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state())
-            )
+            logger.warning("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
 
         # Attach extra info
@@ -270,8 +269,12 @@ class Runner:
 
         cmd["local_cwd"] = get_workbench().get_local_cwd()
 
+        if self._proxy.running_inline_command and isinstance(cmd, InlineCommand):
+            self._postpone_command(cmd)
+            return
+
         # Offer the command
-        logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
+        logger.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
 
         if response == "discard":
@@ -282,6 +285,8 @@ class Runner:
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
+            if isinstance(cmd, InlineCommand):
+                self._proxy.running_inline_command = True
 
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
@@ -303,7 +308,7 @@ class Runner:
                     self._postponed_commands.remove(older_cmd)
 
         if len(self._postponed_commands) > 10:
-            logging.warning("Can't pile up too many commands. This command will be just ignored")
+            logger.warning("Can't pile up too many commands. This command will be just ignored")
         else:
             self._postponed_commands.append(cmd)
 
@@ -312,7 +317,7 @@ class Runner:
         self._postponed_commands = []
 
         for cmd in todo:
-            logging.debug("Sending postponed command: %s", cmd)
+            logger.debug("Sending postponed command: %s", cmd)
             self.send_command(cmd)
 
     def send_program_input(self, data: str) -> None:
@@ -438,7 +443,7 @@ class Runner:
                     master=self,
                 )
         else:
-            logging.warning("User tried interrupting without proxy")
+            logger.warning("User tried interrupting without proxy")
 
     def _cmd_interrupt_with_shortcut(self, event=None):
         if not self._cmd_interrupt_enabled():
@@ -532,9 +537,9 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
-                logging.debug(
-                    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
-                )
+                # logger.debug(
+                #    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
+                # )
 
                 msg_count += 1
             except BackendTerminatedError as exc:
@@ -551,6 +556,9 @@ class Runner:
                 self._set_state("waiting_toplevel_command")
             elif isinstance(msg, DebuggerResponse):
                 self._set_state("waiting_debugger_command")
+            elif isinstance(msg, InlineResponse):
+                # next inline command won't be sent before response from the last has arrived
+                self._proxy.running_inline_command = False
             else:
                 "other messages don't affect the state"
 
@@ -582,7 +590,7 @@ class Runner:
                 with open(faults_file, encoding="ASCII") as fp:
                     err += fp.read()
         except Exception:
-            logging.exception("Failed retrieving backend faults")
+            logger.exception("Failed retrieving backend faults")
 
         err = err.strip() + " Use 'Stop/Restart' to restart.\n"
 
@@ -669,7 +677,7 @@ class Runner:
             result = kernel32.AttachConsole(child.pid)
             if not result:
                 err = ctypes.get_last_error()
-                logging.info("Could not allocate console. Error code: " + str(err))
+                logger.info("Could not allocate console. Error code: " + str(err))
             child.stdin.write(b"\n")
             try:
                 child.stdin.flush()
@@ -744,6 +752,7 @@ class BackendProxy:
         Backend is considered ready when the runner gets a ToplevelResponse
         with attribute "welcome_text" from fetch_next_message.
         """
+        self.running_inline_command = False
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
@@ -972,6 +981,10 @@ class SubprocessProxy(BackendProxy):
             self._send_msg(cmd)
 
     def _send_msg(self, msg):
+        if not self._proc:
+            logger.warning("Ignoring command without active backend process")
+            return
+
         self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
 
@@ -1369,7 +1382,7 @@ def get_environment_overrides_for_python_subprocess(target_executable):
                 result["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
                 result["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
         except Exception:
-            logging.exception("Can't compute Tcl/Tk library location")
+            logger.exception("Can't compute Tcl/Tk library location")
 
     return result
 

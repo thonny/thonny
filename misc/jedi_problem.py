@@ -1,28 +1,15 @@
 from operator import abs
 
 from jedi import Script
-
-s = Script(code="""def mula(muusa:int, puusa:str) -> str:
-    x = "dadocstring"
-    return puusa
-musi = 3
-suur = 4
-mula(mu""")
-comps = s.complete(line=6, column=7, fuzzy=True)
-
-ii = 3
-
-ss = "asdf"
-
-def kala(x: int):
-    return x
-
-
-
-def showsig(x):
-    if not x:
-        return x
-    return x[0].to_string() + "(%s, %s)" % (x[0].index, x[0].bracket_start)
+code = """print(end"""
+s = Script(code=code)
+comps = s.complete(line=1, column=len(code), fuzzy=True)
 
 for comp in comps:
-    print(comp, comp.type, showsig(comp.get_signatures()), comp.docstring(raw=True, fast=True), sep=" | ")
+    print("--------------------------")
+    """
+    for name in dir(comp):
+        if not name.startswith("_"):
+            print(name, ":", getattr(comp, name))
+    """
+    print(comp.name, comp.get_completion_prefix_length())

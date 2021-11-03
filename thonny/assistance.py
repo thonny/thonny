@@ -1,6 +1,6 @@
 import ast
 import datetime
-import logging
+from logging import getLogger
 import os.path
 import subprocess
 import sys
@@ -21,9 +21,9 @@ from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import ToplevelResponse, read_source
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import CommonDialog, scrollbar_style
+from thonny.ui_utils import CommonDialog, scrollbar_style, get_hyperlink_cursor
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
@@ -645,7 +645,7 @@ class FeedbackDialog(CommonDialog):
             main_frame,
             text="(Preview the data to be sent)",
             style="Url.TLabel",
-            cursor="hand2",
+            cursor=get_hyperlink_cursor(),
             font=url_font,
         )
         preview_link.bind("<1>", self._preview_submission_data, True)
@@ -772,14 +772,14 @@ class FeedbackDialog(CommonDialog):
 
             submission["mypy_version"] = str(mypy.version.__version__)
         except ImportError:
-            logging.exception("Could not get MyPy version")
+            logger.exception("Could not get MyPy version")
 
         try:
             import pylint
 
             submission["pylint_version"] = str(pylint.__version__)
         except ImportError:
-            logging.exception("Could not get Pylint version")
+            logger.exception("Could not get Pylint version")
 
         if self.include_snapshots_var.get():
             submission["snapshots"] = self.snapshots

@@ -3,7 +3,7 @@
 import ast
 import collections
 import importlib
-import logging
+from logging import getLogger
 import os.path
 import pkgutil
 import platform
@@ -59,9 +59,10 @@ from thonny.ui_utils import (
     caps_lock_is_on,
     shift_is_pressed,
     ems_to_pixels,
+    get_hyperlink_cursor,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 SERVER_SUCCESS = "OK"
 SIMPLE_MODE_VIEWS = ["ShellView"]
@@ -195,9 +196,9 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         self._try_action(self._open_views)
 
-        self.bind_class("CodeViewText", "<<CursorMove>>", self.update_title, True)
-        self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
-        self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<CursorMove>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<Modified>>", self.update_title, True)
+        self.bind_class("EditorCodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_toolbar, True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
@@ -226,8 +227,9 @@ class Workbench(tk.Tk):
         self.after_idle(self.advertise_ready)
 
     def advertise_ready(self):
-        self.event_generate("WorkbenchReady")
         self.ready = True
+        self.event_generate("WorkbenchReady")
+        self._editor_notebook.update_appearance()
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
@@ -389,14 +391,14 @@ class Workbench(tk.Tk):
         modules = []
         for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
             if module_name in OBSOLETE_PLUGINS:
-                logging.debug("Skipping plug-in %s", module_name)
+                logger.debug("Skipping plug-in %s", module_name)
             else:
                 try:
                     m = importlib.import_module(module_name)
                     if hasattr(m, load_function_name):
                         modules.append(m)
                 except Exception:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
+                    logger.exception("Failed loading plugin '" + module_name + "'")
 
         def module_sort_key(m):
             return getattr(m, "load_order_key", m.__name__)
@@ -532,7 +534,7 @@ class Workbench(tk.Tk):
 
         def server_loop():
             while True:
-                logging.debug("Waiting for next client")
+                logger.debug("Waiting for next client")
                 (client_socket, _) = server_socket.accept()
                 try:
                     data = bytes()
@@ -548,7 +550,7 @@ class Workbench(tk.Tk):
                         # respond OK
                         client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
                         client_socket.shutdown(socket.SHUT_WR)
-                        logging.debug("AFTER NEW REQUEST %s", client_socket)
+                        logger.debug("AFTER NEW REQUEST %s", client_socket)
                     else:
                         client_socket.shutdown(socket.SHUT_WR)
                         raise PermissionError("Wrong secret")
@@ -995,7 +997,7 @@ class Workbench(tk.Tk):
                 handler()
             else:
                 denied = True
-                logging.debug("Command '" + command_id + "' execution denied")
+                logger.debug("Command '" + command_id + "' execution denied")
                 if bell_when_denied:
                     self.bell()
 
@@ -1417,7 +1419,7 @@ class Workbench(tk.Tk):
             justify="right",
             font="SmallLinkFont",
             style="Url.TLabel",
-            cursor="hand2",
+            cursor=get_hyperlink_cursor(),
         )
         label.grid(row=0, column=1001, sticky="ne")
 
@@ -1722,7 +1724,7 @@ class Workbench(tk.Tk):
         # pylint: disable=signature-differs
 
         if not add:
-            logging.warning(
+            logger.warning(
                 "Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(
                     sequence, add
                 )
@@ -2181,7 +2183,7 @@ class Workbench(tk.Tk):
                     try:
                         enabled = tester()
                     except Exception as e:
-                        logging.exception(
+                        logger.exception(
                             "Could not check command tester for '%s'", item_data, exc_info=e
                         )
                         traceback.print_exc()
@@ -2321,7 +2323,7 @@ class Workbench(tk.Tk):
                 pass
 
         except Exception:
-            logging.exception("Error while destroying workbench")
+            logger.exception("Error while destroying workbench")
 
         finally:
             try:
@@ -2348,10 +2350,13 @@ class Workbench(tk.Tk):
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
+        if isinstance(val, KeyboardInterrupt):
+            # no need to report this, just let it close
+            return
         self.report_exception()
 
     def report_exception(self, title: str = "Internal error") -> None:
-        logging.exception(title)
+        logger.exception(title)
         if tk._default_root and not self._closing:  # type: ignore
             (typ, value, _) = sys.exc_info()
             assert typ is not None

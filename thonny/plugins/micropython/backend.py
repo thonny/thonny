@@ -36,7 +36,7 @@ CP 5.0
 import ast
 import datetime
 import io
-import logging
+from logging import getLogger
 import os
 import re
 import sys
@@ -49,6 +49,8 @@ from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
 from typing import Optional, Dict, Union, Tuple, List
+
+from serial import SerialTimeoutException
 
 from thonny import get_backend_log_file, BACKEND_LOG_MARKER
 from thonny.backend import MainBackend
@@ -104,7 +106,7 @@ PASTE_MODE_CMD = b"\x05"
 PASTE_MODE_LINE_PREFIX = b"=== "
 
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def debug(msg):
@@ -123,7 +125,6 @@ class MicroPythonBackend(MainBackend, ABC):
         self._sys_path = None
         self._epoch_year = None
         self._builtin_modules = []
-        self._api_stubs_path = args.get("api_stubs_path")
         self._suppressed_internal_error = None
 
         self._builtins_info = self._fetch_builtins_info()
@@ -148,11 +149,9 @@ class MicroPythonBackend(MainBackend, ABC):
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
-        except ManagementError as e:
-            logger.exception("ManagementError")
-            self._log_management_error_details(e)
         except Exception as e:
             logger.exception("Crash in backend", exc_info=e)
+            self._report_likely_communication_error(e)
 
     def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
@@ -379,25 +378,8 @@ class MicroPythonBackend(MainBackend, ABC):
                     self._show_error(
                         "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
                     )
-                    if isinstance(e, ManagementError):
-                        self._log_management_error_details(e)
-                    if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
-                        self._show_error(
-                            (
-                                "It looks like %s has arrived to an unexpected state"
-                                " or there have been communication problems."
-                            )
-                            % self._get_interpreter_kind(),
-                            end=" ",
-                        )
-                    else:
-                        traceback.print_exc()
 
-                    self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
-                    self._show_error(
-                        'You may need to press "Stop/Restart" or hard-reset your '
-                        "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
-                    )
+                    self._report_likely_communication_error(e)
                     response = create_error_response(error="Internal error")
 
         if response is None:
@@ -428,18 +410,30 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _connected_to_microbit(self):
+        if not self._welcome_text:
+            return None
+
         return "micro:bit" in self._welcome_text.lower()
 
     def _connected_to_pyboard(self):
+        if not self._welcome_text:
+            return None
+
         return "pyb" in self._welcome_text.lower() or "pyb" in self._builtin_modules
 
     def _connected_to_circuitpython(self):
+        if not self._welcome_text:
+            return None
+
         return "circuitpython" in self._welcome_text.lower()
 
     def _get_interpreter_kind(self):
         return "CircuitPython" if self._connected_to_circuitpython() else "MicroPython"
 
     def _connected_to_pycom(self):
+        if not self._welcome_text:
+            return None
+
         return "pycom" in self._welcome_text.lower()
 
     def _fetch_welcome_text(self) -> str:
@@ -455,14 +449,13 @@ class MicroPythonBackend(MainBackend, ABC):
             return self._evaluate("__thonny_helper.sys.path")
 
     def _fetch_builtins_info(self):
-        result = {}
+        for stubs_dir in self._get_sys_path_for_analysis():
+            for name in ["builtins.py", "builtins.pyi"]:
+                path = os.path.join(stubs_dir, name)
+                if os.path.exists(path):
+                    return parse_api_information(path)
 
-        for name in ["builtins.py", "builtins.pyi"]:
-            path = os.path.join(self._api_stubs_path, name)
-            if os.path.exists(path):
-                result = parse_api_information(path)
-
-        return result
+        return {}
 
     def _fetch_epoch_year(self):
         if self._connected_to_microbit():
@@ -546,7 +539,7 @@ class MicroPythonBackend(MainBackend, ABC):
             else:
                 # because of autoreload? timing problems? interruption?
                 # Leave it.
-                logging.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
+                logger.warning("Unexpected echo. Expected %r, got %r" % (bdata, echo))
             self._connection.unread(echo)
 
     def send_message(self, msg: MessageFromBackend) -> None:
@@ -1027,7 +1020,7 @@ class MicroPythonBackend(MainBackend, ABC):
         assert not cmd.path.startswith("//")
         self._mkdir(cmd.path)
 
-    def _cmd_editor_autocomplete(self, cmd):
+    def __cmd_editor_autocomplete(self, cmd):
         # template for the response
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
 
@@ -1067,11 +1060,11 @@ class MicroPythonBackend(MainBackend, ABC):
                 if parent_name == "builtins" and name not in self._builtins_info:
                     continue
 
-            result.append({"name": completion.name, "complete": completion.complete})
+            result.append({"name": completion.name})
 
         return result
 
-    def _cmd_shell_autocomplete(self, cmd):
+    def __cmd_shell_autocomplete(self, cmd):
         source = cmd.source
 
         # TODO: combine dynamic results and jedi results
@@ -1122,98 +1115,15 @@ class MicroPythonBackend(MainBackend, ABC):
                 if name.startswith(prefix) and not name.startswith("__"):
                     completions.append({"name": name, "complete": name[len(prefix) :]})
 
-            return {"completions": completions, "source": source}
+            return {
+                "completions": completions,
+                "source": source,
+                "row": cmd.row,
+                "column": cmd.column,
+            }
 
-    def _cmd_dump_api_info(self, cmd):
-        "For use during development of the plug-in"
-
-        self._execute_without_output(
-            dedent(
-                """
-            def __get_object_atts(obj):
-                result = []
-                errors = []
-                for name in __thonny_helper.builtins.dir(obj):
-                    try:
-                        val = __thonny_helper.builtins.getattr(obj, name)
-                        result.append((name, __thonny_helper.builtins.repr(val), __thonny_helper.builtins.repr(__thonny_helper.builtins.type(val))))
-                    except __thonny_helper.builtins.BaseException as e:
-                        errors.append("Couldn't get attr '%s' from object '%r', Err: %r" % (name, obj, e))
-                return (result, errors)
-        """
-            )
-        )
-
-        for module_name in sorted(self._fetch_builtin_modules()):
-            if (
-                not module_name.startswith("_")
-                and not module_name.startswith("adafruit")
-                # and not module_name == "builtins"
-            ):
-                file_name = os.path.join(
-                    self._api_stubs_path, module_name.replace(".", "/") + ".py"
-                )
-                self._dump_module_stubs(module_name, file_name)
-
-    def _dump_module_stubs(self, module_name, file_name):
-        self._execute_without_output("import {0}".format(module_name))
-
-        os.makedirs(os.path.dirname(file_name), exist_ok=True)
-        with io.open(file_name, "w", encoding="utf-8", newline="\n") as fp:
-            if module_name not in [
-                "webrepl",
-                "_webrepl",
-                "gc",
-                "http_client",
-                "http_client_ssl",
-                "http_server",
-                "framebuf",
-                "example_pub_button",
-                "flashbdev",
-            ]:
-                self._dump_object_stubs(fp, module_name, "")
-
-    def _dump_object_stubs(self, fp, object_expr, indent):
-        if object_expr in [
-            "docs.conf",
-            "pulseio.PWMOut",
-            "adafruit_hid",
-            "upysh",
-            # "webrepl",
-            # "gc",
-            # "http_client",
-            # "http_server",
-        ]:
-            print("SKIPPING problematic name:", object_expr)
-            return
-
-        print("DUMPING", indent, object_expr)
-        items, errors = self._evaluate("__get_object_atts({0})".format(object_expr))
-
-        if errors:
-            print("ERRORS", errors)
-
-        for name, rep, typ in sorted(items, key=lambda x: x[0]):
-            if name.startswith("__"):
-                continue
-
-            print("DUMPING", indent, object_expr, name)
-            print("  * " + name + " : " + typ)
-
-            if typ in ["<class 'function'>", "<class 'bound_method'>"]:
-                fp.write(indent + "def " + name + "():\n")
-                fp.write(indent + "    pass\n\n")
-            elif typ in ["<class 'str'>", "<class 'int'>", "<class 'float'>"]:
-                fp.write(indent + name + " = " + rep + "\n")
-            elif typ == "<class 'type'>" and indent == "":
-                # full expansion only on toplevel
-                fp.write("\n")
-                fp.write(indent + "class " + name + ":\n")  # What about superclass?
-                fp.write(indent + "    ''\n")
-                self._dump_object_stubs(fp, "{0}.{1}".format(object_expr, name), indent + "    ")
-            else:
-                # keep only the name
-                fp.write(indent + name + " = None\n")
+    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        return [os.path.join(os.path.dirname(__file__), "api_stubs")]
 
     def _join_remote_path_parts(self, left, right):
         if left == "":  # micro:bit
@@ -1466,6 +1376,30 @@ class MicroPythonBackend(MainBackend, ABC):
             e.script,
             e.out,
             e.err,
+        )
+
+    def _show_unexpected_condition_message(self):
+        self._show_error(
+            (
+                "It looks like %s has arrived to an unexpected state"
+                " or there have been communication problems."
+            )
+            % self._get_interpreter_kind(),
+            end=" ",
+        )
+
+    def _report_likely_communication_error(self, e):
+        if isinstance(e, ManagementError):
+            self._log_management_error_details(e)
+        if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
+            self._show_unexpected_condition_message()
+        else:
+            self._show_error("Internal error (%s)" % e)
+
+        self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
+        self._show_error(
+            'You may need to press "Stop/Restart" or hard-reset your '
+            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
         )
 
 

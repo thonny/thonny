@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from logging import getLogger
 import os.path
 import re
 import tkinter as tk
@@ -33,6 +33,7 @@ from thonny.ui_utils import (
     show_dialog,
     tr_btn,
     ems_to_pixels,
+    get_hyperlink_cursor,
 )
 
 OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"-?\d+")
@@ -40,7 +41,7 @@ OBJECT_INFO_START_REGEX = re.compile(OBJECT_INFO_START_REGEX_STR)
 OBJECT_INFO_END_REGEX_STR = re.escape(OBJECT_LINK_END)
 OBJECT_INFO_END_REGEX = re.compile(OBJECT_INFO_END_REGEX_STR)
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
@@ -653,14 +654,14 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
         if len(ints) != 1:
-            logging.warning("bad CSI cursor positioning: %s", marker)
+            logger.warning("bad CSI cursor positioning: %s", marker)
             # do nothing
             return
 
         try:
             delta = int(ints[0])
         except ValueError:
-            logging.warning("bad CSI cursor positioning: %s", marker)
+            logger.warning("bad CSI cursor positioning: %s", marker)
             return
 
         if marker.endswith("D"):
@@ -1148,7 +1149,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return True
 
     def _submit_input(self, text_to_be_submitted):
-        logging.debug(
+        logger.debug(
             "SHELL: submitting %r in state %s", text_to_be_submitted, get_runner().get_state()
         )
         if get_runner().is_waiting_toplevel_command():
@@ -1437,8 +1438,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _on_mouse_move(self, event=None):
         tags = self.tag_names("@%d,%d" % (event.x, event.y))
         if "value" in tags or "io_hyperlink" in tags:
-            if self.cget("cursor") != "hand2":
-                self.config(cursor="hand2")
+            if self.cget("cursor") != get_hyperlink_cursor():
+                self.config(cursor=get_hyperlink_cursor())
         else:
             if self.cget("cursor"):
                 self.config(cursor="")

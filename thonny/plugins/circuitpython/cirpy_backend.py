@@ -1,13 +1,14 @@
-import logging
+from logging import getLogger
 import time
 
 from thonny.plugins.micropython.backend import INTERRUPT_CMD
 from thonny.plugins.micropython.bare_metal_backend import (
     BareMetalMicroPythonBackend,
     SOFT_REBOOT_CMD,
+    launch_bare_metal_backend,
 )
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
@@ -28,3 +29,7 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         self._write(INTERRUPT_CMD)
 
         self._capture_output_until_active_prompt()
+
+
+if __name__ == "__main__":
+    launch_bare_metal_backend(CircuitPythonBackend)
