@@ -715,10 +715,10 @@ class BaseFileBrowser(ttk.Frame):
         if self.supports_copypaste():
             self.menu.add_command(label=tr("Copy"), command=self.copy_files)
             self.menu.add_command(label=tr("Cut"), command=self.cut_files)
-            if self.copypaste.has_selection():
-                target = self.get_selected_file()
-                if target and not self.copypaste.conflicts(target):
-                    self.menu.add_command(label=tr("Paste"), command=self.paste_files)
+            target = self.get_selected_file()            
+            self.menu.add_command(label=tr("Paste"), command=self.paste_files)
+            if target is None or not self.copypaste.has_selection() or self.copypaste.conflicts(target):
+                self.menu.entryconfig(tr("Paste"), state = "disabled")
 
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
