@@ -498,7 +498,7 @@ class MainCPythonBackend(MainBackend):
                 atts["error"] = "Frame not found"
             else:
                 atts["code_name"] = frame.f_code.co_name
-                atts["module_name"] = frame.f_globals["__name__"]
+                atts["module_name"] = frame.f_globals.get("__name__", None)
                 atts["locals"] = (
                     None
                     if frame.f_locals is frame.f_globals
@@ -886,7 +886,7 @@ class MainCPythonBackend(MainBackend):
         system_frame = newest_frame
 
         while system_frame is not None:
-            module_name = system_frame.f_globals["__name__"]
+            module_name = system_frame.f_globals.get("__name__", None)
             code_name = system_frame.f_code.co_name
 
             if not relevance_checker or relevance_checker(system_frame):
@@ -1983,7 +1983,7 @@ class NiceTracer(Tracer):
         self._last_reported_frame_ids = set()
         for tframe in state["stack"]:
             system_frame = tframe.system_frame
-            module_name = system_frame.f_globals["__name__"]
+            module_name = system_frame.f_globals.get("__name__", None)
             code_name = system_frame.f_code.co_name
 
             source, firstlineno, in_library = self._backend._get_frame_source_info(system_frame)
@@ -2178,7 +2178,7 @@ class NiceTracer(Tracer):
 
         for custom_frame in self._custom_stack:
             system_frame = custom_frame.system_frame
-            module_name = system_frame.f_globals["__name__"]
+            module_name = system_frame.f_globals.get("__name__", None)
 
             result.append(
                 TempFrameInfo(
