@@ -170,7 +170,7 @@ class CompletionsBox(EditorInfoBox):
         if (
             self._details_box
             and self._details_box.is_visible()
-            or get_workbench().get_option("edit.show_completion_details")
+            or get_workbench().get_option("edit.automatic_completion_details")
         ):
             self.request_details()
 
