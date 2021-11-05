@@ -64,7 +64,17 @@ class CalltipBox(DocuBoxBase):
         if event.keysym == "Escape":
             return
 
-        self.after_idle(self._calltipper.request_calltip)
+        if event.char or event.keysym in [
+            "Left",
+            "Right",
+            "Up",
+            "Down",
+            "KP_Left",
+            "KP_Right",
+            "KP_Up",
+            "KP_Down",
+        ]:
+            self.after_idle(self._calltipper.request_calltip)
 
 
 class Calltipper:
