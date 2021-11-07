@@ -57,6 +57,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * André Roberge
 * Ankith
 * Antonio Carlos
+* atesin
 * Augene J. Pak
 * Austin Bart
 * Avag. sayan

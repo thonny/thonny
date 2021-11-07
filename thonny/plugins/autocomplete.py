@@ -10,7 +10,7 @@ from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
-from thonny.ui_utils import modifier_is_pressed, ems_to_pixels
+from thonny.ui_utils import modifier_is_pressed, ems_to_pixels, control_is_pressed
 
 logger = getLogger(__name__)
 
@@ -170,7 +170,7 @@ class CompletionsBox(EditorInfoBox):
         if (
             self._details_box
             and self._details_box.is_visible()
-            or get_workbench().get_option("edit.show_completion_details")
+            or get_workbench().get_option("edit.automatic_completion_details")
         ):
             self.request_details()
 
@@ -196,7 +196,12 @@ class CompletionsBox(EditorInfoBox):
             self.after_idle(
                 lambda: self._completer.request_completions_for_text(self._target_text_widget)
             )
-        elif event.char and not _is_python_name_char(event.char) and event.char != ".":
+        elif (
+            event.char
+            and not _is_python_name_char(event.char)
+            and event.char != "."
+            and not control_is_pressed(event.state)
+        ):
             self.hide(event)
 
         return None
@@ -360,7 +365,10 @@ class Completer:
             get_workbench().bell()
 
     def _box_is_visible(self):
-        return self._completions_box and self._completions_box.is_visible()
+        if not self._completions_box:
+            return False
+
+        return self._completions_box.is_visible()
 
     def _close_box(self):
         if self._completions_box:
