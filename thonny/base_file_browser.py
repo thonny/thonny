@@ -982,7 +982,6 @@ class CopyPaste(object):
         # print(self.mode, self.paths)
 
     def paste(self, target):
-        return
         # https://docs.python.org/3/library/shutil.html#shutil.move
         # depends on os.rename semantics
         try:
