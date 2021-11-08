@@ -963,8 +963,13 @@ class CopyPaste(object):
     def conflicts(self, target):
         target = self.dirname(target)
         folder = set(map(lambda x: self.dirname(x), self.paths))
-        target_conflict = target in folder
-        return target_conflict
+        for p in folder:
+            if target.startswith(p + os.sep):
+                return True
+            if p.startswith(target + os.sep):
+                _confl = p.find(os.sep, len(target) + 1) < 0
+                return _confl
+        return False
 
     def cut(self):
         self.paths = self.get_selection_paths()
@@ -977,6 +982,7 @@ class CopyPaste(object):
         # print(self.mode, self.paths)
 
     def paste(self, target):
+        return
         # https://docs.python.org/3/library/shutil.html#shutil.move
         # depends on os.rename semantics
         try:
