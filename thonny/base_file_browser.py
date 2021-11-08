@@ -963,12 +963,14 @@ class CopyPaste(object):
     def conflicts(self, target):
         target = self.dirname(target)
         folder = set(map(lambda x: self.dirname(x), self.paths))
+
         for p in folder:
             if target.startswith(p + os.sep):
                 return True
             if p.startswith(target + os.sep):
                 _confl = p.find(os.sep, len(target) + 1) < 0
-                return _confl
+                if _confl:
+                    return True
         return False
 
     def cut(self):
