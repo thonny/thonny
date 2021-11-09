@@ -5,7 +5,7 @@
 echo "Starting postinstall"
 echo "Thonny was installed to $2"
 
-PYVER="3.9"
+PYVER="3.10"
 PYFWK="$2/Thonny.app/Contents/Frameworks/Python.framework"
 PYBIN="$PYFWK/Versions/$PYVER/bin"
 PYINT="$PYBIN/python$PYVER"
