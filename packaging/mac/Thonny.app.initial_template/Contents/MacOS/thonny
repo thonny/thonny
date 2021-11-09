@@ -13,6 +13,7 @@ ssl_cert_dir = libdir + "/python3.9/site-packages/certifi"
 mainprogram = os.path.join(resdir, "thonnymain.py")
 
 sys.argv.insert(1, mainprogram)
+sys.argv.insert(1, "-I")
 
 os.environ["PYTHON_SYS_EXECUTABLE"] = executable
 os.environ["SSL_CERT_DIR"] = ssl_cert_dir
@@ -20,4 +21,4 @@ os.environ["SSL_CERT_FILE"] = ssl_cert_dir + "/cacert.pem"
 os.environ["TCL_LIBRARY"] = libdir + "/tcl8.6"
 os.environ["TK_LIBRARY"] = libdir + "/tk8.6"
 
-os.execve(executable, ["-I"] + sys.argv, os.environ)
+os.execve(executable, sys.argv, os.environ)
