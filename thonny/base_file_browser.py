@@ -939,7 +939,6 @@ class BaseFileBrowser(ttk.Frame):
 class CopyPaste(object):
     def __init__(self, filebrowser):
         self.fb = filebrowser
-        self.tree = filebrowser.tree
         self.reset()
 
     def reset(self):
@@ -976,12 +975,10 @@ class CopyPaste(object):
     def cut(self):
         self.paths = self.get_selection_paths()
         self.mode = "X"
-        # print(self.mode, self.paths)
 
     def copy(self):
         self.paths = self.get_selection_paths()
         self.mode = "C"
-        # print(self.mode, self.paths)
 
     def paste(self, target):
         # https://docs.python.org/3/library/shutil.html#shutil.move
@@ -1003,7 +1000,6 @@ class CopyPaste(object):
                         shutil.copytree(f, folder_target, dirs_exist_ok=True)
                 elif self.mode == "X":
                     dest = shutil.move(f, target)
-                    # print(dest)
                 else:
                     raise Exception("unsupported mode")
 
