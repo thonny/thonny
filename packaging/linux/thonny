@@ -13,4 +13,4 @@ unset PYTHONINSPECT
 unset TCL_LIBRARY
 unset TK_LIBRARY
 
-"$DIR/python3.10" -E -m thonny "$@"
+"$DIR/python3.10" -I -m thonny "$@"

@@ -13,7 +13,7 @@ PYLIB="$PYFWK/Versions/$PYVER/lib/python$PYVER"
 PYAPP="$PYFWK/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
 
 echo "Setting launcher shebang"
-sed -i '' "s:SHEBANG_PY:$PYAPP:g" "$2/Thonny.app/Contents/MacOS/thonny"
+sed -i '' "s:SHEBANG_PY:$PYAPP -I:g" "$2/Thonny.app/Contents/MacOS/thonny"
 
 
 echo "Compiling standard library"
