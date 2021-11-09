@@ -2,7 +2,7 @@
 
 set -e
 
-PREFIX=$HOME/pythonny39
+PREFIX=$HOME/pythonny310
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -29,21 +29,21 @@ export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 if [ `getconf LONG_BIT` = "32" ]
 then
-#    $TARGET_DIR/bin/python3.9 -s -m pip install setuptools-scm
+#    $TARGET_DIR/bin/python3.10 -s -m pip install setuptools-scm
 
     # newer cryptography versions can't be (easily?) built on Ubuntu 16.04
-    $TARGET_DIR/bin/python3.9 -s -m pip install cryptography==3.2.*
+    $TARGET_DIR/bin/python3.10 -s -m pip install cryptography==3.2.*
 fi
 
-$TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir wheel
-$TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
-$TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir distro==1.5.*
-$TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir certifi
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir wheel
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir distro==1.5.*
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.9 -s -m pip install --pre --no-cache-dir thonny
+$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
 
-VERSION=$(<$TARGET_DIR/lib/python3.9/site-packages/thonny/VERSION)
+VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 XXL_VERSION_NAME=thonny-xxl-$VERSION-$ARCHITECTURE 
@@ -62,42 +62,42 @@ find $TARGET_DIR -type d -name "__pycache__" -delete
 rm -rf $TARGET_DIR/lib/tk8.6/demos
 
 
-rm -rf $TARGET_DIR/lib/python3.9/test
-rm -rf $TARGET_DIR/lib/python3.9/idlelib
-rm -rf $TARGET_DIR/lib/python3.9/distutils/command/*.exe
-#rm -rf $TARGET_DIR/lib/python3.9/config-3.9m
-#rm -rf $TARGET_DIR/lib/python3.9/site-packages/pip*
-#rm -rf $TARGET_DIR/lib/python3.9/site-packages/setuptools*
+rm -rf $TARGET_DIR/lib/python3.10/test
+rm -rf $TARGET_DIR/lib/python3.10/idlelib
+rm -rf $TARGET_DIR/lib/python3.10/distutils/command/*.exe
+#rm -rf $TARGET_DIR/lib/python3.10/config-3.10m
+#rm -rf $TARGET_DIR/lib/python3.10/site-packages/pip*
+#rm -rf $TARGET_DIR/lib/python3.10/site-packages/setuptools*
 
-rm -rf $TARGET_DIR/lib/python3.9/site-packages/pylint/test
-rm -rf $TARGET_DIR/lib/python3.9/site-packages/mypy/test
+rm -rf $TARGET_DIR/lib/python3.10/site-packages/pylint/test
+rm -rf $TARGET_DIR/lib/python3.10/site-packages/mypy/test
 
 
 # clear most of the include folder ##################################################
 #rm -rf $TARGET_DIR/include/lzma
 #rm -rf $TARGET_DIR/include/*.h
-#mv $TARGET_DIR/include/python3.9m/pyconfig.h $SCRIPT_DIR # pip needs this
-#rm -rf $TARGET_DIR/include/python3.9m/*
-#mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.9m # put it back
+#mv $TARGET_DIR/include/python3.10m/pyconfig.h $SCRIPT_DIR # pip needs this
+#rm -rf $TARGET_DIR/include/python3.10m/*
+#mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.10m # put it back
 
 
 
 # clear bin because its scripts have absolute paths #################################
-mv $TARGET_DIR/bin/python3.9 $SCRIPT_DIR # save python exe
+mv $TARGET_DIR/bin/python3.10 $SCRIPT_DIR # save python exe
 rm -rf $TARGET_DIR/bin/*
-mv $SCRIPT_DIR/python3.9 $TARGET_DIR/bin/
+mv $SCRIPT_DIR/python3.10 $TARGET_DIR/bin/
 
 # create other executables and links
 # NB! check that pip.sh refers to correct executable!
-cp ../pip.sh $TARGET_DIR/bin/pip3.9
+cp ../pip.sh $TARGET_DIR/bin/pip3.10
 
 # create new commands ###############################################################
 cp thonny $TARGET_DIR/bin
 
 # create links ###############################################################
 cd $TARGET_DIR/bin
-ln -s python3.9 python3
-ln -s pip3.9 pip3
+ln -s python3.10 python3
+ln -s pip3.10 pip3
 cd $SCRIPT_DIR
 
 # copy the token signifying Thonny-private Python
@@ -124,7 +124,7 @@ tar -cvzf dist/${VERSION_NAME}-alt.tar.gz -C build thonny
 
 # XXL ###########################################################
 
-# $TARGET_DIR/bin/python3.9 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
+# $TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
 #
 # find $TARGET_DIR -type f -name "*.pyo" -delete
 # find $TARGET_DIR -type f -name "*.pyc" -delete
