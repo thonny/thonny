@@ -42,6 +42,7 @@ from thonny.misc_utils import (
     running_on_mac_os,
     running_on_rpi,
     running_on_windows,
+    get_user_site_packages_dir_for_base,
 )
 from thonny.plugins.microbit import MicrobitFlashingDialog
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
@@ -377,6 +378,8 @@ class Workbench(tk.Tk):
         self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")  # type: ignore
 
         # 3rd party plugins from namespace package
+        # Now it's time to add plugins dir to sys path
+        sys.path.append(self.get_sys_path_directory_containg_plugins())
         try:
             import thonnycontrib  # @UnresolvedImport
         except ImportError:
@@ -1983,6 +1986,15 @@ class Workbench(tk.Tk):
 
     def get_toolbar_button(self, command_id):
         return self._toolbar_buttons[command_id]
+
+    def get_user_base_directory_for_plugins(self) -> str:
+        return os.path.join(thonny.THONNY_USER_DIR, "plugins")
+
+    def get_sys_path_directory_containg_plugins(self) -> str:
+        return get_user_site_packages_dir_for_base(self.get_user_base_directory_for_plugins())
+
+    def get_user_base_directory_for_bundled_backend(self) -> str:
+        return os.path.join(thonny.THONNY_USER_DIR, "user-packages-for-bundled-python")
 
     def _update_toolbar(self, event=None) -> None:
         if self._destroyed or not hasattr(self, "_toolbar"):

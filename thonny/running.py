@@ -26,7 +26,7 @@ from logging import debug
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
-from typing import Any, List, Optional, Set, Union, Callable  # @UnusedImport; @UnusedImport
+from typing import Any, List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
@@ -1219,7 +1219,11 @@ def create_backend_python_process(
 
 
 def create_frontend_python_process(
-    args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    args,
+    stdin=None,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    environment_extras: Optional[Dict[str, str]] = None,
 ):
     """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
     if _console_allocated:
@@ -1229,6 +1233,8 @@ def create_frontend_python_process(
     env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
+    if environment_extras is not None:
+        env.update(environment_extras)
     return _create_python_process(python_exe, args, stdin, stdout, stderr)
 
 
@@ -1294,7 +1300,7 @@ def is_venv_interpreter_of_current_interpreter(executable):
     return False
 
 
-def get_environment_for_python_subprocess(target_executable):
+def get_environment_for_python_subprocess(target_executable) -> Dict[str, str]:
     overrides = get_environment_overrides_for_python_subprocess(target_executable)
     return get_environment_with_overrides(overrides)
 

@@ -51,6 +51,23 @@ def running_on_rpi() -> bool:
     )
 
 
+def get_user_site_packages_dir_for_base(userbase: str) -> str:
+    # copied from site._get_path of 3.8 and 3.10
+    version = sys.version_info
+
+    if os.name == "nt":
+        if sys.version_info < (3, 10):
+            return f"{userbase}\\Python{version[0]}{version[1]}\\site-packages"
+        else:
+            ver_nodot = sys.winver.replace(".", "")
+            return f"{userbase}\\Python{ver_nodot}\\site-packages"
+
+    if sys.platform == "darwin" and sys._framework:
+        return f"{userbase}/lib/python/site-packages"
+
+    return f"{userbase}/lib/python{version[0]}.{version[1]}/site-packages"
+
+
 def list_volumes(skip_letters=set()) -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
     if sys.platform == "win32":
