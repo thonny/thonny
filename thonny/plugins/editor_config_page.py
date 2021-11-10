@@ -37,7 +37,7 @@ class EditorConfigurationPage(ConfigurationPage):
         get_workbench().set_default("view.remember_line", False)
         self.add_checkbox(
             "view.remember_line",
-            tr("Remember cursor position after reloading on external confirmation"),
+            tr("Remember cursor position after reloading on external modification"),
         )
 
         self.add_checkbox(
