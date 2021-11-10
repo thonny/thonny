@@ -959,18 +959,28 @@ class CopyPaste(object):
             path = os.path.dirname(path)
         return path
 
-    def conflicts(self, target):
-        target = self.dirname(target)
-        folder = set(map(lambda x: self.dirname(x), self.paths))
+    def _conflicts(self, target):
+        target = self.dirname(target) + os.sep
+        folder = set(map(lambda x: self.dirname(x) + os.sep, self.paths))
 
-        for p in folder:
-            if target.startswith(p + os.sep):
-                return True
-            if p.startswith(target + os.sep):
-                _confl = p.find(os.sep, len(target) + 1) < 0
-                if _confl:
+        if target in folder:
+            return True
+
+        for p in self.paths:
+            p_isdir = os.path.isdir(p)
+            if p_isdir:
+                if target.startswith(p + os.sep):
                     return True
+            if p.startswith(target):
+                if p_isdir:
+                    _conf = p.find(os.sep, len(target)) < 0
+                    if _conf:
+                        return True
         return False
+
+    def conflicts(self, target):
+        conf = self._conflicts(target)
+        return conf
 
     def cut(self):
         self.paths = self.get_selection_paths()
