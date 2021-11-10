@@ -5,12 +5,12 @@ import os.path
 
 target_dir = sys.argv[1]
 script_dir = os.path.abspath(os.path.dirname(__file__))
-old_prelude1=b"#!/Library/Frameworks/Python.framework/Versions/3.9/bin/python3"
-old_prelude2=b"#!" + script_dir.encode("ASCII") + b"/build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.9/bin/python3"
+old_prelude1=b"#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3"
+old_prelude2=b"#!" + script_dir.encode("ASCII") + b"/build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/bin/python3"
 
 # https://stackoverflow.com/a/33225909/261181
 new_prelude=b"""#!/bin/sh
-"exec" "`dirname $0`/python3.9" "$0" "$@"
+"exec" "`dirname $0`/python3.10" "$0" "$@"
 
 """
 
@@ -27,4 +27,3 @@ for name in os.listdir(target_dir):
         if new_content is not None:
             with open(full_path, mode="bw") as f:
                 f.write(new_content)
-                

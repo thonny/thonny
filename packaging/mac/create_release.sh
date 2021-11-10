@@ -2,7 +2,7 @@
 
 set -e
 
-thonny_version=$(<../../thonny/VERSION)
+thonny_version=3.3.14 #$(<../../thonny/VERSION)
 
 echo "Releasing $thonny_version"
 echo 
@@ -20,7 +20,7 @@ echo
 #echo 
 #echo "### Creating portable DMG ####################################################"
 #./prepare_dist_bundle.sh $thonny_version ../requirements-regular-bundle.txt
-#cp ../portable_thonny.ini build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.9/bin
+#cp ../portable_thonny.ini build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/bin
 #./sign_bundle_in_build.sh
 #./create_portable_dmg_from_build.sh "thonny" $thonny_version
 

@@ -6,9 +6,9 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy C:\Pythonny39\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Pythonny310-32\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
-copy ThonnyRunner39\x64\Release\thonny.exe %BUILDDIR% /Y
+copy ThonnyRunner310\Win32\Release\thonny.exe %BUILDDIR% /Y
 @rem NB! ucrt_redist not required in Windows 10
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
 xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
@@ -78,23 +78,23 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
-@echo ............... CREATING ZIP ..........................
-SET PATH=%PATH%;C:\Program Files\7-Zip
-cd %BUILDDIR%
-7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
-cd ..
+@rem @echo ............... CREATING ZIP ..........................
+@rem SET PATH=%PATH%;C:\Program Files\7-Zip
+@rem cd %BUILDDIR%
+@rem 7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
+@rem cd ..
 
-@echo ............... XXL ..........................
-%BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
-
-del /S "%BUILDDIR%\*.pyc">NUL
-
-@rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
-del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
-del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
-
-
-"C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
+@rem @echo ............... XXL ..........................
+@rem %BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
+@rem 
+@rem del /S "%BUILDDIR%\*.pyc">NUL
+@rem 
+@rem @rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
+@rem del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
+@rem del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
+@rem 
+@rem 
+@rem "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
 
 @rem rmdir %BUILDDIR% /S /Q
 pause

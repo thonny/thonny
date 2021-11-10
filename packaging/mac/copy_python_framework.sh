@@ -3,10 +3,10 @@ set -e
 # https://github.com/lektor/lektor/blob/master/gui/bin/make-python-framework-relocatable
 
 # Take from env
-# LOCAL_FRAMEWORKS=$HOME/thonny_template_build_39/Thonny.app/Contents/Frameworks
+# LOCAL_FRAMEWORKS=$HOME/thonny_template_build_310/Thonny.app/Contents/Frameworks
 
-VERSION=3.9
-OTHER_VERSION=3.10
+VERSION=3.10
+OTHER_VERSION=3.9
 ORIGINAL_FRAMEWORK_PATH=/Library/Frameworks/Python.framework
 NEW_FRAMEWORK_PATH=$LOCAL_FRAMEWORKS/Python.framework
 
@@ -18,7 +18,7 @@ rm -rf $NEW_FRAMEWORK_PATH/Versions/$OTHER_VERSION
 
 BIN_EXE=$NEW_FRAMEWORK_PATH/Versions/$VERSION/bin/python$VERSION
 
-# delete everything in bin except python3.9
+# delete everything in bin except python3.10
 #find $NEW_FRAMEWORK_PATH/Versions/$VERSION/bin -type f -maxdepth 1 ! -name python$VERSION -delete
 
 # Make main binaries and libraries relocatable
@@ -39,94 +39,94 @@ install_name_tool -change $ORIG_MAIN_LIB $MAIN_LIB_LOCAL_NAME $BUNDLE_EXE
 install_name_tool -add_rpath @executable_path/../../../../../../../ $BUNDLE_EXE
 
 # update tkinter links
-chmod 0755 $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libtcl8.6.dylib
+chmod 0755 $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libtcl8.6.dylib
 install_name_tool -change \
-    /Library/Frameworks/Python.framework/Versions/3.9/lib/libtcl8.6.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libtcl8.6.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libtcl8.6.dylib 
+    /Library/Frameworks/Python.framework/Versions/3.10/lib/libtcl8.6.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libtcl8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libtcl8.6.dylib
 
-chmod 0755 $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libtk8.6.dylib
+chmod 0755 $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libtk8.6.dylib
 install_name_tool -change \
-    /Library/Frameworks/Python.framework/Versions/3.9/lib/libtk8.6.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libtk8.6.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libtk8.6.dylib 
-
-install_name_tool -change \
-    /Library/Frameworks/Python.framework/Versions/3.9/lib/libtcl8.6.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libtcl8.6.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_tkinter.cpython-39-darwin.so 
+    /Library/Frameworks/Python.framework/Versions/3.10/lib/libtk8.6.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libtk8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libtk8.6.dylib
 
 install_name_tool -change \
-    /Library/Frameworks/Python.framework/Versions/3.9/lib/libtk8.6.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libtk8.6.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_tkinter.cpython-39-darwin.so 
+    /Library/Frameworks/Python.framework/Versions/3.10/lib/libtcl8.6.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libtcl8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_tkinter.cpython-310-darwin.so
+
+install_name_tool -change \
+    /Library/Frameworks/Python.framework/Versions/3.10/lib/libtk8.6.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libtk8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_tkinter.cpython-310-darwin.so
 
 # update libcrypto and libssl links
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib
 
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libssl.1.1.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libssl.1.1.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libssl.1.1.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libssl.1.1.dylib
 
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libssl.1.1.dylib
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libssl.1.1.dylib
 
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libcrypto.1.1.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_ssl.cpython-39-darwin.so
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libcrypto.1.1.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_ssl.cpython-310-darwin.so
 
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libssl.1.1.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libssl.1.1.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_ssl.cpython-39-darwin.so
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libssl.1.1.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libssl.1.1.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_ssl.cpython-310-darwin.so
 
 # update curses links
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libncursesw.5.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libncursesw.5.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libncursesw.5.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libncursesw.5.dylib
 
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libformw.5.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libformw.5.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libformw.5.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libformw.5.dylib
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libformw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libformw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libformw.5.dylib
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libformw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libformw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libformw.5.dylib
 
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libmenuw.5.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libmenuw.5.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libmenuw.5.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libmenuw.5.dylib
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libmenuw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libmenuw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libmenuw.5.dylib
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libmenuw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libmenuw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libmenuw.5.dylib
 
 install_name_tool -id \
-	@rpath/Python.framework/Versions/3.9/lib/libpanelw.5.dylib \
-    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libpanelw.5.dylib 
+	@rpath/Python.framework/Versions/3.10/lib/libpanelw.5.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libpanelw.5.dylib
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libpanelw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libpanelw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/libpanelw.5.dylib
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libpanelw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libpanelw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/libpanelw.5.dylib
 
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libncursesw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libncursesw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_curses.cpython-39-darwin.so
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libncursesw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libncursesw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_curses.cpython-310-darwin.so
 
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libncursesw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libncursesw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_curses_panel.cpython-39-darwin.so
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libncursesw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libncursesw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_curses_panel.cpython-310-darwin.so
 install_name_tool -change \
-	/Library/Frameworks/Python.framework/Versions/3.9/lib/libpanelw.5.dylib \
-	@rpath/Python.framework/Versions/3.9/lib/libpanelw.5.dylib \
-	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_curses_panel.cpython-39-darwin.so
+	/Library/Frameworks/Python.framework/Versions/3.10/lib/libpanelw.5.dylib \
+	@rpath/Python.framework/Versions/3.10/lib/libpanelw.5.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.10/lib/python3.10/lib-dynload/_curses_panel.cpython-310-darwin.so
 
 
 # copy the token signifying Thonny-private Python
