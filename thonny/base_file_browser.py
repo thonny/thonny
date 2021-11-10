@@ -971,8 +971,7 @@ class CopyPaste(object):
             if p_isdir:
                 if target.startswith(p + os.sep):
                     return True
-            if p.startswith(target):
-                if p_isdir:
+                if p.startswith(target):
                     _conf = p.find(os.sep, len(target)) < 0
                     if _conf:
                         return True
