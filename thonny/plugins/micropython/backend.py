@@ -48,7 +48,7 @@ from abc import ABC, abstractmethod
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
-from typing import Optional, Dict, Union, Tuple, List
+from typing import Optional, Dict, Union, Tuple, List, Any
 
 from serial import SerialTimeoutException
 
@@ -116,6 +116,7 @@ def debug(msg):
 
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
+        self._connection: MicroPythonConnection
         self._args = args
         self._prev_time = time.time()
         self._local_cwd = None
@@ -505,7 +506,9 @@ class MicroPythonBackend(MainBackend, ABC):
         self.send_message(ToplevelResponse(**args))
 
     def _write(self, data):
-        raise NotImplementedError()
+        if b"0x1" in data or b"0x2" in data or b"0x3" in data or b"0x4" in data:
+            logger.debug("Sending ctrl chars: %r", data)
+        self._connection.write(data)
 
     def _submit_input(self, cdata: str) -> None:
         # TODO: what if there is a previous unused data waiting

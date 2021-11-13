@@ -603,9 +603,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
         )
 
-    def _write(self, data):
-        self._connection.write(data)
-
     def _submit_code(self, script):
         """
         Code is submitted via paste mode, because this provides echo, which can be used as flow control.
@@ -638,7 +635,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _submit_code_via_paste_mode(self, script_bytes: bytes) -> None:
         # Go to paste mode
         self._ensure_normal_mode()
-        self._connection.write(PASTE_MODE_CMD)
+        self._write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
 
         # Send script
@@ -666,7 +663,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         # push and read comfirmation
-        self._connection.write(EOT)
+        self._write(EOT)
         expected_confirmation = b"\r\n"
         actual_confirmation = self._connection.read(
             len(expected_confirmation), timeout=WAIT_OR_CRASH_TIMEOUT
@@ -744,7 +741,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 elif data == b"\x04":
                     # Device indicated abrupt end, most likely a syntax error.
                     # Acknowledge it and finish.
-                    self._connection.write(b"\x04")
+                    self._write(b"\x04")
                     logger.debug(
                         "Abrupt end of raw paste submit after submitting %s bytes out of %s",
                         i,
