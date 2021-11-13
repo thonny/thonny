@@ -361,7 +361,11 @@ class Runner:
         """
 
         if not self.is_waiting_toplevel_command():
-            self.restart_backend(True, False, 2)
+            try:
+                self.restart_backend(True, False, 2)
+            except TimeoutError as e:
+                get_shell().print_error(str(e))
+                return
 
         filename = get_saved_current_script_filename()
 
@@ -624,10 +628,13 @@ class Runner:
 
         if wait:
             start_time = time.time()
-            while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
-                # self._pull_backend_messages()
+            while time.time() - start_time <= wait:
+                if self.is_waiting_toplevel_command():
+                    break
                 get_workbench().update()
                 sleep(0.01)
+            else:
+                raise TimeoutError("Backend was not restarted in time")
 
         get_workbench().event_generate("BackendRestart", full=True)
 
