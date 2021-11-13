@@ -4,7 +4,8 @@ import os.path
 import subprocess
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, simpledialog
+import stat, shutil
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_children_info
@@ -73,6 +74,8 @@ class BaseFileBrowser(ttk.Frame):
             self.tree.bind("<Control-1>", self.on_secondary_click, True)
         self.tree.bind("<Double-Button-1>", self.on_double_click, True)
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
+
+        self.copypaste = None
 
         wb = get_workbench()
         self.folder_icon = wb.get_image("folder")
@@ -703,6 +706,24 @@ class BaseFileBrowser(ttk.Frame):
         if self.supports_directories():
             self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
 
+        if self.supports_new_file():
+            self.menu.add_command(label=tr("New file"), command=self.create_new_file)
+
+        if self.supports_rename():
+            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
+
+        if self.supports_copypaste():
+            self.menu.add_command(label=tr("Copy"), command=self.copy_files)
+            self.menu.add_command(label=tr("Cut"), command=self.cut_files)
+            target = self.get_selected_file()
+            self.menu.add_command(label=tr("Paste"), command=self.paste_files)
+            if (
+                target is None
+                or not self.copypaste.has_selection()
+                or self.copypaste.conflicts(target)
+            ):
+                self.menu.entryconfig(tr("Paste"), state="disabled")
+
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
         if context == "button":
@@ -863,12 +884,144 @@ class BaseFileBrowser(ttk.Frame):
         ext = self.get_extension_from_name(name)
         return get_workbench().get_option(get_file_handler_conf_key(ext), "system") == "thonny"
 
+    def supports_new_file(self):
+        return False
+
+    def create_new_file(self):
+        raise NotImplementedError()
+
+    def get_selected_file(self):
+        selection = self.get_selection_info(True)
+        if not selection or len(selection["paths"]) > 1:
+            return
+        return selection["paths"][0]
+
+    def supports_rename(self):
+        return False
+
+    def rename_file(self):
+        old_name = self.get_selected_file()
+        if old_name is None:
+            return
+        file_name = os.path.basename(old_name)
+
+        new_name = simpledialog.askstring(
+            tr("Rename '%s'") % file_name, tr("Enter new name"), initialvalue=file_name, parent=self
+        )
+        if new_name:
+            rc = self.perform_rename(old_name, new_name)
+            if rc:
+                messagebox.showerror(tr("Rename of '%s' failed") % old_name, rc, parent=self)
+
+    def perform_rename(self, old_name, new_name):
+        raise Exception("overload this in subclass")
+
+    def supports_copypaste(self):
+        return self.copypaste
+
+    def cut_files(self):
+        assert self.copypaste
+        self.copypaste.cut()
+
+    def copy_files(self):
+        assert self.copypaste
+        self.copypaste.copy()
+
+    def paste_files(self):
+        assert self.copypaste
+        target = self.get_selected_file()
+        assert target
+        if os.path.isfile(target):
+            target = os.path.dirname(target)
+        self.copypaste.paste(target)
+
+
+class CopyPaste(object):
+    def __init__(self, filebrowser):
+        self.fb = filebrowser
+        self.reset()
+
+    def reset(self):
+        self.mode = None
+        self.paths = []
+
+    def get_selection_paths(self):
+        selection = self.fb.get_selection_info(True)
+        if selection:
+            return selection["paths"]
+        return []
+
+    def has_selection(self):
+        return len(self.paths) > 0
+
+    def dirname(self, path):
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        return path
+
+    def _conflicts(self, target):
+        target = self.dirname(target) + os.sep
+        folder = set(map(lambda x: self.dirname(x) + os.sep, self.paths))
+
+        if target in folder:
+            return True
+
+        for p in self.paths:
+            p_isdir = os.path.isdir(p)
+            if p_isdir:
+                if target.startswith(p + os.sep):
+                    return True
+                if p.startswith(target):
+                    _conf = p.find(os.sep, len(target)) < 0
+                    if _conf:
+                        return True
+        return False
+
+    def conflicts(self, target):
+        conf = self._conflicts(target)
+        return conf
+
+    def cut(self):
+        self.paths = self.get_selection_paths()
+        self.mode = "X"
+
+    def copy(self):
+        self.paths = self.get_selection_paths()
+        self.mode = "C"
+
+    def paste(self, target):
+        # https://docs.python.org/3/library/shutil.html#shutil.move
+        # depends on os.rename semantics
+        try:
+            if self.conflicts(target):
+                messagebox.showerror(
+                    tr("Paste failed"), tr("There are conflicting folders"), parent=self
+                )
+                return
+
+            for f in self.paths:
+                isfile = os.path.isfile(f)
+                if self.mode == "C":
+                    if isfile:
+                        shutil.copy2(f, target)
+                    else:
+                        folder_target = os.path.join(target, os.path.basename(f))
+                        shutil.copytree(f, folder_target, dirs_exist_ok=True)
+                elif self.mode == "X":
+                    dest = shutil.move(f, target)
+                else:
+                    raise Exception("unsupported mode")
+
+        finally:
+            self.reset()
+
 
 class BaseLocalFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_expand_buttons=True):
         super().__init__(master, show_expand_buttons=show_expand_buttons)
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
+        self.copypaste = CopyPaste(self)
 
     def destroy(self):
         super().destroy()
@@ -948,6 +1101,37 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             return True
         except ImportError:
             return False
+
+    def supports_new_file(self):
+        return True
+
+    def create_new_file(self):
+        path = self.get_selected_file()
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        n = 0
+        while True:
+            fnam = os.path.join(path, "new_file{}.py".format("_" + str(n) if n > 0 else ""))
+            if not os.path.exists(fnam):
+                break
+            n += 1
+        with open(fnam, "a") as f:
+            pass
+
+    def supports_rename(self):
+        return self.get_selected_file()
+
+    def perform_rename(self, old_name, new_name):
+        basepath = os.path.dirname(old_name)
+        full_path = os.path.join(basepath, new_name)
+        logger.debug("rename %s to %s" % (old_name, full_path))
+
+        if old_name == full_path:
+            return
+        if os.path.exists(full_path):
+            return tr("File already exists")
+
+        os.rename(old_name, full_path)
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):

@@ -34,6 +34,12 @@ class EditorConfigurationPage(ConfigurationPage):
             tr("Highlight current line (requires reopening the editor)"),
         )
 
+        get_workbench().set_default("view.remember_line", False)
+        self.add_checkbox(
+            "view.remember_line",
+            tr("Remember cursor position after reloading on external modification"),
+        )
+
         self.add_checkbox(
             "edit.automatic_calltips",
             tr("Automatically show parameter info after typing '('"),

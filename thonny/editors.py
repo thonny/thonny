@@ -5,7 +5,7 @@ import sys
 import tkinter as tk
 import traceback
 from logging import exception
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, simpledialog
 
 from _tkinter import TclError
 
@@ -158,7 +158,17 @@ class Editor(ttk.Frame):
                     ),
                     master=self,
                 ):
+                    cur_line = self.get_text_widget().index("insert")
+                    # convert cursor position to line number
+                    cur_line = int(float(cur_line))
+
                     self._load_file(self._filename, keep_undo=True)
+
+                    get_workbench().set_default("view.remember_line", False)
+                    flag = get_workbench().get_variable("view.remember_line").get()
+                    if flag:
+                        print("set cursor")
+                        self.select_line(cur_line)
                 else:
                     self._last_known_mtime = os.path.getmtime(self._filename)
         finally:
@@ -682,6 +692,18 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             group=10,
         )
 
+        get_workbench().add_command(
+            "goto_source_line",
+            "edit",
+            tr("Go to line ..."),
+            self._cmd_goto_source_line,
+            default_sequence=select_sequence("<Control-g>", "<Command-g>"),
+            # tester=,
+            # no global switch, or cross plugin switch?
+            # todo use same as find and replace -> plugins/find_replace.py
+            group=60,
+        )
+
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
 
     def load_startup_files(self):
@@ -904,6 +926,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         editors = self.winfo_children()
         if len(editors) == 1 and not editors[0].is_modified() and not editors[0].get_filename():
             self._cmd_close_file()
+
+    def _cmd_goto_source_line(self):
+        editor = self.get_current_editor()
+        if editor:
+            line_no = simpledialog.askinteger(tr("Goto"), tr("Line number"))
+            if line_no:
+                editor.select_line(line_no)
 
     def _mac_open_document(self, *args):
         for arg in args:
