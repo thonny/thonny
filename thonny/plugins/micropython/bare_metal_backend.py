@@ -264,7 +264,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # Discard what's printed by now and order a prompt, so that we get to know
             # if the REPL is already idle
             discarded = self._connection.read_all()
-            logger.debug("Asked for raw mode")
+            logger.debug("Asking for raw mode")
             try:
                 self._write(RAW_MODE_CMD)
             except SerialTimeoutException:
@@ -276,6 +276,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         if self._submit_mode is None:
             self._choose_submit_mode()
+
+    def _interrupt(self):
+        try:
+            super()._interrupt()
+        except SerialTimeoutException as e:
+            self._handle_communication_error(e)
 
     def _choose_submit_mode(self):
         if self._connected_over_webrepl():
@@ -1111,6 +1117,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             except Exception as e:
                 if "read-only" in str(e).lower():
                     self._delete_via_mount(paths)
+                else:
+                    raise
 
             self._sync_remote_filesystem()
 
@@ -1465,6 +1473,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         except ManagementError as e:
             if "read-only" in e.err.lower():
                 self._makedirs_via_mount(path)
+            else:
+                raise
 
         self._sync_remote_filesystem()
 

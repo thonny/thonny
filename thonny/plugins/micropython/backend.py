@@ -125,7 +125,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._sys_path = None
         self._epoch_year = None
         self._builtin_modules = []
-        self._suppressed_internal_error = None
+        self._postponed_internal_error = None
 
         self._builtins_info = self._fetch_builtins_info()
 
@@ -150,8 +150,7 @@ class MicroPythonBackend(MainBackend, ABC):
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
         except Exception as e:
-            logger.exception("Crash in backend", exc_info=e)
-            self._report_likely_communication_error(e)
+            self._handle_communication_error(e)
 
     def _prepare_after_soft_reboot(self, clean=False):
         self._report_time("bef preparing helpers")
@@ -315,18 +314,23 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         if cmd["name"] == "interrupt":
-            # don't interrupt while command or input is being written
-            with self._interrupt_lock:
-                if self._current_command:
-                    self._current_command.interrupted = True
-                self._write(INTERRUPT_CMD)
-                time.sleep(0.1)
-                self._write(INTERRUPT_CMD)
-                time.sleep(0.1)
-                self._write(INTERRUPT_CMD)
+            self._interrupt()
+
+    def _interrupt(self):
+        # don't interrupt while command or input is being written
+        with self._interrupt_lock:
+            if self._current_command:
+                self._current_command.interrupted = True
+            logger.info("Sending interrupt")
+            self._write(INTERRUPT_CMD)
+            time.sleep(0.1)
+            self._write(INTERRUPT_CMD)
+            time.sleep(0.1)
+            self._write(INTERRUPT_CMD)
+            logger.info("Done sending interrupt")
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        self._suppressed_internal_error = None
+        self._postponed_internal_error = None
         logger.info("Handling command '%s' (%r) ", cmd.name, cmd)
         self._report_time("before " + cmd.name)
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
@@ -350,10 +354,10 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             try:
                 response = handler(cmd)
-                if self._suppressed_internal_error:
-                    raise SuppressedInternalError(
-                        "Suppressed internal error: %s" % self._suppressed_internal_error
-                    )
+                if self._postponed_internal_error:
+                    msg = self._postponed_internal_error
+                    self._postponed_internal_error = None
+                    raise PostponedInternalError("Postponed internal error: %s" % msg)
             except SystemExit:
                 # Must be caused by Thonny or plugins code
                 # TODO: Does the process get closed?
@@ -371,15 +375,14 @@ class MicroPythonBackend(MainBackend, ABC):
             except OSError as e:
                 response = create_error_response(error="OSError: " + str(e))
             except Exception as e:
-                logger.exception("%s while handling %s", type(e).__name__, cmd.name)
+                logger.error("%s while handling %s", type(e).__name__, cmd.name)
                 if isinstance(e, ManagementError) and "KeyboardInterrupt" in e.err:
                     response = create_error_response(error="Interrupted", interrupted=True)
                 else:
                     self._show_error(
                         "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
                     )
-
-                    self._report_likely_communication_error(e)
+                    self._handle_communication_error(e)
                     response = create_error_response(error="Internal error")
 
         if response is None:
@@ -562,7 +565,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         if "NameError: name '__thonny_helper' isn't defined" in data:
             # Don't want to raise error here and disturb the protocol
-            self._suppressed_internal_error = "Missing __thonny_helper"
+            self._postponed_internal_error = "Missing __thonny_helper"
 
     def _execute(self, script, capture_output=False) -> Tuple[str, str]:
         if capture_output:
@@ -874,36 +877,33 @@ class MicroPythonBackend(MainBackend, ABC):
         self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
 
     def _cmd_get_active_distributions(self, cmd):
-        try:
-            dists = {}
-            for path in self._get_library_paths():
-                children = self._get_dir_children_info(path)
-                if children is None:
+        dists = {}
+        for path in self._get_library_paths():
+            children = self._get_dir_children_info(path)
+            if children is None:
+                continue
+            for name, info in children.items():
+                if info["kind"] == "dir":
+                    key = name
+                elif name.endswith(".py"):
+                    key = name[:-3]
+                elif name.endswith(".mpy"):
+                    key = name[:-4]
+                else:
                     continue
-                for name, info in children.items():
-                    if info["kind"] == "dir":
-                        key = name
-                    elif name.endswith(".py"):
-                        key = name[:-3]
-                    elif name.endswith(".mpy"):
-                        key = name[:-4]
-                    else:
-                        continue
 
-                    dists[key] = {
-                        "project_name": key,
-                        "key": key,
-                        "guessed_pypi_name": self._guess_package_pypi_name(key),
-                        "location": path,
-                        "version": "n/a",
-                    }
+                dists[key] = {
+                    "project_name": key,
+                    "key": key,
+                    "guessed_pypi_name": self._guess_package_pypi_name(key),
+                    "location": path,
+                    "version": "n/a",
+                }
 
-            return dict(
-                distributions=dists,
-                usersitepackages=None,
-            )
-        except Exception:
-            return InlineResponse("get_active_distributions", error=traceback.format_exc())
+        return dict(
+            distributions=dists,
+            usersitepackages=None,
+        )
 
     def _cmd_get_module_info(self, cmd):
         location = None
@@ -1020,27 +1020,6 @@ class MicroPythonBackend(MainBackend, ABC):
         assert not cmd.path.startswith("//")
         self._mkdir(cmd.path)
 
-    def __cmd_editor_autocomplete(self, cmd):
-        # template for the response
-        result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
-
-        try:
-            from thonny import jedi_utils
-
-            completions = jedi_utils.get_script_completions(
-                cmd.source,
-                cmd.row,
-                cmd.column,
-                filename=cmd.filename,
-                sys_path=[self._api_stubs_path],
-            )
-            result["completions"] = self._filter_completions(completions)
-        except Exception as e:
-            logger.exception("Problem with editor autocomplete", exc_info=e)
-            result["error"] = "Autocomplete error"
-
-        return result
-
     def _filter_completions(self, completions):
         # filter out completions not applicable to MicroPython
         result = []
@@ -1063,64 +1042,6 @@ class MicroPythonBackend(MainBackend, ABC):
             result.append({"name": completion.name})
 
         return result
-
-    def __cmd_shell_autocomplete(self, cmd):
-        source = cmd.source
-
-        # TODO: combine dynamic results and jedi results
-        if source.strip().startswith("import ") or source.strip().startswith("from "):
-            # this needs the power of jedi
-            response = {"source": cmd.source}
-
-            try:
-                from thonny import jedi_utils
-
-                # at the moment I'm assuming source is the code before cursor, not whole input
-                lines = source.split("\n")
-                completions = jedi_utils.get_script_completions(
-                    source, len(lines), len(lines[-1]), "<shell>", sys_path=[self._api_stubs_path]
-                )
-                response["completions"] = self._filter_completions(completions)
-            except Exception as e:
-                logger.exception("Problem with shell autocomplete", exc_info=e)
-                response["error"] = "Autocomplete error"
-
-            return response
-        else:
-            # use live data
-            match = re.search(
-                r"(\w+\.)*(\w+)?$", source
-            )  # https://github.com/takluyver/ubit_kernel/blob/master/ubit_kernel/kernel.py
-            if match:
-                prefix = match.group()
-                if "." in prefix:
-                    obj, prefix = prefix.rsplit(".", 1)
-                    names = self._evaluate(
-                        "__thonny_helper.builtins.dir({obj}) if '{obj}' in __thonny_helper.builtins.locals() or '{obj}' in __thonny_helper.builtins.globals() else []".format(
-                            obj=obj
-                        )
-                    )
-                else:
-                    names = self._evaluate("__thonny_helper.builtins.dir()")
-            else:
-                names = []
-                prefix = ""
-
-            completions = []
-
-            # prevent TypeError (iterating over None)
-            names = names if names else []
-
-            for name in names:
-                if name.startswith(prefix) and not name.startswith("__"):
-                    completions.append({"name": name, "complete": name[len(prefix) :]})
-
-            return {
-                "completions": completions,
-                "source": source,
-                "row": cmd.row,
-                "column": cmd.column,
-            }
 
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
         return [os.path.join(os.path.dirname(__file__), "api_stubs")]
@@ -1378,21 +1299,23 @@ class MicroPythonBackend(MainBackend, ABC):
             e.err,
         )
 
-    def _show_unexpected_condition_message(self):
-        self._show_error(
-            (
-                "It looks like %s has arrived to an unexpected state"
-                " or there have been communication problems."
-            )
-            % self._get_interpreter_kind(),
-            end=" ",
-        )
+    def _handle_communication_error(self, e):
+        logger.error("Unexpected error", exc_info=e)
 
-    def _report_likely_communication_error(self, e):
         if isinstance(e, ManagementError):
             self._log_management_error_details(e)
-        if isinstance(e, (ManagementError, ProtocolError, SuppressedInternalError)):
-            self._show_unexpected_condition_message()
+
+        if isinstance(
+            e, (ManagementError, ProtocolError, PostponedInternalError, SerialTimeoutException)
+        ):
+            self._show_error(
+                (
+                    "It looks like %s has arrived to an unexpected state"
+                    " or there have been communication problems."
+                )
+                % self._get_interpreter_kind(),
+                end=" ",
+            )
         else:
             self._show_error("Internal error (%s)" % e)
 
@@ -1407,7 +1330,7 @@ class ProtocolError(RuntimeError):
     pass
 
 
-class SuppressedInternalError(RuntimeError):
+class PostponedInternalError(RuntimeError):
     pass
 
 
