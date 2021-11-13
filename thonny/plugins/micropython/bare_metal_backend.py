@@ -493,8 +493,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._write(INTERRUPT_CMD)
             self._write(RAW_MODE_CMD)
             time.sleep(delay)
+            logger.debug("gonna capture")
             self._capture_output_until_active_prompt()
             if self._last_prompt in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
+                logger.debug("Got raw prompt")
                 break
         else:
             max_tail_length = 500
@@ -1626,9 +1628,9 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
     thonny.configure_backend_logging()
 
     import ast
-    import sys
 
     args = ast.literal_eval(sys.argv[1])
+    logger.info("Starting backend, args: %r", args)
 
     try:
         if args["port"] is None:
