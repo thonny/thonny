@@ -323,10 +323,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._current_command.interrupted = True
             logger.info("Sending interrupt")
             self._write(INTERRUPT_CMD)
-            time.sleep(0.1)
-            self._write(INTERRUPT_CMD)
-            time.sleep(0.1)
-            self._write(INTERRUPT_CMD)
             logger.info("Done sending interrupt")
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
