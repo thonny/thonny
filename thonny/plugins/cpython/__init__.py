@@ -7,7 +7,7 @@ from tkinter import messagebox
 from tkinter import ttk
 
 import thonny
-from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running
+from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running, get_shell
 from thonny.common import (
     ToplevelCommand,
     InlineCommand,

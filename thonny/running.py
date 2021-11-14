@@ -9,23 +9,22 @@ shell becomes kind of title for the execution.
 """
 
 
-import collections
-from logging import getLogger
 import os.path
-import re
 import shlex
-import signal
-import subprocess
+import tkinter as tk
 import traceback
+from logging import getLogger
+from tkinter import messagebox, ttk
 
+import collections
+import re
+import subprocess
 import sys
 import time
-import tkinter as tk
 import warnings
 from threading import Thread
 from time import sleep
-from tkinter import messagebox, ttk
-from typing import Any, List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
+from typing import List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
@@ -41,7 +40,6 @@ from thonny.common import (
     ToplevelResponse,
     UserError,
     is_same_path,
-    normpath_with_actual_case,
     parse_message,
     path_startswith,
     serialize_message,
@@ -67,7 +65,7 @@ from thonny.misc_utils import (
     running_on_windows,
     show_command_not_available_in_flatpak_message,
 )
-from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
+from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -97,7 +95,7 @@ class Runner:
 
         self._init_commands()
         self._state = "starting"
-        self._proxy = None  # type: BackendProxy
+        self._proxy: Optional[BackendProxy] = None
         self._publishing_events = False
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]

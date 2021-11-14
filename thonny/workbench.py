@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import os.path
+import platform
+import tkinter as tk
+import tkinter.font as tk_font
+import traceback
+from logging import getLogger
+from tkinter import messagebox, ttk
+
 import ast
 import collections
 import importlib
-from logging import getLogger
-import os.path
 import pkgutil
-import platform
 import queue
 import re
 import shutil
 import socket
 import sys
-import tkinter as tk
-import tkinter.font as tk_font
-import traceback
 from threading import Thread
-from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -28,7 +29,6 @@ from thonny import (
     get_shell,
     is_portable,
     languages,
-    running,
     ui_utils,
 )
 from thonny.common import Record, UserError, normpath_with_actual_case
@@ -44,8 +44,6 @@ from thonny.misc_utils import (
     running_on_windows,
     get_user_site_packages_dir_for_base,
 )
-from thonny.plugins.microbit import MicrobitFlashingDialog
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -59,7 +57,6 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
     caps_lock_is_on,
     shift_is_pressed,
-    ems_to_pixels,
     get_hyperlink_cursor,
 )
 
