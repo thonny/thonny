@@ -22,7 +22,6 @@ import sys
 import time
 import tkinter as tk
 import warnings
-from logging import debug
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
@@ -359,12 +358,17 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
+        assert command_name[0].isupper()
 
         if not self.is_waiting_toplevel_command():
+            self._proxy.interrupt()
+
             try:
-                self.restart_backend(True, False, 2)
+                self._wait_for_prompt(2)
             except TimeoutError as e:
-                get_shell().print_error(str(e))
+                get_shell().print_error(
+                    "Could not interrupt current process. Please wait, try again or select Stop/Restart!"
+                )
                 return
 
         filename = get_saved_current_script_filename()
@@ -393,6 +397,16 @@ class Runner:
             self.execute_script(
                 target_path, self._get_active_arguments(), working_directory, command_name
             )
+
+    def _wait_for_prompt(self, timeout) -> None:
+        start_time = time.time()
+        while time.time() - start_time <= timeout:
+            if self.is_waiting_toplevel_command():
+                return
+            get_workbench().update()
+            sleep(0.01)
+
+        raise TimeoutError("Backend was not restarted in time")
 
     def _get_active_arguments(self):
         if get_workbench().get_option("view.show_program_arguments"):
@@ -603,7 +617,7 @@ class Runner:
 
         get_workbench().become_active_window(False)
 
-    def restart_backend(self, clean: bool, first: bool = False, wait: float = 0) -> None:
+    def restart_backend(self, clean: bool, first: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
 
         if not first:
@@ -625,16 +639,6 @@ class Runner:
         self._proxy = backend_class(clean)
 
         self._poll_backend_messages()
-
-        if wait:
-            start_time = time.time()
-            while time.time() - start_time <= wait:
-                if self.is_waiting_toplevel_command():
-                    break
-                get_workbench().update()
-                sleep(0.01)
-            else:
-                raise TimeoutError("Backend was not restarted in time")
 
         get_workbench().event_generate("BackendRestart", full=True)
 
@@ -941,7 +945,7 @@ class SubprocessProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
 
-        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
+        logger.info("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
 
         extra_params = {}
         if sys.version_info >= (3, 6):
@@ -974,7 +978,7 @@ class SubprocessProxy(BackendProxy):
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
-            self._clear_environment()
+            self._prepare_clean_launch()
 
         if isinstance(cmd, ToplevelCommand):
             # required by SshCPythonBackend for creating fresh target process
@@ -995,7 +999,7 @@ class SubprocessProxy(BackendProxy):
         self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
 
-    def _clear_environment(self):
+    def _prepare_clean_launch(self):
         pass
 
     def send_program_input(self, data):

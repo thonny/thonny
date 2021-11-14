@@ -56,7 +56,7 @@ class CPythonProxy(SubprocessProxy):
         if "gui_is_active" in msg:
             self._update_gui_updating(msg)
 
-    def _clear_environment(self):
+    def _prepare_clean_launch(self):
         self._close_backend()
         self._start_background_process()
 
