@@ -164,11 +164,7 @@ class Editor(ttk.Frame):
 
                     self._load_file(self._filename, keep_undo=True)
 
-                    get_workbench().set_default("view.remember_line", False)
-                    flag = get_workbench().get_variable("view.remember_line").get()
-                    if flag:
-                        print("set cursor")
-                        self.select_line(cur_line)
+                    self.select_line(cur_line)
                 else:
                     self._last_known_mtime = os.path.getmtime(self._filename)
         finally:

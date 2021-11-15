@@ -1068,11 +1068,9 @@ class PluginsPipDialog(PipDialog):
 
     def _get_target_directory(self):
         if self._use_user_install():
-            import site
-
-            assert hasattr(site, "getusersitepackages")
-            os.makedirs(site.getusersitepackages(), exist_ok=True)
-            return normpath_with_actual_case(site.getusersitepackages())
+            target = get_workbench().get_sys_path_directory_containg_plugins()
+            os.makedirs(target, exist_ok=True)
+            return normpath_with_actual_case(target)
         else:
             for d in sys.path:
                 if ("site-packages" in d or "dist-packages" in d) and path_startswith(
@@ -1120,7 +1118,13 @@ class PluginsPipDialog(PipDialog):
 
     def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
         args = ["-m", "pip"] + args + self._get_extra_switches()
-        proc = running.create_frontend_python_process(args, stderr=subprocess.STDOUT)
+        proc = running.create_frontend_python_process(
+            args,
+            stderr=subprocess.STDOUT,
+            environment_extras={
+                "PYTHONUSERBASE": get_workbench().get_user_base_directory_for_plugins()
+            },
+        )
         cmd = proc.cmd
         dlg = SubprocessDialog(self, proc, "pip", long_description=title, autostart=True)
         ui_utils.show_dialog(dlg)

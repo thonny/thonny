@@ -185,8 +185,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         return super().send_command(cmd)
 
-    def _clear_environment(self):
-        "TODO:"
+    def _prepare_clean_launch(self):
+        """Nothing to do in this level. The backend takes care of the clearing"""
 
     @classmethod
     def _detect_potential_ports(cls):

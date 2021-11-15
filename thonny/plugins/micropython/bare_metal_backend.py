@@ -264,7 +264,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # Discard what's printed by now and order a prompt, so that we get to know
             # if the REPL is already idle
             discarded = self._connection.read_all()
-            logger.debug("Asked for raw mode")
+            logger.debug("Asking for raw mode")
             try:
                 self._write(RAW_MODE_CMD)
             except SerialTimeoutException:
@@ -276,6 +276,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         if self._submit_mode is None:
             self._choose_submit_mode()
+
+    def _interrupt(self):
+        try:
+            super()._interrupt()
+        except SerialTimeoutException as e:
+            self._handle_communication_error(e)
 
     def _choose_submit_mode(self):
         if self._connected_over_webrepl():
@@ -489,6 +495,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             time.sleep(delay)
             self._capture_output_until_active_prompt()
             if self._last_prompt in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
+                logger.debug("Got raw prompt")
                 break
         else:
             max_tail_length = 500
@@ -597,9 +604,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
         )
 
-    def _write(self, data):
-        self._connection.write(data)
-
     def _submit_code(self, script):
         """
         Code is submitted via paste mode, because this provides echo, which can be used as flow control.
@@ -632,7 +636,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _submit_code_via_paste_mode(self, script_bytes: bytes) -> None:
         # Go to paste mode
         self._ensure_normal_mode()
-        self._connection.write(PASTE_MODE_CMD)
+        self._write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
 
         # Send script
@@ -660,7 +664,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         # push and read comfirmation
-        self._connection.write(EOT)
+        self._write(EOT)
         expected_confirmation = b"\r\n"
         actual_confirmation = self._connection.read(
             len(expected_confirmation), timeout=WAIT_OR_CRASH_TIMEOUT
@@ -738,7 +742,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 elif data == b"\x04":
                     # Device indicated abrupt end, most likely a syntax error.
                     # Acknowledge it and finish.
-                    self._connection.write(b"\x04")
+                    self._write(b"\x04")
                     logger.debug(
                         "Abrupt end of raw paste submit after submitting %s bytes out of %s",
                         i,
@@ -1111,6 +1115,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             except Exception as e:
                 if "read-only" in str(e).lower():
                     self._delete_via_mount(paths)
+                else:
+                    raise
 
             self._sync_remote_filesystem()
 
@@ -1465,6 +1471,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         except ManagementError as e:
             if "read-only" in e.err.lower():
                 self._makedirs_via_mount(path)
+            else:
+                raise
 
         self._sync_remote_filesystem()
 
@@ -1619,9 +1627,9 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
     thonny.configure_backend_logging()
 
     import ast
-    import sys
 
     args = ast.literal_eval(sys.argv[1])
+    logger.info("Starting backend, args: %r", args)
 
     try:
         if args["port"] is None:

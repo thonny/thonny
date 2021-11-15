@@ -9,24 +9,22 @@ shell becomes kind of title for the execution.
 """
 
 
-import collections
-from logging import getLogger
 import os.path
-import re
 import shlex
-import signal
-import subprocess
+import tkinter as tk
 import traceback
+from logging import getLogger
+from tkinter import messagebox, ttk
 
+import collections
+import re
+import subprocess
 import sys
 import time
-import tkinter as tk
 import warnings
-from logging import debug
 from threading import Thread
 from time import sleep
-from tkinter import messagebox, ttk
-from typing import Any, List, Optional, Set, Union, Callable  # @UnusedImport; @UnusedImport
+from typing import List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
@@ -42,7 +40,6 @@ from thonny.common import (
     ToplevelResponse,
     UserError,
     is_same_path,
-    normpath_with_actual_case,
     parse_message,
     path_startswith,
     serialize_message,
@@ -68,7 +65,7 @@ from thonny.misc_utils import (
     running_on_windows,
     show_command_not_available_in_flatpak_message,
 )
-from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
+from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -98,7 +95,7 @@ class Runner:
 
         self._init_commands()
         self._state = "starting"
-        self._proxy = None  # type: BackendProxy
+        self._proxy: Optional[BackendProxy] = None
         self._publishing_events = False
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
@@ -359,9 +356,18 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
+        assert command_name[0].isupper()
 
         if not self.is_waiting_toplevel_command():
-            self.restart_backend(True, False, 2)
+            self._proxy.interrupt()
+
+            try:
+                self._wait_for_prompt(2)
+            except TimeoutError as e:
+                get_shell().print_error(
+                    "Could not interrupt current process. Please wait, try again or select Stop/Restart!"
+                )
+                return
 
         filename = get_saved_current_script_filename()
 
@@ -389,6 +395,16 @@ class Runner:
             self.execute_script(
                 target_path, self._get_active_arguments(), working_directory, command_name
             )
+
+    def _wait_for_prompt(self, timeout) -> None:
+        start_time = time.time()
+        while time.time() - start_time <= timeout:
+            if self.is_waiting_toplevel_command():
+                return
+            get_workbench().update()
+            sleep(0.01)
+
+        raise TimeoutError("Backend was not restarted in time")
 
     def _get_active_arguments(self):
         if get_workbench().get_option("view.show_program_arguments"):
@@ -599,7 +615,7 @@ class Runner:
 
         get_workbench().become_active_window(False)
 
-    def restart_backend(self, clean: bool, first: bool = False, wait: float = 0) -> None:
+    def restart_backend(self, clean: bool, first: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
 
         if not first:
@@ -621,13 +637,6 @@ class Runner:
         self._proxy = backend_class(clean)
 
         self._poll_backend_messages()
-
-        if wait:
-            start_time = time.time()
-            while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
-                # self._pull_backend_messages()
-                get_workbench().update()
-                sleep(0.01)
 
         get_workbench().event_generate("BackendRestart", full=True)
 
@@ -934,7 +943,7 @@ class SubprocessProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
 
-        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
+        logger.info("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
 
         extra_params = {}
         if sys.version_info >= (3, 6):
@@ -967,7 +976,7 @@ class SubprocessProxy(BackendProxy):
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
-            self._clear_environment()
+            self._prepare_clean_launch()
 
         if isinstance(cmd, ToplevelCommand):
             # required by SshCPythonBackend for creating fresh target process
@@ -988,7 +997,7 @@ class SubprocessProxy(BackendProxy):
         self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
 
-    def _clear_environment(self):
+    def _prepare_clean_launch(self):
         pass
 
     def send_program_input(self, data):
@@ -1219,7 +1228,11 @@ def create_backend_python_process(
 
 
 def create_frontend_python_process(
-    args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    args,
+    stdin=None,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    environment_extras: Optional[Dict[str, str]] = None,
 ):
     """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
     if _console_allocated:
@@ -1229,6 +1242,8 @@ def create_frontend_python_process(
     env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
+    if environment_extras is not None:
+        env.update(environment_extras)
     return _create_python_process(python_exe, args, stdin, stdout, stderr)
 
 
@@ -1294,7 +1309,7 @@ def is_venv_interpreter_of_current_interpreter(executable):
     return False
 
 
-def get_environment_for_python_subprocess(target_executable):
+def get_environment_for_python_subprocess(target_executable) -> Dict[str, str]:
     overrides = get_environment_overrides_for_python_subprocess(target_executable)
     return get_environment_with_overrides(overrides)
 

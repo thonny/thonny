@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import os.path
+import platform
+import tkinter as tk
+import tkinter.font as tk_font
+import traceback
+from logging import getLogger
+from tkinter import messagebox, ttk
+
 import ast
 import collections
 import importlib
-from logging import getLogger
-import os.path
 import pkgutil
-import platform
 import queue
 import re
 import shutil
 import socket
 import sys
-import tkinter as tk
-import tkinter.font as tk_font
-import traceback
 from threading import Thread
-from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -28,7 +29,6 @@ from thonny import (
     get_shell,
     is_portable,
     languages,
-    running,
     ui_utils,
 )
 from thonny.common import Record, UserError, normpath_with_actual_case
@@ -42,9 +42,8 @@ from thonny.misc_utils import (
     running_on_mac_os,
     running_on_rpi,
     running_on_windows,
+    get_user_site_packages_dir_for_base,
 )
-from thonny.plugins.microbit import MicrobitFlashingDialog
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -58,7 +57,6 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
     caps_lock_is_on,
     shift_is_pressed,
-    ems_to_pixels,
     get_hyperlink_cursor,
 )
 
@@ -377,6 +375,8 @@ class Workbench(tk.Tk):
         self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")  # type: ignore
 
         # 3rd party plugins from namespace package
+        # Now it's time to add plugins dir to sys path
+        sys.path.append(self.get_sys_path_directory_containg_plugins())
         try:
             import thonnycontrib  # @UnresolvedImport
         except ImportError:
@@ -1983,6 +1983,15 @@ class Workbench(tk.Tk):
 
     def get_toolbar_button(self, command_id):
         return self._toolbar_buttons[command_id]
+
+    def get_user_base_directory_for_plugins(self) -> str:
+        return os.path.join(thonny.THONNY_USER_DIR, "plugins")
+
+    def get_sys_path_directory_containg_plugins(self) -> str:
+        return get_user_site_packages_dir_for_base(self.get_user_base_directory_for_plugins())
+
+    def get_user_base_directory_for_bundled_backend(self) -> str:
+        return os.path.join(thonny.THONNY_USER_DIR, "user-packages-for-bundled-python")
 
     def _update_toolbar(self, event=None) -> None:
         if self._destroyed or not hasattr(self, "_toolbar"):

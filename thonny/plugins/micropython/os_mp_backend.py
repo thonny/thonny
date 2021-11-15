@@ -164,11 +164,11 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         of Thonny commands.
         """
         end_marker = "#uIuIu"
-        self._connection.write(PASTE_MODE_CMD)
+        self._write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
-        self._connection.write(script + end_marker)
+        self._write(script + end_marker)
         self._connection.read_until(end_marker.encode("ascii"))
-        self._connection.write(EOT)
+        self._write(EOT)
         self._connection.read_until(b"\n")
         self._forward_output_until_active_prompt(output_consumer)
 
@@ -228,9 +228,6 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         else:
             out = data
         self._send_output(self._decode(out), "stdout")
-
-    def _write(self, data):
-        self._connection.write(data)
 
     def _cmd_Run(self, cmd):
         self._connection.close()
