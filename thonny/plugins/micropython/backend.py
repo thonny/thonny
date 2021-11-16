@@ -116,6 +116,7 @@ def debug(msg):
 
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
+        logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)
         self._connection: MicroPythonConnection
         self._args = args
         self._prev_time = time.time()
