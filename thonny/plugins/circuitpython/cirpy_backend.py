@@ -29,7 +29,8 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         time.sleep(0.05)
         self._write(INTERRUPT_CMD)
 
-        self._capture_output_until_active_prompt()
+        # TODO: interrupt more if the prompt doesn't appear in time
+        self._log_output_until_active_prompt()
 
 
 if __name__ == "__main__":

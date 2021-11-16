@@ -493,7 +493,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._write(INTERRUPT_CMD)
             self._write(RAW_MODE_CMD)
             time.sleep(delay)
-            self._capture_output_until_active_prompt()
+            self._log_output_until_active_prompt()
             if self._last_prompt in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
                 logger.debug("Got raw prompt")
                 break
@@ -524,7 +524,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("_soft_reboot_in_raw_prompt_without_running_main")
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
         self._check_reconnect()
-        self._capture_output_until_active_prompt()
+        self._log_output_until_active_prompt()
 
         logger.debug("Done soft reboot in raw prompt")
 
@@ -540,19 +540,19 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         # assuming we are currently on a normal prompt
         self._write(RAW_MODE_CMD)
-        out, err = self._capture_output_until_active_prompt()
+        self._log_output_until_active_prompt()
         if self._last_prompt == NORMAL_PROMPT:
             # Don't know why this happens sometimes (eg. when interrupting a Ctrl+D or restarted
             # program, which is outputting text on ESP32)
             logger.info("Found normal prompt instead of expected raw prompt. Trying again.")
             self._write(RAW_MODE_CMD)
             time.sleep(0.5)
-            out, err = self._capture_output_until_active_prompt()
+            self._log_output_until_active_prompt()
 
         if self._last_prompt not in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
             logger.error(
                 "Could not enter raw prompt, got %r",
-                ((out + err).encode(ENCODING) + self._last_prompt),
+                self._last_prompt,
             )
             raise ProtocolError("Could not enter raw prompt")
 
@@ -562,7 +562,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         logger.debug("requesting normal mode at %r", self._last_prompt)
         self._write(NORMAL_MODE_CMD)
-        self._capture_output_until_active_prompt()
+        self._log_output_until_active_prompt()
         assert self._last_prompt == NORMAL_PROMPT, (
             "Could not get normal prompt, got %s" % self._last_prompt
         )
@@ -986,6 +986,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._forward_output_until_active_prompt(collect_output)
 
         return output["stdout"], output["stderr"]
+
+    def _log_output_until_active_prompt(self) -> None:
+        def collect_output(data, stream):
+            logger.info("Discarding %s: %r", stream, data)
+
+        self._forward_output_until_active_prompt(collect_output)
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
