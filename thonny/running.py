@@ -917,29 +917,29 @@ class SubprocessProxy(BackendProxy):
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
-            
+
         add_env_file = self._load_env_file()
-            
-        chained_env = collections.ChainMap(add_env_file,env)
-        
+
+        chained_env = collections.ChainMap(add_env_file, env)
+
         return chained_env
 
-    def _load_env_file(self,interpolate=True):  
-        # todo: configuration menu -> Tools > Options > Run & Debug 
-        env_file = os.environ.get( "THONNY_ENV_FILE", ".env" )
+    def _load_env_file(self, interpolate=True):
+        # todo: configuration menu -> Tools > Options > Run & Debug
+        env_file = os.environ.get("THONNY_ENV_FILE", ".env")
         script_dir = self._get_launcher_python_script_dir()
-        
+
         env_file = os.path.join(script_dir, env_file)
-        
-        if os.path.exists( env_file ) and os.path.isfile( env_file ):
-            env = dotenv_values( env_file, interpolate=interpolate )
+
+        if os.path.exists(env_file) and os.path.isfile(env_file):
+            env = dotenv_values(env_file, interpolate=interpolate)
         else:
-            env = { }
-               
+            env = {}
+
         return env
 
     def _get_launcher_python_script_dir(self):
-        return self._get_launcher_with_args()[-1]        
+        return self._get_launcher_with_args()[-1]
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
