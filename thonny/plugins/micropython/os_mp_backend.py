@@ -26,6 +26,10 @@ from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PAS
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 
+# Can't use __name__, because it will be "__main__"
+logger = getLogger("thonny.plugins.micropython.os_mp_backend")
+
+
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
     "gc",

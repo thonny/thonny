@@ -5,7 +5,8 @@ from thonny.plugins.micropython.bare_metal_backend import (
     launch_bare_metal_backend,
 )
 
-logger = getLogger(__name__)
+# Can't use __name__, because it will be "__main__"
+logger = getLogger("thonny.plugins.micropython.microbit_backend")
 
 
 class MicrobitMicroPythonBackend(BareMetalMicroPythonBackend):

@@ -344,7 +344,7 @@ def get_frontend_log_file():
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter("%(levelname)-7s %(name)s: %(message)s")
 
-    # NB! Don't mess with the root logger, because (CPython) backend runs user code
+    # NB! Don't mess with the main root logger, because (CPython) backend runs user code
     thonny_root_logger = logging.getLogger("thonny")
     thonny_root_logger.setLevel(_choose_logging_level())
     thonny_root_logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
