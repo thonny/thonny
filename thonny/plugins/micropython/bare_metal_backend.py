@@ -1,14 +1,12 @@
 import binascii
-import datetime
 from logging import getLogger
 import os
-import queue
 import re
 import sys
 import struct
 import time
 from textwrap import dedent, indent
-from typing import BinaryIO, Callable, Optional, Tuple, Union, Dict, Any
+from typing import BinaryIO, Callable, Optional, Union, List
 
 from serial import SerialTimeoutException
 
@@ -16,14 +14,12 @@ import thonny
 from thonny.backend import UploadDownloadMixin
 from thonny.common import (
     BackendEvent,
-    InlineResponse,
     ToplevelResponse,
-    UserError,
     execute_system_command,
     serialize_message,
     EOFCommand,
 )
-from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
+from thonny.misc_utils import find_volumes_by_name
 from thonny.plugins.micropython.backend import (
     MicroPythonBackend,
     ManagementError,
@@ -37,6 +33,10 @@ from thonny.plugins.micropython.backend import (
     ProtocolError,
     starts_with_continuation_byte,
     is_continuation_byte,
+    RAW_MODE_CMD,
+    NORMAL_MODE_CMD,
+    SOFT_REBOOT_CMD,
+    INTERRUPT_CMD,
 )
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
@@ -60,10 +60,6 @@ BAUDRATE = 115200
 ENCODING = "utf-8"
 
 # Commands
-RAW_MODE_CMD = b"\x01"
-NORMAL_MODE_CMD = b"\x02"
-INTERRUPT_CMD = b"\x03"
-SOFT_REBOOT_CMD = b"\x04"
 
 # Output tokens
 VALUE_REPR_START = b"<repr>"
@@ -567,11 +563,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             "Could not get normal prompt, got %s" % self._last_prompt
         )
 
-    def _soft_reboot_without_running_main(self):
-        logger.debug("_soft_reboot_without_running_main")
+    def _create_fresh_repl(self):
+        logger.debug("_create_fresh_repl")
         self._interrupt_to_raw_prompt()
         self._soft_reboot_in_raw_prompt_without_running_main()
-        logger.debug("Done _soft_reboot_without_running_main")
+        logger.debug("Done _create_fresh_repl")
 
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
@@ -776,7 +772,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._report_time("affforw")
 
     def _forward_output_until_active_prompt(
-        self, output_consumer: Callable[[str, str], None], stream_name="stdout"
+        self,
+        output_consumer: Callable[[str, str], None],
+        stream_name="stdout",
+        interrupt_times: Optional[List[float]] = None,
     ):
         """Meant for incrementally forwarding stdout from user statements,
         scripts and soft-reboots. Also used for forwarding side-effect output from
@@ -837,6 +836,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
 
+        start_time = time.time()
+        if interrupt_times:
+            interrupt_times = interrupt_times.copy()
+
         # Don't want to block on lone EOT (the first EOT), because finding the second EOT
         # together with raw prompt marker is the most important.
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
@@ -855,6 +858,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
+
+            while interrupt_times:
+                spent_time = time.time() - start_time
+                if spent_time >= interrupt_times[0]:
+                    self._interrupt()
+                    interrupt_times.pop(0)
 
             # Prefer whole lines, but allow also incremental output to single line
             new_data = self._connection.soft_read_until(
@@ -987,11 +996,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return output["stdout"], output["stderr"]
 
-    def _log_output_until_active_prompt(self) -> None:
+    def _log_output_until_active_prompt(
+        self, interrupt_times: Optional[List[float]] = None
+    ) -> None:
         def collect_output(data, stream):
             logger.info("Discarding %s: %r", stream, data)
 
-        self._forward_output_until_active_prompt(collect_output)
+        self._forward_output_until_active_prompt(collect_output, interrupt_times=interrupt_times)
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
@@ -1024,7 +1035,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         reset_environment_before_run = True  # TODO: make it configurable
         if cmd.get("source"):
             if reset_environment_before_run:
-                self._soft_reboot_without_running_main()
+                self._create_fresh_repl()
 
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)

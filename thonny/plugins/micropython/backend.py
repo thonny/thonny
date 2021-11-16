@@ -80,7 +80,10 @@ from thonny.running import EXPECTED_TERMINATION_CODE
 ENCODING = "utf-8"
 
 # Commands
+RAW_MODE_CMD = b"\x01"
+NORMAL_MODE_CMD = b"\x02"
 INTERRUPT_CMD = b"\x03"
+SOFT_REBOOT_CMD = b"\x04"
 
 # Output tokens
 VALUE_REPR_START = b"<repr>"
@@ -507,7 +510,13 @@ class MicroPythonBackend(MainBackend, ABC):
         self.send_message(ToplevelResponse(**args))
 
     def _write(self, data):
-        if b"0x1" in data or b"0x2" in data or b"0x3" in data or b"0x4" in data:
+        if (
+            RAW_MODE_CMD in data
+            or NORMAL_MODE_CMD in data
+            or INTERRUPT_CMD in data
+            or EOT in data
+            or PASTE_MODE_CMD in data
+        ):
             logger.debug("Sending ctrl chars: %r", data)
         self._connection.write(data)
 
