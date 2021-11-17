@@ -921,8 +921,7 @@ class SubprocessProxy(BackendProxy):
         add_env_file = self._load_env_file()
 
         chained_env = collections.ChainMap(add_env_file, env)
-
-        return chained_env
+        return dict(chained_env)
 
     def _load_env_file(self, interpolate=True):
         # todo: configuration menu -> Tools > Options > Run & Debug
