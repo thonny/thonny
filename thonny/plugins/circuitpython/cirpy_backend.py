@@ -4,7 +4,7 @@ from textwrap import dedent
 
 import time
 
-from thonny.plugins.micropython.backend import INTERRUPT_CMD, SOFT_REBOOT_CMD
+from thonny.plugins.micropython.backend import SOFT_REBOOT_CMD
 from thonny.plugins.micropython.bare_metal_backend import (
     BareMetalMicroPythonBackend,
     launch_bare_metal_backend,
@@ -42,7 +42,7 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         )
 
         self._write(SOFT_REBOOT_CMD)
-        self._write(INTERRUPT_CMD)
+        self._interrupt()
 
         # first couple of the extra interrupts should usually suffice
         self._log_output_until_active_prompt(

@@ -138,7 +138,9 @@ class MicroPythonBackend(MainBackend, ABC):
         MainBackend.__init__(self)
         try:
             self._report_time("before prepare")
-            self._process_until_initial_prompt(interrupt=args.get("interrupt", False), clean=clean)
+            self._process_until_initial_prompt(
+                interrupt=args.get("interrupt_on_connect", False) or clean, clean=clean
+            )
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()
                 self._report_time("got welcome")
@@ -675,7 +677,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._submit_input(cmd.data)
             elif isinstance(cmd, EOFCommand):
                 # in this context it is not supposed to soft-reboot
-                self._write(b"\x04")
+                self._write(EOT)
             else:
                 postponed.append(cmd)
 
