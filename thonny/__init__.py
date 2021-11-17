@@ -342,7 +342,9 @@ def get_frontend_log_file():
 
 
 def _configure_logging(log_file, console_level=None):
-    logFormatter = logging.Formatter("%(levelname)-7s %(name)s: %(message)s")
+    logFormatter = logging.Formatter(
+        "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
+    )
 
     # NB! Don't mess with the main root logger, because (CPython) backend runs user code
     thonny_root_logger = logging.getLogger("thonny")
