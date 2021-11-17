@@ -472,14 +472,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._soft_reboot_for_restarting_user_program()
 
-    def _soft_reboot_in_raw_prompt_without_running_main(self):
-        logger.debug("_soft_reboot_in_raw_prompt_without_running_main")
-        self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
-        self._check_reconnect()
-        self._log_output_until_active_prompt()
-
-        logger.debug("Done soft reboot in raw prompt")
-
     def _ensure_raw_mode(self):
         if self._last_prompt in [
             RAW_PROMPT,
@@ -522,7 +514,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _clear_repl(self):
         """NB! assumes prompt and may be called without __thonny_helper"""
         logger.debug("_create_fresh_repl")
-        self._soft_reboot_in_raw_prompt_without_running_main()
+        self._ensure_raw_mode()
+        self._write(SOFT_REBOOT_CMD)
+        self._check_reconnect()
+        self._log_output_until_active_prompt()
         logger.debug("Done _create_fresh_repl")
 
     def _soft_reboot_for_restarting_user_program(self):
@@ -592,7 +587,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # Go to paste mode
         self._ensure_normal_mode()
         self._write(PASTE_MODE_CMD)
-        self._connection.read_until(PASTE_MODE_LINE_PREFIX)
+        discarded = self._connection.read_until(PASTE_MODE_LINE_PREFIX)
+        logger.debug("Discarding %r", discarded)
 
         # Send script
         while script_bytes:
@@ -616,9 +612,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
-            self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
+            discarded = self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
+            logger.debug("Discarding %r", discarded)
 
-        # push and read comfirmation
+        # push and read confirmation
         self._write(EOT)
         expected_confirmation = b"\r\n"
         actual_confirmation = self._connection.read(
