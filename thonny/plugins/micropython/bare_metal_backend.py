@@ -132,7 +132,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
-        self._interrupt_suggestion_given = False
         self._last_inferred_fs_mount: Optional[str] = None
 
         # https://forum.micropython.org/viewtopic.php?f=15&t=3698
@@ -252,27 +251,26 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         else:
             return 0.01
 
-    def _process_until_initial_prompt(self, clean):
+    def _process_until_initial_prompt(self, interrupt: bool, clean: bool) -> None:
         logger.debug("_process_until_initial_prompt, clean=%s", clean)
-        if clean:
-            self._interrupt_to_raw_prompt()
-            self._soft_reboot_in_raw_prompt_without_running_main()
+
+        poke_after = 0.05
+        if interrupt:
+            interrupt_times = [0.0, 0.1, 0.2]
+            advice_after = interrupt_times[-1] + 2.0
         else:
-            # Discard what's printed by now and order a prompt, so that we get to know
-            # if the REPL is already idle
-            discarded = self._connection.read_all()
-            logger.debug("Asking for raw mode")
-            try:
-                self._write(RAW_MODE_CMD)
-            except SerialTimeoutException:
-                logger.warning("Got timeout when asking for raw mode")
+            interrupt_times = None
+            advice_after = 2.0
 
-            logger.debug("Forwarding output")
-            self._forward_output_until_active_prompt(self._send_output)
-            logger.debug("Done forwarding output")
+        self._process_output_until_active_prompt(
+            self._send_output,
+            interrupt_times=interrupt_times,
+            poke_after=poke_after,
+            advice_after=advice_after,
+        )
 
-        if self._submit_mode is None:
-            self._choose_submit_mode()
+        if clean:
+            self._clear_repl()
 
     def _interrupt(self):
         try:
@@ -474,49 +472,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         self._soft_reboot_for_restarting_user_program()
 
-    def _interrupt_to_raw_prompt(self):
-        # NB! Sometimes disconnecting and reconnecting (on macOS?)
-        # too quickly causes anomalies. See CalliopeMiniProxy for more details
-        logger.debug("_interrupt_to_raw_prompt")
-        discarded_bytes = b""
-
-        for delay in [0.05, 0.5, 0.1, 1.0, 3.0, 5.0]:
-            # Interrupt several times, because with some drivers first interrupts seem to vanish
-            if delay >= 1:
-                self._show_error(
-                    "Could not enter REPL. Trying again with %d second waiting time..." % delay
-                )
-            self._connection.reset_output_buffer()  # cancels previous writes
-            self._write(INTERRUPT_CMD)
-            self._write(RAW_MODE_CMD)
-            time.sleep(delay)
-            self._log_output_until_active_prompt()
-            if self._last_prompt in [FIRST_RAW_PROMPT, W600_FIRST_RAW_PROMPT]:
-                logger.debug("Got raw prompt")
-                break
-        else:
-            max_tail_length = 500
-            if len(discarded_bytes) > max_tail_length:
-                discarded_bytes_str = (
-                    "[skipping %d bytes] ..." % (len(discarded_bytes) - max_tail_length)
-                ) + repr(discarded_bytes[:-max_tail_length])
-            else:
-                discarded_bytes_str = repr(discarded_bytes)
-            self._show_error(
-                "Could not enter REPL. Giving up. Read bytes:\n"
-                + discarded_bytes_str
-                + "\n\nYour options:\n\n"
-                + "  - check connection properties;\n"
-                + "  - make sure the device has suitable firmware;\n"
-                + "  - make sure the device is not in bootloader mode;\n"
-                + "  - reset the device and try again;\n"
-                + "  - try other serial clients (Putty, TeraTerm, screen, ...);\n"
-                + "  - ask for help in Thonny's forum or issue tracker."
-            )
-            sys.exit()
-
-        logger.debug("Done _interrupt_to_raw_prompt")
-
     def _soft_reboot_in_raw_prompt_without_running_main(self):
         logger.debug("_soft_reboot_in_raw_prompt_without_running_main")
         self._write(SOFT_REBOOT_CMD + INTERRUPT_CMD)
@@ -564,9 +519,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             "Could not get normal prompt, got %s" % self._last_prompt
         )
 
-    def _create_fresh_repl(self):
+    def _clear_repl(self):
+        """NB! assumes prompt and may be called without __thonny_helper"""
         logger.debug("_create_fresh_repl")
-        self._interrupt_to_raw_prompt()
         self._soft_reboot_in_raw_prompt_without_running_main()
         logger.debug("Done _create_fresh_repl")
 
@@ -577,7 +532,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._ensure_normal_mode()
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
-        self._forward_output_until_active_prompt(self._send_output)
+        self._process_output_until_active_prompt(self._send_output)
         logger.debug("Restoring helpers")
         self._prepare_after_soft_reboot(False)
         self.send_message(ToplevelResponse(cwd=self._cwd))
@@ -612,6 +567,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         (OK, most likely the reading thread will eliminate the problem with output buffer, but just in case...)
         """
         assert script
+
+        if self._submit_mode is None:
+            self._choose_submit_mode()
 
         # assuming we are already at a prompt, but threads may have produced something
         self._forward_unexpected_output()
@@ -769,14 +727,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._report_time("befsubcode")
         self._submit_code(script)
         self._report_time("affsubcode")
-        self._forward_output_until_active_prompt(output_consumer)
+        self._process_output_until_active_prompt(output_consumer)
         self._report_time("affforw")
 
-    def _forward_output_until_active_prompt(
+    def _process_output_until_active_prompt(
         self,
         output_consumer: Callable[[str, str], None],
         stream_name="stdout",
         interrupt_times: Optional[List[float]] = None,
+        poke_after: Optional[float] = None,
+        advice_after: Optional[float] = None,
     ):
         """Meant for incrementally forwarding stdout from user statements,
         scripts and soft-reboots. Also used for forwarding side-effect output from
@@ -837,9 +797,17 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
 
+        have_read_something = False
+        have_poked = False
+        have_given_advice = False
+
         start_time = time.time()
+        num_interrupts_before = self._number_of_interrupts_sent
+
         if interrupt_times:
-            interrupt_times = interrupt_times.copy()
+            interrupt_times_left = interrupt_times.copy()
+        else:
+            interrupt_times_left = []
 
         # Don't want to block on lone EOT (the first EOT), because finding the second EOT
         # together with raw prompt marker is the most important.
@@ -860,11 +828,43 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # and we can't progress without resolving it first
             self._check_for_side_commands()
 
-            while interrupt_times:
-                spent_time = time.time() - start_time
-                if spent_time >= interrupt_times[0]:
+            spent_time = time.time() - start_time
+            interrupts_given_here = self._number_of_interrupts_sent - num_interrupts_before
+
+            # advice (if requested) is warranted if there has been attempt to interrupt
+            # or nothing has appeared to the output (which may be confusing)
+            if (
+                advice_after is not None
+                and spent_time > advice_after
+                and not have_given_advice
+                and (interrupts_given_here > 0 or not have_read_something)
+            ):
+                logger.info("Giving advice")
+                self._show_error(
+                    "\nDevice is busy or does not respond. Your options:\n\n"
+                    + "  - wait until it completes current work;\n"
+                    + "  - use Ctrl+C to interrupt current work;\n"
+                    + "  - reset the device and try again;\n"
+                    + "  - check connection properties;\n"
+                    + "  - make sure the device has suitable firmware;\n"
+                    + "  - make sure the device is not in bootloader mode.\n"
+                )
+                have_given_advice = True
+
+            if (
+                poke_after is not None
+                and spent_time > poke_after
+                and not have_read_something
+                and not have_poked
+            ):
+                logger.debug("Poking")
+                self._write(RAW_MODE_CMD)
+                have_poked = True
+
+            while interrupt_times_left:
+                if spent_time >= interrupt_times_left[0]:
                     self._interrupt()
-                    interrupt_times.pop(0)
+                    interrupt_times_left.pop(0)
                 else:
                     break
 
@@ -872,6 +872,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             new_data = self._connection.soft_read_until(
                 INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
             )
+            if new_data:
+                have_read_something = True
 
             # Try to separate stderr from stdout in raw mode
             eot_pos = new_data.find(EOT)
@@ -891,26 +893,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 # start of stderr in paste mode
                 stream_name = "stderr"
 
-            if not new_data:
-                # In case we are still waiting for the first bits after connecting ...
-                # TODO: this suggestion should be implemented in Shell
-                if (
-                    self._connection.num_bytes_received == 0
-                    and not self._interrupt_suggestion_given
-                    and time.time() - self._connection.startup_time > 2.5
-                ):
-                    self._show_error(
-                        "\n"
-                        + "Device is busy or does not respond. Your options:\n\n"
-                        + "  - wait until it completes current work;\n"
-                        + "  - use Ctrl+C to interrupt current work;\n"
-                        + "  - use Stop/Restart to interrupt more and enter REPL.\n"
-                    )
-                    self._interrupt_suggestion_given = True
-
-                if not pending:
-                    # nothing to parse
-                    continue
+            if not new_data and not pending:
+                # nothing to parse
+                continue
 
             pending += new_data
 
@@ -995,17 +980,19 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         def collect_output(data, stream):
             output[stream] += data
 
-        self._forward_output_until_active_prompt(collect_output)
+        self._process_output_until_active_prompt(collect_output)
 
         return output["stdout"], output["stderr"]
 
     def _log_output_until_active_prompt(
-        self, interrupt_times: Optional[List[float]] = None
+        self, interrupt_times: Optional[List[float]] = None, poke_after: Optional[float] = None
     ) -> None:
         def collect_output(data, stream):
             logger.info("Discarding %s: %r", stream, data)
 
-        self._forward_output_until_active_prompt(collect_output, interrupt_times=interrupt_times)
+        self._process_output_until_active_prompt(
+            collect_output, interrupt_times=interrupt_times, poke_after=poke_after
+        )
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
@@ -1038,7 +1025,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         reset_environment_before_run = True  # TODO: make it configurable
         if cmd.get("source"):
             if reset_environment_before_run:
-                self._create_fresh_repl()
+                self._clear_repl()
 
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)
@@ -1519,6 +1506,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # This method is most likely required with CircuitPython,
         # so try its approach first
         # https://learn.adafruit.com/welcome-to-circuitpython/the-circuitpy-drive
+
         result = self._evaluate(
             dedent(
                 """

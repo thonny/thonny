@@ -131,13 +131,14 @@ class MicroPythonBackend(MainBackend, ABC):
         self._epoch_year = None
         self._builtin_modules = []
         self._postponed_internal_error = None
+        self._number_of_interrupts_sent = 0
 
         self._builtins_info = self._fetch_builtins_info()
 
         MainBackend.__init__(self)
         try:
             self._report_time("before prepare")
-            self._process_until_initial_prompt(clean)
+            self._process_until_initial_prompt(interrupt=args.get("interrupt", False), clean=clean)
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()
                 self._report_time("got welcome")
@@ -305,7 +306,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _get_actual_time_tuple_on_device(self):
         raise NotImplementedError()
 
-    def _process_until_initial_prompt(self, clean):
+    def _process_until_initial_prompt(self, interrupt: bool, clean: bool) -> None:
         raise NotImplementedError()
 
     def _perform_idle_tasks(self):
@@ -329,6 +330,7 @@ class MicroPythonBackend(MainBackend, ABC):
             logger.info("Sending interrupt")
             self._write(INTERRUPT_CMD)
             logger.info("Done sending interrupt")
+            self._number_of_interrupts_sent += 1
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         self._postponed_internal_error = None
