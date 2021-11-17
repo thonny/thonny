@@ -133,6 +133,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
+        self._last_inferred_fs_mount: Optional[str] = None
 
         # https://forum.micropython.org/viewtopic.php?f=15&t=3698
         # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
@@ -864,6 +865,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 if spent_time >= interrupt_times[0]:
                     self._interrupt()
                     interrupt_times.pop(0)
+                else:
+                    break
 
             # Prefer whole lines, but allow also incremental output to single line
             new_data = self._connection.soft_read_until(
@@ -1570,9 +1573,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             return "/"
 
     def _get_fs_mount(self):
+        if self._last_inferred_fs_mount and os.path.isdir(self._last_inferred_fs_mount):
+            logger.debug("Using cached mount path %r", self._last_inferred_fs_mount)
+            return self._last_inferred_fs_mount
+
+        logger.debug("Computing mount path")
+
         label = self._get_fs_mount_label()
         if label is None:
-            return None
+            self._last_inferred_fs_mount = None
         else:
             candidates = find_volumes_by_name(
                 self._get_fs_mount_label(),
@@ -1584,7 +1593,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             elif len(candidates) > 1:
                 raise RuntimeError("Found several possible mount points: %s" % candidates)
             else:
-                return candidates[0]
+                self._last_inferred_fs_mount = candidates[0]
+
+        return self._last_inferred_fs_mount
 
     def _should_hexlify(self, path):
         if "binascii" not in self._builtin_modules and "ubinascii" not in self._builtin_modules:
