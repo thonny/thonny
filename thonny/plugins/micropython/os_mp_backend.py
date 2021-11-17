@@ -138,7 +138,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
 
         result = super()._get_helper_code() + textwrap.indent(extra, "    ")
 
-    def _process_until_initial_prompt(self, clean):
+    def _process_until_initial_prompt(self, interrupt, clean):
         # This will be called only when the interpreter gets run without script.
         # (%Run script.py does not create a new instance of this class)
         output = []

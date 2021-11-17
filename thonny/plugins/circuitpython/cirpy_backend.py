@@ -15,7 +15,7 @@ logger = getLogger("thonny.plugins.micropython.cirpy_backend")
 
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
-    def _create_fresh_repl(self):
+    def _clear_repl(self):
         """
         CP runs code.py after soft-reboot even in raw repl.
         At the same time, it creates fresh VM after entering REPL, so it's enough to order a
@@ -23,18 +23,23 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         """
         logger.info("Creating fresh REPL for CP")
 
-        helper_file = "/.clean_run_helper_for_thonny"
-        if os.path.isfile(self._internal_path_to_mounted_path(helper_file)):
-            logger.info("Using set_next_code_file(%r)", helper_file)
-            # avoid executing code.py
-            self._execute_without_output(
-                dedent(
-                    f"""
+        # Try avoiding executing code.py
+        # NB! This must be done without __thonny_helper!
+        helper_file = "/.next_code_file_for_clear_repl"
+        # stat-ing the file to see if it exists
+        self._execute_without_output(
+            dedent(
+                f"""
+            import os
+            try:
+                os.stat({helper_file!r})  
                 import supervisor
                 supervisor.set_next_code_file({helper_file!r})
-                """
-                )
+            except:
+                pass
+            """
             )
+        )
 
         self._write(SOFT_REBOOT_CMD)
         self._write(INTERRUPT_CMD)
