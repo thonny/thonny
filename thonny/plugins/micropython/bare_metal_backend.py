@@ -854,7 +854,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 and not have_read_something
                 and not have_poked
             ):
-                logger.debug("Poking")
+                logger.info("Poking")
                 self._write(RAW_MODE_CMD)
                 have_poked = True
 
