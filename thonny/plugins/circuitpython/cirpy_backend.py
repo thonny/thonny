@@ -18,36 +18,13 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
     def _clear_repl(self):
         """
         CP runs code.py after soft-reboot even in raw repl.
-        At the same time, it creates fresh VM after entering REPL, so it's enough to order a
-        soft reboot (which won't run boot.py) and then interrupt the main script.
+        At the same time, it re-initializes VM and hardware just by switching
+        between raw and friendly REPL (tested in CP 6.3 and 7.1)
         """
         logger.info("Creating fresh REPL for CP")
+        self._ensure_normal_mode()
+        self._ensure_raw_mode()
 
-        # Try avoiding executing code.py
-        # NB! This must be done without __thonny_helper!
-        helper_file = "/.next_code_file_for_clear_repl"
-        # stat-ing the file to see if it exists
-        self._execute_without_output(
-            dedent(
-                f"""
-            import os
-            try:
-                os.stat({helper_file!r})  
-                import supervisor
-                supervisor.set_next_code_file({helper_file!r})
-            except:
-                pass
-            """
-            )
-        )
-
-        self._write(SOFT_REBOOT_CMD)
-        self._interrupt()
-
-        # first couple of the extra interrupts should usually suffice
-        self._log_output_until_active_prompt(
-            interrupt_times=[0.01, 0.02, 0.03, 0.11, 0.12, 0.13, 1.1, 1.2, 1.3]
-        )
 
 
 if __name__ == "__main__":
