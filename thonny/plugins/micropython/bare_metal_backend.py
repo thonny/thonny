@@ -257,16 +257,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         poke_after = 0.05
         if interrupt:
             interrupt_times = [0.0, 0.1, 0.2]
-            advice_after = interrupt_times[-1] + 2.0
+            advice_delay = interrupt_times[-1] + 2.0
         else:
             interrupt_times = None
-            advice_after = 2.0
+            advice_delay = 2.0
 
         self._process_output_until_active_prompt(
             self._send_output,
             interrupt_times=interrupt_times,
             poke_after=poke_after,
-            advice_after=advice_after,
+            advice_delay=advice_delay,
         )
 
         if clean:
@@ -735,7 +735,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         stream_name="stdout",
         interrupt_times: Optional[List[float]] = None,
         poke_after: Optional[float] = None,
-        advice_after: Optional[float] = None,
+        advice_delay: Optional[float] = None,
     ):
         """Meant for incrementally forwarding stdout from user statements,
         scripts and soft-reboots. Also used for forwarding side-effect output from
@@ -833,10 +833,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             # advice (if requested) is warranted if there has been attempt to interrupt
             # or nothing has appeared to the output (which may be confusing)
             if (
-                advice_after is not None
-                and spent_time > advice_after
+                advice_delay is not None
                 and not have_given_advice
-                and (interrupts_given_here > 0 or not have_read_something)
+                and (
+                    not have_read_something
+                    and spent_time > advice_delay
+                    or interrupts_given_here > 0
+                    and time.time() - self._last_interrupt_time > advice_delay
+                )
             ):
                 logger.info("Giving advice")
                 self._show_error(

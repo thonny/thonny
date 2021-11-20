@@ -123,6 +123,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._connection: MicroPythonConnection
         self._args = args
         self._prev_time = time.time()
+        self._last_interrupt_time = None
         self._local_cwd = None
         self._cwd = args.get("cwd")
         self._progress_times = {}
@@ -333,6 +334,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._write(INTERRUPT_CMD)
             logger.info("Done sending interrupt")
             self._number_of_interrupts_sent += 1
+            self._last_interrupt_time = time.time()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         self._postponed_internal_error = None
