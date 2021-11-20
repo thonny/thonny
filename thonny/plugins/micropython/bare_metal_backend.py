@@ -612,7 +612,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
-            discarded = self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
+            discarded = self._connection.read_all_expected(
+                expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT
+            )
             logger.debug("Discarding %r", discarded)
 
         # push and read confirmation
@@ -1004,9 +1006,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 else:
                     prompt = FIRST_RAW_PROMPT
 
-                if not met_prompt:
-                    met_prompt = True
-                    self._last_prompt = prompt
+                met_prompt = True
+                self._last_prompt = prompt
 
                 # hide the prompt from the output ...
                 data = data[: -len(prompt)]
