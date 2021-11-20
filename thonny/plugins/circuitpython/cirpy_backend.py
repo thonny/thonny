@@ -26,6 +26,5 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         self._ensure_raw_mode()
 
 
-
 if __name__ == "__main__":
     launch_bare_metal_backend(CircuitPythonBackend)
