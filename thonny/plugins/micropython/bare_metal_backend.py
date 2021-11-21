@@ -544,13 +544,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return isinstance(self._connection, WebReplConnection)
 
-    def _transform_output(self, data, stream_name):
-        # For CircuitPython. Any keypress wouldn't work in Thonny's shell
-        return data.replace(
-            "Press any key to enter the REPL. Use CTRL-D to reload.",
-            "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
-        )
-
     def _submit_code(self, script):
         """
         Code is submitted via paste mode, because this provides echo, which can be used as flow control.
@@ -799,6 +792,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         have_read_something = False
         have_poked = False
         have_given_advice = False
+        have_given_output_based_interrupt = False
+        last_new_data = b""
+        last_new_data_time = 0
 
         start_time = time.time()
         num_interrupts_before = self._number_of_interrupts_sent
@@ -854,8 +850,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     + "  - make sure the device is not in bootloader mode.\n"
                 )
                 have_given_advice = True
-
-            if (
+            elif (
                 poke_after is not None
                 and spent_time > poke_after
                 and not have_read_something
@@ -864,13 +859,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 logger.info("Poking")
                 self._write(RAW_MODE_CMD)
                 have_poked = True
-
-            while interrupt_times_left:
-                if spent_time >= interrupt_times_left[0]:
-                    self._interrupt()
-                    interrupt_times_left.pop(0)
-                else:
-                    break
+            elif interrupt_times_left and spent_time >= interrupt_times_left[0]:
+                self._interrupt()
+                interrupt_times_left.pop(0)
+            elif (
+                time.time() - last_new_data_time > 0.5
+                and self._output_warrants_interrupt(last_new_data)
+                and not have_given_output_based_interrupt
+            ):
+                self._interrupt()
+                have_given_output_based_interrupt = True
 
             # Prefer whole lines, but allow also incremental output to single line
             new_data = self._connection.soft_read_until(
@@ -878,6 +876,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
             if new_data:
                 have_read_something = True
+                last_new_data = new_data
+                last_new_data_time = time.time()
 
             # Try to separate stderr from stdout in raw mode
             eot_pos = new_data.find(EOT)
@@ -1632,6 +1632,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             i -= 1
 
         return source_bytes[:i]
+
+    def _output_warrants_interrupt(self, data):
+        return False
 
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
