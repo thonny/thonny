@@ -307,6 +307,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         welcome_text = out.strip("\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace("\r\n", "\n")
+            welcome_text += "\n"
+        else:
+            welcome_text += "\r\n"
 
         return welcome_text
 
