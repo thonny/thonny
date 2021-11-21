@@ -146,6 +146,11 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._welcome_text = self._fetch_welcome_text()
                 self._report_time("got welcome")
 
+            # Get rid of the welcome text which was printed while searching for prompt
+            self.send_message(
+                BackendEvent(event_type="HideTrailingOutput", text=self._welcome_text)
+            )
+
             self._prepare_after_soft_reboot(clean)
 
             if not self._builtin_modules:
