@@ -51,6 +51,7 @@ class BaseBackend(ABC):
         self._incoming_message_queue = queue.Queue()  # populated by the reader thread
         self._interrupt_lock = threading.Lock()
         self._last_progress_reporting_time = 0
+        self._last_sent_output = ""
         self._init_command_reader()
 
     def _init_command_reader(self):
@@ -167,6 +168,7 @@ class BaseBackend(ABC):
 
         data = self._transform_output(data, stream_name)
         msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
+        self._last_sent_output = data
         self.send_message(msg)
 
     def _transform_output(self, data, stream_name):

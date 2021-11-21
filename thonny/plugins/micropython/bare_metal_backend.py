@@ -545,7 +545,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return isinstance(self._connection, WebReplConnection)
 
     def _transform_output(self, data, stream_name):
-        # Any keypress wouldn't work
+        # For CircuitPython. Any keypress wouldn't work in Thonny's shell
         return data.replace(
             "Press any key to enter the REPL. Use CTRL-D to reload.",
             "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
@@ -835,6 +835,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             if (
                 advice_delay is not None
                 and not have_given_advice
+                and not "Ctrl-C" in self._last_sent_output  # CircuitPython's advice
                 and (
                     not have_read_something
                     and spent_time > advice_delay
