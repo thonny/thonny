@@ -792,7 +792,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         For now I'm ignoring these problems and assume all output comes from the main thread.
         """
 
-        have_read_something = False
+        have_read_non_whitespace = False
         have_poked = False
         have_given_advice = False
         have_given_output_based_interrupt = False
@@ -836,7 +836,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 and not have_given_advice
                 and not "Ctrl-C" in self._last_sent_output  # CircuitPython's advice
                 and (
-                    not have_read_something
+                    not have_read_non_whitespace
                     and spent_time > advice_delay
                     or interrupts_given_here > 0
                     and time.time() - self._last_interrupt_time > advice_delay
@@ -856,7 +856,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             elif (
                 poke_after is not None
                 and spent_time > poke_after
-                and not have_read_something
+                and not have_read_non_whitespace
                 and not have_poked
             ):
                 logger.info("Poking")
@@ -878,7 +878,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
             )
             if new_data:
-                have_read_something = True
+                if new_data.strip():
+                    have_read_non_whitespace = True
                 last_new_data = new_data
                 last_new_data_time = time.time()
 
