@@ -87,10 +87,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         super().__init__(clean)
 
-        # Following is required for compatibility with older MP plugins (ESP)
-        # TODO: remove it later
-        self.micropython_upload_enabled = False
-
     def _fix_port(self):
         if self._port == "webrepl":
             return
