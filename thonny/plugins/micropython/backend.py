@@ -123,6 +123,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._connection: MicroPythonConnection
         self._args = args
         self._prev_time = time.time()
+        self._last_interrupt_time = None
         self._local_cwd = None
         self._cwd = args.get("cwd")
         self._progress_times = {}
@@ -131,16 +132,24 @@ class MicroPythonBackend(MainBackend, ABC):
         self._epoch_year = None
         self._builtin_modules = []
         self._postponed_internal_error = None
+        self._number_of_interrupts_sent = 0
 
         self._builtins_info = self._fetch_builtins_info()
 
         MainBackend.__init__(self)
         try:
             self._report_time("before prepare")
-            self._process_until_initial_prompt(clean)
+            self._process_until_initial_prompt(
+                interrupt=args.get("interrupt_on_connect", False) or clean, clean=clean
+            )
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()
                 self._report_time("got welcome")
+
+            # Get rid of the welcome text which was printed while searching for prompt
+            self.send_message(
+                BackendEvent(event_type="HideTrailingOutput", text=self._welcome_text)
+            )
 
             self._prepare_after_soft_reboot(clean)
 
@@ -305,7 +314,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _get_actual_time_tuple_on_device(self):
         raise NotImplementedError()
 
-    def _process_until_initial_prompt(self, clean):
+    def _process_until_initial_prompt(self, interrupt: bool, clean: bool) -> None:
         raise NotImplementedError()
 
     def _perform_idle_tasks(self):
@@ -329,6 +338,8 @@ class MicroPythonBackend(MainBackend, ABC):
             logger.info("Sending interrupt")
             self._write(INTERRUPT_CMD)
             logger.info("Done sending interrupt")
+            self._number_of_interrupts_sent += 1
+            self._last_interrupt_time = time.time()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         self._postponed_internal_error = None
@@ -673,7 +684,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._submit_input(cmd.data)
             elif isinstance(cmd, EOFCommand):
                 # in this context it is not supposed to soft-reboot
-                self._write(b"\x04")
+                self._write(EOT)
             else:
                 postponed.append(cmd)
 

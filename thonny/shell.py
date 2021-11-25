@@ -442,7 +442,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             self._ensure_visible()
 
         welcome_text = msg.get("welcome_text")
-        if welcome_text and welcome_text:
+        if welcome_text:
+            self.restart()
             preceding = self.get("output_insert -1 c", "output_insert")
             if preceding.strip() and not preceding.endswith("\n"):
                 self._insert_text_directly("\n")
@@ -876,6 +877,12 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self):
+        if (
+            "restart_line" in self.tag_names("output_insert -2 chars")
+            or not self.get("1.0", "3.0").strip()
+        ):
+            return
+
         self._insert_text_directly(
             # "\n============================== RESTART ==============================\n",
             "\n" + "─" * 200 + "\n",
@@ -1481,12 +1488,15 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         if ui_utils.get_tk_version_info() >= (8, 6, 6):
             self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
-    def _hide_trailing_output(self, msg):
-        pos = self.search(msg.text, index="end", backwards=True)
+    def _hide_trailing_output(self, text):
+        pos = self.search(text, index="end", backwards=True)
+        logger.debug("Position for trailing %r: %s", text, pos)
         if pos:
-            end_pos = self.index("%s + %d chars" % (pos, len(msg.text)))
+            end_pos = self.index("%s + %d chars" % (pos, len(text)))
             if end_pos == self.index("output_end"):
                 self.direct_delete(pos, end_pos)
+            else:
+                logger.debug("end_pos %s, output_end %s", end_pos, self.index("output_end"))
 
 
 class ShellText(BaseShellText):
@@ -1505,7 +1515,9 @@ class ShellText(BaseShellText):
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
         get_workbench().bind("BackendRestart", self._on_backend_restart, True)
-        get_workbench().bind("HideTrailingOutput", self._hide_trailing_output, True)
+        get_workbench().bind(
+            "HideTrailingOutput", lambda msg: self._hide_trailing_output(msg.text), True
+        )
 
 
 class SqueezedTextDialog(CommonDialog):
