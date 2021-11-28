@@ -27,6 +27,7 @@ venv38
 venv37
 venv36
 venv35/**
+venv310
 packaging/linux/build
 build
 resources_build

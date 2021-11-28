@@ -25,7 +25,6 @@ from typing import Optional, Dict
 import __main__
 
 import thonny
-from thonny import jedi_utils
 from thonny.backend import MainBackend, interrupt_local_process, logger
 from thonny.common import (
     InputSubmission,
@@ -58,6 +57,7 @@ from thonny.common import (
     update_system_path,
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
+    CompletionInfo,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -229,7 +229,7 @@ class MainCPythonBackend(MainBackend):
             except SystemExit as e:
                 # Must be caused by Thonny or plugins code
                 if isinstance(cmd, ToplevelCommand):
-                    logger.exception("Unexpected SystemExit", exc_info=e)
+                    logger.warning("Unexpected SystemExit", exc_info=e)
                 response = {"SystemExit": True}
             except UserError as e:
                 sys.stderr.write(str(e) + "\n")
@@ -237,8 +237,8 @@ class MainCPythonBackend(MainBackend):
             except KeyboardInterrupt:
                 response = {"user_exception": self._prepare_user_exception()}
             except Exception as e:
-                self._report_internal_exception(e)
-                response = {"context_info": "other unhandled exception"}
+                self._report_internal_error(e)
+                response = {"context_info": "other unhandled exception", "error": str(e)}
 
         if response is False:
             # Command doesn't want to send any response
@@ -321,14 +321,14 @@ class MainCPythonBackend(MainBackend):
             try:
                 handler(module)
             except Exception as e:
-                self._report_internal_exception(e)
+                self._report_internal_error(e)
 
         # general handlers
         for handler in self._import_handlers.get("*", []):
             try:
                 handler(module)
             except Exception as e:
-                self._report_internal_exception(e)
+                self._report_internal_error(e)
 
         return module
 
@@ -365,7 +365,7 @@ class MainCPythonBackend(MainBackend):
                     else:
                         f(self)
             except Exception as e:
-                logger.exception("Failed loading plugin '" + module_name + "'", exc_info=e)
+                logger.warning("Failed loading plugin %r", module_name, exc_info=e)
 
     def _cmd_get_environment_info(self, cmd):
         return ToplevelResponse(
@@ -565,65 +565,6 @@ class MainCPythonBackend(MainBackend):
 
         return InlineResponse("get_heap", heap=result)
 
-    def _cmd_shell_autocomplete(self, cmd):
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
-
-        error = None
-        try:
-            import jedi
-        except ImportError:
-            jedi = None
-            completions = []
-            error = "Could not import jedi"
-        else:
-            try:
-                with warnings.catch_warnings():
-                    jedi_completions = jedi_utils.get_interpreter_completions(
-                        cmd.source, [__main__.__dict__]
-                    )
-                    completions = self._export_completions(jedi_completions)
-            except Exception as e:
-                completions = []
-                logger.info("Autocomplete error", exc_info=e)
-                error = "Autocomplete error: " + str(e)
-
-        return InlineResponse(
-            "shell_autocomplete", source=cmd.source, completions=completions, error=error
-        )
-
-    def _cmd_editor_autocomplete(self, cmd):
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
-
-        error = None
-        try:
-            import jedi
-
-            self._debug(jedi.__file__, sys.path)
-            with warnings.catch_warnings():
-                jedi_completions = jedi_utils.get_script_completions(
-                    cmd.source, cmd.row, cmd.column, cmd.filename
-                )
-                completions = self._export_completions(jedi_completions)
-
-        except ImportError:
-            jedi = None
-            completions = []
-            error = "Could not import jedi"
-        except Exception as e:
-            completions = []
-            logger.info("Autocomplete error", exc_info=e)
-            error = "Autocomplete error: " + str(e)
-
-        return InlineResponse(
-            "editor_autocomplete",
-            source=cmd.source,
-            row=cmd.row,
-            column=cmd.column,
-            filename=cmd.filename,
-            completions=completions,
-            error=error,
-        )
-
     def _cmd_get_object_info(self, cmd):
         if isinstance(self._current_executor, NiceTracer) and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
@@ -733,29 +674,6 @@ class MainCPythonBackend(MainBackend):
                 "modified": None,
                 "error": str(e),
             }
-
-    def _export_completions(self, jedi_completions):
-        result = []
-        for c in jedi_completions:
-            if not c.name.startswith("__"):
-                record = {
-                    "name": c.name,
-                    "complete": c.complete,
-                    "type": c.type,
-                    "description": c.description,
-                }
-                """ TODO: 
-                try:
-                    if c.type in ["class", "module", "function"]:
-                        if c.type == "function":
-                            record["docstring"] = c.docstring()
-                        else:
-                            record["docstring"] = c.description + "\n" + c.docstring()
-                except Exception:
-                    pass
-                """
-                result.append(record)
-        return result
 
     def _get_tcl(self):
         if self._tcl is not None:
@@ -1286,7 +1204,7 @@ class Executor:
         except SystemExit:
             return {"SystemExit": True}
         except Exception as e:
-            self._backend._report_internal_exception(e)
+            self._backend._report_internal_error(e)
             return {}
 
     @return_execution_result
@@ -2502,7 +2420,19 @@ class NiceTracer(Tracer):
             and "DictComp.key" not in node.tags
             and "DictComp.value" not in node.tags
             and "comprehension.if" not in node.tags
+            and not self._is_case_pattern(node)
         )
+
+    def _is_case_pattern(self, node):
+        if sys.version_info < (3, 10):
+            logger.debug("below 3.10")
+            return False
+
+        result = isinstance(node, (
+        ast.MatchValue, ast.MatchSingleton, ast.MatchSequence, ast.MatchMapping, ast.MatchClass, ast.MatchStar,
+        ast.MatchAs, ast.MatchOr,), )
+        logger.debug("Type %s, iscase %s", type(node), result)
+        return result
 
     def _should_instrument_as_statement(self, node):
         return (

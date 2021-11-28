@@ -11,7 +11,7 @@ from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
-from thonny.codeview import CodeView, BinaryFileException
+from thonny.codeview import CodeView, BinaryFileException, CodeViewText
 from thonny.common import (
     InlineCommand,
     TextRange,
@@ -34,6 +34,19 @@ PYTHONLIKE_EXTENSIONS = set()
 logger = logging.getLogger(__name__)
 
 
+class EditorCodeViewText(CodeViewText):
+    """Allows separate class binding for CodeViewTexts which are inside editors"""
+
+    def __init__(self, master=None, cnf={}, **kw):
+
+        super().__init__(
+            master=master,
+            cnf=cnf,
+            **kw,
+        )
+        self.bindtags(self.bindtags() + ("EditorCodeViewText",))
+
+
 class Editor(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -42,7 +55,10 @@ class Editor(ttk.Frame):
 
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
-            get_workbench(), propose_remove_line_numbers=True, font="EditorFont"
+            get_workbench(),
+            propose_remove_line_numbers=True,
+            font="EditorFont",
+            text_class=EditorCodeViewText,
         )
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -544,8 +560,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             if os.path.exists(filename):
                 self._open_file(filename)
         """
-
-        self.update_appearance()
 
         # should be in the end, so that it can be detected when
         # constructor hasn't completed yet

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 
 import _thread
 import io
@@ -31,6 +32,7 @@ from thonny.common import (
     universal_dirname,
     MESSAGE_MARKER,
     read_one_incoming_message_str,
+    try_load_modules_with_frontend_sys_path,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import ConnectionClosedException
@@ -177,11 +179,11 @@ class BaseBackend(ABC):
         """Executed when there is no commands in queue"""
         pass
 
-    def _report_internal_exception(self, exception=None):
-        logger.exception("PROBLEM WITH THONNY'S BACK-END", exc_info=exception)
-
-    def _report_internal_error(self, message):
-        print("PROBLEM WITH THONNY'S BACK-END:\n" + message + "\n", file=sys.stderr)
+    def _report_internal_error(self,msg:str, *args, **kwargs) -> None:
+        logger.exception(msg, *args, **kwargs)
+        print("PROBLEM WITH THONNY'S BACK-END: "
+              + msg.format(*args, **kwargs)
+              + "\nSee backend.log for more info.", file=sys.stderr)
 
     @abstractmethod
     def _should_keep_going(self) -> bool:
@@ -210,6 +212,7 @@ class MainBackend(BaseBackend, ABC):
 
     def __init__(self):
         BaseBackend.__init__(self)
+        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
@@ -227,6 +230,113 @@ class MainBackend(BaseBackend, ABC):
         assert "id" in cmd
         """Returns info about all items under and including cmd.paths"""
         return {"all_items": self._get_paths_info(cmd.source_paths, recurse=True)}
+
+    def _cmd_shell_autocomplete(self, cmd):
+        error = None
+        try:
+            from thonny import jedi_utils
+        except ImportError:
+            completions = []
+            error = "Could not import jedi"
+        else:
+            import __main__
+
+            try:
+                with warnings.catch_warnings():
+                    completions = jedi_utils.get_interpreter_completions(
+                        cmd.source, [__main__.__dict__]
+                    )
+            except Exception as e:
+                completions = []
+                logger.info("Autocomplete error", exc_info=e)
+                error = "Autocomplete error: " + str(e)
+
+        return InlineResponse(
+            "shell_autocomplete",
+            source=cmd.source,
+            completions=completions,
+            error=error,
+            row=cmd.row,
+            column=cmd.column,
+        )
+
+    def _cmd_editor_autocomplete(self, cmd):
+        error = None
+        try:
+            from thonny import jedi_utils
+
+            with warnings.catch_warnings():
+                completions = jedi_utils.get_script_completions(
+                    cmd.source, cmd.row, cmd.column, cmd.filename
+                )
+        except ImportError:
+            completions = []
+            error = "Could not import jedi"
+        except Exception as e:
+            completions = []
+            logger.info("Autocomplete error", exc_info=e)
+            error = "Autocomplete error: " + str(e)
+
+        return InlineResponse(
+            "editor_autocomplete",
+            source=cmd.source,
+            row=cmd.row,
+            column=cmd.column,
+            filename=cmd.filename,
+            completions=completions,
+            error=error,
+        )
+
+    def _cmd_get_completion_details(self, cmd):
+        from thonny import jedi_utils
+
+        return InlineResponse(
+            "get_completion_details",
+            full_name=cmd.full_name,
+            details=jedi_utils.get_completion_details(cmd.full_name),
+        )
+
+    def _cmd_get_editor_calltip(self, cmd):
+        from thonny import jedi_utils
+
+        signatures = jedi_utils.get_script_signatures(cmd.source, cmd.row, cmd.column, cmd.filename)
+        return InlineResponse(
+            "get_editor_calltip",
+            source=cmd.source,
+            row=cmd.row,
+            column=cmd.column,
+            filename=cmd.filename,
+            signatures=signatures,
+        )
+
+    def _cmd_get_shell_calltip(self, cmd):
+        from thonny import jedi_utils
+        import __main__
+
+        signatures = jedi_utils.get_interpreter_signatures(cmd.source, [__main__.__dict__])
+        return InlineResponse(
+            "get_shell_calltip",
+            source=cmd.source,
+            row=cmd.row,
+            column=cmd.column,
+            filename=cmd.filename,
+            signatures=signatures,
+        )
+
+    def _cmd_highlight_occurrences(self, cmd):
+        from thonny import jedi_utils
+
+        refs = jedi_utils.get_references(
+            cmd.source, cmd.row, cmd.column, cmd.filename, scope="file"
+        )
+
+        return {"references": refs, "text_last_operation_time": cmd.text_last_operation_time}
+
+    def _cmd_get_definitions(self, cmd):
+        from thonny import jedi_utils
+
+        defs = jedi_utils.get_definitions(cmd.source, cmd.row, cmd.column, filename=cmd.filename)
+        return {"definitions": defs}
 
     def _get_paths_info(self, paths: List[str], recurse: bool) -> Dict[str, Dict]:
         result = {}

@@ -1067,7 +1067,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 if parent_name == "builtins" and name not in self._builtins_info:
                     continue
 
-            result.append({"name": completion.name, "complete": completion.complete})
+            result.append({"name": completion.name})
 
         return result
 
@@ -1122,7 +1122,12 @@ class MicroPythonBackend(MainBackend, ABC):
                 if name.startswith(prefix) and not name.startswith("__"):
                     completions.append({"name": name, "complete": name[len(prefix) :]})
 
-            return {"completions": completions, "source": source}
+            return {
+                "completions": completions,
+                "source": source,
+                "row": cmd.row,
+                "column": cmd.column,
+            }
 
     def _cmd_dump_api_info(self, cmd):
         "For use during development of the plug-in"
@@ -1483,10 +1488,6 @@ class ManagementError(ProtocolError):
         self.script = script
         self.out = out
         self.err = err
-
-
-def _report_internal_error(exception=None):
-    logger.exception("PROBLEM WITH THONNY'S BACK-END:", exc_info=exception)
 
 
 def parse_api_information(file_path):

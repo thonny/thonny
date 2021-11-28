@@ -1,12 +1,12 @@
 jedi==0.18.*
 pyserial==3.5
-pylint==2.8.*
+pylint==2.11.*
 docutils==0.17.*
-mypy==0.902.*
+mypy==0.910.*
 asttokens==2.0.*
-Send2Trash==1.7.*
+Send2Trash==1.8.*
 esptool==3.1.*
-paramiko==2.7.*
+paramiko==2.8.*
 ptyprocess==0.7.*
-websockets==9.1.*
+websockets==10.*
 

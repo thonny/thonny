@@ -9,6 +9,8 @@ import os.path
 import platform
 import site
 import subprocess
+from dataclasses import dataclass
+
 import sys
 from collections import namedtuple
 from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
@@ -395,6 +397,43 @@ def update_system_path(env, value):
         env["PATH"] = value
 
 
+@dataclass
+class SignatureParameter:
+    kind: str
+    name: str
+    annotation: Optional[str]
+    default: Optional[str]
+
+
+@dataclass
+class SignatureInfo:
+    name: str
+    params: List[SignatureParameter]
+    return_type: Optional[str]
+    current_param_index: Optional[int] = None
+    call_bracket_start: Optional[Tuple[int, int]] = None
+
+
+@dataclass
+class CompletionInfo:
+    name: str
+    name_with_symbols: str
+    full_name: str
+    type: str
+    prefix_length: int  # the number of chars to be deleted before inserting name
+    signatures: Optional[List[SignatureInfo]]
+    docstring: Optional[str]
+
+
+@dataclass
+class NameReference:
+    module_name: str
+    module_path: str
+    row: int
+    column: int
+    length: int
+
+
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
 
@@ -672,12 +711,12 @@ def try_load_modules_with_frontend_sys_path(module_names):
         frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
         assert isinstance(frontend_sys_path, list)
     except Exception as e:
-        logger.warning("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
-        return
+        logger.debug("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
+        frontend_sys_path = []
 
     from importlib import import_module
 
-    old_sys_path = sys.path.copy()
+    old_sys_path = sys.path
     sys.path = sys.path + frontend_sys_path
     try:
         for name in module_names:
