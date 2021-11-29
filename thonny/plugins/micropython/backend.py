@@ -139,7 +139,7 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             self._report_time("before prepare")
             self._process_until_initial_prompt(
-                interrupt=args.get("interrupt_on_connect", False) or clean, clean=clean
+                interrupt=args["interrupt_on_connect"] or clean, clean=clean
             )
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()

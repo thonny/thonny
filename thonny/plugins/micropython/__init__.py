@@ -23,7 +23,7 @@ from thonny.plugins.backend_config_page import (
 from thonny.running import SubprocessProxy
 from thonny.ui_utils import (
     create_string_var,
-    create_url_label,
+    create_url_label, ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -143,6 +143,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
             "rts": get_workbench().get_option(self.backend_name + ".rts"),
             "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
+            "interrupt_on_connect": get_workbench().get_option(self.backend_name + ".interrupt_on_connect"),
+            "restart_interpreter_before_run": get_workbench().get_option(self.backend_name + ".restart_interpreter_before_run"),
             "write_block_size": self._get_write_block_size(),
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
@@ -448,6 +450,13 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.columnconfigure(0, weight=1)
 
         self._webrepl_frame = None
+
+        self.add_checkbox(self.backend_name + ".interrupt_on_connect", row=10
+                           , description=tr("Interrupt working program on connect"),
+                          pady=(ems_to_pixels(2.0),0))
+
+        self.add_checkbox(self.backend_name + ".restart_interpreter_before_run", row=11
+                           , description=tr("Restart interpreter before run"))
 
         last_row = ttk.Frame(self)
         last_row.grid(row=100, sticky="swe")
@@ -936,6 +945,8 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
         get_workbench().set_default(name + ".submit_mode", None)
+        get_workbench().set_default(name + ".interrupt_on_connect", True)
+        get_workbench().set_default(name + ".restart_interpreter_before_run", True)
 
         if sync_time is None:
             sync_time = True
