@@ -12,7 +12,6 @@ import pydoc
 import queue
 import re
 import site
-import subprocess
 import sys
 import tokenize
 import traceback
@@ -20,10 +19,9 @@ import types
 import warnings
 from collections import namedtuple
 from importlib.machinery import SourceFileLoader, PathFinder
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 
 import __main__
-
 import thonny
 from thonny.backend import MainBackend, interrupt_local_process, logger
 from thonny.common import (
@@ -57,7 +55,6 @@ from thonny.common import (
     update_system_path,
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
-    CompletionInfo,
 )
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -103,7 +100,6 @@ class MainCPythonBackend(MainBackend):
         _backend = self
 
         self._ini = None
-        self._command_handlers = {}
         self._object_info_tweakers = []
         self._import_handlers = {}
         self._input_queue = queue.Queue()
@@ -173,14 +169,6 @@ class MainCPythonBackend(MainBackend):
         self._read_one_incoming_message()
         return self._incoming_message_queue.get()
 
-    def add_command(self, command_name, handler):
-        """Handler should be 1-argument function taking command object.
-
-        Handler may return None (in this case no response is sent to frontend)
-        or a BackendResponse
-        """
-        self._command_handlers[command_name] = handler
-
     def add_object_info_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
         self._object_info_tweakers.append(tweaker)
@@ -210,48 +198,28 @@ class MainCPythonBackend(MainBackend):
         sys.exit()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        assert isinstance(cmd, (ToplevelCommand, InlineCommand))
+        if cmd.name == "process_gui_events":
+            # Don't want logging for this cmd
+            response = self._prepare_command_response(self._process_gui_events(), cmd)
+            self.send_message(response)
+            return
+
+        logger.info("Handling normal command %r in cpython_backend", cmd.name)
 
         if isinstance(cmd, ToplevelCommand):
             self._source_info_by_frame = {}
             self._input_queue = queue.Queue()
 
-        if cmd.name in self._command_handlers:
-            handler = self._command_handlers[cmd.name]
-        else:
-            handler = getattr(self, "_cmd_" + cmd.name, None)
+        super()._handle_normal_command(cmd)
 
-        if handler is None:
-            response = {"error": "Unknown command: " + cmd.name}
-        else:
-            try:
-                response = handler(cmd)
-            except SystemExit as e:
-                # Must be caused by Thonny or plugins code
-                if isinstance(cmd, ToplevelCommand):
-                    logger.exception("Unexpected SystemExit", exc_info=e)
-                response = {"SystemExit": True}
-            except UserError as e:
-                sys.stderr.write(str(e) + "\n")
-                response = {}
-            except KeyboardInterrupt:
-                response = {"user_exception": self._prepare_user_exception()}
-            except Exception as e:
-                self._report_internal_exception(e)
-                response = {"context_info": "other unhandled exception", "error": str(e)}
+    def _prepare_command_response(
+        self, response: Union[MessageFromBackend, Dict, None], command: CommandToBackend
+    ) -> MessageFromBackend:
+        result = super()._prepare_command_response(response, command)
+        if isinstance(result, ToplevelResponse):
+            result["gui_is_active"] = self._get_tcl() is not None or self._get_qt_app() is not None
 
-        if response is False:
-            # Command doesn't want to send any response
-            return
-
-        real_response = self._prepare_command_response(response, cmd)
-
-        if isinstance(real_response, ToplevelResponse):
-            real_response["gui_is_active"] = (
-                self._get_tcl() is not None or self._get_qt_app() is not None
-            )
-
-        self.send_message(real_response)
+        return result
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
         if cmd.name == "interrupt":
@@ -320,15 +288,19 @@ class MainCPythonBackend(MainBackend):
         for handler in self._import_handlers.get(module.__name__, []):
             try:
                 handler(module)
-            except Exception as e:
-                self._report_internal_exception(e)
+            except Exception:
+                msg = f"Could not apply import handler {handler}"
+                logger.exception(msg)
+                self._report_internal_warning(msg)
 
         # general handlers
         for handler in self._import_handlers.get("*", []):
             try:
                 handler(module)
-            except Exception as e:
-                self._report_internal_exception(e)
+            except Exception:
+                msg = f"Could not apply import handler {handler}"
+                logger.exception(msg)
+                self._report_internal_warning(msg)
 
         return module
 
@@ -365,7 +337,9 @@ class MainCPythonBackend(MainBackend):
                     else:
                         f(self)
             except Exception as e:
-                logger.exception("Failed loading plugin '" + module_name + "'", exc_info=e)
+                msg = f"Failed loading plugin {module_name}"
+                logger.exception(msg)
+                self._report_internal_warning(msg)
 
     def _cmd_get_environment_info(self, cmd):
         return ToplevelResponse(
@@ -428,11 +402,11 @@ class MainCPythonBackend(MainBackend):
         except SyntaxError as e:
             error = "".join(traceback.format_exception_only(type(e), e))
             sys.stderr.write(error)
-            return ToplevelResponse()
+            return {}
 
         assert isinstance(root, ast.Module)
 
-        result_attributes = self._execute_source(
+        return self._execute_source(
             source,
             filename,
             "repl",
@@ -440,17 +414,12 @@ class MainCPythonBackend(MainBackend):
             cmd,
         )
 
-        return ToplevelResponse(command_name="execute_source", **result_attributes)
-
     def _cmd_execute_system_command(self, cmd):
         self._check_update_tty_mode(cmd)
-        try:
-            returncode = execute_system_command(cmd, disconnect_stdin=True)
-            return {"returncode": returncode}
-        except Exception as e:
-            logger.exception("Could not execute system command %s", cmd, exc_info=e)
+        returncode = execute_system_command(cmd, disconnect_stdin=True)
+        return {"returncode": returncode}
 
-    def _cmd_process_gui_events(self, cmd):
+    def _process_gui_events(self):
         # advance the event loop
         try:
             # First try Tkinter.
@@ -480,76 +449,63 @@ class MainCPythonBackend(MainBackend):
 
     def _cmd_get_globals(self, cmd):
         # warnings.warn("_cmd_get_globals is deprecated for CPython")
-        try:
-            return InlineResponse(
-                "get_globals",
-                module_name=cmd.module_name,
-                globals=self.export_globals(cmd.module_name),
-            )
-        except Exception as e:
-            return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
+        return dict(
+            module_name=cmd.module_name,
+            globals=self.export_globals(cmd.module_name),
+        )
 
     def _cmd_get_frame_info(self, cmd):
         atts = {}
-        try:
-            # TODO: make it work also in past states
-            frame, location = self._lookup_frame_by_id(cmd["frame_id"])
-            if frame is None:
-                atts["error"] = "Frame not found"
-            else:
-                atts["code_name"] = frame.f_code.co_name
-                atts["module_name"] = frame.f_globals.get("__name__", None)
-                atts["locals"] = (
-                    None
-                    if frame.f_locals is frame.f_globals
-                    else self.export_variables(frame.f_locals)
-                )
-                atts["globals"] = self.export_variables(frame.f_globals)
-                atts["freevars"] = frame.f_code.co_freevars
-                atts["location"] = location
-        except Exception as e:
-            atts["error"] = str(e)
+        # TODO: make it work also in past states
+        frame, location = self._lookup_frame_by_id(cmd["frame_id"])
+        if frame is None:
+            atts["error"] = "Frame not found"
+        else:
+            atts["code_name"] = frame.f_code.co_name
+            atts["module_name"] = frame.f_globals.get("__name__", None)
+            atts["locals"] = (
+                None if frame.f_locals is frame.f_globals else self.export_variables(frame.f_locals)
+            )
+            atts["globals"] = self.export_variables(frame.f_globals)
+            atts["freevars"] = frame.f_code.co_freevars
+            atts["location"] = location
 
-        return InlineResponse("get_frame_info", frame_id=cmd.frame_id, **atts)
+        return dict(frame_id=cmd.frame_id, **atts)
 
     def _cmd_get_active_distributions(self, cmd):
-        try:
-            # if it is called after first installation to user site packages
-            # this dir is not yet in sys.path
-            if (
-                site.ENABLE_USER_SITE
-                and site.getusersitepackages()
-                and os.path.exists(site.getusersitepackages())
-                and site.getusersitepackages() not in sys.path
-            ):
-                # insert before first site packages item
-                for i, item in enumerate(sys.path):
-                    if "site-packages" in item or "dist-packages" in item:
-                        sys.path.insert(i, site.getusersitepackages())
-                        break
-                else:
-                    sys.path.append(site.getusersitepackages())
+        # if it is called after first installation to user site packages
+        # this dir is not yet in sys.path
+        if (
+            site.ENABLE_USER_SITE
+            and site.getusersitepackages()
+            and os.path.exists(site.getusersitepackages())
+            and site.getusersitepackages() not in sys.path
+        ):
+            # insert before first site packages item
+            for i, item in enumerate(sys.path):
+                if "site-packages" in item or "dist-packages" in item:
+                    sys.path.insert(i, site.getusersitepackages())
+                    break
+            else:
+                sys.path.append(site.getusersitepackages())
 
-            import pkg_resources
+        import pkg_resources
 
-            pkg_resources._initialize_master_working_set()
-            dists = {
-                dist.key: {
-                    "project_name": dist.project_name,
-                    "key": dist.key,
-                    "location": dist.location,
-                    "version": dist.version,
-                }
-                for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
+        pkg_resources._initialize_master_working_set()
+        dists = {
+            dist.key: {
+                "project_name": dist.project_name,
+                "key": dist.key,
+                "location": dist.location,
+                "version": dist.version,
             }
+            for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
+        }
 
-            return InlineResponse(
-                "get_active_distributions",
-                distributions=dists,
-                usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
-            )
-        except Exception:
-            return InlineResponse("get_active_distributions", error=traceback.format_exc())
+        return dict(
+            distributions=dists,
+            usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
+        )
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
@@ -624,13 +580,14 @@ class MainCPythonBackend(MainBackend):
         else:
             info = {"id": cmd.object_id, "error": "object info not available"}
 
-        return InlineResponse("get_object_info", id=cmd.object_id, info=info)
+        return dict(id=cmd.object_id, info=info)
 
     def _cmd_mkdir(self, cmd):
         os.mkdir(cmd.path)
 
     def _cmd_delete(self, cmd):
         for path in cmd.paths:
+            # TODO: add incremental feedback for each path
             try:
                 if os.path.isfile(path):
                     os.remove(path)
@@ -977,12 +934,12 @@ class MainCPythonBackend(MainBackend):
             tb = tb.tb_next
         last_frame = tb.tb_frame
 
-        if e_type is SyntaxError:
+        if isinstance(e_value, SyntaxError):
             # Don't show ast frame
             while last_frame.f_code.co_filename and last_frame.f_code.co_filename == ast.__file__:
+                logger.info("COF %r vs %r", last_frame.f_code.co_filename, ast.__file__)
                 last_frame = last_frame.f_back
 
-        if e_type is SyntaxError:
             msg = (
                 traceback.format_exception_only(e_type, e_value)[-1]
                 .replace(e_type.__name__ + ":", "")
@@ -1159,9 +1116,11 @@ def return_execution_result(method):
             result = method(self, *args, **kwargs)
             if result is not None:
                 return result
-            return {"context_info": "after normal execution"}
-        except Exception:
+            return {}
+        except (Exception, KeyboardInterrupt):
             return {"user_exception": self._backend._prepare_user_exception()}
+        except SystemExit:
+            return {"SystemExit": True}
 
     return wrapper
 
@@ -1204,11 +1163,6 @@ class Executor:
             return self._execute_prepared_user_code(statements, global_vars)
         except SyntaxError:
             return {"user_exception": self._backend._prepare_user_exception()}
-        except SystemExit:
-            return {"SystemExit": True}
-        except Exception as e:
-            self._backend._report_internal_exception(e)
-            return {}
 
     @return_execution_result
     @prepare_hooks
@@ -1295,6 +1249,7 @@ class Tracer(Executor):
         raise NotImplementedError()
 
     def _execute_prepared_user_code(self, statements, global_vars):
+        old_breakpointhook = None
         try:
             sys.settrace(self._trace)
             if hasattr(sys, "breakpointhook"):
@@ -1706,8 +1661,8 @@ class NiceTracer(Tracer):
     def _trace(self, frame, event, arg):
         try:
             return self._trace_and_catch(frame, event, arg)
-        except BaseException as e:
-            logger.exception("Exception in _trace", exc_info=e)
+        except BaseException:
+            logger.exception("Exception in _trace", exc_info=True)
             sys.settrace(None)
             return None
 
@@ -2719,7 +2674,7 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
                     and (
                         not entry.filename.endswith(os.sep + "ast.py")
                         or entry.name != "parse"
-                        or etype is not SyntaxError
+                        or not isinstance(e_value, SyntaxError)
                     )
                 ):
                     fmt = '  File "{}", line {}, in {}\n'.format(
