@@ -1030,21 +1030,21 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _cmd_Run(self, cmd):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
-        reset_environment_before_run = True  # TODO: make it configurable
+        restart_interpreter_before_run = self._args["restart_interpreter_before_run"]
         if cmd.get("source"):
-            if reset_environment_before_run:
+            if restart_interpreter_before_run:
                 self._clear_repl()
 
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)
-                if reset_environment_before_run:
+                if restart_interpreter_before_run:
                     logger.debug("Ensuring normal mode after soft reboot")
                     self._ensure_normal_mode(force=True)
             else:
                 source = cmd.source
 
             self._execute(source, capture_output=False)
-            if reset_environment_before_run:
+            if restart_interpreter_before_run:
                 self._prepare_after_soft_reboot(False)
         return {}
 
