@@ -464,9 +464,21 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
 
         self.add_checkbox(
-            self.backend_name + ".restart_interpreter_before_run",
+            self.backend_name + ".sync_time",
             row=11,
-            description=tr("Restart interpreter before run"),
+            description=tr("Synchronize device's real time clock"),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".local_rtc",
+            row=12,
+            description=tr("Use local time in real time clock"),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".restart_interpreter_before_run",
+            row=13,
+            description=tr("Restart interpreter before running a script"),
         )
 
         last_row = ttk.Frame(self)
