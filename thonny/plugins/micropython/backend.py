@@ -284,10 +284,10 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _get_time_for_rtc(self):
-        if self._args["utc_clock"]:
-            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
-        else:
+        if self._args["local_rtc"]:
             return datetime.datetime.now().timetuple()
+        else:
+            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
 
     def _validate_time(self):
         this_computer = self._get_time_for_rtc()
@@ -1189,7 +1189,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _system_time_to_posix_time(self, value: float) -> float:
         result = value + self._get_epoch_offset()
-        if not self._args["utc_clock"]:
+        if self._args["local_rtc"]:
             # convert to UTC
             result += time.timezone
 
