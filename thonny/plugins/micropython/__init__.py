@@ -74,7 +74,7 @@ class MicroPythonProxy(SubprocessProxy):
             "validate_time": get_workbench().get_option(
                 self.backend_name + ".validate_time", False
             ),
-            "utc_clock": get_workbench().get_option(self.backend_name + ".utc_clock", False),
+            "local_rtc": get_workbench().get_option(self.backend_name + ".local_rtc", False),
         }
         return result
 
@@ -939,7 +939,7 @@ def add_micropython_backend(
     sort_key=None,
     validate_time=True,
     sync_time=None,
-    utc_clock=False,
+    local_rtc=True,
     write_block_size=None,
     write_block_delay=None,
     dtr=None,
@@ -966,7 +966,7 @@ def add_micropython_backend(
             sync_time = False
 
     get_workbench().set_default(name + ".sync_time", sync_time)
-    get_workbench().set_default(name + ".utc_clock", utc_clock)
+    get_workbench().set_default(name + ".local_rtc", local_rtc)
     get_workbench().set_default(name + ".validate_time", validate_time)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 
@@ -987,7 +987,7 @@ def load_plugin():
             tr("MicroPython (local)"),
             LocalMicroPythonConfigPage,
             bare_metal=False,
-            utc_clock=True,
+            local_rtc=False,
             sort_key="21",
         )
         get_workbench().set_default("LocalMicroPython.executable", "micropython")
@@ -998,7 +998,7 @@ def load_plugin():
         tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
-        utc_clock=True,
+        local_rtc=False,
         sort_key="22",
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")
