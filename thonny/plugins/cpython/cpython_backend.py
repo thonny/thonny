@@ -2380,6 +2380,24 @@ class NiceTracer(Tracer):
             and "comprehension.if" not in node.tags
         )
 
+    def _is_case_pattern(self, node) -> bool:
+        if sys.version_info < (3, 10):
+            return False
+        else:
+            return isinstance(
+                node,
+                (
+                    ast.MatchValue,
+                    ast.MatchSingleton,
+                    ast.MatchSequence,
+                    ast.MatchMapping,
+                    ast.MatchClass,
+                    ast.MatchStar,
+                    ast.MatchAs,
+                    ast.MatchOr,
+                ),
+            )
+
     def _should_instrument_as_statement(self, node):
         return (
             isinstance(node, _ast.stmt)
@@ -2527,6 +2545,9 @@ class NiceTracer(Tracer):
                     else:
                         # This expression (and its children) should be ignored
                         return node
+                elif tracer._is_case_pattern(node):
+                    # ignore this and children
+                    return node
                 else:
                     # Descend into statements
                     return ast.NodeTransformer.generic_visit(self, node)
