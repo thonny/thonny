@@ -34,6 +34,8 @@ from thonny.ui_utils import CommonDialog, select_sequence, get_hyperlink_cursor
 from thonny.ui_utils import select_sequence, CommonDialog, get_tk_version_info
 from _tkinter import TclError
 
+logger = getLogger(__name__)
+
 _current_debugger = None
 
 RESUME_COMMAND_CAPTION = ""  # Init later when gettext is loaded
