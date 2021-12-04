@@ -11,6 +11,7 @@ def report_time(label: str) -> None:
     """
     Method for finding unwarranted imports and delays.
     """
+    return
     global _last_time, _last_module_count, _last_modules
 
     log_modules = False
