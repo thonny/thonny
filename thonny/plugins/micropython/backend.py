@@ -1,7 +1,7 @@
 """
 MP 1.12
 
->>> import uos
+>>> #import uos
 >>> dir(uos)
 ['__class__', '__name__', 'remove', 'VfsFat', 'VfsLfs2', 'chdir', 'dupterm', 'dupterm_notify', 
 'getcwd', 'ilistdir', 'listdir', 'mkdir', 'mount', 'rename', 'rmdir', 'stat', 'statvfs', 'umount', 
@@ -76,6 +76,7 @@ from thonny.common import (
 from thonny.common import ConnectionClosedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.running import EXPECTED_TERMINATION_CODE
+from thonny import report_time
 
 ENCODING = "utf-8"
 
@@ -122,7 +123,6 @@ class MicroPythonBackend(MainBackend, ABC):
         logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)
         self._connection: MicroPythonConnection
         self._args = args
-        self._prev_time = time.time()
         self._last_interrupt_time = None
         self._local_cwd = None
         self._cwd = args.get("cwd")
@@ -137,13 +137,13 @@ class MicroPythonBackend(MainBackend, ABC):
 
         MainBackend.__init__(self)
         try:
-            self._report_time("before prepare")
+            report_time("before prepare")
             self._process_until_initial_prompt(
                 interrupt=args["interrupt_on_connect"] or clean, clean=clean
             )
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()
-                self._report_time("got welcome")
+                report_time("got welcome")
 
             # Get rid of the welcome text which was printed while searching for prompt
             self.send_message(
@@ -158,7 +158,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
             self._prepare_rtc()
             self._send_ready_message()
-            self._report_time("sent ready")
+            report_time("sent ready")
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
@@ -167,7 +167,7 @@ class MicroPythonBackend(MainBackend, ABC):
             self._report_internal_exception("Internal error")
 
     def _prepare_after_soft_reboot(self, clean=False):
-        self._report_time("bef preparing helpers")
+        report_time("bef preparing helpers")
         logger.info("Preparing helpers")
         script = self._get_helper_code()
         logger.debug("Helper code:\n%s", script)
@@ -182,13 +182,13 @@ class MicroPythonBackend(MainBackend, ABC):
         #     """
         #     ).strip()
         # )
-        self._report_time("prepared helpers")
+        report_time("prepared helpers")
 
         self._update_cwd()
-        self._report_time("got cwd")
+        report_time("got cwd")
         self._sys_path = self._fetch_sys_path()
 
-        self._report_time("prepared")
+        report_time("prepared")
         self._check_perform_just_in_case_gc()
         logger.info("Prepared")
 
@@ -342,8 +342,8 @@ class MicroPythonBackend(MainBackend, ABC):
             self._last_interrupt_time = time.time()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        logger.info("Handling normal command '%s' in micropython backend ", cmd.name)
-        self._report_time("before " + cmd.name)
+        logger.debug("Handling normal command '%s' in micropython backend ", cmd.name)
+        report_time("before " + cmd.name)
 
         if "local_cwd" in cmd:
             self._local_cwd = cmd["local_cwd"]
@@ -351,7 +351,7 @@ class MicroPythonBackend(MainBackend, ABC):
         super()._handle_normal_command(cmd)
 
         self._check_perform_just_in_case_gc()
-        self._report_time("after " + cmd.name)
+        report_time("after " + cmd.name)
 
     def _should_keep_going(self) -> bool:
         return self._is_connected()
@@ -643,10 +643,10 @@ class MicroPythonBackend(MainBackend, ABC):
         # TODO: clear last object inspector requests dictionary
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
-            self._report_time("befexeccc")
+            report_time("befexeccc")
             self._execute(source, capture_output=False)
             self._check_prepare()
-            self._report_time("affexeccc")
+            report_time("affexeccc")
         # TODO: assign last value to _
         return {}
 
@@ -1181,11 +1181,6 @@ class MicroPythonBackend(MainBackend, ABC):
             return True
 
         return False
-
-    def _report_time(self, caption):
-        new_time = time.time()
-        # print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
-        self._prev_time = new_time
 
     def _system_time_to_posix_time(self, value: float) -> float:
         result = value + self._get_epoch_offset()

@@ -33,15 +33,15 @@ def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
 
 
 def running_on_windows() -> bool:
-    return platform.system() == "Windows"
+    return sys.platform == "win32"
 
 
 def running_on_mac_os() -> bool:
-    return platform.system() == "Darwin"
+    return sys.platform == "darwin"
 
 
 def running_on_linux() -> bool:
-    return platform.system() == "Linux"
+    return sys.platform == "linux"
 
 
 def running_on_rpi() -> bool:
@@ -374,7 +374,7 @@ def get_file_creation_date(path_to_file):
     last modified if that isn't possible.
     See http://stackoverflow.com/a/39501288/1709587 for explanation.
     """
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)
@@ -487,26 +487,6 @@ def sizeof_fmt(num, suffix="B"):
             return "%.1f %s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, "Yi", suffix)
-
-
-def _get_known_folder(ID):
-    # http://stackoverflow.com/a/3859336/261181
-    # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
-    import ctypes.wintypes
-
-    SHGFP_TYPE_CURRENT = 0
-    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(0, ID, 0, SHGFP_TYPE_CURRENT, buf)
-    assert buf.value
-    return buf.value
-
-
-def get_roaming_appdata_dir():
-    return _get_known_folder(26)
-
-
-def get_local_appdata_dir():
-    return _get_known_folder(28)
 
 
 class PopenWithOutputQueues(subprocess.Popen):

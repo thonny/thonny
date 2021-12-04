@@ -48,7 +48,7 @@ class CPythonProxy(SubprocessProxy):
         return os.path.dirname(os.path.dirname(thonny.__file__))
 
     def _get_launcher_with_args(self):
-        return ["-m", "thonny.plugins.cpython", self.get_cwd()]
+        return ["-m", "thonny.plugins.cpython_backend", self.get_cwd()]
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)

@@ -3,12 +3,9 @@
 """
 Classes used both by front-end and back-end
 """
-import ast
 from logging import getLogger
 import os.path
-import platform
 import site
-import subprocess
 from dataclasses import dataclass
 
 import sys
@@ -304,7 +301,7 @@ def read_source(filename):
 def get_exe_dirs():
     result = []
     if site.ENABLE_USER_SITE:
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             if site.getusersitepackages():
                 result.append(site.getusersitepackages().replace("site-packages", "Scripts"))
         else:
@@ -331,7 +328,7 @@ def get_exe_dirs():
         if os.path.isdir(dirpath) and dirpath not in result:
             result.append(dirpath)
 
-    if platform.system() != "Windows" and "/usr/local/bin" not in result:
+    if sys.platform != "win32" and "/usr/local/bin" not in result:
         # May be missing on macOS, when started as bundle
         # (yes, more may be missing, but this one is most useful)
         result.append("/usr/local/bin")
@@ -343,6 +340,8 @@ def get_site_dir(symbolic_name, executable=None):
     if not executable or executable == sys.executable:
         result = getattr(site, symbolic_name, "")
     else:
+        import subprocess
+
         result = (
             subprocess.check_output(
                 [executable, "-m", "site", "--" + symbolic_name.lower().replace("_", "-")],
@@ -359,7 +358,7 @@ def get_base_executable():
     if sys.exec_prefix == sys.base_exec_prefix:
         return sys.executable
 
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
         result = normpath_with_actual_case(result)
     else:
@@ -384,7 +383,7 @@ def get_augmented_system_path(extra_dirs):
 def update_system_path(env, value):
     # in Windows, env keys are not case sensitive
     # this is important if env is a dict (not os.environ)
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         found = False
         for key in env:
             if key.upper() == "PATH":
@@ -443,7 +442,7 @@ class UserError(RuntimeError):
 def is_hidden_or_system_file(path: str) -> bool:
     if os.path.basename(path).startswith("."):
         return True
-    elif platform.system() == "Windows":
+    elif sys.platform == "win32":
         from ctypes import windll
 
         FILE_ATTRIBUTE_HIDDEN = 0x2
@@ -464,7 +463,7 @@ def get_dirs_children_info(
 
 def get_single_dir_child_data(path: str, include_hidden: bool = False) -> Optional[Dict[str, Dict]]:
     if path == "":
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             return {**get_windows_volumes_info(), **get_windows_network_locations()}
         else:
             return get_single_dir_child_data("/", include_hidden)
@@ -619,6 +618,7 @@ def get_windows_network_locations():
 
 
 def get_windows_lnk_target(lnk_file_path):
+    import subprocess
     import thonny
 
     script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
@@ -629,6 +629,8 @@ def get_windows_lnk_target(lnk_file_path):
 
 
 def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
+    import subprocess
+
     logger.debug("execute_system_command, cmd=%r, cwd=%s", cmd, cwd)
     env = dict(os.environ).copy()
     encoding = "utf-8"
@@ -707,6 +709,8 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
 
 
 def try_load_modules_with_frontend_sys_path(module_names):
+    import ast
+
     try:
         frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
         assert isinstance(frontend_sys_path, list)

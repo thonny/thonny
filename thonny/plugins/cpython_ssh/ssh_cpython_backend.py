@@ -19,8 +19,6 @@ from thonny.common import (
     InputSubmission,
     CommandToBackend,
     MessageFromBackend,
-    parse_message,
-    MESSAGE_MARKER,
 )
 
 
@@ -110,7 +108,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
         return self._create_remote_process(
-            [self._remote_interpreter, "-m", "thonny.plugins.cpython", self._cwd],
+            [self._remote_interpreter, "-m", "thonny.plugins.cpython_backend", self._cwd],
             cwd=self._get_remote_program_directory(),
             env=env,
         )
@@ -132,7 +130,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             return
 
         ensure_posix_directory(
-            launch_dir + "/thonny/plugins/cpython",
+            launch_dir + "/thonny/plugins/cpython_backend",
             self._get_stat_mode_for_upload,
             self._mkdir_for_upload,
         )
@@ -141,7 +139,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         import thonny.jedi_utils
         import thonny.backend
         import thonny.common
-        import thonny.plugins.cpython.cpython_backend
+        import thonny.plugins.cpython_backend
 
         local_context = os.path.dirname(os.path.dirname(thonny.__file__))
         for local_path in [
@@ -150,13 +148,13 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             thonny.ast_utils.__file__,
             thonny.jedi_utils.__file__,
             thonny.backend.__file__,
-            thonny.plugins.cpython.cpython_backend.__file__,
-            thonny.plugins.cpython.__file__.replace("__init__", "__main__"),
+            thonny.plugins.cpython_backend.__file__,
+            thonny.plugins.cpython_backend.__file__.replace("__init__", "__main__"),
         ]:
             local_suffix = local_path[len(local_context) :]
             remote_path = launch_dir + local_suffix.replace("\\", "/")
             self._perform_sftp_operation_with_retry(lambda sftp: sftp.put(local_path, remote_path))
 
         def create_empty_cpython_init(sftp):
-            with sftp.open(thonny.plugins.cpython.__file__, "w") as fp:
+            with sftp.open(thonny.plugins.cpython_backend.__file__, "w") as fp:
                 fp.close(self._perform_sftp_operation_with_retry(create_empty_cpython_init))

@@ -44,12 +44,12 @@ def _open_system_shell():
 
     activate = os.path.join(
         os.path.dirname(target_executable),
-        "activate.bat" if platform.system() == "Windows" else "activate",
+        "activate.bat" if sys.platform == "win32" else "activate",
     )
 
     if os.path.isfile(activate):
         del env_overrides["PATH"]
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             cmd = [activate, "&"] + cmd
         else:
             cmd = ["source", activate, ";"] + cmd

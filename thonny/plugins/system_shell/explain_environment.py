@@ -5,7 +5,7 @@ import warnings
 
 
 def _clear_screen():
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         os.system("cls")
     else:
         os.system("clear")
@@ -80,7 +80,7 @@ def wrap_in_ansi_code(text, code):
 
 
 def can_use_ansi_codes():
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         ver = platform.win32_ver()
         try:
             return float(ver[0]) >= 10
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     else:
         highlight_dirs = []
 
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         # Add Scripts for pip
         highlight_dirs.append(os.path.join(os.path.dirname(sys_real), "Scripts"))
         highlight_dirs.append(os.path.join(os.path.dirname(sys_executable), "Scripts"))

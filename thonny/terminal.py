@@ -13,11 +13,11 @@ def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
     if not cwd or not os.path.exists(cwd):
         cwd = os.getcwd()
 
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title)
-    elif platform.system() == "Linux":
+    elif sys.platform == "linux":
         _run_in_terminal_in_linux(cmd, cwd, env, keep_open)
-    elif platform.system() == "Darwin":
+    elif sys.platform == "darwin":
         _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open)
     else:
         raise RuntimeError("Can't launch terminal in " + platform.system())
@@ -28,12 +28,12 @@ def open_system_shell(cwd, env_overrides={}):
 
     env = get_environment_with_overrides(env_overrides)
 
-    if platform.system() == "Darwin":
+    if sys.platform == "darwin":
         _run_in_terminal_in_macos([], cwd, env_overrides, True)
-    elif platform.system() == "Windows":
+    elif sys.platform == "win32":
         cmd = "start cmd"
         subprocess.Popen(cmd, cwd=cwd, env=env, shell=True)
-    elif platform.system() == "Linux":
+    elif sys.platform == "linux":
         cmd = _get_linux_terminal_command()
         subprocess.Popen(cmd, cwd=cwd, env=env, shell=True)
     else:
@@ -46,7 +46,7 @@ def _add_to_path(directory, path):
     # it probably won't be in path yet and therefore will be prepended.
     if (
         directory in path.split(os.pathsep)
-        or platform.system() == "Windows"
+        or sys.platform == "win32"
         and directory.lower() in path.lower().split(os.pathsep)
     ):
         return path

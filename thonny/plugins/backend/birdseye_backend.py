@@ -1,7 +1,7 @@
 import os
 
 from thonny.common import try_load_modules_with_frontend_sys_path
-from thonny.plugins.cpython.cpython_backend import (
+from thonny.plugins.cpython_backend import (
     get_backend,
     Executor,
     return_execution_result,

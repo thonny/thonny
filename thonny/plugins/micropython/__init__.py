@@ -898,7 +898,7 @@ def list_serial_ports():
 
     try:
         old_islink = os.path.islink
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             os.path.islink = lambda _: False
         return list(serial.tools.list_ports.comports())
     finally:

@@ -1,21 +1,75 @@
-import os.path
-import platform
-import logging
+_last_module_count = 0
+_last_modules = set()
+import time
+
+_last_time = time.time()
+
 import sys
-import traceback
+
+
+def report_time(label: str) -> None:
+    """
+    Method for finding unwarranted imports and delays.
+    """
+    global _last_time, _last_module_count, _last_modules
+
+    log_modules = False
+
+    t = time.time()
+    mod_count = len(sys.modules)
+    mod_delta = mod_count - _last_module_count
+    if mod_delta > 0:
+        mod_info = f"(+{mod_count - _last_module_count} modules)"
+    else:
+        mod_info = ""
+    print("TIME/MODS", label, round(t - _last_time, 3), mod_info)
+
+    if log_modules and mod_delta > 0:
+        current_modules = set(sys.modules.keys())
+        print("NEW MODS", list(sorted(current_modules - _last_modules)))
+        _last_modules = current_modules
+
+    _last_time = t
+    _last_module_count = mod_count
+
+
+report_time("After defining report_time")
+
+import os.path
+import logging
 from typing import TYPE_CHECKING, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
 BACKEND_LOG_MARKER = "Thonny's backend.log"
 
 
+def _get_known_folder(ID):
+    # http://stackoverflow.com/a/3859336/261181
+    # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
+    import ctypes.wintypes
+
+    SHGFP_TYPE_CURRENT = 0
+    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+    ctypes.windll.shell32.SHGetFolderPathW(0, ID, 0, SHGFP_TYPE_CURRENT, buf)
+    assert buf.value
+    return buf.value
+
+
+def _get_roaming_appdata_dir():
+    return _get_known_folder(26)
+
+
+def _get_local_appdata_dir():
+    return _get_known_folder(28)
+
+
 def _compute_thonny_user_dir():
     if os.environ.get("THONNY_USER_DIR", ""):
         return os.path.expanduser(os.environ["THONNY_USER_DIR"])
     elif is_portable():
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             root_dir = os.path.dirname(sys.executable)
-        elif platform.system() == "Darwin":
+        elif sys.platform == "darwin":
             root_dir = os.path.join(
                 os.path.dirname(sys.executable), "..", "..", "..", "..", "..", ".."
             )
@@ -30,11 +84,9 @@ def _compute_thonny_user_dir():
     ):
         # we're in a virtualenv or venv
         return os.path.join(sys.prefix, ".thonny")
-    elif platform.system() == "Windows":
-        from thonny import misc_utils
-
-        return os.path.join(misc_utils.get_roaming_appdata_dir(), "Thonny")
-    elif platform.system() == "Darwin":
+    elif sys.platform == "win32":
+        return os.path.join(_get_roaming_appdata_dir(), "Thonny")
+    elif sys.platform == "darwin":
         return os.path.expanduser("~/Library/Thonny")
     else:
         # https://specifications.freedesktop.org/basedir-spec/latest/ar01s02.html
@@ -73,7 +125,7 @@ def is_portable():
 
     # ... or it becomes implicitly portable if it's on a removable drive
     abs_location = os.path.abspath(__file__)
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         drive = os.path.splitdrive(abs_location)[0]
         if drive.endswith(":"):
             from ctypes import windll
@@ -81,7 +133,7 @@ def is_portable():
             return windll.kernel32.GetDriveTypeW(drive) == 2  # @UndefinedVariable
         else:
             return False
-    elif platform.system() == "Darwin":
+    elif sys.platform == "darwin":
         # not exact heuristics
         return abs_location.startswith("/Volumes/")
     else:
@@ -111,10 +163,8 @@ def get_ipc_file_path():
     if _IPC_FILE:
         return _IPC_FILE
 
-    from thonny import misc_utils
-
-    if platform.system() == "Windows":
-        base_dir = misc_utils.get_local_appdata_dir()
+    if sys.platform == "win32":
+        base_dir = _get_local_appdata_dir()
     else:
         base_dir = os.environ.get("XDG_RUNTIME_DIR")
         if not base_dir or not os.path.exists(base_dir):
@@ -133,7 +183,7 @@ def get_ipc_file_path():
     ipc_dir = os.path.join(base_dir, "thonny-%s" % username)
     os.makedirs(ipc_dir, exist_ok=True)
 
-    if not platform.system() == "Windows":
+    if not sys.platform == "win32":
         os.chmod(ipc_dir, 0o700)
 
     _IPC_FILE = os.path.join(ipc_dir, "ipc.sock")
@@ -158,7 +208,6 @@ def _check_welcome():
 
 def launch():
     import runpy
-    import socket
 
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
@@ -309,7 +358,7 @@ def _create_client_socket():
 
     timeout = 2.0
 
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         with open(get_ipc_file_path(), "r") as fp:
             port = int(fp.readline().strip())
             secret = fp.readline().strip()
@@ -437,3 +486,6 @@ def get_runner() -> "Runner":
 
 def get_shell() -> "ShellView":
     return cast("ShellView", get_workbench().get_view("ShellView"))
+
+
+report_time("After loading thonny module")
