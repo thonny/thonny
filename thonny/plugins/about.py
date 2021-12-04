@@ -48,7 +48,7 @@ class AboutDialog(CommonDialog):
         url_label.grid()
         url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
 
-        if platform.system() == "Linux":
+        if sys.platform == "linux":
             try:
                 import distro  # distro don't need to be installed
 

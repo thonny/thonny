@@ -1,7 +1,7 @@
 # coding=utf-8
 """Extensions for tk.Text"""
 from logging import getLogger
-import platform
+import sys
 from typing import Optional
 
 import time
@@ -263,7 +263,7 @@ class EnhancedText(TweakableText):
         except Exception:
             pass
 
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             self.bind("<KeyPress>", self._insert_untypable_characters_on_windows, True)
 
     def _bind_keypad(self):
@@ -1219,7 +1219,7 @@ def _running_on_x11():
 
 def get_keyboard_language():
     # https://stackoverflow.com/a/42047820/261181
-    if platform.system() != "Windows":
+    if sys.platform != "win32":
         raise NotImplementedError("Can provide keyboard language only on Windows")
 
     import ctypes

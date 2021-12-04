@@ -1546,7 +1546,7 @@ class SqueezedTextDialog(CommonDialog):
         )
         explanation_label.grid(row=0, column=0, sticky="nsew", padx=padding, pady=padding)
 
-        self._wrap_var = tk.BooleanVar(False)
+        self._wrap_var = tk.BooleanVar(value=False)
         self.wrap_checkbox = ttk.Checkbutton(
             mainframe,
             text=tr("Wrap text (may be slow)"),

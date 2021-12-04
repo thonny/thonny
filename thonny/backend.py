@@ -7,7 +7,6 @@ from logging import getLogger
 import os.path
 import pathlib
 import queue
-import shlex
 import stat
 import sys
 import threading
@@ -16,6 +15,7 @@ import traceback
 from abc import abstractmethod, ABC
 from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
 
+from thonny import report_time
 from thonny.common import (
     BackendEvent,
     EOFCommand,
@@ -60,6 +60,8 @@ class BaseBackend(ABC):
         _thread.start_new_thread(self._read_incoming_messages, ())
 
     def mainloop(self):
+        report_time("Beginning of mainloop")
+
         try:
             while self._should_keep_going():
                 try:
@@ -228,8 +230,8 @@ class MainBackend(BaseBackend, ABC):
 
     def __init__(self):
         self._command_handlers = {}
+        self._jedi_is_loaded = False
         BaseBackend.__init__(self)
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
 
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
@@ -238,6 +240,13 @@ class MainBackend(BaseBackend, ABC):
         or a BackendResponse
         """
         self._command_handlers[command_name] = handler
+
+    def send_message(self, msg: MessageFromBackend) -> None:
+        super().send_message(msg)
+
+        # take the time for pre-loading jedi after the first toplevel response
+        if isinstance(msg, ToplevelResponse):
+            self._check_load_jedi()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
@@ -483,6 +492,16 @@ class MainBackend(BaseBackend, ABC):
     def _get_sep(self) -> str:
         """Returns symbol for combining parent directory path and child name"""
 
+    def _check_load_jedi(self) -> None:
+        if self._jedi_is_loaded:
+            return
+        logger.info("Loading Jedi")
+
+        report_time("Before loading Jedi")
+        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
+        self._jedi_is_loaded = True
+        report_time("After loading Jedi")
+
 
 class UploadDownloadMixin(ABC):
     """Backend, which runs on a local process and talks to a nonlocal system,
@@ -727,6 +746,8 @@ class SshMixin(UploadDownloadMixin):
             sys.exit(1)
 
     def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
+        import shlex
+
         # Before running the main thing:
         # * print process id (so that we can kill it later)
         #   http://redes-privadas-virtuales.blogspot.com/2013/03/getting-hold-of-remote-pid-through.html

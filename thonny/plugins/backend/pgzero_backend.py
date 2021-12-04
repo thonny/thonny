@@ -2,7 +2,7 @@ import ast
 import os
 import sys
 
-from thonny.plugins.cpython.cpython_backend import get_backend, MainCPythonBackend
+from thonny.plugins.cpython_backend import get_backend, MainCPythonBackend
 
 
 def augment_ast(root):

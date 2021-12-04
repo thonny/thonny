@@ -1,7 +1,7 @@
 import os
 
 from thonny.common import BackendEvent
-from thonny.plugins.cpython.cpython_backend import get_backend
+from thonny.plugins.cpython_backend import get_backend
 
 _last_pos = (None, None)
 _notification_is_sent = False

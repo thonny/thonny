@@ -739,7 +739,7 @@ class Runner:
             return self._proxy.get_node_label()
 
     def using_venv(self) -> bool:
-        from thonny.plugins.cpython import CPythonProxy
+        from thonny.plugins.cpython_frontend import CPythonProxy
 
         return isinstance(self._proxy, CPythonProxy) and self._proxy._in_venv
 
