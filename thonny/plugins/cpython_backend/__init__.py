@@ -346,8 +346,12 @@ class MainCPythonBackend(MainBackend):
             raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
+        report_time("Before Run")
         self.switch_env_to_script_mode(cmd)
-        return self._execute_file(cmd, SimpleRunner)
+        try:
+            return self._execute_file(cmd, SimpleRunner)
+        finally:
+            report_time("After Run")
 
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
