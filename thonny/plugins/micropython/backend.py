@@ -1,7 +1,7 @@
 """
 MP 1.12
 
->>> import uos
+>>> #import uos
 >>> dir(uos)
 ['__class__', '__name__', 'remove', 'VfsFat', 'VfsLfs2', 'chdir', 'dupterm', 'dupterm_notify', 
 'getcwd', 'ilistdir', 'listdir', 'mkdir', 'mount', 'rename', 'rmdir', 'stat', 'statvfs', 'umount', 
@@ -76,6 +76,7 @@ from thonny.common import (
 from thonny.common import ConnectionClosedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.running import EXPECTED_TERMINATION_CODE
+from thonny import report_time
 
 ENCODING = "utf-8"
 
@@ -122,7 +123,6 @@ class MicroPythonBackend(MainBackend, ABC):
         logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)
         self._connection: MicroPythonConnection
         self._args = args
-        self._prev_time = time.time()
         self._last_interrupt_time = None
         self._local_cwd = None
         self._cwd = args.get("cwd")
@@ -131,20 +131,19 @@ class MicroPythonBackend(MainBackend, ABC):
         self._sys_path = None
         self._epoch_year = None
         self._builtin_modules = []
-        self._postponed_internal_error = None
         self._number_of_interrupts_sent = 0
 
         self._builtins_info = self._fetch_builtins_info()
 
         MainBackend.__init__(self)
         try:
-            self._report_time("before prepare")
+            report_time("before prepare")
             self._process_until_initial_prompt(
-                interrupt=args.get("interrupt_on_connect", False) or clean, clean=clean
+                interrupt=args["interrupt_on_connect"] or clean, clean=clean
             )
             if self._welcome_text is None:
                 self._welcome_text = self._fetch_welcome_text()
-                self._report_time("got welcome")
+                report_time("got welcome")
 
             # Get rid of the welcome text which was printed while searching for prompt
             self.send_message(
@@ -159,15 +158,16 @@ class MicroPythonBackend(MainBackend, ABC):
 
             self._prepare_rtc()
             self._send_ready_message()
-            self._report_time("sent ready")
+            report_time("sent ready")
             self.mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
-        except Exception as e:
-            self._handle_communication_error(e)
+        except Exception:
+            logger.exception("Exception in MicroPython main method")
+            self._report_internal_exception("Internal error")
 
     def _prepare_after_soft_reboot(self, clean=False):
-        self._report_time("bef preparing helpers")
+        report_time("bef preparing helpers")
         logger.info("Preparing helpers")
         script = self._get_helper_code()
         logger.debug("Helper code:\n%s", script)
@@ -182,13 +182,13 @@ class MicroPythonBackend(MainBackend, ABC):
         #     """
         #     ).strip()
         # )
-        self._report_time("prepared helpers")
+        report_time("prepared helpers")
 
         self._update_cwd()
-        self._report_time("got cwd")
+        report_time("got cwd")
         self._sys_path = self._fetch_sys_path()
 
-        self._report_time("prepared")
+        report_time("prepared")
         self._check_perform_just_in_case_gc()
         logger.info("Prepared")
 
@@ -284,10 +284,10 @@ class MicroPythonBackend(MainBackend, ABC):
         raise NotImplementedError()
 
     def _get_time_for_rtc(self):
-        if self._args["utc_clock"]:
-            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
-        else:
+        if self._args["local_rtc"]:
             return datetime.datetime.now().timetuple()
+        else:
+            return datetime.datetime.now(tz=datetime.timezone.utc).timetuple()
 
     def _validate_time(self):
         this_computer = self._get_time_for_rtc()
@@ -342,81 +342,16 @@ class MicroPythonBackend(MainBackend, ABC):
             self._last_interrupt_time = time.time()
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
-        self._postponed_internal_error = None
-        logger.info("Handling command '%s' (%r) ", cmd.name, cmd)
-        self._report_time("before " + cmd.name)
-        assert isinstance(cmd, (ToplevelCommand, InlineCommand))
+        logger.debug("Handling normal command '%s' in micropython backend ", cmd.name)
+        report_time("before " + cmd.name)
 
         if "local_cwd" in cmd:
             self._local_cwd = cmd["local_cwd"]
 
-        def create_error_response(**kw):
-            if "error" not in kw:
-                kw["error"] = traceback.format_exc()
-
-            if isinstance(cmd, ToplevelCommand):
-                return ToplevelResponse(command_name=cmd.name, **kw)
-            else:
-                return InlineResponse(command_name=cmd.name, **kw)
-
-        handler = getattr(self, "_cmd_" + cmd.name, None)
-
-        if handler is None:
-            response = create_error_response(error="Unknown command: " + cmd.name)
-        else:
-            try:
-                response = handler(cmd)
-                if self._postponed_internal_error:
-                    msg = self._postponed_internal_error
-                    self._postponed_internal_error = None
-                    raise PostponedInternalError("Postponed internal error: %s" % msg)
-            except SystemExit:
-                # Must be caused by Thonny or plugins code
-                # TODO: Does the process get closed?
-                if isinstance(cmd, ToplevelCommand):
-                    logger.exception("Unexpected SystemExit while handling %s", cmd.name)
-                response = create_error_response(SystemExit=True)
-            except UserError as e:
-                self._show_error(str(e))
-                response = create_error_response()
-            except KeyboardInterrupt:
-                response = create_error_response(error="Interrupted", interrupted=True)
-            except ConnectionClosedException as e:
-                response = False
-                self._on_connection_closed(e)
-            except OSError as e:
-                response = create_error_response(error="OSError: " + str(e))
-            except Exception as e:
-                logger.error("%s while handling %s", type(e).__name__, cmd.name)
-                if isinstance(e, ManagementError) and "KeyboardInterrupt" in e.err:
-                    response = create_error_response(error="Interrupted", interrupted=True)
-                else:
-                    self._show_error(
-                        "\nERROR: Thonny could not complete command '%s'." % cmd.name, end=" "
-                    )
-                    self._handle_communication_error(e)
-                    response = create_error_response(error="Internal error")
-
-        if response is None:
-            response = {}
-
-        if response is False:
-            # Command doesn't want to send any response
-            logger.debug("Not sending any response for %s", cmd.name)
-            return
-
-        elif isinstance(response, dict):
-            if isinstance(cmd, ToplevelCommand):
-                response = ToplevelResponse(command_name=cmd.name, **response)
-            elif isinstance(cmd, InlineCommand):
-                response = InlineResponse(cmd.name, **response)
-
-        logger.debug("Sending response %r for %s", response, cmd.name)
-        self.send_message(self._prepare_command_response(response, cmd))
+        super()._handle_normal_command(cmd)
 
         self._check_perform_just_in_case_gc()
-
-        self._report_time("after " + cmd.name)
+        report_time("after " + cmd.name)
 
     def _should_keep_going(self) -> bool:
         return self._is_connected()
@@ -580,13 +515,6 @@ class MicroPythonBackend(MainBackend, ABC):
     def _send_error_message(self, msg):
         self._send_output("\n" + msg + "\n", "stderr")
 
-    def _send_output(self, data, stream_name):
-        super(MicroPythonBackend, self)._send_output(data, stream_name)
-
-        if "NameError: name '__thonny_helper' isn't defined" in data:
-            # Don't want to raise error here and disturb the protocol
-            self._postponed_internal_error = "Missing __thonny_helper"
-
     def _execute(self, script, capture_output=False) -> Tuple[str, str]:
         if capture_output:
             output_lists = {"stdout": [], "stderr": []}
@@ -715,10 +643,10 @@ class MicroPythonBackend(MainBackend, ABC):
         # TODO: clear last object inspector requests dictionary
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
-            self._report_time("befexeccc")
+            report_time("befexeccc")
             self._execute(source, capture_output=False)
             self._check_prepare()
-            self._report_time("affexeccc")
+            report_time("affexeccc")
         # TODO: assign last value to _
         return {}
 
@@ -1254,14 +1182,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
         return False
 
-    def _report_time(self, caption):
-        new_time = time.time()
-        # print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
-        self._prev_time = new_time
-
     def _system_time_to_posix_time(self, value: float) -> float:
         result = value + self._get_epoch_offset()
-        if not self._args["utc_clock"]:
+        if self._args["local_rtc"]:
             # convert to UTC
             result += time.timezone
 
@@ -1319,38 +1242,8 @@ class MicroPythonBackend(MainBackend, ABC):
             e.err,
         )
 
-    def _handle_communication_error(self, e):
-        logger.error("Unexpected error", exc_info=e)
-
-        if isinstance(e, ManagementError):
-            self._log_management_error_details(e)
-
-        if isinstance(
-            e, (ManagementError, ProtocolError, PostponedInternalError, SerialTimeoutException)
-        ):
-            self._show_error(
-                (
-                    "It looks like %s has arrived to an unexpected state"
-                    " or there have been communication problems."
-                )
-                % self._get_interpreter_kind(),
-                end=" ",
-            )
-        else:
-            self._show_error("Internal error (%s)" % e)
-
-        self._show_error("See %s for more details.\n" % BACKEND_LOG_MARKER)
-        self._show_error(
-            'You may need to press "Stop/Restart" or hard-reset your '
-            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
-        )
-
 
 class ProtocolError(RuntimeError):
-    pass
-
-
-class PostponedInternalError(RuntimeError):
     pass
 
 
@@ -1360,10 +1253,6 @@ class ManagementError(ProtocolError):
         self.script = script
         self.out = out
         self.err = err
-
-
-def _report_internal_error(exception=None):
-    logger.exception("PROBLEM WITH THONNY'S BACK-END:", exc_info=exception)
 
 
 def parse_api_information(file_path):

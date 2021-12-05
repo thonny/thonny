@@ -7,7 +7,6 @@ from logging import getLogger
 import os.path
 import pathlib
 import queue
-import shlex
 import stat
 import sys
 import threading
@@ -16,6 +15,7 @@ import traceback
 from abc import abstractmethod, ABC
 from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
 
+from thonny import report_time
 from thonny.common import (
     BackendEvent,
     EOFCommand,
@@ -30,9 +30,9 @@ from thonny.common import (
     MessageFromBackend,
     CommandToBackend,
     universal_dirname,
-    MESSAGE_MARKER,
     read_one_incoming_message_str,
     try_load_modules_with_frontend_sys_path,
+    UserError,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import ConnectionClosedException
@@ -60,6 +60,8 @@ class BaseBackend(ABC):
         _thread.start_new_thread(self._read_incoming_messages, ())
 
     def mainloop(self):
+        report_time("Beginning of mainloop")
+
         try:
             while self._should_keep_going():
                 try:
@@ -78,6 +80,10 @@ class BaseBackend(ABC):
                 except KeyboardInterrupt:
                     self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
                     self.send_message(ToplevelResponse())
+                except Exception:
+                    # Error in Thonny's code
+                    logger.exception("mainloop error")
+                    self._report_internal_exception("mainloop error")
         except ConnectionClosedException:
             sys.exit(0)
 
@@ -181,11 +187,21 @@ class BaseBackend(ABC):
         """Executed when there is no commands in queue"""
         pass
 
-    def _report_internal_exception(self, exception=None):
-        logger.exception("PROBLEM WITH THONNY'S BACK-END", exc_info=exception)
+    def _report_internal_exception(self, msg: str) -> None:
+        user_msg = "PROBLEM WITH THONNY'S BACK-END: " + msg
+        if sys.exc_info()[1]:
+            err_msg = "\n".join(
+                traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])
+            ).strip()
+            user_msg += f" ({err_msg})"
 
-    def _report_internal_error(self, message):
-        print("PROBLEM WITH THONNY'S BACK-END:\n" + message + "\n", file=sys.stderr)
+        user_msg += ".\nSee backend.log for more info."
+
+        print(user_msg, file=sys.stderr)
+
+    def _report_internal_warning(self, msg: str) -> None:
+        user_msg = f"Warning: {msg}.\nSee backend.log for more info."
+        print(user_msg, file=sys.stderr)
 
     @abstractmethod
     def _should_keep_going(self) -> bool:
@@ -213,8 +229,74 @@ class MainBackend(BaseBackend, ABC):
     """Backend which does not forward to another backend"""
 
     def __init__(self):
+        self._command_handlers = {}
+        self._jedi_is_loaded = False
         BaseBackend.__init__(self)
-        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
+
+    def add_command(self, command_name, handler):
+        """Handler should be 1-argument function taking command object.
+
+        Handler may return None (in this case no response is sent to frontend)
+        or a BackendResponse
+        """
+        self._command_handlers[command_name] = handler
+
+    def send_message(self, msg: MessageFromBackend) -> None:
+        super().send_message(msg)
+
+        # take the time for pre-loading jedi after the first toplevel response
+        if isinstance(msg, ToplevelResponse):
+            self._check_load_jedi()
+
+    def _handle_normal_command(self, cmd: CommandToBackend) -> None:
+        assert isinstance(cmd, (ToplevelCommand, InlineCommand))
+        logger.debug("Command: %r", cmd)
+
+        if cmd.name in self._command_handlers:
+            handler = self._command_handlers[cmd.name]
+        else:
+            handler = getattr(self, "_cmd_" + cmd.name, None)
+
+        if handler is None:
+            response = {"error": "Unknown command: " + cmd.name}
+        else:
+            try:
+                response = handler(cmd)
+                # Exceptions must be caused by Thonny or plugins code, because the ones
+                # from user code are caught at execution places
+            except UserError as e:
+                logger.info("UserError while handling %r", cmd.name, exc_info=True)
+                if isinstance(cmd, ToplevelCommand):
+                    print(str(e), file=sys.stderr)
+                    response = {}
+                else:
+                    response = {"error": str(e)}
+            except KeyboardInterrupt as e:
+                if isinstance(cmd, ToplevelCommand):
+                    print(str(e), file=sys.stderr)
+                    response = {}
+                else:
+                    response = {"error": "Interrupted", "interrupted": True}
+            except ConnectionClosedException as e:
+                response = False
+                self._on_connection_closed(e)
+            except Exception as e:
+                logger.exception("Exception while handling %r", cmd.name)
+                if isinstance(cmd, ToplevelCommand):
+                    self._report_internal_exception(f"Failed executing {cmd.name!r}")
+                    response = {}
+                else:
+                    response = {"error": str(e)}
+
+        if response is False:
+            # Command doesn't want to send any response
+            return
+
+        real_response = self._prepare_command_response(response, cmd)
+        self.send_message(real_response)
+
+    def _on_connection_closed(self, error=None):
+        pass
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
@@ -243,18 +325,12 @@ class MainBackend(BaseBackend, ABC):
         else:
             import __main__
 
-            try:
-                with warnings.catch_warnings():
-                    completions = jedi_utils.get_interpreter_completions(
-                        cmd.source, [__main__.__dict__], sys_path=self._get_sys_path_for_analysis()
-                    )
-            except Exception as e:
-                completions = []
-                logger.info("Autocomplete error", exc_info=e)
-                error = "Autocomplete error: " + str(e)
+            with warnings.catch_warnings():
+                completions = jedi_utils.get_interpreter_completions(
+                    cmd.source, [__main__.__dict__], sys_path=self._get_sys_path_for_analysis()
+                )
 
-        return InlineResponse(
-            "shell_autocomplete",
+        return dict(
             source=cmd.source,
             completions=completions,
             error=error,
@@ -278,13 +354,8 @@ class MainBackend(BaseBackend, ABC):
         except ImportError:
             completions = []
             error = "Could not import jedi"
-        except Exception as e:
-            completions = []
-            logger.info("Autocomplete error", exc_info=e)
-            error = "Autocomplete error: " + str(e)
 
-        return InlineResponse(
-            "editor_autocomplete",
+        return dict(
             source=cmd.source,
             row=cmd.row,
             column=cmd.column,
@@ -410,7 +481,9 @@ class MainBackend(BaseBackend, ABC):
         """Returns information about this path or None if it doesn't exist"""
 
     @abstractmethod
-    def _get_dir_children_info(self, path: str) -> Optional[Dict[str, Dict]]:
+    def _get_dir_children_info(
+        self, path: str, include_hidden: bool = False
+    ) -> Optional[Dict[str, Dict]]:
         """For existing dirs returns Dict[child_short_name, Dict of its information].
         Returns None if path doesn't exist or is not a dir.
         """
@@ -418,6 +491,16 @@ class MainBackend(BaseBackend, ABC):
     @abstractmethod
     def _get_sep(self) -> str:
         """Returns symbol for combining parent directory path and child name"""
+
+    def _check_load_jedi(self) -> None:
+        if self._jedi_is_loaded:
+            return
+        logger.info("Loading Jedi")
+
+        report_time("Before loading Jedi")
+        try_load_modules_with_frontend_sys_path(["jedi", "parso"])
+        self._jedi_is_loaded = True
+        report_time("After loading Jedi")
 
 
 class UploadDownloadMixin(ABC):
@@ -444,37 +527,24 @@ class UploadDownloadMixin(ABC):
         def callback(completed, total):
             self._report_progress(cmd, cmd["path"], completed, total)
 
-        try:
-            with io.BytesIO() as fp:
-                self._read_file(cmd["path"], fp, callback)
-                fp.seek(0)
-                content_bytes = fp.read()
+        with io.BytesIO() as fp:
+            self._read_file(cmd["path"], fp, callback)
+            fp.seek(0)
+            content_bytes = fp.read()
 
-            error = None
-        except Exception as e:
-            self._report_internal_exception()
-            error = str(e)
-            content_bytes = None
-
-        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
+        return {"content_bytes": content_bytes, "path": cmd["path"]}
 
     def _cmd_write_file(self, cmd):
         def callback(completed, total):
             self._report_progress(cmd, cmd["path"], completed, total)
 
-        try:
-            with io.BytesIO() as fp:
-                fp.write(cmd["content_bytes"])
-                fp.seek(0)
-                self._write_file(fp, cmd["path"], len(cmd["content_bytes"]), callback)
-
-            error = None
-        except Exception as e:
-            self._report_internal_exception()
-            error = str(e)
+        with io.BytesIO() as fp:
+            fp.write(cmd["content_bytes"])
+            fp.seek(0)
+            self._write_file(fp, cmd["path"], len(cmd["content_bytes"]), callback)
 
         return InlineResponse(
-            command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id"), error=error
+            command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
         )
 
     def _supports_directories(self) -> bool:
@@ -567,7 +637,7 @@ class UploadDownloadMixin(ABC):
 
     @abstractmethod
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
-        "returns None if path doesn't exist"
+        """returns None if path doesn't exist"""
 
     @abstractmethod
     def _mkdir_for_upload(self, path: str) -> None:
@@ -656,9 +726,6 @@ class SshMixin(UploadDownloadMixin):
         self._connect()
 
     def _connect(self):
-        from paramiko.ssh_exception import AuthenticationException
-        import socket
-
         from paramiko import SSHException
 
         try:
@@ -679,6 +746,8 @@ class SshMixin(UploadDownloadMixin):
             sys.exit(1)
 
     def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
+        import shlex
+
         # Before running the main thing:
         # * print process id (so that we can kill it later)
         #   http://redes-privadas-virtuales.blogspot.com/2013/03/getting-hold-of-remote-pid-through.html

@@ -27,7 +27,7 @@ from time import sleep
 from typing import List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
 
 import thonny
-from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench
+from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, report_time
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -430,7 +430,9 @@ class Runner:
     def cmd_run_current_script(self) -> None:
         if get_workbench().in_simple_mode():
             get_workbench().hide_view("VariablesView")
+        report_time("Before Run")
         self.execute_current("Run")
+        report_time("After Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
         if inside_flatpak():
@@ -739,7 +741,7 @@ class Runner:
             return self._proxy.get_node_label()
 
     def using_venv(self) -> bool:
-        from thonny.plugins.cpython import CPythonProxy
+        from thonny.plugins.cpython_frontend import CPythonProxy
 
         return isinstance(self._proxy, CPythonProxy) and self._proxy._in_venv
 

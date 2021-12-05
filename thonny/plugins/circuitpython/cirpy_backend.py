@@ -29,7 +29,7 @@ _ENTER_REPL_PHRASES = [
 _AUTO_RELOAD_PHRASES = [
     "Auto-reload is on. Simply save files over USB to run them or enter REPL to disable.",
     "Auto-chargement activé. Copiez ou sauvegardez les fichiers via USB pour les lancer ou démarrez le REPL pour le désactiver.",
-    "Auto-reload habilitado. Simplemente guarda los archivos via USB para ejecutarlos o entra al REPL para desabilitarlos."    ,
+    "Auto-reload habilitado. Simplemente guarda los archivos via USB para ejecutarlos o entra al REPL para desabilitarlos.",
     "Automatisches Neuladen ist aktiv. Speichere Dateien über USB um sie auszuführen oder verbinde dich mit der REPL zum Deaktivieren.",
     "L'auto-reload è attivo. Salva i file su USB per eseguirli o entra nel REPL per disabilitarlo.",
     "Auto-reload be on. Put yer files on USB to weigh anchor, er' bring'er about t' the REPL t' scuttle.",

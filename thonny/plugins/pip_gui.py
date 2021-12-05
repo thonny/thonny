@@ -16,7 +16,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
-from thonny.plugins.cpython import CPythonProxy
+from thonny.plugins.cpython_frontend import CPythonProxy
 from thonny.plugins.cpython_ssh import SshCPythonProxy
 from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog
 from thonny.ui_utils import (

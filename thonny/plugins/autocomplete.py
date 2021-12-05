@@ -10,7 +10,12 @@ from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
-from thonny.ui_utils import modifier_is_pressed, ems_to_pixels, control_is_pressed
+from thonny.ui_utils import (
+    ems_to_pixels,
+    control_is_pressed,
+    command_is_pressed,
+    alt_is_pressed_without_char,
+)
 
 logger = getLogger(__name__)
 
@@ -200,7 +205,7 @@ class CompletionsBox(EditorInfoBox):
             event.char
             and not _is_python_name_char(event.char)
             and event.char != "."
-            and not control_is_pressed(event.state)
+            and not control_is_pressed(event)
         ):
             self.hide(event)
 
@@ -315,6 +320,7 @@ class CompletionsBox(EditorInfoBox):
         self._show_next_to_completions()
 
     def _update_completion(self, details: CompletionInfo) -> None:
+        # logger.debug("Handling completion details %r", details)
         for i, comp in enumerate(self._completions):
             if comp.full_name == details.full_name:
                 comp.name_with_symbols = details.name_with_symbols
@@ -342,6 +348,7 @@ class Completer:
     """
 
     def __init__(self):
+        logger.debug("Creating Completer")
         self._completions_box: Optional[CompletionsBox] = None
 
         get_workbench().bind_class(
@@ -375,7 +382,15 @@ class Completer:
             self._completions_box.hide()
 
     def _check_trigger_keypress(self, event: tk.Event) -> None:
-        if modifier_is_pressed(event.state):
+        runner = get_runner()
+        if not runner or runner.is_running():
+            return
+
+        if (
+            control_is_pressed(event)
+            or command_is_pressed(event)
+            or alt_is_pressed_without_char(event)
+        ):
             return
 
         widget = event.widget
@@ -476,13 +491,17 @@ def load_plugin() -> None:
 
     completer = Completer()
 
+    def can_complete():
+        runner = get_runner()
+        return runner and not runner.is_running()
+
     get_workbench().add_command(
         "autocomplete",
         "edit",
         tr("Auto-complete"),
         completer.request_completions,
-        default_sequence="<Control-space>"
-        # TODO: tester
+        default_sequence="<Control-space>",
+        tester=can_complete,
     )
 
     get_workbench().set_default("edit.tab_request_completions_in_editors", True)

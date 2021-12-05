@@ -24,6 +24,7 @@ from thonny.running import SubprocessProxy
 from thonny.ui_utils import (
     create_string_var,
     create_url_label,
+    ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -73,7 +74,7 @@ class MicroPythonProxy(SubprocessProxy):
             "validate_time": get_workbench().get_option(
                 self.backend_name + ".validate_time", False
             ),
-            "utc_clock": get_workbench().get_option(self.backend_name + ".utc_clock", False),
+            "local_rtc": get_workbench().get_option(self.backend_name + ".local_rtc", False),
         }
         return result
 
@@ -86,10 +87,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._fix_port()
 
         super().__init__(clean)
-
-        # Following is required for compatibility with older MP plugins (ESP)
-        # TODO: remove it later
-        self.micropython_upload_enabled = False
 
     def _fix_port(self):
         if self._port == "webrepl":
@@ -147,6 +144,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
             "rts": get_workbench().get_option(self.backend_name + ".rts"),
             "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
+            "interrupt_on_connect": get_workbench().get_option(
+                self.backend_name + ".interrupt_on_connect"
+            ),
+            "restart_interpreter_before_run": get_workbench().get_option(
+                self.backend_name + ".restart_interpreter_before_run"
+            ),
             "write_block_size": self._get_write_block_size(),
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
@@ -452,6 +455,31 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.columnconfigure(0, weight=1)
 
         self._webrepl_frame = None
+
+        self.add_checkbox(
+            self.backend_name + ".interrupt_on_connect",
+            row=10,
+            description=tr("Interrupt working program on connect"),
+            pady=(ems_to_pixels(2.0), 0),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".sync_time",
+            row=11,
+            description=tr("Synchronize device's real time clock"),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".local_rtc",
+            row=12,
+            description=tr("Use local time in real time clock"),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".restart_interpreter_before_run",
+            row=13,
+            description=tr("Restart interpreter before running a script"),
+        )
 
         last_row = ttk.Frame(self)
         last_row.grid(row=100, sticky="swe")
@@ -870,7 +898,7 @@ def list_serial_ports():
 
     try:
         old_islink = os.path.islink
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             os.path.islink = lambda _: False
         return list(serial.tools.list_ports.comports())
     finally:
@@ -923,7 +951,7 @@ def add_micropython_backend(
     sort_key=None,
     validate_time=True,
     sync_time=None,
-    utc_clock=False,
+    local_rtc=True,
     write_block_size=None,
     write_block_delay=None,
     dtr=None,
@@ -940,6 +968,8 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
         get_workbench().set_default(name + ".submit_mode", None)
+        get_workbench().set_default(name + ".interrupt_on_connect", True)
+        get_workbench().set_default(name + ".restart_interpreter_before_run", True)
 
         if sync_time is None:
             sync_time = True
@@ -948,7 +978,7 @@ def add_micropython_backend(
             sync_time = False
 
     get_workbench().set_default(name + ".sync_time", sync_time)
-    get_workbench().set_default(name + ".utc_clock", utc_clock)
+    get_workbench().set_default(name + ".local_rtc", local_rtc)
     get_workbench().set_default(name + ".validate_time", validate_time)
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)
 
@@ -969,7 +999,7 @@ def load_plugin():
             tr("MicroPython (local)"),
             LocalMicroPythonConfigPage,
             bare_metal=False,
-            utc_clock=True,
+            local_rtc=False,
             sort_key="21",
         )
         get_workbench().set_default("LocalMicroPython.executable", "micropython")
@@ -980,7 +1010,7 @@ def load_plugin():
         tr("MicroPython (SSH)"),
         SshMicroPythonConfigPage,
         bare_metal=False,
-        utc_clock=True,
+        local_rtc=False,
         sort_key="22",
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")

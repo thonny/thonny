@@ -275,8 +275,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _interrupt(self):
         try:
             super()._interrupt()
-        except SerialTimeoutException as e:
-            self._handle_communication_error(e)
+        except SerialTimeoutException:
+            logger.exception("Timeout while trying to interrupt")
+            self._report_internal_exception("Could not interrupt")
 
     def _choose_submit_mode(self):
         if self._connected_over_webrepl():
@@ -1029,21 +1030,21 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _cmd_Run(self, cmd):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
-        reset_environment_before_run = True  # TODO: make it configurable
+        restart_interpreter_before_run = self._args["restart_interpreter_before_run"]
         if cmd.get("source"):
-            if reset_environment_before_run:
+            if restart_interpreter_before_run:
                 self._clear_repl()
 
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 source = self._avoid_printing_expression_statements(cmd.source)
-                if reset_environment_before_run:
+                if restart_interpreter_before_run:
                     logger.debug("Ensuring normal mode after soft reboot")
                     self._ensure_normal_mode(force=True)
             else:
                 source = cmd.source
 
             self._execute(source, capture_output=False)
-            if reset_environment_before_run:
+            if restart_interpreter_before_run:
                 self._prepare_after_soft_reboot(False)
         return {}
 
@@ -1639,6 +1640,29 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _output_warrants_interrupt(self, data):
         return False
+
+    def _report_internal_exception(self, msg: str) -> None:
+        e = sys.exc_info()[1]
+        if isinstance(e, ManagementError):
+            self._log_management_error_details(e)
+
+        if isinstance(e, (ManagementError, ProtocolError, SerialTimeoutException)):
+            self._show_error(
+                (
+                    "It looks like %s has arrived to an unexpected state"
+                    " or there have been communication problems."
+                )
+                % self._get_interpreter_kind(),
+                end=" ",
+            )
+        else:
+            self._show_error("Internal error (%s)" % e)
+
+        self._show_error("See %s for more details.\n" % thonny.BACKEND_LOG_MARKER)
+        self._show_error(
+            'You may need to press "Stop/Restart" or hard-reset your '
+            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
+        )
 
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):

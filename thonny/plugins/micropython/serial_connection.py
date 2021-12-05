@@ -52,7 +52,7 @@ class SerialConnection(MicroPythonConnection):
             message = "Unable to connect to " + port + ": " + err_str
 
             # TODO: check if these error codes also apply to Linux and Mac
-            if error.errno == 13 and platform.system() == "Linux":
+            if error.errno == 13 and sys.platform == "linux":
                 try:
                     group = pathlib.Path(self._serial.port).group()
                 except Exception as e:

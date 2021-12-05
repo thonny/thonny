@@ -2,6 +2,13 @@
 Version history
 ===============
 
+4.4.0b1 (2021-12-??)
+====================
+New & changed
+--------------
+* Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends.
+
+
 3.3.14 (2021-08-01)
 ===================
 * Fix problems in org.thonny.Thonny.appdata.xml
