@@ -1389,32 +1389,42 @@ def create_boolean_var(value, modification_listener=None) -> EnhancedBooleanVar:
     return EnhancedBooleanVar(None, value, None, modification_listener)
 
 
-def shift_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def shift_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0001
+    return event.state & 0x0001
 
 
-def caps_lock_is_on(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def caps_lock_is_on(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0002
+    return event.state & 0x0002
 
 
-def control_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def control_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0004
+    return event.state & 0x0004
 
 
-def command_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def alt_is_pressed_without_char(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0008
+    # https://bugs.python.org/msg268429
+    if event.char:
+        return False
+    if running_on_windows():
+        return event.state & 0x20000
+
+    raise NotImplementedError()
 
 
-def modifier_is_pressed(event_state: int) -> bool:
-    return event_state != 0 and event_state != 0b10000
+def command_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
+    # http://stackoverflow.com/q/32426250/261181
+    if not running_on_mac_os():
+        return False
+    return event.state & 0x0008
 
 
 def get_hyperlink_cursor() -> str:
@@ -1451,7 +1461,7 @@ def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, in
         return None
 
     event_state = 0
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # https://tkdocs.com/shipman/event-handlers.html
     # https://stackoverflow.com/questions/32426250/python-documentation-and-or-lack-thereof-e-g-keyboard-event-state
     for modifier in modifiers:
         if modifier == "shift":
@@ -2059,7 +2069,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
     # because at least on Windows, Ctrl-shortcuts' state
     # has something extra
     simplified_state = 0x04
-    if shift_is_pressed(event.state):
+    if shift_is_pressed(event):
         simplified_state |= 0x01
 
     # print(simplified_state, event.keycode)
