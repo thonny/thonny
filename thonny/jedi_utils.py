@@ -367,6 +367,8 @@ def _get_completion_name_with_symbols(
         if not signatures:
             # signatures not found or haven't been computed yet
             return completion.name + "("
+    elif completion.type == "keyword" and completion.name != "pass":
+        return completion.name + " "
 
     if signatures:
         # logger.info("name: %s, type: %s, sigs: %s", completion.name, completion.type, signatures)
