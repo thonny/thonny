@@ -320,6 +320,7 @@ class CompletionsBox(EditorInfoBox):
         self._show_next_to_completions()
 
     def _update_completion(self, details: CompletionInfo) -> None:
+        # logger.debug("Handling completion details %r", details)
         for i, comp in enumerate(self._completions):
             if comp.full_name == details.full_name:
                 comp.name_with_symbols = details.name_with_symbols
@@ -390,7 +391,6 @@ class Completer:
             or command_is_pressed(event)
             or alt_is_pressed_without_char(event)
         ):
-            logger.info("mod %s, %s", bin(event.state), hex(event.state))
             return
 
         widget = event.widget
