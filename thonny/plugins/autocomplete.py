@@ -381,11 +381,16 @@ class Completer:
             self._completions_box.hide()
 
     def _check_trigger_keypress(self, event: tk.Event) -> None:
+        runner = get_runner()
+        if not runner or runner.is_running():
+            return
+
         if (
             control_is_pressed(event)
             or command_is_pressed(event)
             or alt_is_pressed_without_char(event)
         ):
+            logger.info("mod %s, %s", bin(event.state), hex(event.state))
             return
 
         widget = event.widget
@@ -486,13 +491,17 @@ def load_plugin() -> None:
 
     completer = Completer()
 
+    def can_complete():
+        runner = get_runner()
+        return runner and not runner.is_running()
+
     get_workbench().add_command(
         "autocomplete",
         "edit",
         tr("Auto-complete"),
         completer.request_completions,
-        default_sequence="<Control-space>"
-        # TODO: tester
+        default_sequence="<Control-space>",
+        tester=can_complete,
     )
 
     get_workbench().set_default("edit.tab_request_completions_in_editors", True)

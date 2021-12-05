@@ -68,7 +68,7 @@ class OccurrencesHighlighter:
         self._clear()
         row, column = map(int, self.text.index("insert").split("."))
         runner = get_runner()
-        if not runner:
+        if not runner or runner.is_running():
             return
 
         runner.send_command(
