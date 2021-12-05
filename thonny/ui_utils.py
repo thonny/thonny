@@ -1413,10 +1413,14 @@ def alt_is_pressed_without_char(event: tk.Event) -> bool:
     # https://bugs.python.org/msg268429
     if event.char:
         return False
+
     if running_on_windows():
         return event.state & 0x20000
-
-    raise NotImplementedError()
+    elif running_on_mac_os():
+        # combinations always produce a char or are consumed by the OS
+        return False
+    else:
+        raise NotImplementedError()
 
 
 def command_is_pressed(event: tk.Event) -> bool:
