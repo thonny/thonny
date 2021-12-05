@@ -2,6 +2,9 @@ import tkinter as tk
 
 root = tk.Tk()
 
+def on_key(event):
+    print(bin(event.state), hex(event.state), event)
+
 text = tk.Text(root)
 text.grid()
 
@@ -16,6 +19,8 @@ text.tag_configure("too", foreground="blue")
 text.tag_configure("see", background="red")
 text.tag_configure("see", foreground="green", background="")
 text.tag_configure("see", foreground="", background="")
+
+text.bind("<Key>", on_key, True)
 
 
 root.mainloop()

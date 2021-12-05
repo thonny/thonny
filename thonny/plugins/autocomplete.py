@@ -347,6 +347,7 @@ class Completer:
     """
 
     def __init__(self):
+        logger.debug("Creating Completer")
         self._completions_box: Optional[CompletionsBox] = None
 
         get_workbench().bind_class(
