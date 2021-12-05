@@ -10,7 +10,12 @@ from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
-from thonny.ui_utils import modifier_is_pressed, ems_to_pixels, control_is_pressed
+from thonny.ui_utils import (
+    ems_to_pixels,
+    control_is_pressed,
+    command_is_pressed,
+    alt_is_pressed_without_char,
+)
 
 logger = getLogger(__name__)
 
@@ -200,7 +205,7 @@ class CompletionsBox(EditorInfoBox):
             event.char
             and not _is_python_name_char(event.char)
             and event.char != "."
-            and not control_is_pressed(event.state)
+            and not control_is_pressed(event)
         ):
             self.hide(event)
 
@@ -375,7 +380,11 @@ class Completer:
             self._completions_box.hide()
 
     def _check_trigger_keypress(self, event: tk.Event) -> None:
-        if modifier_is_pressed(event.state):
+        if (
+            control_is_pressed(event)
+            or command_is_pressed(event)
+            or alt_is_pressed_without_char(event)
+        ):
             return
 
         widget = event.widget

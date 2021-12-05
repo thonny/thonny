@@ -1004,7 +1004,7 @@ class Workbench(tk.Tk):
             self.event_generate("UICommandDispatched", command_id=command_id, denied=denied)
 
         def dispatch_if_caps_lock_is_on(event):
-            if caps_lock_is_on(event.state) and not shift_is_pressed(event.state):
+            if caps_lock_is_on(event) and not shift_is_pressed(event):
                 dispatch(event)
 
         sequence_option_name = "shortcuts." + command_id

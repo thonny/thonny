@@ -84,14 +84,14 @@ def _patch_perform_return():
         ranges = text.tag_ranges("CURRENT_CELL")
 
         if len(ranges) == 2 and (
-            ui_utils.shift_is_pressed(event.state) or ui_utils.control_is_pressed(event.state)
+            ui_utils.shift_is_pressed(event) or ui_utils.control_is_pressed(event)
         ):
 
             if run_enabled():
                 code = text.get(ranges[0], ranges[1]).strip()
                 _submit_code(code)
 
-                if ui_utils.shift_is_pressed(event.state):
+                if ui_utils.shift_is_pressed(event):
                     # advance to next cell
                     text.mark_set("insert", ranges[1])
 

@@ -1,5 +1,6 @@
 from logging import getLogger
 import os.path
+import tkinter as tk
 from tkinter import messagebox
 from typing import cast, Set
 
@@ -27,7 +28,7 @@ class GotoHandler:
         wb.bind("get_definitions_response", self.handle_definitions_response, True)
 
     def request_definitions(self, event=None):
-        if not self.proper_modifier_is_pressed(event.state):
+        if not self.proper_modifier_is_pressed(event):
             return
 
         assert isinstance(event.widget, CodeViewText)
@@ -44,11 +45,11 @@ class GotoHandler:
             )
         )
 
-    def proper_modifier_is_pressed(self, event_state: int) -> bool:
+    def proper_modifier_is_pressed(self, event: tk.Event) -> bool:
         if running_on_mac_os():
-            return command_is_pressed(event_state)
+            return command_is_pressed(event)
         else:
-            return control_is_pressed(event_state)
+            return control_is_pressed(event)
 
     def handle_definitions_response(self, msg):
         defs = msg.definitions
@@ -74,7 +75,7 @@ class GotoHandler:
 
     def on_motion(self, event):
         text = cast(SyntaxText, event.widget)
-        if self.proper_modifier_is_pressed(event.state):
+        if self.proper_modifier_is_pressed(event):
             self.remove_underline(event)
             start_index = text.index(f"@{event.x},{event.y} wordstart")
             end_index = text.index(f"@{event.x},{event.y} wordend")
