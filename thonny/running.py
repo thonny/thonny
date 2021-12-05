@@ -1002,11 +1002,7 @@ class SubprocessProxy(BackendProxy):
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
 
-        add_env_file = self._load_env_file_with_overlay(overlay_env=env)
-
-        chained_env = collections.ChainMap(add_env_file, env)
-        result_env = dict(chained_env)
-
+        result_env = self._load_env_file_with_overlay(overlay_env=env)
         return result_env
 
     def _load_env_file_with_overlay(self, overlay_env):
@@ -1027,7 +1023,7 @@ class SubprocessProxy(BackendProxy):
                     logger.exception("env-file" + str(env.excep))
             env = env.get_env()
         else:
-            env = {}
+            env = overlay_env
 
         return env
 
