@@ -22,6 +22,8 @@ class TodoView(ui_utils.TreeFrame):
         self.tree.bind("<<TreeviewSelect>>", self._on_click)
         self.tree.bind("<Map>", self._update, True)
 
+        # todo bind to reload event for update
+
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
