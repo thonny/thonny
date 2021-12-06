@@ -874,6 +874,13 @@ class EnvFile(object):
         r_ex = r"[^\\](\${\s*([a-zA-Z_]+[a-zA-Z_0-9]*)\s*})"
         self._r_match = re.compile(r_ex)
 
+    @staticmethod
+    def build_env_file_path(basedir):
+        # todo: configuration menu -> Tools > Options > Run & Debug
+        env_file = os.environ.get("THONNY_ENV_FILE", ".env")
+        env_file = os.path.join(basedir, env_file)
+        return env_file
+
     def clear(self):
         self._env.clear()
         self.clear_errors()
@@ -943,13 +950,6 @@ class EnvFile(object):
         self._env = env
 
 
-def build_env_file_path(basedir):
-    # todo: configuration menu -> Tools > Options > Run & Debug
-    env_file = os.environ.get("THONNY_ENV_FILE", ".env")
-    env_file = os.path.join(basedir, env_file)
-    return env_file
-
-
 class SubprocessProxy(BackendProxy):
     def __init__(self, clean: bool, executable: Optional[str] = None) -> None:
         super().__init__(clean)
@@ -1011,7 +1011,7 @@ class SubprocessProxy(BackendProxy):
             PATH= ${PATH};c:\\mydesk;
         if PATH is given in overlay_env
         """
-        env_file = build_env_file_path(self.get_cwd())
+        env_file = EnvFile.build_env_file_path(self.get_cwd())
 
         if os.path.exists(env_file) and os.path.isfile(env_file):
             env = EnvFile()
