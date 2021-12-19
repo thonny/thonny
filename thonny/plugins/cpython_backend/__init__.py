@@ -191,9 +191,17 @@ class MainCPythonBackend(MainBackend):
         return result
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        """
+        Following is an idea, but it didn't work properly. Also, threaded reading
+        was reverted for CPython https://github.com/thonny/thonny/issues/1363.
+        Therefore signals are used for interrupting CPython programs.
+
         if cmd.name == "interrupt":
             with self._interrupt_lock:
                 interrupt_local_process()
+        """
+
+        raise NotImplementedError()
 
     def _should_keep_going(self) -> bool:
         return True
