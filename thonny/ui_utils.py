@@ -1420,7 +1420,7 @@ def alt_is_pressed_without_char(event: tk.Event) -> bool:
         # combinations always produce a char or are consumed by the OS
         return False
     else:
-        raise NotImplementedError()
+        return event.state & 0x0010
 
 
 def command_is_pressed(event: tk.Event) -> bool:
