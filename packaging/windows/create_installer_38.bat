@@ -6,9 +6,12 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy C:\Python310-64\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Python38-32\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
-copy ThonnyRunner310\x64\Release\thonny.exe %BUILDDIR% /Y
+copy ThonnyRunner38\Win32\Release\thonny.exe %BUILDDIR% /Y
+@rem NB! ucrt_redist not required in Windows 10
+xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
+xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
@@ -40,7 +43,7 @@ del "%BUILDDIR%\Scripts\*" /Q>NUL
 
 copy .\pip.bat "%BUILDDIR%\Scripts\pip.bat"
 copy .\pip.bat "%BUILDDIR%\Scripts\pip3.bat"
-copy .\pip.bat "%BUILDDIR%\Scripts\pip3.10.bat"
+copy .\pip.bat "%BUILDDIR%\Scripts\pip3.8.bat"
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 
@@ -74,24 +77,3 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 @echo ............... CREATING INSTALLER ..........................
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
-
-@rem @echo ............... CREATING ZIP ..........................
-@rem SET PATH=%PATH%;C:\Program Files\7-Zip
-@rem cd %BUILDDIR%
-@rem 7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
-@rem cd ..
-
-@rem @echo ............... XXL ..........................
-@rem %BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
-@rem 
-@rem del /S "%BUILDDIR%\*.pyc">NUL
-@rem 
-@rem @rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
-@rem del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
-@rem del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
-@rem 
-@rem 
-@rem "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
-
-@rem rmdir %BUILDDIR% /S /Q
-pause
