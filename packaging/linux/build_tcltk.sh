@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=8.6.11
+VERSION=8.6.12
 
 # COMPILE TCL/TK ####################################################
 wget https://deac-riga.dl.sourceforge.net/project/tcl/Tcl/${VERSION}/tcl${VERSION}-src.tar.gz
