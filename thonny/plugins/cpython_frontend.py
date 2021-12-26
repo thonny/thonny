@@ -407,7 +407,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python 3.5 and later")
+        extra_text = tr("NB! Thonny only supports Python 3.7 and later")
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
@@ -519,7 +519,7 @@ def _get_interpreters():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
-        for minor in [6, 7, 8, 9, 10]:
+        for minor in [7, 8, 9, 10, 11]:
             for dir_ in [
                 "C:\\Python3%d" % minor,
                 "C:\\Python3%d-32" % minor,
@@ -565,13 +565,20 @@ def _get_interpreters():
             apath = normpath_with_actual_case(dir_)
             if apath != dir_ and apath in dirs:
                 continue
-            for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
+            for name in [
+                "python3",
+                "python3.7",
+                "python3.8",
+                "python3.9",
+                "python3.10",
+                "python3.11",
+            ]:
                 path = os.path.join(dir_, name)
                 if os.path.exists(path):
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.6", "3.7", "3.8", "3.9"]:
+        for version in ["3.7", "3.8", "3.9", "3.10", "3.11"]:
             dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
             path = os.path.join(dir_, "python3")
 
@@ -580,7 +587,7 @@ def _get_interpreters():
 
     from shutil import which
 
-    for command in ["python3", "python3.6", "python3.7", "python3.8", "python3.9"]:
+    for command in ["python3", "python3.7", "python3.8", "python3.9", "python3.10", "python3.11"]:
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)

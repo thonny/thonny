@@ -67,7 +67,7 @@ setup(
     },
     platforms=["Windows", "macOS", "Linux"],
     install_requires=requirements,
-    python_requires=">=3.5",
+    python_requires=">=3.7",
     packages=find_packages(),
     package_data={
         "": ["VERSION", "defaults.ini", "res/*"] + recursive_files("thonny/locale"),
