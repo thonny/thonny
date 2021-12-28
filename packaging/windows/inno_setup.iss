@@ -63,7 +63,8 @@ ChangesAssociations=yes
 ; http://www.jrsoftware.org/ishelp/index.php?topic=setup_signtool
 ;
 ; signtool prefix to be configured in Tools => Configure sign tools:
-; $qC:\Program Files (x86)\kSign\signtool.exe$q sign /f $qcertfile.p12$q /p password $p
+; "C:\Program Files (x86)\Windows Kits\10\App Certification Kit\signtool.exe" sign /f CERT.p12 /p PASSWORD $p
+; NB! Don't forget the trailing $p
 SignTool=signtool /tr http://timestamp.digicert.com /td sha256 /fd sha256 /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://thonny.org$q $f
 
 
