@@ -41,7 +41,8 @@ $TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir distro==1.5.*
 $TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
+#$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
+$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0.dev0-py3-none-any.whl
 
 VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
@@ -103,16 +104,20 @@ cd $SCRIPT_DIR
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $TARGET_DIR/bin 
 
-# copy libffi6, which is not present in newer Linuxes
+# copy libffi6, which is not present in newer Linuxes ...
 if [ `getconf LONG_BIT` = "32" ]
 then
-  cp /usr/lib/i386-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+  LIBFFI=/usr/lib/i386-linux-gnu/libffi.so.6.0.4
 else
-  cp /usr/lib/x86_64-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+  LIBFFI=/usr/lib/x86_64-linux-gnu/libffi.so.6.0.4
 fi
-cd $TARGET_DIR/lib
-ln -s libffi.so.6.0.4 libffi.so.6
-cd $SCRIPT_DIR
+# ... unless this script is run in a newer machine
+if [ -f "$LIBFFI" ]; then
+  cp $LIBFFI $TARGET_DIR/lib
+  cd $TARGET_DIR/lib
+  ln -s libffi.so.6.0.4 libffi.so.6
+  cd $SCRIPT_DIR
+fi
 
 
 # copy licenses
