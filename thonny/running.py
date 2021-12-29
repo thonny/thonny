@@ -1246,7 +1246,7 @@ def create_frontend_python_process(
     env["PYTHONUNBUFFERED"] = "1"
     if environment_extras is not None:
         env.update(environment_extras)
-    return _create_python_process(python_exe, args, stdin, stdout, stderr)
+    return _create_python_process(python_exe, args, stdin, stdout, stderr, env=env)
 
 
 def _create_python_process(
