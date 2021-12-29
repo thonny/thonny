@@ -396,22 +396,26 @@ def _configure_logging(log_file, console_level=None):
         "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
     )
 
-    # NB! Don't mess with the main root logger, because (CPython) backend runs user code
-    thonny_root_logger = logging.getLogger("thonny")
-    thonny_root_logger.setLevel(_choose_logging_level())
-    thonny_root_logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
-
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
     file_handler.setFormatter(logFormatter)
-    thonny_root_logger.addHandler(file_handler)
+
+    main_logger = logging.getLogger("thonny")
+    contrib_logger = logging.getLogger("thonnycontrib")
+
+    # NB! Don't mess with the main root logger, because (CPython) backend runs user code
+    for logger in [main_logger, contrib_logger]:
+        logger.setLevel(_choose_logging_level())
+        logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
+        logger.addHandler(file_handler)
 
     if console_level is not None:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(logFormatter)
         console_handler.setLevel(console_level)
-        thonny_root_logger.addHandler(console_handler)
+        for logger in [main_logger, contrib_logger]:
+            logger.addHandler(console_handler)
 
-    thonny_root_logger.info("Thonny version: %s", get_version())
+    main_logger.info("Thonny version: %s", get_version())
 
     import faulthandler
 
