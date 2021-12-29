@@ -519,7 +519,7 @@ class MainCPythonBackend(MainBackend):
         return InlineResponse("get_heap", heap=result)
 
     def _cmd_get_object_info(self, cmd):
-        if self._current_executor.is_in_past():
+        if self._current_executor and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
 
         elif cmd.object_id in self._heap:
