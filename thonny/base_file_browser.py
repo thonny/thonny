@@ -891,7 +891,7 @@ class BaseFileBrowser(ttk.Frame):
         raise NotImplementedError()
 
     def get_selected_file(self):
-        selection = self.get_selection_info(True)
+        selection = self.get_selection_info(False)
         if not selection or len(selection["paths"]) > 1:
             return
         return selection["paths"][0]
