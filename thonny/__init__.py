@@ -393,6 +393,7 @@ def get_frontend_log_file():
 def get_orig_argv():
     try:
         from sys import orig_argv # since 3.10
+        return sys.orig_argv
     except ImportError:
         # https://stackoverflow.com/a/57914236/261181
         import ctypes
