@@ -1,7 +1,7 @@
 from logging import getLogger
 import tkinter as tk
 from tkinter import messagebox
-from typing import Optional, List
+from typing import Optional, List, cast
 
 from thonny import get_runner, get_workbench, editor_helpers
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
@@ -420,12 +420,23 @@ class Completer:
         if (
             not self._box_is_visible()
             and not _is_python_name_char(event.char)
-            and event.char != "."
+            and not self._is_start_of_an_attribute(event)
         ):
             # non-word chars are allowed only while the box is already open
             return
 
         widget.after_idle(lambda: self.request_completions_for_text(widget))
+
+    def _is_start_of_an_attribute(self, event: tk.Event) -> bool:
+        if event.char != ".":
+            return False
+
+        text = cast(tk.Text, event.widget)
+        preceding = text.get("insert -2 chars")
+        if preceding.isnumeric():
+            return False
+
+        return True
 
     def request_completions_for_text(self, text: SyntaxText) -> None:
         source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
