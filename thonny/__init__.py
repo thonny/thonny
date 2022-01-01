@@ -390,13 +390,16 @@ def get_backend_log_file():
 def get_frontend_log_file():
     return os.path.join(THONNY_USER_DIR, "frontend.log")
 
+
 def get_orig_argv():
     try:
-        from sys import orig_argv # since 3.10
+        from sys import orig_argv  # since 3.10
+
         return sys.orig_argv
     except ImportError:
         # https://stackoverflow.com/a/57914236/261181
         import ctypes
+
         argc = ctypes.c_int()
         argv = ctypes.POINTER(ctypes.c_wchar_p if sys.version_info >= (3,) else ctypes.c_char_p)()
         ctypes.pythonapi.Py_GetArgcArgv(ctypes.byref(argc), ctypes.byref(argv))
@@ -408,6 +411,8 @@ def get_orig_argv():
             arguments.append(argv[i])
 
         return arguments
+
+
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
         "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
@@ -444,6 +449,16 @@ def _configure_logging(log_file, console_level=None):
 
     fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
     faulthandler.enable(fault_out)
+
+
+def get_user_base_directory_for_plugins() -> str:
+    return os.path.join(THONNY_USER_DIR, "plugins")
+
+
+def get_sys_path_directory_containg_plugins() -> str:
+    from thonny.misc_utils import get_user_site_packages_dir_for_base
+
+    return get_user_site_packages_dir_for_base(get_user_base_directory_for_plugins())
 
 
 def set_dpi_aware():

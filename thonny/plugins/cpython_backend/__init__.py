@@ -48,6 +48,7 @@ from thonny.common import (
     update_system_path,
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
+    execute_with_frontend_sys_path,
 )
 
 _REPL_HELPER_NAME = "_thonny_repl_print"
@@ -94,8 +95,9 @@ class MainCPythonBackend(MainBackend):
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
+        logger.info("Loading plugins")
         report_time("Before loading plugins")
-        self._load_plugins()
+        execute_with_frontend_sys_path(self._load_plugins)
         report_time("After loading plugins")
 
         # preceding code was run in the directory containing thonny module, now switch to provided
@@ -289,7 +291,6 @@ class MainCPythonBackend(MainBackend):
             # May happen eg. in ssh session
             return
 
-        try_load_modules_with_frontend_sys_path("thonnycontrib")
         self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package

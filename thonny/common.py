@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import sys
 from collections import namedtuple
-from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
+from typing import List, Optional, Dict, Iterable, Tuple, Callable, Any  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -708,28 +708,36 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
     return result
 
 
-def try_load_modules_with_frontend_sys_path(module_names):
+def execute_with_frontend_sys_path(function: Callable) -> Any:
     import ast
 
     try:
         frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
         assert isinstance(frontend_sys_path, list)
+        logger.info("Using THONNY_FRONTEND_SYS_PATH %s", frontend_sys_path)
     except Exception as e:
         logger.debug("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
         frontend_sys_path = []
 
-    from importlib import import_module
-
     old_sys_path = sys.path
     sys.path = sys.path + frontend_sys_path
     try:
+        return function()
+    finally:
+        sys.path = old_sys_path
+
+
+def try_load_modules_with_frontend_sys_path(module_names):
+    def load():
+        from importlib import import_module
+
         for name in module_names:
             try:
                 import_module(name)
             except ImportError:
                 pass
-    finally:
-        sys.path = old_sys_path
+
+    execute_with_frontend_sys_path(load)
 
 
 def read_one_incoming_message_str(line_reader):

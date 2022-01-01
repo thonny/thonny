@@ -854,7 +854,9 @@ class PipDialog(CommonDialog):
         else:
             # readonly if not in a virtual environment
             # and user site packages is disabled
-            return not cast(SubprocessProxy, get_runner().get_backend_proxy()).get_user_site_packages()
+            return not cast(
+                SubprocessProxy, get_runner().get_backend_proxy()
+            ).get_user_site_packages()
 
     def _tweak_search_results(self, results, query):
         return results
@@ -1066,7 +1068,7 @@ class PluginsPipDialog(PipDialog):
 
     def _get_target_directory(self):
         if self._use_user_install():
-            target = get_workbench().get_sys_path_directory_containg_plugins()
+            target = thonny.get_sys_path_directory_containg_plugins()
             os.makedirs(target, exist_ok=True)
             return normpath_with_actual_case(target)
         else:
@@ -1089,7 +1091,6 @@ class PluginsPipDialog(PipDialog):
             + "\n"
         )
 
-
         banner_msg += "\n" + tr(
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
@@ -1107,9 +1108,7 @@ class PluginsPipDialog(PipDialog):
         proc = running.create_frontend_python_process(
             args,
             stderr=subprocess.STDOUT,
-            environment_extras={
-                "PYTHONUSERBASE": get_workbench().get_user_base_directory_for_plugins()
-            },
+            environment_extras={"PYTHONUSERBASE": thonny.get_user_base_directory_for_plugins()},
         )
         cmd = proc.cmd
         dlg = SubprocessDialog(self, proc, "pip", long_description=title, autostart=True)

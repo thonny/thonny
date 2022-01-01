@@ -724,7 +724,6 @@ class BaseFileBrowser(ttk.Frame):
         else:
             self.menu.add_command(label=tr("Delete"), command=self.delete)
 
-
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
         if context == "button":

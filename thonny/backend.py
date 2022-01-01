@@ -259,6 +259,8 @@ class MainBackend(BaseBackend, ABC):
             handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
+            if isinstance(cmd, ToplevelCommand):
+                self._send_output(f"Unknown command '{cmd.name}'", "stderr")
             response = {"error": "Unknown command: " + cmd.name}
         else:
             try:
