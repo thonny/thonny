@@ -694,6 +694,27 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_tree()
 
     def add_middle_menu_items(self, context):
+        if self.supports_new_file():
+            self.menu.add_command(label=tr("New file") + "...", command=self.create_new_file)
+
+        if self.supports_directories():
+            self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
+
+        if self.supports_copypaste():
+            self.menu.add_command(label=tr("Cut"), command=self.cut_files)
+            self.menu.add_command(label=tr("Copy"), command=self.copy_files)
+            target = self.get_selected_file()
+            self.menu.add_command(label=tr("Paste"), command=self.paste_files)
+            if (
+                target is None
+                or not self.copypaste.has_selection()
+                or self.copypaste.conflicts(target)
+            ):
+                self.menu.entryconfig(tr("Paste"), state="disabled")
+
+        if self.supports_rename():
+            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
+
         if self.supports_trash():
             if running_on_windows():
                 trash_label = tr("Move to Recycle Bin")
@@ -703,26 +724,6 @@ class BaseFileBrowser(ttk.Frame):
         else:
             self.menu.add_command(label=tr("Delete"), command=self.delete)
 
-        if self.supports_directories():
-            self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
-
-        if self.supports_new_file():
-            self.menu.add_command(label=tr("New file"), command=self.create_new_file)
-
-        if self.supports_rename():
-            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
-
-        if self.supports_copypaste():
-            self.menu.add_command(label=tr("Copy"), command=self.copy_files)
-            self.menu.add_command(label=tr("Cut"), command=self.cut_files)
-            target = self.get_selected_file()
-            self.menu.add_command(label=tr("Paste"), command=self.paste_files)
-            if (
-                target is None
-                or not self.copypaste.has_selection()
-                or self.copypaste.conflicts(target)
-            ):
-                self.menu.entryconfig(tr("Paste"), state="disabled")
 
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
@@ -886,9 +887,6 @@ class BaseFileBrowser(ttk.Frame):
 
     def supports_new_file(self):
         return False
-
-    def create_new_file(self):
-        raise NotImplementedError()
 
     def get_selected_file(self):
         selection = self.get_selection_info(False)
@@ -1104,19 +1102,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
     def supports_new_file(self):
         return True
-
-    def create_new_file(self):
-        path = self.get_selected_file()
-        if os.path.isfile(path):
-            path = os.path.dirname(path)
-        n = 0
-        while True:
-            fnam = os.path.join(path, "new_file{}.py".format("_" + str(n) if n > 0 else ""))
-            if not os.path.exists(fnam):
-                break
-            n += 1
-        with open(fnam, "a") as f:
-            pass
 
     def supports_rename(self):
         return self.get_selected_file()
