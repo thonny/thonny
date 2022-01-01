@@ -390,7 +390,23 @@ def get_backend_log_file():
 def get_frontend_log_file():
     return os.path.join(THONNY_USER_DIR, "frontend.log")
 
+def get_orig_argv():
+    try:
+        from sys import orig_argv # since 3.10
+    except ImportError:
+        # https://stackoverflow.com/a/57914236/261181
+        import ctypes
+        argc = ctypes.c_int()
+        argv = ctypes.POINTER(ctypes.c_wchar_p if sys.version_info >= (3,) else ctypes.c_char_p)()
+        ctypes.pythonapi.Py_GetArgcArgv(ctypes.byref(argc), ctypes.byref(argv))
 
+        # Ctypes are weird. They can't be used in list comprehensions, you can't use `in` with them, and you can't
+        # use a for-each loop on them. We have to do an old-school for-i loop.
+        arguments = list()
+        for i in range(argc.value):
+            arguments.append(argv[i])
+
+        return arguments
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
         "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
@@ -418,8 +434,10 @@ def _configure_logging(log_file, console_level=None):
     # Log most important info as soon as possible
     main_logger.info("Thonny version: %s", get_version())
     main_logger.info("cwd: %s", os.getcwd())
+    main_logger.info("original argv: %s", get_orig_argv())
     main_logger.info("sys.argv: %s", sys.argv)
     main_logger.info("sys.path: %s", sys.path)
+    main_logger.info("sys.flags: %s", sys.flags)
 
     import faulthandler
 
