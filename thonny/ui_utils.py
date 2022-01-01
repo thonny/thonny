@@ -2095,6 +2095,13 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
 
     master = master.winfo_toplevel()
 
+    # https://bugs.python.org/issue43655
+    if dlg._windowingsystem == "aqua":
+        dlg.tk.call("::tk::unsupported::MacWindowStyle", "style",
+                  dlg, "moveableModal", "")
+    elif dlg._windowingsystem == "x11":
+        dlg.wm_attributes("-type", "dialog")
+
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
