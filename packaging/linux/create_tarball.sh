@@ -35,10 +35,10 @@ then
     $TARGET_DIR/bin/python3.10 -s -m pip install cryptography==3.2.*
 fi
 
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir wheel
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir distro==1.5.*
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir certifi
+$TARGET_DIR/bin/python3.10 -s -m pip install wheel
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-binary mypy -r ../requirements-regular-bundle.txt
+$TARGET_DIR/bin/python3.10 -s -m pip install distro
+$TARGET_DIR/bin/python3.10 -s -m pip install certifi
 
 # INSTALL THONNY ###################################
 #$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny

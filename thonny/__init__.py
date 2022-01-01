@@ -415,7 +415,11 @@ def _configure_logging(log_file, console_level=None):
         for logger in [main_logger, contrib_logger]:
             logger.addHandler(console_handler)
 
+    # Log most important info as soon as possible
     main_logger.info("Thonny version: %s", get_version())
+    main_logger.info("cwd: %s", os.getcwd())
+    main_logger.info("sys.argv: %s", sys.argv)
+    main_logger.info("sys.path: %s", sys.path)
 
     import faulthandler
 
