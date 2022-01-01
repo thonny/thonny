@@ -1990,9 +1990,6 @@ class Workbench(tk.Tk):
     def get_sys_path_directory_containg_plugins(self) -> str:
         return get_user_site_packages_dir_for_base(self.get_user_base_directory_for_plugins())
 
-    def get_user_base_directory_for_bundled_backend(self) -> str:
-        return os.path.join(thonny.THONNY_USER_DIR, "user-packages-for-bundled-python")
-
     def _update_toolbar(self, event=None) -> None:
         if self._destroyed or not hasattr(self, "_toolbar"):
             return
