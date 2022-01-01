@@ -137,6 +137,8 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
             "9901": "BBC micro:bit v1.5",
             "9903": "BBC micro:bit v2.0 (9903)",
             "9904": "BBC micro:bit v2.0",
+            "9905": "BBC micro:bit v2.2 (9905)",
+            "9906": "BBC micro:bit v2.2 (9906)",
         }
 
         with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:

@@ -23,6 +23,18 @@
       "date" : "2021-06-30",
       "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
       "size" : 1195130
+    },
+    "9905" : {
+      "version" : "2.0.0",
+      "date" : "2021-06-30",
+      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
+      "size" : 1195130
+    },
+    "9906" : {
+      "version" : "2.0.0",
+      "date" : "2021-06-30",
+      "hex_download" : "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
+      "size" : 1195130
     }
   }
 }
