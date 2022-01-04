@@ -44,6 +44,7 @@ from thonny.plugins.micropython.webrepl_connection import (
     WebReplConnection,
     WebreplBinaryMsg,
 )
+from thonny import report_time
 
 PASTE_SUBMIT_MODE = "paste"
 RAW_PASTE_SUBMIT_MODE = "raw_paste"
@@ -720,11 +721,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             raise ProtocolError("Could not complete raw paste")
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
-        self._report_time("befsubcode")
+        report_time("befsubcode")
         self._submit_code(script)
-        self._report_time("affsubcode")
+        report_time("affsubcode")
         self._process_output_until_active_prompt(output_consumer)
-        self._report_time("affforw")
+        report_time("affforw")
 
     def _process_output_until_active_prompt(
         self,

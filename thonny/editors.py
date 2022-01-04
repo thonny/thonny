@@ -99,7 +99,7 @@ class Editor(ttk.Frame):
 
     def get_title(self):
         if self.get_filename() is None:
-            result = "<untitled>"
+            result = tr("<untitled>")
         elif is_remote_path(self.get_filename()):
             path = extract_target_path(self.get_filename())
             name = path.split("/")[-1]
@@ -173,7 +173,7 @@ class Editor(ttk.Frame):
     def get_long_description(self):
 
         if self._filename is None:
-            result = "<untitled>"
+            result = tr("<untitled>")
         else:
             result = self._filename
 

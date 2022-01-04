@@ -10,7 +10,7 @@ from logging import exception
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from typing import List, Union, Dict, Tuple
+from typing import List, Union, Dict, Tuple, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
@@ -18,7 +18,7 @@ from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case
 from thonny.languages import tr
 from thonny.plugins.cpython_frontend import CPythonProxy
 from thonny.plugins.cpython_ssh import SshCPythonProxy
-from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog
+from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog, SubprocessProxy
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
@@ -854,9 +854,9 @@ class PipDialog(CommonDialog):
         else:
             # readonly if not in a virtual environment
             # and user site packages is disabled
-            import site
-
-            return not site.ENABLE_USER_SITE
+            return not cast(
+                SubprocessProxy, get_runner().get_backend_proxy()
+            ).get_user_site_packages()
 
     def _tweak_search_results(self, results, query):
         return results
@@ -1068,7 +1068,7 @@ class PluginsPipDialog(PipDialog):
 
     def _get_target_directory(self):
         if self._use_user_install():
-            target = get_workbench().get_sys_path_directory_containg_plugins()
+            target = thonny.get_sys_path_directory_containg_plugins()
             os.makedirs(target, exist_ok=True)
             return normpath_with_actual_case(target)
         else:
@@ -1091,19 +1091,6 @@ class PluginsPipDialog(PipDialog):
             + "\n"
         )
 
-        runner = get_runner()
-        if (
-            runner is not None
-            and runner.get_local_executable() is not None
-            and is_same_path(self._get_interpreter(), get_runner().get_local_executable())
-        ):
-            banner_msg += (
-                tr(
-                    "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
-                )
-                + "\n"
-            )
-
         banner_msg += "\n" + tr(
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
@@ -1121,9 +1108,7 @@ class PluginsPipDialog(PipDialog):
         proc = running.create_frontend_python_process(
             args,
             stderr=subprocess.STDOUT,
-            environment_extras={
-                "PYTHONUSERBASE": get_workbench().get_user_base_directory_for_plugins()
-            },
+            environment_extras={"PYTHONUSERBASE": thonny.get_user_base_directory_for_plugins()},
         )
         cmd = proc.cmd
         dlg = SubprocessDialog(self, proc, "pip", long_description=title, autostart=True)

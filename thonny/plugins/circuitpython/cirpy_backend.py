@@ -1,5 +1,7 @@
 import os.path
 from logging import getLogger
+from typing import Optional, List
+
 from textwrap import dedent
 
 import time
@@ -69,6 +71,11 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
                 return True
 
         return False
+
+    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        return [
+            os.path.join(os.path.dirname(__file__), "api_stubs"),
+        ]
 
 
 if __name__ == "__main__":

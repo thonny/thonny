@@ -16,7 +16,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		return 10;
 	}
 
-	Py_IgnoreEnvironmentFlag = 1;
+	Py_IsolatedFlag = 1;
 	// Flag doesn't affect the back-end.
 	// Clear misleading environment variables for good...
 	_putenv("PYTHONHOME=");

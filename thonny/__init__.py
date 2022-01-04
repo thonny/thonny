@@ -391,32 +391,74 @@ def get_frontend_log_file():
     return os.path.join(THONNY_USER_DIR, "frontend.log")
 
 
+def get_orig_argv():
+    try:
+        from sys import orig_argv  # since 3.10
+
+        return sys.orig_argv
+    except ImportError:
+        # https://stackoverflow.com/a/57914236/261181
+        import ctypes
+
+        argc = ctypes.c_int()
+        argv = ctypes.POINTER(ctypes.c_wchar_p if sys.version_info >= (3,) else ctypes.c_char_p)()
+        ctypes.pythonapi.Py_GetArgcArgv(ctypes.byref(argc), ctypes.byref(argv))
+
+        # Ctypes are weird. They can't be used in list comprehensions, you can't use `in` with them, and you can't
+        # use a for-each loop on them. We have to do an old-school for-i loop.
+        arguments = list()
+        for i in range(argc.value):
+            arguments.append(argv[i])
+
+        return arguments
+
+
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
         "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
     )
 
-    # NB! Don't mess with the main root logger, because (CPython) backend runs user code
-    thonny_root_logger = logging.getLogger("thonny")
-    thonny_root_logger.setLevel(_choose_logging_level())
-    thonny_root_logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
-
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
     file_handler.setFormatter(logFormatter)
-    thonny_root_logger.addHandler(file_handler)
+
+    main_logger = logging.getLogger("thonny")
+    contrib_logger = logging.getLogger("thonnycontrib")
+
+    # NB! Don't mess with the main root logger, because (CPython) backend runs user code
+    for logger in [main_logger, contrib_logger]:
+        logger.setLevel(_choose_logging_level())
+        logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
+        logger.addHandler(file_handler)
 
     if console_level is not None:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(logFormatter)
         console_handler.setLevel(console_level)
-        thonny_root_logger.addHandler(console_handler)
+        for logger in [main_logger, contrib_logger]:
+            logger.addHandler(console_handler)
 
-    thonny_root_logger.info("Thonny version: %s", get_version())
+    # Log most important info as soon as possible
+    main_logger.info("Thonny version: %s", get_version())
+    main_logger.info("cwd: %s", os.getcwd())
+    main_logger.info("original argv: %s", get_orig_argv())
+    main_logger.info("sys.argv: %s", sys.argv)
+    main_logger.info("sys.path: %s", sys.path)
+    main_logger.info("sys.flags: %s", sys.flags)
 
     import faulthandler
 
     fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
     faulthandler.enable(fault_out)
+
+
+def get_user_base_directory_for_plugins() -> str:
+    return os.path.join(THONNY_USER_DIR, "plugins")
+
+
+def get_sys_path_directory_containg_plugins() -> str:
+    from thonny.misc_utils import get_user_site_packages_dir_for_base
+
+    return get_user_site_packages_dir_for_base(get_user_base_directory_for_plugins())
 
 
 def set_dpi_aware():

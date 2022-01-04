@@ -55,8 +55,9 @@ class BaseBackend(ABC):
         self._init_command_reader()
 
     def _init_command_reader(self):
-        # Don't use threading for creating a management thread, because I don't want them
-        # to be affected by threading.settrace
+        # NB! This approach is used only in MicroPython and SshCPython backend.
+        # MainCPython backend uses main thread for reading commands
+        # https://github.com/thonny/thonny/issues/1363
         _thread.start_new_thread(self._read_incoming_messages, ())
 
     def mainloop(self):
@@ -258,6 +259,8 @@ class MainBackend(BaseBackend, ABC):
             handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
+            if isinstance(cmd, ToplevelCommand):
+                self._send_output(f"Unknown command '{cmd.name}'", "stderr")
             response = {"error": "Unknown command: " + cmd.name}
         else:
             try:

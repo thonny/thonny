@@ -15,7 +15,6 @@ logger = getLogger("thonny.plugins.micropython.rpi_pico_backend")
 class RaspberryPiPicoBackend(BareMetalMicroPythonBackend):
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
         return [
-            os.path.join(os.path.dirname(__file__), "libs"),
             os.path.join(os.path.dirname(__file__), "api_stubs"),
         ] + super()._get_sys_path_for_analysis()
 

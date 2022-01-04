@@ -25,6 +25,7 @@ from thonny.plugins.micropython.backend import (
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
+from thonny import report_time
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
@@ -146,11 +147,11 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         def collect_output(data, stream_name):
             output.append(data)
 
-        self._report_time("befini")
+        report_time("befini")
         self._forward_output_until_active_prompt(collect_output, "stdout")
         self._original_welcome_text = "".join(output).replace("\r\n", "\n")
         self._welcome_text = self._tweak_welcome_text(self._original_welcome_text)
-        self._report_time("afini")
+        report_time("afini")
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
@@ -235,7 +236,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
 
     def _cmd_Run(self, cmd):
         self._connection.close()
-        self._report_time("befconn")
+        report_time("befconn")
         args = cmd.args
         if cmd.source and args[0] == "-c":
             if len(args) > 1:
@@ -246,15 +247,15 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             args = ["-c", cmd.source]
 
         self._connection = self._create_connection(args)
-        self._report_time("afconn")
+        report_time("afconn")
         self._forward_output_until_active_prompt(self._send_output, "stdout")
-        self._report_time("afforv")
+        report_time("afforv")
         self.send_message(
             BackendEvent(event_type="HideTrailingOutput", text=self._original_welcome_text)
         )
-        self._report_time("beffhelp")
+        report_time("beffhelp")
         self._prepare_after_soft_reboot()
-        self._report_time("affhelp")
+        report_time("affhelp")
 
     def _cmd_execute_system_command(self, cmd):
         assert cmd.cmd_line.startswith("!")

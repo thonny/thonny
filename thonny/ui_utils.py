@@ -1420,7 +1420,7 @@ def alt_is_pressed_without_char(event: tk.Event) -> bool:
         # combinations always produce a char or are consumed by the OS
         return False
     else:
-        raise NotImplementedError()
+        return event.state & 0x0010
 
 
 def command_is_pressed(event: tk.Event) -> bool:
@@ -2094,6 +2094,12 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
         master = getattr(dlg, "parent", None) or getattr(dlg, "master", None) or tk._default_root
 
     master = master.winfo_toplevel()
+
+    # https://bugs.python.org/issue43655
+    if dlg._windowingsystem == "aqua":
+        dlg.tk.call("::tk::unsupported::MacWindowStyle", "style", dlg, "moveableModal", "")
+    elif dlg._windowingsystem == "x11":
+        dlg.wm_attributes("-type", "dialog")
 
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance

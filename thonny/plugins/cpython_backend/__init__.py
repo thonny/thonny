@@ -48,6 +48,7 @@ from thonny.common import (
     update_system_path,
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
+    execute_with_frontend_sys_path,
 )
 
 _REPL_HELPER_NAME = "_thonny_repl_print"
@@ -94,8 +95,9 @@ class MainCPythonBackend(MainBackend):
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
+        logger.info("Loading plugins")
         report_time("Before loading plugins")
-        self._load_plugins()
+        execute_with_frontend_sys_path(self._load_plugins)
         report_time("After loading plugins")
 
         # preceding code was run in the directory containing thonny module, now switch to provided
@@ -191,9 +193,17 @@ class MainCPythonBackend(MainBackend):
         return result
 
     def _handle_immediate_command(self, cmd: ImmediateCommand) -> None:
+        """
+        Following is an idea, but it didn't work properly. Also, threaded reading
+        was reverted for CPython https://github.com/thonny/thonny/issues/1363.
+        Therefore signals are used for interrupting CPython programs.
+
         if cmd.name == "interrupt":
             with self._interrupt_lock:
                 interrupt_local_process()
+        """
+
+        raise NotImplementedError()
 
     def _should_keep_going(self) -> bool:
         return True
@@ -281,7 +291,6 @@ class MainCPythonBackend(MainBackend):
             # May happen eg. in ssh session
             return
 
-        try_load_modules_with_frontend_sys_path("thonnycontrib")
         self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package
@@ -511,7 +520,7 @@ class MainCPythonBackend(MainBackend):
         return InlineResponse("get_heap", heap=result)
 
     def _cmd_get_object_info(self, cmd):
-        if self._current_executor.is_in_past():
+        if self._current_executor and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
 
         elif cmd.object_id in self._heap:
@@ -586,9 +595,6 @@ class MainCPythonBackend(MainBackend):
                     shutil.rmtree(path)
             except Exception as e:
                 print("Could not delete %s: %s" % (path, str(e)), file=sys.stderr)
-
-    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
-        return ["/home/annamaa/python_stuff/thonny/thonny/plugins/micropython/api_stubs"]
 
     def _get_sep(self) -> str:
         return os.path.sep

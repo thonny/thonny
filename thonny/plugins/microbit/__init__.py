@@ -20,6 +20,11 @@ LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/relea
 
 
 class MicrobitProxy(BareMetalMicroPythonProxy):
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.microbit.microbit_backend
+
+        return thonny.plugins.microbit.microbit_backend.__file__
+
     def _start_background_process(self, clean=None, extra_args=[]):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies
@@ -132,6 +137,8 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
             "9901": "BBC micro:bit v1.5",
             "9903": "BBC micro:bit v2.0 (9903)",
             "9904": "BBC micro:bit v2.0",
+            "9905": "BBC micro:bit v2.2 (9905)",
+            "9906": "BBC micro:bit v2.2 (9906)",
         }
 
         with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
