@@ -5,7 +5,7 @@ VERSION=_VERSION_
 VARIANT=_VARIANT_
 
 ARCHITECTURE="$(uname -m)"
-if [[ "$ARCHITECTURE" == "x86_64_" ]]; then
+if [[ "$ARCHITECTURE" == "x86_64" ]]; then
   echo
   echo "This script will download and install Thonny ($VARIANT-$VERSION) for Linux (32 or 64-bit PC)."
   read -p "Press ENTER to continue or Ctrl+C to cancel."
@@ -34,19 +34,30 @@ else
     read -p "Press ENTER to continue or Ctrl+C to cancel."
 
     # Install non-pip dependencies
-    if [[ -f /etc/arch-release ]]; then
-      if ! pacman -Qi $package > /dev/null ; then
+    if [[ -f /etc/debian_version ]]; then
+      if ! dpkg -s python3-tk > /dev/null ; then
+        echo "Going to install 'python3-tk' first"
+        sudo apt-get install python3-tk
+      fi
+      if ! dpkg -s python3-venv > /dev/null ; then
+        echo "Going to install 'python3-venv' first"
+        sudo apt-get install python3-venv
+      fi
+    elif [[ -f /etc/redhat-release ]]; then
+      if rpm -qa | grep python3-tkinter > /dev/null ; then
+        echo "Going to install 'python3-tkinter' first"
+        sudo yum install python3-tkinter
+      fi
+    elif [[ -f /etc/SuSE-release ]]; then # TODO: this file is deprecated
+      if ! rpm -qa | grep python3-tkinter > /dev/null ; then
+        echo "Going to install 'python3-tkinter' first"
+        sudo zypper install python3-tkinter
+      fi
+    elif [[ -f /etc/arch-release ]]; then
+      if ! pacman -Qi tk > /dev/null ; then
         echo "Going to install 'tk' first"
         sudo pacman -S tk
       fi
-    elif [[ -f /etc/debian-release ]]; then
-      echo "Having debian"
-    elif [[ -f /etc/gentoo-release ]]; then
-      echo "emerge"
-    elif [[ -f /etc/redhat-release ]]; then
-      echo "rpm"
-    elif [[ -f /etc/SuSE-release ]]; then
-      echo "zypp"
     else
       echo "Can't determine your package manager, assuming Tkinter and venv are present."
     fi
