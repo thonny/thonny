@@ -100,15 +100,6 @@ class Runner:
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
 
-    def _remove_obsolete_jedi_copies(self) -> None:
-        # Thonny 2.1 used to copy jedi in order to make it available
-        # for the backend. Get rid of it now
-        for item in os.listdir(THONNY_USER_DIR):
-            if item.startswith("jedi_0."):
-                import shutil
-
-                shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
-
     def start(self) -> None:
         global _console_allocated
         try:
@@ -119,8 +110,6 @@ class Runner:
             _console_allocated = False
 
         self.restart_backend(False, True)
-        # temporary
-        self._remove_obsolete_jedi_copies()
 
     def _init_commands(self) -> None:
         global RUN_COMMAND_CAPTION, RUN_COMMAND_LABEL
