@@ -2282,15 +2282,6 @@ def get_size_option_name(window):
     return "layout." + type(window).__name__ + "_size"
 
 
-def get_default_theme():
-    if running_on_windows():
-        return "Windows"
-    elif running_on_rpi():
-        return "Raspberry Pi"
-    else:
-        return "Enhanced Clam"
-
-
 def get_default_basic_theme():
     if running_on_windows():
         return "vista"

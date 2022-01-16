@@ -885,7 +885,7 @@ class Workbench(tk.Tk):
         self._syntax_themes = (
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
-        self.set_default("view.ui_theme", ui_utils.get_default_theme())
+        self.set_default("view.ui_theme", self.get_default_ui_theme())
 
     def add_command(
         self,
@@ -1334,17 +1334,39 @@ class Workbench(tk.Tk):
         codeview.set_syntax_options(get_settings(name))
 
     def reload_themes(self) -> None:
-        preferred_theme = self.get_option("view.ui_theme")
+        ui_theme = self.get_option("view.ui_theme")
         available_themes = self.get_usable_ui_theme_names()
+        if ui_theme not in available_themes:
+            logger.warning("Could not find UI theme %r, switching to default", ui_theme)
+            ui_theme = self.get_default_ui_theme()
+            self.set_option("view.ui_theme", ui_theme)
 
-        if preferred_theme in available_themes:
-            self._apply_ui_theme(preferred_theme)
+        self._apply_ui_theme(ui_theme)
+
+        syntax_theme = self.get_option("view.syntax_theme")
+        if syntax_theme not in self._syntax_themes:
+            logger.warning("Could not find syntax theme %r, switching to default", syntax_theme)
+            syntax_theme = self.get_default_syntax_theme()
+            self.set_option("view.syntax_theme", syntax_theme)
+
+        self._apply_syntax_theme(syntax_theme)
+
+    def get_default_ui_theme(self) -> str:
+        available_themes = self.get_usable_ui_theme_names()
+        if "Windows" in available_themes:
+            return "Windows"
+        elif running_on_rpi() and "Raspberry Pi" in available_themes:
+            return "Raspberry Pi"
         elif "Enhanced Clam" in available_themes:
-            self._apply_ui_theme("Enhanced Clam")
-        elif "Windows" in available_themes:
-            self._apply_ui_theme("Windows")
+            return "Enhanced Clam"
+        else:
+            return "clam"
 
-        self._apply_syntax_theme(self.get_option("view.syntax_theme"))
+    def get_default_syntax_theme(self) -> str:
+        if self.uses_dark_ui_theme():
+            return "Default Dark"
+        else:
+            return "Default Light"
 
     def uses_dark_ui_theme(self) -> bool:
 
@@ -1352,8 +1374,11 @@ class Workbench(tk.Tk):
         while True:
             if "dark" in name.lower():
                 return True
+            try:
+                name, _, _ = self._ui_themes[name]
+            except KeyError:
+                return False
 
-            name, _, _ = self._ui_themes[name]
             if name is None:
                 # reached start of the chain
                 break
