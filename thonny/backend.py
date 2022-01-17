@@ -342,6 +342,7 @@ class MainBackend(BaseBackend, ABC):
         )
 
     def _cmd_editor_autocomplete(self, cmd):
+        logger.debug("Starting _cmd_editor_autocomplete")
         error = None
         try:
             from thonny import jedi_utils
