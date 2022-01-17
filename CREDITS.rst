@@ -117,6 +117,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Radim
 * Rene Lehtma
 * Rune Langøy
+* Sam Warmuth
 * Sami Almuhammady
 * sailslack
 * segalion
