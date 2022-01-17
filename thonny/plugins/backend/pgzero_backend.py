@@ -74,6 +74,7 @@ def augment_ast(root):
 def patched_editor_autocomplete(self, cmd):
     logger.debug("Starting patched _cmd_editor_autocomplete")
     # Make extra builtins visible for Jedi
+    prefix = "from pgzero.builtins import *\n"
     cmd["source"] = prefix + cmd["source"]
     cmd["row"] = cmd["row"] + 1
 
