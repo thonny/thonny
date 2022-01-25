@@ -1195,10 +1195,6 @@ def _ends_with_incomplete_ansi_code(data):
     return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
 
 
-def is_bundled_python(executable):
-    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
-
-
 def create_backend_python_process(
     args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
 ):

@@ -764,3 +764,14 @@ class ConnectionFailedException(Exception):
 
 class ConnectionClosedException(Exception):
     pass
+
+
+def is_virtual_executable(executable):
+    exe_dir = os.path.dirname(executable)
+    return os.path.exists(os.path.join(exe_dir, "activate")) or os.path.exists(
+        os.path.join(exe_dir, "activate.bat")
+    )
+
+
+def is_private_python(executable):
+    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))

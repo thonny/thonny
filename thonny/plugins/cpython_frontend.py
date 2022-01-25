@@ -15,6 +15,9 @@ from thonny.common import (
     normpath_with_actual_case,
     get_python_version_string,
     InlineResponse,
+    get_base_executable,
+    is_virtual_executable,
+    is_private_python,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os, running_on_linux
@@ -23,7 +26,6 @@ from thonny.running import (
     SubprocessProxy,
     create_frontend_python_process,
     get_interpreter_for_subprocess,
-    is_bundled_python,
     WINDOWS_EXE,
 )
 from thonny.terminal import run_in_terminal
@@ -256,12 +258,12 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):
-        super().__init__(clean, get_interpreter_for_subprocess())
+        super().__init__(clean, _get_same_as_front_executable())
 
     def fetch_next_message(self):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
-            if is_bundled_python(self._executable):
+            if is_private_python(self._executable):
                 msg["welcome_text"] += " (bundled)"
             else:
                 msg["welcome_text"] += " (" + self._executable + ")"
@@ -319,7 +321,7 @@ class CustomCPythonProxy(CPythonProxy):
 
 
 def get_private_venv_path():
-    if is_bundled_python(sys.executable.lower()):
+    if is_private_python(sys.executable.lower()):
         prefix = "BundledPython"
     else:
         prefix = "Python"
@@ -355,7 +357,7 @@ def _get_venv_info(venv_path):
 class SameAsFrontEndConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
-        label = ttk.Label(self, text=get_interpreter_for_subprocess())
+        label = ttk.Label(self, text=_get_same_as_front_executable())
         label.grid()
 
     def should_restart(self):
@@ -647,6 +649,17 @@ def _check_venv_installed(parent):
     except ImportError:
         messagebox.showerror("Error", "Package 'venv' is not available.", parent=parent)
         return False
+
+
+def _get_same_as_front_executable() -> str:
+    logger.info(
+        "priv %s, virt %s", is_private_python(sys.executable), is_virtual_executable(sys.executable)
+    )
+    if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
+        # Private venv. Make an exception and use base Python for default backend.
+        return get_base_executable()
+    else:
+        return get_interpreter_for_subprocess()
 
 
 def load_plugin():

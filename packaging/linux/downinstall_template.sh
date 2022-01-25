@@ -70,6 +70,9 @@ else
     echo "Creating virtual environment for Thonny"
     python3 -m venv $TARGET
 
+    echo "Marking virtual environment as private to Thonny"
+    echo ";Existence of this file indicates that Python in this directory is private for Thonny" > ${TARGET}\bin\thonny_python.ini
+
     echo "Installing Thonny and its dependencies"
     $TARGET/bin/pip3 install thonny
 

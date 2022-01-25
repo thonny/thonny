@@ -40,7 +40,7 @@ def is_virtual_exe(p):
     )
 
 
-def is_bundled_exe(p):
+def is_private_exe(p):
     pdir = os.path.dirname(p)
     return os.path.exists(os.path.join(pdir, "thonny_python.ini"))
 
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     sys_real = normpath_with_actual_case(equivalent_realpath(sys.executable))
     sys_executable = normpath_with_actual_case(sys.executable)
 
-    if is_virtual_exe(sys_executable) or is_bundled_exe(sys_executable):
+    if is_virtual_exe(sys_executable) or is_private_exe(sys_executable):
         highlight_dirs = [os.path.dirname(sys_executable)]
     else:
         highlight_dirs = []
