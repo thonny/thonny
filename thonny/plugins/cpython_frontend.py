@@ -652,9 +652,6 @@ def _check_venv_installed(parent):
 
 
 def _get_same_as_front_executable() -> str:
-    logger.info(
-        "priv %s, virt %s", is_private_python(sys.executable), is_virtual_executable(sys.executable)
-    )
     if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
         # Private venv. Make an exception and use base Python for default backend.
         return get_base_executable()
