@@ -13,7 +13,7 @@ Distribution
 * Drop support for Python 3.5 and 3.6
 * The main Windows bundle is now 64-bit. For fallback publish 32-bit bundle with Python 3.8 for 32-bit Windows 10 and 8.1 and all variants of Windows 7 and 8.
 * Stop publishing 32-bit Linux bundles
-* Enhance Linux installer script to create a venv and pip-install Thonny if run on the platform for which there is no binary bundle available, #1736
+* Enhance Linux installer script to create a venv and pip-install Thonny if run on a platform for which there is no binary bundle available, #1736
 
 Code completion and analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
