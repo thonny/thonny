@@ -411,7 +411,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python 3.7 and later")
+        extra_text = tr("NB! Thonny only supports Python 3.8 and later")
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
@@ -571,7 +571,6 @@ def _get_interpreters():
                 continue
             for name in [
                 "python3",
-                "python3.7",
                 "python3.8",
                 "python3.9",
                 "python3.10",
@@ -582,7 +581,7 @@ def _get_interpreters():
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.7", "3.8", "3.9", "3.10", "3.11"]:
+        for version in ["3.8", "3.9", "3.10", "3.11"]:
             dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
             path = os.path.join(dir_, "python3")
 
@@ -591,7 +590,7 @@ def _get_interpreters():
 
     from shutil import which
 
-    for command in ["python3", "python3.7", "python3.8", "python3.9", "python3.10", "python3.11"]:
+    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11"]:
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)
@@ -614,9 +613,6 @@ def _get_interpreters_from_windows_registry():
             "3.6",
             "3.6-32",
             "3.6-64",
-            "3.7",
-            "3.7-32",
-            "3.7-64",
             "3.8",
             "3.8-32",
             "3.8-64",

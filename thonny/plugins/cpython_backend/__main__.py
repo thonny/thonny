@@ -22,9 +22,9 @@ if sys.platform == "darwin":
             file=sys.stderr,
         )
 
-if not sys.version_info > (3, 7):
+if not sys.version_info > (3, 8):
     print(
-        "This version of Thonny only supports Python 3.7 and later.\n"
+        "This version of Thonny only supports Python 3.8 and later.\n"
         + "Choose another interpreter from Tools => Options => Interpreter",
         file=sys.stderr,
     )
