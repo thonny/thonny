@@ -71,12 +71,12 @@ else
     python3 -m venv $TARGET
 
     echo "Marking virtual environment as private to Thonny"
-    echo ";Existence of this file indicates that Python in this directory is private for Thonny" > ${TARGET}\bin\thonny_python.ini
+    echo ";Existence of this file indicates that Python in this directory is private for Thonny" > ${TARGET}/bin/thonny_python.ini
 
     echo "Installing Thonny's dependencies"
     $TARGET/bin/pip3 install _DEPS_
     echo "Installing Thonny and its dependencies"
-    $TARGET/bin/pip3 install thonny
+    $TARGET/bin/pip3 install thonny==${VERSION}
 
     echo "Creating the launcher"
     LAUNCHER=~/.local/share/applications/Thonny.desktop
@@ -99,7 +99,7 @@ else
     echo "Exec=$TARGET/bin/thonny %F" >> $LAUNCHER
     echo "Name=Edit with Thonny" >> $LAUNCHER
   else
-    echo "Your system doesn't seem to have suitable Python interpreter"
+    echo "Can't offer alternatives as your system doesn't seem to have suitable Python interpreter."
     exit 1
   fi
 fi

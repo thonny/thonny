@@ -258,7 +258,9 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):
-        super().__init__(clean, _get_same_as_front_executable())
+        executable = _get_same_as_front_executable()
+        logger.info("Using %s for back-end")
+        super().__init__(clean, executable)
 
     def fetch_next_message(self):
         msg = super().fetch_next_message()
