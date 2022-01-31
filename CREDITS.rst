@@ -124,6 +124,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Simon Gijsen
 * Simon Long
 * sourceperl
+* speedy-10
 * Stefan Rothe
 * Suk-Hyung Hwang
 * Sven Duzont

@@ -43,7 +43,8 @@ Various
 * Make editor remember current line when reloading external changes, #2001 by @kr-g
 * Add "Edit => Go to line..." command (Ctrl-G), #2001 by @kr-g
 * Add "Rename" command for the local file browser, #2001 by @kr-g
-
+* Add nicer Stop-button for higher resolutions, #1445 by @speedy-10
+* Improve button icon scaling (larger icons when screen has over 1024 lines)
 
 
 Fixed

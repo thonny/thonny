@@ -1635,10 +1635,17 @@ class Workbench(tk.Tk):
         if os.path.exists(plat_filename):
             filename = plat_filename
 
-        if self._scaling_factor >= 2.0:
+        if (
+            (self._scaling_factor >= 2.0 or self.winfo_screenheight() > 1024)
+            and not filename.endswith("48.png")
+            or self._scaling_factor > 2.0
+        ):
             scaled_filename = filename[:-4] + "_2x.png"
+            scaled_filename_alt = filename[:-4] + "48.png"  # used in pi theme
             if os.path.exists(scaled_filename):
                 filename = scaled_filename
+            elif os.path.exists(scaled_filename_alt):
+                filename = scaled_filename_alt
             else:
                 img = tk.PhotoImage(file=filename)
                 # can't use zoom method, because this doesn't allow name
@@ -1648,8 +1655,8 @@ class Workbench(tk.Tk):
                     "copy",
                     img.name,
                     "-zoom",
-                    int(self._scaling_factor),
-                    int(self._scaling_factor),
+                    2,
+                    2,
                 )
                 self._images.add(img2)
                 return img2
