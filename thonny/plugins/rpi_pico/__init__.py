@@ -29,6 +29,7 @@ class RaspberryPiPicoBackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_known_usb_vids_pids(cls):
+        # https://github.com/raspberrypi/usb-pid
         return {(0x2E8A, 0x0005)}
 
     @classmethod

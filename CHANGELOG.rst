@@ -28,7 +28,7 @@ MicroPython
 ~~~~~~~~~~~
 * Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends, 116aecd714d5e94a8ad6e244deac44aece5065eb
 * Present MicroPython time options (whether to sync time and whether to use local time) in back-end configuration page, #1638
-* Add the option to automatically interrupt current process when connecting to bare-metal MicroPython or CircuitPython device, #2059
+* Automatically interrupt current process when connecting to bare-metal MicroPython or CircuitPython device. This can be turned off at device's settings page, #2059
 * Don't hide the output when Stop/Restarting MicroPython, #1805
 * Make internal MicroPython errors less intimidating. In several cases the errors are caused by bugs in MicroPython or USB driver and there is no use of showing the stacktrace. User is now directed to restart the device and stacktrace can be checked from the backend.log, #1799
 * Make MicroPython back-end advise Ctrl+C also if only whitespace characters get printed, #1755
