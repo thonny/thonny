@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from logging import getLogger
 import os.path
 import sys
@@ -394,6 +395,7 @@ class Editor(ttk.Frame):
     def ask_new_remote_path(self):
         target_path = ask_backend_path(self.winfo_toplevel(), "save")
         if target_path:
+            target_path = self._check_propose_py_extension(target_path)
             return make_remote_path(target_path)
         else:
             return None
@@ -409,7 +411,7 @@ class Editor(ttk.Frame):
         # http://tkinter.unpythonic.net/wiki/tkFileDialog
         new_filename = asksaveasfilename(
             filetypes=_dialog_filetypes,
-            defaultextension=".py",
+            defaultextension=None,
             initialdir=initialdir,
             initialfile=initialfile,
             parent=get_workbench(),
@@ -431,6 +433,8 @@ class Editor(ttk.Frame):
                 normpath_with_actual_case(os.path.dirname(new_filename)),
                 os.path.basename(new_filename),
             )
+
+        new_filename = self._check_propose_py_extension(new_filename)
 
         if new_filename.endswith(".py"):
             base = os.path.basename(new_filename)
@@ -536,6 +540,23 @@ class Editor(ttk.Frame):
         get_workbench().event_generate(
             "EditorTextDestroyed", editor=self, text_widget=self.get_text_widget()
         )
+
+    def _check_propose_py_extension(self, path: str) -> str:
+        assert path
+        parts = re.split(r"[/\\]", path)
+        name = parts[-1]
+        if "." not in name:
+            if messagebox.askyesno(
+                title=tr("Confirmation"),
+                message=tr("Python files usually have .py extension.")
+                + "\n\n"
+                + tr("Did you mean '%s'?" % (name + ".py")),
+            ):
+                return path + ".py"
+            else:
+                return path
+
+        return path
 
 
 class EditorNotebook(ui_utils.ClosableNotebook):
