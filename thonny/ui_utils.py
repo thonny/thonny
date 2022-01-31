@@ -1729,7 +1729,7 @@ class ChoiceDialog(CommonDialogEx):
         question_label.grid(row=row, column=0, columnspan=2, sticky="w", padx=20, pady=20)
         row += 1
 
-        self.var = tk.StringVar("")
+        self.var = tk.StringVar(value="")
         if initial_choice_index is not None:
             self.var.set(choices[initial_choice_index])
         for choice in choices:
