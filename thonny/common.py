@@ -14,6 +14,8 @@ from typing import List, Optional, Dict, Iterable, Tuple, Callable, Any  # @Unus
 
 logger = getLogger(__name__)
 
+STRING_PSEUDO_FILENAME = "<string>"
+REPL_PSEUDO_FILENAME = "<stdin>"
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"

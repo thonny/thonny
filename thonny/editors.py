@@ -9,6 +9,7 @@ from logging import exception
 from tkinter import messagebox, ttk, simpledialog
 
 from _tkinter import TclError
+from typing import Optional
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
@@ -24,7 +25,7 @@ from thonny.common import (
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
-from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
+from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence, get_beam_cursor
 
 _dialog_filetypes = [("Python files", ".py .pyw .pyi"), ("all files", ".*")]
 
@@ -60,6 +61,7 @@ class Editor(ttk.Frame):
             propose_remove_line_numbers=True,
             font="EditorFont",
             text_class=EditorCodeViewText,
+            cursor=get_beam_cursor(),
         )
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -92,11 +94,20 @@ class Editor(ttk.Frame):
         # TODO: try to get rid of this
         return self._code_view
 
+    def get_content(self) -> str:
+        return self._code_view.get_content()
+
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
             self.save_file()
 
         return self._filename
+
+    def get_identifier(self):
+        if self._filename:
+            return self._filename
+        else:
+            return str(self.winfo_id())
 
     def get_title(self):
         if self.get_filename() is None:
@@ -266,7 +277,7 @@ class Editor(ttk.Frame):
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
 
-    def save_file(self, ask_filename=False, save_copy=False, node=None):
+    def save_file(self, ask_filename=False, save_copy=False, node=None) -> str:
         if self._filename is not None and not ask_filename:
             save_filename = self._filename
             get_workbench().event_generate("Save", editor=self, filename=save_filename)
@@ -958,7 +969,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 self.show_file(arg)
         get_workbench().become_active_window()
 
-    def get_current_editor(self):
+    def get_current_editor(self) -> Optional[Editor]:
         return self.get_current_child()
 
     def get_current_editor_content(self):
@@ -966,7 +977,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if editor is None:
             return None
         else:
-            return editor.get_code_view().get_content()
+            return editor.get_content()
 
     def get_all_editors(self):
         # When workspace is closing, self.winfo_children()
@@ -1068,16 +1079,18 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             editor.destroy()
             return None
 
-    def get_editor(self, filename, open_when_necessary=False):
-        if not is_remote_path(filename) and os.path.isfile(filename):
-            filename = normpath_with_actual_case(os.path.abspath(filename))
+    def get_editor(self, filename_or_id, open_when_necessary=False):
+        if os.path.isfile(filename_or_id):
+            filename_or_id = normpath_with_actual_case(os.path.abspath(filename_or_id))
+
         for child in self.winfo_children():
-            child_filename = child.get_filename(False)
-            if child_filename == filename:
+            assert isinstance(child, Editor)
+            child_identifier = child.get_identifier()
+            if child_identifier == filename_or_id:
                 return child
 
         if open_when_necessary:
-            return self._open_file(filename)
+            return self._open_file(filename_or_id)
         else:
             return None
 

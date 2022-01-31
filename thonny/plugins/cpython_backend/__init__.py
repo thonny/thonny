@@ -49,6 +49,8 @@ from thonny.common import (
     get_augmented_system_path,
     try_load_modules_with_frontend_sys_path,
     execute_with_frontend_sys_path,
+    STRING_PSEUDO_FILENAME,
+    REPL_PSEUDO_FILENAME,
 )
 
 _REPL_HELPER_NAME = "_thonny_repl_print"
@@ -385,7 +387,7 @@ class MainCPythonBackend(MainBackend):
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
         self._check_update_tty_mode(cmd)
-        filename = "<pyshell>"
+        filename = REPL_PSEUDO_FILENAME
         source = cmd.source.strip()
 
         try:
@@ -707,24 +709,26 @@ class MainCPythonBackend(MainBackend):
         if len(cmd.args) >= 1:
             sys.argv = cmd.args
             filename = cmd.args[0]
-            if filename == "-c" or os.path.isabs(filename):
-                full_filename = filename
+            if filename == "-c":
+                tweaked_filename = STRING_PSEUDO_FILENAME
+            elif os.path.isabs(filename):
+                tweaked_filename = filename
             else:
-                full_filename = os.path.abspath(filename)
+                tweaked_filename = os.path.abspath(filename)
 
-            if full_filename == "-c":
+            if tweaked_filename == STRING_PSEUDO_FILENAME:
                 source = cmd.source
             else:
-                with tokenize.open(full_filename) as fp:
+                with tokenize.open(tweaked_filename) as fp:
                     source = fp.read()
 
             for preproc in self._source_preprocessors:
                 source = preproc(source, cmd)
 
             result_attributes = self._execute_source(
-                source, full_filename, "exec", executor_class, cmd, self._ast_postprocessors
+                source, tweaked_filename, "exec", executor_class, cmd, self._ast_postprocessors
             )
-            result_attributes["filename"] = full_filename
+            result_attributes["filename"] = tweaked_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument" % cmd.name)

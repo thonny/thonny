@@ -37,7 +37,7 @@ MicroPython
 
 Various
 ~~~~~~~
-* Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
+* Allow running untitled files without saving, #778
 * Ask confirmation for adding .py extension when the user saves the file without any extension, #2077
 * Add Cut/Copy/Paste to the file browser, #2001 by @kr-g
 * Make editor remember current line when reloading external changes, #2001 by @kr-g
@@ -45,6 +45,7 @@ Various
 * Add "Rename" command for the local file browser, #2001 by @kr-g
 * Add nicer Stop-button for higher resolutions, #1445 by @speedy-10
 * Improve button icon scaling (larger icons when screen has over 1024 lines)
+* Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
 
 
 Fixed

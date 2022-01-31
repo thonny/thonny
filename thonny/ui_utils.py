@@ -1438,6 +1438,13 @@ def get_hyperlink_cursor() -> str:
         return "hand2"
 
 
+def get_beam_cursor() -> str:
+    if running_on_mac_os() or running_on_windows():
+        return "ibeam"
+    else:
+        return "xterm"
+
+
 def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, int]]:
     # remember handlers for certain shortcuts which require
     # different treatment on non-latin keyboards

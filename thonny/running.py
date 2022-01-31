@@ -303,7 +303,7 @@ class Runner:
         self._postponed_commands = []
 
         for cmd in todo:
-            logger.debug("Sending postponed command: %s", cmd)
+            # logger.debug("Sending postponed command: %s", cmd) # too much spam
             self.send_command(cmd)
 
     def send_program_input(self, data: str) -> None:
@@ -358,17 +358,25 @@ class Runner:
                 )
                 return
 
-        filename = get_saved_current_script_filename()
-
-        if not filename:
-            # user has cancelled file saving
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if not editor:
             return
+
+        UNTITLED = "<untitled>"
+        if editor.get_filename():
+            filename = editor.save_file()
+            if not filename:
+                # user has cancelled file saving
+                return
+        else:
+            filename = UNTITLED
 
         if (
             is_remote_path(filename)
             and not self._proxy.can_run_remote_files()
             or is_local_path(filename)
             and not self._proxy.can_run_local_files()
+            or filename == UNTITLED
         ):
             self.execute_editor_content(command_name, self._get_active_arguments())
         else:
