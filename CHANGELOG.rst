@@ -33,6 +33,7 @@ MicroPython
 * Make internal MicroPython errors less intimidating. In several cases the errors are caused by bugs in MicroPython or USB driver and there is no use of showing the stacktrace. User is now directed to restart the device and stacktrace can be checked from the backend.log, #1799
 * Make MicroPython back-end advise Ctrl+C also if only whitespace characters get printed, #1755
 * Allow running MicroPython scripts without soft-rebooting first, #1565, #1716
+* Mention the possibility to reconfigure file types when denying opening remote files in a system app, #2148
 
 Various
 ~~~~~~~
