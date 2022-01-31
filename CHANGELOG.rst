@@ -38,7 +38,7 @@ MicroPython
 Various
 ~~~~~~~
 * Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
-*  #2077
+* Ask confirmation for adding .py extension when the user saves the file without any extension, #2077
 * Add Cut/Copy/Paste to the file browser, #2001 by @kr-g
 * Make editor remember current line when reloading external changes, #2001 by @kr-g
 * Add "Edit => Go to line..." command (Ctrl-G), #2001 by @kr-g
