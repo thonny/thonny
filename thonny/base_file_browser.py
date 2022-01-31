@@ -1175,9 +1175,18 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def open_path_with_system_app(self, path):
         messagebox.showinfo(
-            "Not supported",
-            "Opening remote files in system app is not supported.\n\n"
-            + "Please download the file to a local directory and open it from there!",
+            tr("Not supported"),
+            tr("Opening remote files in system app is not supported.")
+            + "\n\n"
+            + tr(
+                "If it is a text file, then you can configure it to open in Thonny "
+                "by right-clicking it and selecting 'Configure ... files'."
+            )
+            + "\n\n"
+            + tr(
+                "If the file needs to be opened in a system app, then download it to a local "
+                "directory and open it from there!"
+            ),
             master=self,
         )
 
