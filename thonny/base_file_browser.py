@@ -6,9 +6,10 @@ import time
 import tkinter as tk
 from tkinter import messagebox, ttk, simpledialog
 import stat, shutil
+from typing import Optional
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, get_dirs_children_info
+from thonny.common import InlineCommand, get_dirs_children_info, UserError
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
 from thonny.ui_utils import (
@@ -906,9 +907,8 @@ class BaseFileBrowser(ttk.Frame):
             tr("Rename '%s'") % file_name, tr("Enter new name"), initialvalue=file_name, parent=self
         )
         if new_name:
-            rc = self.perform_rename(old_name, new_name)
-            if rc:
-                messagebox.showerror(tr("Rename of '%s' failed") % old_name, rc, parent=self)
+            self.perform_rename(old_name, new_name)
+            self.refresh_tree()
 
     def perform_rename(self, old_name, new_name):
         raise Exception("overload this in subclass")
@@ -1112,8 +1112,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
         if old_name == full_path:
             return
+
         if os.path.exists(full_path):
-            return tr("File already exists")
+            raise UserError(tr("File already exists"))
 
         os.rename(old_name, full_path)
 
@@ -1263,6 +1264,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             return
 
         super().cmd_refresh_tree()
+
+    def perform_rename(self, old_name, new_name):
+        # TODO:
+        raise NotImplementedError()
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):

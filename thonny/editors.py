@@ -414,6 +414,7 @@ class Editor(ttk.Frame):
             initialfile=initialfile,
             parent=get_workbench(),
         )
+        logger.info("Save dialog returned %r", new_filename)
 
         # Different tkinter versions may return different values
         if new_filename in ["", (), None]:
@@ -691,7 +692,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "goto_source_line",
             "edit",
-            tr("Go to line ..."),
+            tr("Go to line..."),
             self._cmd_goto_source_line,
             default_sequence=select_sequence("<Control-g>", "<Command-g>"),
             # tester=,
