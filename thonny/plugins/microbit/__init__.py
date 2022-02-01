@@ -181,8 +181,12 @@ def load_plugin():
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
     import thonny.plugins.micropython
+    import thonny.plugins.esp
 
     thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(MicrobitProxy.get_known_usb_vids_pids())
     thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )
