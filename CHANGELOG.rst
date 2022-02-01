@@ -65,6 +65,7 @@ Fixed
 * Fix problems with full screen and split screen views in macOS, #1293, #1012
 * Fix the crash when pasting certain Unicode chars to editor in macOS, #32
 * Fix the crash caused by Cmd-backtick and others with Spanish keyboard in macOS, #886
+* Fix focus issues in dialogs, #2153
 
 3.3.14 (2021-08-01)
 ===================
