@@ -45,7 +45,7 @@ Various
 * Add "Edit => Go to line..." command (Ctrl-G), #2001 by @kr-g
 * Add "Rename" command for the local file browser, #2001 by @kr-g
 * Add nicer Stop-button for higher resolutions, #1445 by @speedy-10
-* Improve button icon scaling (larger icons when screen has over 1024 lines)
+* Improve icon scaling -- use larger icons when em-width in pixels is larger than ``general.large_icon_em_px_threshold``
 * Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
 
 

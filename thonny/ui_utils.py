@@ -2299,7 +2299,7 @@ def get_default_basic_theme():
 EM_WIDTH = None
 
 
-def ems_to_pixels(x):
+def ems_to_pixels(x: int) -> int:
     global EM_WIDTH
     if EM_WIDTH is None:
         EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")

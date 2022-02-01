@@ -58,6 +58,7 @@ from thonny.ui_utils import (
     caps_lock_is_on,
     shift_is_pressed,
     get_hyperlink_cursor,
+    ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -261,6 +262,7 @@ class Workbench(tk.Tk):
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("general.environment", [])
+        self.set_default("general.large_icon_em_px_threshold", 13)
         self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
         self.update_debug_mode()
@@ -1635,11 +1637,9 @@ class Workbench(tk.Tk):
         if os.path.exists(plat_filename):
             filename = plat_filename
 
-        if (
-            (self._scaling_factor >= 2.0 or self.winfo_screenheight() > 1024)
-            and not filename.endswith("48.png")
-            or self._scaling_factor > 2.0
-        ):
+        ems = ems_to_pixels(1)
+        threshold = self.get_option("general.large_icon_em_px_threshold")
+        if ems > threshold and not filename.endswith("48.png") or ems > threshold * 1.5:
             scaled_filename = filename[:-4] + "_2x.png"
             scaled_filename_alt = filename[:-4] + "48.png"  # used in pi theme
             if os.path.exists(scaled_filename):
