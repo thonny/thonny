@@ -1489,6 +1489,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_add("inactive", "1.0", end_index)
         self.tag_remove("value", "1.0", end_index)
+        self.tag_remove("stacktrace_hyperlink", "1.0", end_index)
 
         while len(self.active_extra_tags) > 0:
             self.tag_remove(self.active_extra_tags.pop(), "1.0", "end")
