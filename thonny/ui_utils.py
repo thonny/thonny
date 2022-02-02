@@ -1931,7 +1931,7 @@ def _get_dialog_provider():
 
 
 def asksaveasfilename(**options):
-    # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
+    # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
     _check_dialog_parent(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
@@ -2380,5 +2380,21 @@ def add_messagebox_parent_checker():
         setattr(messagebox, name, wrap_with_parent_checker(fun))
 
 
+def windows_known_extensions_are_hidden() -> bool:
+    assert running_on_windows()
+    import winreg
+
+    reg_key = winreg.OpenKey(
+        winreg.HKEY_CURRENT_USER,
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+        0,
+        winreg.KEY_READ,
+    )
+    try:
+        return winreg.QueryValueEx(reg_key, "HideFileExt")[0] == 1
+    finally:
+        reg_key.Close()
+
+
 if __name__ == "__main__":
-    root = tk.Tk()
+    print(windows_known_extensions_are_hidden())

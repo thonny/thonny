@@ -25,9 +25,17 @@ from thonny.common import (
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
-from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence, get_beam_cursor
+from thonny.ui_utils import (
+    askopenfilename,
+    asksaveasfilename,
+    select_sequence,
+    get_beam_cursor,
+    windows_known_extensions_are_hidden,
+)
 
-_dialog_filetypes = [("Python files", ".py .pyw .pyi"), ("all files", ".*")]
+
+PYTHON_FILES_STR = tr("Python files")
+_dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]
 
 REMOTE_PATH_MARKER = " :: "
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
@@ -406,7 +414,7 @@ class Editor(ttk.Frame):
     def ask_new_remote_path(self):
         target_path = ask_backend_path(self.winfo_toplevel(), "save")
         if target_path:
-            target_path = self._check_propose_py_extension(target_path)
+            target_path = self._check_add_py_extension(target_path)
             return make_remote_path(target_path)
         else:
             return None
@@ -419,24 +427,21 @@ class Editor(ttk.Frame):
             initialdir = os.path.dirname(self._filename)
             initialfile = os.path.basename(self._filename)
 
-        # http://tkinter.unpythonic.net/wiki/tkFileDialog
+        # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
+        type_var = tk.StringVar(value="")
         new_filename = asksaveasfilename(
             filetypes=_dialog_filetypes,
             defaultextension=None,
             initialdir=initialdir,
             initialfile=initialfile,
             parent=get_workbench(),
+            typevariable=type_var,
         )
-        logger.info("Save dialog returned %r", new_filename)
+        logger.info("Save dialog returned %r with typevariable %r", new_filename, type_var.get())
 
         # Different tkinter versions may return different values
         if new_filename in ["", (), None]:
             return None
-
-        # Seems that in some Python versions defaultextension
-        # acts funny
-        if new_filename.lower().endswith(".py.py"):
-            new_filename = new_filename[:-3]
 
         if running_on_windows():
             # may have /-s instead of \-s and wrong case
@@ -445,7 +450,8 @@ class Editor(ttk.Frame):
                 os.path.basename(new_filename),
             )
 
-        new_filename = self._check_propose_py_extension(new_filename)
+        if type_var.get() == PYTHON_FILES_STR:
+            new_filename = self._check_add_py_extension(new_filename, without_asking=True)
 
         if new_filename.endswith(".py"):
             base = os.path.basename(new_filename)
@@ -552,16 +558,17 @@ class Editor(ttk.Frame):
             "EditorTextDestroyed", editor=self, text_widget=self.get_text_widget()
         )
 
-    def _check_propose_py_extension(self, path: str) -> str:
+    def _check_add_py_extension(self, path: str, without_asking: bool = False) -> str:
         assert path
         parts = re.split(r"[/\\]", path)
         name = parts[-1]
         if "." not in name:
-            if messagebox.askyesno(
+            if without_asking or messagebox.askyesno(
                 title=tr("Confirmation"),
                 message=tr("Python files usually have .py extension.")
                 + "\n\n"
                 + tr("Did you mean '%s'?" % (name + ".py")),
+                parent=self.winfo_toplevel(),
             ):
                 return path + ".py"
             else:
