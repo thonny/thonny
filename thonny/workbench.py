@@ -262,7 +262,7 @@ class Workbench(tk.Tk):
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("general.environment", [])
-        self.set_default("general.large_icon_em_px_threshold", 13)
+        self.set_default("general.large_icon_rowheight_threshold", 32)
         self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
         self.update_debug_mode()
@@ -1632,9 +1632,13 @@ class Workbench(tk.Tk):
         if os.path.exists(plat_filename):
             filename = plat_filename
 
-        ems = ems_to_pixels(1)
-        threshold = self.get_option("general.large_icon_em_px_threshold")
-        if ems > threshold and not filename.endswith("48.png") or ems > threshold * 1.5:
+        treeview_rowheight = self._compute_treeview_rowheight()
+        threshold = self.get_option("general.large_icon_rowheight_threshold")
+        if (
+            treeview_rowheight > threshold
+            and not filename.endswith("48.png")
+            or treeview_rowheight > threshold * 1.5
+        ):
             scaled_filename = filename[:-4] + "_2x.png"
             scaled_filename_alt = filename[:-4] + "48.png"  # used in pi theme
             if os.path.exists(scaled_filename):
@@ -1858,8 +1862,6 @@ class Workbench(tk.Tk):
                 f.configure(size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER))
 
     def update_fonts(self) -> None:
-        default_font = tk_font.nametofont("TkDefaultFont")
-
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
 
@@ -1911,12 +1913,15 @@ class Workbench(tk.Tk):
             )
 
         # Tk doesn't update Treeview row height properly, at least not in Linux Tk
-        rowheight = round(default_font.metrics("linespace") * 1.2)
         style = ttk.Style()
-        style.configure("Treeview", rowheight=rowheight)
+        style.configure("Treeview", rowheight=self._compute_treeview_rowheight())
 
         if self._editor_notebook is not None:
             self._editor_notebook.update_appearance()
+
+    def _compute_treeview_rowheight(self):
+        default_font = tk_font.nametofont("TkDefaultFont")
+        return round(default_font.metrics("linespace") * 1.15)
 
     def _get_menu_index(self, menu: tk.Menu) -> int:
         for i in range(len(self._menubar.winfo_children())):
