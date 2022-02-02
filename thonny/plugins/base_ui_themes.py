@@ -26,7 +26,6 @@ def _treeview_settings() -> BasicUiThemeSettings:
 
     return {
         "Treeview": {
-            "configure": {"font": "TreeviewFont"},
             "map": {
                 "background": [
                     ("selected", "focus", bg_sel_focus),
@@ -419,7 +418,6 @@ def aqua() -> BasicUiThemeSettings:
         "TCombobox": {"configure": {"postoffset": [5, -2, -10, 0]}},
         "Heading": {"configure": {"font": "TkHeadingFont"}},
         "Treeview": {
-            "configure": {"rowheight": 18, "background": "white"},
             "map": {
                 "background": [
                     ("disabled", "systemDialogBackgroundInactive"),

@@ -485,11 +485,6 @@ class Workbench(tk.Tk):
                 slant="italic",
             ),
             tk_font.Font(
-                name="TreeviewFont",
-                family=default_font.cget("family"),
-                size=default_font.cget("size"),
-            ),
-            tk_font.Font(
                 name="BoldTkDefaultFont",
                 family=default_font.cget("family"),
                 size=default_font.cget("size"),
@@ -1863,6 +1858,8 @@ class Workbench(tk.Tk):
                 f.configure(size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER))
 
     def update_fonts(self) -> None:
+        default_font = tk_font.nametofont("TkDefaultFont")
+
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
 
@@ -1913,16 +1910,8 @@ class Workbench(tk.Tk):
                 size=round(editor_font_size * small_size_factor)
             )
 
-        # Update Treeview font and row height
-        if running_on_mac_os():
-            treeview_font_size = int(editor_font_size * 0.7 + 4)
-        else:
-            treeview_font_size = int(editor_font_size * 0.7 + 2)
-
-        treeview_font = tk_font.nametofont("TreeviewFont")
-        treeview_font.configure(size=treeview_font_size)
-        rowheight = round(treeview_font.metrics("linespace") * 1.2)
-
+        # Tk doesn't update Treeview row height properly, at least not in Linux Tk
+        rowheight = round(default_font.metrics("linespace") * 1.2)
         style = ttk.Style()
         style.configure("Treeview", rowheight=rowheight)
 

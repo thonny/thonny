@@ -48,7 +48,7 @@ Various
 * Add nicer Stop-button for higher resolutions, #1445 by @speedy-10
 * Improve icon scaling -- use larger icons when em-width in pixels is larger than ``general.large_icon_em_px_threshold``
 * Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
-
+* Use default font in Treeviews (including Files and Variables view). Therefore Treeview's font size is now affected by the scaling factor and is not affected by editor font size.
 
 Fixed
 -----
