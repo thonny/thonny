@@ -2013,9 +2013,6 @@ class _ZenityDialogProvider:
         if not filename:
             return None
 
-        if "defaultextension" in options and "." not in os.path.basename(filename):
-            filename += options["defaultextension"]
-
         return filename
 
     @classmethod

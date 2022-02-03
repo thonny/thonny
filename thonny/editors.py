@@ -450,8 +450,10 @@ class Editor(ttk.Frame):
                 os.path.basename(new_filename),
             )
 
-        if type_var.get() == PYTHON_FILES_STR:
-            new_filename = self._check_add_py_extension(new_filename, without_asking=True)
+        if type_var.get() == PYTHON_FILES_STR or type_var.get() == "":
+            new_filename = self._check_add_py_extension(
+                new_filename, without_asking=type_var.get() == PYTHON_FILES_STR
+            )
 
         if new_filename.endswith(".py"):
             base = os.path.basename(new_filename)
