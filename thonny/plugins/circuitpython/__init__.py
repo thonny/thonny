@@ -147,7 +147,7 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
         )
 
         # reporting approximate size for now. Downloader can take precise value from the header later
-        size = 2 ** 20  # 1 MiB
+        size = 2**20  # 1 MiB
         return (url, size)
 
     def _is_suitable_asset(self, asset, model_id):

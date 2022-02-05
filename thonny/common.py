@@ -702,7 +702,7 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
         result += "-" + sys.version_info[3]
 
     if maxsize is not None:
-        result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
+        result += " (" + ("64" if sys.maxsize > 2**32 else "32") + " bit)"
 
     return result
 

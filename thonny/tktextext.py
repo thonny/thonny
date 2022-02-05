@@ -1231,7 +1231,7 @@ def get_keyboard_language():
     klid = user32.GetKeyboardLayout(thread_id)
     # Language ID -> low 10 bits, Sub-language ID -> high 6 bits
     # Extract language ID from KLID
-    lid = klid & (2 ** 16 - 1)
+    lid = klid & (2**16 - 1)
 
     return lid
 

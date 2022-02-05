@@ -198,7 +198,7 @@ class CodeView(tktextext.EnhancedTextFrame):
             return encoding
         else:
             ENCODING_MARKER = re.compile(
-                br"(charset|coding)[\t ]*[=: ][\t ]*[\"\']?([a-z][0-9a-z-_ ]*[0-9a-z])[\"\'\n\r\t ]?",
+                rb"(charset|coding)[\t ]*[=: ][\t ]*[\"\']?([a-z][0-9a-z-_ ]*[0-9a-z])[\"\'\n\r\t ]?",
                 re.IGNORECASE,
             )
 
