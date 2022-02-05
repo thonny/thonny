@@ -959,6 +959,7 @@ def add_micropython_backend(
     validate_time=True,
     sync_time=None,
     local_rtc=True,
+    submit_mode=None,
     write_block_size=None,
     write_block_delay=None,
     dtr=None,
@@ -968,13 +969,12 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".port", "auto")
         get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
         get_workbench().set_default(name + ".webrepl_password", "")
+        get_workbench().set_default(name + ".submit_mode", submit_mode)
         get_workbench().set_default(name + ".write_block_size", write_block_size)
-        # write_block_delay is used only with "raw" submit_mode
         get_workbench().set_default(name + ".write_block_delay", write_block_delay)
         get_workbench().set_default(name + ".used_vidpids", set())
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
-        get_workbench().set_default(name + ".submit_mode", None)
         get_workbench().set_default(name + ".interrupt_on_connect", True)
         get_workbench().set_default(name + ".restart_interpreter_before_run", True)
 

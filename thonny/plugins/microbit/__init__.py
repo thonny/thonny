@@ -13,6 +13,7 @@ from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
+from thonny.plugins.micropython.bare_metal_backend import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import CommonDialog, FileCopyDialog, ems_to_pixels
 
@@ -174,6 +175,7 @@ def load_plugin():
         sort_key="31",
         validate_time=False,
         sync_time=False,
+        submit_mode=PASTE_SUBMIT_MODE,
         write_block_size=128,
     )
 

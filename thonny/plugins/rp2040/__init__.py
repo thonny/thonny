@@ -6,6 +6,7 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
     BareMetalMicroPythonConfigPage,
 )
+from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 logger = getLogger(__name__)
@@ -49,5 +50,6 @@ def load_plugin():
         sort_key="33",
         validate_time=False,
         sync_time=True,
+        submit_mode=RAW_PASTE_SUBMIT_MODE,
         write_block_size=64,
     )

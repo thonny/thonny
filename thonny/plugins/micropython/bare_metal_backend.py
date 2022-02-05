@@ -131,9 +131,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._last_inferred_fs_mount: Optional[str] = None
 
         self._submit_mode = args.get("submit_mode", None)
+        if self._submit_mode is None:
+            self._submit_mode = self._infer_submit_mode()
 
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
             self._write_block_size = self._infer_write_block_size()
@@ -232,20 +232,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return result
 
     def _infer_write_block_size(self):
-        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
-        # paste mode and larger block sizes (problem confirmed with 128 and 64 bytes blocks)
-        # https://github.com/thonny/thonny/issues/2143
-        from thonny.plugins.micropython.serial_connection import SerialConnection
+        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
+        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
 
-        if (
-            self._submit_mode == "paste"
-            and running_on_windows()
-            and isinstance(self._connection, SerialConnection)
-        ):
-            # TODO: Only reduce the block size when VID:PID is 0403:6001
-            return 30
-        else:
-            return 255
+        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
+        # paste mode and larger block sizes (problem confirmed with 128, 64 and bytes blocks)
+        # https://github.com/thonny/thonny/issues/2143
+        # Don't know any other good solutions besides avoiding paste mode for this device.
+        return 255
 
     def _infer_read_block_size(self):
         # TODO:
@@ -257,7 +251,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return 0
 
     def _infer_write_block_delay(self):
-        if self._submit_mode in ("paste", "raw_paste"):
+        if self._submit_mode in (PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE):
             return 0
         elif self._connected_over_webrepl():
             # ESP-32 needs long delay to work reliably over raw mode WebREPL
@@ -287,28 +281,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if clean:
             self._clear_repl()
 
-    def _choose_submit_mode(self):
+    def _infer_submit_mode(self):
         if self._connected_over_webrepl():
             logger.info("Choosing paste submit mode because of WebREPL")
-            self._submit_mode = PASTE_SUBMIT_MODE
-            return
+            return PASTE_SUBMIT_MODE
 
-        # at least sometimes, we end up at normal prompt, although we asked for raw prompt
-        self._ensure_raw_mode()
-        self._write(RAW_PASTE_COMMAND)
-        response = self._connection.soft_read(2)
-        assert len(response) == 2, "Could not read response for raw paste command: " + response
-        if response == RAW_PASTE_CONFIRMATION:
-            logger.info("Choosing raw paste submit mode")
-            self._submit_mode = RAW_PASTE_SUBMIT_MODE
-            self._write(EOT)
-            discarding = self._connection.read_until(RAW_PROMPT)
-        else:
-            discarding = self._connection.read_until(RAW_PROMPT)
-            logger.info("Choosing raw submit mode (%r)", response + discarding)
-            self._submit_mode = RAW_SUBMIT_MODE
-
-        discarding += self._connection.read_all()
+        return RAW_PASTE_SUBMIT_MODE
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
@@ -567,9 +545,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         (OK, most likely the reading thread will eliminate the problem with output buffer, but just in case...)
         """
         assert script
-
-        if self._submit_mode is None:
-            self._choose_submit_mode()
 
         # assuming we are already at a prompt, but threads may have produced something
         self._forward_unexpected_output()

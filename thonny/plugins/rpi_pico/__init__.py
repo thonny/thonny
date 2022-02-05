@@ -7,6 +7,7 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
     BareMetalMicroPythonConfigPage,
 )
+from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.plugins.rp2040 import RP2040BackendProxy, RP2040BackendConfigPage
 from thonny.ui_utils import show_dialog
@@ -101,6 +102,7 @@ def load_plugin():
         sort_key="32",
         validate_time=False,
         sync_time=True,
+        submit_mode=RAW_PASTE_SUBMIT_MODE,
         write_block_size=64,
     )
 
