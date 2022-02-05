@@ -273,13 +273,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if clean:
             self._clear_repl()
 
-    def _interrupt(self):
-        try:
-            super()._interrupt()
-        except SerialTimeoutException:
-            logger.exception("Timeout while trying to interrupt")
-            self._report_internal_exception("Could not interrupt")
-
     def _choose_submit_mode(self):
         if self._connected_over_webrepl():
             logger.info("Choosing paste submit mode because of WebREPL")
@@ -610,6 +603,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
+            logger.debug("Expecting to read %r", expected_echo)
             discarded = self._connection.read_all_expected(
                 expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT
             )
@@ -1643,26 +1637,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return False
 
     def _report_internal_exception(self, msg: str) -> None:
+        super()._report_internal_exception(msg)
+
         e = sys.exc_info()[1]
         if isinstance(e, ManagementError):
             self._log_management_error_details(e)
 
-        if isinstance(e, (ManagementError, ProtocolError, SerialTimeoutException)):
-            self._show_error(
-                (
-                    "It looks like %s has arrived to an unexpected state"
-                    " or there have been communication problems."
-                )
-                % self._get_interpreter_kind(),
-                end=" ",
-            )
-        else:
-            self._show_error("Internal error (%s)" % e)
-
-        self._show_error("See %s for more details.\n" % thonny.BACKEND_LOG_MARKER)
         self._show_error(
             'You may need to press "Stop/Restart" or hard-reset your '
-            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
+            + "%s device and try again.\n" % self._get_interpreter_kind()
         )
 
 

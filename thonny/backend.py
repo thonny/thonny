@@ -15,6 +15,7 @@ import traceback
 from abc import abstractmethod, ABC
 from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
 
+import thonny
 from thonny import report_time
 from thonny.common import (
     BackendEvent,
@@ -189,14 +190,14 @@ class BaseBackend(ABC):
         pass
 
     def _report_internal_exception(self, msg: str) -> None:
-        user_msg = "PROBLEM WITH THONNY'S BACK-END: " + msg
+        user_msg = "PROBLEM IN THONNY'S BACK-END: " + msg
         if sys.exc_info()[1]:
             err_msg = "\n".join(
                 traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])
             ).strip()
             user_msg += f" ({err_msg})"
 
-        user_msg += ".\nSee backend.log for more info."
+        user_msg += ".\nSee " + thonny.BACKEND_LOG_MARKER + " for more info."
 
         print(user_msg, file=sys.stderr)
 
