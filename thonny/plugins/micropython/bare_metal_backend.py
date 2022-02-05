@@ -19,7 +19,7 @@ from thonny.common import (
     serialize_message,
     EOFCommand,
 )
-from thonny.misc_utils import find_volumes_by_name
+from thonny.misc_utils import find_volumes_by_name, running_on_windows
 from thonny.plugins.micropython.backend import (
     MicroPythonBackend,
     ManagementError,
@@ -130,11 +130,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._startup_time = time.time()
         self._last_inferred_fs_mount: Optional[str] = None
 
+        self._submit_mode = args.get("submit_mode", None)
+
         # https://forum.micropython.org/viewtopic.php?f=15&t=3698
         # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
-            self._write_block_size = 255
+            self._write_block_size = self._infer_write_block_size()
 
         # write delay is used only with original raw submit mode
         self._write_block_delay = args.get("write_block_delay", None)
@@ -147,7 +149,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size is None:
             self._read_block_size = self._infer_read_block_size()
 
-        self._submit_mode = args.get("submit_mode", None)
         logger.debug(
             "Initial submit_mode: %s, "
             "write_block_size: %s, "
@@ -230,6 +231,22 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return result
 
+    def _infer_write_block_size(self):
+        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
+        # paste mode and larger block sizes (problem confirmed with 128 and 64 bytes blocks)
+        # https://github.com/thonny/thonny/issues/2143
+        from thonny.plugins.micropython.serial_connection import SerialConnection
+
+        if (
+            self._submit_mode == "paste"
+            and running_on_windows()
+            and isinstance(self._connection, SerialConnection)
+        ):
+            # TODO: Only reduce the block size when VID:PID is 0403:6001
+            return 30
+        else:
+            return 255
+
     def _infer_read_block_size(self):
         # TODO:
         # in Windows it should be > 0 if the port is bluetooth over serial
@@ -240,7 +257,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return 0
 
     def _infer_write_block_delay(self):
-        if self._connected_over_webrepl():
+        if self._submit_mode in ("paste", "raw_paste"):
+            return 0
+        elif self._connected_over_webrepl():
             # ESP-32 needs long delay to work reliably over raw mode WebREPL
             # TODO: consider removing when this gets fixed
             return 0.5
@@ -598,11 +617,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
-            logger.debug("Expecting to read %r", expected_echo)
-            discarded = self._connection.read_all_expected(
-                expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT
-            )
-            logger.debug("Discarding %r", discarded)
+            self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         # push and read confirmation
         self._write(EOT)
