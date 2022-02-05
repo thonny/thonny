@@ -124,11 +124,6 @@ FALLBACK_BUILTIN_MODULES = [
 logger = getLogger("thonny.plugins.micropython.bare_metal_backend")
 
 
-def debug(msg):
-    return
-    # print(msg, file=sys.stderr)
-
-
 class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection, clean, args):
         self._connection = connection

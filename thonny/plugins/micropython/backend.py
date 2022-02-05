@@ -113,11 +113,6 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 logger = getLogger(__name__)
 
 
-def debug(msg):
-    return
-    # print(msg, file=sys.stderr)
-
-
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
         logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)

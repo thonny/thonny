@@ -1,6 +1,5 @@
 from logging import getLogger
 import pathlib
-import platform
 import sys
 import threading
 import time
@@ -180,7 +179,3 @@ class DifficultSerialConnection(SerialConnection):
             super()._make_output_available(data[end - 1 :], block=block)
         else:
             super()._make_output_available(data, block=block)
-
-
-def debug(*args, file=sys.stderr):
-    print(*args, file=file)
