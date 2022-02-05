@@ -103,6 +103,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marie Roald
 * Marko Ristin
 * Matt Iversen
 * Miro Hrončok
