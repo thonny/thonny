@@ -39,6 +39,7 @@ MicroPython
 Various
 ~~~~~~~
 * Allow running content of untitled editors without saving, #778
+* Clear Shell before starting new process (Run, Debug, Stop/Restart, ...) by default. Can be turned off in Tools => Options => Shell, #1681
 * Make stacktrace links to ``<stdin>`` and ``<input>`` pseudo-files go to the editor containing corresponding source, #778
 * Ask confirmation for adding .py extension when the user saves the file without any extension to MicroPython/CircuitPython device, #2077
 * Don't add the .py extension when the user saves a local file and selects "All files" filter.

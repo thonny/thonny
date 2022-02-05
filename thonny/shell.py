@@ -105,6 +105,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().set_default("shell.squeeze_threshold", 1000)
         get_workbench().set_default("shell.tty_mode", True)
         get_workbench().set_default("shell.auto_inspect_values", True)
+        get_workbench().set_default("shell.clear_for_new_process", True)
 
         self.text = ShellText(
             main_frame,
@@ -884,18 +885,22 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self):
-        if (
-            "restart_line" in self.tag_names("output_insert -2 chars")
-            or not self.get("1.0", "3.0").strip()
-        ):
-            return
+        if get_workbench().get_option("shell.clear_for_new_process"):
+            self._clear_content("end")
+        else:
+            if (
+                "restart_line" in self.tag_names("output_insert -2 chars")
+                or not self.get("1.0", "3.0").strip()
+            ):
+                return
 
-        self._insert_text_directly(
-            # "\n============================== RESTART ==============================\n",
-            "\n" + "─" * 200 + "\n",
-            # "\n" + "═"*200 + "\n",
-            ("magic", "restart_line"),
-        )
+            self._insert_text_directly(
+                # "\n============================== RESTART ==============================\n",
+                "\n" + "─" * 200 + "\n",
+                # "\n" + "═"*200 + "\n",
+                ("magic", "restart_line"),
+            )
+
         self.see("end")
 
     def intercept_insert(self, index, txt, tags=()):
@@ -1213,6 +1218,11 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                         source = None
                         self._last_main_file = None
 
+                    if command_name[0].isupper() and get_workbench().get_option(
+                        "shell.clear_for_new_process"
+                    ):
+                        self._clear_shell()
+
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
                         ToplevelCommand(
@@ -1455,7 +1465,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._clear_content(proposed_cut)
 
     def _clear_content(self, cut_idx):
-        proposed_cut_float = float(cut_idx)
+        proposed_cut_float = float(self.index(cut_idx))
         for btn in list(self._squeeze_buttons):
             try:
                 idx = self.index(btn)
@@ -1553,7 +1563,7 @@ class ShellText(BaseShellText):
 
 
 class SqueezedTextDialog(CommonDialog):
-    def __init__(self, master, button):
+    def __init__(self, master: BaseShellText, button):
         super().__init__(master)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
