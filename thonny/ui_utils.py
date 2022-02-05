@@ -66,8 +66,6 @@ class CommonDialog(tk.Toplevel):
         if node is None:
             node = self
 
-        logger.info("consi %r", type(node))
-
         if isinstance(
             node,
             (
