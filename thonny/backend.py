@@ -286,11 +286,8 @@ class MainBackend(BaseBackend, ABC):
                 self._on_connection_closed(e)
             except Exception as e:
                 logger.exception("Exception while handling %r", cmd.name)
-                if isinstance(cmd, ToplevelCommand):
-                    self._report_internal_exception(f"Failed executing {cmd.name!r}")
-                    response = {}
-                else:
-                    response = {"error": str(e)}
+                self._report_internal_exception("Exception while handling %r" % cmd.name)
+                sys.exit(1)
 
         if response is False:
             # Command doesn't want to send any response
