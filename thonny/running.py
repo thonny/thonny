@@ -639,14 +639,14 @@ class Runner:
 
         get_workbench().event_generate("BackendRestart", full=True)
 
-    def destroy_backend(self) -> None:
+    def destroy_backend(self, for_restart: bool = False) -> None:
         if self._polling_after_id is not None:
             get_workbench().after_cancel(self._polling_after_id)
             self._polling_after_id = None
 
         self._postponed_commands = []
         if self._proxy:
-            self._proxy.destroy()
+            self._proxy.destroy(for_restart=for_restart)
             self._proxy = None
 
         get_workbench().event_generate("BackendTerminated")
@@ -791,7 +791,7 @@ class BackendProxy:
         """Tries to interrupt current command without resetting the backend"""
         pass
 
-    def destroy(self):
+    def destroy(self, for_restart: bool = False):
         """Called when Thonny no longer needs this instance
         (Thonny gets closed or new backend gets selected)
         """
@@ -1014,7 +1014,7 @@ class SubprocessProxy(BackendProxy):
     def get_sys_path(self):
         return self._sys_path
 
-    def destroy(self):
+    def destroy(self, for_restart: bool = False):
         self._close_backend()
 
     def _close_backend(self):

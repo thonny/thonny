@@ -1,3 +1,4 @@
+import time
 from logging import getLogger
 import os
 import platform
@@ -87,6 +88,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._fix_port()
 
         super().__init__(clean)
+
+    def destroy(self, for_restart: bool = False):
+        super().destroy(for_restart=for_restart)
+        if self._port != "webrepl":
+            # let the OS release the port
+            time.sleep(0.1)
 
     def _fix_port(self):
         if self._port == "webrepl":

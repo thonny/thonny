@@ -82,7 +82,7 @@ class SshCPythonProxy(SubprocessProxy):
     def get_exe_dirs(self):
         return []
 
-    def destroy(self):
+    def destroy(self, for_restart: bool = False):
         try:
             self.send_command(ImmediateCommand("kill"))
         except BrokenPipeError:
