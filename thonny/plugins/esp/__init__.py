@@ -25,6 +25,8 @@ from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
 
+VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS = set()
+
 
 class ESPProxy(BareMetalMicroPythonProxy):
     @classmethod
@@ -48,8 +50,7 @@ class ESPProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_vids_pids_to_avoid(self):
-        # micro:bit
-        return {(0x0D28, 0x0204)}
+        return VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS
 
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.esp.esp_backend

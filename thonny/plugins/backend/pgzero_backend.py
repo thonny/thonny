@@ -1,8 +1,10 @@
 import ast
 import os
 import sys
-
+from logging import getLogger
 from thonny.plugins.cpython_backend import get_backend, MainCPythonBackend
+
+logger = getLogger(__name__)
 
 
 def augment_ast(root):
@@ -70,6 +72,7 @@ def augment_ast(root):
 
 
 def patched_editor_autocomplete(self, cmd):
+    logger.debug("Starting patched _cmd_editor_autocomplete")
     # Make extra builtins visible for Jedi
     prefix = "from pgzero.builtins import *\n"
     cmd["source"] = prefix + cmd["source"]

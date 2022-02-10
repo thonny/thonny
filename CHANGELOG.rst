@@ -2,12 +2,72 @@
 Version history
 ===============
 
-4.4.0b1 (2021-12-??)
+4.0.0b1 (2022-01-??)
 ====================
 New & changed
 --------------
-* Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends.
 
+Distribution
+~~~~~~~~~~~~
+* Upgrade bundled Python to 3.10
+* Drop support for Python 3.5, 3.6 and 3.7
+* The main Windows bundle is now 64-bit. For fallback publish 32-bit bundle with Python 3.8 for 32-bit Windows 10 and 8.1 and all variants of Windows 7 and 8.
+* Stop publishing 32-bit Linux bundles.
+* Enhance Linux installer script (the .bash-file) to create a venv and pip-install Thonny if run on a platform for which there is no binary bundle available. This means you can now use Linux installer also on Raspberry Pi, #1736
+
+Code completion and analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Add the option for automatically getting completions while typing (Tools => Options => Editor)
+* Selecting a completion with Tab now replaces the name suffix right of the cursor, #1998
+* Turn off requesting completions with Tab in editors by default, #2069
+* Show documentation for the selected completion with another Ctrl-Space or automatically (Tools => Options => Editor)
+* Add "call-tips" -- a box describing the formal parameters of current method call. Invoke manually with Ctrl-Shift-Space or automatically after typing open parentheses (Tools => Options => Editor)
+* Enhance Go-to-definition (Ctrl-click). The name is now underlined while ctrl-hovering over it.
+
+MicroPython
+~~~~~~~~~~~
+* Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends, 116aecd714d5e94a8ad6e244deac44aece5065eb
+* Present MicroPython time options (whether to sync time and whether to use local time) in back-end configuration page, #1638
+* Automatically interrupt current process when connecting to bare-metal MicroPython or CircuitPython device. This can be turned off at device's settings page, #2059
+* Don't hide the output when Stop/Restarting MicroPython, #1805
+* Make internal MicroPython errors less intimidating. In several cases the errors are caused by bugs in MicroPython or USB driver and there is no use of showing the stacktrace. User is now directed to restart the device and stacktrace can be checked from the backend.log, #1799
+* Make MicroPython back-end advise Ctrl+C also if only whitespace characters get printed, #1755
+* Allow running MicroPython scripts without soft-rebooting first, #1565, #1716
+* Add generic "MicroPython (RP2040)" back-end in addition to the more specific "MicroPython (Raspberry Pi Pico)", #2151
+* Mention the possibility to reconfigure file types when denying opening remote files in a system app, #2148
+
+Various
+~~~~~~~
+* Allow running content of untitled editors without saving, #778
+* Clear Shell before starting new process (Run, Debug, Stop/Restart, ...) by default. Can be turned off in Tools => Options => Shell, #1681
+* Make stacktrace links to ``<stdin>`` and ``<input>`` pseudo-files go to the editor containing corresponding source, #778
+* Ask confirmation for adding .py extension when the user saves the file without any extension to MicroPython/CircuitPython device, #2077
+* Don't add the .py extension when the user saves a local file and selects "All files" filter.
+* Add Cut/Copy/Paste to the file browser, #2001 by @kr-g
+* Make editor remember current line when reloading external changes, #2001 by @kr-g
+* Add "Edit => Go to line..." command (Ctrl-G), #2001 by @kr-g
+* Add "Rename" command for the local file browser, #2001 by @kr-g
+* Add nicer Stop-button for higher resolutions, #1445 by @speedy-10
+* Improve icon scaling -- use larger icons when Treeview row height is larger than ``general.large_icon_rowheight_threshold``
+* Use default font in Treeviews (including Files and Variables view). Therefore Treeview's font size is now affected by the scaling factor and is not affected by editor font size.
+* Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
+
+Fixed
+-----
+* Fix issues with printouts containing more than 999 lines, #2118, #1646
+* Fall back to default theme when used 3rd party theme gets uninstalled, #2117
+* Fix problem with Files hamburger menu when nothing is selected, #2101
+* Fix Windows version detection in "Tools => Open system shell", #1961
+* Make sure Thonny's dialogs are treated as dialogs in macOS and Linux, #1790
+* Don't issue two Ctrl+C-s too quickly in row when interrupting MicroPython process, in order to give time for finally-blocks to clean up, #1757
+* Fix asm_pio error when working in with RP-pico in shell mode, #1718
+* Fix the crash when scripts longer than 4KB are sent to Python 3 SSH back-end, #1680
+* Properly interrupt MicroPython code before submitting new code when using F5 while code is running, #1668
+* Use "vista" Tk-theme instead of "xpnative" in Windows. Gives nicer combobox, #1663
+* Fix problems with full screen and split screen views in macOS, #1293, #1012
+* Fix the crash when pasting certain Unicode chars to editor in macOS, #32
+* Fix the crash caused by Cmd-backtick and others with Spanish keyboard in macOS, #886
+* Fix focus issues in dialogs, #2153
 
 3.3.14 (2021-08-01)
 ===================

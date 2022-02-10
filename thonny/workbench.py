@@ -58,6 +58,7 @@ from thonny.ui_utils import (
     caps_lock_is_on,
     shift_is_pressed,
     get_hyperlink_cursor,
+    ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -261,6 +262,7 @@ class Workbench(tk.Tk):
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("general.environment", [])
+        self.set_default("general.large_icon_rowheight_threshold", 32)
         self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
         self.update_debug_mode()
@@ -481,11 +483,6 @@ class Workbench(tk.Tk):
                 family=self.get_option("view.editor_font_family"),
                 weight="bold",
                 slant="italic",
-            ),
-            tk_font.Font(
-                name="TreeviewFont",
-                family=default_font.cget("family"),
-                size=default_font.cget("size"),
             ),
             tk_font.Font(
                 name="BoldTkDefaultFont",
@@ -885,7 +882,7 @@ class Workbench(tk.Tk):
         self._syntax_themes = (
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
-        self.set_default("view.ui_theme", ui_utils.get_default_theme())
+        self.set_default("view.ui_theme", self.get_default_ui_theme())
 
     def add_command(
         self,
@@ -1334,17 +1331,39 @@ class Workbench(tk.Tk):
         codeview.set_syntax_options(get_settings(name))
 
     def reload_themes(self) -> None:
-        preferred_theme = self.get_option("view.ui_theme")
+        ui_theme = self.get_option("view.ui_theme")
         available_themes = self.get_usable_ui_theme_names()
+        if ui_theme not in available_themes:
+            logger.warning("Could not find UI theme %r, switching to default", ui_theme)
+            ui_theme = self.get_default_ui_theme()
+            self.set_option("view.ui_theme", ui_theme)
 
-        if preferred_theme in available_themes:
-            self._apply_ui_theme(preferred_theme)
+        self._apply_ui_theme(ui_theme)
+
+        syntax_theme = self.get_option("view.syntax_theme")
+        if syntax_theme not in self._syntax_themes:
+            logger.warning("Could not find syntax theme %r, switching to default", syntax_theme)
+            syntax_theme = self.get_default_syntax_theme()
+            self.set_option("view.syntax_theme", syntax_theme)
+
+        self._apply_syntax_theme(syntax_theme)
+
+    def get_default_ui_theme(self) -> str:
+        available_themes = self.get_usable_ui_theme_names()
+        if "Windows" in available_themes:
+            return "Windows"
+        elif running_on_rpi() and "Raspberry Pi" in available_themes:
+            return "Raspberry Pi"
         elif "Enhanced Clam" in available_themes:
-            self._apply_ui_theme("Enhanced Clam")
-        elif "Windows" in available_themes:
-            self._apply_ui_theme("Windows")
+            return "Enhanced Clam"
+        else:
+            return "clam"
 
-        self._apply_syntax_theme(self.get_option("view.syntax_theme"))
+    def get_default_syntax_theme(self) -> str:
+        if self.uses_dark_ui_theme():
+            return "Default Dark"
+        else:
+            return "Default Light"
 
     def uses_dark_ui_theme(self) -> bool:
 
@@ -1352,8 +1371,11 @@ class Workbench(tk.Tk):
         while True:
             if "dark" in name.lower():
                 return True
+            try:
+                name, _, _ = self._ui_themes[name]
+            except KeyError:
+                return False
 
-            name, _, _ = self._ui_themes[name]
             if name is None:
                 # reached start of the chain
                 break
@@ -1610,10 +1632,19 @@ class Workbench(tk.Tk):
         if os.path.exists(plat_filename):
             filename = plat_filename
 
-        if self._scaling_factor >= 2.0:
+        treeview_rowheight = self._compute_treeview_rowheight()
+        threshold = self.get_option("general.large_icon_rowheight_threshold")
+        if (
+            treeview_rowheight > threshold
+            and not filename.endswith("48.png")
+            or treeview_rowheight > threshold * 1.5
+        ):
             scaled_filename = filename[:-4] + "_2x.png"
+            scaled_filename_alt = filename[:-4] + "48.png"  # used in pi theme
             if os.path.exists(scaled_filename):
                 filename = scaled_filename
+            elif os.path.exists(scaled_filename_alt):
+                filename = scaled_filename_alt
             else:
                 img = tk.PhotoImage(file=filename)
                 # can't use zoom method, because this doesn't allow name
@@ -1623,8 +1654,8 @@ class Workbench(tk.Tk):
                     "copy",
                     img.name,
                     "-zoom",
-                    int(self._scaling_factor),
-                    int(self._scaling_factor),
+                    2,
+                    2,
                 )
                 self._images.add(img2)
                 return img2
@@ -1757,17 +1788,13 @@ class Workbench(tk.Tk):
         )
 
     def in_debug_mode(self) -> bool:
-        return (
-            os.environ.get("THONNY_DEBUG", False)
-            in [
-                "1",
-                1,
-                "True",
-                True,
-                "true",
-            ]
-            or self.get_option("general.debug_mode", False)
-        )
+        return os.environ.get("THONNY_DEBUG", False) in [
+            "1",
+            1,
+            "True",
+            True,
+            "true",
+        ] or self.get_option("general.debug_mode", False)
 
     def _init_scaling(self) -> None:
         self._default_scaling_factor = self.tk.call("tk", "scaling")
@@ -1881,21 +1908,16 @@ class Workbench(tk.Tk):
                 size=round(editor_font_size * small_size_factor)
             )
 
-        # Update Treeview font and row height
-        if running_on_mac_os():
-            treeview_font_size = int(editor_font_size * 0.7 + 4)
-        else:
-            treeview_font_size = int(editor_font_size * 0.7 + 2)
-
-        treeview_font = tk_font.nametofont("TreeviewFont")
-        treeview_font.configure(size=treeview_font_size)
-        rowheight = round(treeview_font.metrics("linespace") * 1.2)
-
+        # Tk doesn't update Treeview row height properly, at least not in Linux Tk
         style = ttk.Style()
-        style.configure("Treeview", rowheight=rowheight)
+        style.configure("Treeview", rowheight=self._compute_treeview_rowheight())
 
         if self._editor_notebook is not None:
             self._editor_notebook.update_appearance()
+
+    def _compute_treeview_rowheight(self):
+        default_font = tk_font.nametofont("TkDefaultFont")
+        return round(default_font.metrics("linespace") * 1.15)
 
     def _get_menu_index(self, menu: tk.Menu) -> int:
         for i in range(len(self._menubar.winfo_children())):

@@ -19,7 +19,7 @@ from thonny.common import (
     serialize_message,
     EOFCommand,
 )
-from thonny.misc_utils import find_volumes_by_name
+from thonny.misc_utils import find_volumes_by_name, running_on_windows
 from thonny.plugins.micropython.backend import (
     MicroPythonBackend,
     ManagementError,
@@ -124,22 +124,19 @@ FALLBACK_BUILTIN_MODULES = [
 logger = getLogger("thonny.plugins.micropython.bare_metal_backend")
 
 
-def debug(msg):
-    return
-    # print(msg, file=sys.stderr)
-
-
 class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
         self._last_inferred_fs_mount: Optional[str] = None
 
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+        self._submit_mode = args.get("submit_mode", None)
+        if self._submit_mode is None:
+            self._submit_mode = self._infer_submit_mode()
+
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
-            self._write_block_size = 255
+            self._write_block_size = self._infer_write_block_size()
 
         # write delay is used only with original raw submit mode
         self._write_block_delay = args.get("write_block_delay", None)
@@ -152,7 +149,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size is None:
             self._read_block_size = self._infer_read_block_size()
 
-        self._submit_mode = args.get("submit_mode", None)
         logger.debug(
             "Initial submit_mode: %s, "
             "write_block_size: %s, "
@@ -235,6 +231,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return result
 
+    def _infer_write_block_size(self):
+        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
+        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+
+        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
+        # paste mode and larger block sizes (problem confirmed with 128, 64 and bytes blocks)
+        # https://github.com/thonny/thonny/issues/2143
+        # Don't know any other good solutions besides avoiding paste mode for this device.
+        return 255
+
     def _infer_read_block_size(self):
         # TODO:
         # in Windows it should be > 0 if the port is bluetooth over serial
@@ -245,7 +251,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return 0
 
     def _infer_write_block_delay(self):
-        if self._connected_over_webrepl():
+        if self._submit_mode in (PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE):
+            return 0
+        elif self._connected_over_webrepl():
             # ESP-32 needs long delay to work reliably over raw mode WebREPL
             # TODO: consider removing when this gets fixed
             return 0.5
@@ -273,35 +281,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if clean:
             self._clear_repl()
 
-    def _interrupt(self):
-        try:
-            super()._interrupt()
-        except SerialTimeoutException:
-            logger.exception("Timeout while trying to interrupt")
-            self._report_internal_exception("Could not interrupt")
-
-    def _choose_submit_mode(self):
+    def _infer_submit_mode(self):
         if self._connected_over_webrepl():
             logger.info("Choosing paste submit mode because of WebREPL")
-            self._submit_mode = PASTE_SUBMIT_MODE
-            return
+            return PASTE_SUBMIT_MODE
 
-        # at least sometimes, we end up at normal prompt, although we asked for raw prompt
-        self._ensure_raw_mode()
-        self._write(RAW_PASTE_COMMAND)
-        response = self._connection.soft_read(2)
-        assert len(response) == 2, "Could not read response for raw paste command: " + response
-        if response == RAW_PASTE_CONFIRMATION:
-            logger.info("Choosing raw paste submit mode")
-            self._submit_mode = RAW_PASTE_SUBMIT_MODE
-            self._write(EOT)
-            discarding = self._connection.read_until(RAW_PROMPT)
-        else:
-            discarding = self._connection.read_until(RAW_PROMPT)
-            logger.info("Choosing raw submit mode (%r)", response + discarding)
-            self._submit_mode = RAW_SUBMIT_MODE
-
-        discarding += self._connection.read_all()
+        return RAW_PASTE_SUBMIT_MODE
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
@@ -561,9 +546,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         """
         assert script
 
-        if self._submit_mode is None:
-            self._choose_submit_mode()
-
         # assuming we are already at a prompt, but threads may have produced something
         self._forward_unexpected_output()
 
@@ -610,10 +592,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
-            discarded = self._connection.read_all_expected(
-                expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT
-            )
-            logger.debug("Discarding %r", discarded)
+            self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         # push and read confirmation
         self._write(EOT)
@@ -1643,26 +1622,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return False
 
     def _report_internal_exception(self, msg: str) -> None:
+        super()._report_internal_exception(msg)
+
         e = sys.exc_info()[1]
         if isinstance(e, ManagementError):
             self._log_management_error_details(e)
 
-        if isinstance(e, (ManagementError, ProtocolError, SerialTimeoutException)):
-            self._show_error(
-                (
-                    "It looks like %s has arrived to an unexpected state"
-                    " or there have been communication problems."
-                )
-                % self._get_interpreter_kind(),
-                end=" ",
-            )
-        else:
-            self._show_error("Internal error (%s)" % e)
-
-        self._show_error("See %s for more details.\n" % thonny.BACKEND_LOG_MARKER)
         self._show_error(
             'You may need to press "Stop/Restart" or hard-reset your '
-            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
+            + "%s device and try again.\n" % self._get_interpreter_kind()
         )
 
 

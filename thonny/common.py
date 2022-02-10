@@ -14,6 +14,8 @@ from typing import List, Optional, Dict, Iterable, Tuple, Callable, Any  # @Unus
 
 logger = getLogger(__name__)
 
+STRING_PSEUDO_FILENAME = "<string>"
+REPL_PSEUDO_FILENAME = "<stdin>"
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
@@ -360,14 +362,11 @@ def get_base_executable():
 
     if sys.platform == "win32":
         result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
-        result = normpath_with_actual_case(result)
+        return normpath_with_actual_case(result)
+    elif os.path.islink(sys.executable):
+        return os.path.realpath(sys.executable)
     else:
-        result = sys.executable.replace(sys.exec_prefix, sys.base_exec_prefix)
-
-    if not os.path.isfile(result):
-        raise RuntimeError("Can't locate base executable")
-
-    return result
+        raise RuntimeError("Don't know how to locate base executable")
 
 
 def get_augmented_system_path(extra_dirs):
@@ -703,7 +702,7 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
         result += "-" + sys.version_info[3]
 
     if maxsize is not None:
-        result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
+        result += " (" + ("64" if sys.maxsize > 2**32 else "32") + " bit)"
 
     return result
 
@@ -764,3 +763,14 @@ class ConnectionFailedException(Exception):
 
 class ConnectionClosedException(Exception):
     pass
+
+
+def is_virtual_executable(executable):
+    exe_dir = os.path.dirname(executable)
+    return os.path.exists(os.path.join(exe_dir, "activate")) or os.path.exists(
+        os.path.join(exe_dir, "activate.bat")
+    )
+
+
+def is_private_python(executable):
+    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))

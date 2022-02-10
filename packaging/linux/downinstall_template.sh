@@ -5,7 +5,7 @@ VERSION=_VERSION_
 VARIANT=_VARIANT_
 
 ARCHITECTURE="$(uname -m)"
-if [[ "$ARCHITECTURE" == "x86_64_" ]]; then
+if [[ "$ARCHITECTURE" == "x86_64" ]]; then
   echo
   echo "This script will download and install Thonny ($VARIANT-$VERSION) for Linux (32 or 64-bit PC)."
   read -p "Press ENTER to continue or Ctrl+C to cancel."
@@ -27,26 +27,37 @@ else
   echo "Thonny only provides pre-built bundles for x86_64 (not $ARCHITECTURE)."
   TARGET=~/apps/thonny
   PYVER="$(python3 -V 2>&1)"
-  GOODVER="Python 3\.(7|8|9|10)\.*"
+  GOODVER="Python 3\.(8|9|10)\.*"
   if [[ "$PYVER" =~ $GOODVER ]]; then
     PYLOC="$(which python3 2>&1)"
     echo "I could install Thonny into a venv under your existing $PYVER ($PYLOC)."
     read -p "Press ENTER to continue or Ctrl+C to cancel."
 
     # Install non-pip dependencies
-    if [[ -f /etc/arch-release ]]; then
-      if ! pacman -Qi $package > /dev/null ; then
+    if [[ -f /etc/debian_version ]]; then
+      if ! dpkg -s python3-tk > /dev/null ; then
+        echo "Going to install 'python3-tk' first"
+        sudo apt-get install python3-tk
+      fi
+      if ! dpkg -s python3-venv > /dev/null ; then
+        echo "Going to install 'python3-venv' first"
+        sudo apt-get install python3-venv
+      fi
+    elif [[ -f /etc/redhat-release ]]; then
+      if rpm -qa | grep python3-tkinter > /dev/null ; then
+        echo "Going to install 'python3-tkinter' first"
+        sudo yum install python3-tkinter
+      fi
+    elif [[ -f /etc/SuSE-release ]]; then # TODO: this file is deprecated
+      if ! rpm -qa | grep python3-tkinter > /dev/null ; then
+        echo "Going to install 'python3-tkinter' first"
+        sudo zypper install python3-tkinter
+      fi
+    elif [[ -f /etc/arch-release ]]; then
+      if ! pacman -Qi tk > /dev/null ; then
         echo "Going to install 'tk' first"
         sudo pacman -S tk
       fi
-    elif [[ -f /etc/debian-release ]]; then
-      echo "Having debian"
-    elif [[ -f /etc/gentoo-release ]]; then
-      echo "emerge"
-    elif [[ -f /etc/redhat-release ]]; then
-      echo "rpm"
-    elif [[ -f /etc/SuSE-release ]]; then
-      echo "zypp"
     else
       echo "Can't determine your package manager, assuming Tkinter and venv are present."
     fi
@@ -59,8 +70,13 @@ else
     echo "Creating virtual environment for Thonny"
     python3 -m venv $TARGET
 
+    echo "Marking virtual environment as private to Thonny"
+    echo ";Existence of this file indicates that Python in this directory is private for Thonny" > ${TARGET}/bin/thonny_python.ini
+
+    echo "Installing Thonny's dependencies"
+    $TARGET/bin/pip3 install _DEPS_
     echo "Installing Thonny and its dependencies"
-    $TARGET/bin/pip3 install thonny
+    $TARGET/bin/pip3 install thonny==${VERSION}
 
     echo "Creating the launcher"
     LAUNCHER=~/.local/share/applications/Thonny.desktop
@@ -83,7 +99,7 @@ else
     echo "Exec=$TARGET/bin/thonny %F" >> $LAUNCHER
     echo "Name=Edit with Thonny" >> $LAUNCHER
   else
-    echo "Your system doesn't seem to have suitable Python interpreter"
+    echo "Can't offer alternatives as your system doesn't seem to have suitable Python interpreter."
     exit 1
   fi
 fi

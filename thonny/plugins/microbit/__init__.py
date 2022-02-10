@@ -13,6 +13,7 @@ from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
+from thonny.plugins.micropython.bare_metal_backend import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.ui_utils import CommonDialog, FileCopyDialog, ems_to_pixels
 
@@ -174,6 +175,7 @@ def load_plugin():
         sort_key="31",
         validate_time=False,
         sync_time=False,
+        submit_mode=PASTE_SUBMIT_MODE,
         write_block_size=128,
     )
 
@@ -181,8 +183,12 @@ def load_plugin():
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
     import thonny.plugins.micropython
+    import thonny.plugins.esp
 
     thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(MicrobitProxy.get_known_usb_vids_pids())
     thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )

@@ -100,15 +100,6 @@ class Runner:
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
 
-    def _remove_obsolete_jedi_copies(self) -> None:
-        # Thonny 2.1 used to copy jedi in order to make it available
-        # for the backend. Get rid of it now
-        for item in os.listdir(THONNY_USER_DIR):
-            if item.startswith("jedi_0."):
-                import shutil
-
-                shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
-
     def start(self) -> None:
         global _console_allocated
         try:
@@ -119,8 +110,6 @@ class Runner:
             _console_allocated = False
 
         self.restart_backend(False, True)
-        # temporary
-        self._remove_obsolete_jedi_copies()
 
     def _init_commands(self) -> None:
         global RUN_COMMAND_CAPTION, RUN_COMMAND_LABEL
@@ -314,7 +303,7 @@ class Runner:
         self._postponed_commands = []
 
         for cmd in todo:
-            logger.debug("Sending postponed command: %s", cmd)
+            # logger.debug("Sending postponed command: %s", cmd) # too much spam
             self.send_command(cmd)
 
     def send_program_input(self, data: str) -> None:
@@ -369,17 +358,25 @@ class Runner:
                 )
                 return
 
-        filename = get_saved_current_script_filename()
-
-        if not filename:
-            # user has cancelled file saving
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if not editor:
             return
+
+        UNTITLED = "<untitled>"
+        if editor.get_filename():
+            filename = editor.save_file()
+            if not filename:
+                # user has cancelled file saving
+                return
+        else:
+            filename = UNTITLED
 
         if (
             is_remote_path(filename)
             and not self._proxy.can_run_remote_files()
             or is_local_path(filename)
             and not self._proxy.can_run_local_files()
+            or filename == UNTITLED
         ):
             self.execute_editor_content(command_name, self._get_active_arguments())
         else:
@@ -642,14 +639,14 @@ class Runner:
 
         get_workbench().event_generate("BackendRestart", full=True)
 
-    def destroy_backend(self) -> None:
+    def destroy_backend(self, for_restart: bool = False) -> None:
         if self._polling_after_id is not None:
             get_workbench().after_cancel(self._polling_after_id)
             self._polling_after_id = None
 
         self._postponed_commands = []
         if self._proxy:
-            self._proxy.destroy()
+            self._proxy.destroy(for_restart=for_restart)
             self._proxy = None
 
         get_workbench().event_generate("BackendTerminated")
@@ -794,7 +791,7 @@ class BackendProxy:
         """Tries to interrupt current command without resetting the backend"""
         pass
 
-    def destroy(self):
+    def destroy(self, for_restart: bool = False):
         """Called when Thonny no longer needs this instance
         (Thonny gets closed or new backend gets selected)
         """
@@ -1109,7 +1106,7 @@ class SubprocessProxy(BackendProxy):
     def get_sys_path(self):
         return self._sys_path
 
-    def destroy(self):
+    def destroy(self, for_restart: bool = False):
         self._close_backend()
 
     def _close_backend(self):
@@ -1296,10 +1293,6 @@ def _ends_with_incomplete_ansi_code(data):
     # note ANSI_CODE_TERMINATOR also includes [
     params_and_terminator = data[pos + 2 :]
     return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
-
-
-def is_bundled_python(executable):
-    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
 
 
 def create_backend_python_process(

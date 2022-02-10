@@ -103,6 +103,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marie Roald
 * Marko Ristin
 * Matt Iversen
 * Miro Hrončok
@@ -117,12 +118,14 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Radim
 * Rene Lehtma
 * Rune Langøy
+* Sam Warmuth
 * Sami Almuhammady
 * sailslack
 * segalion
 * Simon Gijsen
 * Simon Long
 * sourceperl
+* speedy-10
 * Stefan Rothe
 * Suk-Hyung Hwang
 * Sven Duzont

@@ -426,4 +426,4 @@ def load_plugin() -> None:
     # Comments in IDLE Dark really hurt the eyes
     # get_workbench().add_syntax_theme("IDLE Dark", "Default Dark", idle_dark)
 
-    get_workbench().set_default("view.syntax_theme", "Default Light")
+    get_workbench().set_default("view.syntax_theme", get_workbench().get_default_syntax_theme())

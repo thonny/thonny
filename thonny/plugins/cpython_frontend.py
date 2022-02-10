@@ -15,6 +15,9 @@ from thonny.common import (
     normpath_with_actual_case,
     get_python_version_string,
     InlineResponse,
+    get_base_executable,
+    is_virtual_executable,
+    is_private_python,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows, running_on_mac_os, running_on_linux
@@ -23,7 +26,6 @@ from thonny.running import (
     SubprocessProxy,
     create_frontend_python_process,
     get_interpreter_for_subprocess,
-    is_bundled_python,
     WINDOWS_EXE,
 )
 from thonny.terminal import run_in_terminal
@@ -256,12 +258,14 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):
-        super().__init__(clean, get_interpreter_for_subprocess())
+        executable = _get_same_as_front_executable()
+        logger.info("Using %s for back-end")
+        super().__init__(clean, executable)
 
     def fetch_next_message(self):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
-            if is_bundled_python(self._executable):
+            if is_private_python(self._executable):
                 msg["welcome_text"] += " (bundled)"
             else:
                 msg["welcome_text"] += " (" + self._executable + ")"
@@ -319,7 +323,7 @@ class CustomCPythonProxy(CPythonProxy):
 
 
 def get_private_venv_path():
-    if is_bundled_python(sys.executable.lower()):
+    if is_private_python(sys.executable.lower()):
         prefix = "BundledPython"
     else:
         prefix = "Python"
@@ -355,7 +359,7 @@ def _get_venv_info(venv_path):
 class SameAsFrontEndConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
-        label = ttk.Label(self, text=get_interpreter_for_subprocess())
+        label = ttk.Label(self, text=_get_same_as_front_executable())
         label.grid()
 
     def should_restart(self):
@@ -407,7 +411,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python 3.7 and later")
+        extra_text = tr("NB! Thonny only supports Python 3.8 and later")
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
@@ -567,7 +571,6 @@ def _get_interpreters():
                 continue
             for name in [
                 "python3",
-                "python3.7",
                 "python3.8",
                 "python3.9",
                 "python3.10",
@@ -578,7 +581,7 @@ def _get_interpreters():
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.7", "3.8", "3.9", "3.10", "3.11"]:
+        for version in ["3.8", "3.9", "3.10", "3.11"]:
             dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
             path = os.path.join(dir_, "python3")
 
@@ -587,7 +590,7 @@ def _get_interpreters():
 
     from shutil import which
 
-    for command in ["python3", "python3.7", "python3.8", "python3.9", "python3.10", "python3.11"]:
+    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11"]:
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)
@@ -610,9 +613,6 @@ def _get_interpreters_from_windows_registry():
             "3.6",
             "3.6-32",
             "3.6-64",
-            "3.7",
-            "3.7-32",
-            "3.7-64",
             "3.8",
             "3.8-32",
             "3.8-64",
@@ -647,6 +647,14 @@ def _check_venv_installed(parent):
     except ImportError:
         messagebox.showerror("Error", "Package 'venv' is not available.", parent=parent)
         return False
+
+
+def _get_same_as_front_executable() -> str:
+    if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
+        # Private venv. Make an exception and use base Python for default backend.
+        return get_base_executable()
+    else:
+        return get_interpreter_for_subprocess()
 
 
 def load_plugin():

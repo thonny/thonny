@@ -1,12 +1,12 @@
 import sys
 import threading
-import time
 from queue import Queue
 
 from thonny.common import ConnectionFailedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
+from logging import getLogger, DEBUG
 
-DEBUG = False
+logger = getLogger(__name__)
 
 
 class WebReplConnection(MicroPythonConnection):
@@ -50,7 +50,8 @@ class WebReplConnection(MicroPythonConnection):
         import asyncio
 
         loop = asyncio.new_event_loop()
-        loop.set_debug(DEBUG)
+        if logger.isEnabledFor(DEBUG):
+            loop.set_debug(True)
         loop.run_until_complete(self._ws_main())
 
     async def _ws_main(self):
@@ -66,7 +67,7 @@ class WebReplConnection(MicroPythonConnection):
         await asyncio.gather(self._ws_keep_reading(), self._ws_keep_writing())
 
     async def _ws_connect(self):
-        import websockets
+        import websockets.exceptions
 
         try:
             try:
@@ -77,19 +78,17 @@ class WebReplConnection(MicroPythonConnection):
         except OSError as e:
             # print("\nCould not connect:", e, file=sys.stderr)
             raise ConnectionFailedException(str(e))
-        debug("GOT WS", self._ws)
+        logger.debug("GOT WS: %r", self._ws)
 
         # read password prompt and send password
         read_chars = ""
+        logger.debug("Looking for password prompt")
         while read_chars != "Password: ":
-            debug("prelude", read_chars)
             ch = await self._ws.recv()
-            debug("GOT", ch)
             read_chars += ch
 
-        debug("sending password")
+        logger.debug("Submitting password")
         await self._ws.send(self._password + "\n")
-        debug("sent password")
 
     async def _ws_keep_reading(self):
         import websockets.exceptions
@@ -121,7 +120,7 @@ class WebReplConnection(MicroPythonConnection):
                 else:
                     payload = data.decode("UTF-8")
                 await self._ws.send(payload)
-                debug("Wrote bytes", len(data))
+                # logger.debug("Wrote %r bytes", len(data))
                 self._write_responses.put(len(data))
 
             # Allow reading loop to progress
@@ -155,8 +154,3 @@ class WebreplBinaryMsg:
 
     def __len__(self):
         return len(self.data)
-
-
-def debug(*args):
-    if DEBUG:
-        print(*args, file=sys.stderr)

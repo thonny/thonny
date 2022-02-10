@@ -2,7 +2,6 @@ import gettext
 from logging import getLogger
 import os
 
-from thonny import get_workbench
 
 logger = getLogger(__name__)
 
@@ -52,6 +51,8 @@ _translation = gettext.NullTranslations()
 
 
 def get_button_padding():
+    from thonny import get_workbench
+
     code = get_workbench().get_option("general.language")
     if code in BUTTON_PADDING_SIZES:
         return BUTTON_PADDING_SIZES[code] * " "

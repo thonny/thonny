@@ -18,7 +18,12 @@ from typing import Iterable
 
 import thonny
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
-from thonny.common import ToplevelResponse, read_source
+from thonny.common import (
+    ToplevelResponse,
+    read_source,
+    STRING_PSEUDO_FILENAME,
+    REPL_PSEUDO_FILENAME,
+)
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
 from thonny.ui_utils import CommonDialog, scrollbar_style, get_hyperlink_cursor
@@ -112,7 +117,8 @@ class AssistantView(tktextext.TextFrame):
             return
 
         # prepare for snapshot
-        key = msg.get("filename", "<pyshell>")
+        # TODO: should distinguish between <string> and <stdin> ?
+        key = msg.get("filename", STRING_PSEUDO_FILENAME)
         self._current_snapshot = {
             "timestamp": datetime.datetime.now().isoformat()[:19],
             "main_file_path": key,
@@ -669,7 +675,7 @@ class FeedbackDialog(CommonDialog):
         self._populate_tree()
 
     def _happened_in_shell(self):
-        return self.main_file_path is None or self.main_file_path.lower() == "<pyshell>"
+        return self.main_file_path is None or self.main_file_path == REPL_PSEUDO_FILENAME
 
     def _populate_tree(self):
         groups = {}

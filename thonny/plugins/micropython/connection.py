@@ -5,6 +5,9 @@ from queue import Queue
 
 from thonny.common import ConnectionClosedException
 from thonny.misc_utils import TimeHelper
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class MicroPythonConnection:
@@ -48,7 +51,13 @@ class MicroPythonConnection:
                 if timeout_is_soft:
                     return b""
                 else:
-                    raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                    logger.error(
+                        "Could not read expected %s bytes in %s seconds. Bytes read: %r",
+                        size,
+                        timeout,
+                        self._read_buffer,
+                    )
+                    raise TimeoutError()
 
         try:
             data = self._read_buffer[:size]

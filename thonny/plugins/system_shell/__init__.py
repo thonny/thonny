@@ -5,7 +5,6 @@ import sys
 
 from thonny import get_runner, get_workbench, terminal
 from thonny.common import get_augmented_system_path, get_exe_dirs
-from thonny.editors import get_saved_current_script_filename
 from thonny.languages import tr
 from thonny.misc_utils import inside_flatpak, show_command_not_available_in_flatpak_message
 from thonny.running import get_environment_overrides_for_python_subprocess

@@ -23,10 +23,10 @@ pre {
 
 code {
     counter-increment: line;
-	padding-left: 1em;    
+    padding-left: 1em;    
 }
 code:before {
-	color: gray;
+    color: gray;
     content: counter(line);
     padding-right: 0.5em;
     margin-right: 0.5em;
@@ -36,6 +36,7 @@ code:before {
     min-width: %gutter_ems%em;
     font-style: italic;
     -webkit-user-select: none;
+    white-space: nowrap;
 }
 
 .keyword {

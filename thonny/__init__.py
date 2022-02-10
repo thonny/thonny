@@ -1,3 +1,5 @@
+from thonny.common import is_virtual_executable, is_private_python
+
 _last_module_count = 0
 _last_modules = set()
 import time
@@ -77,13 +79,7 @@ def _compute_thonny_user_dir():
         else:
             root_dir = os.path.join(os.path.dirname(sys.executable), "..")
         return os.path.normpath(os.path.abspath(os.path.join(root_dir, "user_data")))
-    elif (
-        hasattr(sys, "base_prefix")
-        and sys.base_prefix != sys.prefix
-        or hasattr(sys, "real_prefix")
-        and getattr(sys, "real_prefix") != sys.prefix
-    ):
-        # we're in a virtualenv or venv
+    elif is_virtual_executable(sys.executable) and not is_private_python(sys.executable):
         return os.path.join(sys.prefix, ".thonny")
     elif sys.platform == "win32":
         return os.path.join(_get_roaming_appdata_dir(), "Thonny")
