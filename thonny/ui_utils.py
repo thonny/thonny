@@ -975,7 +975,7 @@ class AutoScrollbar(SafeScrollbar):
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
-        elif float(first) > 0.001 or float(last) < 0.009:
+        elif float(first) > 0.001 or float(last) < 0.999:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
             self.grid()
         ttk.Scrollbar.set(self, first, last)
