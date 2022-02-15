@@ -92,6 +92,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Илья Кругликов
 * Jarek Miszczak
 * Jens Diemer
+* jharris1993
 * Juan Falgueras
 * Jonathan Campbell
 * Jordan Williams
