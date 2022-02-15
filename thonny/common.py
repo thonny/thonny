@@ -361,12 +361,14 @@ def get_base_executable():
         return sys.executable
 
     if sys.platform == "win32":
-        result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
-        return normpath_with_actual_case(result)
-    elif os.path.islink(sys.executable):
+        guess = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
+        if os.path.isfile(guess):
+            return normpath_with_actual_case(guess)
+
+    if os.path.islink(sys.executable):
         return os.path.realpath(sys.executable)
-    else:
-        raise RuntimeError("Don't know how to locate base executable")
+
+    raise RuntimeError("Don't know how to locate base executable")
 
 
 def get_augmented_system_path(extra_dirs):
