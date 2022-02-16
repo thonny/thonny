@@ -1,5 +1,5 @@
-import sys
 import ast
+import sys
 
 from thonny.plugins.cpython_ssh.ssh_cpython_backend import SshCPythonBackend
 

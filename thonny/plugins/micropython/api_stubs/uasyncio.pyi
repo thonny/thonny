@@ -38,8 +38,7 @@ __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython).
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 from abc import ABC
-from typing import Awaitable, TypeVar, Callable
-from typing import Coroutine, Any, Dict, Iterable, Generic, Final
+from typing import Any, Awaitable, Callable, Coroutine, Dict, Final, Generic, Iterable, TypeVar
 
 from uio import AnyReadableBuf
 

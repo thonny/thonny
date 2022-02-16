@@ -1,5 +1,5 @@
-from logging import getLogger
 import os
+from logging import getLogger
 
 from thonny import get_runner
 from thonny.assistance import ProgramAnalyzer, add_program_analyzer

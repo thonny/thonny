@@ -1,32 +1,31 @@
-from logging import getLogger
 import os.path
 import subprocess
 import sys
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from logging import getLogger
+from tkinter import messagebox, ttk
 
 import thonny
-from thonny import get_workbench, get_runner, ui_utils, THONNY_USER_DIR, running, get_shell
+from thonny import THONNY_USER_DIR, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
-    ToplevelCommand,
     InlineCommand,
-    is_same_path,
-    normpath_with_actual_case,
-    get_python_version_string,
     InlineResponse,
+    ToplevelCommand,
     get_base_executable,
-    is_virtual_executable,
+    get_python_version_string,
     is_private_python,
+    is_same_path,
+    is_virtual_executable,
+    normpath_with_actual_case,
 )
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, running_on_mac_os, running_on_linux
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import (
+    WINDOWS_EXE,
     SubprocessProxy,
     create_frontend_python_process,
     get_interpreter_for_subprocess,
-    WINDOWS_EXE,
 )
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import askdirectory, askopenfilename, create_string_var

@@ -1,4 +1,4 @@
-from thonny.common import is_virtual_executable, is_private_python
+from thonny.common import is_private_python, is_virtual_executable
 
 _last_module_count = 0
 _last_modules = set()
@@ -38,8 +38,8 @@ def report_time(label: str) -> None:
 
 report_time("After defining report_time")
 
-import os.path
 import logging
+import os.path
 from typing import TYPE_CHECKING, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
@@ -248,14 +248,14 @@ def launch():
         return 0
 
     except SystemExit as e:
-        from tkinter import messagebox, _default_root
+        from tkinter import _default_root, messagebox
 
         messagebox.showerror("System exit", str(e), master=_default_root)
         return -1
 
     except Exception:
-        from logging import exception
         import traceback
+        from logging import exception
 
         exception("Internal launch or mainloop error")
         from thonny import ui_utils

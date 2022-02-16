@@ -1,11 +1,9 @@
-from typing import Union
-
 import queue
 import re
 import time
-from queue import Queue
-
 from logging import getLogger
+from queue import Queue
+from typing import Union
 
 logger = getLogger(__name__)
 

@@ -2,8 +2,8 @@
 
 . venv/bin/activate
 
-#echo "isorting ..."
-#isort -rc thonny
+echo "isorting ..."
+isort thonny
 
 echo
 echo "blackening ..."

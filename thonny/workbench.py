@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import os.path
-import platform
-import tkinter as tk
-import tkinter.font as tk_font
-import traceback
-from logging import getLogger
-from tkinter import messagebox, ttk
-
 import ast
 import collections
 import importlib
+import os.path
 import pkgutil
+import platform
 import queue
 import re
 import shutil
 import socket
 import sys
+import tkinter as tk
+import tkinter.font as tk_font
+import traceback
+from logging import getLogger
 from threading import Thread
+from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -38,27 +37,27 @@ from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
+    get_user_site_packages_dir_for_base,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
     running_on_windows,
-    get_user_site_packages_dir_for_base,
 )
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
     AutomaticNotebook,
     AutomaticPanedWindow,
+    caps_lock_is_on,
     create_tooltip,
+    ems_to_pixels,
+    get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    caps_lock_is_on,
     shift_is_pressed,
-    get_hyperlink_cursor,
-    ems_to_pixels,
 )
 
 logger = getLogger(__name__)

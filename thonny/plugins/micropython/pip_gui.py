@@ -4,14 +4,14 @@ import subprocess
 import tempfile
 import threading
 import tkinter as tk
-from tkinter import ttk, messagebox
-from typing import cast, Tuple
+from tkinter import messagebox, ttk
+from typing import Tuple, cast
 
-from thonny import running, get_runner, get_workbench, ui_utils
+from thonny import get_runner, get_workbench, running, ui_utils
 from thonny.common import InlineCommand
 from thonny.languages import tr
-from thonny.plugins.files import upload, prepare_upload_items
-from thonny.plugins.micropython import MicroPythonProxy, LocalMicroPythonProxy
+from thonny.plugins.files import prepare_upload_items, upload
+from thonny.plugins.micropython import LocalMicroPythonProxy, MicroPythonProxy
 from thonny.plugins.pip_gui import (
     BackendPipDialog,
     _fetch_url_future,

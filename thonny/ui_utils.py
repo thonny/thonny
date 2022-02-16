@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from logging import getLogger
 import os
 import platform
 import re
@@ -11,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 

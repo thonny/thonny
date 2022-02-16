@@ -1,49 +1,46 @@
 import binascii
-from logging import getLogger
 import os
 import re
-import sys
 import struct
+import sys
 import time
+from logging import getLogger
 from textwrap import dedent, indent
-from typing import BinaryIO, Callable, Optional, Union, List
+from typing import BinaryIO, Callable, List, Optional, Union
 
 from serial import SerialTimeoutException
 
 import thonny
+from thonny import report_time
 from thonny.backend import UploadDownloadMixin
 from thonny.common import (
     BackendEvent,
+    EOFCommand,
     ToplevelResponse,
     execute_system_command,
     serialize_message,
-    EOFCommand,
 )
 from thonny.misc_utils import find_volumes_by_name, running_on_windows
 from thonny.plugins.micropython.backend import (
-    MicroPythonBackend,
-    ManagementError,
-    ReadOnlyFilesystemError,
-    ends_overlap,
-    Y2000_EPOCH_OFFSET,
+    EOT,
+    INTERRUPT_CMD,
+    NORMAL_MODE_CMD,
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,
-    EOT,
-    WAIT_OR_CRASH_TIMEOUT,
-    ProtocolError,
-    starts_with_continuation_byte,
-    is_continuation_byte,
     RAW_MODE_CMD,
-    NORMAL_MODE_CMD,
     SOFT_REBOOT_CMD,
-    INTERRUPT_CMD,
+    WAIT_OR_CRASH_TIMEOUT,
+    Y2000_EPOCH_OFFSET,
+    ManagementError,
+    MicroPythonBackend,
+    ProtocolError,
+    ReadOnlyFilesystemError,
+    ends_overlap,
+    is_continuation_byte,
+    starts_with_continuation_byte,
 )
-from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
-from thonny.plugins.micropython.webrepl_connection import (
-    WebReplConnection,
-    WebreplBinaryMsg,
-)
-from thonny import report_time
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.webrepl_connection import WebreplBinaryMsg, WebReplConnection
 
 PASTE_SUBMIT_MODE = "paste"
 RAW_PASTE_SUBMIT_MODE = "raw_paste"

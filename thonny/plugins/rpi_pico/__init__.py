@@ -1,15 +1,15 @@
 from logging import getLogger
 from typing import Optional
 
-from thonny import ui_utils, get_workbench
+from thonny import get_workbench, ui_utils
 from thonny.plugins.micropython import (
+    BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
     add_micropython_backend,
-    BareMetalMicroPythonConfigPage,
 )
 from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
-from thonny.plugins.rp2040 import RP2040BackendProxy, RP2040BackendConfigPage
+from thonny.plugins.rp2040 import RP2040BackendConfigPage, RP2040BackendProxy
 from thonny.ui_utils import show_dialog
 
 logger = getLogger(__name__)
@@ -109,8 +109,8 @@ def load_plugin():
     # Don't consider Pico in generic backends
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
-    import thonny.plugins.micropython
     import thonny.plugins.esp
+    import thonny.plugins.micropython
 
     thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(
         RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()

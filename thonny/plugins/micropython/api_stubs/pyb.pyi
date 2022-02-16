@@ -88,12 +88,23 @@ __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython).
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 from abc import ABC, abstractmethod
-from typing import NoReturn, overload, Sequence, runtime_checkable, Protocol
-from typing import Callable, Dict, Any, ClassVar, Final
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Final,
+    NoReturn,
+    Protocol,
+    Sequence,
+    overload,
+    runtime_checkable,
+)
 
 from uarray import array
 from uio import AnyReadableBuf, AnyWritableBuf
 from uos import AbstractBlockDev
+
 @runtime_checkable
 class _OldAbstractReadOnlyBlockDev(Protocol):
     """

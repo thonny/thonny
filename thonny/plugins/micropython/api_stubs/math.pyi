@@ -24,7 +24,7 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import SupportsFloat, Final
+from typing import Final, SupportsFloat
 
 def acos(x: SupportsFloat, /) -> float:
     """

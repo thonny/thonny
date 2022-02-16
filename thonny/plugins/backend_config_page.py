@@ -8,11 +8,11 @@ from thonny.backend import delete_stored_ssh_password, get_ssh_password_file_pat
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.misc_utils import (
+    PASSWORD_METHOD,
     PUBLIC_KEY_NO_PASS_METHOD,
     PUBLIC_KEY_WITH_PASS_METHOD,
-    PASSWORD_METHOD,
 )
-from thonny.ui_utils import create_string_var, ems_to_pixels, CommonDialogEx
+from thonny.ui_utils import CommonDialogEx, create_string_var, ems_to_pixels
 
 
 class BackendDetailsConfigPage(ConfigurationPage):

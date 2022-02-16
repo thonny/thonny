@@ -11,7 +11,7 @@ from typing import Dict, Union  # @UnusedImport
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.tktextext import EnhancedText
-from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style, ask_string
+from thonny.ui_utils import EnhancedTextWithLogging, ask_string, scrollbar_style
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet

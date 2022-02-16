@@ -3,6 +3,7 @@ import sys
 
 from setuptools import find_packages, setup
 
+
 def recursive_files(directory):
     paths = []
     for (path, _, filenames) in os.walk(directory):

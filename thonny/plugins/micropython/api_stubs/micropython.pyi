@@ -13,7 +13,7 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import TypeVar, overload, Callable, Any, Final
+from typing import Any, Callable, Final, TypeVar, overload
 
 _T: Final = TypeVar("_T")
 _F: Final = TypeVar("_F", bound=Callable[..., Any])

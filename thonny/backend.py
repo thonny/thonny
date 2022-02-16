@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import warnings
-
 import _thread
 import io
-from logging import getLogger
 import os.path
 import pathlib
 import queue
@@ -12,30 +9,32 @@ import sys
 import threading
 import time
 import traceback
-from abc import abstractmethod, ABC
-from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
+import warnings
+from abc import ABC, abstractmethod
+from logging import getLogger
+from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
 
 import thonny
 from thonny import report_time
+from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import (
     BackendEvent,
+    CommandToBackend,
     EOFCommand,
+    ImmediateCommand,
     InlineCommand,
     InlineResponse,
     InputSubmission,
+    MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
-    parse_message,
-    serialize_message,
-    ImmediateCommand,
-    MessageFromBackend,
-    CommandToBackend,
-    universal_dirname,
-    read_one_incoming_message_str,
-    try_load_modules_with_frontend_sys_path,
     UserError,
+    parse_message,
+    read_one_incoming_message_str,
+    serialize_message,
+    try_load_modules_with_frontend_sys_path,
+    universal_dirname,
 )
-from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 
 NEW_DIR_MODE = 0o755
 
@@ -395,8 +394,8 @@ class MainBackend(BaseBackend, ABC):
         )
 
     def _cmd_get_shell_calltip(self, cmd):
-        from thonny import jedi_utils
         import __main__
+        from thonny import jedi_utils
 
         signatures = jedi_utils.get_interpreter_signatures(
             cmd.source, [__main__.__dict__], sys_path=self._get_sys_path_for_analysis()
@@ -704,7 +703,7 @@ class SshMixin(UploadDownloadMixin):
         # UploadDownloadMixin.__init__(self)
         try:
             import paramiko
-            from paramiko.client import SSHClient, AutoAddPolicy
+            from paramiko.client import AutoAddPolicy, SSHClient
         except ImportError:
             print(
                 "\nThis back-end requires an extra package named 'paramiko'."

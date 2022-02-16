@@ -1,6 +1,6 @@
 import ast
-from logging import getLogger
 import subprocess
+from logging import getLogger
 
 from thonny import get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer

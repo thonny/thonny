@@ -14,10 +14,10 @@ In Shell only current command entry is colored
 
 Regexes are adapted from idlelib
 """
-from logging import getLogger
 import re
-
 import tkinter
+from logging import getLogger
+
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
@@ -42,16 +42,16 @@ class SyntaxColorer:
             BUILTIN,
             COMMENT,
             COMMENT_WITH_Q3DELIMITER,
+            FUNCTION_CALL,
             KEYWORD,
             MAGIC_COMMAND,
+            METHOD_CALL,
             NUMBER,
             STRING3,
             STRING3_DELIMITER,
             STRING_CLOSED,
             STRING_OPEN,
             TAB,
-            FUNCTION_CALL,
-            METHOD_CALL,
         )
 
         self.uniline_regex = re.compile(

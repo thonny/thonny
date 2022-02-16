@@ -2,7 +2,8 @@ import ast
 import os
 import sys
 from logging import getLogger
-from thonny.plugins.cpython_backend import get_backend, MainCPythonBackend
+
+from thonny.plugins.cpython_backend import MainCPythonBackend, get_backend
 
 logger = getLogger(__name__)
 

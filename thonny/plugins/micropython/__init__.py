@@ -1,20 +1,15 @@
-import time
-from logging import getLogger
 import os
 import platform
 import shutil
 import sys
+import time
+from logging import getLogger
 from textwrap import dedent
 from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
-from thonny.common import (
-    CommandToBackend,
-    EOFCommand,
-    ImmediateCommand,
-    InlineCommand,
-)
+from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.languages import tr
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
@@ -22,11 +17,7 @@ from thonny.plugins.backend_config_page import (
     get_ssh_password,
 )
 from thonny.running import SubprocessProxy
-from thonny.ui_utils import (
-    create_string_var,
-    create_url_label,
-    ems_to_pixels,
-)
+from thonny.ui_utils import create_string_var, create_url_label, ems_to_pixels
 
 logger = getLogger(__name__)
 

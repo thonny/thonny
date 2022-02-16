@@ -9,22 +9,21 @@ shell becomes kind of title for the execution.
 """
 
 
-import os.path
-import shlex
-import tkinter as tk
-import traceback
-from logging import getLogger
-from tkinter import messagebox, ttk
-
 import collections
+import os.path
 import re
+import shlex
 import subprocess
 import sys
 import time
+import tkinter as tk
+import traceback
 import warnings
+from logging import getLogger
 from threading import Thread
 from time import sleep
-from typing import List, Optional, Set, Union, Callable, Dict  # @UnusedImport; @UnusedImport
+from tkinter import messagebox, ttk
+from typing import Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, report_time
@@ -35,27 +34,27 @@ from thonny.common import (
     DebuggerResponse,
     EOFCommand,
     InlineCommand,
+    InlineResponse,
     InputSubmission,
+    MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
     UserError,
     is_same_path,
     parse_message,
     path_startswith,
-    serialize_message,
-    update_system_path,
-    MessageFromBackend,
-    universal_relpath,
     read_one_incoming_message_str,
-    InlineResponse,
+    serialize_message,
+    universal_relpath,
+    update_system_path,
 )
 from thonny.editors import (
+    extract_target_path,
     get_current_breakpoints,
     get_saved_current_script_filename,
-    is_remote_path,
-    is_local_path,
     get_target_dirname_from_editor_filename,
-    extract_target_path,
+    is_local_path,
+    is_remote_path,
 )
 from thonny.languages import tr
 from thonny.misc_utils import (

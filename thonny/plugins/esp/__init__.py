@@ -1,4 +1,3 @@
-from logging import getLogger
 import os
 import signal
 import subprocess
@@ -6,14 +5,13 @@ import threading
 import time
 import tkinter as tk
 from collections import OrderedDict
+from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import get_runner, ui_utils
 from thonny.languages import tr
-from thonny.misc_utils import (
-    running_on_windows,
-)
+from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,

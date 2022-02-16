@@ -26,18 +26,19 @@ SOFTWARE.
 import io
 import json
 import os.path
-import sys
 import shlex
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import textwrap
-from typing import Union, List, Dict, Any, Optional, Tuple
+from logging import getLogger
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.error import HTTPError
 from urllib.request import urlopen
+
 import pkg_resources
-from logging import getLogger
 
 try:
     from shlex import join as shlex_join

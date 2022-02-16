@@ -1,12 +1,12 @@
 import ast
 import datetime
-from logging import getLogger
 import os.path
 import subprocess
 import sys
 import textwrap
 import tkinter as tk
 from collections import namedtuple
+from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Dict  # pylint disable=unused-import
 from typing import List  # pylint disable=unused-import
@@ -19,14 +19,14 @@ from typing import Iterable
 import thonny
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import (
+    REPL_PSEUDO_FILENAME,
+    STRING_PSEUDO_FILENAME,
     ToplevelResponse,
     read_source,
-    STRING_PSEUDO_FILENAME,
-    REPL_PSEUDO_FILENAME,
 )
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import CommonDialog, scrollbar_style, get_hyperlink_cursor
+from thonny.ui_utils import CommonDialog, get_hyperlink_cursor, scrollbar_style
 
 logger = getLogger(__name__)
 

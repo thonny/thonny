@@ -1,15 +1,13 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-from logging import getLogger
 import sys
-from typing import Optional
-
 import time
 import tkinter as tk
-from logging import exception
+from logging import exception, getLogger
 from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
+from typing import Optional
 
 logger = getLogger(__name__)
 

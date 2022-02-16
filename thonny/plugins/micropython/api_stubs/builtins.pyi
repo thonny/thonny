@@ -1,9 +1,35 @@
 from builtins import property
-
-from typing import Any, Iterable, Type, Dict, Optional, TypeVar, Union, Tuple, Callable, overload, \
-    List, Mapping, SupportsInt, Sequence, Iterator, ByteString, MutableSequence, MutableMapping, \
-    Generic, KeysView, ValuesView, ItemsView, MutableSet, Set, AbstractSet, FrozenSet, SupportsAbs, \
-    Sized, Protocol
+from typing import (
+    AbstractSet,
+    Any,
+    ByteString,
+    Callable,
+    Dict,
+    FrozenSet,
+    Generic,
+    ItemsView,
+    Iterable,
+    Iterator,
+    KeysView,
+    List,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Optional,
+    Protocol,
+    Sequence,
+    Set,
+    Sized,
+    SupportsAbs,
+    SupportsInt,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    ValuesView,
+    overload,
+)
 
 _T = TypeVar('_T')
 _T_co = TypeVar('_T_co', covariant=True)

@@ -10,8 +10,8 @@ I could also do python -c "from backend import MainCPythonBackend: MainCPythonBa
 gives relative __file__-s on imported modules.)
 """
 
-import sys
 import os
+import sys
 
 if sys.platform == "darwin":
     try:

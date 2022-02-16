@@ -1,6 +1,6 @@
-from logging import getLogger
 import os
 import re
+from logging import getLogger
 
 from thonny import get_workbench
 from thonny.ui_utils import scale

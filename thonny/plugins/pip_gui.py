@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from logging import getLogger
 import os
 import re
 import subprocess
 import sys
 import tkinter as tk
-from logging import exception
+from logging import exception, getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from typing import List, Union, Dict, Tuple, cast
+from typing import Dict, List, Tuple, Union, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
@@ -18,17 +17,17 @@ from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case
 from thonny.languages import tr
 from thonny.plugins.cpython_frontend import CPythonProxy
 from thonny.plugins.cpython_ssh import SshCPythonProxy
-from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog, SubprocessProxy
+from thonny.running import InlineCommandDialog, SubprocessProxy, get_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
     askopenfilename,
+    ems_to_pixels,
     get_busy_cursor,
+    get_hyperlink_cursor,
     lookup_style_option,
     open_path_in_system_file_manager,
     scrollbar_style,
-    ems_to_pixels,
-    get_hyperlink_cursor,
 )
 from thonny.workdlg import SubprocessDialog
 

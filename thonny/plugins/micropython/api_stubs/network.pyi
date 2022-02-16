@@ -45,7 +45,7 @@ __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython).
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 from abc import abstractmethod
-from typing import Protocol, Callable, overload, Any, ClassVar, Final
+from typing import Any, Callable, ClassVar, Final, Protocol, overload
 
 import pyb
 

@@ -1,11 +1,11 @@
-from logging import getLogger
-import threading
 import os.path
+import threading
 import time
-import traceback
 import tkinter.font as tkfont
+import traceback
 import urllib.request
-from tkinter import ttk, messagebox
+from logging import getLogger
+from tkinter import messagebox, ttk
 from typing import Optional
 from urllib.request import urlopen
 
@@ -14,13 +14,10 @@ from thonny.languages import tr
 from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
-    list_serial_ports_with_descriptions,
     list_serial_ports,
+    list_serial_ports_with_descriptions,
 )
-from thonny.ui_utils import (
-    set_text_if_different,
-    ems_to_pixels,
-)
+from thonny.ui_utils import ems_to_pixels, set_text_if_different
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)

@@ -3,14 +3,13 @@
 """
 Classes used both by front-end and back-end
 """
-from logging import getLogger
 import os.path
 import site
-from dataclasses import dataclass
-
 import sys
 from collections import namedtuple
-from typing import List, Optional, Dict, Tuple, Callable, Any  # @UnusedImport
+from dataclasses import dataclass
+from logging import getLogger
+from typing import Any, Callable, Dict, List, Optional, Tuple  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -620,6 +619,7 @@ def get_windows_network_locations():
 
 def get_windows_lnk_target(lnk_file_path):
     import subprocess
+
     import thonny
 
     script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")

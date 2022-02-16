@@ -1,13 +1,13 @@
-from logging import getLogger
 import pathlib
 import sys
 import threading
 import time
+from logging import getLogger
 from textwrap import dedent
 
 OUTPUT_ENQ = b"\x05"
 OUTPUT_ACK = b"\x06"
-from .connection import MicroPythonConnection, ConnectionFailedException
+from .connection import ConnectionFailedException, MicroPythonConnection
 
 NORMAL_PROMPT = b">>> "
 FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"

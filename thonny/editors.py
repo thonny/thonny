@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-import re
-from logging import getLogger
 import os.path
+import re
 import sys
 import tkinter as tk
 import traceback
-from logging import exception
-from tkinter import messagebox, ttk, simpledialog
+from logging import exception, getLogger
+from tkinter import messagebox, simpledialog, ttk
+from typing import Optional
 
 from _tkinter import TclError
-from typing import Optional
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
-from thonny.codeview import CodeView, BinaryFileException, CodeViewText
+from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
     InlineCommand,
     TextRange,
@@ -28,11 +27,10 @@ from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import (
     askopenfilename,
     asksaveasfilename,
-    select_sequence,
     get_beam_cursor,
+    select_sequence,
     windows_known_extensions_are_hidden,
 )
-
 
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]

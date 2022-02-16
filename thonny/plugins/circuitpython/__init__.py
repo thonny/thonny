@@ -1,7 +1,7 @@
-from logging import getLogger
 import os.path
 import threading
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import Optional

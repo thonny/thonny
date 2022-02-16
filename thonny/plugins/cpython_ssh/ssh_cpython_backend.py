@@ -6,19 +6,19 @@ from threading import Thread
 
 import thonny
 from thonny.backend import (
-    SshMixin,
     BaseBackend,
-    interrupt_local_process,
     RemoteProcess,
+    SshMixin,
     ensure_posix_directory,
+    interrupt_local_process,
 )
 from thonny.common import (
-    serialize_message,
-    ImmediateCommand,
-    EOFCommand,
-    InputSubmission,
     CommandToBackend,
+    EOFCommand,
+    ImmediateCommand,
+    InputSubmission,
     MessageFromBackend,
+    serialize_message,
 )
 
 
@@ -136,9 +136,9 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         )
 
         import thonny.ast_utils
-        import thonny.jedi_utils
         import thonny.backend
         import thonny.common
+        import thonny.jedi_utils
         import thonny.plugins.cpython_backend
 
         local_context = os.path.dirname(os.path.dirname(thonny.__file__))

@@ -1,6 +1,6 @@
-from logging import getLogger
-from typing import Optional, List
 import os.path
+from logging import getLogger
+from typing import List, Optional
 
 from thonny.plugins.micropython.bare_metal_backend import (
     BareMetalMicroPythonBackend,

@@ -4,53 +4,52 @@ import ast
 import builtins
 import functools
 import importlib
+import inspect
 import io
 import os.path
 import queue
 import re
 import site
 import sys
-import inspect
 import tokenize
 import traceback
 import types
 import warnings
-from typing import Optional, Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import __main__
-
 import thonny
 from thonny import report_time
 from thonny.backend import MainBackend, interrupt_local_process, logger
 from thonny.common import (
-    InputSubmission,
-    EOFCommand,
-    ToplevelResponse,
-    CommandToBackend,
-    ToplevelCommand,
-    InlineCommand,
-    UserError,
-    InlineResponse,
-    MessageFromBackend,
-    serialize_message,
-    ValueInfo,
-    path_startswith,
-    get_exe_dirs,
-    ImmediateCommand,
-    get_single_dir_child_data,
-    BackendEvent,
-    execute_system_command,
-    FrameInfo,
-    TextRange,
-    OBJECT_LINK_START,
     OBJECT_LINK_END,
-    get_python_version_string,
-    update_system_path,
-    get_augmented_system_path,
-    try_load_modules_with_frontend_sys_path,
-    execute_with_frontend_sys_path,
-    STRING_PSEUDO_FILENAME,
+    OBJECT_LINK_START,
     REPL_PSEUDO_FILENAME,
+    STRING_PSEUDO_FILENAME,
+    BackendEvent,
+    CommandToBackend,
+    EOFCommand,
+    FrameInfo,
+    ImmediateCommand,
+    InlineCommand,
+    InlineResponse,
+    InputSubmission,
+    MessageFromBackend,
+    TextRange,
+    ToplevelCommand,
+    ToplevelResponse,
+    UserError,
+    ValueInfo,
+    execute_system_command,
+    execute_with_frontend_sys_path,
+    get_augmented_system_path,
+    get_exe_dirs,
+    get_python_version_string,
+    get_single_dir_child_data,
+    path_startswith,
+    serialize_message,
+    try_load_modules_with_frontend_sys_path,
+    update_system_path,
 )
 
 _REPL_HELPER_NAME = "_thonny_repl_print"

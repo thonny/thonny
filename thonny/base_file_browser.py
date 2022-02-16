@@ -1,26 +1,27 @@
 import datetime
-from logging import getLogger
 import os.path
+import shutil
+import stat
 import subprocess
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk, simpledialog
-import stat, shutil
+from logging import getLogger
+from tkinter import messagebox, simpledialog, ttk
 from typing import Optional
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, get_dirs_children_info, UserError
+from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
+    ask_one_from_choices,
+    ask_string,
     create_string_var,
+    get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
     show_dialog,
-    ask_string,
-    ask_one_from_choices,
-    get_hyperlink_cursor,
 )
 
 _dummy_node_text = "..."

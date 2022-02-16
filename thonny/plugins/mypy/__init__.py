@@ -1,8 +1,8 @@
-from logging import getLogger
 import os.path
 import re
 import subprocess
 import sys
+from logging import getLogger
 from typing import Iterable
 
 from thonny import get_runner, get_workbench, ui_utils

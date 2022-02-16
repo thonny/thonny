@@ -21,7 +21,7 @@ __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython).
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 from abc import abstractmethod
-from typing import Final, TypeVar, runtime_checkable, Protocol, overload, Literal
+from typing import Final, Literal, Protocol, TypeVar, overload, runtime_checkable
 
 from uio import IOBase
 

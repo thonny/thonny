@@ -1,9 +1,9 @@
 import sys
 import threading
+from logging import DEBUG, getLogger
 from queue import Queue
 
-from .connection import MicroPythonConnection, ConnectionFailedException
-from logging import getLogger, DEBUG
+from .connection import ConnectionFailedException, MicroPythonConnection
 
 logger = getLogger(__name__)
 

@@ -3,15 +3,13 @@
 import ast
 import configparser
 import datetime
-from logging import getLogger
 import os.path
 import sys
 import tkinter as tk
 from configparser import ConfigParser
-from logging import exception
+from logging import exception, getLogger
 
 from thonny import THONNY_USER_DIR
-
 
 logger = getLogger(__name__)
 

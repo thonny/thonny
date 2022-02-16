@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-from typing import (
-    List,
-    Optional,
-    Union, Final, Tuple, overload, NoReturn,
-)
+from typing import Final, List, NoReturn, Optional, Tuple, Union, overload
 
-import audio # this module is available via microbit since V2
+import audio  # this module is available via microbit since V2
 
 def panic(n: Optional[int]=...) -> NoReturn:
     """

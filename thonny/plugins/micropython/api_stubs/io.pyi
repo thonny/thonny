@@ -85,8 +85,7 @@ __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython).
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 from types import TracebackType
-from typing import TypeVar, Final, Protocol, runtime_checkable, Literal
-from typing import AnyStr, overload, Type
+from typing import AnyStr, Final, Literal, Protocol, Type, TypeVar, overload, runtime_checkable
 
 from uarray import array
 

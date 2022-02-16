@@ -5,9 +5,9 @@ Adds debugging commands and features.
 """
 
 import ast
-from logging import getLogger
 import os.path
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
@@ -30,9 +30,7 @@ from thonny.languages import tr
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import running_on_mac_os, running_on_rpi, shorten_repr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import CommonDialog, select_sequence, get_hyperlink_cursor
-from thonny.ui_utils import select_sequence, CommonDialog, get_tk_version_info
-from _tkinter import TclError
+from thonny.ui_utils import CommonDialog, get_hyperlink_cursor, get_tk_version_info, select_sequence
 
 logger = getLogger(__name__)
 

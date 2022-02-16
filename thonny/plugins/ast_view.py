@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import ast
-from logging import getLogger
-
 import sys
 import tkinter as tk
+from logging import getLogger
 
 from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller

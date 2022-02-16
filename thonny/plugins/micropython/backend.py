@@ -36,7 +36,6 @@ CP 5.0
 import ast
 import datetime
 import io
-from logging import getLogger
 import os
 import re
 import sys
@@ -45,37 +44,37 @@ import threading
 import time
 import traceback
 from abc import ABC, abstractmethod
+from logging import getLogger
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
-from typing import Optional, Dict, Union, Tuple, List, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from serial import SerialTimeoutException
 
-from thonny import get_backend_log_file, BACKEND_LOG_MARKER
+from thonny import BACKEND_LOG_MARKER, get_backend_log_file, report_time
 from thonny.backend import MainBackend
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
     BackendEvent,
+    CommandToBackend,
     EOFCommand,
+    ImmediateCommand,
     InlineCommand,
     InlineResponse,
     InputSubmission,
-    ImmediateCommand,
+    MessageFromBackend,
+    Record,
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    ValueInfo,
     parse_message,
     serialize_message,
-    MessageFromBackend,
-    Record,
-    CommandToBackend,
-    ValueInfo,
 )
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.running import EXPECTED_TERMINATION_CODE
-from thonny import report_time
 
 ENCODING = "utf-8"
 

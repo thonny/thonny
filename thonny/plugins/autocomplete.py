@@ -1,20 +1,20 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import messagebox
-from typing import Optional, List, cast
+from typing import List, Optional, cast
 
-from thonny import get_runner, get_workbench, editor_helpers
+from thonny import editor_helpers, get_runner, get_workbench
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
-from thonny.common import InlineCommand, CompletionInfo
+from thonny.common import CompletionInfo, InlineCommand
 from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.ui_utils import (
-    ems_to_pixels,
-    control_is_pressed,
-    command_is_pressed,
     alt_is_pressed_without_char,
+    command_is_pressed,
+    control_is_pressed,
+    ems_to_pixels,
 )
 
 logger = getLogger(__name__)

@@ -1,9 +1,9 @@
 from thonny import get_workbench
 from thonny.languages import tr
 from thonny.plugins.micropython import (
+    SshMicroPythonConfigPage,
     SshMicroPythonProxy,
     add_micropython_backend,
-    SshMicroPythonConfigPage,
 )
 
 

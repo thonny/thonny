@@ -1,6 +1,5 @@
 import datetime
 import io
-from logging import getLogger
 import os
 import re
 import shlex
@@ -8,23 +7,24 @@ import sys
 import textwrap
 import time
 from abc import ABC
+from logging import getLogger
 from typing import Callable, Optional, Union
 
 import thonny
+from thonny import report_time
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.backend import (
     ENCODING,
     EOT,
-    MicroPythonBackend,
-    ends_overlap,
-    ManagementError,
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,
+    ManagementError,
+    MicroPythonBackend,
+    ends_overlap,
 )
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
-from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
-from thonny import report_time
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")

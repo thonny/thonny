@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from logging import getLogger
 import os.path
 import re
 import tkinter as tk
 import traceback
+from logging import getLogger
 from tkinter import ttk
 
 from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
-from thonny.codeview import get_syntax_options_for_tag, perform_python_return, SyntaxText
+from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
+    REPL_PSEUDO_FILENAME,
+    STRING_PSEUDO_FILENAME,
     InlineCommand,
     ToplevelCommand,
     ToplevelResponse,
-    STRING_PSEUDO_FILENAME,
-    REPL_PSEUDO_FILENAME,
 )
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
@@ -29,14 +29,14 @@ from thonny.ui_utils import (
     EnhancedTextWithLogging,
     TextMenu,
     create_tooltip,
+    ems_to_pixels,
+    get_beam_cursor,
+    get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
     select_sequence,
     show_dialog,
     tr_btn,
-    ems_to_pixels,
-    get_hyperlink_cursor,
-    get_beam_cursor,
 )
 
 OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"-?\d+")

@@ -31,11 +31,10 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import overload, NoReturn, Callable
-from typing import Sequence, ClassVar, Any, Final
+from typing import Any, Callable, ClassVar, Final, NoReturn, Sequence, overload
 
-from uos import AbstractBlockDev
 from uio import AnyReadableBuf, AnyWritableBuf
+from uos import AbstractBlockDev
 
 def reset() -> NoReturn:
     """

@@ -1,27 +1,28 @@
-import _ast
 import ast
 import builtins
 import dis
 import inspect
+import os.path
 import site
 import sys
-import os.path
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 from logging import getLogger
 
+import _ast
+
 from thonny.common import (
-    InlineCommand,
     DebuggerCommand,
-    path_startswith,
-    try_load_modules_with_frontend_sys_path,
-    FrameInfo,
-    range_contains_smaller,
-    is_same_path,
-    InlineResponse,
     DebuggerResponse,
+    FrameInfo,
+    InlineCommand,
+    InlineResponse,
     TextRange,
+    is_same_path,
+    path_startswith,
+    range_contains_smaller,
     range_contains_smaller_or_equal,
+    try_load_modules_with_frontend_sys_path,
 )
 from thonny.plugins.cpython_backend import Executor, format_exception_with_frame_info
 
