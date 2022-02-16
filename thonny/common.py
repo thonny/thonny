@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import sys
 from collections import namedtuple
-from typing import List, Optional, Dict, Iterable, Tuple, Callable, Any  # @UnusedImport
+from typing import List, Optional, Dict, Tuple, Callable, Any  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -757,14 +757,6 @@ def read_one_incoming_message_str(line_reader):
         read_lines += 1
 
     return msg_str
-
-
-class ConnectionFailedException(Exception):
-    pass
-
-
-class ConnectionClosedException(Exception):
-    pass
 
 
 def is_virtual_executable(executable):

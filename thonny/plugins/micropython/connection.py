@@ -1,10 +1,10 @@
+from typing import Union
+
 import queue
 import re
 import time
 from queue import Queue
 
-from thonny.common import ConnectionClosedException
-from thonny.misc_utils import TimeHelper
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -30,10 +30,10 @@ class MicroPythonConnection:
         self._error = None
         self._reader_stopped = False
 
-    def soft_read(self, size, timeout=1):
+    def soft_read(self, size: int, timeout: float = 1) -> bytes:
         return self.read(size, timeout, True)
 
-    def read(self, size, timeout=10, timeout_is_soft=False):
+    def read(self, size: int, timeout: float = 10, timeout_is_soft: bool = False) -> bytes:
         if timeout == 0:
             if timeout_is_soft:
                 return b""
@@ -65,16 +65,22 @@ class MicroPythonConnection:
         finally:
             del self._read_buffer[:size]
 
-    def soft_read_until(self, terminator, timeout=1000000):
+    def soft_read_until(self, terminator, timeout: float = 1000000) -> bytes:
         return self.read_until(terminator, timeout, timeout_is_soft=True)
 
-    def read_until(self, terminator, timeout=1000000, timeout_is_soft=False):
+    def read_until(
+        self,
+        terminator: Union[str, re.Pattern],
+        timeout: float = 1000000,
+        timeout_is_soft: bool = False,
+    ) -> bytes:
         timer = TimeHelper(timeout)
 
         if isinstance(terminator, str):
             terminator = re.compile(re.escape(terminator))
 
-        match = None
+        assert isinstance(terminator, re.Pattern)
+
         while True:
             self._check_for_error()
 
@@ -103,15 +109,11 @@ class MicroPythonConnection:
         del self._read_buffer[:size]
         return data
 
-    def _fetch_to_buffer(self):
+    def _fetch_to_buffer(self) -> None:
         while not self._read_queue.empty():
             self._read_buffer.extend(self._read_queue.get(True))
 
-    def peek_incoming(self):
-        self._fetch_to_buffer()
-        return self._read_buffer
-
-    def read_all(self, check_error=True):
+    def read_all(self, check_error: bool = True) -> bytes:
         self._fetch_to_buffer()
 
         if len(self._read_buffer) == 0 and check_error:
@@ -122,18 +124,19 @@ class MicroPythonConnection:
         finally:
             self._read_buffer = bytearray()
 
-    def read_all_expected(self, expected, timeout=None):
+    def read_all_expected(self, expected: bytes, timeout: float = None) -> bytes:
         actual = self.read(len(expected), timeout=timeout)
         actual += self.read_all()
         assert expected == actual, "Expected %r, got %r" % (expected, actual)
+        return actual
 
-    def _check_for_error(self):
+    def _check_for_error(self) -> None:
         if self._error is None:
             return
 
-        raise ConnectionClosedException(self._error)
+        raise ConnectionError(self._error)
 
-    def unread(self, data):
+    def unread(self, data: bytes) -> None:
         if not data:
             return
 
@@ -144,10 +147,10 @@ class MicroPythonConnection:
 
         self._read_buffer = data + self._read_buffer
 
-    def write(self, data):
+    def write(self, data: bytes) -> None:
         raise NotImplementedError()
 
-    def _log_data(self, data):
+    def _log_data(self, data: bytes) -> None:
         print(
             data.decode(self.encoding, errors="replace")
             .replace("\r\n", "\n")
@@ -158,34 +161,46 @@ class MicroPythonConnection:
             end="",
         )
 
-    def _make_output_available(self, data, block=True):
+    def _make_output_available(self, data: bytes, block: bool = True) -> None:
         # self._log_data(data)
         if data:
             self._read_queue.put(data, block=block)
             self.num_bytes_received += len(data)
 
-    def incoming_is_empty(self):
+    def incoming_is_empty(self) -> bool:
         return self._read_queue.empty() and len(self._read_buffer) == 0
 
-    def outgoing_is_empty(self):
+    def outgoing_is_empty(self) -> bool:
         return True
 
-    def buffers_are_empty(self):
+    def buffers_are_empty(self) -> bool:
         return self.incoming_is_empty() and self.outgoing_is_empty()
 
-    def reset_input_buffer(self):
-        return self.read_all()
-
-    def reset_output_buffer(self):
-        pass
-
-    def set_text_mode(self, value):
+    def set_text_mode(self, value: bool) -> None:
         self.text_mode = value
 
-    def stop_reader(self):
+    def stop_reader(self) -> None:
         self._reader_stopped = True
         self._read_queue = Queue()
         self._read_buffer = bytearray()
 
-    def close(self):
+    def close(self) -> None:
         raise NotImplementedError()
+
+
+class ConnectionFailedException(ConnectionError):
+    pass
+
+
+class TimeHelper:
+    def __init__(self, time_allowed):
+        self.start_time = time.time()
+        self.time_allowed = time_allowed
+
+    @property
+    def time_spent(self):
+        return time.time() - self.start_time
+
+    @property
+    def time_left(self):
+        return max(self.time_allowed - self.time_spent, 0)

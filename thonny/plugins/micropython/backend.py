@@ -73,7 +73,6 @@ from thonny.common import (
     CommandToBackend,
     ValueInfo,
 )
-from thonny.common import ConnectionClosedException
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.running import EXPECTED_TERMINATION_CODE
 from thonny import report_time
@@ -155,8 +154,8 @@ class MicroPythonBackend(MainBackend, ABC):
             self._send_ready_message()
             report_time("sent ready")
             self.mainloop()
-        except ConnectionClosedException as e:
-            self._on_connection_closed(e)
+        except ConnectionError as e:
+            self._on_connection_error(e)
         except Exception:
             logger.exception("Exception in MicroPython main method")
             self._report_internal_exception("Internal error")
@@ -1055,7 +1054,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
-    def _on_connection_closed(self, error=None):
+    def _on_connection_error(self, error=None):
         logger.info("Handling closed connection")
         self._forward_unexpected_output("stderr")
         message = "Connection lost"

@@ -23,8 +23,7 @@ from thonny.plugins.micropython.backend import (
     PASTE_MODE_LINE_PREFIX,
 )
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
 from thonny import report_time
 
 # Can't use __name__, because it will be "__main__"

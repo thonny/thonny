@@ -36,7 +36,6 @@ from thonny.common import (
     UserError,
 )
 from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
-from thonny.common import ConnectionClosedException
 
 NEW_DIR_MODE = 0o755
 
@@ -86,7 +85,7 @@ class BaseBackend(ABC):
                     # Error in Thonny's code
                     logger.exception("mainloop error")
                     self._report_internal_exception("mainloop error")
-        except ConnectionClosedException:
+        except ConnectionError:
             sys.exit(0)
 
     def _current_command_is_interrupted(self):
@@ -281,9 +280,9 @@ class MainBackend(BaseBackend, ABC):
                     response = {}
                 else:
                     response = {"error": "Interrupted", "interrupted": True}
-            except ConnectionClosedException as e:
+            except ConnectionError as e:
                 response = False
-                self._on_connection_closed(e)
+                self._on_connection_error(e)
             except Exception as e:
                 logger.exception("Exception while handling %r", cmd.name)
                 self._report_internal_exception("Exception while handling %r" % cmd.name)
@@ -296,7 +295,7 @@ class MainBackend(BaseBackend, ABC):
         real_response = self._prepare_command_response(response, cmd)
         self.send_message(real_response)
 
-    def _on_connection_closed(self, error=None):
+    def _on_connection_error(self, error=None):
         pass
 
     def _cmd_get_dirs_children_info(self, cmd):

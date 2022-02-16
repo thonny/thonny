@@ -5,14 +5,13 @@ import threading
 import time
 from textwrap import dedent
 
-from thonny.plugins.micropython.bare_metal_backend import (
-    NORMAL_PROMPT,
-    FIRST_RAW_PROMPT,
-    OUTPUT_ENQ,
-    OUTPUT_ACK,
-)
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
+OUTPUT_ENQ = b"\x05"
+OUTPUT_ACK = b"\x06"
+from .connection import MicroPythonConnection, ConnectionFailedException
+
+NORMAL_PROMPT = b">>> "
+FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
+
 
 logger = getLogger(__name__)
 
@@ -140,9 +139,6 @@ class SerialConnection(MicroPythonConnection):
 
     def outgoing_is_empty(self):
         return self._serial.out_waiting == 0
-
-    def reset_output_buffer(self):
-        self._serial.reset_output_buffer()
 
     def close(self):
         if self._serial is not None:

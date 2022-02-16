@@ -2,8 +2,7 @@ import sys
 import threading
 from queue import Queue
 
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
+from .connection import MicroPythonConnection, ConnectionFailedException
 from logging import getLogger, DEBUG
 
 logger = getLogger(__name__)

@@ -38,8 +38,7 @@ from thonny.plugins.micropython.backend import (
     SOFT_REBOOT_CMD,
     INTERRUPT_CMD,
 )
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
 from thonny.plugins.micropython.webrepl_connection import (
     WebReplConnection,
     WebreplBinaryMsg,
@@ -54,8 +53,6 @@ RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
 RAW_PASTE_CONTINUE = b"\x01"
 
-OUTPUT_ENQ = b"\x05"
-OUTPUT_ACK = b"\x06"
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -206,6 +203,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size and self._read_block_size > 0:
             # make sure management prints are done in blocks
             result = result.replace("cls.builtins.print", "cls.controlled_print")
+            from thonny.plugins.micropython.serial_connection import OUTPUT_ENQ
+
             result += indent(
                 dedent(
                     """
@@ -221,7 +220,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                         for i in __thonny_helper.builtins.range(0, __thonny_helper.builtins.len(data), cls._print_block_size):
                             cls.builtins.print(end=data[i:i+cls._print_block_size])
                             cls.builtins.print(end={out_enq!r})
-                            cls.sys.stdin.read(1)
+                            cls.sys.stdin.read(1) # ack
                         
                     cls.builtins.print(end=end)
             """
