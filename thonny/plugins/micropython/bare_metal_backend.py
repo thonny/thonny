@@ -1104,7 +1104,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             try:
                 super()._delete_sorted_paths(paths)
             except Exception as e:
-                if "read-only" in str(e).lower():
+                if self._contains_read_only_error(str(e)):
                     self._delete_via_mount(paths)
                 else:
                     raise
@@ -1278,6 +1278,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return bytes_written
 
+    def _contains_read_only_error(self, s: str) -> bool:
+        canonic_out = s.replace("-", "").lower()
+        return "readonly" in canonic_out or "errno 30" in canonic_out
+
     def _write_file_via_serial(
         self,
         source_fp: BinaryIO,
@@ -1299,8 +1303,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             capture_output=True,
         )
 
-        canonic_out = (out + err).replace("-", "").lower()
-        if "readonly" in canonic_out or "errno 30" in canonic_out:
+        if self._contains_read_only_error(out + err):
             raise ReadOnlyFilesystemError()
         elif out + err:
             raise OSError(
@@ -1466,7 +1469,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         try:
             super()._mkdir(path)
         except ManagementError as e:
-            if "read-only" in e.err.lower():
+            if self._contains_read_only_error(e.err):
                 self._makedirs_via_mount(path)
             else:
                 raise
