@@ -40,7 +40,7 @@ from thonny.plugins.micropython.backend import (
     starts_with_continuation_byte,
 )
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
-from thonny.plugins.micropython.webrepl_connection import WebreplBinaryMsg, WebReplConnection
+from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 PASTE_SUBMIT_MODE = "paste"
 RAW_PASTE_SUBMIT_MODE = "raw_paste"
@@ -251,6 +251,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             return 0
         elif self._connected_over_webrepl():
             # ESP-32 needs long delay to work reliably over raw mode WebREPL
+            # https://github.com/micropython/micropython/issues/2497
             # TODO: consider removing when this gets fixed
             return 0.5
         else:
@@ -531,15 +532,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return isinstance(self._connection, WebReplConnection)
 
     def _submit_code(self, script):
-        """
-        Code is submitted via paste mode, because this provides echo, which can be used as flow control.
-
-        The echo of a written block must be read before next block is written.
-        Safe USB block size is 64 bytes (may be larger for some devices),
-        but we need to account for b"=== " added by the paste mode in the echo, so each block is sized such that
-        its echo doesn't exceed self._write_block_size (some devices may have problem with outputs bigger than that).
-        (OK, most likely the reading thread will eliminate the problem with output buffer, but just in case...)
-        """
         assert script
 
         # assuming we are already at a prompt, but threads may have produced something
@@ -555,7 +547,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     self._submit_code_via_raw_paste_mode(to_be_sent)
                 except RawPasteNotSupportedError:
                     logger.info("WARNING: Could not use expected raw paste, falling back to raw")
-                    self._submit_code_via_raw_mode(to_be_sent)
+                    self._submit_code_via_raw_mode(
+                        to_be_sent, self._infer_write_block_size(), self._infer_write_block_delay()
+                    )
             else:
                 self._submit_code_via_raw_mode(to_be_sent)
 
@@ -601,9 +595,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             actual_confirmation,
         )
 
-    def _submit_code_via_raw_mode(self, script_bytes: bytes) -> None:
+    def _submit_code_via_raw_mode(
+        self,
+        script_bytes: bytes,
+        block_size: Optional[int] = None,
+        block_delay: Optional[float] = None,
+    ) -> None:
         self._ensure_raw_mode()
-
+        block_size = block_size or self._write_block_size
+        block_delay = block_delay or self._write_block_delay
         to_be_written = script_bytes + EOT
 
         while to_be_written:
@@ -1205,28 +1205,32 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         rec = struct.pack(
             WEBREPL_REQ_S, b"WA", WEBREPL_GET_FILE, 0, 0, 0, len(src_fname), src_fname
         )
-        self._write(WebreplBinaryMsg(rec))
-        assert self._read_websocket_response() == 0
+        self._connection.set_text_mode(False)
+        try:
+            self._write(rec)
+            assert self._read_websocket_response() == 0
 
-        bytes_read = 0
-        callback(bytes_read, file_size)
-        while True:
-            # report ready
-            self._write(WebreplBinaryMsg(b"\0"))
+            bytes_read = 0
+            callback(bytes_read, file_size)
+            while True:
+                # report ready
+                self._write(b"\0")
 
-            (block_size,) = struct.unpack("<H", self._connection.read(2))
-            if block_size == 0:
-                break
-            while block_size:
-                buf = self._connection.read(block_size)
-                if not buf:
-                    raise OSError("Could not read in WebREPL binary protocol")
-                bytes_read += len(buf)
-                target_fp.write(buf)
-                block_size -= len(buf)
-                callback(bytes_read, file_size)
+                (block_size,) = struct.unpack("<H", self._connection.read(2))
+                if block_size == 0:
+                    break
+                while block_size:
+                    buf = self._connection.read(block_size)
+                    if not buf:
+                        raise OSError("Could not read in WebREPL binary protocol")
+                    bytes_read += len(buf)
+                    target_fp.write(buf)
+                    block_size -= len(buf)
+                    callback(bytes_read, file_size)
 
-        assert self._read_websocket_response() == 0
+            assert self._read_websocket_response() == 0
+        finally:
+            self._connection.set_text_mode(True)
 
     def _write_file(
         self,
@@ -1415,23 +1419,25 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         rec = struct.pack(
             WEBREPL_REQ_S, b"WA", WEBREPL_PUT_FILE, 0, 0, file_size, len(dest_fname), dest_fname
         )
-        self._write(WebreplBinaryMsg(rec[:10]))
-        self._write(WebreplBinaryMsg(rec[10:]))
-        assert self._read_websocket_response() == 0
+        self._connection.set_text_mode(False)
+        try:
+            self._write(rec[:10])
+            self._write(rec[10:])
+            assert self._read_websocket_response() == 0
 
-        bytes_sent = 0
-        callback(bytes_sent, file_size)
-        while True:
-            block = source.read(1024)
-            if not block:
-                break
-            self._write(WebreplBinaryMsg(block))
-            bytes_sent += len(block)
+            bytes_sent = 0
             callback(bytes_sent, file_size)
+            while True:
+                block = source.read(1024)
+                if not block:
+                    break
+                self._write(block)
+                bytes_sent += len(block)
+                callback(bytes_sent, file_size)
 
-        assert self._read_websocket_response() == 0
-
-        return bytes_sent
+            assert self._read_websocket_response() == 0
+        finally:
+            self._connection.set_text_mode(True)
 
     def _read_websocket_response(self):
         data = self._connection.read(4)

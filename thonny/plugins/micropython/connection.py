@@ -3,7 +3,7 @@ import re
 import time
 from logging import getLogger
 from queue import Queue
-from typing import Union
+from typing import Optional, Union
 
 logger = getLogger(__name__)
 
@@ -36,7 +36,7 @@ class MicroPythonConnection:
             if timeout_is_soft:
                 return b""
             else:
-                raise TimeoutError()
+                raise ReadingTimeoutError(read_bytes=b"")
 
         timer = TimeHelper(timeout)
 
@@ -55,7 +55,7 @@ class MicroPythonConnection:
                         timeout,
                         self._read_buffer,
                     )
-                    raise TimeoutError()
+                    raise ReadingTimeoutError(read_bytes=self._read_buffer)
 
         try:
             data = self._read_buffer[:size]
@@ -68,13 +68,13 @@ class MicroPythonConnection:
 
     def read_until(
         self,
-        terminator: Union[str, re.Pattern],
+        terminator: Union[bytes, re.Pattern],
         timeout: float = 1000000,
         timeout_is_soft: bool = False,
     ) -> bytes:
         timer = TimeHelper(timeout)
 
-        if isinstance(terminator, str):
+        if isinstance(terminator, bytes):
             terminator = re.compile(re.escape(terminator))
 
         assert isinstance(terminator, re.Pattern)
@@ -95,7 +95,7 @@ class MicroPythonConnection:
                 if timeout_is_soft:
                     break
                 else:
-                    raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                    raise ReadingTimeoutError(read_bytes=self._read_buffer)
 
         if match:
             size = match.end()
@@ -145,7 +145,8 @@ class MicroPythonConnection:
 
         self._read_buffer = data + self._read_buffer
 
-    def write(self, data: bytes) -> None:
+    def write(self, data: bytes) -> int:
+        """Writing"""
         raise NotImplementedError()
 
     def _log_data(self, data: bytes) -> None:
@@ -188,6 +189,12 @@ class MicroPythonConnection:
 
 class ConnectionFailedException(ConnectionError):
     pass
+
+
+class ReadingTimeoutError(TimeoutError):
+    def __init__(self, read_bytes: bytes):
+        super().__init__(f"Read bytes: {read_bytes}")
+        self.read_bytes = read_bytes
 
 
 class TimeHelper:

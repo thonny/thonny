@@ -448,7 +448,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self.send_message(ToplevelResponse(**args))
 
-    def _write(self, data):
+    def _write(self, data: bytes) -> int:
         if (
             RAW_MODE_CMD in data
             or NORMAL_MODE_CMD in data
@@ -457,7 +457,7 @@ class MicroPythonBackend(MainBackend, ABC):
             or PASTE_MODE_CMD in data
         ):
             logger.debug("Sending ctrl chars: %r", data)
-        self._connection.write(data)
+        return self._connection.write(data)
 
     def _submit_input(self, cdata: str) -> None:
         # TODO: what if there is a previous unused data waiting

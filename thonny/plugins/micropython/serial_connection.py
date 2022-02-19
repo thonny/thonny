@@ -84,7 +84,7 @@ class SerialConnection(MicroPythonConnection):
             self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
             self._reading_thread.start()
 
-    def write(self, data):
+    def write(self, data: bytes) -> int:
         size = self._serial.write(data)
         # print(data.decode(), end="")
         assert size == len(data)

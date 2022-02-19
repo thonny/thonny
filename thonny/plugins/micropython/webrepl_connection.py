@@ -114,10 +114,10 @@ class WebReplConnection(MicroPythonConnection):
         while True:
             while not self._write_queue.empty():
                 data = self._write_queue.get(block=False)
-                if isinstance(data, WebreplBinaryMsg):
-                    payload = data.data
-                else:
+                if self.text_mode:
                     payload = data.decode("UTF-8")
+                else:
+                    payload = data
                 await self._ws.send(payload)
                 # logger.debug("Wrote %r bytes", len(data))
                 self._write_responses.put(len(data))
@@ -125,7 +125,7 @@ class WebReplConnection(MicroPythonConnection):
             # Allow reading loop to progress
             await asyncio.sleep(0.01)
 
-    def write(self, data):
+    def write(self, data: bytes) -> int:
         self._write_queue.put_nowait(data)
         return self._write_responses.get()
 
@@ -142,14 +142,3 @@ class WebReplConnection(MicroPythonConnection):
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
-
-
-class WebreplBinaryMsg:
-    """This wrapper helps distinguishing between bytes which should
-    be decoded and sent as text frame and bytes sent as binary frame"""
-
-    def __init__(self, data):
-        self.data = data
-
-    def __len__(self):
-        return len(self.data)
