@@ -136,7 +136,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             """
         )
 
-        result = super()._get_helper_code() + textwrap.indent(extra, "    ")
+        return super()._get_helper_code() + textwrap.indent(extra, "    ")
 
     def _process_until_initial_prompt(self, interrupt, clean):
         # This will be called only when the interpreter gets run without script.
@@ -170,7 +170,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         end_marker = "#uIuIu"
         self._write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
-        self._write(script + end_marker)
+        self._write((script + end_marker).encode(ENCODING))
         self._connection.read_until(end_marker.encode("ascii"))
         self._write(EOT)
         self._connection.read_until(b"\n")

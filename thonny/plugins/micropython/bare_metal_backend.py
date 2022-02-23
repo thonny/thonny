@@ -1280,7 +1280,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _contains_read_only_error(self, s: str) -> bool:
         canonic_out = s.replace("-", "").lower()
-        return "readonly" in canonic_out or "errno 30" in canonic_out or "oserror: 30" in canonic_out
+        return (
+            "readonly" in canonic_out or "errno 30" in canonic_out or "oserror: 30" in canonic_out
+        )
 
     def _write_file_via_serial(
         self,
