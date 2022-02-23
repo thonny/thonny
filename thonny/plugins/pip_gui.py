@@ -934,7 +934,10 @@ class CPythonBackendPipDialog(BackendPipDialog):
 
     def _get_target_directory(self):
         if self._should_install_to_site_packages():
-            return normpath_with_actual_case(self._backend_proxy.get_site_packages())
+            sp = self._backend_proxy.get_site_packages()
+            if sp is None:
+                return None
+            return normpath_with_actual_case(sp)
         else:
             usp = self._backend_proxy.get_user_site_packages()
             if isinstance(self._backend_proxy, CPythonProxy):

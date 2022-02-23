@@ -17,7 +17,7 @@ logger = getLogger(__name__)
 
 
 class SerialConnection(MicroPythonConnection):
-    def __init__(self, port, baudrate, dtr=None, rts=None, skip_reader=False):
+    def __init__(self, port, baudrate=115200, dtr=None, rts=None, skip_reader=False):
 
         import serial
         from serial.serialutil import SerialException
