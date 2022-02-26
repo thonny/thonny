@@ -33,9 +33,9 @@ logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
-    def __init__(self, master=None):
+    def __init__(self, master=None, **kw):
         assert master
-        super().__init__(master=master)
+        super().__init__(master=master, **kw)
         self.withdraw()  # remain invisible until size calculations are done
 
         # TODO: Is it still required ?
