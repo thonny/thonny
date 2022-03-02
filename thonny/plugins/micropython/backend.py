@@ -48,7 +48,7 @@ from logging import getLogger
 from queue import Empty, Queue
 from textwrap import dedent
 from threading import Lock
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from serial import SerialTimeoutException
 
@@ -59,6 +59,7 @@ from thonny.common import (
     OBJECT_LINK_START,
     BackendEvent,
     CommandToBackend,
+    DistInfo,
     EOFCommand,
     ImmediateCommand,
     InlineCommand,
@@ -818,77 +819,40 @@ class MicroPythonBackend(MainBackend, ABC):
         self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
 
     def _cmd_get_active_distributions(self, cmd):
-        dists = {}
-        for path in self._get_library_paths():
-            children = self._get_dir_children_info(path)
-            if children is None:
-                continue
-            for name, info in children.items():
-                if info["kind"] == "dir":
-                    key = name
-                elif name.endswith(".py"):
-                    key = name[:-3]
-                elif name.endswith(".mpy"):
-                    key = name[:-4]
-                else:
-                    continue
-
-                dists[key] = {
-                    "project_name": key,
-                    "key": key,
-                    "guessed_pypi_name": self._guess_package_pypi_name(key),
-                    "location": path,
-                    "version": "n/a",
-                }
+        current_state = self._perform_pipkin_operation_and_list(None)
 
         return dict(
-            distributions=dists,
-            usersitepackages=None,
+            distributions={dist.key: dist for dist in current_state},
         )
 
-    def _cmd_get_module_info(self, cmd):
-        location = None
-        effective_items = []
-        shadowed_items = []
+    def _cmd_install_distributions(self, cmd):
+        args = cast(List[str], cmd.args[:])
+        if "--user" in args:
+            user = True
+            args.remove("--user")
+        else:
+            user = False
 
-        for lib_dir in self._get_library_paths():
-            dir_children = self._get_dir_children_info(lib_dir)
-            if not dir_children:
-                continue
+        if "--upgrade" in args:
+            update = True
+            args.remove("--upgrade")
+        else:
+            update = False
 
-            # print(lib_dir, dir_children)
+        assert not any([arg.startswith("-") for arg in args])
+        specs = args
 
-            if cmd.module_name in dir_children and dir_children[cmd.module_name]["kind"] == "dir":
-                # dir takes precedence over .py and .mpy
-                # presence of __init__.py is not required
-                dir_full_path = lib_dir + "/" + cmd.module_name
-                descendants = self._get_dir_descendants_info(dir_full_path)
-                # print("desc", dir_full_path, descendants)
-                desc_paths = list(sorted(descendants.keys()))
+        new_state = self._perform_pipkin_operation_and_list(
+            command="install", specs=specs, user=user, update=update
+        )
+        return {"distributions": new_state}
 
-                if not effective_items:  # ie. it's the first one found
-                    effective_items.append(dir_full_path)
-                    effective_items.extend(desc_paths)
-                    location = lib_dir
-                else:
-                    shadowed_items.extend(desc_paths)
+    def _cmd_uninstall_distributions(self, cmd):
 
-            for suffix in [".py", ".mpy"]:
-                with_suffix = cmd.module_name + suffix
-                if with_suffix in dir_children and dir_children[with_suffix]["kind"] == "file":
-                    full_path = lib_dir + "/" + with_suffix
-                    if not effective_items:
-                        effective_items.append(full_path)
-                        location = lib_dir
-                    else:
-                        shadowed_items.append(full_path)
+        assert not any([arg.startswith("-") for arg in cmd.args])
 
-        return {
-            "location": location,
-            "effective_items": effective_items,
-            "shadowed_items": shadowed_items,
-            "module_name": cmd.module_name,
-        }
+        new_state = self._perform_pipkin_operation_and_list(command="uninstall", packages=cmd.args)
+        return {"distributions": new_state}
 
     def _get_library_paths(self) -> [str]:
         """Returns list of directories which are supposed to contain library code"""
@@ -903,6 +867,32 @@ class MicroPythonBackend(MainBackend, ABC):
     def _mkdir(self, path: str) -> None:
         # assumes part path exists and path doesn't
         self._execute_without_output("__thonny_helper.os.mkdir(%r)" % path)
+
+    @abstractmethod
+    def _create_pipkin_adapter(self):
+        ...
+
+    def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
+        from pipkin.session import Session
+
+        adapter = self._create_pipkin_adapter()
+        session = Session(adapter)
+
+        try:
+            if command:
+                assert hasattr(session, command)
+                getattr(session, command, **kwargs)
+            return {
+                DistInfo(
+                    key=di.key,
+                    project_name=di.project_name,
+                    version=di.version,
+                    location=di.location,
+                )
+                for di in session.basic_list()
+            }
+        finally:
+            session.close()
 
     def _delete_sorted_paths(self, paths):
         self._execute_without_output(

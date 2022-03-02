@@ -154,7 +154,7 @@ class Tracer(Executor):
             and (
                 self._current_command.get("allow_stepping_into_libraries", False)
                 or (
-                self._main_module_path is not None
+                    self._main_module_path is not None
                     and path_startswith(path, os.path.dirname(self._main_module_path))
                     # main module may be at the root of the fs
                     and not path_startswith(path, sys.prefix)

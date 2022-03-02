@@ -710,11 +710,6 @@ class LocalMicroPythonProxy(MicroPythonProxy):
     def get_exe_dirs(self):
         return []
 
-    def get_pip_gui_class(self):
-        from thonny.plugins.micropython.pip_gui import LocalMicroPythonPipDialog
-
-        return LocalMicroPythonPipDialog
-
     def can_run_local_files(self):
         return True
 

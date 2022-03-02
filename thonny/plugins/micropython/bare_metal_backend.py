@@ -1628,6 +1628,23 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _output_warrants_interrupt(self, data):
         return False
 
+    def _create_pipkin_adapter(self):
+        if self._connected_over_webrepl():
+            from pipkin.bare_metal import WebReplAdapter
+
+            class_ = WebReplAdapter
+        else:
+            from pipkin.bare_metal import SerialPortAdapter
+
+            class_ = SerialPortAdapter
+
+        return class_(
+            self._connection,
+            submit_mode=self._submit_mode,
+            write_block_size=self._write_block_size,
+            write_block_delay=self._write_block_delay,
+        )
+
     def _report_internal_exception(self, msg: str) -> None:
         super()._report_internal_exception(msg)
 

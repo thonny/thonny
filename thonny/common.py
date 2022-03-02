@@ -54,6 +54,14 @@ FrameInfo = namedtuple(
 TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"])
 
 
+@dataclass(frozen=True)
+class DistInfo:
+    key: str
+    project_name: str
+    version: str
+    location: str
+
+
 class Record:
     def __init__(self, **kw):
         self.__dict__.update(kw)

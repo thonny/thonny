@@ -7,8 +7,6 @@ Commands get executed via shell, this way the command line in the
 shell becomes kind of title for the execution.
 
 """
-
-
 import collections
 import os.path
 import re
@@ -19,6 +17,7 @@ import time
 import tkinter as tk
 import traceback
 import warnings
+from abc import ABC, abstractmethod
 from logging import getLogger
 from threading import Thread
 from time import sleep
@@ -742,7 +741,7 @@ class Runner:
         return isinstance(self._proxy, CPythonProxy) and self._proxy._in_venv
 
 
-class BackendProxy:
+class BackendProxy(ABC):
     """Communicates with backend process.
 
     All communication methods must be non-blocking,

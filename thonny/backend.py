@@ -435,6 +435,15 @@ class MainBackend(BaseBackend, ABC):
         )
         return {"definitions": defs}
 
+    def _cmd_get_active_distributions(self, cmd):
+        raise NotImplementedError()
+
+    def _cmd_install_distributions(self, cmd):
+        raise NotImplementedError()
+
+    def _cmd_uninstall_distributions(self, cmd):
+        raise NotImplementedError()
+
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
         return None
 
