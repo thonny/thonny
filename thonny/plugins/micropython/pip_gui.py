@@ -70,6 +70,9 @@ class MicroPythonPipDialog(BackendPipDialog):
     def _use_user_install(self):
         return False
 
+    def _installer_runs_locally(self):
+        return True
+
     def _show_instructions_about_target(self):
         self._append_info_text(tr("Scope") + "\n", ("caption",))
 

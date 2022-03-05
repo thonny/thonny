@@ -110,9 +110,9 @@ class AssistantView(tktextext.TextFrame):
 
         self._clear()
 
-        from thonny.plugins.cpython_frontend import CPythonProxy
+        from thonny.plugins.cpython_frontend import LocalCPythonProxy
 
-        if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
+        if not isinstance(get_runner().get_backend_proxy(), LocalCPythonProxy):
             # TODO: add some support for MicroPython as well
             return
 

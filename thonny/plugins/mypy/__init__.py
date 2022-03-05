@@ -47,7 +47,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
         if ver >= (0, 590):
             args.insert(3, "--python-executable")
-            args.insert(4, get_runner().get_local_executable())
+            args.insert(4, get_runner().get_backend_proxy().get_target_executable())
 
         if ver >= (0, 730):
             args.insert(3, "--warn-unreachable")

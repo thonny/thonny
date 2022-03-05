@@ -437,6 +437,7 @@ def _configure_logging(log_file, console_level=None):
     main_logger.info("Thonny version: %s", get_version())
     main_logger.info("cwd: %s", os.getcwd())
     main_logger.info("original argv: %s", get_orig_argv())
+    main_logger.info("sys.executable: %s", sys.executable)
     main_logger.info("sys.argv: %s", sys.argv)
     main_logger.info("sys.path: %s", sys.path)
     main_logger.info("sys.flags: %s", sys.flags)

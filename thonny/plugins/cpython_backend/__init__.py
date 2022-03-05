@@ -15,7 +15,7 @@ import tokenize
 import traceback
 import types
 import warnings
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import __main__
 import thonny
@@ -478,12 +478,12 @@ class MainCPythonBackend(MainBackend):
         )
 
     def _cmd_install_distributions(self, cmd):
-        new_state = self._perform_pip_operation_and_list(["install"] + cmd.args)
-        return {"new_state": new_state}
+        returncode, new_state = self._perform_pip_operation_and_list(["install"] + cmd.args)
+        return {"new_state": new_state, "returncode": returncode}
 
     def _cmd_uninstall_distributions(self, cmd):
-        new_state = self._perform_pip_operation_and_list(["uninstall"] + cmd.args)
-        return {"new_state": new_state}
+        returncode, new_state = self._perform_pip_operation_and_list(["uninstall", "-y"] + cmd.args)
+        return {"new_state": new_state, "returncode": returncode}
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
@@ -576,15 +576,17 @@ class MainCPythonBackend(MainBackend):
             except Exception as e:
                 print("Could not delete %s: %s" % (path, str(e)), file=sys.stderr)
 
-    def _perform_pip_operation_and_list(self, cmd_line: List[str]) -> Dict[str, DistInfo]:
+    def _perform_pip_operation_and_list(
+        self, cmd_line: List[str]
+    ) -> Tuple[int, Dict[str, DistInfo]]:
 
         extra_switches = ["--disable-pip-version-check"]
         proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
         if proxy:
             extra_switches.append("--proxy=" + proxy)
 
-        subprocess.check_call([sys.executable, "-m", "pip"] + extra_switches + cmd_line)
-        return self._get_distributions_info()
+        returncode = subprocess.call([sys.executable, "-m", "pip"] + extra_switches + cmd_line)
+        return returncode, self._get_distributions_info()
 
     def _get_distributions_info(self) -> Dict[str, DistInfo]:
         # Avoiding pip, because pip is slow.

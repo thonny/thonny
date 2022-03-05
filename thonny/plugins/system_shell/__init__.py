@@ -25,8 +25,8 @@ def _open_system_shell():
     if proxy and proxy.has_custom_system_shell():
         proxy.open_custom_system_shell()
         return
-    if proxy and proxy.get_local_executable():
-        target_executable = proxy.get_local_executable()
+    if proxy and proxy.has_local_interpreter():
+        target_executable = proxy.get_target_executable()
     else:
         target_executable = sys.executable
 

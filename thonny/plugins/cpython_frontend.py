@@ -2,6 +2,7 @@ import os.path
 import subprocess
 import sys
 import tkinter as tk
+from abc import ABC
 from logging import getLogger
 from tkinter import messagebox, ttk
 
@@ -33,9 +34,7 @@ from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
 logger = getLogger(__name__)
 
 
-class CPythonProxy(SubprocessProxy):
-    "abstract class"
-
+class LocalCPythonProxy(SubprocessProxy, ABC):
     def __init__(self, clean: bool, executable: str) -> None:
         self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)
@@ -65,8 +64,8 @@ class CPythonProxy(SubprocessProxy):
         self._cancel_gui_update_loop()
         super()._close_backend()
 
-    def get_local_executable(self):
-        return self._executable
+    def get_target_executable(self):
+        return self._mgmt_executable
 
     def _update_gui_updating(self, msg):
         """Enables running Tkinter or Qt programs which doesn't call mainloop.
@@ -120,7 +119,7 @@ class CPythonProxy(SubprocessProxy):
                 self._proc.send_signal(signal.SIGINT)
 
     def run_script_in_terminal(self, script_path, args, interactive, keep_open):
-        cmd = [self._executable]
+        cmd = [self._mgmt_executable]
         if interactive:
             cmd.append("-i")
         cmd.append(os.path.basename(script_path))
@@ -128,13 +127,10 @@ class CPythonProxy(SubprocessProxy):
 
         run_in_terminal(cmd, os.path.dirname(script_path), keep_open=keep_open)
 
-    def get_supported_features(self):
-        return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
-
     def get_pip_gui_class(self):
-        from thonny.plugins.cpython_pip_gui import CPythonBackendPipDialog
+        from thonny.plugins.cpython_pip_gui import LocalCPythonPipDialog
 
-        return CPythonBackendPipDialog
+        return LocalCPythonPipDialog
 
     def can_run_remote_files(self):
         return False
@@ -144,7 +140,7 @@ class CPythonProxy(SubprocessProxy):
 
     def fetch_next_message(self):
         while True:
-            msg = super(CPythonProxy, self).fetch_next_message()
+            msg = super().fetch_next_message()
             if isinstance(msg, InlineResponse) and msg.command_name == "process_gui_events":
                 # Only wanted to know that the command was processed
                 # Don't pass upstream
@@ -154,8 +150,11 @@ class CPythonProxy(SubprocessProxy):
 
         return msg
 
+    def has_local_interpreter(self):
+        return True
 
-class PrivateVenvCPythonProxy(CPythonProxy):
+
+class PrivateVenvCPythonProxy(LocalCPythonProxy):
     def __init__(self, clean):
         self._prepare_private_venv()
         super().__init__(clean, get_private_venv_executable())
@@ -255,7 +254,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         return []
 
 
-class SameAsFrontendCPythonProxy(CPythonProxy):
+class SameAsFrontendCPythonProxy(LocalCPythonProxy):
     def __init__(self, clean):
         executable = _get_same_as_front_executable()
         logger.info("Using %s for back-end")
@@ -264,17 +263,17 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
     def fetch_next_message(self):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
-            if is_private_python(self._executable):
+            if is_private_python(self._mgmt_executable):
                 msg["welcome_text"] += " (bundled)"
             else:
-                msg["welcome_text"] += " (" + self._executable + ")"
+                msg["welcome_text"] += " (" + self._mgmt_executable + ")"
         return msg
 
     def get_clean_description(self):
         return "Python " + get_python_version_string()
 
 
-class CustomCPythonProxy(CPythonProxy):
+class CustomCPythonProxy(LocalCPythonProxy):
     def __init__(self, clean):
         executable = get_workbench().get_option("CustomInterpreter.path")
 
@@ -289,7 +288,7 @@ class CustomCPythonProxy(CPythonProxy):
     def fetch_next_message(self):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
-            msg["welcome_text"] += " (" + self._executable + ")"
+            msg["welcome_text"] += " (" + self._mgmt_executable + ")"
         return msg
 
     def get_clean_description(self):

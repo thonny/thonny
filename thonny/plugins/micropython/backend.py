@@ -839,11 +839,24 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             update = False
 
+        if "-r" in args:
+            pos = args.index("-r")
+            req_file = args[pos + 1]
+            del args[pos + 1]
+            del args[pos]
+            requirement_files = [req_file]
+        else:
+            requirement_files = None
+
         assert not any([arg.startswith("-") for arg in args])
         specs = args
 
         new_state = self._perform_pipkin_operation_and_list(
-            command="install", specs=specs, user=user, update=update
+            command="install",
+            specs=specs,
+            user=user,
+            update=update,
+            requirement_files=requirement_files,
         )
         return {"distributions": new_state}
 

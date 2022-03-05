@@ -1,17 +1,13 @@
 import os
+from abc import ABC
 
 from thonny import get_runner
 from thonny.common import normpath_with_actual_case
-from thonny.plugins.cpython_frontend import CPythonProxy
-from thonny.plugins.cpython_ssh import SshCPythonProxy
+from thonny.plugins.cpython_frontend import LocalCPythonProxy
 from thonny.plugins.pip_gui import BackendPipDialog
 
 
-class CPythonBackendPipDialog(BackendPipDialog):
-    def __init__(self, master):
-        super().__init__(master)
-        assert isinstance(self._backend_proxy, (CPythonProxy, SshCPythonProxy))
-
+class CPythonPipDialog(BackendPipDialog, ABC):
     def _is_read_only(self):
         # readonly if not in a virtual environment
         # and user site packages is disabled
@@ -20,13 +16,10 @@ class CPythonBackendPipDialog(BackendPipDialog):
             and not get_runner().get_backend_proxy().get_user_site_packages()
         )
 
-    def _get_interpreter_description(self):
-        return get_runner().get_local_executable()
-
     def _get_target_directory(self):
         if self._use_user_install():
             usp = self._backend_proxy.get_user_site_packages()
-            if isinstance(self._backend_proxy, CPythonProxy):
+            if isinstance(self._backend_proxy, LocalCPythonProxy):
                 os.makedirs(usp, exist_ok=True)
                 return normpath_with_actual_case(usp)
             else:
@@ -42,3 +35,11 @@ class CPythonBackendPipDialog(BackendPipDialog):
 
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
+
+
+class LocalCPythonPipDialog(CPythonPipDialog):
+    def _installer_runs_locally(self):
+        return True
+
+    def _get_interpreter_description(self):
+        return get_runner().get_backend_proxy().get_target_executable()

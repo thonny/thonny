@@ -2,6 +2,7 @@
 import os.path
 import sys
 import threading
+from logging import getLogger
 from threading import Thread
 
 import thonny
@@ -20,6 +21,8 @@ from thonny.common import (
     MessageFromBackend,
     serialize_message,
 )
+
+logger = getLogger(__name__)
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
@@ -107,8 +110,11 @@ class SshCPythonBackend(BaseBackend, SshMixin):
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
+
+        args = [self._target_interpreter, "-m", "thonny.plugins.cpython_backend", self._cwd]
+        logger.info("Starting remote process: %r", args)
         return self._create_remote_process(
-            [self._remote_interpreter, "-m", "thonny.plugins.cpython_backend", self._cwd],
+            args,
             cwd=self._get_remote_program_directory(),
             env=env,
         )
@@ -121,7 +127,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         self._start_response_forwarder()
 
     def _get_remote_program_directory(self):
-        return "/tmp/thonny-backend-" + thonny.get_version()
+        return f"/tmp/thonny-backend-{thonny.get_version()}-{self._user}"
 
     def _upload_main_backend(self):
         launch_dir = self._get_remote_program_directory()
@@ -153,6 +159,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         ]:
             local_suffix = local_path[len(local_context) :]
             remote_path = launch_dir + local_suffix.replace("\\", "/")
+            logger.info("Uploading %s => %s", local_path, remote_path)
             self._perform_sftp_operation_with_retry(lambda sftp: sftp.put(local_path, remote_path))
 
         def create_empty_cpython_init(sftp):

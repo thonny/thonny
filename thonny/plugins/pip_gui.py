@@ -331,8 +331,9 @@ class PipDialog(CommonDialog, ABC):
             self._show_read_only_instructions()
         else:
             self._show_instructions_about_installing_from_pypi()
-            self._show_instructions_about_installing_from_requirements_file()
-            self._show_instructions_about_installing_from_local_file()
+            if not self._installer_runs_locally():
+                self._show_instructions_about_installing_from_requirements_file()
+                self._show_instructions_about_installing_from_local_file()
             self._show_instructions_about_existing_packages()
 
             if self._get_target_directory():
@@ -460,7 +461,7 @@ class PipDialog(CommonDialog, ABC):
 
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
-            self.title_label["text"] = active_dist.project_nam
+            self.title_label["text"] = active_dist.project_name
             self._append_info_text(tr("Installed version:") + " ", ("caption",))
             self._append_info_text(active_dist.version + "\n")
             self._append_info_text(tr("Installed to:") + " ", ("caption",))
@@ -678,9 +679,13 @@ class PipDialog(CommonDialog, ABC):
                 None if action == "uninstall" else self.current_package_data["info"]["name"]
             )
 
-            get_workbench().event_generate("RemoteFilesChanged")
+            if self._has_remote_target():
+                get_workbench().event_generate("RemoteFilesChanged")
 
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
+        """Returns whether the action was at least started and some packages might have been
+        modified.
+        """
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
         data = self.current_package_data
@@ -741,8 +746,8 @@ class PipDialog(CommonDialog, ABC):
         else:
             raise RuntimeError("Unknown action")
 
-        returncode, _, _ = self._run_pip_with_dialog(command, args, title=title)
-        return returncode == 0
+        self._run_pip_with_dialog(command, args, title=title)
+        return True
 
     def does_support_update_deps_switch(self):
         return True
@@ -853,6 +858,12 @@ class PipDialog(CommonDialog, ABC):
     def _use_user_install(self):
         raise NotImplementedError()
 
+    def _has_remote_target(self):
+        raise NotImplementedError()
+
+    def _installer_runs_locally(self):
+        raise NotImplementedError()
+
     def _get_target_directory(self):
         raise NotImplementedError()
 
@@ -875,6 +886,9 @@ class BackendPipDialog(PipDialog):
         super().__init__(master)
 
         self._last_name_to_show = None
+
+    def _has_remote_target(self):
+        return get_runner().get_backend_proxy().supports_remote_files()
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
@@ -949,6 +963,12 @@ class PluginsPipDialog(PipDialog):
         # make sure directory exists, so user can put her plug-ins there
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
+
+    def _has_remote_target(self):
+        return False
+
+    def _installer_runs_locally(self):
+        return True
 
     def _is_read_only(self):
         return False

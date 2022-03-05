@@ -11,9 +11,10 @@ _server_process = None
 
 
 def _start_debug_enabled():
-    return (
-        get_workbench().get_editor_notebook().get_current_editor() is not None
-        and "debug" in get_runner().get_supported_features()
+    from thonny.plugins.cpython_frontend import LocalCPythonProxy
+
+    return get_workbench().get_editor_notebook().get_current_editor() is not None and isinstance(
+        get_runner().get_backend_proxy(), LocalCPythonProxy
     )
 
 

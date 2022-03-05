@@ -267,9 +267,9 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
 
     def _get_3rd_party_modules(self):
         proxy = get_runner().get_backend_proxy()
-        from thonny.plugins.cpython_frontend import CPythonProxy
+        from thonny.plugins.cpython_frontend import LocalCPythonProxy
 
-        if not isinstance(proxy, CPythonProxy):
+        if not isinstance(proxy, LocalCPythonProxy):
             return []
 
         try:

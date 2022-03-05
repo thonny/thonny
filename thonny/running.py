@@ -410,15 +410,12 @@ class Runner:
             return []
 
     def cmd_run_current_script_enabled(self) -> bool:
-        return (
-            get_workbench().get_editor_notebook().get_current_editor() is not None
-            and "run" in get_runner().get_supported_features()
-        )
+        return get_workbench().get_editor_notebook().get_current_editor() is not None
 
     def _cmd_run_current_script_in_terminal_enabled(self) -> bool:
         return (
             self._proxy
-            and "run_in_terminal" in self._proxy.get_supported_features()
+            and self._proxy.can_run_in_terminal()
             and self.cmd_run_current_script_enabled()
         )
 
@@ -649,12 +646,6 @@ class Runner:
 
         get_workbench().event_generate("BackendTerminated")
 
-    def get_local_executable(self) -> Optional[str]:
-        if self._proxy is None:
-            return None
-        else:
-            return self._proxy.get_local_executable()
-
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
 
@@ -711,12 +702,6 @@ class Runner:
 
         return ready
 
-    def get_supported_features(self) -> Set[str]:
-        if self._proxy is None:
-            return set()
-        else:
-            return self._proxy.get_supported_features()
-
     def supports_remote_files(self):
         if self._proxy is None:
             return False
@@ -736,9 +721,9 @@ class Runner:
             return self._proxy.get_node_label()
 
     def using_venv(self) -> bool:
-        from thonny.plugins.cpython_frontend import CPythonProxy
+        from thonny.plugins.cpython_frontend import LocalCPythonProxy
 
-        return isinstance(self._proxy, CPythonProxy) and self._proxy._in_venv
+        return isinstance(self._proxy, LocalCPythonProxy) and self._proxy._in_venv
 
 
 class BackendProxy(ABC):
@@ -760,24 +745,22 @@ class BackendProxy(ABC):
         """
         self.running_inline_command = False
 
+    @abstractmethod
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
-        raise NotImplementedError()
 
+    @abstractmethod
     def send_program_input(self, data: str) -> None:
         """Send input data to backend"""
-        raise NotImplementedError()
 
+    @abstractmethod
     def fetch_next_message(self):
         """Read next message from the queue or None if queue is empty"""
-        raise NotImplementedError()
 
-    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
-        raise NotImplementedError()
-
+    @abstractmethod
     def get_sys_path(self):
         "backend's sys.path"
-        return []
+        ...
 
     def get_backend_name(self):
         return type(self).backend_name
@@ -785,32 +768,36 @@ class BackendProxy(ABC):
     def get_pip_gui_class(self):
         return None
 
+    @abstractmethod
     def interrupt(self):
         """Tries to interrupt current command without resetting the backend"""
-        pass
+        ...
 
+    @abstractmethod
     def destroy(self, for_restart: bool = False):
         """Called when Thonny no longer needs this instance
         (Thonny gets closed or new backend gets selected)
         """
-        pass
+        ...
 
+    @abstractmethod
     def is_connected(self):
-        return True
+        ...
 
-    def get_local_executable(self):
-        """Return system command for invoking current interpreter"""
-        return None
+    @abstractmethod
+    def has_local_interpreter(self):
+        ...
 
-    def get_supported_features(self):
-        return {"run"}
+    @abstractmethod
+    def get_target_executable(self) -> Optional[str]:
+        """Returns `sys.executable` if the interpreter has it."""
 
     def get_node_label(self):
-        """Used as files caption if back-end has separate files"""
+        """Used as files caption if back-end has separate files,
+        also when choosing file save target"""
         return "Back-end"
 
     def get_full_label(self):
-        """Used in pip GUI title"""
         return self.get_node_label()
 
     def supports_remote_files(self):
@@ -833,10 +820,14 @@ class BackendProxy(ABC):
     def can_run_local_files(self):
         raise NotImplementedError()
 
+    @abstractmethod
+    def can_debug(self) -> bool:
+        ...
+
     def ready_for_remote_file_operations(self):
         return False
 
-    def get_cwd(self):
+    def get_cwd(self) -> Optional[str]:
         return None
 
     def get_clean_description(self):
@@ -855,6 +846,13 @@ class BackendProxy(ABC):
         """
         return [(cls.get_current_switcher_configuration(), cls.backend_description)]
 
+    @abstractmethod
+    def can_run_in_terminal(self) -> bool:
+        ...
+
+    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
+        raise NotImplementedError()
+
     def has_custom_system_shell(self):
         return False
 
@@ -863,21 +861,21 @@ class BackendProxy(ABC):
 
 
 class SubprocessProxy(BackendProxy):
-    def __init__(self, clean: bool, executable: Optional[str] = None) -> None:
+    def __init__(self, clean: bool, mgmt_executable: Optional[str] = None) -> None:
         super().__init__(clean)
 
-        if executable:
-            self._executable = executable
+        if mgmt_executable:
+            self._mgmt_executable = mgmt_executable
         else:
-            self._executable = get_interpreter_for_subprocess()
+            self._mgmt_executable = get_interpreter_for_subprocess()
 
-        if ".." in self._executable:
-            self._executable = os.path.normpath(self._executable)
+        if ".." in self._mgmt_executable:
+            self._mgmt_executable = os.path.normpath(self._mgmt_executable)
 
-        if not os.path.isfile(self._executable):
+        if not os.path.isfile(self._mgmt_executable):
             raise UserError(
                 "Interpreter '%s' does not exist. Please check the configuration!"
-                % self._executable
+                % self._mgmt_executable
             )
         self._welcome_text = ""
 
@@ -895,7 +893,7 @@ class SubprocessProxy(BackendProxy):
         return None
 
     def _get_environment(self):
-        env = get_environment_for_python_subprocess(self._executable)
+        env = get_environment_for_python_subprocess(self._mgmt_executable)
         # variables controlling communication with the back-end process
         env["PYTHONIOENCODING"] = "utf-8"
 
@@ -919,15 +917,15 @@ class SubprocessProxy(BackendProxy):
         # deque, because in one occasion I need to put messages back
         self._response_queue = collections.deque()
 
-        if not os.path.exists(self._executable):
+        if not os.path.exists(self._mgmt_executable):
             raise UserError(
                 "Interpreter (%s) not found. Please recheck corresponding option!"
-                % self._executable
+                % self._mgmt_executable
             )
 
         cmd_line = (
             [
-                self._executable,
+                self._mgmt_executable,
                 "-u",  # unbuffered IO
                 "-B",  # don't write pyo/pyc files
                 # (to avoid problems when using different Python versions without write permissions)
@@ -1124,9 +1122,6 @@ class SubprocessProxy(BackendProxy):
         if self.uses_local_filesystem():
             get_workbench().set_local_cwd(cwd)
 
-    def get_supported_features(self):
-        return {"run"}
-
     def get_site_packages(self):
         # NB! site.sitepackages may not be present in virtualenv
         for d in self._sys_path:
@@ -1199,25 +1194,6 @@ def _ends_with_incomplete_ansi_code(data):
     # note ANSI_CODE_TERMINATOR also includes [
     params_and_terminator = data[pos + 2 :]
     return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
-
-
-def create_backend_python_process(
-    args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-):
-    """Used for running helper commands (eg. pip) on CPython backend.
-    Assumes current backend is CPython."""
-
-    # TODO: if backend == frontend, then delegate to create_frontend_python_process
-
-    python_exe = get_runner().get_local_executable()
-
-    env = get_environment_for_python_subprocess(python_exe)
-    env["PYTHONIOENCODING"] = "utf-8"
-    env["PYTHONUNBUFFERED"] = "1"
-
-    # TODO: remove frontend python from path and add backend python to it
-
-    return _create_python_process(python_exe, args, stdin, stdout, stderr, env=env)
 
 
 def create_frontend_python_process(

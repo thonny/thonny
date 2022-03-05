@@ -70,6 +70,12 @@ class MicroPythonProxy(SubprocessProxy):
         }
         return result
 
+    def _installer_runs_locally(self):
+        return True
+
+    def has_local_interpreter(self):
+        return False
+
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -79,6 +85,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._fix_port()
 
         super().__init__(clean)
+
+    def get_target_executable(self) -> Optional[str]:
+        return None
 
     def destroy(self, for_restart: bool = False):
         super().destroy(for_restart=for_restart)
@@ -381,9 +390,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             title=self._port,
         )
 
-    def get_supported_features(self):
-        return {"run", "run_in_terminal"}
-
     def run_script_in_terminal(self, script_path, args, interactive, keep_open):
         messagebox.showinfo(
             "Running in terminal",
@@ -646,8 +652,16 @@ class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
 
 class LocalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
-        self._mp_executable = get_workbench().get_option("LocalMicroPython.executable")
+        exe = get_workbench().get_option("LocalMicroPython.executable")
+        if os.path.isabs(exe):
+            self._target_executable = exe
+        else:
+            self._target_executable = shutil.which(exe)
+
         super().__init__(clean)
+
+    def get_target_executable(self) -> Optional[str]:
+        return self._target_executable
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_mp_backend
@@ -656,7 +670,7 @@ class LocalMicroPythonProxy(MicroPythonProxy):
             thonny.plugins.micropython.os_mp_backend.__file__,
             repr(
                 {
-                    "interpreter": self._mp_executable,
+                    "interpreter": self._target_executable,
                     "cwd": self.get_cwd(),
                 }
             ),
@@ -705,7 +719,7 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         return "Local"
 
     def get_full_label(self):
-        return self._mp_executable
+        return self._target_executable
 
     def get_exe_dirs(self):
         return []
@@ -759,7 +773,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("SshMicroPython.host")
         self._user = get_workbench().get_option("SshMicroPython.user")
-        self._mp_executable = get_workbench().get_option("SshMicroPython.executable")
+        self._target_executable = get_workbench().get_option("SshMicroPython.executable")
 
         super().__init__(clean)
 
@@ -768,7 +782,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
         args = {
             "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
-            "interpreter": self._mp_executable,
+            "interpreter": self._target_executable,
             "host": self._host,
             "user": self._user,
             "password": get_ssh_password("SshMicroPython"),
@@ -831,7 +845,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         return self._host
 
     def get_full_label(self):
-        return self._mp_executable + " @ " + self._host
+        return self._target_executable + " @ " + self._host
 
     def get_exe_dirs(self):
         return []

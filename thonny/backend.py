@@ -724,7 +724,7 @@ class SshMixin(UploadDownloadMixin):
         self._host = host
         self._user = user
         self._password = password
-        self._remote_interpreter = interpreter
+        self._target_interpreter = interpreter
         self._cwd = cwd
         self._proc = None  # type: Optional[RemoteProcess]
         self._sftp = None  # type: Optional[paramiko.SFTPClient]

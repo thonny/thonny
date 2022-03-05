@@ -1,5 +1,6 @@
 import shutil
 from tkinter import messagebox
+from typing import Optional
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
@@ -12,10 +13,22 @@ class SshCPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("ssh.host")
         self._user = get_workbench().get_option("ssh.user")
-        self._remote_interpreter = get_workbench().get_option("ssh.executable")
+        self._target_executable = get_workbench().get_option("ssh.executable")
 
         super().__init__(clean)
         self._send_msg(ToplevelCommand("get_environment_info"))
+
+    def get_target_executable(self) -> Optional[str]:
+        return self._target_executable
+
+    def get_host(self) -> str:
+        return self._host
+
+    def can_run_in_terminal(self) -> bool:
+        return False
+
+    def can_debug(self) -> bool:
+        return True
 
     def _get_launcher_with_args(self):
         return [
@@ -26,7 +39,7 @@ class SshCPythonProxy(SubprocessProxy):
                     "host": self._host,
                     "user": self._user,
                     "password": get_ssh_password("ssh"),
-                    "interpreter": self._remote_interpreter,
+                    "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),
                 }
             ),
@@ -114,9 +127,9 @@ class SshCPythonProxy(SubprocessProxy):
             return []
 
     def get_pip_gui_class(self):
-        from thonny.plugins import pip_gui
+        from thonny.plugins.cpython_ssh.cpython_ssh_pip_gui import SshCPythonPipDialog
 
-        return pip_gui.CPythonBackendPipDialog
+        return SshCPythonPipDialog
 
     def has_custom_system_shell(self):
         return True
@@ -135,8 +148,8 @@ class SshCPythonProxy(SubprocessProxy):
             ["ssh", userhost], cwd=get_workbench().get_local_cwd(), keep_open=False, title=userhost
         )
 
-    def get_supported_features(self):
-        return {"run", "debug"}
+    def has_local_interpreter(self):
+        return False
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
