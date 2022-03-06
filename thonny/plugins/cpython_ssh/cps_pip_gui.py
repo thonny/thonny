@@ -8,7 +8,4 @@ class SshCPythonPipDialog(CPythonPipDialog):
         return False
 
     def _get_interpreter_description(self):
-
-        proxy = get_runner().get_backend_proxy()
-        assert isinstance(proxy, SshCPythonProxy)
-        return f"{proxy.get_target_executable()} @ {proxy.get_host()}"
+        return self._backend_proxy.get_full_label()

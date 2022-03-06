@@ -884,6 +884,7 @@ class SubprocessProxy(BackendProxy):
         self._response_queue = None
         self._sys_path = []
         self._usersitepackages = None
+        self._reported_executable = None
         self._gui_update_loop_id = None
         self._in_venv = None
         self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none

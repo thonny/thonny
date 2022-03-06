@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from logging import exception, getLogger
+from os import makedirs
+from tkinter import messagebox, ttk
+
 import os
 import re
 import subprocess
@@ -8,9 +12,6 @@ import tkinter.font as tk_font
 import urllib.error
 import urllib.parse
 from abc import ABC
-from logging import exception, getLogger
-from os import makedirs
-from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
 from typing import Dict, List, Optional, Tuple, Union, cast
 
@@ -331,7 +332,7 @@ class PipDialog(CommonDialog, ABC):
             self._show_read_only_instructions()
         else:
             self._show_instructions_about_installing_from_pypi()
-            if not self._installer_runs_locally():
+            if self._installer_runs_locally():
                 self._show_instructions_about_installing_from_requirements_file()
                 self._show_instructions_about_installing_from_local_file()
             self._show_instructions_about_existing_packages()

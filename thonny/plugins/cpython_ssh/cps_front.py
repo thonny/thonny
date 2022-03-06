@@ -110,6 +110,9 @@ class SshCPythonProxy(SubprocessProxy):
     def can_run_local_files(self):
         return False
 
+    def get_full_label(self):
+        return f"{self._reported_executable or self.get_target_executable()} @ {self.get_host()}"
+
     @classmethod
     def should_show_in_switcher(cls):
         # Show when the executable, user and host are configured
