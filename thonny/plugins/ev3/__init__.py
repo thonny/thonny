@@ -16,7 +16,7 @@ class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
     pass
 
 
-def load_plugin():
+def _load_plugin():
     add_micropython_backend(
         "EV3MicroPython",
         EV3MicroPythonProxy,
