@@ -1,5 +1,5 @@
 from thonny import get_runner
-from thonny.plugins.cpython_pip_gui import CPythonPipDialog
+from thonny.plugins.cpython_frontend.cp_pip_gui import CPythonPipDialog
 from thonny.plugins.cpython_ssh import SshCPythonProxy
 
 

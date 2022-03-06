@@ -3,7 +3,7 @@ from abc import ABC
 
 from thonny import get_runner
 from thonny.common import normpath_with_actual_case
-from thonny.plugins.cpython_frontend import LocalCPythonProxy
+from thonny.plugins.cpython_frontend.cp_front import LocalCPythonProxy
 from thonny.plugins.pip_gui import BackendPipDialog
 
 

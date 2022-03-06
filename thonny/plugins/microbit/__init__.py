@@ -1,13 +1,10 @@
 import os.path
 import sys
-import threading
 from time import sleep
-from tkinter import messagebox, ttk
 from typing import Optional
 
-from thonny import get_workbench, ui_utils
+from thonny import ui_utils
 from thonny.languages import tr
-from thonny.misc_utils import find_volume_by_name, list_volumes
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
@@ -15,7 +12,6 @@ from thonny.plugins.micropython import (
 )
 from thonny.plugins.micropython.bare_metal_backend import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
-from thonny.ui_utils import CommonDialog, FileCopyDialog, ems_to_pixels
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -185,8 +181,10 @@ def load_plugin():
     import thonny.plugins.esp
     import thonny.plugins.micropython
 
-    thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(MicrobitProxy.get_known_usb_vids_pids())
-    thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+    thonny.plugins.circuitpython.cirpy_front.VIDS_PIDS_TO_AVOID.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.micropython.mp_front.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )
     thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(

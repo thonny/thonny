@@ -1,12 +1,11 @@
 from logging import getLogger
-from typing import Optional
 
-from thonny.plugins.micropython import (
+from thonny.plugins.micropython import add_micropython_backend
+from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
-    add_micropython_backend,
 )
-from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 logger = getLogger(__name__)

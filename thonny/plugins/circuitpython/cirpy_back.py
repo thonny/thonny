@@ -1,10 +1,7 @@
 import os.path
-import time
 from logging import getLogger
-from textwrap import dedent
 from typing import List, Optional
 
-from thonny.plugins.micropython.backend import SOFT_REBOOT_CMD
 from thonny.plugins.micropython.bare_metal_backend import (
     BareMetalMicroPythonBackend,
     launch_bare_metal_backend,

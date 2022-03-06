@@ -2,11 +2,7 @@ from logging import getLogger
 from typing import Optional
 
 from thonny import get_workbench, ui_utils
-from thonny.plugins.micropython import (
-    BareMetalMicroPythonConfigPage,
-    BareMetalMicroPythonProxy,
-    add_micropython_backend,
-)
+from thonny.plugins.micropython import add_micropython_backend
 from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.plugins.rp2040 import RP2040BackendConfigPage, RP2040BackendProxy
@@ -112,10 +108,10 @@ def load_plugin():
     import thonny.plugins.esp
     import thonny.plugins.micropython
 
-    thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(
+    thonny.plugins.circuitpython.cirpy_front.VIDS_PIDS_TO_AVOID.update(
         RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()
     )
-    thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+    thonny.plugins.micropython.mp_front.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
         RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()
     )
     thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(

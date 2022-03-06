@@ -1,4 +1,6 @@
 """Intermediate process for communicating with the remote Python via SSH"""
+
+import ast
 import os.path
 import sys
 import threading
@@ -27,6 +29,7 @@ logger = getLogger(__name__)
 
 class SshCPythonBackend(BaseBackend, SshMixin):
     def __init__(self, host, user, password, interpreter, cwd):
+        logger.info("Starting mediator for %s @ %s", user, host)
         SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()
         self._proc = self._start_main_backend()
@@ -111,7 +114,12 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
 
-        args = [self._target_interpreter, "-m", "thonny.plugins.cpython_backend", self._cwd]
+        args = [
+            self._target_interpreter,
+            "-m",
+            "thonny.plugins.cpython_backend.cp_launcher",
+            self._cwd,
+        ]
         logger.info("Starting remote process: %r", args)
         return self._create_remote_process(
             args,
@@ -130,8 +138,10 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         return f"/tmp/thonny-backend-{thonny.get_version()}-{self._user}"
 
     def _upload_main_backend(self):
+        import thonny
+
         launch_dir = self._get_remote_program_directory()
-        if self._get_stat_mode_for_upload(launch_dir) and not launch_dir.endswith("-dev"):
+        if self._get_stat_mode_for_upload(launch_dir) and not thonny.get_version().endswith("-dev"):
             # don't overwrite unless in dev mode
             return
 
@@ -143,9 +153,10 @@ class SshCPythonBackend(BaseBackend, SshMixin):
 
         import thonny.ast_utils
         import thonny.backend
-        import thonny.common
         import thonny.jedi_utils
-        import thonny.plugins.cpython_backend
+        import thonny.plugins.cpython_backend.cp_back
+
+        # Don't want to import cp_back_launcher and cp_tracers
 
         local_context = os.path.dirname(os.path.dirname(thonny.__file__))
         for local_path in [
@@ -155,13 +166,18 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             thonny.jedi_utils.__file__,
             thonny.backend.__file__,
             thonny.plugins.cpython_backend.__file__,
-            thonny.plugins.cpython_backend.__file__.replace("__init__", "__main__"),
+            thonny.plugins.cpython_backend.cp_back.__file__,
+            thonny.plugins.cpython_backend.cp_back.__file__.replace("cp_back.py", "cp_launcher.py"),
+            thonny.plugins.cpython_backend.cp_back.__file__.replace("cp_back.py", "cp_tracers.py"),
         ]:
             local_suffix = local_path[len(local_context) :]
             remote_path = launch_dir + local_suffix.replace("\\", "/")
             logger.info("Uploading %s => %s", local_path, remote_path)
             self._perform_sftp_operation_with_retry(lambda sftp: sftp.put(local_path, remote_path))
 
-        def create_empty_cpython_init(sftp):
-            with sftp.open(thonny.plugins.cpython_backend.__file__, "w") as fp:
-                fp.close(self._perform_sftp_operation_with_retry(create_empty_cpython_init))
+
+if __name__ == "__main__":
+    thonny.configure_backend_logging()
+    args = ast.literal_eval(sys.argv[1])
+    backend = SshCPythonBackend(**args)
+    backend.mainloop()

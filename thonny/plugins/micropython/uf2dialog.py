@@ -12,7 +12,7 @@ from urllib.request import urlopen
 from thonny import get_runner
 from thonny.languages import tr
 from thonny.misc_utils import list_volumes
-from thonny.plugins.micropython import (
+from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonProxy,
     list_serial_ports,
     list_serial_ports_with_descriptions,

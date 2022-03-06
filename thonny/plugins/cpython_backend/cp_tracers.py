@@ -24,7 +24,7 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     try_load_modules_with_frontend_sys_path,
 )
-from thonny.plugins.cpython_backend import Executor, format_exception_with_frame_info
+from thonny.plugins.cpython_backend.cp_back import Executor, format_exception_with_frame_info
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"

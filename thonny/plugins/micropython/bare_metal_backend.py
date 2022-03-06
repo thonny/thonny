@@ -21,7 +21,8 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.misc_utils import find_volumes_by_name, running_on_windows
-from thonny.plugins.micropython.backend import (
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.mp_back import (
     EOT,
     INTERRUPT_CMD,
     NORMAL_MODE_CMD,
@@ -39,7 +40,6 @@ from thonny.plugins.micropython.backend import (
     is_continuation_byte,
     starts_with_continuation_byte,
 )
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 PASTE_SUBMIT_MODE = "paste"
