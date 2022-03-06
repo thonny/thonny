@@ -128,7 +128,7 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
         run_in_terminal(cmd, os.path.dirname(script_path), keep_open=keep_open)
 
     def get_pip_gui_class(self):
-        from thonny.plugins.cpython_pip_gui import LocalCPythonPipDialog
+        from thonny.plugins.cpython_frontend.cp_pip_gui import LocalCPythonPipDialog
 
         return LocalCPythonPipDialog
 

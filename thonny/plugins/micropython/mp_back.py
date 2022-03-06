@@ -50,6 +50,7 @@ from textwrap import dedent
 from threading import Lock
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
+import pipkin.common
 from serial import SerialTimeoutException
 
 from thonny import BACKEND_LOG_MARKER, get_backend_log_file, report_time
@@ -819,7 +820,11 @@ class MicroPythonBackend(MainBackend, ABC):
         self._delete_sorted_paths(sorted(cmd.paths, key=len, reverse=True))
 
     def _cmd_get_active_distributions(self, cmd):
-        current_state = self._perform_pipkin_operation_and_list(None)
+        try:
+            current_state = self._perform_pipkin_operation_and_list(None)
+        except Exception as e:
+            logger.exception("Could not get active distributions")
+            return dict(error=str(e))
 
         return dict(
             distributions={dist.key: dist for dist in current_state},
@@ -827,6 +832,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _cmd_install_distributions(self, cmd):
         args = cast(List[str], cmd.args[:])
+        assert isinstance(args, List)
         if "--user" in args:
             user = True
             args.remove("--user")
@@ -851,20 +857,30 @@ class MicroPythonBackend(MainBackend, ABC):
         assert not any([arg.startswith("-") for arg in args])
         specs = args
 
-        new_state = self._perform_pipkin_operation_and_list(
-            command="install",
-            specs=specs,
-            user=user,
-            update=update,
-            requirement_files=requirement_files,
-        )
+        try:
+            new_state = self._perform_pipkin_operation_and_list(
+                command="install",
+                specs=specs,
+                user=user,
+                update=update,
+                requirement_files=requirement_files,
+            )
+        except Exception as e:
+            logger.exception("Could not install")
+            return dict(error=str(e))
+
         return {"distributions": new_state}
 
     def _cmd_uninstall_distributions(self, cmd):
-
         assert not any([arg.startswith("-") for arg in cmd.args])
+        try:
+            new_state = self._perform_pipkin_operation_and_list(
+                command="uninstall", packages=cmd.args, yes=True
+            )
+        except Exception as e:
+            logger.exception("Could not uninstall")
+            return dict(error=str(e))
 
-        new_state = self._perform_pipkin_operation_and_list(command="uninstall", packages=cmd.args)
         return {"distributions": new_state}
 
     def _get_library_paths(self) -> [str]:
@@ -894,7 +910,8 @@ class MicroPythonBackend(MainBackend, ABC):
         try:
             if command:
                 assert hasattr(session, command)
-                getattr(session, command, **kwargs)
+                logger.info("Calling method %r in pipkin session with args %r", command, kwargs)
+                getattr(session, command)(**kwargs)
             return {
                 DistInfo(
                     key=di.key,
@@ -904,6 +921,14 @@ class MicroPythonBackend(MainBackend, ABC):
                 )
                 for di in session.basic_list()
             }
+        except pipkin.common.ManagementError as e:
+            if e.script:
+                logger.error("ManagementError.script: %s", e.script)
+            if e.out:
+                logger.error("ManagementError.out: %s", e.out)
+            if e.err:
+                logger.error("ManagementError.err: %s", e.err)
+            raise
         finally:
             session.close()
 

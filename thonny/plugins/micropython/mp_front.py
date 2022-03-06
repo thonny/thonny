@@ -806,6 +806,9 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def _get_extra_launcher_args(self):
         return {}
 
+    def get_target_executable(self) -> Optional[str]:
+        return self._target_executable
+
     def interrupt(self):
         # Don't interrupt local process, but direct it to the device
         self._send_msg(ImmediateCommand("interrupt"))

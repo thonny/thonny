@@ -51,9 +51,9 @@ class ESPProxy(BareMetalMicroPythonProxy):
         return VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS
 
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.esp.esp_backend
+        import thonny.plugins.esp.esp_back
 
-        return thonny.plugins.esp.esp_backend.__file__
+        return thonny.plugins.esp.esp_back.__file__
 
 
 class ESP8266Proxy(ESPProxy):

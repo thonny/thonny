@@ -14,7 +14,9 @@ import thonny
 from thonny import report_time
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.backend import (
+from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.mp_back import (
     ENCODING,
     EOT,
     PASTE_MODE_CMD,
@@ -23,8 +25,6 @@ from thonny.plugins.micropython.backend import (
     MicroPythonBackend,
     ends_overlap,
 )
-from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
@@ -334,6 +334,9 @@ class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
     def _decode(self, data: bytes) -> str:
         return data.decode(errors="replace")
 
+    def _create_pipkin_adapter(self):
+        raise NotImplementedError()
+
 
 class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args):
@@ -373,6 +376,9 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 
     def _decode(self, data: bytes) -> str:
         return data.decode(ENCODING, errors="replace")
+
+    def _create_pipkin_adapter(self):
+        raise NotImplementedError()
 
 
 if __name__ == "__main__":

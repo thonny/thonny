@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-from logging import exception, getLogger
-from os import makedirs
-from tkinter import messagebox, ttk
-
 import os
 import re
 import subprocess
@@ -12,6 +8,9 @@ import tkinter.font as tk_font
 import urllib.error
 import urllib.parse
 from abc import ABC
+from logging import exception, getLogger
+from os import makedirs
+from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
 from typing import Dict, List, Optional, Tuple, Union, cast
 
@@ -526,19 +525,24 @@ class PipDialog(CommonDialog, ABC):
                     + " "
                     + str(error_code)
                 )
+                logger.exception("Coult not fetch package info for %r", name)
 
             return
 
         info = data["info"]
+        # NB! Json from micropython.org/pi doesn't have all the same fields as PyPI!
         self.title_label["text"] = info["name"]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att(tr("Latest stable version"), latest_stable_version)
         else:
             write_att(tr("Latest version"), data["info"]["version"])
-        write_att(tr("Summary"), info["summary"])
-        write_att(tr("Author"), info["author"])
-        write_att(tr("Homepage"), info["home_page"], "url")
+        if "summary" in info:
+            write_att(tr("Summary"), info["summary"])
+        if "author" in info:
+            write_att(tr("Author"), info["author"])
+        if "home_page" in info:
+            write_att(tr("Homepage"), info["home_page"], "url")
         if info.get("bugtrack_url", None):
             write_att(tr("Bugtracker"), info["bugtrack_url"], "url")
         if info.get("docs_url", None):
@@ -1326,7 +1330,12 @@ def _start_fetching_package_info(name, url: str, fallback_url: str, completion_h
             try:
                 _, bin_data = url_future.result()
                 raw_data = bin_data.decode("UTF-8")
-                completion_handler(name, json.loads(raw_data))
+                data = json.loads(raw_data)
+                if "info" in data and "name" not in data["info"]:
+                    # this is the case of micropython.org/pi
+                    data["info"]["name"] = name
+
+                completion_handler(name, data)
             except urllib.error.HTTPError as e:
                 completion_handler(
                     name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
@@ -1430,7 +1439,8 @@ def load_plugin() -> None:
         proxy = get_runner().get_backend_proxy()
         if proxy is None:
             return None
-        return proxy.get_pip_gui_class()
+        pip_gui_class = proxy.get_pip_gui_class()
+        return pip_gui_class
 
     def open_backend_pip_gui(*args):
         pg_class = get_pip_gui_class()
@@ -1450,9 +1460,10 @@ def load_plugin() -> None:
         ui_utils.show_dialog(pg)
 
     def open_backend_pip_gui_enabled():
-        return get_pip_gui_class() is not None
+        class_ = get_pip_gui_class()
+        return class_ is not None
 
-    def open_frontend_pip_gui(*args):
+    def open_plugins_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
         ui_utils.show_dialog(pg)
 
@@ -1465,5 +1476,5 @@ def load_plugin() -> None:
         group=80,
     )
     get_workbench().add_command(
-        "pluginspipgui", "tools", tr("Manage plug-ins..."), open_frontend_pip_gui, group=180
+        "pluginspipgui", "tools", tr("Manage plug-ins..."), open_plugins_pip_gui, group=180
     )

@@ -9,6 +9,7 @@ from thonny.plugins.micropython.mp_front import (
     GenericBareMetalMicroPythonProxy,
     LocalMicroPythonConfigPage,
     LocalMicroPythonProxy,
+    MicroPythonProxy,
     SshMicroPythonConfigPage,
     SshMicroPythonProxy,
     add_micropython_backend,
