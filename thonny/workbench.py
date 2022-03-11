@@ -177,7 +177,6 @@ class Workbench(tk.Tk):
         assert self._editor_notebook is not None
 
         self._init_program_arguments_frame()
-        # self._init_backend_switcher()
         self._init_regular_mode_link()  # TODO:
 
         self._show_views()
@@ -808,27 +807,15 @@ class Workbench(tk.Tk):
             if not entries:
                 continue
 
-            if len(entries) == 1:
+            for conf, label in entries:
                 self._backend_menu.add_radiobutton(
-                    label=backend.description,
+                    label=label,
                     command=choose_backend,
                     variable=self._backend_conf_variable,
-                    value=repr(entries[0][0]),
+                    value=repr(conf),
                 )
-            else:
-                submenu = tk.Menu(self._backend_menu, tearoff=False)
-                for conf, label in entries:
-                    submenu.add_radiobutton(
-                        label=label,
-                        command=choose_backend,
-                        variable=self._backend_conf_variable,
-                        value=repr(conf),
-                    )
-                self._backend_menu.add_cascade(label=backend.description, menu=submenu)
 
-            max_description_width = max(
-                menu_font.measure(backend.description), max_description_width
-            )
+                max_description_width = max(menu_font.measure(label), max_description_width)
         num_entries += 1
 
         # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
