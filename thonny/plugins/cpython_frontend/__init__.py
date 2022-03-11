@@ -1,42 +1,27 @@
 from thonny import get_workbench
 from thonny.languages import tr
 from thonny.plugins.cpython_frontend.cp_front import (
-    CustomCPythonConfigurationPage,
-    CustomCPythonProxy,
+    LocalCPythonConfigurationPage,
     LocalCPythonProxy,
-    PrivateVenvConfigurationPage,
-    PrivateVenvCPythonProxy,
-    SameAsFrontEndConfigurationPage,
-    SameAsFrontendCPythonProxy,
+    get_default_cpython_path_for_backend,
 )
 
 
 def load_plugin():
     wb = get_workbench()
-    wb.set_default("run.backend_name", "SameAsFrontend")
-    wb.set_default("CustomInterpreter.used_paths", [])
-    wb.set_default("CustomInterpreter.path", "")
+    wb.set_default("run.backend_name", "LocalCPython")
+    wb.set_default("LocalCPython.last_executables", [])
+    wb.set_default("LocalCPython.path", "")
+
+    if wb.get_option("run.backend_name") in ["PrivateVenv", "SameAsFrontend", "CustomCPython"]:
+        # Removed in Thonny 4.0
+        wb.set_option("run.backend_name", "LocalCPython")
+        wb.set_option("LocalCPython.path", get_default_cpython_path_for_backend())
 
     wb.add_backend(
-        "SameAsFrontend",
-        SameAsFrontendCPythonProxy,
-        tr("The same interpreter which runs Thonny (default)"),
-        SameAsFrontEndConfigurationPage,
-        "01",
-    )
-
-    wb.add_backend(
-        "CustomCPython",
-        CustomCPythonProxy,
-        tr("Alternative Python 3 interpreter or virtual environment"),
-        CustomCPythonConfigurationPage,
+        "LocalCPython",
+        LocalCPythonProxy,
+        tr("Local Python 3"),
+        LocalCPythonConfigurationPage,
         "02",
-    )
-
-    wb.add_backend(
-        "PrivateVenv",
-        PrivateVenvCPythonProxy,
-        tr("A special virtual environment (deprecated)"),
-        PrivateVenvConfigurationPage,
-        "zz",
     )

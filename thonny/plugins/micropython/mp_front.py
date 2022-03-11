@@ -29,7 +29,7 @@ VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 class MicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._lib_dirs = []
-        super().__init__(clean, running.get_interpreter_for_subprocess())
+        super().__init__(clean, running.get_front_interpreter_for_subprocess())
 
     def get_pip_gui_class(self):
         from thonny.plugins.micropython.pip_gui import MicroPythonPipDialog
@@ -377,7 +377,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         terminal.run_in_terminal(
             [
-                running.get_interpreter_for_subprocess(sys.executable),
+                running.get_front_interpreter_for_subprocess(sys.executable),
                 "-m",
                 # "serial.tools.miniterm",
                 "thonny.plugins.micropython.miniterm_wrapper",

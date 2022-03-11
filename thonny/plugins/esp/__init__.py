@@ -18,7 +18,7 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
-from thonny.running import get_interpreter_for_subprocess
+from thonny.running import get_front_interpreter_for_subprocess
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -100,7 +100,7 @@ class ESPConfigPage(BareMetalMicroPythonConfigPage):
         try:
             import esptool
 
-            return [get_interpreter_for_subprocess(), "-u", "-m", "esptool"]
+            return [get_front_interpreter_for_subprocess(), "-u", "-m", "esptool"]
         except ImportError:
             import shutil
 

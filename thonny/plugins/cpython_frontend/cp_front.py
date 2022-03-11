@@ -5,9 +5,10 @@ import tkinter as tk
 from abc import ABC
 from logging import getLogger
 from tkinter import messagebox, ttk
+from typing import List
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, get_shell, get_workbench, running, ui_utils
+from thonny import get_runner, get_workbench, running, ui_utils
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -15,19 +16,13 @@ from thonny.common import (
     get_base_executable,
     get_python_version_string,
     is_private_python,
-    is_same_path,
     is_virtual_executable,
     normpath_with_actual_case,
 )
 from thonny.languages import tr
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
-from thonny.running import (
-    WINDOWS_EXE,
-    SubprocessProxy,
-    create_frontend_python_process,
-    get_interpreter_for_subprocess,
-)
+from thonny.running import WINDOWS_EXE, SubprocessProxy, get_front_interpreter_for_subprocess
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
 
@@ -35,10 +30,24 @@ logger = getLogger(__name__)
 
 
 class LocalCPythonProxy(SubprocessProxy, ABC):
-    def __init__(self, clean: bool, executable: str) -> None:
+    def __init__(self, clean: bool) -> None:
+        executable = get_workbench().get_option("LocalCPython.path")
         self._expecting_response_for_gui_update = False
+        self._have_updated_last_executables = False
         super().__init__(clean, executable)
         self._send_msg(ToplevelCommand("get_environment_info"))
+
+    def _update_last_executables(self) -> None:
+        # Remember the usage of this interpreter
+        last_executables = self.get_last_executables()
+        if self._mgmt_executable not in last_executables:
+            last_executables.insert(0, self._mgmt_executable)
+
+        # remove non-existant
+        last_executables = [path for path in last_executables if os.path.exists(path)]
+        # Remember only last 5
+        last_executables = last_executables[:5]
+        get_workbench().set_option("LocalCPython.last_executables", last_executables)
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
@@ -48,10 +57,14 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
         return os.path.dirname(os.path.dirname(thonny.__file__))
 
     def _get_launcher_with_args(self):
-        return ["-m", "thonny.plugins.cpython_backend", self.get_cwd()]
+        return ["-m", "thonny.plugins.cpython_backend.cp_launcher", self.get_cwd()]
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)
+
+        if not self._have_updated_last_executables:
+            self._update_last_executables()
+            self._have_updated_last_executables = True
 
         if "gui_is_active" in msg:
             self._update_gui_updating(msg)
@@ -153,239 +166,47 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
     def has_local_interpreter(self):
         return True
 
+    def can_debug(self) -> bool:
+        return True
 
-class PrivateVenvCPythonProxy(LocalCPythonProxy):
-    def __init__(self, clean):
-        self._prepare_private_venv()
-        super().__init__(clean, get_private_venv_executable())
-
-    def _prepare_private_venv(self):
-        path = get_private_venv_path()
-        if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
-            self._check_upgrade_private_venv(path)
-        else:
-            self._create_private_venv(
-                path, "Please wait!\nThonny prepares its virtual environment."
-            )
-
-    def _check_upgrade_private_venv(self, path):
-        # If home is wrong then regenerate
-        # If only micro version is different, then upgrade
-        info = _get_venv_info(path)
-
-        if not is_same_path(info["home"], os.path.dirname(sys.executable)):
-            self._create_private_venv(
-                path,
-                "Thonny's virtual environment was created for another interpreter.\n"
-                + "Regenerating the virtual environment for current interpreter.\n"
-                + "(You may need to reinstall your 3rd party packages)\n"
-                + "Please wait!.",
-                clear=True,
-            )
-        else:
-            venv_version = tuple(map(int, info["version"].split(".")))
-            sys_version = sys.version_info[:3]
-            assert venv_version[0] == sys_version[0]
-            assert venv_version[1] == sys_version[1]
-
-            if venv_version[2] != sys_version[2]:
-                self._create_private_venv(
-                    path, "Please wait!\nUpgrading Thonny's virtual environment.", upgrade=True
-                )
-
-    def _create_private_venv(self, path, description, clear=False, upgrade=False):
-        if not _check_venv_installed(self):
-            return
-        # Don't include system site packages
-        # This way all students will have similar configuration
-        # independently of system Python (if Thonny is used with system Python)
-
-        # NB! Cant run venv.create directly, because in Windows bundle
-        # it tries to link venv to thonny.exe.
-        # Need to run it via proper python
-        args = ["-m", "venv"]
-        if clear:
-            args.append("--clear")
-        if upgrade:
-            args.append("--upgrade")
-
-        try:
-            import ensurepip
-        except ImportError:
-            args.append("--without-pip")
-
-        args.append(path)
-
-        proc = create_frontend_python_process(args)
-
-        from thonny.workdlg import SubprocessDialog
-
-        dlg = SubprocessDialog(
-            get_workbench(),
-            proc,
-            "Preparing the backend",
-            long_description=description,
-            autostart=True,
-        )
-        try:
-            ui_utils.show_dialog(dlg)
-        except Exception:
-            # if using --without-pip the dialog may close very quickly
-            # and for some reason wait_window would give error then
-            logger.exception("Problem with waiting for venv creation dialog")
-        get_workbench().become_active_window()  # Otherwise focus may get stuck somewhere
-
-        bindir = os.path.dirname(get_private_venv_executable())
-        # create private env marker
-        marker_path = os.path.join(bindir, "is_private")
-        with open(marker_path, mode="w") as fp:
-            fp.write("# This file marks Thonny-private venv")
-
-        # Create recommended pip conf to get rid of list deprecation warning
-        # https://github.com/pypa/pip/issues/4058
-        pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
-        with open(os.path.join(path, pip_conf), mode="w") as fp:
-            fp.write("[list]\nformat = columns")
-
-        assert os.path.isdir(path)
-
-    @classmethod
-    def get_switcher_entries(cls):
-        return []
-
-
-class SameAsFrontendCPythonProxy(LocalCPythonProxy):
-    def __init__(self, clean):
-        executable = _get_same_as_front_executable()
-        logger.info("Using %s for back-end")
-        super().__init__(clean, executable)
-
-    def fetch_next_message(self):
-        msg = super().fetch_next_message()
-        if msg and "welcome_text" in msg:
-            if is_private_python(self._mgmt_executable):
-                msg["welcome_text"] += " (bundled)"
-            else:
-                msg["welcome_text"] += " (" + self._mgmt_executable + ")"
-        return msg
+    def can_run_in_terminal(self) -> bool:
+        return True
 
     def get_clean_description(self):
-        return "Python " + get_python_version_string()
-
-
-class CustomCPythonProxy(LocalCPythonProxy):
-    def __init__(self, clean):
-        executable = get_workbench().get_option("CustomInterpreter.path")
-
-        # Remember the usage of this non-default interpreter
-        used_interpreters = get_workbench().get_option("CustomInterpreter.used_paths")
-        if executable not in used_interpreters:
-            used_interpreters.append(executable)
-        get_workbench().set_option("CustomInterpreter.used_paths", used_interpreters)
-
-        super().__init__(clean, get_interpreter_for_subprocess(executable))
-
-    def fetch_next_message(self):
-        msg = super().fetch_next_message()
-        if msg and "welcome_text" in msg:
-            msg["welcome_text"] += " (" + self._mgmt_executable + ")"
-        return msg
-
-    def get_clean_description(self):
-        desc = get_workbench().get_option("CustomInterpreter.path")
-        if not desc:
-            desc = sys.executable
-
-        return desc
+        return f"Python {get_python_version_string()} - {self.get_target_executable()}"
 
     @classmethod
     def _get_switcher_entry_for_executable(cls, executable):
         return (
-            {"run.backend_name": cls.backend_name, "CustomInterpreter.path": executable},
+            {"run.backend_name": cls.backend_name, "LocalCPython.path": executable},
             executable,
         )
 
     @classmethod
     def get_current_switcher_configuration(cls):
         return cls._get_switcher_entry_for_executable(
-            get_workbench().get_option("CustomInterpreter.path")
+            get_workbench().get_option("LocalCPython.path")
         )[0]
 
     @classmethod
     def get_switcher_entries(cls):
         return [
             cls._get_switcher_entry_for_executable(executable)
-            for executable in _get_interpreters()
+            for executable in sorted(cls.get_last_executables())
             if os.path.exists(executable)
         ]
 
-
-def get_private_venv_path():
-    if is_private_python(sys.executable.lower()):
-        prefix = "BundledPython"
-    else:
-        prefix = "Python"
-    return os.path.join(
-        THONNY_USER_DIR, prefix + "%d%d" % (sys.version_info[0], sys.version_info[1])
-    )
+    @classmethod
+    def get_last_executables(cls) -> List[str]:
+        return get_workbench().get_option("LocalCPython.last_executables")
 
 
-def get_private_venv_executable():
-    venv_path = get_private_venv_path()
-
-    if running_on_windows():
-        exe = os.path.join(venv_path, "Scripts", WINDOWS_EXE)
-    else:
-        exe = os.path.join(venv_path, "bin", "python3")
-
-    return exe
-
-
-def _get_venv_info(venv_path):
-    cfg_path = os.path.join(venv_path, "pyvenv.cfg")
-    result = {}
-
-    with open(cfg_path, encoding="UTF-8") as fp:
-        for line in fp:
-            if "=" in line:
-                key, val = line.split("=", maxsplit=1)
-                result[key.strip()] = val.strip()
-
-    return result
-
-
-class SameAsFrontEndConfigurationPage(BackendDetailsConfigPage):
-    def __init__(self, master):
-        super().__init__(master)
-        label = ttk.Label(self, text=_get_same_as_front_executable())
-        label.grid()
-
-    def should_restart(self):
-        return False
-
-
-class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
-    def __init__(self, master):
-        super().__init__(master)
-        text = (
-            tr("This virtual environment is automatically maintained by Thonny.\n")
-            + tr("Location: ")
-            + get_private_venv_path()
-        )
-
-        label = ttk.Label(self, text=text)
-        label.grid()
-
-    def should_restart(self):
-        return False
-
-
-class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
+class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
 
         self._configuration_variable = create_string_var(
-            get_workbench().get_option("CustomInterpreter.path")
+            get_workbench().get_option("LocalCPython.path")
         )
 
         entry_label = ttk.Label(self, text=tr("Python executable"))
@@ -483,7 +304,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         path = normpath_with_actual_case(path)
 
         proc = subprocess.Popen(
-            [running.get_interpreter_for_subprocess(), "-m", "venv", path],
+            [running.get_front_interpreter_for_subprocess(), "-m", "venv", path],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -511,7 +332,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
 
         path = self._configuration_variable.get()
         if os.path.isfile(path):
-            get_workbench().set_option("CustomInterpreter.path", path)
+            get_workbench().set_option("LocalCPython.path", path)
 
 
 def _get_interpreters():
@@ -593,11 +414,39 @@ def _get_interpreters():
         if path is not None and os.path.isabs(path):
             result.add(path)
 
-    for path in get_workbench().get_option("CustomInterpreter.used_paths"):
+    for path in get_workbench().get_option("LocalCPython.last_executables"):
         if os.path.exists(path):
             result.add(normpath_with_actual_case(path))
 
-    return sorted(result)
+    # TODO: remove softlinked duplicates?
+
+    sorted_result = sorted(result)
+
+    # bundled python
+    default_path = get_default_cpython_path_for_backend()
+    if is_private_python(default_path):
+        sorted_result.insert(0, default_path)
+
+    return sorted_result
+
+
+def get_default_cpython_path_for_backend() -> str:
+    if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
+        # Private venv. Make an exception and use base Python for default backend.
+        default_path = get_base_executable()
+    else:
+        default_path = get_front_interpreter_for_subprocess()
+
+    if running_on_mac_os():
+        # try to generalize so that the path can survive Python upgrade
+        ver = "{}.{}".format(*sys.version_info)
+        ver_fragment = f"/Versions/{ver}/bin/"
+        if ver_fragment in default_path:
+            generalized = default_path.replace(ver_fragment, "/Versions/Current/bin/")
+            if os.path.exists(generalized):
+                return generalized
+
+    return default_path
 
 
 def _get_interpreters_from_windows_registry():
@@ -645,42 +494,3 @@ def _check_venv_installed(parent):
     except ImportError:
         messagebox.showerror("Error", "Package 'venv' is not available.", parent=parent)
         return False
-
-
-def _get_same_as_front_executable() -> str:
-    if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
-        # Private venv. Make an exception and use base Python for default backend.
-        return get_base_executable()
-    else:
-        return get_interpreter_for_subprocess()
-
-
-def load_plugin():
-    wb = get_workbench()
-    wb.set_default("run.backend_name", "SameAsFrontend")
-    wb.set_default("CustomInterpreter.used_paths", [])
-    wb.set_default("CustomInterpreter.path", "")
-
-    wb.add_backend(
-        "SameAsFrontend",
-        SameAsFrontendCPythonProxy,
-        tr("The same interpreter which runs Thonny (default)"),
-        SameAsFrontEndConfigurationPage,
-        "01",
-    )
-
-    wb.add_backend(
-        "CustomCPython",
-        CustomCPythonProxy,
-        tr("Alternative Python 3 interpreter or virtual environment"),
-        CustomCPythonConfigurationPage,
-        "02",
-    )
-
-    wb.add_backend(
-        "PrivateVenv",
-        PrivateVenvCPythonProxy,
-        tr("A special virtual environment (deprecated)"),
-        PrivateVenvConfigurationPage,
-        "zz",
-    )

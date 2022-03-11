@@ -329,7 +329,7 @@ class MainCPythonBackend(MainBackend):
             sys_path=sys.path,
             usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
             prefix=sys.prefix,
-            welcome_text="Python " + get_python_version_string(),
+            welcome_text=f"Python {get_python_version_string()} ({sys.executable})",
             executable=sys.executable,
             exe_dirs=get_exe_dirs(),
             in_venv=(

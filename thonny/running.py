@@ -867,7 +867,7 @@ class SubprocessProxy(BackendProxy):
         if mgmt_executable:
             self._mgmt_executable = mgmt_executable
         else:
-            self._mgmt_executable = get_interpreter_for_subprocess()
+            self._mgmt_executable = get_front_interpreter_for_subprocess()
 
         if ".." in self._mgmt_executable:
             self._mgmt_executable = os.path.normpath(self._mgmt_executable)
@@ -889,6 +889,7 @@ class SubprocessProxy(BackendProxy):
         self._in_venv = None
         self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none
         self._start_background_process(clean=clean)
+        self._have_seen_toplevel_response = False
 
     def _get_initial_cwd(self):
         return None
@@ -1150,7 +1151,10 @@ class SubprocessProxy(BackendProxy):
                 return None
 
         msg = self._response_queue.popleft()
-        self._store_state_info(msg)
+        if isinstance(msg, ToplevelResponse):
+            self._have_seen_toplevel_response = True
+            self._store_state_info(msg)
+
         if msg.event_type == "ProgramOutput":
             # combine available small output messages to one single message,
             # in order to put less pressure on UI code
@@ -1206,9 +1210,9 @@ def create_frontend_python_process(
 ):
     """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
     if _console_allocated:
-        python_exe = get_interpreter_for_subprocess().replace("pythonw.exe", "python.exe")
+        python_exe = get_front_interpreter_for_subprocess().replace("pythonw.exe", "python.exe")
     else:
-        python_exe = get_interpreter_for_subprocess().replace("python.exe", "pythonw.exe")
+        python_exe = get_front_interpreter_for_subprocess().replace("python.exe", "pythonw.exe")
     env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
@@ -1488,10 +1492,10 @@ class InlineCommandDialog(WorkDialog):
 def get_frontend_python():
     # TODO: deprecated (name can be misleading)
     warnings.warn("get_frontend_python is deprecated")
-    return get_interpreter_for_subprocess(sys.executable)
+    return get_front_interpreter_for_subprocess(sys.executable)
 
 
-def get_interpreter_for_subprocess(candidate=None):
+def get_front_interpreter_for_subprocess(candidate=None):
     if candidate is None:
         candidate = sys.executable
 

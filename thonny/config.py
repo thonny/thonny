@@ -53,33 +53,6 @@ class ConfigurationManager:
         if os.path.exists(self._filename):
             with open(self._filename, "r", encoding="UTF-8") as fp:
                 self._ini.read_file(fp)
-        else:
-            # For migration to new conf directory
-            # only if not in venv
-            if not (
-                hasattr(sys, "base_prefix")
-                and sys.base_prefix != sys.prefix
-                or hasattr(sys, "real_prefix")
-                and getattr(sys, "real_prefix") != sys.prefix
-            ):
-                old_user_dir = os.path.join(os.path.expanduser("~"), ".thonny")
-                old_config_file = os.path.join(old_user_dir, "configuration.ini")
-                if os.path.exists(old_config_file):
-                    with open(old_config_file, "r", encoding="UTF-8") as fp:
-                        self._ini.read_file(fp)
-                        self.set_option("run.backend_name", "SameAsFrontend")
-
-                    # migrate user_logs
-                    # (I know, it's not proper place for this code, but ...)
-                    old_user_logs = os.path.join(old_user_dir, "user_logs")
-                    new_user_logs = os.path.join(THONNY_USER_DIR, "user_logs")
-                    if os.path.exists(old_user_logs) and not os.path.exists(new_user_logs):
-                        try:
-                            import shutil
-
-                            shutil.copytree(old_user_logs, new_user_logs)
-                        except Exception as e:
-                            logger.exception("Problem migrating user logs", exc_info=e)
 
         if not self.get_option("general.configuration_creation_timestamp"):
             self.set_option(

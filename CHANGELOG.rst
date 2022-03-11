@@ -53,6 +53,8 @@ Various
 * Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
 * Allow installing packages for remote CPython backend, #1319
 * Flatten the list of interpreters in the backend-switcher menu (lower-right corner of the main window)
+* Removed previously deprecated "A special virtual environment". Use regular virtual environments instead.
+* Merge "The same interpreter which runs Thonny" and "Alternative Python 3 interpreter or virtual environment" back-ends into "Local Python 3"
 
 Fixed
 -----

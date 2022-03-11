@@ -25,7 +25,7 @@ def start_server():
     output_file = open(out_err_filename, "w")
     _server_process = subprocess.Popen(
         [
-            running.get_interpreter_for_subprocess(),
+            running.get_front_interpreter_for_subprocess(),
             "-m",
             "birdseye",
             "-p",

@@ -18,7 +18,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import InlineCommand, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
-from thonny.running import InlineCommandDialog, get_interpreter_for_subprocess
+from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
@@ -1012,7 +1012,7 @@ class PluginsPipDialog(PipDialog):
             return None
 
     def _get_interpreter_description(self):
-        return get_interpreter_for_subprocess(sys.executable)
+        return get_front_interpreter_for_subprocess(sys.executable)
 
     def _use_user_install(self):
         return True
