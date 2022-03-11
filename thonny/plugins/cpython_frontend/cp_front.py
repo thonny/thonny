@@ -190,9 +190,14 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
 
     @classmethod
     def get_switcher_entries(cls):
+        executables = sorted(cls.get_last_executables())
+        default_exe = get_default_cpython_path_for_backend()
+        if is_private_python(default_exe) and default_exe not in executables:
+            executables.insert(0, default_exe)
+
         return [
             cls._get_switcher_entry_for_executable(executable)
-            for executable in sorted(cls.get_last_executables())
+            for executable in executables
             if os.path.exists(executable)
         ]
 

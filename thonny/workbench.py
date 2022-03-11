@@ -801,13 +801,15 @@ class Workbench(tk.Tk):
         button_text_width = menu_font.measure(self._backend_button.cget("text"))
 
         num_entries = 0
+        added_micropython_separator = False
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
             entries = backend.proxy_class.get_switcher_entries()
 
-            if not entries:
-                continue
-
             for conf, label in entries:
+                if not added_micropython_separator and "MicroPython" in label:
+                    self._backend_menu.add_separator()
+                    added_micropython_separator = True
+
                 self._backend_menu.add_radiobutton(
                     label=label,
                     command=choose_backend,
