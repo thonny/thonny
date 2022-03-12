@@ -320,5 +320,5 @@ def load_plugin() -> None:
         "interpreter", tr("Interpreter"), BackendConfigurationPage, 20
     )
     get_workbench().add_command(
-        "select_interpreter", "run", tr("Select interpreter") + "...", select_device, group=1
+        "select_interpreter", "run", tr("Configure interpreter..."), select_device, group=1
     )

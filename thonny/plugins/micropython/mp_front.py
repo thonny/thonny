@@ -1,14 +1,13 @@
 import os
-import platform
 import shutil
 import sys
 import time
 from logging import getLogger
 from textwrap import dedent
 from tkinter import messagebox, ttk
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
+from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.languages import tr
 from thonny.plugins.backend_config_page import (
@@ -22,6 +21,7 @@ from thonny.ui_utils import create_string_var, create_url_label, ems_to_pixels
 logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
+WEBREPL_PORT_VALUE = "webrepl"
 
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
@@ -82,6 +82,10 @@ class MicroPythonProxy(SubprocessProxy):
     def can_run_in_terminal(self) -> bool:
         return False
 
+    @classmethod
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        return True
+
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -97,12 +101,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def destroy(self, for_restart: bool = False):
         super().destroy(for_restart=for_restart)
-        if self._port != "webrepl":
+        if self._port != WEBREPL_PORT_VALUE:
             # let the OS release the port
             time.sleep(0.1)
 
     def _fix_port(self):
-        if self._port == "webrepl":
+        if self._port == WEBREPL_PORT_VALUE:
             return
 
         elif self._port == "auto":
@@ -112,7 +116,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             else:
                 if not potential and self.device_is_present_in_bootloader_mode():
                     if self._propose_install_firmware():
-                        print("POSITIVE")
                         return self._fix_port()
 
                 self._port = None
@@ -167,7 +170,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
         }
-        if self._port == "webrepl":
+        if self._port == WEBREPL_PORT_VALUE:
             args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
             args["password"] = get_workbench().get_option(self.backend_name + ".webrepl_password")
 
@@ -205,7 +208,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         """Nothing to do in this level. The backend takes care of the clearing"""
 
     @classmethod
-    def _detect_potential_ports(cls):
+    def _detect_potential_ports(cls) -> List[Tuple[str, str]]:
         all_ports = list_serial_ports()
         """
         for p in all_ports:
@@ -321,12 +324,11 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if (
             not self._have_stored_pidwid
             and getattr(msg, "event_type", None) == "ToplevelResponse"
-            and self._port != "webrepl"
+            and self._port != WEBREPL_PORT_VALUE
         ):
             # Let's remember that this vidpid was used with this backend
             # need to copy and store explicitly, because otherwise I may change the default value
             used_vidpids = get_workbench().get_option(self.backend_name + ".used_vidpids").copy()
-            from serial.tools.list_ports_common import ListPortInfo
 
             info = get_port_info(self._port)
             used_vidpids.add((info.vid, info.pid))
@@ -339,34 +341,57 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def device_is_present_in_bootloader_mode(cls):
         return False
 
-    @classmethod
-    def should_show_in_switcher(cls):
-        if cls.device_is_present_in_bootloader_mode():
-            return True
+    def get_current_switcher_configuration(self) -> Dict[str, Any]:
+        conf = {
+            "run.backend_name": self.backend_name,
+            f"{self.backend_name}.port": get_workbench().get_option(f"{self.backend_name}.port"),
+        }
+        if self._port == WEBREPL_PORT_VALUE:
+            conf[f"{self.backend_name}.webrepl_url"] = get_workbench().get_option(
+                f"{self.backend_name}.webrepl_url"
+            )
 
-        # Show only if it looks like we can connect using current configuration
-        port = get_workbench().get_option(cls.backend_name + ".port")
-        if port == "webrepl":
-            return True
-        if port == "auto":
-            potential_ports = cls._detect_potential_ports()
-            return len(potential_ports) > 0
-        else:
-            for p in list_serial_ports():
-                if p.device == port:
-                    return True
-
-            return False
+        return conf
 
     @classmethod
     def get_switcher_entries(cls):
-        if cls.should_show_in_switcher():
-            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
-        else:
-            return []
+        def get_description(conf):
+            port = conf[f"{cls.backend_name}.port"]
+            if port == WEBREPL_PORT_VALUE:
+                url = conf[f"{cls.backend_name}.url"]
+                return f"{cls.backend_description} - {url}"
+            else:
+                return f"{cls.backend_description} - {port}"
+
+        def should_show(conf):
+            if cls.device_is_present_in_bootloader_mode():
+                return True
+
+            port = conf[f"{cls.backend_name}.port"]
+            if port == WEBREPL_PORT_VALUE:
+                return True
+            elif port == "auto":
+                potential_ports = cls._detect_potential_ports()
+                return len(potential_ports) > 0
+            else:
+                for p in list_serial_ports():
+                    if p.device == port:
+                        return True
+
+                return False
+
+        relevant_confs = list(filter(should_show, cls.get_last_configurations()))
+
+        for device, desc in cls._detect_potential_ports():
+            conf = {"run.backend_name": cls.backend_name, f"{cls.backend_name}.port": device}
+            if conf not in relevant_confs:
+                relevant_confs.append(conf)
+
+        sorted_confs = sorted(relevant_confs, key=get_description)
+        return [(conf, get_description(conf)) for conf in sorted_confs]
 
     def has_custom_system_shell(self):
-        return self._port and self._port != "webrepl"
+        return self._port and self._port != WEBREPL_PORT_VALUE
 
     def open_custom_system_shell(self):
         from thonny import terminal
@@ -435,7 +460,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:
-            self._ports_by_desc[self._WEBREPL_OPTION_DESC] = "webrepl"
+            self._ports_by_desc[self._WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
 
         def port_order(p):
             _, name = p
@@ -593,7 +618,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
 
     def webrepl_selected(self):
-        return self.get_selected_port_name() == "webrepl"
+        return self.get_selected_port_name() == WEBREPL_PORT_VALUE
 
     def should_restart(self):
         return self.is_modified() or self._has_opened_firmware_flasher
@@ -737,21 +762,31 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         return False
 
     @classmethod
-    def should_show_in_switcher(cls):
-        # Show when the executable is configured and exists
-        executable = get_workbench().get_option("LocalMicroPython.executable")
-        import shutil
+    def _get_switcher_conf_for_executable(cls, executable):
+        return {"run.backend_name": cls.backend_name, f"{cls.backend_name}.executable": executable}
 
-        return bool(executable) and (
-            os.path.isabs(executable) and os.path.exists(executable) or shutil.which(executable)
+    def get_current_switcher_configuration(self):
+        return self._get_switcher_conf_for_executable(
+            get_workbench().get_option(f"{self.backend_name}.executable")
         )
 
     @classmethod
     def get_switcher_entries(cls):
-        if cls.should_show_in_switcher():
-            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
-        else:
-            return []
+        confs = sorted(
+            cls.get_last_configurations(), key=lambda conf: conf[f"{cls.backend_name}.executable"]
+        )
+
+        return [
+            (conf, cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"])
+            for conf in confs
+            if os.path.exists(conf[f"{cls.backend_name}.executable"])
+            or shutil.which(conf[f"{cls.backend_name}.executable"])
+        ]
+
+    @classmethod
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        executable = conf[f"{cls.backend_name}.executable"]
+        return os.path.exists(executable) or shutil.which(executable)
 
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
@@ -865,21 +900,27 @@ class SshMicroPythonProxy(MicroPythonProxy):
     def can_run_remote_files(self):
         return True
 
-    @classmethod
-    def should_show_in_switcher(cls):
-        # Show when the executable, user and host are configured
-        return (
-            get_workbench().get_option("SshMicroPython.host")
-            and get_workbench().get_option("SshMicroPython.user")
-            and get_workbench().get_option("SshMicroPython.executable")
-        )
+    def get_current_switcher_configuration(self) -> Dict[str, Any]:
+        return {
+            "run.backend_name": self.backend_name,
+            f"{self.backend_name}.executable": get_workbench().get_option(
+                f"{self.backend_name}.executable"
+            ),
+            f"{self.backend_name}.host": get_workbench().get_option(f"{self.backend_name}.host"),
+            f"{self.backend_name}.user": get_workbench().get_option(f"{self.backend_name}.user"),
+        }
 
     @classmethod
     def get_switcher_entries(cls):
-        if cls.should_show_in_switcher():
-            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
-        else:
-            return []
+        def get_description(conf):
+            user = conf[f"{cls.backend_name}.user"]
+            host = conf[f"{cls.backend_name}.host"]
+            executable = conf[f"{cls.backend_name}.executable"]
+            return f"{cls.backend_description} - {user} @ {host} : {executable}"
+
+        confs = sorted(cls.get_last_configurations(), key=get_description)
+
+        return [(conf, get_description(conf)) for conf in confs]
 
     def has_custom_system_shell(self):
         return True
@@ -897,6 +938,10 @@ class SshMicroPythonProxy(MicroPythonProxy):
         terminal.run_in_terminal(
             ["ssh", userhost], cwd=get_workbench().get_local_cwd(), keep_open=False, title=userhost
         )
+
+    @classmethod
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        return True
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):

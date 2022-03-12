@@ -1176,6 +1176,8 @@ class Workbench(tk.Tk):
             sort_key if sort_key is not None else description,
         )
 
+        self.set_default(f"{name}.last_configurations", [])
+
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
         proxy_class.backend_description = description  # type: ignore

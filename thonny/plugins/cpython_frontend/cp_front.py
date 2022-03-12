@@ -2,10 +2,9 @@ import os.path
 import subprocess
 import sys
 import tkinter as tk
-from abc import ABC
 from logging import getLogger
 from tkinter import messagebox, ttk
-from typing import List
+from typing import Any, Dict
 
 import thonny
 from thonny import get_runner, get_workbench, running, ui_utils
@@ -29,25 +28,12 @@ from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
 logger = getLogger(__name__)
 
 
-class LocalCPythonProxy(SubprocessProxy, ABC):
+class LocalCPythonProxy(SubprocessProxy):
     def __init__(self, clean: bool) -> None:
-        executable = get_workbench().get_option("LocalCPython.path")
+        executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
-        self._have_updated_last_executables = False
         super().__init__(clean, executable)
         self._send_msg(ToplevelCommand("get_environment_info"))
-
-    def _update_last_executables(self) -> None:
-        # Remember the usage of this interpreter
-        last_executables = self.get_last_executables()
-        if self._mgmt_executable not in last_executables:
-            last_executables.insert(0, self._mgmt_executable)
-
-        # remove non-existant
-        last_executables = [path for path in last_executables if os.path.exists(path)]
-        # Remember only last 5
-        last_executables = last_executables[:5]
-        get_workbench().set_option("LocalCPython.last_executables", last_executables)
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
@@ -61,10 +47,6 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)
-
-        if not self._have_updated_last_executables:
-            self._update_last_executables()
-            self._have_updated_last_executables = True
 
         if "gui_is_active" in msg:
             self._update_gui_updating(msg)
@@ -176,34 +158,36 @@ class LocalCPythonProxy(SubprocessProxy, ABC):
         return f"Python {get_python_version_string()} - {self.get_target_executable()}"
 
     @classmethod
-    def _get_switcher_entry_for_executable(cls, executable):
-        return (
-            {"run.backend_name": cls.backend_name, "LocalCPython.path": executable},
-            executable,
+    def _get_switcher_conf_for_executable(cls, executable):
+        return {"run.backend_name": cls.backend_name, f"{cls.backend_name}.executable": executable}
+
+    def get_current_switcher_configuration(self):
+        return self._get_switcher_conf_for_executable(
+            get_workbench().get_option(f"{self.backend_name}.executable")
         )
 
     @classmethod
-    def get_current_switcher_configuration(cls):
-        return cls._get_switcher_entry_for_executable(
-            get_workbench().get_option("LocalCPython.path")
-        )[0]
-
-    @classmethod
     def get_switcher_entries(cls):
-        executables = sorted(cls.get_last_executables())
+        confs = sorted(
+            cls.get_last_configurations(), key=lambda conf: conf[f"{cls.backend_name}.executable"]
+        )
         default_exe = get_default_cpython_path_for_backend()
-        if is_private_python(default_exe) and default_exe not in executables:
-            executables.insert(0, default_exe)
+        default_conf = cls._get_switcher_conf_for_executable(default_exe)
+        if default_conf not in confs:
+            confs.insert(0, default_conf)
 
         return [
-            cls._get_switcher_entry_for_executable(executable)
-            for executable in executables
-            if os.path.exists(executable)
+            (conf, cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"])
+            for conf in confs
+            if os.path.exists(conf[f"{cls.backend_name}.executable"])
         ]
 
+    def open_custom_system_shell(self) -> None:
+        raise NotImplementedError()
+
     @classmethod
-    def get_last_executables(cls) -> List[str]:
-        return get_workbench().get_option("LocalCPython.last_executables")
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        return os.path.exists(conf[f"{cls.backend_name}.executable"])
 
 
 class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
@@ -211,7 +195,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         super().__init__(master)
 
         self._configuration_variable = create_string_var(
-            get_workbench().get_option("LocalCPython.path")
+            get_workbench().get_option("LocalCPython.executable")
         )
 
         entry_label = ttk.Label(self, text=tr("Python executable"))
@@ -337,7 +321,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
 
         path = self._configuration_variable.get()
         if os.path.isfile(path):
-            get_workbench().set_option("LocalCPython.path", path)
+            get_workbench().set_option("LocalCPython.executable", path)
 
 
 def _get_interpreters():
@@ -419,7 +403,8 @@ def _get_interpreters():
         if path is not None and os.path.isabs(path):
             result.add(path)
 
-    for path in get_workbench().get_option("LocalCPython.last_executables"):
+    for conf in get_workbench().get_option(f"LocalCPython.last_configurations"):
+        path = conf["LocalCPython.executable"]
         if os.path.exists(path):
             result.add(normpath_with_actual_case(path))
 

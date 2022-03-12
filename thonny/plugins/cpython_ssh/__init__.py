@@ -9,6 +9,7 @@ def load_plugin():
     get_workbench().set_default("ssh.auth_method", "password")
     get_workbench().set_default("ssh.executable", "python3")
     get_workbench().set_default("ssh.cwd", "~")
+    get_workbench().set_default("ssh.last_executables", [])
     get_workbench().add_backend(
         "SSHProxy", SshCPythonProxy, tr("Remote Python 3 (SSH)"), SshProxyConfigPage, sort_key="15"
     )

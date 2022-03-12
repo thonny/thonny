@@ -22,7 +22,7 @@ from logging import getLogger
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
-from typing import Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
+from typing import Any, Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
 
 import thonny
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, report_time
@@ -833,18 +833,17 @@ class BackendProxy(ABC):
     def get_clean_description(self):
         return self.backend_description
 
-    @classmethod
-    def get_current_switcher_configuration(cls):
+    @abstractmethod
+    def get_current_switcher_configuration(self) -> Dict[str, Any]:
         """returns the dict of configuration entries that distinguish current backend conf from other
-        items in the backend switcher"""
-        return {"run.backend_name": cls.backend_name}
+        items in the backend switcher. Also used for collecting last used configurations."""
 
     @classmethod
+    @abstractmethod
     def get_switcher_entries(cls):
         """
         Each returned entry creates one item in the backend switcher menu.
         """
-        return [(cls.get_current_switcher_configuration(), cls.backend_description)]
 
     @abstractmethod
     def can_run_in_terminal(self) -> bool:
@@ -856,11 +855,11 @@ class BackendProxy(ABC):
     def has_custom_system_shell(self):
         return False
 
-    def open_custom_system_shell(self):
+    def open_custom_system_shell(self) -> None:
         raise NotImplementedError()
 
 
-class SubprocessProxy(BackendProxy):
+class SubprocessProxy(BackendProxy, ABC):
     def __init__(self, clean: bool, mgmt_executable: Optional[str] = None) -> None:
         super().__init__(clean)
 
@@ -889,7 +888,35 @@ class SubprocessProxy(BackendProxy):
         self._in_venv = None
         self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none
         self._start_background_process(clean=clean)
-        self._have_seen_toplevel_response = False
+        self._have_remembered_current_configuration = False
+
+    def _remember_current_configuration(self) -> None:
+        last_configurations = self.get_last_configurations()
+        current_configuration = self.get_current_switcher_configuration()
+        if current_configuration not in last_configurations:
+            last_configurations.insert(0, current_configuration)
+
+        # remove non-valid
+        last_configurations = [
+            conf for conf in last_configurations if self.is_valid_configuration(conf)
+        ]
+        # Remember only last 5
+        last_configurations = last_configurations[:5]
+        self.set_last_configurations(last_configurations)
+
+    @classmethod
+    def get_last_configurations(cls) -> List[Dict]:
+        return get_workbench().get_option(f"{cls.backend_name}.last_configurations")
+
+    @classmethod
+    def set_last_configurations(cls, value: List[Dict[str, Any]]) -> None:
+        return get_workbench().set_option(f"{cls.backend_name}.last_configurations", value)
+
+    @classmethod
+    @abstractmethod
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        """Returns whether it makes sense to present this configuration in the switcher"""
+        ...
 
     def _get_initial_cwd(self):
         return None
@@ -1152,8 +1179,10 @@ class SubprocessProxy(BackendProxy):
 
         msg = self._response_queue.popleft()
         if isinstance(msg, ToplevelResponse):
-            self._have_seen_toplevel_response = True
             self._store_state_info(msg)
+            if not self._have_remembered_current_configuration:
+                self._remember_current_configuration()
+                self._have_remembered_current_configuration = True
 
         if msg.event_type == "ProgramOutput":
             # combine available small output messages to one single message,

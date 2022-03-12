@@ -1,10 +1,9 @@
 import shutil
 from tkinter import messagebox
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
-from thonny.languages import tr
 from thonny.plugins.backend_config_page import BaseSshProxyConfigPage, get_ssh_password
 from thonny.running import SubprocessProxy
 
@@ -113,21 +112,27 @@ class SshCPythonProxy(SubprocessProxy):
     def get_full_label(self):
         return f"{self._reported_executable or self.get_target_executable()} @ {self.get_host()}"
 
-    @classmethod
-    def should_show_in_switcher(cls):
-        # Show when the executable, user and host are configured
-        return (
-            get_workbench().get_option("ssh.host")
-            and get_workbench().get_option("ssh.user")
-            and get_workbench().get_option("ssh.executable")
-        )
+    def get_current_switcher_configuration(self) -> Dict[str, Any]:
+        return {
+            "run.backend_name": self.backend_name,
+            f"{self.backend_name}.executable": get_workbench().get_option(
+                f"{self.backend_name}.executable"
+            ),
+            f"{self.backend_name}.host": get_workbench().get_option(f"{self.backend_name}.host"),
+            f"{self.backend_name}.user": get_workbench().get_option(f"{self.backend_name}.user"),
+        }
 
     @classmethod
     def get_switcher_entries(cls):
-        if cls.should_show_in_switcher():
-            return [(cls.get_current_switcher_configuration(), cls.backend_description)]
-        else:
-            return []
+        def get_description(conf):
+            user = conf[f"{cls.backend_name}.user"]
+            host = conf[f"{cls.backend_name}.host"]
+            executable = conf[f"{cls.backend_name}.executable"]
+            return f"{cls.backend_description} - {user} @ {host} : {executable}"
+
+        confs = sorted(cls.get_last_configurations(), key=get_description)
+
+        return [(conf, get_description(conf)) for conf in confs]
 
     def get_pip_gui_class(self):
         from thonny.plugins.cpython_ssh.cps_pip_gui import SshCPythonPipDialog

@@ -55,6 +55,7 @@ Various
 * Flatten the list of interpreters in the backend-switcher menu (lower-right corner of the main window)
 * Removed previously deprecated "A special virtual environment". Use regular virtual environments instead.
 * Merge "The same interpreter which runs Thonny" and "Alternative Python 3 interpreter or virtual environment" back-ends into "Local Python 3"
+* Back-end switcher now remembers several configurations for remote CPython and MicroPython.
 
 Fixed
 -----
