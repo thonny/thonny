@@ -1,4 +1,4 @@
-from adafruit_board_toolkit._list_ports_windows import comports
+#from adafruit_board_toolkit._list_ports_windows import comports
 from serial.tools.list_ports import comports
 
 for p in comports():

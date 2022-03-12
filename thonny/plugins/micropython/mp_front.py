@@ -354,15 +354,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return conf
 
     @classmethod
-    def get_switcher_entries(cls):
-        def get_description(conf):
-            port = conf[f"{cls.backend_name}.port"]
-            if port == WEBREPL_PORT_VALUE:
-                url = conf[f"{cls.backend_name}.url"]
-                return f"{cls.backend_description} - {url}"
-            else:
-                return f"{cls.backend_description} - {port}"
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        port = conf[f"{cls.backend_name}.port"]
+        if port == WEBREPL_PORT_VALUE:
+            url = conf[f"{cls.backend_name}.url"]
+            return f"{cls.backend_description} - {url}"
+        else:
+            return f"{cls.backend_description} - {port}"
 
+    @classmethod
+    def get_switcher_entries(cls):
         def should_show(conf):
             if cls.device_is_present_in_bootloader_mode():
                 return True
@@ -387,8 +388,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             if conf not in relevant_confs:
                 relevant_confs.append(conf)
 
-        sorted_confs = sorted(relevant_confs, key=get_description)
-        return [(conf, get_description(conf)) for conf in sorted_confs]
+        sorted_confs = sorted(relevant_confs, key=cls.get_switcher_configuration_label)
+        return [(conf, cls.get_switcher_configuration_label(conf)) for conf in sorted_confs]
 
     def has_custom_system_shell(self):
         return self._port and self._port != WEBREPL_PORT_VALUE
@@ -777,11 +778,15 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         )
 
         return [
-            (conf, cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"])
+            (conf, cls.get_switcher_configuration_label(conf))
             for conf in confs
             if os.path.exists(conf[f"{cls.backend_name}.executable"])
             or shutil.which(conf[f"{cls.backend_name}.executable"])
         ]
+
+    @classmethod
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        return cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"]
 
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
@@ -911,16 +916,16 @@ class SshMicroPythonProxy(MicroPythonProxy):
         }
 
     @classmethod
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        user = conf[f"{cls.backend_name}.user"]
+        host = conf[f"{cls.backend_name}.host"]
+        executable = conf[f"{cls.backend_name}.executable"]
+        return f"{cls.backend_description} - {user} @ {host} : {executable}"
+
+    @classmethod
     def get_switcher_entries(cls):
-        def get_description(conf):
-            user = conf[f"{cls.backend_name}.user"]
-            host = conf[f"{cls.backend_name}.host"]
-            executable = conf[f"{cls.backend_name}.executable"]
-            return f"{cls.backend_description} - {user} @ {host} : {executable}"
-
-        confs = sorted(cls.get_last_configurations(), key=get_description)
-
-        return [(conf, get_description(conf)) for conf in confs]
+        confs = sorted(cls.get_last_configurations(), key=cls.get_switcher_configuration_label)
+        return [(conf, cls.get_switcher_configuration_label(conf)) for conf in confs]
 
     def has_custom_system_shell(self):
         return True

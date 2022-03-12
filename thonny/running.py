@@ -830,13 +830,15 @@ class BackendProxy(ABC):
     def get_cwd(self) -> Optional[str]:
         return None
 
-    def get_clean_description(self):
-        return self.backend_description
-
     @abstractmethod
     def get_current_switcher_configuration(self) -> Dict[str, Any]:
         """returns the dict of configuration entries that distinguish current backend conf from other
         items in the backend switcher. Also used for collecting last used configurations."""
+
+    @classmethod
+    @abstractmethod
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        """Formats configuration for menu item"""
 
     @classmethod
     @abstractmethod

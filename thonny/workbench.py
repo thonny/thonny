@@ -852,14 +852,14 @@ class Workbench(tk.Tk):
     def _on_backend_restart(self, event):
         proxy = get_runner().get_backend_proxy()
         if proxy:
-            desc = proxy.get_clean_description()
-            self._backend_conf_variable.set(value=repr(proxy.get_current_switcher_configuration()))
+            conf = proxy.get_current_switcher_configuration()
+            desc = proxy.get_switcher_configuration_label(conf)
+            value = repr(conf)
         else:
-            backend_conf = self._backends.get(self.get_option("run.backend_name"), None)
-            if backend_conf:
-                desc = backend_conf.description
-            else:
-                desc = "<no backend>"
+            desc = "<no backend>"
+            value = "n/a"
+
+        self._backend_conf_variable.set(value=value)
         self._backend_button.configure(text=desc + " ☰")
 
     def _init_theming(self) -> None:

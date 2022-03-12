@@ -29,9 +29,9 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
         return "RP2040 device"
 
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.rp2040.rp2040_backend
+        import thonny.plugins.rp2040.rp2040_back
 
-        return thonny.plugins.rp2040.rp2040_backend.__file__
+        return thonny.plugins.rp2040.rp2040_back.__file__
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):

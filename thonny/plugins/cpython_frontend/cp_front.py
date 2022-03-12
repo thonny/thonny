@@ -13,7 +13,6 @@ from thonny.common import (
     InlineResponse,
     ToplevelCommand,
     get_base_executable,
-    get_python_version_string,
     is_private_python,
     is_virtual_executable,
     normpath_with_actual_case,
@@ -154,9 +153,6 @@ class LocalCPythonProxy(SubprocessProxy):
     def can_run_in_terminal(self) -> bool:
         return True
 
-    def get_clean_description(self):
-        return f"Python {get_python_version_string()} - {self.get_target_executable()}"
-
     @classmethod
     def _get_switcher_conf_for_executable(cls, executable):
         return {"run.backend_name": cls.backend_name, f"{cls.backend_name}.executable": executable}
@@ -165,6 +161,10 @@ class LocalCPythonProxy(SubprocessProxy):
         return self._get_switcher_conf_for_executable(
             get_workbench().get_option(f"{self.backend_name}.executable")
         )
+
+    @classmethod
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        return cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"]
 
     @classmethod
     def get_switcher_entries(cls):
@@ -177,7 +177,7 @@ class LocalCPythonProxy(SubprocessProxy):
             confs.insert(0, default_conf)
 
         return [
-            (conf, cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"])
+            (conf, cls.get_switcher_configuration_label(conf))
             for conf in confs
             if os.path.exists(conf[f"{cls.backend_name}.executable"])
         ]

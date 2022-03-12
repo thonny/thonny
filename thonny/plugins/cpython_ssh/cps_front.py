@@ -10,9 +10,9 @@ from thonny.running import SubprocessProxy
 
 class SshCPythonProxy(SubprocessProxy):
     def __init__(self, clean):
-        self._host = get_workbench().get_option("ssh.host")
-        self._user = get_workbench().get_option("ssh.user")
-        self._target_executable = get_workbench().get_option("ssh.executable")
+        self._host = get_workbench().get_option("SshCPython.host")
+        self._user = get_workbench().get_option("SshCPython.user")
+        self._target_executable = get_workbench().get_option("SshCPython.executable")
 
         super().__init__(clean)
         self._send_msg(ToplevelCommand("get_environment_info"))
@@ -37,7 +37,7 @@ class SshCPythonProxy(SubprocessProxy):
                 {
                     "host": self._host,
                     "user": self._user,
-                    "password": get_ssh_password("ssh"),
+                    "password": get_ssh_password("SshCPython"),
                     "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),
                 }
@@ -48,10 +48,10 @@ class SshCPythonProxy(SubprocessProxy):
         pass
 
     def _get_initial_cwd(self):
-        return get_workbench().get_option("ssh.cwd")
+        return get_workbench().get_option("SshCPython.cwd")
 
     def _publish_cwd(self, cwd):
-        get_workbench().set_option("ssh.cwd", cwd)
+        get_workbench().set_option("SshCPython.cwd", cwd)
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
@@ -123,16 +123,16 @@ class SshCPythonProxy(SubprocessProxy):
         }
 
     @classmethod
+    def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
+        user = conf[f"{cls.backend_name}.user"]
+        host = conf[f"{cls.backend_name}.host"]
+        executable = conf[f"{cls.backend_name}.executable"]
+        return f"{cls.backend_description} - {user} @ {host} : {executable}"
+
+    @classmethod
     def get_switcher_entries(cls):
-        def get_description(conf):
-            user = conf[f"{cls.backend_name}.user"]
-            host = conf[f"{cls.backend_name}.host"]
-            executable = conf[f"{cls.backend_name}.executable"]
-            return f"{cls.backend_description} - {user} @ {host} : {executable}"
-
-        confs = sorted(cls.get_last_configurations(), key=get_description)
-
-        return [(conf, get_description(conf)) for conf in confs]
+        confs = sorted(cls.get_last_configurations(), key=cls.get_switcher_configuration_label)
+        return [(conf, cls.get_switcher_configuration_label(conf)) for conf in confs]
 
     def get_pip_gui_class(self):
         from thonny.plugins.cpython_ssh.cps_pip_gui import SshCPythonPipDialog
@@ -159,9 +159,13 @@ class SshCPythonProxy(SubprocessProxy):
     def has_local_interpreter(self):
         return False
 
+    @classmethod
+    def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
+        return True
+
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
     def __init__(self, master):
-        super().__init__(master, "ssh")
+        super().__init__(master, "SshCPython")
