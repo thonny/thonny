@@ -50,6 +50,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Alar Leemet
 * Aleks ANDRÉ
 * Alex Hall
+* Alexandre Barrozo do Amaral Villares
 * Algent Albrahimi
 * Anatoly Techtonik
 * Anders Pamdal
@@ -67,6 +68,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Celso Isayah Dias
 * Chad Purdy
 * codemee
+* Collision Detection
 * cspaier
 * cubimon
 * Curtis Wang
