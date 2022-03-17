@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from thonny.plugins.micropython import add_micropython_backend
-from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,

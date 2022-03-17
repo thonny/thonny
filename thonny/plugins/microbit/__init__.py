@@ -10,7 +10,7 @@ from thonny.plugins.micropython import (
     BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
-from thonny.plugins.micropython.bare_metal_backend import PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"

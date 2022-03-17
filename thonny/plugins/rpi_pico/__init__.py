@@ -3,7 +3,7 @@ from typing import Optional
 
 from thonny import get_workbench, ui_utils
 from thonny.plugins.micropython import add_micropython_backend
-from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 from thonny.plugins.rp2040 import RP2040BackendConfigPage, RP2040BackendProxy
 from thonny.ui_utils import show_dialog

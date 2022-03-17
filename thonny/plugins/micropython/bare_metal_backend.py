@@ -40,11 +40,8 @@ from thonny.plugins.micropython.mp_back import (
     is_continuation_byte,
     starts_with_continuation_byte,
 )
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.webrepl_connection import WebReplConnection
-
-PASTE_SUBMIT_MODE = "paste"
-RAW_PASTE_SUBMIT_MODE = "raw_paste"
-RAW_SUBMIT_MODE = "raw"
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
