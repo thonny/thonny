@@ -27,6 +27,8 @@ def load_plugin():
         sort_key="49",
     )
 
+    get_workbench().set_default("serial.last_backend_per_vid_pid", {})
+
     if platform.system() in ("Linux", "Darwin"):
         add_micropython_backend(
             "LocalMicroPython",

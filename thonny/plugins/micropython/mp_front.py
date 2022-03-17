@@ -90,7 +90,6 @@ class MicroPythonProxy(SubprocessProxy):
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._port = get_workbench().get_option(self.backend_name + ".port")
-        self._have_stored_pidwid = False
         self._clean_start = clean
         self._fix_port()
 
@@ -214,7 +213,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         for p in all_ports:
             print(vars(p))
         """
-        return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
+        last_backs = get_workbench().get_option("serial.last_backend_per_vid_pid")
+        return [
+            (p.device, p.description)
+            for p in all_ports
+            if cls._is_potential_port(p) or last_backs.get((p.vid, p.pid), None) == cls.backend_name
+        ]
 
     @classmethod
     def _is_potential_port(cls, p):
@@ -237,7 +241,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
         """Return set of pairs of USB device VID, PID"""
-        return cls.get_used_usb_vidpids()
+        return set()
 
     @classmethod
     def get_vids_pids_to_avoid(cls):
@@ -246,10 +250,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         in the switcher.
         """
         return set()
-
-    @classmethod
-    def get_used_usb_vidpids(cls):
-        return get_workbench().get_option(cls.backend_name + ".used_vidpids")
 
     @classmethod
     def get_uart_adapter_vids_pids(cls):
@@ -319,27 +319,20 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def can_run_remote_files(self):
         return False
 
-    def fetch_next_message(self):
-        msg = super(BareMetalMicroPythonProxy, self).fetch_next_message()
-        if (
-            not self._have_stored_pidwid
-            and getattr(msg, "event_type", None) == "ToplevelResponse"
-            and self._port != WEBREPL_PORT_VALUE
-        ):
-            # Let's remember that this vidpid was used with this backend
-            # need to copy and store explicitly, because otherwise I may change the default value
-            used_vidpids = get_workbench().get_option(self.backend_name + ".used_vidpids").copy()
-
-            info = get_port_info(self._port)
-            used_vidpids.add((info.vid, info.pid))
-            self._have_stored_pidwid = True
-            get_workbench().set_option(self.backend_name + ".used_vidpids", used_vidpids)
-
-        return msg
-
     @classmethod
     def device_is_present_in_bootloader_mode(cls):
         return False
+
+    def _check_remember_current_configuration(self) -> None:
+        super()._check_remember_current_configuration()
+
+        current_conf = self.get_current_switcher_configuration()
+        port = current_conf[f"{self.backend_name}.port"]
+        if port and port != WEBREPL_PORT_VALUE:
+            last_backs = get_workbench().get_option("serial.last_backend_per_vid_pid")
+            info = get_port_info(port)
+            last_backs[(info.vid, info.pid)] = self.backend_name
+            get_workbench().set_option("serial.last_backend_per_vid_pid", last_backs)
 
     def _should_remember_configuration(self, configuration: Dict[str, Any]) -> bool:
         return bool(configuration.get(f"{self.backend_name}.webrepl_url", False))
@@ -1034,7 +1027,6 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".submit_mode", submit_mode)
         get_workbench().set_default(name + ".write_block_size", write_block_size)
         get_workbench().set_default(name + ".write_block_delay", write_block_delay)
-        get_workbench().set_default(name + ".used_vidpids", set())
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
         get_workbench().set_default(name + ".interrupt_on_connect", True)
