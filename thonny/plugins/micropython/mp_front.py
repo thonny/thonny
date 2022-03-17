@@ -341,6 +341,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def device_is_present_in_bootloader_mode(cls):
         return False
 
+    def _should_remember_configuration(self, configuration: Dict[str, Any]) -> bool:
+        return bool(configuration.get(f"{self.backend_name}.webrepl_url", False))
+
     def get_current_switcher_configuration(self) -> Dict[str, Any]:
         conf = {
             "run.backend_name": self.backend_name,

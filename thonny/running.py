@@ -890,13 +890,18 @@ class SubprocessProxy(BackendProxy, ABC):
         self._in_venv = None
         self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none
         self._start_background_process(clean=clean)
-        self._have_remembered_current_configuration = False
+        self._have_check_remembered_current_configuration = False
 
-    def _remember_current_configuration(self) -> None:
-        last_configurations = self.get_last_configurations()
+    def _check_remember_current_configuration(self) -> None:
         current_configuration = self.get_current_switcher_configuration()
-        if current_configuration not in last_configurations:
-            last_configurations.insert(0, current_configuration)
+        if not self._should_remember_configuration(current_configuration):
+            return
+
+        last_configurations = self.get_last_configurations()
+        if current_configuration in last_configurations:
+            last_configurations.remove(current_configuration)
+
+        last_configurations.insert(0, current_configuration)
 
         # remove non-valid
         last_configurations = [
@@ -905,6 +910,9 @@ class SubprocessProxy(BackendProxy, ABC):
         # Remember only last 5
         last_configurations = last_configurations[:5]
         self.set_last_configurations(last_configurations)
+
+    def _should_remember_configuration(self, configuration: Dict[str, Any]) -> bool:
+        return True
 
     @classmethod
     def get_last_configurations(cls) -> List[Dict]:
@@ -1182,9 +1190,9 @@ class SubprocessProxy(BackendProxy, ABC):
         msg = self._response_queue.popleft()
         if isinstance(msg, ToplevelResponse):
             self._store_state_info(msg)
-            if not self._have_remembered_current_configuration:
-                self._remember_current_configuration()
-                self._have_remembered_current_configuration = True
+            if not self._have_check_remembered_current_configuration:
+                self._check_remember_current_configuration()
+                self._have_check_remembered_current_configuration = True
 
         if msg.event_type == "ProgramOutput":
             # combine available small output messages to one single message,
