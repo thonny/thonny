@@ -8,8 +8,6 @@ from logging import getLogger
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, List, Optional, Union
 
-from serial import SerialTimeoutException
-
 import thonny
 from thonny import report_time
 from thonny.backend import UploadDownloadMixin
@@ -20,11 +18,10 @@ from thonny.common import (
     execute_system_command,
     serialize_message,
 )
-from thonny.misc_utils import find_volumes_by_name, running_on_windows
+from thonny.misc_utils import find_volumes_by_name
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
     EOT,
-    INTERRUPT_CMD,
     NORMAL_MODE_CMD,
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,

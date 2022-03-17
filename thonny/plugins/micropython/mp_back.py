@@ -50,7 +50,6 @@ from textwrap import dedent
 from threading import Lock
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
-import pipkin.common
 from serial import SerialTimeoutException
 
 from thonny import BACKEND_LOG_MARKER, get_backend_log_file, report_time
@@ -903,6 +902,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
         from pipkin.session import Session
+        import pipkin.common
 
         adapter = self._create_pipkin_adapter()
         session = Session(adapter)
