@@ -338,9 +338,10 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return bool(configuration.get(f"{self.backend_name}.webrepl_url", False))
 
     def get_current_switcher_configuration(self) -> Dict[str, Any]:
+        # NB! using current port value, not the configured one (which may be "auto")
         conf = {
             "run.backend_name": self.backend_name,
-            f"{self.backend_name}.port": get_workbench().get_option(f"{self.backend_name}.port"),
+            f"{self.backend_name}.port": self._port,
         }
         if self._port == WEBREPL_PORT_VALUE:
             conf[f"{self.backend_name}.webrepl_url"] = get_workbench().get_option(
