@@ -348,6 +348,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
         x_padding = 4
+        welcome_vert_spacing = x_padding
         io_vert_spacing = 10
         io_indent = 16 + x_padding
         self.io_indent = io_indent
@@ -364,9 +365,16 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("inactive_value", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
 
-        self.tag_configure("welcome", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure(
+            "welcome",
+            lmargin1=x_padding,
+            lmargin2=x_padding,
+            spacing1=welcome_vert_spacing,
+            spacing3=welcome_vert_spacing,
+        )
 
         # Underline on the font looks better than underline on the tag,
         # therefore Shell doesn't use configured "hyperlink" style directly
@@ -451,7 +459,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text:
-            self.restart()
             preceding = self.get("output_insert -1 c", "output_insert")
             if preceding.strip() and not preceding.endswith("\n"):
                 self._insert_text_directly("\n")
@@ -1363,7 +1370,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _on_backend_restart(self, event=None):
         # make sure dead values are not clickable anymore
-        self.tag_remove("value", "0.1", "end")
+        self._invalidate_current_data()
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
@@ -1498,6 +1505,19 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         end_index = self.index("output_end")
 
         self.tag_add("inactive", "1.0", end_index)
+
+        # inactivate values
+        pos = end_index
+        while True:
+            rng = self.tag_prevrange("value", pos)
+            if rng:
+                rng_start, rng_end = rng
+                self.tag_remove("value", rng_start, rng_end)
+                self.tag_add("inactive_value", rng_start, rng_end)
+                pos = rng_start
+            else:
+                break
+
         self.tag_remove("value", "1.0", end_index)
         self.tag_remove("stacktrace_hyperlink", "1.0", end_index)
 
