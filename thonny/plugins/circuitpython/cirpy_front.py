@@ -1,3 +1,4 @@
+import sys
 from logging import getLogger
 from typing import Optional
 
@@ -62,6 +63,22 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
         import thonny.plugins.circuitpython.cirpy_back
 
         return thonny.plugins.circuitpython.cirpy_back.__file__
+
+    @classmethod
+    def _is_for_micropython(cls):
+        return False
+
+    @classmethod
+    def _is_for_circuitpython(cls):
+        return True
+
+    @classmethod
+    def _is_potential_port(cls, p):
+        if "adafruit_board_toolkit" in sys.modules or sys.platform == "linux":
+            # can trust p.interface value
+            return "CircuitPython CDC control" in (p.interface or "")
+        else:
+            return super()._is_potential_port(p)
 
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):

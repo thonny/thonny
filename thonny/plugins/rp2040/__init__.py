@@ -5,6 +5,7 @@ from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
+    get_uart_adapter_vids_pids,
 )
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
@@ -32,6 +33,10 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
         import thonny.plugins.rp2040.rp2040_back
 
         return thonny.plugins.rp2040.rp2040_back.__file__
+
+    @classmethod
+    def get_vids_pids_to_avoid(self):
+        return get_uart_adapter_vids_pids()
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):

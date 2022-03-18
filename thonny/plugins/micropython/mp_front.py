@@ -213,7 +213,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         for p in all_ports:
             print(vars(p))
         """
-        last_backs = get_workbench().get_option("serial.last_backend_per_vid_pid")
+        last_backs = {}  # get_workbench().get_option("serial.last_backend_per_vid_pid")
         return [
             (p.device, p.description)
             for p in all_ports
@@ -221,7 +221,25 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         ]
 
     @classmethod
+    def _is_for_micropython(cls):
+        return True
+
+    @classmethod
+    def _is_for_circuitpython(cls):
+        return False
+
+    @classmethod
     def _is_potential_port(cls, p):
+        # logger.debug("Considering %s for %s", p.device, cls.backend_name)
+        if "CircuitPython CDC control" in (p.interface or ""):
+            return cls._is_for_circuitpython()
+
+        if "CircuitPython CDC2 control" in (p.interface or ""):
+            return False
+
+        if "MicroPython" in (p.manufacturer or ""):
+            return cls._is_for_micropython()
+
         return (
             (p.vid, p.pid) in cls.get_known_usb_vids_pids()
             or (p.vid, None) in cls.get_known_usb_vids_pids()
@@ -229,8 +247,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             or cls.should_consider_unknown_devices()
             and (p.vid, p.pid) not in cls.get_vids_pids_to_avoid()
             and (
-                getattr(p, "manufacturer", "") == "MicroPython"
-                or ("USB" in p.description and "serial" in p.description.lower())
+                ("USB" in p.description and "serial" in p.description.lower())
                 or "UART" in p.description
                 or "DAPLink" in p.description
                 or "STLink" in p.description
@@ -666,7 +683,7 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
             (0x1209, 0xADDA),
             (0x0694, 0x0009),  # SPIKE Prime
             (0x0694, 0x0010),  # Robot Inventor
-        } | cls.get_uart_adapter_vids_pids()
+        } | get_uart_adapter_vids_pids()
 
     @classmethod
     def get_vids_pids_to_avoid(self):
@@ -959,11 +976,29 @@ def list_serial_ports():
     # Workarond: temporally patch os.path.islink
     import serial.tools.list_ports
 
+    old_islink = os.path.islink
     try:
-        old_islink = os.path.islink
         if sys.platform == "win32":
             os.path.islink = lambda _: False
-        return list(serial.tools.list_ports.comports())
+
+        if sys.platform == "win32":
+            try:
+                from adafruit_board_toolkit._list_ports_windows import comports
+
+                logger.info("Could import adafruit_board_toolkit")
+            except ImportError:
+                logger.info("Falling back to serial.tools.list_ports.comports")
+                return list(serial.tools.list_ports.comports())
+        elif sys.platform == "darwin":
+            try:
+                from adafruit_board_toolkit._list_ports_osx import comports
+
+                logger.info("Could import adafruit_board_toolkit")
+            except ImportError:
+                logger.info("Falling back to serial.tools.list_ports.comports")
+                return list(serial.tools.list_ports.comports())
+        else:
+            return list(serial.tools.list_ports.comports())
     finally:
         os.path.islink = old_islink
 
@@ -996,6 +1031,21 @@ def list_serial_ports_with_descriptions():
         )
         for p in sorted_ports
     ]
+
+
+def get_uart_adapter_vids_pids():
+    # https://github.com/per1234/zzInoVIDPID
+    # https://github.com/per1234/zzInoVIDPID/blob/master/zzInoVIDPID/boards.txt
+    return {
+        (0x1A86, 0x7523),  # HL-340
+        (0x10C4, 0xEA60),  # CP210x"),
+        (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
+        (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
+        (0x0403, 0x6011),  # FT4232
+        (0x0403, 0x6014),  # FT232H
+        (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
+        (0x0403, 0x601C),  # FT4222H
+    }
 
 
 def get_port_info(port):

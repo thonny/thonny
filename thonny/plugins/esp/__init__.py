@@ -18,6 +18,7 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
+from thonny.plugins.micropython.mp_front import get_uart_adapter_vids_pids
 from thonny.running import get_front_interpreter_for_subprocess
 from thonny.workdlg import WorkDialog
 
@@ -62,13 +63,13 @@ class ESP8266Proxy(ESPProxy):
 
     @classmethod
     def get_known_usb_vids_pids(cls):
-        return cls.get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids()
 
 
 class ESP32Proxy(ESPProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
-        return cls.get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids()
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):

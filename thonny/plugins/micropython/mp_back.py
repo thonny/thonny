@@ -901,8 +901,8 @@ class MicroPythonBackend(MainBackend, ABC):
         ...
 
     def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
-        from pipkin.session import Session
         import pipkin.common
+        from pipkin.session import Session
 
         adapter = self._create_pipkin_adapter()
         session = Session(adapter)

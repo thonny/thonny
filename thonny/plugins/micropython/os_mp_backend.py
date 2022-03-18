@@ -15,7 +15,6 @@ from thonny import report_time
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
-from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
     ENCODING,
@@ -26,6 +25,7 @@ from thonny.plugins.micropython.mp_back import (
     MicroPythonBackend,
     ends_overlap,
 )
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
