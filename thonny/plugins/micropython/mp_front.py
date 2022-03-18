@@ -1037,8 +1037,9 @@ def get_uart_adapter_vids_pids():
     # https://github.com/per1234/zzInoVIDPID
     # https://github.com/per1234/zzInoVIDPID/blob/master/zzInoVIDPID/boards.txt
     return {
-        (0x1A86, 0x7523),  # HL-340
-        (0x10C4, 0xEA60),  # CP210x"),
+        (0x1A86, 0x7523),  # CH340 (HL-340?)
+        (0x1A86, 0x5523),  # CH341
+        (0x10C4, 0xEA60),  # CP210x,
         (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
         (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
         (0x0403, 0x6011),  # FT4232
