@@ -1,3 +1,4 @@
+import _ast
 import ast
 import builtins
 import dis
@@ -8,8 +9,6 @@ import sys
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 from logging import getLogger
-
-import _ast
 
 from thonny.common import (
     DebuggerCommand,

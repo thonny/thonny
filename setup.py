@@ -8,7 +8,8 @@ def recursive_files(directory):
     paths = []
     for (path, _, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
+            if not filename.endswith(".pyc"):
+                paths.append(os.path.join('..', path, filename))
     return paths
 
 if sys.version_info < (3, 6):
@@ -69,7 +70,9 @@ setup(
     python_requires=">=3.8",
     packages=find_packages(),
     package_data={
-        "": ["VERSION", "defaults.ini", "res/*"] + recursive_files("thonny/locale"),
+        "": ["VERSION", "defaults.ini", "res/*"]
+            + recursive_files("thonny/locale")
+            + recursive_files("thonny/vendored_libs"),
         "thonny.plugins.help": ["*.rst"],
         "thonny.plugins.pi": ["res/*.*"],
         "thonny.plugins.printing": ["*.html"],
