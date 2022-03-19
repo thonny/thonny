@@ -8,7 +8,6 @@ import stat
 import subprocess
 import sys
 import urllib.request
-import venv
 from dataclasses import dataclass
 from logging import getLogger
 from typing import Dict, List, Optional, Set, Tuple
@@ -16,6 +15,7 @@ from urllib.request import urlopen
 
 import filelock
 from filelock import BaseFileLock, FileLock
+
 from pipkin.adapters import Adapter
 from pipkin.common import UserError
 from pipkin.proxy import start_proxy
@@ -47,11 +47,12 @@ class Session:
     Allows performing several commands in row without releasing the venv.
     """
 
-    def __init__(self, adapter: Adapter):
+    def __init__(self, adapter: Adapter, tty: bool=True):
         self._adapter = adapter
         self._venv_lock: Optional[BaseFileLock] = None
         self._venv_dir: Optional[str] = None
         self._quiet = False
+        self._tty = tty
 
     def install(
         self,
@@ -74,6 +75,7 @@ class Session:
         mpy_cross: Optional[str] = None,
         **_,
     ):
+        logger.debug("Starting install")
 
         if compile is None and mpy_cross:
             compile = True
@@ -418,7 +420,7 @@ class Session:
                 os.path.join(self._get_venv_site_packages_path(), rel_path)
             )
 
-            full_device_path = self._adapter.join_path(target, rel_path)
+            full_device_path = self._adapter.join_path(target, self._adapter.normpath(rel_path))
 
             if full_path.endswith(".py") and compile:
                 self._compile_with_mpy_cross(
@@ -441,7 +443,9 @@ class Session:
 
         # add RECORD (without hashes)
         target_record_lines.append(self._adapter.normpath(rel_record_path) + ",,")
-        full_device_record_path = self._adapter.join_path(target, rel_record_path)
+        full_device_record_path = self._adapter.join_path(
+            target, self._adapter.normpath(rel_record_path)
+        )
         self._adapter.write_file(
             full_device_record_path, "\n".join(target_record_lines).encode(META_ENCODING)
         )
@@ -464,14 +468,22 @@ class Session:
         self._venv_lock, self._venv_dir = self._prepare_venv()
 
     def _prepare_venv(self) -> Tuple[BaseFileLock, str]:
-        # 1. create sample venv (if it doesn't exist yet)
-        # 2. clone the venv for this session (Too slow in Windows ???)
-        # https://github.com/edwardgeorge/virtualenv-clone/blob/master/clonevirtualenv.py
         path = self._compute_venv_path()
         if not os.path.exists(path):
             logger.info("Start preparing working environment at %s ...", path)
-            venv.main([path])
-            subprocess.check_call(
+            subprocess.check_output(
+                [
+                    sys.executable,
+                    "-I",
+                    "-m",
+                    "venv",
+                    path,
+                ],
+                stdin=subprocess.DEVNULL,
+            )
+            logger.info("Done creating venv")
+            assert os.path.exists(path)
+            subprocess.check_output(
                 [
                     get_venv_executable(path),
                     "-I",
@@ -484,7 +496,8 @@ class Session:
                     "pip==22.0.*",
                     "setuptools==60.9.*",
                     "wheel==0.37.*",
-                ]
+                ],
+                stdin=subprocess.DEVNULL,
             )
             logger.info("Done preparing working environment.")
         else:
@@ -492,12 +505,13 @@ class Session:
 
         lock = FileLock(os.path.join(path, "pipkin.lock"))
         try:
-            lock.acquire(timeout=0)
+            lock.acquire(timeout=0.05)
         except filelock.Timeout:
             raise UserError(
                 "Could not get exclusive access to the working environment. "
                 "Is there another pipkin instance running?"
             )
+        logger.debug("Received lock on the working environment")
 
         return lock, path
 
@@ -506,6 +520,7 @@ class Session:
 
     def _clear_venv(self) -> None:
         sp_path = self._get_venv_site_packages_path()
+        logger.debug("Clearing %s", sp_path)
         for name in os.listdir(sp_path):
             full_path = os.path.join(sp_path, name)
             if self._is_initial_venv_item(name):
@@ -518,6 +533,7 @@ class Session:
 
     def _populate_venv(self, paths: Optional[List[str]] = None, user: bool = False) -> None:
         """paths and user should be used only with list and freeze commands"""
+        logger.debug("Start populating venv")
         self._ensure_venv()
         # TODO: try to re-use the state from the previous command executed in the same session.
         assert not (paths and user)
@@ -530,6 +546,7 @@ class Session:
         for name in dist_infos:
             meta_dir_name, original_path = dist_infos[name]
             self._prepare_dummy_dist(meta_dir_name, original_path)
+        logger.debug("Done populating venv")
 
     def _prepare_dummy_dist(self, meta_dir_name: str, original_path: str) -> None:
         sp_path = self._get_venv_site_packages_path()
@@ -634,7 +651,12 @@ class Session:
             get_venv_executable(self._venv_dir),
             "-I",
             "-m",
-            "pip",
+            "pip"]
+
+        if not self._tty:
+            pip_cmd += ["--no-color"]
+
+        pip_cmd += [
             "--disable-pip-version-check",
             "--trusted-host",
             "127.0.0.1",
@@ -644,7 +666,7 @@ class Session:
         env = {key: os.environ[key] for key in os.environ if not key.startswith("PIP_")}
         env["PIP_CACHE_DIR"] = self._get_pipkin_cache_dir()
 
-        subprocess.check_call(pip_cmd, env=env)
+        subprocess.check_output(pip_cmd, env=env, stdin=subprocess.DEVNULL)
 
     def _compile_with_mpy_cross(
         self, source_path: str, target_path: str, mpy_cross_path: Optional[str]

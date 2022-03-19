@@ -1,7 +1,10 @@
 import os.path
 import subprocess
 import sys
+from logging import getLogger
 from typing import Tuple
+
+logger = getLogger(__name__)
 
 
 def get_windows_folder(ID: int) -> str:
@@ -59,11 +62,18 @@ def get_venv_executable(path: str) -> str:
 
 
 def get_venv_site_packages_path(venv_path: str) -> str:
+    logger.debug("Querying site packages path for %s", venv_path)
     result = subprocess.check_output(
-        [get_venv_executable(venv_path), "-c", "import site; print(site.getsitepackages()[0])"],
+        [
+            get_venv_executable(venv_path),
+            "-c",
+            "import site; print([p for p in site.getsitepackages() if 'site-packages' in p][0])",
+        ],
         text=True,
+        stdin=subprocess.DEVNULL,
     ).strip()
-    assert result.startswith(venv_path)
+    assert result.startswith(venv_path) and result != venv_path
+    logger.debug("Got site packages path %s", result)
     return result
 
 

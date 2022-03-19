@@ -910,7 +910,7 @@ class MicroPythonBackend(MainBackend, ABC):
         from pipkin.session import Session
 
         adapter = self._create_pipkin_adapter()
-        session = Session(adapter)
+        session = Session(adapter, tty=False)
 
         try:
             if command:

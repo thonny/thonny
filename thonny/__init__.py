@@ -419,9 +419,10 @@ def _configure_logging(log_file, console_level=None):
 
     main_logger = logging.getLogger("thonny")
     contrib_logger = logging.getLogger("thonnycontrib")
+    pipkin_logger = logging.getLogger("pipkin")
 
     # NB! Don't mess with the main root logger, because (CPython) backend runs user code
-    for logger in [main_logger, contrib_logger]:
+    for logger in [main_logger, contrib_logger, pipkin_logger]:
         logger.setLevel(_choose_logging_level())
         logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
         logger.addHandler(file_handler)

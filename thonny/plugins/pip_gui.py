@@ -465,10 +465,7 @@ class PipDialog(CommonDialog, ABC):
             self._append_info_text(tr("Installed version:") + " ", ("caption",))
             self._append_info_text(active_dist.version + "\n")
             self._append_info_text(tr("Installed to:") + " ", ("caption",))
-            # TODO: only show link if local backend
-            self.info_text.direct_insert(
-                "end", normpath_with_actual_case(active_dist.location), ("url",)
-            )
+            self._append_location_to_info_path(active_dist.location)
             self._append_info_text("\n\n")
             self._select_list_item(name)
         else:
@@ -492,6 +489,9 @@ class PipDialog(CommonDialog, ABC):
                 # new package
                 self.install_button["text"] = self.get_install_button_text()
                 self.uninstall_button.grid_remove()
+
+    def _append_location_to_info_path(self, path):
+        self.info_text.direct_insert("end", path)
 
     def _show_package_info(self, name, data, error_code=None):
         self._set_state("idle")
@@ -602,7 +602,7 @@ class PipDialog(CommonDialog, ABC):
         if dist is None:
             return False
         else:
-            return normpath_with_actual_case(dist.location) != self._get_target_directory()
+            return self._normalize_target_path(dist.location) != self._get_target_directory()
 
     def _normalize_name(self, name):
         # looks like (in some cases?) pip list gives the name as it was used during install
@@ -612,6 +612,9 @@ class PipDialog(CommonDialog, ABC):
 
         # https://www.python.org/dev/peps/pep-0503/#id4
         return re.sub(r"[-_.]+", "-", name).lower().strip()
+
+    def _normalize_target_path(self, path: str) -> str:
+        return path
 
     def _start_search(self, query, discard_selection=True):
         self.current_package_data = None
@@ -1072,14 +1075,17 @@ class PluginsPipDialog(PipDialog):
         if self._use_user_install():
             target = thonny.get_sys_path_directory_containg_plugins()
             os.makedirs(target, exist_ok=True)
-            return normpath_with_actual_case(target)
+            return self._normalize_target_path(target)
         else:
             for d in sys.path:
                 if ("site-packages" in d or "dist-packages" in d) and path_startswith(
                     d, sys.prefix
                 ):
-                    return normpath_with_actual_case(d)
+                    return self._normalize_target_path(d)
             return None
+
+    def _normalize_target_path(self, path: str) -> str:
+        return normpath_with_actual_case(path)
 
     def _create_widgets(self, parent):
         banner = ttk.Frame(parent, style="Tip.TFrame")

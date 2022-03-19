@@ -118,12 +118,12 @@ class BareMetalAdapter(BaseAdapter, ABC):
             try:
                 self._log_output_until_active_prompt(timeout=timeout)
                 break
-            except ReadingTimeoutError as e:
+            except TimeoutError as e:
                 logger.debug(
                     "Could not get prompt with intervention %r and timeout %r. Read bytes: %r",
                     cmd,
                     timeout,
-                    e.read_bytes,
+                    getattr(e, "read_bytes", "?"),
                 )
                 # Try again as long as there are interventions left
         else:

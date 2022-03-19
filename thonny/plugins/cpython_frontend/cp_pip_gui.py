@@ -43,3 +43,11 @@ class LocalCPythonPipDialog(CPythonPipDialog):
 
     def _get_interpreter_description(self):
         return get_runner().get_backend_proxy().get_target_executable()
+
+    def _normalize_target_path(self, path: str) -> str:
+        return normpath_with_actual_case(path)
+
+    def _append_location_to_info_path(self, path):
+        self.info_text.direct_insert(
+            "end", normpath_with_actual_case(path), ("url",)
+        )
