@@ -56,7 +56,7 @@ from thonny.ui_utils import (
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    shift_is_pressed, create_action_label,
+    shift_is_pressed, create_action_label, ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -785,9 +785,9 @@ class Workbench(tk.Tk):
             #image=self.get_image("Ukraine"),
             #compound="left"
         )
-        ukraine_label.grid(row=1, column=1, sticky="w")
+        ukraine_label.grid(row=1, column=1, sticky="wsn")
 
-    def _support_ukraine(self) -> None:
+    def _support_ukraine(self, event=None) -> None:
         webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine!")
 
     def _init_backend_switcher(self):
@@ -1960,7 +1960,7 @@ class Workbench(tk.Tk):
             if self.in_simple_mode():
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
-                padx = (0, 10)
+                padx = (0, ems_to_pixels(1))
             group_frame.grid(row=0, column=toolbar_group, padx=padx)
         else:
             group_frame = slaves[0]
