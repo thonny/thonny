@@ -48,6 +48,4 @@ class LocalCPythonPipDialog(CPythonPipDialog):
         return normpath_with_actual_case(path)
 
     def _append_location_to_info_path(self, path):
-        self.info_text.direct_insert(
-            "end", normpath_with_actual_case(path), ("url",)
-        )
+        self.info_text.direct_insert("end", normpath_with_actual_case(path), ("url",))
