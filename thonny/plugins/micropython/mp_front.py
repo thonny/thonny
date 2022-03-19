@@ -231,11 +231,15 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     @classmethod
     def _is_potential_port(cls, p):
         # logger.debug("Considering %s for %s", p.device, cls.backend_name)
-        if "CircuitPython CDC control" in (p.interface or ""):
-            return cls._is_for_circuitpython()
-
         if "CircuitPython CDC2 control" in (p.interface or ""):
             return False
+
+        last_backs = get_workbench().get_option("serial.last_backend_per_vid_pid")
+        if last_backs.get((p.vid, p.pid), "") == cls.backend_name:
+            return True
+
+        if "CircuitPython CDC control" in (p.interface or ""):
+            return cls._is_for_circuitpython()
 
         if "MicroPython" in (p.manufacturer or ""):
             return cls._is_for_micropython()
@@ -974,8 +978,6 @@ def list_serial_ports():
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
-    import serial.tools.list_ports
-
     old_islink = os.path.islink
     try:
         if sys.platform == "win32":
@@ -988,7 +990,7 @@ def list_serial_ports():
                 logger.info("Could import adafruit_board_toolkit")
             except ImportError:
                 logger.info("Falling back to serial.tools.list_ports.comports")
-                return list(serial.tools.list_ports.comports())
+                from serial.tools.list_ports import comports
         elif sys.platform == "darwin":
             try:
                 from adafruit_board_toolkit._list_ports_osx import comports
@@ -996,9 +998,11 @@ def list_serial_ports():
                 logger.info("Could import adafruit_board_toolkit")
             except ImportError:
                 logger.info("Falling back to serial.tools.list_ports.comports")
-                return list(serial.tools.list_ports.comports())
+                from serial.tools.list_ports import comports
         else:
-            return list(serial.tools.list_ports.comports())
+            from serial.tools.list_ports import comports
+
+        return comports()
     finally:
         os.path.islink = old_islink
 
