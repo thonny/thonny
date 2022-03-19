@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-import os.path
-from logging import getLogger
-from tkinter import messagebox, ttk
-
 import ast
 import collections
 import importlib
+import os.path
 import pkgutil
 import platform
 import queue
@@ -17,7 +14,9 @@ import tkinter as tk
 import tkinter.font as tk_font
 import traceback
 import webbrowser
+from logging import getLogger
 from threading import Thread
+from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -49,14 +48,16 @@ from thonny.ui_utils import (
     AutomaticNotebook,
     AutomaticPanedWindow,
     caps_lock_is_on,
+    create_action_label,
     create_tooltip,
+    ems_to_pixels,
     get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    shift_is_pressed, create_action_label, ems_to_pixels,
+    shift_is_pressed,
 )
 
 logger = getLogger(__name__)
@@ -774,7 +775,7 @@ class Workbench(tk.Tk):
         self._status_label = ttk.Label(self._statusbar, text="")
         self._status_label.grid(row=1, column=1, sticky="w")
 
-        #self._init_support_ukraine_bar()
+        # self._init_support_ukraine_bar()
         self._init_backend_switcher()
 
     def _init_support_ukraine_bar(self) -> None:
@@ -782,8 +783,8 @@ class Workbench(tk.Tk):
             self._statusbar,
             tr("Support Ukraine!"),
             self._support_ukraine,
-            #image=self.get_image("Ukraine"),
-            #compound="left"
+            # image=self.get_image("Ukraine"),
+            # compound="left"
         )
         ukraine_label.grid(row=1, column=1, sticky="wsn")
 
