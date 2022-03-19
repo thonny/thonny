@@ -21,7 +21,7 @@ from thonny.common import (
     ToplevelResponse,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
+from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
 from thonny.tktextext import TextFrame, TweakableText, index2line
 from thonny.ui_utils import (
@@ -58,7 +58,7 @@ OUTPUT_SPLIT_REGEX = re.compile(
 )
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(
-    r"(https?:\/\/[\w\/.:\-\?#=%&]+[\w\/]|data:image\/[a-z]+;base64,[A-Za-z0-9\/=\+]+)"
+    r"(https?://[\w/.:\-?#=%&]+[\w/]|data:image/[a-z]+;base64,[A-Za-z0-9/=+]+)"
 )
 
 INT_REGEX = re.compile(r"\d+")
@@ -308,14 +308,14 @@ class ShellMenu(TextMenu):
 class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     """Passive version of ShellText. Used also for preview"""
 
-    def __init__(self, master, view=None, cnf={}, **kw):
+    def __init__(self, master, view=None, **kw):
         self.view = view
         self._ignore_program_output = False
         self._link_handler_count = 0
         self._last_main_file = None
         kw["tabstyle"] = "wordprocessor"
         kw["cursor"] = get_beam_cursor()
-        super().__init__(master, cnf, **kw)
+        super().__init__(master, **kw)
 
         self._command_history = (
             []
@@ -910,7 +910,10 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.see("end")
 
-    def intercept_insert(self, index, txt, tags=()):
+    def intercept_insert(self, index, chars, tags=None, **kw):
+        if tags is None:
+            tags = ()
+
         # pylint: disable=arguments-differ
         if self._editing_allowed() and self._in_current_input_range(index):
             # self._print_marks("before insert")
@@ -923,7 +926,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             else:
                 tags = tags + ("io", "stdin")
 
-            EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
+            EnhancedTextWithLogging.intercept_insert(self, index, chars, tags)
 
             if not get_runner().is_waiting_toplevel_command():
                 if not self._applied_io_events:
@@ -1561,8 +1564,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
 
 class ShellText(BaseShellText):
-    def __init__(self, master, view, cnf={}, **kw):
-        super().__init__(master, view, cnf=cnf, **kw)
+    def __init__(self, master, view, **kw):
+        super().__init__(master, view, **kw)
         self.bindtags(self.bindtags() + ("ShellText",))
 
         self.tag_bind("value", "<1>", self._value_click)
@@ -1781,6 +1784,7 @@ class PlotterCanvas(tk.Canvas):
         self.coords(self.close_button, self.winfo_width() - self.linespace / 2, self.linespace / 2)
 
     def on_close(self, event):
+        assert isinstance(self.master, ShellView)
         self.master.toggle_plotter()
 
     def reset_range(self, event=None):
@@ -2109,4 +2113,5 @@ class PlotterCanvas(tk.Canvas):
             get_workbench().set_option("view.plotter_width", self.winfo_width())
         self.update_plot(True)
         self.update_close_button()
+        assert isinstance(self.master, ShellView)
         self.master.resize_plotter()

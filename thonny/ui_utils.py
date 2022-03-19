@@ -2294,10 +2294,10 @@ class TextMenu(MenuEx):
         return False
 
 
-def create_url_label(master, url, text=None):
+def create_url_label(master, url, text=None, **kw):
     import webbrowser
 
-    return create_action_label(master, text or url, lambda _: webbrowser.open(url))
+    return create_action_label(master, text or url, lambda _: webbrowser.open(url), **kw)
 
 
 def create_action_label(master, text, click_handler, **kw):

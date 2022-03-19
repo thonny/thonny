@@ -1,3 +1,5 @@
+`Support Ukraine! <https://github.com/thonny/thonny/wiki/Support-Ukraine!>`_
+
 ======
 Thonny
 ======

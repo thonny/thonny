@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import os.path
+from logging import getLogger
+from tkinter import messagebox, ttk
 
 import ast
 import collections
 import importlib
-import os.path
 import pkgutil
 import platform
 import queue
@@ -14,9 +16,8 @@ import sys
 import tkinter as tk
 import tkinter.font as tk_font
 import traceback
-from logging import getLogger
+import webbrowser
 from threading import Thread
-from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -37,7 +38,6 @@ from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
-    get_user_site_packages_dir_for_base,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
@@ -50,14 +50,13 @@ from thonny.ui_utils import (
     AutomaticPanedWindow,
     caps_lock_is_on,
     create_tooltip,
-    ems_to_pixels,
     get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    shift_is_pressed,
+    shift_is_pressed, create_action_label,
 )
 
 logger = getLogger(__name__)
@@ -250,7 +249,7 @@ class Workbench(tk.Tk):
 
     def _init_configuration(self) -> None:
         self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE)
-        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]]
+        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget], int]]
 
         self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
@@ -321,9 +320,6 @@ class Workbench(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.bind("<Configure>", self._on_configure, True)
-
-    def _init_statusbar(self):
-        self._statusbar = ttk.Frame(self)
 
     def _init_icon(self) -> None:
         # Window icons
@@ -683,6 +679,17 @@ class Workbench(tk.Tk):
                 group=101,
             )
 
+        self.add_command(
+            "SupportUkraine",
+            "help",
+            tr("Support Ukraine!"),
+            self._support_ukraine,
+            image="Ukraine",
+            caption=tr("Support!"),
+            include_in_toolbar=True,
+            group=101,
+        )
+
         if thonny.in_debug_mode():
             self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
 
@@ -767,7 +774,21 @@ class Workbench(tk.Tk):
         self._status_label = ttk.Label(self._statusbar, text="")
         self._status_label.grid(row=1, column=1, sticky="w")
 
+        #self._init_support_ukraine_bar()
         self._init_backend_switcher()
+
+    def _init_support_ukraine_bar(self) -> None:
+        ukraine_label = create_action_label(
+            self._statusbar,
+            tr("Support Ukraine!"),
+            self._support_ukraine,
+            #image=self.get_image("Ukraine"),
+            #compound="left"
+        )
+        ukraine_label.grid(row=1, column=1, sticky="w")
+
+    def _support_ukraine(self) -> None:
+        webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine!")
 
     def _init_backend_switcher(self):
 
@@ -783,7 +804,7 @@ class Workbench(tk.Tk):
         # Set up the button
         self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
 
-        self._backend_button.grid(row=1, column=3, sticky="e")
+        self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
 
     def _post_backend_menu(self):
