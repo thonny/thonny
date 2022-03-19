@@ -789,7 +789,7 @@ class Workbench(tk.Tk):
         ukraine_label.grid(row=1, column=1, sticky="wsn")
 
     def _support_ukraine(self, event=None) -> None:
-        webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine!")
+        webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine")
 
     def _init_backend_switcher(self):
 
