@@ -230,15 +230,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def _is_potential_port(cls, p):
-        # logger.debug("Considering %s for %s", p.device, cls.backend_name)
-        if "CircuitPython CDC2 control" in (p.interface or ""):
+        logger.debug("Considering %s for %s", p.device, cls.backend_name)
+        logger.debug("interface: %r", p.interface)
+        if "CircuitPython CDC2 " in (p.interface or ""):
             return False
 
         last_backs = get_workbench().get_option("serial.last_backend_per_vid_pid")
         if last_backs.get((p.vid, p.pid), "") == cls.backend_name:
             return True
 
-        if "CircuitPython CDC control" in (p.interface or ""):
+        if "CircuitPython CDC " in (p.interface or ""):
             return cls._is_for_circuitpython()
 
         if "MicroPython" in (p.manufacturer or ""):
@@ -986,16 +987,12 @@ def list_serial_ports():
         if sys.platform == "win32":
             try:
                 from adafruit_board_toolkit._list_ports_windows import comports
-
-                logger.info("Could import adafruit_board_toolkit")
             except ImportError:
                 logger.info("Falling back to serial.tools.list_ports.comports")
                 from serial.tools.list_ports import comports
         elif sys.platform == "darwin":
             try:
                 from adafruit_board_toolkit._list_ports_osx import comports
-
-                logger.info("Could import adafruit_board_toolkit")
             except ImportError:
                 logger.info("Falling back to serial.tools.list_ports.comports")
                 from serial.tools.list_ports import comports

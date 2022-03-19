@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
-from thonny.common import InlineCommand, normpath_with_actual_case, path_startswith
+from thonny.common import InlineCommand, normpath_with_actual_case, path_startswith, DistInfo
 from thonny.languages import tr
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
@@ -988,12 +988,12 @@ class PluginsPipDialog(PipDialog):
         pkg_resources._initialize_master_working_set()
 
         self._active_distributions = {
-            dist.key: {
-                "project_name": dist.project_name,
-                "key": dist.key,
-                "location": dist.location,
-                "version": dist.version,
-            }
+            dist.key: DistInfo(
+                project_name= dist.project_name,
+                key= dist.key,
+                location= dist.location,
+                version= dist.version,
+            )
             for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
         }
 

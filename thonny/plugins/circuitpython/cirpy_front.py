@@ -76,7 +76,7 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
     def _is_potential_port(cls, p):
         if "adafruit_board_toolkit" in sys.modules or sys.platform == "linux":
             # can trust p.interface value
-            return "CircuitPython CDC control" in (p.interface or "")
+            return "CircuitPython CDC " in (p.interface or "")
         else:
             return super()._is_potential_port(p)
 
