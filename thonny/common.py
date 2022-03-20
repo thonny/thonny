@@ -775,4 +775,6 @@ def is_virtual_executable(executable):
 
 
 def is_private_python(executable):
-    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
+    result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
+    logger.debug("is_private_python(%r) == %r", executable, result)
+    return result

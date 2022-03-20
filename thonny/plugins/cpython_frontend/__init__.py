@@ -11,7 +11,7 @@ def load_plugin():
     wb = get_workbench()
     wb.set_default("run.backend_name", "LocalCPython")
     wb.set_default("LocalCPython.last_executables", [])
-    wb.set_default("LocalCPython.executable", "")
+    wb.set_default("LocalCPython.executable", get_default_cpython_path_for_backend())
 
     if wb.get_option("run.backend_name") in ["PrivateVenv", "SameAsFrontend", "CustomCPython"]:
         # Removed in Thonny 4.0

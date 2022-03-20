@@ -165,8 +165,7 @@ class LocalCPythonProxy(SubprocessProxy):
     @classmethod
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
         exe = conf[f"{cls.backend_name}.executable"]
-        print("Comparing", exe, sys.executable)
-        if is_private_python(exe) and exe == sys.executable:
+        if is_private_python(exe) and exe == get_default_cpython_path_for_backend():
             exe_label = tr("Thonny's Python")
         else:
             exe_label = exe
@@ -434,6 +433,9 @@ def get_default_cpython_path_for_backend() -> str:
     else:
         default_path = get_front_interpreter_for_subprocess()
 
+    # In macOS bundle the path may have ..-s
+    default_path = os.path.normpath(default_path)
+
     if running_on_mac_os():
         # try to generalize so that the path can survive Python upgrade
         ver = "{}.{}".format(*sys.version_info)
@@ -444,7 +446,6 @@ def get_default_cpython_path_for_backend() -> str:
                 return generalized
 
     return default_path
-
 
 def _get_interpreters_from_windows_registry():
     # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
