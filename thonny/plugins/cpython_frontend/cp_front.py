@@ -164,7 +164,14 @@ class LocalCPythonProxy(SubprocessProxy):
 
     @classmethod
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
-        return cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"]
+        exe = conf[f"{cls.backend_name}.executable"]
+        print("Comparing", exe, sys.executable)
+        if is_private_python(exe) and exe == sys.executable:
+            exe_label = tr("Thonny's Python")
+        else:
+            exe_label = exe
+        # •✶♦▸
+        return cls.backend_description + "  •  " + exe_label
 
     @classmethod
     def get_switcher_entries(cls):

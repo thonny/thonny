@@ -377,9 +377,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         port = conf[f"{cls.backend_name}.port"]
         if port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.url"]
-            return f"{cls.backend_description} - {url}"
+            return f"{cls.backend_description}  •  {url}"
         else:
-            return f"{cls.backend_description} - {port}"
+            return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
@@ -805,7 +805,7 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
-        return cls.backend_description + " - " + conf[f"{cls.backend_name}.executable"]
+        return cls.backend_description + "  •  " + conf[f"{cls.backend_name}.executable"]
 
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
@@ -939,7 +939,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         user = conf[f"{cls.backend_name}.user"]
         host = conf[f"{cls.backend_name}.host"]
         executable = conf[f"{cls.backend_name}.executable"]
-        return f"{cls.backend_description} - {user} @ {host} : {executable}"
+        return f"{cls.backend_description}  •  {user} @ {host} : {executable}"
 
     @classmethod
     def get_switcher_entries(cls):

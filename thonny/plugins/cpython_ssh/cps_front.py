@@ -127,7 +127,7 @@ class SshCPythonProxy(SubprocessProxy):
         user = conf[f"{cls.backend_name}.user"]
         host = conf[f"{cls.backend_name}.host"]
         executable = conf[f"{cls.backend_name}.executable"]
-        return f"{cls.backend_description} - {user} @ {host} : {executable}"
+        return f"{cls.backend_description}  •  {user} @ {host} : {executable}"
 
     @classmethod
     def get_switcher_entries(cls):
