@@ -47,7 +47,7 @@ class Session:
     Allows performing several commands in row without releasing the venv.
     """
 
-    def __init__(self, adapter: Adapter, tty: bool=True):
+    def __init__(self, adapter: Adapter, tty: bool = True):
         self._adapter = adapter
         self._venv_lock: Optional[BaseFileLock] = None
         self._venv_dir: Optional[str] = None
@@ -161,9 +161,7 @@ class Session:
         yes: bool = False,
         **_,
     ):
-        args = ["uninstall"]
-        if yes:
-            args += ["--yes"]
+        args = ["uninstall", "--yes"]
 
         for rf in requirement_files or []:
             args += ["-r", rf]
@@ -177,6 +175,13 @@ class Session:
 
         removed_meta_dirs = {name for name in state_before if name not in state_after}
         if removed_meta_dirs:
+            # NB! If you want to move confirmation back to pip process, then test the process
+            # in Windows via Thonny
+            if not yes:
+                names = [parse_meta_dir_name(d)[0] for d in removed_meta_dirs]
+                if input(f"Proceed removing {', '.join(names)} (Y/n) at target? ").lower() == "n":
+                    return
+
             self._report_progress("Starting to apply changes to the target.")
 
         for meta_dir_name in removed_meta_dirs:
@@ -470,8 +475,9 @@ class Session:
     def _prepare_venv(self) -> Tuple[BaseFileLock, str]:
         path = self._compute_venv_path()
         if not os.path.exists(path):
+            self._report_progress("Preparing working environment ...")
             logger.info("Start preparing working environment at %s ...", path)
-            subprocess.check_output(
+            subprocess.check_call(
                 [
                     sys.executable,
                     "-I",
@@ -483,7 +489,7 @@ class Session:
             )
             logger.info("Done creating venv")
             assert os.path.exists(path)
-            subprocess.check_output(
+            subprocess.check_call(
                 [
                     get_venv_executable(path),
                     "-I",
@@ -647,11 +653,7 @@ class Session:
                 proxy.shutdown()
 
     def _invoke_pip(self, args: List[str]) -> None:
-        pip_cmd = [
-            get_venv_executable(self._venv_dir),
-            "-I",
-            "-m",
-            "pip"]
+        pip_cmd = [get_venv_executable(self._venv_dir), "-I", "-m", "pip"]
 
         if not self._tty:
             pip_cmd += ["--no-color"]
@@ -666,7 +668,7 @@ class Session:
         env = {key: os.environ[key] for key in os.environ if not key.startswith("PIP_")}
         env["PIP_CACHE_DIR"] = self._get_pipkin_cache_dir()
 
-        subprocess.check_output(pip_cmd, env=env, stdin=subprocess.DEVNULL)
+        subprocess.check_call(pip_cmd, env=env, stdin=subprocess.DEVNULL)
 
     def _compile_with_mpy_cross(
         self, source_path: str, target_path: str, mpy_cross_path: Optional[str]

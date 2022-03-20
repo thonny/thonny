@@ -8,6 +8,7 @@ from pipkin.common import UserError
 from pipkin.util import parse_meta_dir_name
 
 META_ENCODING = "utf-8"
+KNOWN_VID_PIDS = {(0x2E8A, 0x0005)}  # Raspberry Pi Pico
 
 logger = getLogger(__name__)
 
@@ -439,5 +440,32 @@ def create_adapter(port: Optional[str], mount: Optional[str], dir: Optional[str]
     elif mount:
         return MountAdapter(mount)
     else:
-        # TODO: infer the target
-        raise NotImplementedError()
+        return _infer_adapter()
+
+
+def _infer_adapter() -> BaseAdapter:
+    from serial.tools.list_ports import comports
+
+    candidates = [("port", p.device) for p in comports() if (p.vid, p.pid) in KNOWN_VID_PIDS]
+
+    from .util import list_volumes
+
+    for vol in list_volumes(skip_letters={"A"}):
+        if os.path.isfile(os.path.join(vol, "boot_out.txt")):
+            candidates.append(("mount", vol))
+
+    if not candidates:
+        raise UserError("Could not auto-detect target")
+
+    if len(candidates) > 1:
+        raise UserError(f"Found several possible targets: {candidates}")
+
+    kind, arg = candidates[0]
+    if kind == "port":
+        from pipkin import bare_metal, serial_connection
+
+        connection = serial_connection.SerialConnection(arg)
+        return bare_metal.SerialPortAdapter(connection)
+    else:
+        assert kind == "mount"
+        return MountAdapter(arg)

@@ -28,8 +28,12 @@ import errno
 import io
 import json
 import logging
+import os.path
 import shlex
+import subprocess
+import sys
 import tarfile
+import tempfile
 import threading
 from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -39,11 +43,22 @@ from typing import Dict, List, Optional, Tuple
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
-from pipkin.common import UserError
+from pipkin.util import normalize_dist_name, parse_dist_file_name
 
 MP_ORG_INDEX = "https://micropython.org/pi"
 PYPI_SIMPLE_INDEX = "https://pypi.org/simple"
 SERVER_ENCODING = "utf-8"
+
+# https://github.com/adafruit/circuitpython-build-tools/blob/de44a709f6287d2759df14c89707f2d8f5a026f5/circuitpython_build_tools/scripts/build_bundles.py#L42
+NORMALIZED_IRRELEVANT_PACKAGE_NAMES = {
+    "adafruit_blinka",
+    "adafruit_blinka_bleio",
+    "adafruit_blinka_displayio",
+    "adafruit_blinka_pyportal",
+    "adafruit_python_extended_bus",
+    "pyserial",
+    "adafruit_circuitpython_busdevice",
+}
 
 # For efficient caching it's better if the proxy always runs at the same port
 PREFERRED_PORT = 36628
@@ -144,18 +159,26 @@ class JsonIndexDownloader(BaseIndexDownloader):
         return result
 
 
+class MpOrgIndexDownloader(JsonIndexDownloader):
+    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+        if not normalize_dist_name(dist_name).startswith("micropython_"):
+            return None
+
+        return super()._download_file_urls(dist_name)
+
+
 class PipkinProxy(HTTPServer):
     def __init__(
         self, no_mp_org: bool, index_url: Optional[str], extra_index_urls: List[str], port: int
     ):
         self._downloaders: List[BaseIndexDownloader] = []
-        self._downloaders_by_dist_name: Dict[str, BaseIndexDownloader] = {}
+        self._downloaders_by_dist_name: Dict[str, Optional[BaseIndexDownloader]] = {}
         if not no_mp_org:
-            self._downloaders.append(JsonIndexDownloader(MP_ORG_INDEX))
+            self._downloaders.append(MpOrgIndexDownloader(MP_ORG_INDEX))
         self._downloaders.append(SimpleIndexDownloader(index_url or PYPI_SIMPLE_INDEX))
         for url in extra_index_urls:
             self._downloaders.append(SimpleIndexDownloader(url))
-        super().__init__(("", port), PipkinProxyHandler)
+        super().__init__(("127.0.0.1", port), PipkinProxyHandler)
 
     def get_downloader_for_dist(self, dist_name: str) -> Optional[BaseIndexDownloader]:
         if dist_name not in self._downloaders_by_dist_name:
@@ -215,8 +238,11 @@ class PipkinProxyHandler(BaseHTTPRequestHandler):
     def _serve_file(self, dist_name: str, file_name: str):
         logger.debug("Serving %s for %s", file_name, dist_name)
 
-        original_bytes = self._download_file(dist_name, file_name)
-        tweaked_bytes = self._tweak_file(dist_name, file_name, original_bytes)
+        if self._should_return_dummy(dist_name):
+            tweaked_bytes = create_dummy_dist(dist_name, file_name)
+        else:
+            original_bytes = self._download_file(dist_name, file_name)
+            tweaked_bytes = self._tweak_file(dist_name, file_name, original_bytes)
 
         self.send_response(200)
         self.send_header("Content-Type", "application/octet-stream")
@@ -241,6 +267,13 @@ class PipkinProxyHandler(BaseHTTPRequestHandler):
         with urlopen(url) as result:
             logger.debug("Headers: %r", result.headers.items())
             return result.read()
+
+    def _should_return_dummy(self, dist_name: str) -> bool:
+        return normalize_dist_name(
+            dist_name
+        ) in NORMALIZED_IRRELEVANT_PACKAGE_NAMES or normalize_dist_name(dist_name).startswith(
+            "adafruit_blinka_"
+        )
 
     def _tweak_file(self, dist_name: str, file_name: str, original_bytes: bytes) -> bytes:
         if not file_name.lower().endswith(".tar.gz"):
@@ -276,7 +309,7 @@ class PipkinProxyHandler(BaseHTTPRequestHandler):
                 assert info.isdir()
                 wrapper_dir, rel_name = info.name, ""
 
-            assert wrapper_dir.startswith(dist_name)
+            assert normalize_dist_name(wrapper_dir).startswith(normalize_dist_name(dist_name))
 
             rel_name = rel_name.strip("/")
             rel_segments = rel_name.split("/")
@@ -436,3 +469,47 @@ def start_proxy(
     server_thread.start()
 
     return proxy
+
+
+def create_dummy_dist(dist_name: str, file_name: str) -> bytes:
+    logger.info("Creating dummy content for %s", file_name)
+    parsed_dist_name, version, suffix = parse_dist_file_name(file_name)
+    assert normalize_dist_name(dist_name) == normalize_dist_name(parsed_dist_name)
+
+    with tempfile.TemporaryDirectory(prefix="pipkin-proxy") as tmp:
+        setup_py_path = os.path.join(tmp, "setup.py")
+        with open(setup_py_path, "w", encoding="utf-8") as fp:
+            fp.write(
+                dedent(
+                    f"""
+            from setuptools import setup
+            setup(
+                name={dist_name!r},
+                version={version!r},
+                description="Dummy package for satisfying formal requirements",
+                long_description="?",
+                url="?",
+                author="?"
+            )
+            """
+                )
+            )
+
+        if suffix == ".whl":
+            setup_py_args = ["bdist_wheel"]
+        elif suffix == ".zip":
+            setup_py_args = ["sdist", "--formats=zip"]
+        elif suffix == ".tar.gz":
+            setup_py_args = ["sdist", "--formats=gztar"]
+        else:
+            raise AssertionError("Unexpected suffix " + suffix)
+
+        args = [sys.executable, setup_py_path] + setup_py_args
+        subprocess.check_call(args, cwd=tmp, stdin=subprocess.DEVNULL)
+
+        dist_dir = os.path.join(tmp, "dist")
+        dist_files = os.listdir(dist_dir)
+
+        assert len(dist_files) == 1
+        with open(os.path.join(dist_dir, dist_files[0]), "rb") as bfp:
+            return bfp.read()

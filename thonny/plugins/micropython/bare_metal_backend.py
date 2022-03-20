@@ -1627,16 +1627,24 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             from pipkin.bare_metal import WebReplAdapter
 
             class_ = WebReplAdapter
+            kwargs = {}
         else:
             from pipkin.bare_metal import SerialPortAdapter
 
             class_ = SerialPortAdapter
+            kwargs = {}
+            if self._connected_to_circuitpython():
+                try:
+                    kwargs["mount_path"] = self._get_fs_mount()
+                except Exception:
+                    logger.warning("Could not get mount path", exc_info=True)
 
         return class_(
             self._connection,
             submit_mode=self._submit_mode,
             write_block_size=self._write_block_size,
             write_block_delay=self._write_block_delay,
+            **kwargs,
         )
 
     def _report_internal_exception(self, msg: str) -> None:

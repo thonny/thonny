@@ -1,8 +1,9 @@
 import os.path
+import re
 import subprocess
 import sys
 from logging import getLogger
-from typing import Tuple
+from typing import List, Optional, Set, Tuple
 
 logger = getLogger(__name__)
 
@@ -83,9 +84,69 @@ def parse_meta_dir_name(name: str) -> Tuple[str, str]:
     return name, version
 
 
+def parse_dist_file_name(file_name: str) -> Tuple[str, str, str]:
+    file_name = file_name.lower()
+    for suffix in [".zip", ".whl", ".tar.gz"]:
+        if file_name.endswith(suffix):
+            file_name = file_name[: -len(suffix)]
+            break
+    else:
+        raise AssertionError("Unexpected file name " + file_name)
+
+    # dist name and version is separated by the dash, but both parts can also contain dashes...
+    if file_name.count("-") == 1:
+        dist_name, version = file_name.split("-")
+    else:
+        # assuming dashes in the version part have digit on their left and letter on their right
+        # let's get rid of these
+        tweaked_file_name = re.sub(r"(\d)-([a-zA-Z])", r"\1_\2", file_name)
+        # now let's treat the rightmost dash as separator
+        dist_name = tweaked_file_name.rsplit("-", maxsplit=1)[0]
+        version = file_name[len(dist_name) + 1 :]
+
+    return dist_name, version, suffix
+
+
 def starts_with_continuation_byte(data: bytes) -> bool:
     return len(data) > 0 and is_continuation_byte(data[0])
 
 
 def is_continuation_byte(byte: int) -> bool:
     return (byte & 0b11000000) == 0b10000000
+
+
+def normalize_dist_name(name: str) -> str:
+    return name.lower().replace("-", "_")
+
+
+def list_volumes(skip_letters: Optional[Set[str]] = None) -> List[str]:
+    skip_letters = skip_letters or set()
+
+    "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
+    if sys.platform == "win32":
+        import ctypes
+
+        #
+        # In certain circumstances, volumes are allocated to USB
+        # storage devices which cause a Windows popup to raise if their
+        # volume contains no media. Wrapping the check in SetErrorMode
+        # with SEM_FAILCRITICALERRORS (1) prevents this popup.
+        #
+        old_mode = ctypes.windll.kernel32.SetErrorMode(1)  # @UndefinedVariable
+        try:
+            volumes = []
+            for disk in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                if disk in skip_letters:
+                    continue
+                path = "{}:\\".format(disk)
+                if os.path.exists(path):
+                    volumes.append(path)
+
+            return volumes
+        finally:
+            ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
+    else:
+        # 'posix' means we're on Linux or OSX (Mac).
+        # Call the unix "mount" command to list the mounted volumes.
+        mount_output = subprocess.check_output(["mount"], stdin=subprocess.DEVNULL).splitlines()
+        return [x.split()[2].decode("utf-8") for x in mount_output]

@@ -658,6 +658,7 @@ class SerialPortAdapter(BareMetalAdapter):
             write_block_delay=write_block_delay,
         )
         self._mount_path = mount_path
+        self._read_only_filesystem = False
 
     def _internal_path_to_mounted_path(self, target_path: str) -> str:
         assert self._mount_path
@@ -667,17 +668,14 @@ class SerialPortAdapter(BareMetalAdapter):
     def write_file_in_existing_dir(self, path: str, content: bytes) -> None:
         start_time = time.time()
 
+        if self._read_only_filesystem:
+            self._write_file_via_mount(path, content)
+
         try:
             self._write_file_via_serial(path, content)
         except ReadOnlyFilesystemError as e:
-            if self._mount_path is not None:
-                self._write_file_via_mount(path, content)
-            else:
-                raise UserError(
-                    "Target filesystem seems to be read-only. "
-                    "If your device mounts its filesystem as a disk, "
-                    "you may be able to manage it by using the --mount argument."
-                ) from e
+            self._read_only_filesystem = True
+            self._write_file_via_mount(path, content)
 
         logger.info("Wrote %s in %.1f seconds", path, time.time() - start_time)
 
@@ -797,15 +795,21 @@ class SerialPortAdapter(BareMetalAdapter):
         )
 
     def remove_file_if_exists(self, path: str) -> None:
+        if self._read_only_filesystem:
+            self._remove_file_via_mount(path)
+            return
+
         try:
             super().remove_file_if_exists(path)
         except ManagementError as e:
-            if self._contains_read_only_error(e.out + e.err) and self._mount_path:
+            if self._contains_read_only_error(e.out + e.err):
+                self._read_only_filesystem = True
                 self._remove_file_via_mount(path)
             else:
                 raise
 
     def _remove_file_via_mount(self, target_path: str) -> None:
+        logger.info("Removing %s via mount", target_path)
         mounted_target_path = self._internal_path_to_mounted_path(target_path)
         assert os.path.isfile(mounted_target_path)
         os.remove(mounted_target_path)
@@ -819,10 +823,15 @@ class SerialPortAdapter(BareMetalAdapter):
         )
 
     def mkdir_in_existing_parent_exists_ok(self, path: str) -> None:
+        if self._read_only_filesystem:
+            self._mkdir_via_mount(path)
+            return
+
         try:
             super().mkdir_in_existing_parent_exists_ok(path)
         except ManagementError as e:
             if self._contains_read_only_error(e.out + e.err):
+                self._read_only_filesystem = True
                 self._mkdir_via_mount(path)
             else:
                 raise
@@ -837,11 +846,15 @@ class SerialPortAdapter(BareMetalAdapter):
             return False
 
     def remove_dir_if_empty(self, path: str) -> bool:
+        if self._read_only_filesystem:
+            return self._remove_dir_if_empty_via_mount(path)
+
         try:
             return super().remove_dir_if_empty(path)
         except ManagementError as e:
             if self._contains_read_only_error(e.out + e.err):
-                return self._mkdir_via_mount(path)
+                self._read_only_filesystem = True
+                return self._remove_dir_if_empty_via_mount(path)
             else:
                 raise
 
