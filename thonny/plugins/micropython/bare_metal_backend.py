@@ -1097,8 +1097,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         else:
             try:
                 super()._delete_sorted_paths(paths)
-            except Exception as e:
-                if self._contains_read_only_error(str(e)):
+            except ManagementError as e:
+                if self._contains_read_only_error(e.out + e.err):
                     self._delete_via_mount(paths)
                 else:
                     raise
