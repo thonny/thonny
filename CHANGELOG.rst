@@ -26,6 +26,7 @@ Code completion and analysis
 
 MicroPython
 ~~~~~~~~~~~
+* Use [pipkin](https://pypi.org/project/pipkin/) for managing packages on MicroPython and CircuitPython devices. This enables proper listing of packages together with version info and proper uninstallation.
 * Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends, 116aecd714d5e94a8ad6e244deac44aece5065eb
 * Present MicroPython time options (whether to sync time and whether to use local time) in back-end configuration page, #1638
 * Automatically interrupt current process when connecting to bare-metal MicroPython or CircuitPython device. This can be turned off at device's settings page, #2059
@@ -57,6 +58,7 @@ Various
 * Removed previously deprecated "A special virtual environment". Use regular virtual environments instead.
 * Merge "The same interpreter which runs Thonny" and "Alternative Python 3 interpreter or virtual environment" back-ends into "Local Python 3"
 * Back-end switcher now remembers several configurations for remote CPython and MicroPython.
+* Make package manager work for remote Python 3 (SSH)
 
 Fixed
 -----
