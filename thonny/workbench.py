@@ -686,7 +686,7 @@ class Workbench(tk.Tk):
             tr("Support Ukraine"),
             self._support_ukraine,
             image="Ukraine",
-            caption=tr("Support!"),
+            caption=tr("Support"),
             include_in_toolbar=True,
             group=101,
         )

@@ -20,7 +20,7 @@ def _load_plugin():
     add_micropython_backend(
         "EV3MicroPython",
         EV3MicroPythonProxy,
-        tr("MicroPython (EV3)"),
+        "MicroPython (EV3)",
         EV3MicroPythonConfigPage,
         sort_key="23",
     )

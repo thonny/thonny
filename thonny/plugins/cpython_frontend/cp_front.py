@@ -225,7 +225,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python 3.8 and later")
+        extra_text = tr("NB! Thonny only supports Python %s and later") % "3.8"
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"

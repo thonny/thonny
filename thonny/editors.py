@@ -153,8 +153,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     tr("File is gone"),
-                    tr("Looks like '%s' was deleted or moved outside of the editor.")
-                    % self._filename
+                    tr("Looks like '%s' was deleted or moved.") % self._filename
                     + "\n\n"
                     + tr("Do you want to also close the editor?"),
                     master=self,
@@ -169,7 +168,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     tr("External modification"),
-                    tr("Looks like '%s' was modified outside the editor.") % self._filename
+                    tr("Looks like '%s' was modified outside of the editor.") % self._filename
                     + "\n\n"
                     + tr(
                         "Do you want to discard current editor content and reload the file from disk?"
@@ -966,7 +965,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_goto_source_line(self):
         editor = self.get_current_editor()
         if editor:
-            line_no = simpledialog.askinteger(tr("Goto"), tr("Line number"))
+            line_no = simpledialog.askinteger(tr("Go to line"), tr("Line number"))
             if line_no:
                 editor.select_line(line_no)
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-21 10:24+0200\n"
+"POT-Creation-Date: 2022-03-21 10:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: thonny/base_file_browser.py:92 thonny/base_file_browser.py:762
+#: thonny/base_file_browser.py:92 thonny/base_file_browser.py:759
 msgid "Modified"
 msgstr ""
 
@@ -82,13 +82,17 @@ msgstr ""
 msgid "Open in Thonny"
 msgstr ""
 
-#: thonny/base_file_browser.py:649 thonny/base_file_browser.py:670
-msgid "Open in system default app"
+#: thonny/base_file_browser.py:649
+msgid "Open in default external app"
 msgstr ""
 
 #: thonny/base_file_browser.py:656 thonny/base_file_browser.py:678
 #, python-format
 msgid "Configure %s files"
+msgstr ""
+
+#: thonny/base_file_browser.py:670
+msgid "Open in system default app"
 msgstr ""
 
 #: thonny/base_file_browser.py:671
@@ -106,7 +110,7 @@ msgstr ""
 msgid "New file"
 msgstr ""
 
-#: thonny/base_file_browser.py:703 thonny/base_file_browser.py:858
+#: thonny/base_file_browser.py:703 thonny/base_file_browser.py:854
 msgid "New directory"
 msgstr ""
 
@@ -129,184 +133,171 @@ msgstr ""
 msgid "Rename"
 msgstr ""
 
-#: thonny/base_file_browser.py:722
-msgid "Move to Recycle Bin"
-msgstr ""
-
-#: thonny/base_file_browser.py:724
+#: thonny/base_file_browser.py:721
 msgid "Move to Trash"
 msgstr ""
 
-#: thonny/base_file_browser.py:727
+#: thonny/base_file_browser.py:724
 msgid "Delete"
 msgstr ""
 
-#: thonny/base_file_browser.py:730
+#: thonny/base_file_browser.py:727
 msgid "Properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:732
+#: thonny/base_file_browser.py:729
 msgid "Storage space"
 msgstr ""
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:739
 msgid "Path"
 msgstr ""
 
-#: thonny/base_file_browser.py:744
+#: thonny/base_file_browser.py:741
 msgid "Directory properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:746
+#: thonny/base_file_browser.py:743
 msgid "File properties"
 msgstr ""
 
-#: thonny/base_file_browser.py:748
+#: thonny/base_file_browser.py:745
 msgid "bytes"
 msgstr ""
 
-#: thonny/base_file_browser.py:751
+#: thonny/base_file_browser.py:748
 msgid "Size"
 msgstr ""
 
-#: thonny/base_file_browser.py:821
+#: thonny/base_file_browser.py:818
 #, python-format
 msgid "Deleting %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:831
-msgid "Recycle Bin"
+#: thonny/base_file_browser.py:829
+msgid "Moving to Trash"
 msgstr ""
 
-#: thonny/base_file_browser.py:831
-msgid "Trash"
-msgstr ""
-
-#: thonny/base_file_browser.py:833
+#: thonny/base_file_browser.py:830
 #, python-format
-msgid "Moving to %s"
+msgid "Move %s to Trash?"
 msgstr ""
 
-#: thonny/base_file_browser.py:834
+#: thonny/base_file_browser.py:837
 #, python-format
-msgid "Move %s to %s?"
+msgid "Moving %s to Trash"
 msgstr ""
 
-#: thonny/base_file_browser.py:841
-#, python-format
-msgid "Moving %s to %s"
-msgstr ""
-
-#: thonny/base_file_browser.py:859
+#: thonny/base_file_browser.py:855
 #, python-format
 msgid ""
 "Enter name for new directory under\n"
 "%s"
 msgstr ""
 
-#: thonny/base_file_browser.py:882
+#: thonny/base_file_browser.py:878
 msgid "Nothing selected"
 msgstr ""
 
-#: thonny/base_file_browser.py:882
+#: thonny/base_file_browser.py:878
 msgid "Select an item and try again!"
 msgstr ""
 
-#: thonny/base_file_browser.py:908
+#: thonny/base_file_browser.py:904
 #, python-format
 msgid "Rename '%s'"
 msgstr ""
 
-#: thonny/base_file_browser.py:908
+#: thonny/base_file_browser.py:904
 msgid "Enter new name"
 msgstr ""
 
-#: thonny/base_file_browser.py:996
+#: thonny/base_file_browser.py:992
 msgid "Paste failed"
 msgstr ""
 
-#: thonny/base_file_browser.py:996
+#: thonny/base_file_browser.py:992
 msgid "There are conflicting folders"
 msgstr ""
 
-#: thonny/base_file_browser.py:1118
+#: thonny/base_file_browser.py:1114
 msgid "File already exists"
 msgstr ""
 
-#: thonny/base_file_browser.py:1180 thonny/plugins/pip_gui.py:1460
+#: thonny/base_file_browser.py:1176 thonny/plugins/pip_gui.py:1460
 msgid "Not supported"
 msgstr ""
 
-#: thonny/base_file_browser.py:1181
-msgid "Opening remote files in system app is not supported."
+#: thonny/base_file_browser.py:1177
+msgid "Opening remote files in external app is not supported."
 msgstr ""
 
-#: thonny/base_file_browser.py:1183
+#: thonny/base_file_browser.py:1179
 msgid ""
 "If it is a text file, then you can configure it to open in Thonny by "
 "right-clicking it and selecting 'Configure ... files'."
 msgstr ""
 
-#: thonny/base_file_browser.py:1188
+#: thonny/base_file_browser.py:1184
 msgid ""
-"If the file needs to be opened in a system app, then download it to a "
+"If the file needs to be opened in external app, then download it to a "
 "local directory and open it from there!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1229 thonny/editors.py:945 thonny/editors.py:947
+#: thonny/base_file_browser.py:1225 thonny/editors.py:945 thonny/editors.py:947
 msgid "Deleting"
 msgstr ""
 
-#: thonny/base_file_browser.py:1236
+#: thonny/base_file_browser.py:1232
 msgid "Creating directory"
 msgstr ""
 
-#: thonny/base_file_browser.py:1300
+#: thonny/base_file_browser.py:1296
 #, python-format
 msgid "Open from %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:1303
+#: thonny/base_file_browser.py:1299
 #, python-format
 msgid "Save to %s"
 msgstr ""
 
-#: thonny/base_file_browser.py:1315
+#: thonny/base_file_browser.py:1311
 msgid "File name:"
 msgstr ""
 
-#: thonny/base_file_browser.py:1325 thonny/config_ui.py:37 thonny/export.py:25
+#: thonny/base_file_browser.py:1321 thonny/config_ui.py:37 thonny/export.py:25
 #: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
 #: thonny/ui_utils.py:145 thonny/ui_utils.py:1768 thonny/workdlg.py:197
 msgid "OK"
 msgstr ""
 
-#: thonny/base_file_browser.py:1328 thonny/config_ui.py:38 thonny/export.py:28
+#: thonny/base_file_browser.py:1324 thonny/config_ui.py:38 thonny/export.py:28
 #: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1209
 #: thonny/ui_utils.py:148 thonny/ui_utils.py:1686 thonny/ui_utils.py:1771
 #: thonny/workdlg.py:156 thonny/workdlg.py:200
 msgid "Cancel"
 msgstr ""
 
-#: thonny/base_file_browser.py:1351 thonny/base_file_browser.py:1363
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
 #: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
 msgid "Error"
 msgstr ""
 
-#: thonny/base_file_browser.py:1351 thonny/base_file_browser.py:1363
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
 msgid "You need to select a file!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1367
+#: thonny/base_file_browser.py:1363
 msgid "Overwrite?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1367
+#: thonny/base_file_browser.py:1363
 #, python-format
 msgid "Do you want to overwrite '%s' ?"
 msgstr ""
 
-#: thonny/base_file_browser.py:1512
+#: thonny/base_file_browser.py:1508
 msgid "This computer"
 msgstr ""
 
@@ -333,7 +324,7 @@ msgstr ""
 
 #: thonny/editors.py:156
 #, python-format
-msgid "Looks like '%s' was deleted or moved outside of the editor."
+msgid "Looks like '%s' was deleted or moved."
 msgstr ""
 
 #: thonny/editors.py:159
@@ -346,7 +337,7 @@ msgstr ""
 
 #: thonny/editors.py:172
 #, python-format
-msgid "Looks like '%s' was modified outside the editor."
+msgid "Looks like '%s' was modified outside of the editor."
 msgstr ""
 
 #: thonny/editors.py:174
@@ -437,7 +428,7 @@ msgid "Go to line..."
 msgstr ""
 
 #: thonny/editors.py:969
-msgid "Goto"
+msgid "Go to line"
 msgstr ""
 
 #: thonny/editors.py:969
@@ -665,7 +656,7 @@ msgid "Support Ukraine"
 msgstr ""
 
 #: thonny/workbench.py:689
-msgid "Support!"
+msgid "Support"
 msgstr ""
 
 #: thonny/plugins/backend_config_page.py:323 thonny/workbench.py:849
@@ -1489,15 +1480,6 @@ msgstr ""
 msgid "Thonny plugin without requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1051
-msgid ""
-"Looks like you are trying to install an outdated Thonny\n"
-"plug-in (it doesn't specify required Thonny version\n"
-"or hasn't uploaded a whl file before other files).\n"
-"\n"
-"If you still want it, then please install it from the command line."
-msgstr ""
-
 #: thonny/plugins/pip_gui.py:1066
 msgid "Unsuitable requirements"
 msgstr ""
@@ -1758,7 +1740,8 @@ msgid "Python executable"
 msgstr ""
 
 #: thonny/plugins/cpython_frontend/cp_front.py:228
-msgid "NB! Thonny only supports Python 3.8 and later"
+#, python-format
+msgid "NB! Thonny only supports Python %s and later"
 msgstr ""
 
 #: thonny/plugins/cpython_frontend/cp_front.py:230
@@ -1794,10 +1777,6 @@ msgstr ""
 
 #: thonny/plugins/cpython_ssh/__init__.py:16
 msgid "Remote Python 3 (SSH)"
-msgstr ""
-
-#: thonny/plugins/ev3/__init__.py:23
-msgid "MicroPython (EV3)"
 msgstr ""
 
 #: thonny/plugins/help/__init__.py:70
