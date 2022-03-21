@@ -75,6 +75,7 @@ Fixed
 * Fix the crash caused by Cmd-backtick and others with Spanish keyboard in macOS, #886
 * Fix focus issues in dialogs, #2153
 * Fix automatic horizontal scrollbar not always appearing, #2169 and #659 by @jharris1993 and @lurch
+* Forward SSH password to the back-end process via stdin instead of command line.
 
 3.3.14 (2021-08-01)
 ===================

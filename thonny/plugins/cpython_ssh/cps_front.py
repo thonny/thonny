@@ -37,12 +37,16 @@ class SshCPythonProxy(SubprocessProxy):
                 {
                     "host": self._host,
                     "user": self._user,
-                    "password": get_ssh_password("SshCPython"),
                     "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),
                 }
             ),
         ]
+
+    def _send_initial_input(self) -> None:
+        assert self._proc is not None
+        self._proc.stdin.write((get_ssh_password("SshCPython") or "") + "\n")
+        self._proc.stdin.flush()
 
     def _connect(self):
         pass

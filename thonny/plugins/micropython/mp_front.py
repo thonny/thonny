@@ -848,7 +848,6 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "interpreter": self._target_executable,
             "host": self._host,
             "user": self._user,
-            "password": get_ssh_password("SshMicroPython"),
         }
 
         args.update(self._get_time_args())
@@ -859,6 +858,11 @@ class SshMicroPythonProxy(MicroPythonProxy):
             repr(args),
         ]
         return cmd
+
+    def _send_initial_input(self) -> None:
+        assert self._proc is not None
+        self._proc.stdin.write((get_ssh_password("SshMicroPython") or "") + "\n")
+        self._proc.stdin.flush()
 
     def _get_extra_launcher_args(self):
         return {}

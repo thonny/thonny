@@ -995,10 +995,15 @@ class SubprocessProxy(BackendProxy, ABC):
             **extra_params,
         )
 
+        self._send_initial_input()
+
         # setup asynchronous output listeners
         self._terminated_readers = 0
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
+
+    def _send_initial_input(self) -> None:
+        pass
 
     def _get_launch_cwd(self):
         return self.get_cwd() if self.uses_local_filesystem() else None

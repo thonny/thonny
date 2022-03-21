@@ -28,8 +28,9 @@ logger = getLogger(__name__)
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
-    def __init__(self, host, user, password, interpreter, cwd):
+    def __init__(self, host, user, interpreter, cwd):
         logger.info("Starting mediator for %s @ %s", user, host)
+        password = sys.stdin.readline().strip("\r\n")
         SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()
         self._proc = self._start_main_backend()
