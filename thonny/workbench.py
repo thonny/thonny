@@ -803,7 +803,7 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button
-        self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
+        self._backend_button = ttk.Button(self._statusbar, text="☰", style="Toolbutton")
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)

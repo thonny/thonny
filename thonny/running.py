@@ -873,11 +873,6 @@ class SubprocessProxy(BackendProxy, ABC):
         if ".." in self._mgmt_executable:
             self._mgmt_executable = os.path.normpath(self._mgmt_executable)
 
-        if not os.path.isfile(self._mgmt_executable):
-            raise UserError(
-                "Interpreter '%s' does not exist. Please check the configuration!"
-                % self._mgmt_executable
-            )
         self._welcome_text = ""
 
         self._proc = None
@@ -957,10 +952,12 @@ class SubprocessProxy(BackendProxy, ABC):
         self._response_queue = collections.deque()
 
         if not os.path.exists(self._mgmt_executable):
-            raise UserError(
-                "Interpreter (%s) not found. Please recheck corresponding option!"
-                % self._mgmt_executable
-            )
+            get_shell().print_error(f"Interpreter {self._mgmt_executable} not found. Please recheck corresponding option!")
+            return
+            #raise UserError(
+            #    "Interpreter (%s) not found. Please recheck corresponding option!"
+            #    % self._mgmt_executable
+            #)
 
         cmd_line = (
             [

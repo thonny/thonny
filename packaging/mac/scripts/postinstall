@@ -8,7 +8,7 @@ echo "Thonny was installed to $2"
 PYVER="3.10"
 PYFWK="$2/Thonny.app/Contents/Frameworks/Python.framework"
 PYBIN="$PYFWK/Versions/$PYVER/bin"
-PYINT="$PYBIN/python3"
+PYINT="$PYBIN/python$PYVER"
 PYLIB="$PYFWK/Versions/$PYVER/lib/python$PYVER"
 PYAPP="$PYFWK/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
 

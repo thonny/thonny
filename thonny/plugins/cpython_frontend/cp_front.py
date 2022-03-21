@@ -436,6 +436,7 @@ def get_default_cpython_path_for_backend() -> str:
     # In macOS bundle the path may have ..-s
     default_path = os.path.normpath(default_path)
 
+    """ # Too confusing:
     if running_on_mac_os():
         # try to generalize so that the path can survive Python upgrade
         ver = "{}.{}".format(*sys.version_info)
@@ -444,7 +445,7 @@ def get_default_cpython_path_for_backend() -> str:
             generalized = default_path.replace(ver_fragment, "/Versions/Current/bin/")
             if os.path.exists(generalized):
                 return generalized
-
+    """
     return default_path
 
 def _get_interpreters_from_windows_registry():
