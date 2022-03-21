@@ -118,7 +118,7 @@ class PipDialog(CommonDialog, ABC):
             listframe,
             activestyle="dotbox",
             width=20,
-            height=20,
+            height=23,
             selectborderwidth=0,
             relief="flat",
             # highlightthickness=4,
@@ -200,6 +200,7 @@ class PipDialog(CommonDialog, ABC):
         bold_font.configure(weight="bold", size=default_font.cget("size"))
         self.info_text.tag_configure("caption", font=bold_font)
         self.info_text.tag_configure("bold", font=bold_font)
+        self.info_text.tag_configure("right", justify="right")
 
         self.command_frame = ttk.Frame(info_frame)
         self.command_frame.grid(row=2, column=0, sticky="w")
@@ -339,7 +340,12 @@ class PipDialog(CommonDialog, ABC):
             if self._get_target_directory():
                 self._show_instructions_about_target()
 
+            self._show_extra_instructions()
+
         self._select_list_item(0)
+
+    def _show_extra_instructions(self):
+        pass
 
     def _show_read_only_instructions(self):
         self._append_info_text(tr("Browse the packages") + "\n", ("caption",))
