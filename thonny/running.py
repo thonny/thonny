@@ -952,12 +952,14 @@ class SubprocessProxy(BackendProxy, ABC):
         self._response_queue = collections.deque()
 
         if not os.path.exists(self._mgmt_executable):
-            get_shell().print_error(f"Interpreter {self._mgmt_executable} not found. Please recheck corresponding option!")
+            get_shell().print_error(
+                f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
+            )
             return
-            #raise UserError(
+            # raise UserError(
             #    "Interpreter (%s) not found. Please recheck corresponding option!"
             #    % self._mgmt_executable
-            #)
+            # )
 
         cmd_line = (
             [

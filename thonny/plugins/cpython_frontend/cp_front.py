@@ -448,6 +448,7 @@ def get_default_cpython_path_for_backend() -> str:
     """
     return default_path
 
+
 def _get_interpreters_from_windows_registry():
     # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
     # https://www.python.org/dev/peps/pep-0514/#installpath

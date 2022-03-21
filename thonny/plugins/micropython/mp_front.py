@@ -230,8 +230,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def _is_potential_port(cls, p):
-        logger.debug("Considering %s for %s", p.device, cls.backend_name)
-        logger.debug("interface: %r", p.interface)
         if "CircuitPython CDC2 " in (p.interface or ""):
             return False
 
