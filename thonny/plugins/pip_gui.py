@@ -632,8 +632,6 @@ class PipDialog(CommonDialog, ABC):
         self._set_state("idle")
         self._clear_info_text()
 
-        results = self._tweak_search_results(results, query)
-
         if isinstance(results, str) or not results:
             if not results:
                 self._append_info_text("No results.\n\n")
@@ -644,6 +642,8 @@ class PipDialog(CommonDialog, ABC):
             self._append_info_text("Try opening the package directly:\n")
             self._append_info_text(query, ("url",))
             return
+        else:
+            results = self._tweak_search_results(results, query)
 
         for item in results:
             # self._append_info_text("•")
