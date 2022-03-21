@@ -683,7 +683,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "SupportUkraine",
             "help",
-            tr("Support Ukraine!"),
+            tr("Support Ukraine"),
             self._support_ukraine,
             image="Ukraine",
             caption=tr("Support!"),
@@ -781,7 +781,7 @@ class Workbench(tk.Tk):
     def _init_support_ukraine_bar(self) -> None:
         ukraine_label = create_action_label(
             self._statusbar,
-            tr("Support Ukraine!"),
+            tr("Support Ukraine"),
             self._support_ukraine,
             # image=self.get_image("Ukraine"),
             # compound="left"
