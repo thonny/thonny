@@ -1024,7 +1024,7 @@ class PluginsPipDialog(PipDialog):
         return get_front_interpreter_for_subprocess(sys.executable)
 
     def _use_user_install(self):
-        return True
+        return not self._targets_virtual_environment()
 
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
@@ -1121,9 +1121,10 @@ class PluginsPipDialog(PipDialog):
         cmd = ["-m", "pip", "--disable-pip-version-check", "--no-color", command]
         if command == "install":
             cmd += [
-                "--user",
                 "--no-warn-script-location",
             ]
+            if self._use_user_install():
+                cmd += ["--user"]
         cmd += args
 
         proc = running.create_frontend_python_process(
