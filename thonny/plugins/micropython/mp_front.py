@@ -32,9 +32,7 @@ class MicroPythonProxy(SubprocessProxy):
         super().__init__(clean, running.get_front_interpreter_for_subprocess())
 
     def get_pip_gui_class(self):
-        from thonny.plugins.micropython.pip_gui import MicroPythonPipDialog
-
-        return MicroPythonPipDialog
+        return None
 
     def get_pip_target_dir(self) -> Optional[str]:
 
@@ -97,6 +95,11 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def get_target_executable(self) -> Optional[str]:
         return None
+
+    def get_pip_gui_class(self):
+        from thonny.plugins.micropython.pip_gui import MicroPythonPipDialog
+
+        return MicroPythonPipDialog
 
     def destroy(self, for_restart: bool = False):
         super().destroy(for_restart=for_restart)
