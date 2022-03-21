@@ -735,7 +735,7 @@ class PipDialog(CommonDialog, ABC):
                 master=self,
             ):
                 return False
-            args = [name]
+            args = ["--yes", name]
         elif action == "advanced":
             command = "install"
             title = tr("Installing")
