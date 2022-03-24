@@ -1157,7 +1157,7 @@ class Executor:
     def is_in_past(self):
         return False
 
-    def execute_source(self, source:str, filename, mode, ast_postprocessors):
+    def execute_source(self, source: str, filename, mode, ast_postprocessors):
         assert isinstance(source, str)
 
         if os.path.exists(filename):

@@ -3,11 +3,10 @@
 """
 Adds debugging commands and features.
 """
-import tokenize
-
 import ast
 import os.path
 import tkinter as tk
+import tokenize
 from logging import getLogger
 from tkinter import ttk
 from tkinter.messagebox import showinfo
@@ -729,7 +728,7 @@ class BaseExpressionBox:
             lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
         )
 
-    def _load_expression(self, whole_source:str, filename, text_range):
+    def _load_expression(self, whole_source: str, filename, text_range):
         assert isinstance(whole_source, str)
         root = ast_utils.parse_source(whole_source, filename)
         main_node = ast_utils.find_expression(root, text_range)

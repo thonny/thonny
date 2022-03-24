@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Optional
-
 import ast
 import sys
 import tkinter as tk
 from logging import getLogger
+from typing import Optional
 
 from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
@@ -42,7 +41,7 @@ class AstView(ui_utils.TreeFrame):
         self.tree.heading("range", text="Code range", anchor=tk.W)
 
         self.tree["show"] = ("headings", "tree")
-        self._current_source:Optional[str] = None
+        self._current_source: Optional[str] = None
 
         self._update(None)
 

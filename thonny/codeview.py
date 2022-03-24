@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from logging import getLogger
-
 import codecs
 import io
 import os
 import re
 import sys
 import tkinter as tk
+from logging import getLogger
 from tkinter import messagebox
 from typing import Dict, Union  # @UnusedImport
 
@@ -31,6 +30,7 @@ NON_TEXT_CHARS.remove("\r")
 NON_TEXT_CHARS.remove("\f")
 
 logger = getLogger(__name__)
+
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):

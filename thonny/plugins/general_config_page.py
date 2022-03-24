@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox, ttk
 
 from thonny import get_workbench, languages, tktextext
 from thonny.config_ui import ConfigurationPage
