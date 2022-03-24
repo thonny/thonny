@@ -377,7 +377,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
         port = conf[f"{cls.backend_name}.port"]
         if port == WEBREPL_PORT_VALUE:
-            url = conf[f"{cls.backend_name}.url"]
+            url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
         else:
             return f"{cls.backend_description}  •  {port}"
