@@ -95,6 +95,8 @@ class MainCPythonBackend(MainBackend):
 
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
+        __main__.__package__ = None
+        __main__.__spec__ = None
 
         logger.info("Loading plugins")
         report_time("Before loading plugins")

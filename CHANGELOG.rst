@@ -7,6 +7,7 @@ Version history
 
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
 * Don't clear shell after automatic restart
+* Fixes certain problems with running Flask programs, #2062
 
 4.0.0b1 (2022-03-21)
 ====================
