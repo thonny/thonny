@@ -558,7 +558,7 @@ class Runner:
                 return False
 
             if msg.get("SystemExit", False):
-                self.restart_backend(True)
+                self.restart_backend(True, automatic=True)
                 return False
 
             # change state
@@ -609,11 +609,11 @@ class Runner:
 
         get_workbench().become_active_window(False)
 
-    def restart_backend(self, clean: bool, first: bool = False) -> None:
+    def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
 
         if not first:
-            get_shell().restart()
+            get_shell().restart(automatic=automatic)
             get_shell().update_idletasks()
 
         self.destroy_backend()

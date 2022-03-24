@@ -228,8 +228,8 @@ class ShellView(tk.PanedWindow):
 
         self.text.submit_command(cmd_line, ("magic",))
 
-    def restart(self):
-        self.text.restart()
+    def restart(self, automatic: bool = False):
+        self.text.restart(automatic)
 
     def clear_shell(self):
         self.text._clear_shell()
@@ -891,8 +891,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
-    def restart(self):
-        if get_workbench().get_option("shell.clear_for_new_process"):
+    def restart(self, automatic: bool = False):
+        if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
             self._clear_content("end")
         else:
             if (
