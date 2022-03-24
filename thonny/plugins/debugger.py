@@ -3,6 +3,7 @@
 """
 Adds debugging commands and features.
 """
+import tokenize
 
 import ast
 import os.path
@@ -647,7 +648,7 @@ class BaseExpressionBox:
                 # to while test expression
                 self.clear_debug_view()
 
-            with open(frame_info.filename, "rb") as fp:
+            with tokenize.open(frame_info.filename) as fp:
                 whole_source = fp.read()
 
             lines = whole_source.splitlines()
@@ -728,8 +729,8 @@ class BaseExpressionBox:
             lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
         )
 
-    def _load_expression(self, whole_source, filename, text_range):
-
+    def _load_expression(self, whole_source:str, filename, text_range):
+        assert isinstance(whole_source, str)
         root = ast_utils.parse_source(whole_source, filename)
         main_node = ast_utils.find_expression(root, text_range)
 

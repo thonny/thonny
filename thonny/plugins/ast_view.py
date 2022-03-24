@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from typing import Optional
 
 import ast
 import sys
@@ -41,7 +42,7 @@ class AstView(ui_utils.TreeFrame):
         self.tree.heading("range", text="Code range", anchor=tk.W)
 
         self.tree["show"] = ("headings", "tree")
-        self._current_source = None
+        self._current_source:Optional[str] = None
 
         self._update(None)
 
@@ -56,7 +57,7 @@ class AstView(ui_utils.TreeFrame):
             return
 
         new_cw = editor.get_code_view()
-        new_source = new_cw.get_content_as_bytes()
+        new_source = new_cw.get_content()
         if self._current_code_view == new_cw and self._current_source == new_source:
             return
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from logging import getLogger
+
 import codecs
 import io
 import os
@@ -28,6 +30,7 @@ NON_TEXT_CHARS.remove("\n")
 NON_TEXT_CHARS.remove("\r")
 NON_TEXT_CHARS.remove("\f")
 
+logger = getLogger(__name__)
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
@@ -228,6 +231,7 @@ class CodeView(tktextext.EnhancedTextFrame):
     def set_content_as_bytes(self, data, keep_undo=False):
 
         encoding = self.detect_encoding(data)
+        logger.debug("Detected encoding %s", encoding)
         while True:
             try:
                 chars = data.decode(encoding)

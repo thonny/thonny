@@ -1157,10 +1157,8 @@ class Executor:
     def is_in_past(self):
         return False
 
-    def execute_source(self, source, filename, mode, ast_postprocessors):
-        if isinstance(source, str):
-            # TODO: simplify this or make sure encoding is correct
-            source = source.encode("utf-8")
+    def execute_source(self, source:str, filename, mode, ast_postprocessors):
+        assert isinstance(source, str)
 
         if os.path.exists(filename):
             self._main_module_path = filename
