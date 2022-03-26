@@ -939,6 +939,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
 
         self._load_code(frame_info)
         self._text_frame.text.focus()
+        self.wm_deiconify()
         self.update()
 
     def _init_layout_widgets(self, master, frame_info):
