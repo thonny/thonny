@@ -10,6 +10,7 @@ from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 from logging import getLogger
 
+from thonny import report_time
 from thonny.common import (
     DebuggerCommand,
     DebuggerResponse,
@@ -178,6 +179,7 @@ class Tracer(Executor):
                 self._backend._handle_normal_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
+                report_time(f"Reading debugger command {cmd}")
                 self._prev_breakpoints = self._current_command.breakpoints
                 self._current_command = cmd
                 self._initialize_new_command(current_frame)

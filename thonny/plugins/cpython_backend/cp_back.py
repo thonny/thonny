@@ -376,7 +376,10 @@ class MainCPythonBackend(MainBackend):
 
     def _cmd_Debug(self, cmd):
         self.switch_env_to_script_mode(cmd)
+        report_time("Before importing NiceTracer")
         from thonny.plugins.cpython_backend.cp_tracers import NiceTracer
+
+        report_time("After importing NiceTracer")
 
         return self._execute_file(cmd, NiceTracer)
 
@@ -728,6 +731,7 @@ class MainCPythonBackend(MainBackend):
             info["as_integer_ratio"] = value.as_integer_ratio()
 
     def _execute_file(self, cmd, executor_class):
+        report_time("Starting _execute_file")
         self._check_update_tty_mode(cmd)
 
         if len(cmd.args) >= 1:
@@ -748,7 +752,7 @@ class MainCPythonBackend(MainBackend):
 
             for preproc in self._source_preprocessors:
                 source = preproc(source, cmd)
-
+            report_time("Done preprocessing")
             result_attributes = self._execute_source(
                 source, tweaked_filename, "exec", executor_class, cmd, self._ast_postprocessors
             )
@@ -761,7 +765,7 @@ class MainCPythonBackend(MainBackend):
         self, source, filename, execution_mode, executor_class, cmd, ast_postprocessors=[]
     ):
         self._current_executor = executor_class(self, cmd)
-
+        report_time("Done creating executor")
         try:
             return self._current_executor.execute_source(
                 source, filename, execution_mode, ast_postprocessors
@@ -808,6 +812,7 @@ class MainCPythonBackend(MainBackend):
         builtins.__import__ = self._original_import
 
     def send_message(self, msg: MessageFromBackend) -> None:
+        report_time(f"Sending message {msg.event_type}")
         sys.stdout.flush()
 
         if isinstance(msg, ToplevelResponse):
@@ -1179,10 +1184,12 @@ class Executor:
                 self._instrument_repl_code(module)
                 statements = compile(module, filename, "exec")
             elif mode == "exec":
+                report_time("Before preparing ast in executor")
                 root = self._prepare_ast(source, filename, mode)
                 for func in ast_postprocessors:
                     func(root)
                 statements = compile(root, filename, mode)
+                report_time("After compiling ast in executor")
             else:
                 raise ValueError("Unknown mode", mode)
 

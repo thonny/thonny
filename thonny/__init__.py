@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from thonny.common import is_private_python, is_virtual_executable
 
 _last_module_count = 0
@@ -8,15 +10,18 @@ _last_time = time.time()
 
 import sys
 
+logger = getLogger(__name__)
+
 
 def report_time(label: str) -> None:
     """
     Method for finding unwarranted imports and delays.
     """
-    return
+    # return
+
     global _last_time, _last_module_count, _last_modules
 
-    log_modules = False
+    log_modules = True
 
     t = time.time()
     mod_count = len(sys.modules)
@@ -25,11 +30,11 @@ def report_time(label: str) -> None:
         mod_info = f"(+{mod_count - _last_module_count} modules)"
     else:
         mod_info = ""
-    print("TIME/MODS", label, round(t - _last_time, 3), mod_info)
+    logger.info("TIME/MODS %s %s %s", f"{t - _last_time:.3f}", label, mod_info)
 
     if log_modules and mod_delta > 0:
         current_modules = set(sys.modules.keys())
-        print("NEW MODS", list(sorted(current_modules - _last_modules)))
+        logger.info("NEW MODS %s", list(sorted(current_modules - _last_modules)))
         _last_modules = current_modules
 
     _last_time = t
