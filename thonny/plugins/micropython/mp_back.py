@@ -1018,7 +1018,7 @@ class MicroPythonBackend(MainBackend, ABC):
         return result
 
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
-        return [os.path.join(os.path.dirname(__file__), "api_stubs")]
+        return [os.path.join(os.path.dirname(__file__), "base_api_stubs")]
 
     def _join_remote_path_parts(self, left, right):
         if left == "":  # micro:bit

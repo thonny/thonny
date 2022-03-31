@@ -1661,7 +1661,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
-    pass
+    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        return [
+            os.path.join(os.path.dirname(__file__), "generic_api_stubs"),
+        ] + super()._get_sys_path_for_analysis()
 
 
 class RawPasteNotSupportedError(RuntimeError):
