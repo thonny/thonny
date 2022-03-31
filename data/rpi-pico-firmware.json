@@ -1,13 +1,13 @@
 {
-  "tag_name": "v1.17",
-  "name": "v1.17",
-  "published_at": "2021-09-02T10:00:00Z",
+  "tag_name": "v1.18",
+  "name": "v1.18",
+  "published_at": "2022-01-17T10:00:00Z",
   "assets": [
     {
-      "name": "rp2-pico-20210902-v1.17.uf2",
+      "name": "rp2-pico-20220117-v1.18.uf2",
       "label": null,
-      "size": 563200,
-      "browser_download_url": "https://micropython.org/resources/firmware/rp2-pico-20210902-v1.17.uf2"
+      "size": 582144,
+      "browser_download_url": "https://micropython.org/resources/firmware/rp2-pico-20220117-v1.18.uf2"
     }
   ]
 }
