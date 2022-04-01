@@ -1,7 +1,6 @@
 import gettext
-from logging import getLogger
 import os
-
+from logging import getLogger
 
 logger = getLogger(__name__)
 

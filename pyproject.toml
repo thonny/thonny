@@ -1,9 +1,10 @@
 [tool.black]
 line-length = 100
 target_version = ['py38', 'py39', 'py310']
-exclude = "api_stubs"
+exclude = ".*api_stubs|vendored_libs"
 
 [tool.isort]
 profile = "black"
 src_paths = ["thonny"]
 line_length = 100
+skip = ["api_stubs", "esp32_api_stubs", "esp_common_api_stubs", "base_api_stubs", "generic_api_stubs", "vendored_libs"]

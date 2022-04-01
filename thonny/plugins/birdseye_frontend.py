@@ -11,9 +11,10 @@ _server_process = None
 
 
 def _start_debug_enabled():
-    return (
-        get_workbench().get_editor_notebook().get_current_editor() is not None
-        and "debug" in get_runner().get_supported_features()
+    from thonny.plugins.cpython_frontend import LocalCPythonProxy
+
+    return get_workbench().get_editor_notebook().get_current_editor() is not None and isinstance(
+        get_runner().get_backend_proxy(), LocalCPythonProxy
     )
 
 
@@ -24,7 +25,7 @@ def start_server():
     output_file = open(out_err_filename, "w")
     _server_process = subprocess.Popen(
         [
-            running.get_interpreter_for_subprocess(),
+            running.get_front_interpreter_for_subprocess(),
             "-m",
             "birdseye",
             "-p",

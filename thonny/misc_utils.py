@@ -402,20 +402,6 @@ def lap_time(text=""):
     _timer_time = time.time()
 
 
-class TimeHelper:
-    def __init__(self, time_allowed):
-        self.start_time = time.time()
-        self.time_allowed = time_allowed
-
-    @property
-    def time_spent(self):
-        return time.time() - self.start_time
-
-    @property
-    def time_left(self):
-        return max(self.time_allowed - self.time_spent, 0)
-
-
 def copy_to_clipboard(data):
     if running_on_windows():
         _copy_to_windows_clipboard(data)
@@ -519,8 +505,9 @@ def inside_flatpak():
 
 def show_command_not_available_in_flatpak_message():
     from tkinter import messagebox
-    from thonny.languages import tr
+
     from thonny import get_workbench
+    from thonny.languages import tr
 
     messagebox.showinfo(
         tr("Command not available"),

@@ -115,9 +115,9 @@ Musical Notation
 
     music.play(notes)
     """
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
 
-from . microbit import pin0, MicroBitAnalogDigitalPin
+from .microbit import MicroBitAnalogDigitalPin, pin0
 
 DADADADUM = 0
 ENTERTAINER = 1

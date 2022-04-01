@@ -2,7 +2,15 @@
 Version history
 ===============
 
-4.0.0b1 (2022-01-??)
+4.0.0b2 (2022-??-??)
+====================
+
+* Fix the problem with scripts having declared encoding something else than UTF-8, #1650
+* Don't clear shell after automatic restart
+* Fixes certain problems with running Flask programs, #2062
+* Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
+
+4.0.0b1 (2022-03-21)
 ====================
 New & changed
 --------------
@@ -12,6 +20,7 @@ Distribution
 * Upgrade bundled Python to 3.10
 * Drop support for Python 3.5, 3.6 and 3.7
 * The main Windows bundle is now 64-bit. For fallback publish 32-bit bundle with Python 3.8 for 32-bit Windows 10 and 8.1 and all variants of Windows 7 and 8.
+* Mac bundle now comes with the universal2 build of Python
 * Stop publishing 32-bit Linux bundles.
 * Enhance Linux installer script (the .bash-file) to create a venv and pip-install Thonny if run on a platform for which there is no binary bundle available. This means you can now use Linux installer also on Raspberry Pi, #1736
 
@@ -26,6 +35,7 @@ Code completion and analysis
 
 MicroPython
 ~~~~~~~~~~~
+* Use [pipkin](https://pypi.org/project/pipkin/) for managing packages on MicroPython and CircuitPython devices. This enables proper listing of packages together with version info and proper uninstallation.
 * Use `.local_rtc` config parameters instead of (oppositely worded) `.utc_clock` in MicroPython back-ends, 116aecd714d5e94a8ad6e244deac44aece5065eb
 * Present MicroPython time options (whether to sync time and whether to use local time) in back-end configuration page, #1638
 * Automatically interrupt current process when connecting to bare-metal MicroPython or CircuitPython device. This can be turned off at device's settings page, #2059
@@ -38,6 +48,7 @@ MicroPython
 
 Various
 ~~~~~~~
+* Add new toolbar button which opens the wiki page describing ways to help Ukraine survive the attack from Russia.
 * Allow running content of untitled editors without saving, #778
 * Clear Shell before starting new process (Run, Debug, Stop/Restart, ...) by default. Can be turned off in Tools => Options => Shell, #1681
 * Make stacktrace links to ``<stdin>`` and ``<input>`` pseudo-files go to the editor containing corresponding source, #778
@@ -51,6 +62,12 @@ Various
 * Improve icon scaling -- use larger icons when Treeview row height is larger than ``general.large_icon_rowheight_threshold``
 * Use default font in Treeviews (including Files and Variables view). Therefore Treeview's font size is now affected by the scaling factor and is not affected by editor font size.
 * Use isolated mode for launching Thonny. This includes hiding user-site packages from Thonny's GUI process (not from user programs). Plug-ins now get installed under Thonny's data folder, #2038, #1651
+* Allow installing packages for remote CPython backend, #1319
+* Flatten the list of interpreters in the backend-switcher menu (lower-right corner of the main window)
+* Removed previously deprecated "A special virtual environment". Use regular virtual environments instead.
+* Merge "The same interpreter which runs Thonny" and "Alternative Python 3 interpreter or virtual environment" back-ends into "Local Python 3"
+* Back-end switcher now remembers several configurations for remote CPython and MicroPython.
+* Make package manager work for remote Python 3 (SSH)
 
 Fixed
 -----
@@ -68,6 +85,8 @@ Fixed
 * Fix the crash when pasting certain Unicode chars to editor in macOS, #32
 * Fix the crash caused by Cmd-backtick and others with Spanish keyboard in macOS, #886
 * Fix focus issues in dialogs, #2153
+* Fix automatic horizontal scrollbar not always appearing, #2169 and #659 by @jharris1993 and @lurch
+* Forward SSH password to the back-end process via stdin instead of command line.
 
 3.3.14 (2021-08-01)
 ===================

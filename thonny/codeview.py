@@ -5,13 +5,14 @@ import os
 import re
 import sys
 import tkinter as tk
+from logging import getLogger
 from tkinter import messagebox
 from typing import Dict, Union  # @UnusedImport
 
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.tktextext import EnhancedText
-from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style, ask_string
+from thonny.ui_utils import EnhancedTextWithLogging, ask_string, scrollbar_style
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
@@ -27,6 +28,8 @@ NON_TEXT_CHARS.remove("\t")
 NON_TEXT_CHARS.remove("\n")
 NON_TEXT_CHARS.remove("\r")
 NON_TEXT_CHARS.remove("\f")
+
+logger = getLogger(__name__)
 
 
 class SyntaxText(EnhancedText):
@@ -228,6 +231,7 @@ class CodeView(tktextext.EnhancedTextFrame):
     def set_content_as_bytes(self, data, keep_undo=False):
 
         encoding = self.detect_encoding(data)
+        logger.debug("Detected encoding %s", encoding)
         while True:
             try:
                 chars = data.decode(encoding)

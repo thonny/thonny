@@ -3,28 +3,28 @@
 import os
 import pathlib
 import tkinter as tk
-from pathlib import PurePath, PureWindowsPath, PurePosixPath
+from pathlib import PurePath, PurePosixPath, PureWindowsPath
 from tkinter import messagebox
-from tkinter.messagebox import showerror, askokcancel
-from typing import Iterable, Type, List, Dict, Optional
+from tkinter.messagebox import askokcancel, showerror
+from typing import Dict, Iterable, List, Optional, Type
 
 from thonny import get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
+    HIDDEN_FILES_OPTION,
     BaseLocalFileBrowser,
     BaseRemoteFileBrowser,
     get_file_handler_conf_key,
-    HIDDEN_FILES_OPTION,
 )
 from thonny.common import (
-    InlineCommand,
-    normpath_with_actual_case,
     IGNORED_FILES_AND_DIRS,
     CommandToBackend,
+    InlineCommand,
+    normpath_with_actual_case,
     universal_dirname,
 )
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
-from thonny.running import construct_cd_command, InlineCommandDialog
+from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
+from thonny.running import InlineCommandDialog, construct_cd_command
 from thonny.ui_utils import lookup_style_option
 
 minsize = 80

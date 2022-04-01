@@ -1,6 +1,5 @@
 from typing import List
 
-
 def listdir() -> List[str]:
     """
     Returns a list of the names of all the files contained within the local persistent on-device file system.

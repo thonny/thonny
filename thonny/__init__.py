@@ -1,4 +1,6 @@
-from thonny.common import is_virtual_executable, is_private_python
+from logging import getLogger
+
+from thonny.common import is_private_python, is_virtual_executable
 
 _last_module_count = 0
 _last_modules = set()
@@ -8,15 +10,18 @@ _last_time = time.time()
 
 import sys
 
+logger = getLogger(__name__)
+
 
 def report_time(label: str) -> None:
     """
     Method for finding unwarranted imports and delays.
     """
-    return
+    # return
+
     global _last_time, _last_module_count, _last_modules
 
-    log_modules = False
+    log_modules = True
 
     t = time.time()
     mod_count = len(sys.modules)
@@ -25,11 +30,11 @@ def report_time(label: str) -> None:
         mod_info = f"(+{mod_count - _last_module_count} modules)"
     else:
         mod_info = ""
-    print("TIME/MODS", label, round(t - _last_time, 3), mod_info)
+    logger.info("TIME/MODS %s %s %s", f"{t - _last_time:.3f}", label, mod_info)
 
     if log_modules and mod_delta > 0:
         current_modules = set(sys.modules.keys())
-        print("NEW MODS", list(sorted(current_modules - _last_modules)))
+        logger.info("NEW MODS %s", list(sorted(current_modules - _last_modules)))
         _last_modules = current_modules
 
     _last_time = t
@@ -38,8 +43,8 @@ def report_time(label: str) -> None:
 
 report_time("After defining report_time")
 
-import os.path
 import logging
+import os.path
 from typing import TYPE_CHECKING, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
@@ -248,14 +253,14 @@ def launch():
         return 0
 
     except SystemExit as e:
-        from tkinter import messagebox, _default_root
+        from tkinter import _default_root, messagebox
 
         messagebox.showerror("System exit", str(e), master=_default_root)
         return -1
 
     except Exception:
-        from logging import exception
         import traceback
+        from logging import exception
 
         exception("Internal launch or mainloop error")
         from thonny import ui_utils
@@ -411,7 +416,7 @@ def get_orig_argv():
 
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
-        "%(asctime)s.%(msecs)d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
+        "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
     )
 
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
@@ -419,9 +424,10 @@ def _configure_logging(log_file, console_level=None):
 
     main_logger = logging.getLogger("thonny")
     contrib_logger = logging.getLogger("thonnycontrib")
+    pipkin_logger = logging.getLogger("pipkin")
 
     # NB! Don't mess with the main root logger, because (CPython) backend runs user code
-    for logger in [main_logger, contrib_logger]:
+    for logger in [main_logger, contrib_logger, pipkin_logger]:
         logger.setLevel(_choose_logging_level())
         logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
         logger.addHandler(file_handler)
@@ -437,6 +443,7 @@ def _configure_logging(log_file, console_level=None):
     main_logger.info("Thonny version: %s", get_version())
     main_logger.info("cwd: %s", os.getcwd())
     main_logger.info("original argv: %s", get_orig_argv())
+    main_logger.info("sys.executable: %s", sys.executable)
     main_logger.info("sys.argv: %s", sys.argv)
     main_logger.info("sys.path: %s", sys.path)
     main_logger.info("sys.flags: %s", sys.flags)

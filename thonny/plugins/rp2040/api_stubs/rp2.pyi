@@ -1,6 +1,7 @@
-from uarray import array
+from typing import Any, Iterable, Sequence, Union
+
 from machine import Pin
-from typing import Sequence, Any, Iterable, Union
+from uarray import array
 
 # make_stub_files: Wed 03 Feb 2021 at 08:12:32
 class Flash:

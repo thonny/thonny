@@ -67,10 +67,10 @@ Or:
 
 """
 
+import ast
+import os
 import sys
 import time
-import os
-import ast
 
 try:
     stdout = sys.stdout.buffer
@@ -212,8 +212,9 @@ class ProcessPtyToTerminal:
     this PTY."""
 
     def __init__(self, cmd):
-        import subprocess
         import re
+        import subprocess
+
         import serial
 
         self.subp = subprocess.Popen(

@@ -1,4 +1,4 @@
-from typing import overload, Sequence, TypeVar
+from typing import Sequence, TypeVar, overload
 
 _T = TypeVar('_T')
 

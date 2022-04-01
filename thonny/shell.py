@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from logging import getLogger
 import os.path
 import re
 import tkinter as tk
 import traceback
+from logging import getLogger
 from tkinter import ttk
 
 from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
-from thonny.codeview import get_syntax_options_for_tag, perform_python_return, SyntaxText
+from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return
 from thonny.common import (
     OBJECT_LINK_END,
     OBJECT_LINK_START,
+    REPL_PSEUDO_FILENAME,
+    STRING_PSEUDO_FILENAME,
     InlineCommand,
     ToplevelCommand,
     ToplevelResponse,
-    STRING_PSEUDO_FILENAME,
-    REPL_PSEUDO_FILENAME,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
+from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
 from thonny.tktextext import TextFrame, TweakableText, index2line
 from thonny.ui_utils import (
@@ -29,14 +29,14 @@ from thonny.ui_utils import (
     EnhancedTextWithLogging,
     TextMenu,
     create_tooltip,
+    ems_to_pixels,
+    get_beam_cursor,
+    get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
     select_sequence,
     show_dialog,
     tr_btn,
-    ems_to_pixels,
-    get_hyperlink_cursor,
-    get_beam_cursor,
 )
 
 OBJECT_INFO_START_REGEX_STR = re.escape(OBJECT_LINK_START).replace("%d", r"-?\d+")
@@ -58,7 +58,7 @@ OUTPUT_SPLIT_REGEX = re.compile(
 )
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(
-    r"(https?:\/\/[\w\/.:\-\?#=%&]+[\w\/]|data:image\/[a-z]+;base64,[A-Za-z0-9\/=\+]+)"
+    r"(https?://[\w/.:\-?#=%&]+[\w/]|data:image/[a-z]+;base64,[A-Za-z0-9/=+]+)"
 )
 
 INT_REGEX = re.compile(r"\d+")
@@ -228,8 +228,8 @@ class ShellView(tk.PanedWindow):
 
         self.text.submit_command(cmd_line, ("magic",))
 
-    def restart(self):
-        self.text.restart()
+    def restart(self, automatic: bool = False):
+        self.text.restart(automatic)
 
     def clear_shell(self):
         self.text._clear_shell()
@@ -308,14 +308,14 @@ class ShellMenu(TextMenu):
 class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     """Passive version of ShellText. Used also for preview"""
 
-    def __init__(self, master, view=None, cnf={}, **kw):
+    def __init__(self, master, view=None, **kw):
         self.view = view
         self._ignore_program_output = False
         self._link_handler_count = 0
         self._last_main_file = None
         kw["tabstyle"] = "wordprocessor"
         kw["cursor"] = get_beam_cursor()
-        super().__init__(master, cnf, **kw)
+        super().__init__(master, **kw)
 
         self._command_history = (
             []
@@ -348,6 +348,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
         x_padding = 4
+        welcome_vert_spacing = x_padding
         io_vert_spacing = 10
         io_indent = 16 + x_padding
         self.io_indent = io_indent
@@ -364,9 +365,16 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("inactive_value", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
 
-        self.tag_configure("welcome", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure(
+            "welcome",
+            lmargin1=x_padding,
+            lmargin2=x_padding,
+            spacing1=welcome_vert_spacing,
+            spacing3=welcome_vert_spacing,
+        )
 
         # Underline on the font looks better than underline on the tag,
         # therefore Shell doesn't use configured "hyperlink" style directly
@@ -451,7 +459,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text:
-            self.restart()
             preceding = self.get("output_insert -1 c", "output_insert")
             if preceding.strip() and not preceding.endswith("\n"):
                 self._insert_text_directly("\n")
@@ -884,8 +891,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
-    def restart(self):
-        if get_workbench().get_option("shell.clear_for_new_process"):
+    def restart(self, automatic: bool = False):
+        if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
             self._clear_content("end")
         else:
             if (
@@ -903,7 +910,10 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.see("end")
 
-    def intercept_insert(self, index, txt, tags=()):
+    def intercept_insert(self, index, chars, tags=None, **kw):
+        if tags is None:
+            tags = ()
+
         # pylint: disable=arguments-differ
         if self._editing_allowed() and self._in_current_input_range(index):
             # self._print_marks("before insert")
@@ -916,7 +926,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             else:
                 tags = tags + ("io", "stdin")
 
-            EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
+            EnhancedTextWithLogging.intercept_insert(self, index, chars, tags)
 
             if not get_runner().is_waiting_toplevel_command():
                 if not self._applied_io_events:
@@ -1363,7 +1373,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _on_backend_restart(self, event=None):
         # make sure dead values are not clickable anymore
-        self.tag_remove("value", "0.1", "end")
+        self._invalidate_current_data()
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
@@ -1498,6 +1508,19 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         end_index = self.index("output_end")
 
         self.tag_add("inactive", "1.0", end_index)
+
+        # inactivate values
+        pos = end_index
+        while True:
+            rng = self.tag_prevrange("value", pos)
+            if rng:
+                rng_start, rng_end = rng
+                self.tag_remove("value", rng_start, rng_end)
+                self.tag_add("inactive_value", rng_start, rng_end)
+                pos = rng_start
+            else:
+                break
+
         self.tag_remove("value", "1.0", end_index)
         self.tag_remove("stacktrace_hyperlink", "1.0", end_index)
 
@@ -1541,8 +1564,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
 
 class ShellText(BaseShellText):
-    def __init__(self, master, view, cnf={}, **kw):
-        super().__init__(master, view, cnf=cnf, **kw)
+    def __init__(self, master, view, **kw):
+        super().__init__(master, view, **kw)
         self.bindtags(self.bindtags() + ("ShellText",))
 
         self.tag_bind("value", "<1>", self._value_click)
@@ -1761,6 +1784,7 @@ class PlotterCanvas(tk.Canvas):
         self.coords(self.close_button, self.winfo_width() - self.linespace / 2, self.linespace / 2)
 
     def on_close(self, event):
+        assert isinstance(self.master, ShellView)
         self.master.toggle_plotter()
 
     def reset_range(self, event=None):
@@ -2089,4 +2113,5 @@ class PlotterCanvas(tk.Canvas):
             get_workbench().set_option("view.plotter_width", self.winfo_width())
         self.update_plot(True)
         self.update_close_button()
+        assert isinstance(self.master, ShellView)
         self.master.resize_plotter()

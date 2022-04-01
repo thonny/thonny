@@ -33,7 +33,8 @@ def find_expression(start_node, text_range):
     return None
 
 
-def parse_source(source: bytes, filename="<unknown>", mode="exec", fallback_to_one_char=False):
+def parse_source(source: str, filename="<unknown>", mode="exec", fallback_to_one_char=False):
+    assert isinstance(source, str)
     root = ast.parse(source, filename, mode)
     mark_text_ranges(root, source, fallback_to_one_char)
     return root
@@ -169,16 +170,14 @@ def get_last_child(node, skip_incorrect=True):
     return None
 
 
-def mark_text_ranges(node, source: Union[bytes, str], fallback_to_one_char=False):
+def mark_text_ranges(node, source: str, fallback_to_one_char=False):
     """
     Node is an AST, source is corresponding source as string.
     Function adds recursively attributes end_lineno and end_col_offset to each node
     which has attributes lineno and col_offset.
     """
+    assert isinstance(source, str)
     from asttokens.asttokens import ASTTokens
-
-    if isinstance(source, bytes):
-        source = source.decode("utf8")
 
     ASTTokens(source, tree=node)
     for child in ast.walk(node):

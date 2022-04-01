@@ -1,5 +1,5 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 from typing import Optional
 

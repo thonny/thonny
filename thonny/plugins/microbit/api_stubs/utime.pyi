@@ -43,8 +43,7 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
 __version__ = "7.1.0"  # Version set by https://github.com/hlovatt/tag2ver
 
-from typing import Final, TypeVar, Tuple, Optional
-
+from typing import Final, Optional, Tuple, TypeVar
 
 class _TicksMs: ...
 class _TicksUs: ...

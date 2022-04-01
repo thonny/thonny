@@ -1,6 +1,5 @@
 import datetime
 import io
-from logging import getLogger
 import os
 import re
 import shlex
@@ -8,24 +7,25 @@ import sys
 import textwrap
 import time
 from abc import ABC
+from logging import getLogger
 from typing import Callable, Optional, Union
 
 import thonny
+from thonny import report_time
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.backend import (
+from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.mp_back import (
     ENCODING,
     EOT,
-    MicroPythonBackend,
-    ends_overlap,
-    ManagementError,
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,
+    ManagementError,
+    MicroPythonBackend,
+    ends_overlap,
 )
-from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT, PASTE_SUBMIT_MODE
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
-from thonny import report_time
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
@@ -137,7 +137,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             """
         )
 
-        result = super()._get_helper_code() + textwrap.indent(extra, "    ")
+        return super()._get_helper_code() + textwrap.indent(extra, "    ")
 
     def _process_until_initial_prompt(self, interrupt, clean):
         # This will be called only when the interpreter gets run without script.
@@ -171,7 +171,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         end_marker = "#uIuIu"
         self._write(PASTE_MODE_CMD)
         self._connection.read_until(PASTE_MODE_LINE_PREFIX)
-        self._write(script + end_marker)
+        self._write((script + end_marker).encode(ENCODING))
         self._connection.read_until(end_marker.encode("ascii"))
         self._write(EOT)
         self._connection.read_until(b"\n")
@@ -335,11 +335,15 @@ class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
     def _decode(self, data: bytes) -> str:
         return data.decode(errors="replace")
 
+    def _create_pipkin_adapter(self):
+        raise NotImplementedError()
+
 
 class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args):
+        password = sys.stdin.readline().strip("\r\n")
         SshMixin.__init__(
-            self, args["host"], args["user"], args["password"], args["interpreter"], args.get("cwd")
+            self, args["host"], args["user"], password, args["interpreter"], args.get("cwd")
         )
         self._interpreter_launcher = args.get("interpreter_launcher", [])
         UnixMicroPythonBackend.__init__(self, args)
@@ -374,6 +378,9 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 
     def _decode(self, data: bytes) -> str:
         return data.decode(ENCODING, errors="replace")
+
+    def _create_pipkin_adapter(self):
+        raise NotImplementedError()
 
 
 if __name__ == "__main__":
