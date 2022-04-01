@@ -1,15 +1,24 @@
 """Support for audio samples"""
 
+from __future__ import annotations
+
+import typing
+from typing import Optional
+
+from circuitpython_typing import ReadableBuffer, WriteableBuffer
+
 class RawSample:
     """A raw audio sample buffer in memory"""
 
-    def __init__(self, buffer: array.array, *, channel_count: int = 1, sample_rate: int = 8000):
+    def __init__(
+        self, buffer: ReadableBuffer, *, channel_count: int = 1, sample_rate: int = 8000
+    ) -> None:
         """Create a RawSample based on the given buffer of signed values. If channel_count is more than
         1 then each channel's samples should alternate. In other words, for a two channel buffer, the
         first sample will be for channel 1, the second sample will be for channel two, the third for
         channel 1 and so on.
 
-        :param array.array buffer: An `array.array` with samples
+        :param ~circuitpython_typing.ReadableBuffer buffer: A buffer with samples
         :param int channel_count: The number of channels in the buffer
         :param int sample_rate: The desired playback sample rate
 
@@ -34,21 +43,17 @@ class RawSample:
           time.sleep(1)
           dac.stop()"""
         ...
-
-    def deinit(self, ) -> Any:
-        """Deinitialises the AudioOut and releases any hardware resources for reuse."""
+    def deinit(self) -> None:
+        """Deinitialises the RawSample and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> RawSample:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    sample_rate: Any = ...
+    sample_rate: Optional[int]
     """32 bit value that dictates how quickly samples are played in Hertz (cycles per second).
     When the sample is looped, this can change the pitch output without changing the underlying
     sample. This will not change the sample rate of any active playback. Call ``play`` again to
@@ -59,13 +64,16 @@ class WaveFile:
 
     A .wav file prepped for audio playback. Only mono and stereo files are supported. Samples must
     be 8 bit unsigned or 16 bit signed. If a buffer is provided, it will be used instead of allocating
-    an internal buffer."""
+    an internal buffer, which can prevent memory fragmentation."""
 
-    def __init__(self, file: typing.BinaryIO, buffer: bytearray):
+    def __init__(self, file: typing.BinaryIO, buffer: WriteableBuffer) -> None:
         """Load a .wav file for playback with `audioio.AudioOut` or `audiobusio.I2SOut`.
 
         :param typing.BinaryIO file: Already opened wave file
-        :param bytearray buffer: Optional pre-allocated buffer, that will be split in half and used for double-buffering of the data. If not provided, two 512 byte buffers are allocated internally.
+        :param ~circuitpython_typing.WriteableBuffer buffer: Optional pre-allocated buffer,
+          that will be split in half and used for double-buffering of the data.
+          The buffer must be 8 to 1024 bytes long.
+          If not provided, two 256 byte buffers are initially allocated internally.
 
 
         Playing a wave file from flash::
@@ -89,27 +97,23 @@ class WaveFile:
             pass
           print("stopped")"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the WaveFile and releases all memory resources for reuse."""
         ...
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> WaveFile:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    sample_rate: Any = ...
+    sample_rate: int
     """32 bit value that dictates how quickly samples are loaded into the DAC
     in Hertz (cycles per second). When the sample is looped, this can change
     the pitch output without changing the underlying sample."""
 
-    bits_per_sample: Any = ...
+    bits_per_sample: int
     """Bits per sample. (read only)"""
 
-    channel_count: Any = ...
+    channel_count: int
     """Number of audio channels. (read only)"""
-

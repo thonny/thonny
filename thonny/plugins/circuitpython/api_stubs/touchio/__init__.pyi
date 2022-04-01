@@ -19,6 +19,12 @@ For example::
 This example will initialize the the device, and print the
 :py:data:`~touchio.TouchIn.value`."""
 
+from __future__ import annotations
+
+from typing import Optional
+
+import microcontroller
+
 class TouchIn:
     """Read the state of a capacitive touch sensor
 
@@ -32,38 +38,39 @@ class TouchIn:
            if touch.value:
                print("touched!")"""
 
-    def __init__(self, pin: microcontroller.Pin):
+    def __init__(self, pin: microcontroller.Pin) -> None:
         """Use the TouchIn on the given pin.
 
         :param ~microcontroller.Pin pin: the pin to read from"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the TouchIn and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> TouchIn:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    value: Any = ...
+    value: bool
     """Whether the touch pad is being touched or not. (read-only)
 
     True when `raw_value` > `threshold`."""
 
-    raw_value: Any = ...
+    raw_value: int
     """The raw touch measurement as an `int`. (read-only)"""
 
-    threshold: Any = ...
+    threshold: Optional[int]
     """Minimum `raw_value` needed to detect a touch (and for `value` to be `True`).
 
     When the **TouchIn** object is created, an initial `raw_value` is read from the pin,
     and then `threshold` is set to be 100 + that value.
 
-    You can adjust `threshold` to make the pin more or less sensitive."""
+    You can adjust `threshold` to make the pin more or less sensitive::
 
+      import board
+      import touchio
+
+      touch = touchio.TouchIn(board.A1)
+      touch.threshold = 7300"""
