@@ -1,10 +1,10 @@
-from logging import getLogger
 import tkinter as tk
 import traceback
-from typing import Optional, Tuple, List
+from logging import getLogger
+from typing import List, Optional, Tuple
 
 from thonny import get_workbench
-from thonny.codeview import SyntaxText, CodeViewText, get_syntax_options_for_tag
+from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.common import SignatureInfo, SignatureParameter
 from thonny.editors import Editor
 from thonny.misc_utils import running_on_mac_os

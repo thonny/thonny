@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import warnings
-
 import _thread
 import io
-from logging import getLogger
 import os.path
 import pathlib
 import queue
@@ -12,30 +9,32 @@ import sys
 import threading
 import time
 import traceback
-from abc import abstractmethod, ABC
-from typing import BinaryIO, Callable, List, Dict, Optional, Iterable, Union, Any
+import warnings
+from abc import ABC, abstractmethod
+from logging import getLogger
+from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
 
+import thonny
 from thonny import report_time
+from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
 from thonny.common import (
     BackendEvent,
+    CommandToBackend,
     EOFCommand,
+    ImmediateCommand,
     InlineCommand,
     InlineResponse,
     InputSubmission,
+    MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
-    parse_message,
-    serialize_message,
-    ImmediateCommand,
-    MessageFromBackend,
-    CommandToBackend,
-    universal_dirname,
-    read_one_incoming_message_str,
-    try_load_modules_with_frontend_sys_path,
     UserError,
+    parse_message,
+    read_one_incoming_message_str,
+    serialize_message,
+    try_load_modules_with_frontend_sys_path,
+    universal_dirname,
 )
-from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
-from thonny.common import ConnectionClosedException
 
 NEW_DIR_MODE = 0o755
 
@@ -55,8 +54,9 @@ class BaseBackend(ABC):
         self._init_command_reader()
 
     def _init_command_reader(self):
-        # Don't use threading for creating a management thread, because I don't want them
-        # to be affected by threading.settrace
+        # NB! This approach is used only in MicroPython and SshCPython backend.
+        # MainCPython backend uses main thread for reading commands
+        # https://github.com/thonny/thonny/issues/1363
         _thread.start_new_thread(self._read_incoming_messages, ())
 
     def mainloop(self):
@@ -84,7 +84,7 @@ class BaseBackend(ABC):
                     # Error in Thonny's code
                     logger.exception("mainloop error")
                     self._report_internal_exception("mainloop error")
-        except ConnectionClosedException:
+        except ConnectionError:
             sys.exit(0)
 
     def _current_command_is_interrupted(self):
@@ -188,14 +188,14 @@ class BaseBackend(ABC):
         pass
 
     def _report_internal_exception(self, msg: str) -> None:
-        user_msg = "PROBLEM WITH THONNY'S BACK-END: " + msg
+        user_msg = "PROBLEM IN THONNY'S BACK-END: " + msg
         if sys.exc_info()[1]:
             err_msg = "\n".join(
                 traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])
             ).strip()
             user_msg += f" ({err_msg})"
 
-        user_msg += ".\nSee backend.log for more info."
+        user_msg += ".\nSee " + thonny.BACKEND_LOG_MARKER + " for more info."
 
         print(user_msg, file=sys.stderr)
 
@@ -258,6 +258,8 @@ class MainBackend(BaseBackend, ABC):
             handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
+            if isinstance(cmd, ToplevelCommand):
+                self._send_output(f"Unknown command '{cmd.name}'", "stderr")
             response = {"error": "Unknown command: " + cmd.name}
         else:
             try:
@@ -277,16 +279,13 @@ class MainBackend(BaseBackend, ABC):
                     response = {}
                 else:
                     response = {"error": "Interrupted", "interrupted": True}
-            except ConnectionClosedException as e:
+            except ConnectionError as e:
                 response = False
-                self._on_connection_closed(e)
+                self._on_connection_error(e)
             except Exception as e:
                 logger.exception("Exception while handling %r", cmd.name)
-                if isinstance(cmd, ToplevelCommand):
-                    self._report_internal_exception(f"Failed executing {cmd.name!r}")
-                    response = {}
-                else:
-                    response = {"error": str(e)}
+                self._report_internal_exception("Exception while handling %r" % cmd.name)
+                sys.exit(1)
 
         if response is False:
             # Command doesn't want to send any response
@@ -295,7 +294,7 @@ class MainBackend(BaseBackend, ABC):
         real_response = self._prepare_command_response(response, cmd)
         self.send_message(real_response)
 
-    def _on_connection_closed(self, error=None):
+    def _on_connection_error(self, error=None):
         pass
 
     def _cmd_get_dirs_children_info(self, cmd):
@@ -339,6 +338,7 @@ class MainBackend(BaseBackend, ABC):
         )
 
     def _cmd_editor_autocomplete(self, cmd):
+        logger.debug("Starting _cmd_editor_autocomplete")
         error = None
         try:
             from thonny import jedi_utils
@@ -394,8 +394,8 @@ class MainBackend(BaseBackend, ABC):
         )
 
     def _cmd_get_shell_calltip(self, cmd):
-        from thonny import jedi_utils
         import __main__
+        from thonny import jedi_utils
 
         signatures = jedi_utils.get_interpreter_signatures(
             cmd.source, [__main__.__dict__], sys_path=self._get_sys_path_for_analysis()
@@ -434,6 +434,15 @@ class MainBackend(BaseBackend, ABC):
             sys_path=self._get_sys_path_for_analysis(),
         )
         return {"definitions": defs}
+
+    def _cmd_get_active_distributions(self, cmd):
+        raise NotImplementedError()
+
+    def _cmd_install_distributions(self, cmd):
+        raise NotImplementedError()
+
+    def _cmd_uninstall_distributions(self, cmd):
+        raise NotImplementedError()
 
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
         return None
@@ -703,7 +712,7 @@ class SshMixin(UploadDownloadMixin):
         # UploadDownloadMixin.__init__(self)
         try:
             import paramiko
-            from paramiko.client import SSHClient, AutoAddPolicy
+            from paramiko.client import AutoAddPolicy, SSHClient
         except ImportError:
             print(
                 "\nThis back-end requires an extra package named 'paramiko'."
@@ -715,7 +724,7 @@ class SshMixin(UploadDownloadMixin):
         self._host = host
         self._user = user
         self._password = password
-        self._remote_interpreter = interpreter
+        self._target_interpreter = interpreter
         self._cwd = cwd
         self._proc = None  # type: Optional[RemoteProcess]
         self._sftp = None  # type: Optional[paramiko.SFTPClient]

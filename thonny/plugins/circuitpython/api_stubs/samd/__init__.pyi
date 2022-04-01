@@ -9,6 +9,7 @@
 References to clocks as named by the microcontroller"""
 
 import typing
+
 class Clock:
     """Identifies a clock on the microcontroller.
 

@@ -1,8 +1,8 @@
 import ast
 import logging
-from logging import getLogger
 import tkinter as tk
-from tkinter import ttk, messagebox
+from logging import getLogger
+from tkinter import messagebox, ttk
 
 import thonny.memory
 from thonny import get_runner, get_workbench, ui_utils

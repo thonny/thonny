@@ -1,6 +1,6 @@
-from logging import getLogger
 import tkinter as tk
 import traceback
+from logging import getLogger
 
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag

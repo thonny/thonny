@@ -1,20 +1,20 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import messagebox
-from typing import Optional, List
+from typing import List, Optional, cast
 
-from thonny import get_runner, get_workbench, editor_helpers
+from thonny import editor_helpers, get_runner, get_workbench
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
-from thonny.common import InlineCommand, CompletionInfo
+from thonny.common import CompletionInfo, InlineCommand
 from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.ui_utils import (
-    ems_to_pixels,
-    control_is_pressed,
-    command_is_pressed,
     alt_is_pressed_without_char,
+    command_is_pressed,
+    control_is_pressed,
+    ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -420,12 +420,23 @@ class Completer:
         if (
             not self._box_is_visible()
             and not _is_python_name_char(event.char)
-            and event.char != "."
+            and not self._is_start_of_an_attribute(event)
         ):
             # non-word chars are allowed only while the box is already open
             return
 
         widget.after_idle(lambda: self.request_completions_for_text(widget))
+
+    def _is_start_of_an_attribute(self, event: tk.Event) -> bool:
+        if event.char != ".":
+            return False
+
+        text = cast(tk.Text, event.widget)
+        preceding = text.get("insert -2 chars")
+        if preceding.isnumeric():
+            return False
+
+        return True
 
     def request_completions_for_text(self, text: SyntaxText) -> None:
         source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
@@ -504,7 +515,7 @@ def load_plugin() -> None:
         tester=can_complete,
     )
 
-    get_workbench().set_default("edit.tab_request_completions_in_editors", True)
+    get_workbench().set_default("edit.tab_request_completions_in_editors", False)
     get_workbench().set_default("edit.tab_request_completions_in_shell", True)
     get_workbench().set_default("edit.automatic_completions", False)
     get_workbench().set_default("edit.automatic_completion_details", True)

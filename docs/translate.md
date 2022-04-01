@@ -11,7 +11,7 @@ Thonny's help pages are not translated in POEditor but in the main repository. S
 
 NB! Some original terms have explicit linebreaks in them -- these are significant. In these cases try to write your translation such that it has approximately same line lengths.
 
-When you are done with your translation, it is recommended to test it. For this you need to export thonny.po and thonny.mo files from POEditor into appropriate subfolder under `thonny/locale` under Thonny program directory (can be installed or cloned from GitHub). If you created a new language, then you also need to register it in `thonny/languages.py`.
+When you are done with your translation, it is recommended to test it. For this you need to export thonny.po and thonny.mo files from POEditor into appropriate subfolder under `thonny/locale` under Thonny program directory. For locating the program directory of installed Thonny, select "Tools => Open Thonny program folder". If you created a new language, then you also need to register it in `thonny/languages.py`.
 
 If you noticed a problem (eg. some button is too narrow for your translation), then open an issue.
 

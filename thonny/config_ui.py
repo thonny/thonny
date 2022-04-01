@@ -1,5 +1,5 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 from typing import Optional
 
@@ -15,8 +15,8 @@ class ConfigurationDialog(CommonDialog):
 
     def __init__(self, master, page_records_with_order):
         super().__init__(master)
-        width = ems_to_pixels(59)
-        height = ems_to_pixels(43)
+        width = ems_to_pixels(60)
+        height = ems_to_pixels(50)
         self.geometry("%dx%d" % (width, height))
         self.title(tr("Thonny options"))
 

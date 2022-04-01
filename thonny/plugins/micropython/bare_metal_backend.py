@@ -1,60 +1,49 @@
 import binascii
-from logging import getLogger
 import os
 import re
-import sys
 import struct
+import sys
 import time
+from logging import getLogger
 from textwrap import dedent, indent
-from typing import BinaryIO, Callable, Optional, Union, List
-
-from serial import SerialTimeoutException
+from typing import BinaryIO, Callable, List, Optional, Union
 
 import thonny
+from thonny import report_time
 from thonny.backend import UploadDownloadMixin
 from thonny.common import (
     BackendEvent,
+    EOFCommand,
     ToplevelResponse,
     execute_system_command,
     serialize_message,
-    EOFCommand,
 )
 from thonny.misc_utils import find_volumes_by_name
-from thonny.plugins.micropython.backend import (
-    MicroPythonBackend,
-    ManagementError,
-    ReadOnlyFilesystemError,
-    ends_overlap,
-    Y2000_EPOCH_OFFSET,
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.mp_back import (
+    EOT,
+    NORMAL_MODE_CMD,
     PASTE_MODE_CMD,
     PASTE_MODE_LINE_PREFIX,
-    EOT,
-    WAIT_OR_CRASH_TIMEOUT,
-    ProtocolError,
-    starts_with_continuation_byte,
-    is_continuation_byte,
     RAW_MODE_CMD,
-    NORMAL_MODE_CMD,
     SOFT_REBOOT_CMD,
-    INTERRUPT_CMD,
+    WAIT_OR_CRASH_TIMEOUT,
+    Y2000_EPOCH_OFFSET,
+    ManagementError,
+    MicroPythonBackend,
+    ProtocolError,
+    ReadOnlyFilesystemError,
+    ends_overlap,
+    is_continuation_byte,
+    starts_with_continuation_byte,
 )
-from thonny.common import ConnectionFailedException
-from thonny.plugins.micropython.connection import MicroPythonConnection
-from thonny.plugins.micropython.webrepl_connection import (
-    WebReplConnection,
-    WebreplBinaryMsg,
-)
-
-PASTE_SUBMIT_MODE = "paste"
-RAW_PASTE_SUBMIT_MODE = "raw_paste"
-RAW_SUBMIT_MODE = "raw"
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
 RAW_PASTE_CONTINUE = b"\x01"
 
-OUTPUT_ENQ = b"\x05"
-OUTPUT_ACK = b"\x06"
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -123,22 +112,19 @@ FALLBACK_BUILTIN_MODULES = [
 logger = getLogger("thonny.plugins.micropython.bare_metal_backend")
 
 
-def debug(msg):
-    return
-    # print(msg, file=sys.stderr)
-
-
 class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection, clean, args):
         self._connection = connection
         self._startup_time = time.time()
         self._last_inferred_fs_mount: Optional[str] = None
 
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+        self._submit_mode = args.get("submit_mode", None)
+        if self._submit_mode is None:
+            self._submit_mode = self._infer_submit_mode()
+
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
-            self._write_block_size = 255
+            self._write_block_size = self._infer_write_block_size()
 
         # write delay is used only with original raw submit mode
         self._write_block_delay = args.get("write_block_delay", None)
@@ -151,7 +137,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size is None:
             self._read_block_size = self._infer_read_block_size()
 
-        self._submit_mode = args.get("submit_mode", None)
         logger.debug(
             "Initial submit_mode: %s, "
             "write_block_size: %s, "
@@ -209,6 +194,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size and self._read_block_size > 0:
             # make sure management prints are done in blocks
             result = result.replace("cls.builtins.print", "cls.controlled_print")
+            from thonny.plugins.micropython.serial_connection import OUTPUT_ENQ
+
             result += indent(
                 dedent(
                     """
@@ -224,7 +211,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                         for i in __thonny_helper.builtins.range(0, __thonny_helper.builtins.len(data), cls._print_block_size):
                             cls.builtins.print(end=data[i:i+cls._print_block_size])
                             cls.builtins.print(end={out_enq!r})
-                            cls.sys.stdin.read(1)
+                            cls.sys.stdin.read(1) # ack
                         
                     cls.builtins.print(end=end)
             """
@@ -233,6 +220,16 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             )
 
         return result
+
+    def _infer_write_block_size(self):
+        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
+        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
+
+        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
+        # paste mode and larger block sizes (problem confirmed with 128, 64 and bytes blocks)
+        # https://github.com/thonny/thonny/issues/2143
+        # Don't know any other good solutions besides avoiding paste mode for this device.
+        return 255
 
     def _infer_read_block_size(self):
         # TODO:
@@ -244,8 +241,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return 0
 
     def _infer_write_block_delay(self):
-        if self._connected_over_webrepl():
+        if self._submit_mode in (PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE):
+            return 0
+        elif self._connected_over_webrepl():
             # ESP-32 needs long delay to work reliably over raw mode WebREPL
+            # https://github.com/micropython/micropython/issues/2497
             # TODO: consider removing when this gets fixed
             return 0.5
         else:
@@ -272,35 +272,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if clean:
             self._clear_repl()
 
-    def _interrupt(self):
-        try:
-            super()._interrupt()
-        except SerialTimeoutException:
-            logger.exception("Timeout while trying to interrupt")
-            self._report_internal_exception("Could not interrupt")
-
-    def _choose_submit_mode(self):
+    def _infer_submit_mode(self):
         if self._connected_over_webrepl():
             logger.info("Choosing paste submit mode because of WebREPL")
-            self._submit_mode = PASTE_SUBMIT_MODE
-            return
+            return PASTE_SUBMIT_MODE
 
-        # at least sometimes, we end up at normal prompt, although we asked for raw prompt
-        self._ensure_raw_mode()
-        self._write(RAW_PASTE_COMMAND)
-        response = self._connection.soft_read(2)
-        assert len(response) == 2, "Could not read response for raw paste command: " + response
-        if response == RAW_PASTE_CONFIRMATION:
-            logger.info("Choosing raw paste submit mode")
-            self._submit_mode = RAW_PASTE_SUBMIT_MODE
-            self._write(EOT)
-            discarding = self._connection.read_until(RAW_PROMPT)
-        else:
-            discarding = self._connection.read_until(RAW_PROMPT)
-            logger.info("Choosing raw submit mode (%r)", response + discarding)
-            self._submit_mode = RAW_SUBMIT_MODE
-
-        discarding += self._connection.read_all()
+        return RAW_PASTE_SUBMIT_MODE
 
     def _fetch_welcome_text(self) -> str:
         self._write(NORMAL_MODE_CMD)
@@ -549,19 +526,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return isinstance(self._connection, WebReplConnection)
 
     def _submit_code(self, script):
-        """
-        Code is submitted via paste mode, because this provides echo, which can be used as flow control.
-
-        The echo of a written block must be read before next block is written.
-        Safe USB block size is 64 bytes (may be larger for some devices),
-        but we need to account for b"=== " added by the paste mode in the echo, so each block is sized such that
-        its echo doesn't exceed self._write_block_size (some devices may have problem with outputs bigger than that).
-        (OK, most likely the reading thread will eliminate the problem with output buffer, but just in case...)
-        """
         assert script
-
-        if self._submit_mode is None:
-            self._choose_submit_mode()
 
         # assuming we are already at a prompt, but threads may have produced something
         self._forward_unexpected_output()
@@ -576,7 +541,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     self._submit_code_via_raw_paste_mode(to_be_sent)
                 except RawPasteNotSupportedError:
                     logger.info("WARNING: Could not use expected raw paste, falling back to raw")
-                    self._submit_code_via_raw_mode(to_be_sent)
+                    self._submit_code_via_raw_mode(
+                        to_be_sent, self._infer_write_block_size(), self._infer_write_block_delay()
+                    )
             else:
                 self._submit_code_via_raw_mode(to_be_sent)
 
@@ -609,10 +576,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     break
 
             self._write(block)
-            discarded = self._connection.read_all_expected(
-                expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT
-            )
-            logger.debug("Discarding %r", discarded)
+            self._connection.read_all_expected(expected_echo, timeout=WAIT_OR_CRASH_TIMEOUT)
 
         # push and read confirmation
         self._write(EOT)
@@ -625,9 +589,15 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             actual_confirmation,
         )
 
-    def _submit_code_via_raw_mode(self, script_bytes: bytes) -> None:
+    def _submit_code_via_raw_mode(
+        self,
+        script_bytes: bytes,
+        block_size: Optional[int] = None,
+        block_delay: Optional[float] = None,
+    ) -> None:
         self._ensure_raw_mode()
-
+        block_size = block_size or self._write_block_size
+        block_delay = block_delay or self._write_block_delay
         to_be_written = script_bytes + EOT
 
         while to_be_written:
@@ -720,11 +690,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             raise ProtocolError("Could not complete raw paste")
 
     def _execute_with_consumer(self, script, output_consumer: Callable[[str, str], None]):
-        self._report_time("befsubcode")
+        report_time("befsubcode")
         self._submit_code(script)
-        self._report_time("affsubcode")
+        report_time("affsubcode")
         self._process_output_until_active_prompt(output_consumer)
-        self._report_time("affforw")
+        report_time("affforw")
 
     def _process_output_until_active_prompt(
         self,
@@ -1127,8 +1097,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         else:
             try:
                 super()._delete_sorted_paths(paths)
-            except Exception as e:
-                if "read-only" in str(e).lower():
+            except ManagementError as e:
+                if self._contains_read_only_error(e.out + e.err):
                     self._delete_via_mount(paths)
                 else:
                     raise
@@ -1229,28 +1199,32 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         rec = struct.pack(
             WEBREPL_REQ_S, b"WA", WEBREPL_GET_FILE, 0, 0, 0, len(src_fname), src_fname
         )
-        self._write(WebreplBinaryMsg(rec))
-        assert self._read_websocket_response() == 0
+        self._connection.set_text_mode(False)
+        try:
+            self._write(rec)
+            assert self._read_websocket_response() == 0
 
-        bytes_read = 0
-        callback(bytes_read, file_size)
-        while True:
-            # report ready
-            self._write(WebreplBinaryMsg(b"\0"))
+            bytes_read = 0
+            callback(bytes_read, file_size)
+            while True:
+                # report ready
+                self._write(b"\0")
 
-            (block_size,) = struct.unpack("<H", self._connection.read(2))
-            if block_size == 0:
-                break
-            while block_size:
-                buf = self._connection.read(block_size)
-                if not buf:
-                    raise OSError("Could not read in WebREPL binary protocol")
-                bytes_read += len(buf)
-                target_fp.write(buf)
-                block_size -= len(buf)
-                callback(bytes_read, file_size)
+                (block_size,) = struct.unpack("<H", self._connection.read(2))
+                if block_size == 0:
+                    break
+                while block_size:
+                    buf = self._connection.read(block_size)
+                    if not buf:
+                        raise OSError("Could not read in WebREPL binary protocol")
+                    bytes_read += len(buf)
+                    target_fp.write(buf)
+                    block_size -= len(buf)
+                    callback(bytes_read, file_size)
 
-        assert self._read_websocket_response() == 0
+            assert self._read_websocket_response() == 0
+        finally:
+            self._connection.set_text_mode(True)
 
     def _write_file(
         self,
@@ -1298,6 +1272,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return bytes_written
 
+    def _contains_read_only_error(self, s: str) -> bool:
+        canonic_out = s.replace("-", "").lower()
+        return (
+            "readonly" in canonic_out or "errno 30" in canonic_out or "oserror: 30" in canonic_out
+        )
+
     def _write_file_via_serial(
         self,
         source_fp: BinaryIO,
@@ -1319,8 +1299,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             capture_output=True,
         )
 
-        canonic_out = (out + err).replace("-", "").lower()
-        if "readonly" in canonic_out or "errno 30" in canonic_out:
+        if self._contains_read_only_error(out + err):
             raise ReadOnlyFilesystemError()
         elif out + err:
             raise OSError(
@@ -1439,23 +1418,25 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         rec = struct.pack(
             WEBREPL_REQ_S, b"WA", WEBREPL_PUT_FILE, 0, 0, file_size, len(dest_fname), dest_fname
         )
-        self._write(WebreplBinaryMsg(rec[:10]))
-        self._write(WebreplBinaryMsg(rec[10:]))
-        assert self._read_websocket_response() == 0
+        self._connection.set_text_mode(False)
+        try:
+            self._write(rec[:10])
+            self._write(rec[10:])
+            assert self._read_websocket_response() == 0
 
-        bytes_sent = 0
-        callback(bytes_sent, file_size)
-        while True:
-            block = source.read(1024)
-            if not block:
-                break
-            self._write(WebreplBinaryMsg(block))
-            bytes_sent += len(block)
+            bytes_sent = 0
             callback(bytes_sent, file_size)
+            while True:
+                block = source.read(1024)
+                if not block:
+                    break
+                self._write(block)
+                bytes_sent += len(block)
+                callback(bytes_sent, file_size)
 
-        assert self._read_websocket_response() == 0
-
-        return bytes_sent
+            assert self._read_websocket_response() == 0
+        finally:
+            self._connection.set_text_mode(True)
 
     def _read_websocket_response(self):
         data = self._connection.read(4)
@@ -1484,7 +1465,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         try:
             super()._mkdir(path)
         except ManagementError as e:
-            if "read-only" in e.err.lower():
+            if self._contains_read_only_error(e.err):
                 self._makedirs_via_mount(path)
             else:
                 raise
@@ -1641,32 +1622,49 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _output_warrants_interrupt(self, data):
         return False
 
+    def _create_pipkin_adapter(self):
+        if self._connected_over_webrepl():
+            from pipkin.bare_metal import WebReplAdapter
+
+            class_ = WebReplAdapter
+            kwargs = {}
+        else:
+            from pipkin.bare_metal import SerialPortAdapter
+
+            class_ = SerialPortAdapter
+            kwargs = {}
+            if self._connected_to_circuitpython():
+                try:
+                    kwargs["mount_path"] = self._get_fs_mount()
+                except Exception:
+                    logger.warning("Could not get mount path", exc_info=True)
+
+        return class_(
+            self._connection,
+            submit_mode=self._submit_mode,
+            write_block_size=self._write_block_size,
+            write_block_delay=self._write_block_delay,
+            **kwargs,
+        )
+
     def _report_internal_exception(self, msg: str) -> None:
+        super()._report_internal_exception(msg)
+
         e = sys.exc_info()[1]
         if isinstance(e, ManagementError):
             self._log_management_error_details(e)
 
-        if isinstance(e, (ManagementError, ProtocolError, SerialTimeoutException)):
-            self._show_error(
-                (
-                    "It looks like %s has arrived to an unexpected state"
-                    " or there have been communication problems."
-                )
-                % self._get_interpreter_kind(),
-                end=" ",
-            )
-        else:
-            self._show_error("Internal error (%s)" % e)
-
-        self._show_error("See %s for more details.\n" % thonny.BACKEND_LOG_MARKER)
         self._show_error(
             'You may need to press "Stop/Restart" or hard-reset your '
-            "%s device if the commands keep failing.\n" % self._get_interpreter_kind()
+            + "%s device and try again.\n" % self._get_interpreter_kind()
         )
 
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
-    pass
+    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        return [
+            os.path.join(os.path.dirname(__file__), "generic_api_stubs"),
+        ] + super()._get_sys_path_for_analysis()
 
 
 class RawPasteNotSupportedError(RuntimeError):

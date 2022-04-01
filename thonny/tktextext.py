@@ -1,15 +1,13 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-from logging import getLogger
 import sys
-from typing import Optional
-
 import time
 import tkinter as tk
-from logging import exception
+from logging import exception, getLogger
 from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
+from typing import Optional
 
 logger = getLogger(__name__)
 
@@ -1231,7 +1229,7 @@ def get_keyboard_language():
     klid = user32.GetKeyboardLayout(thread_id)
     # Language ID -> low 10 bits, Sub-language ID -> high 6 bits
     # Extract language ID from KLID
-    lid = klid & (2 ** 16 - 1)
+    lid = klid & (2**16 - 1)
 
     return lid
 

@@ -3,17 +3,18 @@
 """
 Classes used both by front-end and back-end
 """
-from logging import getLogger
 import os.path
 import site
-from dataclasses import dataclass
-
 import sys
 from collections import namedtuple
-from typing import List, Optional, Dict, Iterable, Tuple  # @UnusedImport
+from dataclasses import dataclass
+from logging import getLogger
+from typing import Any, Callable, Dict, List, Optional, Tuple  # @UnusedImport
 
 logger = getLogger(__name__)
 
+STRING_PSEUDO_FILENAME = "<string>"
+REPL_PSEUDO_FILENAME = "<stdin>"
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
@@ -51,6 +52,14 @@ FrameInfo = namedtuple(
 )
 
 TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"])
+
+
+@dataclass(frozen=True)
+class DistInfo:
+    key: str
+    project_name: str
+    version: str
+    location: str
 
 
 class Record:
@@ -359,15 +368,14 @@ def get_base_executable():
         return sys.executable
 
     if sys.platform == "win32":
-        result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
-        result = normpath_with_actual_case(result)
-    else:
-        result = sys.executable.replace(sys.exec_prefix, sys.base_exec_prefix)
+        guess = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
+        if os.path.isfile(guess):
+            return normpath_with_actual_case(guess)
 
-    if not os.path.isfile(result):
-        raise RuntimeError("Can't locate base executable")
+    if os.path.islink(sys.executable):
+        return os.path.realpath(sys.executable)
 
-    return result
+    raise RuntimeError("Don't know how to locate base executable")
 
 
 def get_augmented_system_path(extra_dirs):
@@ -619,6 +627,7 @@ def get_windows_network_locations():
 
 def get_windows_lnk_target(lnk_file_path):
     import subprocess
+
     import thonny
 
     script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
@@ -703,33 +712,41 @@ def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None
         result += "-" + sys.version_info[3]
 
     if maxsize is not None:
-        result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)"
+        result += " (" + ("64" if sys.maxsize > 2**32 else "32") + " bit)"
 
     return result
 
 
-def try_load_modules_with_frontend_sys_path(module_names):
+def execute_with_frontend_sys_path(function: Callable) -> Any:
     import ast
 
     try:
         frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
         assert isinstance(frontend_sys_path, list)
+        logger.info("Using THONNY_FRONTEND_SYS_PATH %s", frontend_sys_path)
     except Exception as e:
         logger.debug("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
         frontend_sys_path = []
 
-    from importlib import import_module
-
     old_sys_path = sys.path
     sys.path = sys.path + frontend_sys_path
     try:
+        return function()
+    finally:
+        sys.path = old_sys_path
+
+
+def try_load_modules_with_frontend_sys_path(module_names):
+    def load():
+        from importlib import import_module
+
         for name in module_names:
             try:
                 import_module(name)
             except ImportError:
                 pass
-    finally:
-        sys.path = old_sys_path
+
+    execute_with_frontend_sys_path(load)
 
 
 def read_one_incoming_message_str(line_reader):
@@ -750,9 +767,14 @@ def read_one_incoming_message_str(line_reader):
     return msg_str
 
 
-class ConnectionFailedException(Exception):
-    pass
+def is_virtual_executable(executable):
+    exe_dir = os.path.dirname(executable)
+    return os.path.exists(os.path.join(exe_dir, "activate")) or os.path.exists(
+        os.path.join(exe_dir, "activate.bat")
+    )
 
 
-class ConnectionClosedException(Exception):
-    pass
+def is_private_python(executable):
+    result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
+    logger.debug("is_private_python(%r) == %r", executable, result)
+    return result

@@ -6,12 +6,9 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy C:\Pythonny310-32\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Python310-64\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
-copy ThonnyRunner310\Win32\Release\thonny.exe %BUILDDIR% /Y
-@rem NB! ucrt_redist not required in Windows 10
-xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
-xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
+copy ThonnyRunner310\x64\Release\thonny.exe %BUILDDIR% /Y
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
@@ -21,7 +18,8 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -s -m pip install --no-cache-dir --no-binary mypy -r ..\requirements-regular-bundle.txt
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python -s -m pip install --pre --no-cache-dir thonny
+%BUILDDIR%\python -s -m pip install --pre --no-cache-dir thonny==4.0.0b1
+@rem %BUILDDIR%\python -s -m pip install ..\setuptools\thonny-4.0.0.dev0-py3-none-any.whl
 
 @echo ............... CLEANING PYTHON ............................
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
@@ -43,7 +41,7 @@ del "%BUILDDIR%\Scripts\*" /Q>NUL
 
 copy .\pip.bat "%BUILDDIR%\Scripts\pip.bat"
 copy .\pip.bat "%BUILDDIR%\Scripts\pip3.bat"
-copy .\pip.bat "%BUILDDIR%\Scripts\pip3.9.bat"
+copy .\pip.bat "%BUILDDIR%\Scripts\pip3.10.bat"
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 

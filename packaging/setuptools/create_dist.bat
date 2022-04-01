@@ -1,4 +1,4 @@
-set PATH=C:\Py3\Scripts;%PATH%
+set PATH=C:\Python310\Scripts;%PATH%
 @echo ............... CHANGING TO PROJECT ROOT ......................
 cd ..\..
 
@@ -11,5 +11,7 @@ python setup.py bdist_wheel -d packaging\setuptools
 python setup.py sdist --formats=gztar -d packaging\setuptools
 
 cd packaging\setuptools
-rm -rf ../../thonny.egg-info
+
+rmdir ..\..\thonny.egg-info /s /q
+
 pause

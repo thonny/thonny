@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import os.path
+import sys
 
 target_dir = sys.argv[1]
 script_dir = os.path.abspath(os.path.dirname(__file__))

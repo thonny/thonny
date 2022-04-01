@@ -1,6 +1,7 @@
 # Bootstrap script for Thonny as an application bundle.
 # Inspired by https://github.com/python/cpython/blob/master/Mac/IDLE/IDLE.app/Contents/Resources/idlemain.py
-import sys, os.path
+import os.path
+import sys
 
 # Make sure sys.executable points to the python interpreter inside the
 # framework, instead of at the helper executable inside the application

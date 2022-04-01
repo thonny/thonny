@@ -3,11 +3,13 @@ import sys
 
 from setuptools import find_packages, setup
 
+
 def recursive_files(directory):
     paths = []
     for (path, _, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
+            if not filename.endswith(".pyc"):
+                paths.append(os.path.join('..', path, filename))
     return paths
 
 if sys.version_info < (3, 6):
@@ -50,8 +52,6 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -67,10 +67,12 @@ setup(
     },
     platforms=["Windows", "macOS", "Linux"],
     install_requires=requirements,
-    python_requires=">=3.5",
+    python_requires=">=3.8",
     packages=find_packages(),
     package_data={
-        "": ["VERSION", "defaults.ini", "res/*"] + recursive_files("thonny/locale"),
+        "": ["VERSION", "defaults.ini", "res/*"]
+            + recursive_files("thonny/locale")
+            + recursive_files("thonny/vendored_libs"),
         "thonny.plugins.help": ["*.rst"],
         "thonny.plugins.pi": ["res/*.*"],
         "thonny.plugins.printing": ["*.html"],

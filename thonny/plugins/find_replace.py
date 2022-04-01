@@ -5,7 +5,7 @@ from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog, select_sequence
+from thonny.ui_utils import CommonDialog, select_sequence, show_dialog
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
 # TODO - logging
@@ -402,7 +402,8 @@ def load_plugin() -> None:
         else:
             editor = get_workbench().get_editor_notebook().get_current_editor()
             if editor:
-                FindDialog(editor._code_view)
+                dlg = FindDialog(editor._code_view)
+                show_dialog(dlg)
 
     def find_f3(event):
         if _active_find_dialog is None:

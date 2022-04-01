@@ -1,9 +1,10 @@
 """
 Utils to handle different jedi versions
 """
-import jedi.api.classes
 from logging import getLogger
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
+import jedi.api.classes
 
 try:
     # Since 0.17
@@ -25,8 +26,7 @@ except ImportError:
     except ImportError:
         from jedi.api.classes import Definition as BaseSignature
 
-
-from thonny.common import SignatureParameter, SignatureInfo, CompletionInfo, NameReference
+from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
 
 logger = getLogger(__name__)
 
