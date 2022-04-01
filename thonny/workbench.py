@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-
-import os.path
-import platform
-import tkinter as tk
-import tkinter.font as tk_font
-import traceback
-from logging import getLogger
-from tkinter import messagebox, ttk
-
 import ast
 import collections
 import importlib
+import os.path
 import pkgutil
+import platform
 import queue
 import re
 import shutil
 import socket
 import sys
+import tkinter as tk
+import tkinter.font as tk_font
+import traceback
+import webbrowser
+from logging import getLogger
 from threading import Thread
+from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 from warnings import warn
 
@@ -42,23 +41,23 @@ from thonny.misc_utils import (
     running_on_mac_os,
     running_on_rpi,
     running_on_windows,
-    get_user_site_packages_dir_for_base,
 )
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
     AutomaticNotebook,
     AutomaticPanedWindow,
+    caps_lock_is_on,
+    create_action_label,
     create_tooltip,
+    ems_to_pixels,
+    get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
-    caps_lock_is_on,
     shift_is_pressed,
-    get_hyperlink_cursor,
-    ems_to_pixels,
 )
 
 logger = getLogger(__name__)
@@ -178,7 +177,6 @@ class Workbench(tk.Tk):
         assert self._editor_notebook is not None
 
         self._init_program_arguments_frame()
-        # self._init_backend_switcher()
         self._init_regular_mode_link()  # TODO:
 
         self._show_views()
@@ -252,7 +250,7 @@ class Workbench(tk.Tk):
 
     def _init_configuration(self) -> None:
         self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE)
-        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]]
+        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget], int]]
 
         self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
@@ -323,9 +321,6 @@ class Workbench(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.bind("<Configure>", self._on_configure, True)
-
-    def _init_statusbar(self):
-        self._statusbar = ttk.Frame(self)
 
     def _init_icon(self) -> None:
         # Window icons
@@ -685,6 +680,17 @@ class Workbench(tk.Tk):
                 group=101,
             )
 
+        self.add_command(
+            "SupportUkraine",
+            "help",
+            tr("Support Ukraine"),
+            self._support_ukraine,
+            image="Ukraine",
+            caption=tr("Support"),
+            include_in_toolbar=True,
+            group=101,
+        )
+
         if thonny.in_debug_mode():
             self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
 
@@ -769,7 +775,21 @@ class Workbench(tk.Tk):
         self._status_label = ttk.Label(self._statusbar, text="")
         self._status_label.grid(row=1, column=1, sticky="w")
 
+        # self._init_support_ukraine_bar()
         self._init_backend_switcher()
+
+    def _init_support_ukraine_bar(self) -> None:
+        ukraine_label = create_action_label(
+            self._statusbar,
+            tr("Support Ukraine"),
+            self._support_ukraine,
+            # image=self.get_image("Ukraine"),
+            # compound="left"
+        )
+        ukraine_label.grid(row=1, column=1, sticky="wsn")
+
+    def _support_ukraine(self, event=None) -> None:
+        webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine")
 
     def _init_backend_switcher(self):
 
@@ -783,9 +803,9 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button
-        self._backend_button = ttk.Button(self._statusbar, text="", style="Toolbutton")
+        self._backend_button = ttk.Button(self._statusbar, text="☰", style="Toolbutton")
 
-        self._backend_button.grid(row=1, column=3, sticky="e")
+        self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
 
     def _post_backend_menu(self):
@@ -803,33 +823,23 @@ class Workbench(tk.Tk):
         button_text_width = menu_font.measure(self._backend_button.cget("text"))
 
         num_entries = 0
+        added_micropython_separator = False
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
             entries = backend.proxy_class.get_switcher_entries()
 
-            if not entries:
-                continue
+            for conf, label in entries:
+                if not added_micropython_separator and "MicroPython" in label:
+                    self._backend_menu.add_separator()
+                    added_micropython_separator = True
 
-            if len(entries) == 1:
                 self._backend_menu.add_radiobutton(
-                    label=backend.description,
+                    label=label,
                     command=choose_backend,
                     variable=self._backend_conf_variable,
-                    value=repr(entries[0][0]),
+                    value=repr(conf),
                 )
-            else:
-                submenu = tk.Menu(self._backend_menu, tearoff=False)
-                for conf, label in entries:
-                    submenu.add_radiobutton(
-                        label=label,
-                        command=choose_backend,
-                        variable=self._backend_conf_variable,
-                        value=repr(conf),
-                    )
-                self._backend_menu.add_cascade(label=backend.description, menu=submenu)
 
-            max_description_width = max(
-                menu_font.measure(backend.description), max_description_width
-            )
+                max_description_width = max(menu_font.measure(label), max_description_width)
         num_entries += 1
 
         # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
@@ -864,14 +874,14 @@ class Workbench(tk.Tk):
     def _on_backend_restart(self, event):
         proxy = get_runner().get_backend_proxy()
         if proxy:
-            desc = proxy.get_clean_description()
-            self._backend_conf_variable.set(value=repr(proxy.get_current_switcher_configuration()))
+            conf = proxy.get_current_switcher_configuration()
+            desc = proxy.get_switcher_configuration_label(conf)
+            value = repr(conf)
         else:
-            backend_conf = self._backends.get(self.get_option("run.backend_name"), None)
-            if backend_conf:
-                desc = backend_conf.description
-            else:
-                desc = "<no backend>"
+            desc = "<no backend>"
+            value = "n/a"
+
+        self._backend_conf_variable.set(value=value)
         self._backend_button.configure(text=desc + " ☰")
 
     def _init_theming(self) -> None:
@@ -1187,6 +1197,8 @@ class Workbench(tk.Tk):
             config_page_constructor,
             sort_key if sort_key is not None else description,
         )
+
+        self.set_default(f"{name}.last_configurations", [])
 
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
@@ -1949,7 +1961,7 @@ class Workbench(tk.Tk):
             if self.in_simple_mode():
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
-                padx = (0, 10)
+                padx = (0, ems_to_pixels(1))
             group_frame.grid(row=0, column=toolbar_group, padx=padx)
         else:
             group_frame = slaves[0]

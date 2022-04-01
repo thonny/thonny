@@ -1,12 +1,12 @@
 from logging import getLogger
-from typing import Optional
 
-from thonny.plugins.micropython import (
-    BareMetalMicroPythonProxy,
-    add_micropython_backend,
+from thonny.plugins.micropython import add_micropython_backend
+from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
+    get_uart_adapter_vids_pids,
 )
-from thonny.plugins.micropython.bare_metal_backend import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 logger = getLogger(__name__)
@@ -30,9 +30,13 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
         return "RP2040 device"
 
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.rp2040.rp2040_backend
+        import thonny.plugins.rp2040.rp2040_back
 
-        return thonny.plugins.rp2040.rp2040_backend.__file__
+        return thonny.plugins.rp2040.rp2040_back.__file__
+
+    @classmethod
+    def get_vids_pids_to_avoid(self):
+        return get_uart_adapter_vids_pids()
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):

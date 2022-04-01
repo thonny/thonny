@@ -2,7 +2,7 @@
 
 set -e
 
-thonny_version=3.3.14 #$(<../../thonny/VERSION)
+thonny_version=$(<../../thonny/VERSION)
 
 echo "Releasing $thonny_version"
 echo 

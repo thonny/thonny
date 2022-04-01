@@ -1,34 +1,34 @@
 # -*- coding: utf-8 -*-
-
-from logging import getLogger
 import os
 import re
 import subprocess
 import sys
 import tkinter as tk
-from logging import exception
+import tkinter.font as tk_font
+import urllib.error
+import urllib.parse
+from abc import ABC
+from logging import exception, getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from typing import List, Union, Dict, Tuple, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
-from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
+from thonny.common import DistInfo, InlineCommand, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
-from thonny.plugins.cpython_frontend import CPythonProxy
-from thonny.plugins.cpython_ssh import SshCPythonProxy
-from thonny.running import get_interpreter_for_subprocess, InlineCommandDialog, SubprocessProxy
+from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
     askopenfilename,
+    ems_to_pixels,
     get_busy_cursor,
+    get_hyperlink_cursor,
     lookup_style_option,
     open_path_in_system_file_manager,
     scrollbar_style,
-    ems_to_pixels,
-    get_hyperlink_cursor,
 )
 from thonny.workdlg import SubprocessDialog
 
@@ -39,7 +39,7 @@ logger = getLogger(__name__)
 _EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
 
 
-class PipDialog(CommonDialog):
+class PipDialog(CommonDialog, ABC):
     def __init__(self, master):
         self._state = "idle"  # possible values: "listing", "fetching", "idle"
         self._process = None
@@ -78,9 +78,6 @@ class PipDialog(CommonDialog):
     def get_uninstall_button_text(self):
         return tr("Uninstall")
 
-    def get_delete_selected_button_text(self):
-        return tr("Delete selected")
-
     def _create_widgets(self, parent):
 
         header_frame = ttk.Frame(parent)
@@ -88,7 +85,7 @@ class PipDialog(CommonDialog):
         header_frame.columnconfigure(0, weight=1)
         header_frame.rowconfigure(1, weight=1)
 
-        name_font = tk.font.nametofont("TkDefaultFont").copy()
+        name_font = tk_font.nametofont("TkDefaultFont").copy()
         name_font.configure(size=16)
         self.search_box = ttk.Entry(header_frame)
         self.search_box.grid(row=1, column=0, sticky="nsew")
@@ -121,7 +118,7 @@ class PipDialog(CommonDialog):
             listframe,
             activestyle="dotbox",
             width=20,
-            height=20,
+            height=23,
             selectborderwidth=0,
             relief="flat",
             # highlightthickness=4,
@@ -195,7 +192,7 @@ class PipDialog(CommonDialog):
             "install_file", "<Leave>", lambda e: self.info_text.config(cursor="")
         )
 
-        default_font = tk.font.nametofont("TkDefaultFont")
+        default_font = tk_font.nametofont("TkDefaultFont")
         self.info_text.configure(font=default_font, wrap="word")
 
         bold_font = default_font.copy()
@@ -203,6 +200,7 @@ class PipDialog(CommonDialog):
         bold_font.configure(weight="bold", size=default_font.cget("size"))
         self.info_text.tag_configure("caption", font=bold_font)
         self.info_text.tag_configure("bold", font=bold_font)
+        self.info_text.tag_configure("right", justify="right")
 
         self.command_frame = ttk.Frame(info_frame)
         self.command_frame.grid(row=2, column=0, sticky="w")
@@ -251,7 +249,7 @@ class PipDialog(CommonDialog):
             self.search_button,
         ]
 
-        if state == "idle" and not self._read_only():
+        if state == "idle" and not self._is_read_only():
             for widget in action_buttons:
                 widget["state"] = tk.NORMAL
         else:
@@ -273,12 +271,6 @@ class PipDialog(CommonDialog):
 
     def _get_state(self):
         return self._state
-
-    def _instructions_for_command_line_install(self):
-        return (
-            "Alternatively, if you have an older pip installed, then you can install packages "
-            + "on the command line (Tools → Open system shell...)"
-        )
 
     def _start_update_list(self, name_to_show=None):
         raise NotImplementedError()
@@ -336,39 +328,24 @@ class PipDialog(CommonDialog):
 
     def _show_instructions(self):
         self._clear()
-        if self._read_only():
+        if self._is_read_only():
             self._show_read_only_instructions()
         else:
-            self._append_info_text(tr("Install from PyPI") + "\n", ("caption",))
-            self.info_text.direct_insert(
-                "end",
-                tr(
-                    "If you don't know where to get the package from, "
-                    + "then most likely you'll want to search the Python Package Index. "
-                    + "Start by entering the name of the package in the search box above and pressing ENTER."
-                )
-                + "\n\n",
-            )
-
-            self.info_text.direct_insert(
-                "end", tr("Install from requirements file") + "\n", ("caption",)
-            )
-            self._append_info_text(tr("Click" + " "))
-            self._append_info_text(tr("here"), ("install_reqs",))
-            self.info_text.direct_insert(
-                "end",
-                " "
-                + tr("to locate requirements.txt file and install the packages specified in it.")
-                + "\n\n",
-            )
-
-            self._show_instructions_about_installing_from_local_file()
+            self._show_instructions_about_installing_from_pypi()
+            if self._installer_runs_locally():
+                self._show_instructions_about_installing_from_requirements_file()
+                self._show_instructions_about_installing_from_local_file()
             self._show_instructions_about_existing_packages()
 
             if self._get_target_directory():
                 self._show_instructions_about_target()
 
+            self._show_extra_instructions()
+
         self._select_list_item(0)
+
+    def _show_extra_instructions(self):
+        pass
 
     def _show_read_only_instructions(self):
         self._append_info_text(tr("Browse the packages") + "\n", ("caption",))
@@ -384,6 +361,31 @@ class PipDialog(CommonDialog):
         if self._get_target_directory():
             self._append_info_text(tr("Packages' directory") + "\n", ("caption",))
             self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
+
+    def _show_instructions_about_installing_from_pypi(self):
+        self._append_info_text(tr("Install from PyPI") + "\n", ("caption",))
+        self.info_text.direct_insert(
+            "end",
+            tr(
+                "If you don't know where to get the package from, "
+                + "then most likely you'll want to search the Python Package Index. "
+                + "Start by entering the name of the package in the search box above and pressing ENTER."
+            )
+            + "\n\n",
+        )
+
+    def _show_instructions_about_installing_from_requirements_file(self):
+        self.info_text.direct_insert(
+            "end", tr("Install from requirements file") + "\n", ("caption",)
+        )
+        self._append_info_text(tr("Click" + " "))
+        self._append_info_text(tr("here"), ("install_reqs",))
+        self.info_text.direct_insert(
+            "end",
+            " "
+            + tr("to locate requirements.txt file and install the packages specified in it.")
+            + "\n\n",
+        )
 
     def _show_instructions_about_installing_from_local_file(self):
         self._append_info_text(tr("Install from local file") + "\n", ("caption",))
@@ -406,10 +408,10 @@ class PipDialog(CommonDialog):
 
     def _show_instructions_about_target(self):
         self._append_info_text(tr("Target:") + "  ", ("caption",))
-        if self._should_install_to_site_packages():
-            self.info_text.direct_insert("end", tr("virtual environment") + "\n", ("caption",))
-        else:
+        if self._use_user_install():
             self.info_text.direct_insert("end", tr("user site packages") + "\n", ("caption",))
+        else:
+            self.info_text.direct_insert("end", tr("virtual environment") + "\n", ("caption",))
 
         self.info_text.direct_insert(
             "end",
@@ -429,6 +431,20 @@ class PipDialog(CommonDialog):
             ),
         )
 
+    def _get_package_metadata_url(self, name: str, version_str: Optional[str]) -> str:
+        # Fetch info from PyPI
+        if version_str is None:
+            return "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
+        else:
+            return "https://pypi.org/pypi/{}/{}/json".format(
+                urllib.parse.quote(name), urllib.parse.quote(version_str)
+            )
+
+    def _get_package_metadata_fallback_url(
+        self, name: str, version_str: Optional[str]
+    ) -> Optional[str]:
+        return None
+
     def _start_show_package_info(self, name):
         self.current_package_data = None
         # Fetch info from PyPI
@@ -436,7 +452,12 @@ class PipDialog(CommonDialog):
         # Following fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
-        _start_fetching_package_info(name, None, self._show_package_info)
+        _start_fetching_package_info(
+            name,
+            url=self._get_package_metadata_url(name, None),
+            fallback_url=self._get_package_metadata_fallback_url(name, None),
+            completion_handler=self._show_package_info,
+        )
 
         self._clear_info_text()
         self.title_label["text"] = ""
@@ -446,14 +467,11 @@ class PipDialog(CommonDialog):
 
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
-            self.title_label["text"] = active_dist["project_name"]
+            self.title_label["text"] = active_dist.project_name
             self._append_info_text(tr("Installed version:") + " ", ("caption",))
-            self._append_info_text(active_dist["version"] + "\n")
+            self._append_info_text(active_dist.version + "\n")
             self._append_info_text(tr("Installed to:") + " ", ("caption",))
-            # TODO: only show link if local backend
-            self.info_text.direct_insert(
-                "end", normpath_with_actual_case(active_dist["location"]), ("url",)
-            )
+            self._append_location_to_info_path(active_dist.location)
             self._append_info_text("\n\n")
             self._select_list_item(name)
         else:
@@ -477,6 +495,9 @@ class PipDialog(CommonDialog):
                 # new package
                 self.install_button["text"] = self.get_install_button_text()
                 self.uninstall_button.grid_remove()
+
+    def _append_location_to_info_path(self, path):
+        self.info_text.direct_insert("end", path)
 
     def _show_package_info(self, name, data, error_code=None):
         self._set_state("idle")
@@ -510,19 +531,24 @@ class PipDialog(CommonDialog):
                     + " "
                     + str(error_code)
                 )
+                logger.exception("Coult not fetch package info for %r", name)
 
             return
 
         info = data["info"]
+        # NB! Json from micropython.org/pi doesn't have all the same fields as PyPI!
         self.title_label["text"] = info["name"]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att(tr("Latest stable version"), latest_stable_version)
         else:
             write_att(tr("Latest version"), data["info"]["version"])
-        write_att(tr("Summary"), info["summary"])
-        write_att(tr("Author"), info["author"])
-        write_att(tr("Homepage"), info["home_page"], "url")
+        if "summary" in info:
+            write_att(tr("Summary"), info["summary"])
+        if "author" in info:
+            write_att(tr("Author"), info["author"])
+        if "home_page" in info:
+            write_att(tr("Homepage"), info["home_page"], "url")
         if info.get("bugtrack_url", None):
             write_att(tr("Bugtracker"), info["bugtrack_url"], "url")
         if info.get("docs_url", None):
@@ -582,7 +608,7 @@ class PipDialog(CommonDialog):
         if dist is None:
             return False
         else:
-            return normpath_with_actual_case(dist["location"]) != self._get_target_directory()
+            return self._normalize_target_path(dist.location) != self._get_target_directory()
 
     def _normalize_name(self, name):
         # looks like (in some cases?) pip list gives the name as it was used during install
@@ -592,6 +618,9 @@ class PipDialog(CommonDialog):
 
         # https://www.python.org/dev/peps/pep-0503/#id4
         return re.sub(r"[-_.]+", "-", name).lower().strip()
+
+    def _normalize_target_path(self, path: str) -> str:
+        return path
 
     def _start_search(self, query, discard_selection=True):
         self.current_package_data = None
@@ -609,8 +638,6 @@ class PipDialog(CommonDialog):
         self._set_state("idle")
         self._clear_info_text()
 
-        results = self._tweak_search_results(results, query)
-
         if isinstance(results, str) or not results:
             if not results:
                 self._append_info_text("No results.\n\n")
@@ -621,6 +648,8 @@ class PipDialog(CommonDialog):
             self._append_info_text("Try opening the package directly:\n")
             self._append_info_text(query, ("url",))
             return
+        else:
+            results = self._tweak_search_results(results, query)
 
         for item in results:
             # self._append_info_text("•")
@@ -656,13 +685,7 @@ class PipDialog(CommonDialog):
         finally:
             self.listbox["state"] = old_state
 
-    def _get_install_command(self):
-        cmd = ["install", "--no-cache-dir"]
-        if self._use_user_install():
-            cmd.append("--user")
-        return cmd
-
-    def _perform_pip_action(self, action: str) -> bool:
+    def _perform_pip_action(self, action: str) -> None:
         if self._perform_pip_action_without_refresh(action):
             if action == "uninstall":
                 self._show_instructions()  # Make the old package go away as fast as possible
@@ -670,28 +693,37 @@ class PipDialog(CommonDialog):
                 None if action == "uninstall" else self.current_package_data["info"]["name"]
             )
 
-            get_workbench().event_generate("RemoteFilesChanged")
+            if self._has_remote_target():
+                get_workbench().event_generate("RemoteFilesChanged")
 
     def _perform_pip_action_without_refresh(self, action: str) -> bool:
+        """Returns whether the action was at least started and some packages might have been
+        modified.
+        """
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
 
-        install_cmd = self._get_install_command()
+        install_args = []
+        if self._use_user_install():
+            install_args.append("--user")
 
         if action == "install":
+            command = "install"
             title = tr("Installing '%s'") % name
             if not self._confirm_install(self.current_package_data):
                 return False
 
-            args = install_cmd
+            args = install_args
             if self._get_active_version(name) is not None:
                 title = tr("Upgrading '%s'") % name
                 args.append("--upgrade")
 
             args.append(name)
+
         elif action == "uninstall":
+            command = "uninstall"
             title = tr("Uninstalling '%s'") % name
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
                 tr("Really uninstall?"),
@@ -703,8 +735,9 @@ class PipDialog(CommonDialog):
                 master=self,
             ):
                 return False
-            args = ["uninstall", "-y", name]
+            args = ["--yes", name]
         elif action == "advanced":
+            command = "install"
             title = tr("Installing")
             details = _ask_installation_details(
                 self,
@@ -719,15 +752,16 @@ class PipDialog(CommonDialog):
             if not self._confirm_install(package_data):
                 return False
 
-            args = install_cmd
+            args = install_args
             if upgrade_deps:
                 args.append("--upgrade")
+
             args.append(name + "==" + version)
         else:
             raise RuntimeError("Unknown action")
 
-        returncode, _, _ = self._run_pip_with_dialog(args, title=title)
-        return returncode == 0
+        self._run_pip_with_dialog(command, args, title=title)
+        return True
 
     def does_support_update_deps_switch(self):
         return True
@@ -766,7 +800,7 @@ class PipDialog(CommonDialog):
         args = self._get_install_file_command(filename, is_requirements_file)
 
         returncode, out, err = self._run_pip_with_dialog(
-            args, title=tr("Installing '%s'") % os.path.basename(filename)
+            command="install", args=args, title=tr("Installing '%s'") % os.path.basename(filename)
         )
 
         # Try to find out the name of the package we're installing
@@ -779,7 +813,7 @@ class PipDialog(CommonDialog):
         )  # @UndefinedVariable
         if len(inst_lines) == 1:
             # take last element
-            elements = re.split(",|:", inst_lines[0])
+            elements = re.split("[,:]", inst_lines[0])
             name = elements[-1].strip()
 
         self._start_update_list(name)
@@ -816,7 +850,7 @@ class PipDialog(CommonDialog):
         if dist is None:
             return None
         else:
-            return dist["version"]
+            return dist.version
 
     def _get_active_dist(self, name):
         normname = self._normalize_name(name)
@@ -827,47 +861,37 @@ class PipDialog(CommonDialog):
 
         return None
 
-    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+    def _run_pip_with_dialog(
+        self, command: str, args: List[str], title: str
+    ) -> Tuple[int, str, str]:
         raise NotImplementedError()
 
-    def _get_interpreter(self):
-        raise NotImplementedError()
-
-    def _should_install_to_site_packages(self):
+    def _get_interpreter_description(self):
         raise NotImplementedError()
 
     def _use_user_install(self):
-        return not self._should_install_to_site_packages()
+        raise NotImplementedError()
+
+    def _has_remote_target(self):
+        raise NotImplementedError()
+
+    def _installer_runs_locally(self):
+        raise NotImplementedError()
 
     def _get_target_directory(self):
         raise NotImplementedError()
 
     def _get_title(self):
-        return tr("Manage packages for %s") % self._get_interpreter()
+        return tr("Manage packages for %s") % self._get_interpreter_description()
 
     def _confirm_install(self, package_data):
         return True
 
-    def _read_only(self):
-        if self._should_install_to_site_packages():
-            return False
-        else:
-            # readonly if not in a virtual environment
-            # and user site packages is disabled
-            return not cast(
-                SubprocessProxy, get_runner().get_backend_proxy()
-            ).get_user_site_packages()
+    def _is_read_only(self):
+        raise NotImplementedError()
 
     def _tweak_search_results(self, results, query):
         return results
-
-    def _get_extra_switches(self):
-        result = ["--disable-pip-version-check"]
-        proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
-        if proxy:
-            result.append("--proxy=" + proxy)
-
-        return result
 
 
 class BackendPipDialog(PipDialog):
@@ -876,6 +900,9 @@ class BackendPipDialog(PipDialog):
         super().__init__(master)
 
         self._last_name_to_show = None
+
+    def _has_remote_target(self):
+        return get_runner().get_backend_proxy().supports_remote_files()
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
@@ -901,19 +928,6 @@ class BackendPipDialog(PipDialog):
         self._set_state("idle", True)
         self._update_list(self._last_name_to_show)
 
-
-class CPythonBackendPipDialog(BackendPipDialog):
-    def __init__(self, master):
-        super().__init__(master)
-        assert isinstance(self._backend_proxy, (CPythonProxy, SshCPythonProxy))
-
-    def _get_interpreter(self):
-        return get_runner().get_local_executable()
-
-    def _create_python_process(self, args):
-        proc = running.create_backend_python_process(args, stderr=subprocess.STDOUT)
-        return proc, proc.cmd
-
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
 
@@ -933,35 +947,23 @@ class CPythonBackendPipDialog(BackendPipDialog):
         else:
             return True
 
-    def _get_target_directory(self):
-        if self._should_install_to_site_packages():
-            return normpath_with_actual_case(self._backend_proxy.get_site_packages())
-        else:
-            usp = self._backend_proxy.get_user_site_packages()
-            if isinstance(self._backend_proxy, CPythonProxy):
-                os.makedirs(usp, exist_ok=True)
-                return normpath_with_actual_case(usp)
-            else:
-                return usp
-
-    def _should_install_to_site_packages(self):
-        return self._targets_virtual_environment()
-
-    def _targets_virtual_environment(self):
-        return get_runner().using_venv()
-
-    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
+    def _run_pip_with_dialog(
+        self, command: str, args: List[str], title: str
+    ) -> Tuple[int, str, str]:
         proxy = get_runner().get_backend_proxy()
-        assert isinstance(proxy, CPythonProxy)
-        sub_cmd = [proxy._reported_executable, "-m", "pip"] + args + self._get_extra_switches()
-        back_cmd = InlineCommand("execute_system_command", cmd_line=sub_cmd)
+        if command == "install":
+            back_cmd = InlineCommand("install_distributions", args=args)
+        elif command == "uninstall":
+            back_cmd = InlineCommand("uninstall_distributions", args=args)
+        else:
+            raise AssertionError(f"Unexpected command {command}")
+
         dlg = InlineCommandDialog(
             self,
             back_cmd,
-            title="pip",
+            title=command,
             instructions=title,
             autostart=True,
-            output_prelude=subprocess.list2cmdline(sub_cmd) + "\n\n",
         )
         ui_utils.show_dialog(dlg)
 
@@ -976,6 +978,15 @@ class PluginsPipDialog(PipDialog):
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
 
+    def _has_remote_target(self):
+        return False
+
+    def _installer_runs_locally(self):
+        return True
+
+    def _is_read_only(self):
+        return False
+
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         import pkg_resources
@@ -983,12 +994,12 @@ class PluginsPipDialog(PipDialog):
         pkg_resources._initialize_master_working_set()
 
         self._active_distributions = {
-            dist.key: {
-                "project_name": dist.project_name,
-                "key": dist.key,
-                "location": dist.location,
-                "version": dist.version,
-            }
+            dist.key: DistInfo(
+                project_name=dist.project_name,
+                key=dist.key,
+                location=dist.location,
+                version=dist.version,
+            )
             for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
         }
 
@@ -1009,11 +1020,11 @@ class PluginsPipDialog(PipDialog):
             logger.exception("Problem computing conflicts")
             return None
 
-    def _get_interpreter(self):
-        return get_interpreter_for_subprocess(sys.executable)
+    def _get_interpreter_description(self):
+        return get_front_interpreter_for_subprocess(sys.executable)
 
-    def _should_install_to_site_packages(self):
-        return self._targets_virtual_environment()
+    def _use_user_install(self):
+        return not self._targets_virtual_environment()
 
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
@@ -1037,7 +1048,7 @@ class PluginsPipDialog(PipDialog):
         if name.lower().startswith("thonny-") and not reqs:
             showerror(
                 tr("Thonny plugin without requirements"),
-                tr(
+                (
                     "Looks like you are trying to install an outdated Thonny\n"
                     + "plug-in (it doesn't specify required Thonny version\n"
                     + "or hasn't uploaded a whl file before other files).\n\n"
@@ -1070,14 +1081,17 @@ class PluginsPipDialog(PipDialog):
         if self._use_user_install():
             target = thonny.get_sys_path_directory_containg_plugins()
             os.makedirs(target, exist_ok=True)
-            return normpath_with_actual_case(target)
+            return self._normalize_target_path(target)
         else:
             for d in sys.path:
                 if ("site-packages" in d or "dist-packages" in d) and path_startswith(
                     d, sys.prefix
                 ):
-                    return normpath_with_actual_case(d)
+                    return self._normalize_target_path(d)
             return None
+
+    def _normalize_target_path(self, path: str) -> str:
+        return normpath_with_actual_case(path)
 
     def _create_widgets(self, parent):
         banner = ttk.Frame(parent, style="Tip.TFrame")
@@ -1103,15 +1117,24 @@ class PluginsPipDialog(PipDialog):
     def _get_title(self):
         return tr("Thonny plug-ins")
 
-    def _run_pip_with_dialog(self, args, title) -> Tuple[int, str, str]:
-        args = ["-m", "pip"] + args + self._get_extra_switches()
+    def _run_pip_with_dialog(self, command: str, args: Dict, title: str) -> Tuple[int, str, str]:
+        cmd = ["-m", "pip", "--disable-pip-version-check", "--no-color", command]
+        if command == "install":
+            cmd += [
+                "--no-warn-script-location",
+            ]
+            if self._use_user_install():
+                cmd += ["--user"]
+        cmd += args
+
         proc = running.create_frontend_python_process(
-            args,
+            cmd,
             stderr=subprocess.STDOUT,
             environment_extras={"PYTHONUSERBASE": thonny.get_user_base_directory_for_plugins()},
         )
-        cmd = proc.cmd
-        dlg = SubprocessDialog(self, proc, "pip", long_description=title, autostart=True)
+        dlg = SubprocessDialog(
+            self, proc, title="pip " + command, long_description=title, autostart=True
+        )
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr
 
@@ -1121,6 +1144,7 @@ class DetailsDialog(CommonDialog):
         from distutils.version import StrictVersion
 
         assert isinstance(master, PipDialog)
+        self._pip_dialog = cast(PipDialog, master)
 
         super().__init__(master)
         self.result = None
@@ -1222,7 +1246,14 @@ class DetailsDialog(CommonDialog):
     def _start_fetching_version_info(self):
         self._set_state("busy")
         _start_fetching_package_info(
-            self._package_name, self.version_var.get(), self._show_version_info
+            self._package_name,
+            url=self._pip_dialog._get_package_metadata_url(
+                self._package_name, self.version_var.get()
+            ),
+            fallback_url=self._pip_dialog._get_package_metadata_fallback_url(
+                self._package_name, self.version_var.get()
+            ),
+            completion_handler=self._show_version_info,
         )
 
     def _show_version_info(self, name, info, error_code=None):
@@ -1257,12 +1288,19 @@ class DetailsDialog(CommonDialog):
         self.destroy()
 
 
-def _fetch_url_future(url, timeout=10):
+def _fetch_url_future(url, fallback_url=None, timeout=10):
     from urllib.request import urlopen
 
     def load_url():
-        with urlopen(url, timeout=timeout) as conn:
-            return (conn, conn.read())
+        try:
+            with urlopen(url, timeout=timeout) as conn:
+                return (conn, conn.read())
+        except urllib.error.HTTPError as e:
+            if e.code == 404 and fallback_url is not None:
+                with urlopen(fallback_url, timeout=timeout) as conn:
+                    return (conn, conn.read())
+            else:
+                raise
 
     from concurrent.futures.thread import ThreadPoolExecutor
 
@@ -1292,19 +1330,11 @@ def _ask_installation_details(master, data, selected_version, support_update_dep
     return dlg.result
 
 
-def _start_fetching_package_info(name, version_str, completion_handler):
+def _start_fetching_package_info(name, url: str, fallback_url: str, completion_handler):
     import urllib.error
     import urllib.parse
 
-    # Fetch info from PyPI
-    if version_str is None:
-        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
-    else:
-        url = "https://pypi.org/pypi/{}/{}/json".format(
-            urllib.parse.quote(name), urllib.parse.quote(version_str)
-        )
-
-    url_future = _fetch_url_future(url)
+    url_future = _fetch_url_future(url=url, fallback_url=fallback_url)
 
     def poll_fetch_complete():
         import json
@@ -1313,7 +1343,12 @@ def _start_fetching_package_info(name, version_str, completion_handler):
             try:
                 _, bin_data = url_future.result()
                 raw_data = bin_data.decode("UTF-8")
-                completion_handler(name, json.loads(raw_data))
+                data = json.loads(raw_data)
+                if "info" in data and "name" not in data["info"]:
+                    # this is the case of micropython.org/pi
+                    data["info"]["name"] = name
+
+                completion_handler(name, data)
             except urllib.error.HTTPError as e:
                 completion_handler(
                     name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
@@ -1323,7 +1358,7 @@ def _start_fetching_package_info(name, version_str, completion_handler):
                     name, {"info": {"name": name}, "error": str(e), "releases": {}}, e
                 )
         else:
-            tk._default_root.after(200, poll_fetch_complete)
+            get_workbench().after(200, poll_fetch_complete)
 
     poll_fetch_complete()
 
@@ -1345,7 +1380,7 @@ def _start_fetching_search_results(query, completion_handler):
             except Exception as e:
                 completion_handler(query, str(e))
         else:
-            tk._default_root.after(200, poll_fetch_complete)
+            get_workbench().after(200, poll_fetch_complete)
 
     poll_fetch_complete()
 
@@ -1417,7 +1452,8 @@ def load_plugin() -> None:
         proxy = get_runner().get_backend_proxy()
         if proxy is None:
             return None
-        return proxy.get_pip_gui_class()
+        pip_gui_class = proxy.get_pip_gui_class()
+        return pip_gui_class
 
     def open_backend_pip_gui(*args):
         pg_class = get_pip_gui_class()
@@ -1437,9 +1473,10 @@ def load_plugin() -> None:
         ui_utils.show_dialog(pg)
 
     def open_backend_pip_gui_enabled():
-        return get_pip_gui_class() is not None
+        class_ = get_pip_gui_class()
+        return class_ is not None
 
-    def open_frontend_pip_gui(*args):
+    def open_plugins_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
         ui_utils.show_dialog(pg)
 
@@ -1452,5 +1489,5 @@ def load_plugin() -> None:
         group=80,
     )
     get_workbench().add_command(
-        "pluginspipgui", "tools", tr("Manage plug-ins..."), open_frontend_pip_gui, group=180
+        "pluginspipgui", "tools", tr("Manage plug-ins..."), open_plugins_pip_gui, group=180
     )

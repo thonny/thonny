@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-import re
-from logging import getLogger
 import os.path
+import re
 import sys
 import tkinter as tk
 import traceback
-from logging import exception
-from tkinter import messagebox, ttk, simpledialog
+from logging import exception, getLogger
+from tkinter import messagebox, simpledialog, ttk
+from typing import Optional
 
 from _tkinter import TclError
-from typing import Optional
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
-from thonny.codeview import CodeView, BinaryFileException, CodeViewText
+from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
     InlineCommand,
     TextRange,
@@ -28,11 +27,10 @@ from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import (
     askopenfilename,
     asksaveasfilename,
-    select_sequence,
     get_beam_cursor,
+    select_sequence,
     windows_known_extensions_are_hidden,
 )
-
 
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]
@@ -155,8 +153,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     tr("File is gone"),
-                    tr("Looks like '%s' was deleted or moved outside of the editor.")
-                    % self._filename
+                    tr("Looks like '%s' was deleted or moved.") % self._filename
                     + "\n\n"
                     + tr("Do you want to also close the editor?"),
                     master=self,
@@ -171,7 +168,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     tr("External modification"),
-                    tr("Looks like '%s' was modified outside the editor.") % self._filename
+                    tr("Looks like '%s' was modified outside of the editor.") % self._filename
                     + "\n\n"
                     + tr(
                         "Do you want to discard current editor content and reload the file from disk?"
@@ -968,7 +965,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_goto_source_line(self):
         editor = self.get_current_editor()
         if editor:
-            line_no = simpledialog.askinteger(tr("Goto"), tr("Line number"))
+            line_no = simpledialog.askinteger(tr("Go to line"), tr("Line number"))
             if line_no:
                 editor.select_line(line_no)
 

@@ -1,5 +1,6 @@
-import serial
 import time
+
+import serial
 
 PORT = "/dev/ttyACM0"
 

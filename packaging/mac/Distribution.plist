@@ -6,7 +6,7 @@
     <allowed-os-versions>
         <os-version min="10.9"/>
     </allowed-os-versions>
-    <options customize="never" require-scripts="false" hostArchitectures="x86_64"/>
+    <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
     <domains enable_anywhere="true" enable_currentUserHome="true" enable_localSystem="true" /> 
     <choices-outline>
         <line choice="default"/>

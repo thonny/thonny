@@ -1,5 +1,6 @@
-import pyboard
 import time
+
+import pyboard
 
 thread_script = """
 import machine

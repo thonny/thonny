@@ -3,8 +3,8 @@ NB! Stippling doesn't work on mac:
 http://wiki.tcl.tk/44444
 http://rkeene.org/projects/tcl/tk.fossil/tkthistory/2954673
 """
-from logging import getLogger
 import os.path
+from logging import getLogger
 from tkinter import font
 
 import thonny

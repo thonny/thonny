@@ -1,4 +1,3 @@
-from logging import getLogger
 import os
 import signal
 import subprocess
@@ -6,21 +5,21 @@ import threading
 import time
 import tkinter as tk
 from collections import OrderedDict
+from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import get_runner, ui_utils
 from thonny.languages import tr
-from thonny.misc_utils import (
-    running_on_windows,
-)
+from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
-from thonny.running import get_interpreter_for_subprocess
+from thonny.plugins.micropython.mp_front import get_uart_adapter_vids_pids
+from thonny.running import get_front_interpreter_for_subprocess
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -30,32 +29,13 @@ VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS = set()
 
 class ESPProxy(BareMetalMicroPythonProxy):
     @classmethod
-    def _is_potential_port(cls, p):
-        # They have UART adapter
-        return (
-            (p.vid, p.pid) in cls.get_known_usb_vids_pids()
-            or (p.vid, None) in cls.get_known_usb_vids_pids()
-            or p.description in cls.get_known_port_descriptions()
-            or cls.should_consider_unknown_devices()
-            and (p.vid, p.pid) not in cls.get_vids_pids_to_avoid()
-            and (
-                ("USB" in p.description and "serial" in p.description.lower())
-                or "UART" in p.description
-                or "DAPLink" in p.description
-                or "STLink" in p.description
-            )
-            and getattr(p, "manufacturer", "") != "MicroPython"  # adapter can't have this?
-            and "python" not in p.description.lower()
-        )
-
-    @classmethod
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS
 
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.esp.esp_backend
+        import thonny.plugins.esp.esp_back
 
-        return thonny.plugins.esp.esp_backend.__file__
+        return thonny.plugins.esp.esp_back.__file__
 
 
 class ESP8266Proxy(ESPProxy):
@@ -64,13 +44,13 @@ class ESP8266Proxy(ESPProxy):
 
     @classmethod
     def get_known_usb_vids_pids(cls):
-        return cls.get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids()
 
 
 class ESP32Proxy(ESPProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
-        return cls.get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids()
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):
@@ -102,7 +82,7 @@ class ESPConfigPage(BareMetalMicroPythonConfigPage):
         try:
             import esptool
 
-            return [get_interpreter_for_subprocess(), "-u", "-m", "esptool"]
+            return [get_front_interpreter_for_subprocess(), "-u", "-m", "esptool"]
         except ImportError:
             import shutil
 

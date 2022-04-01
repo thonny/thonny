@@ -1,6 +1,6 @@
 import shlex
 
-from thonny.plugins.micropython.connection import MicroPythonConnection
+from .connection import MicroPythonConnection
 
 
 class SshProcessConnection(MicroPythonConnection):
@@ -25,7 +25,7 @@ class SshProcessConnection(MicroPythonConnection):
         self._reading_thread = threading.Thread(target=self._listen_output, daemon=True)
         self._reading_thread.start()
 
-    def write(self, data, block_size=255, delay=0.01):
+    def write(self, data: bytes) -> int:
         if isinstance(data, str):
             data = data.encode(self.encoding)
         self._stdin.write(data)

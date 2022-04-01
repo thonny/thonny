@@ -1,11 +1,11 @@
 import ast
-from logging import getLogger
 import subprocess
+from logging import getLogger
 
 from thonny import get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.plugins.pylint.messages import checks_by_id
-from thonny.running import get_interpreter_for_subprocess
+from thonny.running import get_front_interpreter_for_subprocess
 
 logger = getLogger(__name__)
 
@@ -58,7 +58,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         """
 
         self._proc = ui_utils.popen_with_ui_thread_callback(
-            [get_interpreter_for_subprocess(), "-m", "pylint"]
+            [get_front_interpreter_for_subprocess(), "-m", "pylint"]
             + options
             + [main_file_path]
             + list(imported_file_paths),

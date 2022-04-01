@@ -1,26 +1,27 @@
 import datetime
-from logging import getLogger
 import os.path
+import shutil
+import stat
 import subprocess
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk, simpledialog
-import stat, shutil
+from logging import getLogger
+from tkinter import messagebox, simpledialog, ttk
 from typing import Optional
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, get_dirs_children_info, UserError
+from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
+    ask_one_from_choices,
+    ask_string,
     create_string_var,
+    get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
     show_dialog,
-    ask_string,
-    ask_one_from_choices,
-    get_hyperlink_cursor,
 )
 
 _dummy_node_text = "..."
@@ -645,7 +646,7 @@ class BaseFileBrowser(ttk.Frame):
 
             if self.is_active_browser():
                 self.menu.add_command(
-                    label=tr("Open in system default app"),
+                    label=tr("Open in default external app"),
                     command=lambda: self.open_path_with_system_app(selected_path),
                 )
 
@@ -717,10 +718,7 @@ class BaseFileBrowser(ttk.Frame):
             self.menu.add_command(label=tr("Rename"), command=self.rename_file)
 
         if self.supports_trash():
-            if running_on_windows():
-                trash_label = tr("Move to Recycle Bin")
-            else:
-                trash_label = tr("Move to Trash")
+            trash_label = tr("Move to Trash")
             self.menu.add_command(label=trash_label, command=self.move_to_trash)
         else:
             self.menu.add_command(label=tr("Delete"), command=self.delete)
@@ -810,7 +808,7 @@ class BaseFileBrowser(ttk.Frame):
             return
 
         confirmation = "Are you sure want to delete %s?" % selection["description"]
-        confirmation += "\n\nNB! Recycle bin won't be used (no way to undelete)!"
+        confirmation += "\n\nNB! Trash bin won't be used (no way to undelete)!"
         if "dir" in selection["kinds"]:
             confirmation += "\n" + "Directories will be deleted with content."
 
@@ -827,17 +825,16 @@ class BaseFileBrowser(ttk.Frame):
         if not selection:
             return
 
-        trash = tr("Recycle Bin") if running_on_windows() else tr("Trash")
         if not messagebox.askokcancel(
-            tr("Moving to %s") % trash,
-            tr("Move %s to %s?") % (selection["description"], trash),
+            tr("Moving to Trash"),
+            tr("Move %s to Trash?") % selection["description"],
             icon="info",
             master=self,
         ):
             return
 
         self.perform_move_to_trash(
-            selection["paths"], tr("Moving %s to %s") % (selection["description"], trash)
+            selection["paths"], tr("Moving %s to Trash") % (selection["description"])
         )
         self.refresh_tree()
 
@@ -1051,10 +1048,10 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         try:
             open_with_default_app(path)
         except Exception as e:
-            logger.error("Could not open %r in system app", path, exc_info=e)
+            logger.error("Could not open %r in external. app", path, exc_info=e)
             messagebox.showerror(
                 "Error",
-                "Could not open '%s' in system app\nError: %s" % (path, e),
+                "Could not open '%s' in external app\nError: %s" % (path, e),
                 parent=self.winfo_toplevel(),
             )
 
@@ -1177,7 +1174,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     def open_path_with_system_app(self, path):
         messagebox.showinfo(
             tr("Not supported"),
-            tr("Opening remote files in system app is not supported.")
+            tr("Opening remote files in external app is not supported.")
             + "\n\n"
             + tr(
                 "If it is a text file, then you can configure it to open in Thonny "
@@ -1185,7 +1182,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             )
             + "\n\n"
             + tr(
-                "If the file needs to be opened in a system app, then download it to a local "
+                "If the file needs to be opened in external app, then download it to a local "
                 "directory and open it from there!"
             ),
             master=self,

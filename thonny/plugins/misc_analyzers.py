@@ -1,5 +1,5 @@
-from logging import getLogger
 import os
+from logging import getLogger
 
 from thonny import get_runner
 from thonny.assistance import ProgramAnalyzer, add_program_analyzer
@@ -267,9 +267,9 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
 
     def _get_3rd_party_modules(self):
         proxy = get_runner().get_backend_proxy()
-        from thonny.plugins.cpython_frontend import CPythonProxy
+        from thonny.plugins.cpython_frontend import LocalCPythonProxy
 
-        if not isinstance(proxy, CPythonProxy):
+        if not isinstance(proxy, LocalCPythonProxy):
             return []
 
         try:

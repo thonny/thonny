@@ -50,6 +50,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Alar Leemet
 * Aleks ANDRÉ
 * Alex Hall
+* Alexandre Barrozo do Amaral Villares
 * Algent Albrahimi
 * Anatoly Techtonik
 * Anders Pamdal
@@ -67,6 +68,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Celso Isayah Dias
 * Chad Purdy
 * codemee
+* Collision Detection
 * cspaier
 * cubimon
 * Curtis Wang
@@ -92,11 +94,13 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Илья Кругликов
 * Jarek Miszczak
 * Jens Diemer
+* jharris1993
 * Juan Falgueras
 * Jonathan Campbell
 * Jordan Williams
 * jose1711
 * José Carlos García
+* Kaspar Papli
 * Kauri Raba
 * kr-g
 * Laszlo Kocsis
@@ -118,6 +122,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Radim
 * Rene Lehtma
 * Rune Langøy
+* Saishen, Inc.
 * Sam Warmuth
 * Sami Almuhammady
 * sailslack

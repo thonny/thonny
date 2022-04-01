@@ -8,11 +8,11 @@ from thonny.backend import delete_stored_ssh_password, get_ssh_password_file_pat
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.misc_utils import (
+    PASSWORD_METHOD,
     PUBLIC_KEY_NO_PASS_METHOD,
     PUBLIC_KEY_WITH_PASS_METHOD,
-    PASSWORD_METHOD,
 )
-from thonny.ui_utils import create_string_var, ems_to_pixels, CommonDialogEx
+from thonny.ui_utils import CommonDialogEx, create_string_var, ems_to_pixels
 
 
 class BackendDetailsConfigPage(ConfigurationPage):
@@ -81,7 +81,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo_variable = create_string_var(current_backend_desc)
 
         label = ttk.Label(
-            self, text=tr("Which interpreter or device should Thonny use for running your code?")
+            self, text=tr("Which kind of interpreter should Thonny use for running your code?")
         )
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
@@ -320,5 +320,5 @@ def load_plugin() -> None:
         "interpreter", tr("Interpreter"), BackendConfigurationPage, 20
     )
     get_workbench().add_command(
-        "select_interpreter", "run", tr("Select interpreter") + "...", select_device, group=1
+        "select_interpreter", "run", tr("Configure interpreter..."), select_device, group=1
     )

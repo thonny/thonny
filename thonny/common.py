@@ -3,14 +3,13 @@
 """
 Classes used both by front-end and back-end
 """
-from logging import getLogger
 import os.path
 import site
-from dataclasses import dataclass
-
 import sys
 from collections import namedtuple
-from typing import List, Optional, Dict, Iterable, Tuple, Callable, Any  # @UnusedImport
+from dataclasses import dataclass
+from logging import getLogger
+from typing import Any, Callable, Dict, List, Optional, Tuple  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -53,6 +52,14 @@ FrameInfo = namedtuple(
 )
 
 TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"])
+
+
+@dataclass(frozen=True)
+class DistInfo:
+    key: str
+    project_name: str
+    version: str
+    location: str
 
 
 class Record:
@@ -361,12 +368,14 @@ def get_base_executable():
         return sys.executable
 
     if sys.platform == "win32":
-        result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
-        return normpath_with_actual_case(result)
-    elif os.path.islink(sys.executable):
+        guess = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
+        if os.path.isfile(guess):
+            return normpath_with_actual_case(guess)
+
+    if os.path.islink(sys.executable):
         return os.path.realpath(sys.executable)
-    else:
-        raise RuntimeError("Don't know how to locate base executable")
+
+    raise RuntimeError("Don't know how to locate base executable")
 
 
 def get_augmented_system_path(extra_dirs):
@@ -618,6 +627,7 @@ def get_windows_network_locations():
 
 def get_windows_lnk_target(lnk_file_path):
     import subprocess
+
     import thonny
 
     script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
@@ -757,14 +767,6 @@ def read_one_incoming_message_str(line_reader):
     return msg_str
 
 
-class ConnectionFailedException(Exception):
-    pass
-
-
-class ConnectionClosedException(Exception):
-    pass
-
-
 def is_virtual_executable(executable):
     exe_dir = os.path.dirname(executable)
     return os.path.exists(os.path.join(exe_dir, "activate")) or os.path.exists(
@@ -773,4 +775,6 @@ def is_virtual_executable(executable):
 
 
 def is_private_python(executable):
-    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
+    result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
+    logger.debug("is_private_python(%r) == %r", executable, result)
+    return result

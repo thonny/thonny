@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from logging import getLogger
 import os
 import platform
 import re
@@ -11,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
@@ -33,9 +33,9 @@ logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
-    def __init__(self, master=None):
+    def __init__(self, master=None, **kw):
         assert master
-        super().__init__(master=master)
+        super().__init__(master=master, class_="Thonny", **kw)
         self.withdraw()  # remain invisible until size calculations are done
 
         # TODO: Is it still required ?
@@ -975,7 +975,7 @@ class AutoScrollbar(SafeScrollbar):
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
-        elif float(first) > 0.001 or float(last) < 0.009:
+        elif float(first) > 0.001 or float(last) < 0.999:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
             self.grid()
         ttk.Scrollbar.set(self, first, last)
@@ -2294,10 +2294,10 @@ class TextMenu(MenuEx):
         return False
 
 
-def create_url_label(master, url, text=None):
+def create_url_label(master, url, text=None, **kw):
     import webbrowser
 
-    return create_action_label(master, text or url, lambda _: webbrowser.open(url))
+    return create_action_label(master, text or url, lambda _: webbrowser.open(url), **kw)
 
 
 def create_action_label(master, text, click_handler, **kw):
@@ -2324,7 +2324,7 @@ def get_default_basic_theme():
 EM_WIDTH = None
 
 
-def ems_to_pixels(x: int) -> int:
+def ems_to_pixels(x: float) -> int:
     global EM_WIDTH
     if EM_WIDTH is None:
         EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")
