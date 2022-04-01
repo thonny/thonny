@@ -81,6 +81,9 @@ class TodoView(ui_utils.TreeFrame):
                     todo_text = m.groups()[0]
                     self.tree.insert("", "end", values=(line_no, todo_text))
 
+        if len(self.tree.get_children()) == 0:
+            self.tree.insert("", "end", values=("INFO", tr("No line marked with #todo found")))
+
     def clear(self):
         self.tree.delete(*self.tree.get_children())
 
@@ -93,7 +96,7 @@ class TodoView(ui_utils.TreeFrame):
         if iid != "":
             values = self.tree.item(iid)["values"]
             line_no = values[0]
-            if line_no:
+            if line_no and line_no != "INFO":
                 editor = get_workbench().get_editor_notebook().get_current_editor()
                 editor.select_line(line_no)
 
