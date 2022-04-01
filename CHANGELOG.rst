@@ -9,6 +9,7 @@ Version history
 * Don't clear shell after automatic restart
 * Fixes certain problems with running Flask programs, #2062
 * Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
+* Fix parameter completions where name of local variable was proposed with trailing '='
 
 4.0.0b1 (2022-03-21)
 ====================

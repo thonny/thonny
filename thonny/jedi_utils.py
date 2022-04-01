@@ -360,8 +360,9 @@ def _get_completion_name_with_symbols(
     signatures: Optional[List[BaseSignature]] = None,
 ) -> str:
     if completion.type == "param":
-        # some versions of jedi already add '=' to name, some don't
-        return completion.name.rstrip("=") + "="
+        # Older jedi versions may give trailing "=" also for actual arguments.
+        # NB! Not all params are names of the params!
+        return completion.name_with_symbols
     elif completion.type == "function":
         if not signatures:
             # signatures not found or haven't been computed yet
