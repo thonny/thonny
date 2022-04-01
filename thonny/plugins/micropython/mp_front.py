@@ -1069,7 +1069,7 @@ def add_micropython_backend(
     config_page,
     bare_metal=True,
     sort_key=None,
-    validate_time=True,
+    validate_time=False,
     sync_time=None,
     local_rtc=True,
     submit_mode=None,
