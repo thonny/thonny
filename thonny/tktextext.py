@@ -1,15 +1,13 @@
 # coding=utf-8
 """Extensions for tk.Text"""
-from logging import getLogger
-import platform
-from typing import Optional
-
+import sys
 import time
 import tkinter as tk
-from logging import exception
+from logging import exception, getLogger
 from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
+from typing import Optional
 
 logger = getLogger(__name__)
 
@@ -263,7 +261,7 @@ class EnhancedText(TweakableText):
         except Exception:
             pass
 
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             self.bind("<KeyPress>", self._insert_untypable_characters_on_windows, True)
 
     def _bind_keypad(self):
@@ -1219,7 +1217,7 @@ def _running_on_x11():
 
 def get_keyboard_language():
     # https://stackoverflow.com/a/42047820/261181
-    if platform.system() != "Windows":
+    if sys.platform != "win32":
         raise NotImplementedError("Can provide keyboard language only on Windows")
 
     import ctypes
@@ -1231,7 +1229,7 @@ def get_keyboard_language():
     klid = user32.GetKeyboardLayout(thread_id)
     # Language ID -> low 10 bits, Sub-language ID -> high 6 bits
     # Extract language ID from KLID
-    lid = klid & (2 ** 16 - 1)
+    lid = klid & (2**16 - 1)
 
     return lid
 

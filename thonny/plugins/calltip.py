@@ -1,17 +1,13 @@
-from logging import getLogger
 import tkinter as tk
 import traceback
+from logging import getLogger
 from tkinter import messagebox
-from typing import Optional, List
+from typing import List, Optional
 
-from thonny import get_workbench, get_runner, editor_helpers
+from thonny import editor_helpers, get_runner, get_workbench
 from thonny.codeview import SyntaxText
 from thonny.common import InlineCommand, SignatureInfo
-from thonny.editor_helpers import (
-    DocuBoxBase,
-    get_active_text_widget,
-    get_text_filename,
-)
+from thonny.editor_helpers import DocuBoxBase, get_active_text_widget, get_text_filename
 from thonny.languages import tr
 from thonny.shell import ShellText
 from thonny.ui_utils import ems_to_pixels

@@ -35,13 +35,14 @@ then
     $TARGET_DIR/bin/python3.10 -s -m pip install cryptography==3.2.*
 fi
 
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir wheel
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir distro==1.5.*
-$TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir certifi
+$TARGET_DIR/bin/python3.10 -s -m pip install wheel
+$TARGET_DIR/bin/python3.10 -s -m pip install --no-binary mypy -r ../requirements-regular-bundle.txt
+$TARGET_DIR/bin/python3.10 -s -m pip install distro
+$TARGET_DIR/bin/python3.10 -s -m pip install certifi
 
 # INSTALL THONNY ###################################
 $TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
+#$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0.dev0-py3-none-any.whl
 
 VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
@@ -103,16 +104,20 @@ cd $SCRIPT_DIR
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $TARGET_DIR/bin 
 
-# copy libffi6, which is not present in newer Linuxes
+# copy libffi6, which is not present in newer Linuxes ...
 if [ `getconf LONG_BIT` = "32" ]
 then
-  cp /usr/lib/i386-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+  LIBFFI=/usr/lib/i386-linux-gnu/libffi.so.6.0.4
 else
-  cp /usr/lib/x86_64-linux-gnu/libffi.so.6.0.4 $TARGET_DIR/lib
+  LIBFFI=/usr/lib/x86_64-linux-gnu/libffi.so.6.0.4
 fi
-cd $TARGET_DIR/lib
-ln -s libffi.so.6.0.4 libffi.so.6
-cd $SCRIPT_DIR
+# ... unless this script is run in a newer machine
+if [ -f "$LIBFFI" ]; then
+  cp $LIBFFI $TARGET_DIR/lib
+  cd $TARGET_DIR/lib
+  ln -s libffi.so.6.0.4 libffi.so.6
+  cd $SCRIPT_DIR
+fi
 
 
 # copy licenses
@@ -135,11 +140,12 @@ tar -cvzf dist/${VERSION_NAME}-alt.tar.gz -C build thonny
 #
 # create download + install script
 # normal
-DOWNINSTALL_FILENAME=thonny-${VERSION}-alt.bash
+DOWNINSTALL_FILENAME=thonny-${VERSION}.bash
 DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
 cp downinstall_template.sh $DOWNINSTALL_TARGET
-sed -i "s/_VERSION_/${VERSION}-alt/g" $DOWNINSTALL_TARGET
+sed -i "s/_VERSION_/${VERSION}/g" $DOWNINSTALL_TARGET
 sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
+sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-regular-bundle.txt)/g" $DOWNINSTALL_TARGET
 
 # xxl
 #XXL_DOWNINSTALL_FILENAME=thonny-xxl-$VERSION.bash
@@ -147,4 +153,5 @@ sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
 #cp downinstall_template.sh $XXL_DOWNINSTALL_TARGET
 #sed -i "s/_VERSION_/$VERSION/g" $XXL_DOWNINSTALL_TARGET
 #sed -i "s/_VARIANT_/thonny-xxl/g" $XXL_DOWNINSTALL_TARGET
+#sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-xxl-bundle.txt)/g" $XXL_DOWNINSTALL_TARGET
 

@@ -6,10 +6,10 @@ import token
 from thonny import assistance
 from thonny.assistance import (
     ErrorHelper,
+    HelperNotSupportedError,
     Suggestion,
     add_error_helper,
     name_similarity,
-    HelperNotSupportedError,
 )
 from thonny.misc_utils import running_on_windows
 

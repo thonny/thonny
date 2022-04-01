@@ -5,7 +5,6 @@ import sys
 
 from thonny import get_runner, get_workbench, terminal
 from thonny.common import get_augmented_system_path, get_exe_dirs
-from thonny.editors import get_saved_current_script_filename
 from thonny.languages import tr
 from thonny.misc_utils import inside_flatpak, show_command_not_available_in_flatpak_message
 from thonny.running import get_environment_overrides_for_python_subprocess
@@ -26,8 +25,8 @@ def _open_system_shell():
     if proxy and proxy.has_custom_system_shell():
         proxy.open_custom_system_shell()
         return
-    if proxy and proxy.get_local_executable():
-        target_executable = proxy.get_local_executable()
+    if proxy and proxy.has_local_interpreter():
+        target_executable = proxy.get_target_executable()
     else:
         target_executable = sys.executable
 
@@ -44,12 +43,12 @@ def _open_system_shell():
 
     activate = os.path.join(
         os.path.dirname(target_executable),
-        "activate.bat" if platform.system() == "Windows" else "activate",
+        "activate.bat" if sys.platform == "win32" else "activate",
     )
 
     if os.path.isfile(activate):
         del env_overrides["PATH"]
-        if platform.system() == "Windows":
+        if sys.platform == "win32":
             cmd = [activate, "&"] + cmd
         else:
             cmd = ["source", activate, ";"] + cmd

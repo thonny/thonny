@@ -150,5 +150,3 @@ def load_plugin() -> None:
     get_workbench().add_syntax_theme(
         "Tomorrow Night Eighties", "Tomorrow Night", tomorrow_night_eighties()
     )
-
-    get_workbench().set_default("view.syntax_theme", "Default Light")

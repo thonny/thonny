@@ -3,11 +3,11 @@
 """
 Adds debugging commands and features.
 """
-
 import ast
-from logging import getLogger
 import os.path
 import tkinter as tk
+import tokenize
+from logging import getLogger
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
@@ -30,9 +30,9 @@ from thonny.languages import tr
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import running_on_mac_os, running_on_rpi, shorten_repr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import CommonDialog, select_sequence, get_hyperlink_cursor
-from thonny.ui_utils import select_sequence, CommonDialog, get_tk_version_info
-from _tkinter import TclError
+from thonny.ui_utils import CommonDialog, get_hyperlink_cursor, get_tk_version_info, select_sequence
+
+logger = getLogger(__name__)
 
 _current_debugger = None
 
@@ -647,7 +647,7 @@ class BaseExpressionBox:
                 # to while test expression
                 self.clear_debug_view()
 
-            with open(frame_info.filename, "rb") as fp:
+            with tokenize.open(frame_info.filename) as fp:
                 whole_source = fp.read()
 
             lines = whole_source.splitlines()
@@ -728,8 +728,8 @@ class BaseExpressionBox:
             lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
         )
 
-    def _load_expression(self, whole_source, filename, text_range):
-
+    def _load_expression(self, whole_source: str, filename, text_range):
+        assert isinstance(whole_source, str)
         root = ast_utils.parse_source(whole_source, filename)
         main_node = ast_utils.find_expression(root, text_range)
 
@@ -939,6 +939,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
 
         self._load_code(frame_info)
         self._text_frame.text.focus()
+        self.wm_deiconify()
         self.update()
 
     def _init_layout_widgets(self, master, frame_info):
@@ -1181,7 +1182,8 @@ def _start_debug_enabled():
     return (
         _current_debugger is None
         and get_workbench().get_editor_notebook().get_current_editor() is not None
-        and "debug" in get_runner().get_supported_features()
+        and get_runner().get_backend_proxy()
+        and get_runner().get_backend_proxy().can_debug()
     )
 
 

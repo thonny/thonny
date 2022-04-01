@@ -161,6 +161,17 @@
         "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/pirkey_m0/{lang}/adafruit-circuitpython-pirkey_m0-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/pirkey_m0/"
     },
+    "SAMD21E18A-NeoTrinkey-v0": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "NeoPixel Trinkey M0",
+        "VOLUME_LABEL": "TRINKEYBOOT",
+        "INDEX_URL": "https://www.adafruit.com/product/4870",
+        "BOARD_ID": "SAMD21E18A-NeoTrinkey-v0",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x80F0",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/neopixel_trinkey_m0/{lang}/adafruit-circuitpython-neopixel_trinkey_m0-{lang}-{release}.uf2",
+        "CP_URL": "https://circuitpython.org/board/neopixel_trinkey_m0/"
+    },
     "SAMD51G19A-Itsy-v0": {
         "VENDOR_NAME": "Adafruit Industries",
         "PRODUCT_NAME": "ItsyBitsy M4 Express",

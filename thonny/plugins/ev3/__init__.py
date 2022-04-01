@@ -1,9 +1,9 @@
 from thonny import get_workbench
 from thonny.languages import tr
 from thonny.plugins.micropython import (
+    SshMicroPythonConfigPage,
     SshMicroPythonProxy,
     add_micropython_backend,
-    SshMicroPythonConfigPage,
 )
 
 
@@ -16,11 +16,11 @@ class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
     pass
 
 
-def load_plugin():
+def _load_plugin():
     add_micropython_backend(
         "EV3MicroPython",
         EV3MicroPythonProxy,
-        tr("MicroPython (EV3)"),
+        "MicroPython (EV3)",
         EV3MicroPythonConfigPage,
         sort_key="23",
     )

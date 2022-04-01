@@ -1,25 +1,27 @@
 import os.path
 import sys
-import threading
 from time import sleep
-from tkinter import messagebox, ttk
 from typing import Optional
 
-from thonny import get_workbench, ui_utils
+from thonny import ui_utils
 from thonny.languages import tr
-from thonny.misc_utils import find_volume_by_name, list_volumes
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
+from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
-from thonny.ui_utils import CommonDialog, FileCopyDialog, ems_to_pixels
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
 
 class MicrobitProxy(BareMetalMicroPythonProxy):
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.microbit.microbit_backend
+
+        return thonny.plugins.microbit.microbit_backend.__file__
+
     def _start_background_process(self, clean=None, extra_args=[]):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies
@@ -132,6 +134,8 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
             "9901": "BBC micro:bit v1.5",
             "9903": "BBC micro:bit v2.0 (9903)",
             "9904": "BBC micro:bit v2.0",
+            "9905": "BBC micro:bit v2.2 (9905)",
+            "9906": "BBC micro:bit v2.2 (9906)",
         }
 
         with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
@@ -167,15 +171,22 @@ def load_plugin():
         sort_key="31",
         validate_time=False,
         sync_time=False,
+        submit_mode=PASTE_SUBMIT_MODE,
         write_block_size=128,
     )
 
     # Don't consider micro:bit in generic backends
     # The main reason is to reduce the number of items in the backend switcher menu
     import thonny.plugins.circuitpython
+    import thonny.plugins.esp
     import thonny.plugins.micropython
 
-    thonny.plugins.circuitpython.VIDS_PIDS_TO_AVOID.update(MicrobitProxy.get_known_usb_vids_pids())
-    thonny.plugins.micropython.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+    thonny.plugins.circuitpython.cirpy_front.VIDS_PIDS_TO_AVOID.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.micropython.mp_front.VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )

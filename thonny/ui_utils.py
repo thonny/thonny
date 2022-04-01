@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from logging import getLogger
 import os
 import platform
 import re
@@ -11,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
@@ -33,9 +33,21 @@ logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
-    def __init__(self, master=None, cnf={}, **kw):
-        super().__init__(master=master, cnf=cnf, **kw)
-        self.bind("<FocusIn>", self._unlock_on_focus_in, True)
+    def __init__(self, master=None, **kw):
+        assert master
+        super().__init__(master=master, class_="Thonny", **kw)
+        self.withdraw()  # remain invisible until size calculations are done
+
+        # TODO: Is it still required ?
+        # self.bind("<FocusIn>", self._unlock_on_focus_in, True)
+
+        # https://bugs.python.org/issue43655
+        if self._windowingsystem == "aqua":
+            self.tk.call("::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", "")
+        elif self._windowingsystem == "x11":
+            self.wm_attributes("-type", "dialog")
+
+        self.parent = master
 
     def _unlock_on_focus_in(self, event):
         if not self.winfo_ismapped():
@@ -49,6 +61,32 @@ class CommonDialog(tk.Toplevel):
 
     def get_internal_padding(self):
         return self.get_padding() // 4
+
+    def set_initial_focus(self, node=None) -> bool:
+        if node is None:
+            node = self
+
+        if isinstance(
+            node,
+            (
+                ttk.Entry,
+                ttk.Combobox,
+                ttk.Treeview,
+                tk.Text,
+                ttk.Notebook,
+                ttk.Button,
+                tk.Listbox,
+            ),
+        ):
+            node.focus_set()
+            return True
+
+        else:
+            for child in node.winfo_children():
+                if self.set_initial_focus(child):
+                    return True
+
+        return False
 
 
 class CommonDialogEx(CommonDialog):
@@ -937,7 +975,7 @@ class AutoScrollbar(SafeScrollbar):
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
-        elif float(first) > 0.001 or float(last) < 0.009:
+        elif float(first) > 0.001 or float(last) < 0.999:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
             self.grid()
         ttk.Scrollbar.set(self, first, last)
@@ -1389,32 +1427,46 @@ def create_boolean_var(value, modification_listener=None) -> EnhancedBooleanVar:
     return EnhancedBooleanVar(None, value, None, modification_listener)
 
 
-def shift_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def shift_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0001
+    return event.state & 0x0001
 
 
-def caps_lock_is_on(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def caps_lock_is_on(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0002
+    return event.state & 0x0002
 
 
-def control_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def control_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0004
+    return event.state & 0x0004
 
 
-def command_is_pressed(event_state):
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+def alt_is_pressed_without_char(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
     # http://stackoverflow.com/q/32426250/261181
-    return event_state & 0x0008
+    # https://bugs.python.org/msg268429
+    if event.char:
+        return False
+
+    if running_on_windows():
+        return event.state & 0x20000
+    elif running_on_mac_os():
+        # combinations always produce a char or are consumed by the OS
+        return False
+    else:
+        return event.state & 0x0010
 
 
-def modifier_is_pressed(event_state: int) -> bool:
-    return event_state != 0 and event_state != 0b10000
+def command_is_pressed(event: tk.Event) -> bool:
+    # https://tkdocs.com/shipman/event-handlers.html
+    # http://stackoverflow.com/q/32426250/261181
+    if not running_on_mac_os():
+        return False
+    return event.state & 0x0008
 
 
 def get_hyperlink_cursor() -> str:
@@ -1422,6 +1474,13 @@ def get_hyperlink_cursor() -> str:
         return "pointinghand"
     else:
         return "hand2"
+
+
+def get_beam_cursor() -> str:
+    if running_on_mac_os() or running_on_windows():
+        return "ibeam"
+    else:
+        return "xterm"
 
 
 def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, int]]:
@@ -1451,7 +1510,7 @@ def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int, in
         return None
 
     event_state = 0
-    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # https://tkdocs.com/shipman/event-handlers.html
     # https://stackoverflow.com/questions/32426250/python-documentation-and-or-lack-thereof-e-g-keyboard-event-state
     for modifier in modifiers:
         if modifier == "shift":
@@ -1519,53 +1578,36 @@ def remove_line_numbers(s):
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
 
 
-def center_window(win, master=None):
-    # for backward compat
-    return assign_geometry(win, master)
+# Place a toplevel window at the center of parent or screen
+# It is a Python implementation of ::tk::PlaceWindow.
+# Copied from tkinter.simpledialog of Python 3.10.2
+def _place_window(w, parent=None):
+    w.wm_withdraw()  # Remain invisible while we figure out the geometry
+    w.update_idletasks()  # Actualize geometry information
 
-
-def assign_geometry(win, master=None, min_left=0, min_top=0):
-    if master is None:
-        master = tk._default_root
-
-    size = get_workbench().get_option(get_size_option_name(win))
-    if size:
-        width, height = size
-        saved_size = True
+    minwidth = w.winfo_reqwidth()
+    minheight = w.winfo_reqheight()
+    maxwidth = w.winfo_vrootwidth()
+    maxheight = w.winfo_vrootheight()
+    if parent is not None and parent.winfo_ismapped():
+        x = parent.winfo_rootx() + (parent.winfo_width() - minwidth) // 2
+        y = parent.winfo_rooty() + (parent.winfo_height() - minheight) // 2
+        vrootx = w.winfo_vrootx()
+        vrooty = w.winfo_vrooty()
+        x = min(x, vrootx + maxwidth - minwidth)
+        x = max(x, vrootx)
+        y = min(y, vrooty + maxheight - minheight)
+        y = max(y, vrooty)
+        if w._windowingsystem == "aqua":
+            # Avoid the native menu bar which sits on top of everything.
+            y = max(y, 22)
     else:
-        fallback_width = 600
-        fallback_height = 400
-        # need to wait until size is computed
-        # (unfortunately this causes dialog to jump)
-        if getattr(master, "initializing", False):
-            # can't get reliable positions when main window is not in mainloop yet
-            width = fallback_width
-            height = fallback_height
-        else:
-            if not running_on_linux():
-                # better to avoid in Linux because it causes ugly jump
-                win.update_idletasks()
-            # looks like it doesn't take window border into account
-            width = win.winfo_width()
-            height = win.winfo_height()
+        x = (w.winfo_screenwidth() - minwidth) // 2
+        y = (w.winfo_screenheight() - minheight) // 2
 
-            if width < 10:
-                # ie. size measurement is not correct
-                width = fallback_width
-                height = fallback_height
-
-        saved_size = False
-
-    left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
-    top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
-
-    left = max(left, min_left)
-    top = max(top, min_top)
-
-    if saved_size:
-        win.geometry("%dx%d+%d+%d" % (width, height, left, top))
-    else:
-        win.geometry("+%d+%d" % (left, top))
+    w.wm_maxsize(maxwidth, maxheight)
+    w.wm_geometry("+%d+%d" % (x, y))
+    w.wm_deiconify()  # Become visible at the desired location
 
 
 class WaitingDialog(CommonDialog):
@@ -1715,7 +1757,7 @@ class ChoiceDialog(CommonDialogEx):
         question_label.grid(row=row, column=0, columnspan=2, sticky="w", padx=20, pady=20)
         row += 1
 
-        self.var = tk.StringVar("")
+        self.var = tk.StringVar(value="")
         if initial_choice_index is not None:
             self.var.set(choices[initial_choice_index])
         for choice in choices:
@@ -1887,7 +1929,7 @@ def _get_dialog_provider():
 
 
 def asksaveasfilename(**options):
-    # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
+    # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
     _check_dialog_parent(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
@@ -1968,9 +2010,6 @@ class _ZenityDialogProvider:
         filename = cls._call(args)
         if not filename:
             return None
-
-        if "defaultextension" in options and "." not in os.path.basename(filename):
-            filename += options["defaultextension"]
 
         return filename
 
@@ -2059,7 +2098,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
     # because at least on Windows, Ctrl-shortcuts' state
     # has something extra
     simplified_state = 0x04
-    if shift_is_pressed(event.state):
+    if shift_is_pressed(event):
         simplified_state |= 0x01
 
     # print(simplified_state, event.keycode)
@@ -2072,7 +2111,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
+def show_dialog(dlg, master=None, geometry=None):
     if getattr(dlg, "closed", False):
         return
 
@@ -2083,26 +2122,39 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
 
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
-    focused_widget = master.focus_get()
-    dlg.transient(master.winfo_toplevel())
+    old_focused_widget = master.focus_get()
+    if master.winfo_toplevel().winfo_viewable():
+        dlg.transient(master.winfo_toplevel())
 
-    if geometry:
-        # dlg.withdraw() # unfortunately inhibits size calculations in assign_geometry
-        if isinstance(geometry, str):
-            dlg.geometry(geometry)
+    if isinstance(geometry, str):
+        dlg.geometry(geometry)
+        dlg.wm_deiconify()
+    else:
+        saved_size = get_workbench().get_option(get_size_option_name(dlg))
+        if saved_size:
+            width = min(max(saved_size[0], ems_to_pixels(10)), ems_to_pixels(1000))
+            height = min(max(saved_size[0], ems_to_pixels(8)), ems_to_pixels(800))
+            left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
+            top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
+            dlg.geometry("%dx%d+%d+%d" % (width, height, left, top))
+            dlg.wm_deiconify()
         else:
-            assign_geometry(dlg, master, min_left, min_top)
-        # dlg.wm_deiconify()
+            _place_window(dlg, master)
 
     dlg.lift()
-    dlg.focus_set()
 
+    if hasattr(dlg, "set_initial_focus"):
+        dlg.set_initial_focus()
+    else:
+        dlg.focus_set()
+
+    dlg.wait_visibility()
     try:
         dlg.grab_set()
     except TclError as e:
-        print("Can't grab:", e, file=sys.stderr)
+        logger.warning("Can't grab: %s", e)
 
-    master.winfo_toplevel().wait_window(dlg)
+    dlg.wait_window(dlg)
     dlg.grab_release()
     master.winfo_toplevel().lift()
     master.winfo_toplevel().focus_force()
@@ -2110,9 +2162,9 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
     if running_on_mac_os():
         master.winfo_toplevel().grab_release()
 
-    if focused_widget is not None:
+    if old_focused_widget is not None:
         try:
-            focused_widget.focus_force()
+            old_focused_widget.focus_force()
         except TclError:
             pass
 
@@ -2242,10 +2294,10 @@ class TextMenu(MenuEx):
         return False
 
 
-def create_url_label(master, url, text=None):
+def create_url_label(master, url, text=None, **kw):
     import webbrowser
 
-    return create_action_label(master, text or url, lambda _: webbrowser.open(url))
+    return create_action_label(master, text or url, lambda _: webbrowser.open(url), **kw)
 
 
 def create_action_label(master, text, click_handler, **kw):
@@ -2262,15 +2314,6 @@ def get_size_option_name(window):
     return "layout." + type(window).__name__ + "_size"
 
 
-def get_default_theme():
-    if running_on_windows():
-        return "Windows"
-    elif running_on_rpi():
-        return "Raspberry Pi"
-    else:
-        return "Enhanced Clam"
-
-
 def get_default_basic_theme():
     if running_on_windows():
         return "vista"
@@ -2281,7 +2324,7 @@ def get_default_basic_theme():
 EM_WIDTH = None
 
 
-def ems_to_pixels(x):
+def ems_to_pixels(x: float) -> int:
     global EM_WIDTH
     if EM_WIDTH is None:
         EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")
@@ -2332,5 +2375,21 @@ def add_messagebox_parent_checker():
         setattr(messagebox, name, wrap_with_parent_checker(fun))
 
 
+def windows_known_extensions_are_hidden() -> bool:
+    assert running_on_windows()
+    import winreg
+
+    reg_key = winreg.OpenKey(
+        winreg.HKEY_CURRENT_USER,
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+        0,
+        winreg.KEY_READ,
+    )
+    try:
+        return winreg.QueryValueEx(reg_key, "HideFileExt")[0] == 1
+    finally:
+        reg_key.Close()
+
+
 if __name__ == "__main__":
-    root = tk.Tk()
+    print(windows_known_extensions_are_hidden())

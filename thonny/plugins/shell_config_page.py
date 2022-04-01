@@ -1,5 +1,5 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 
 from thonny import get_workbench
@@ -11,6 +11,15 @@ class ShellConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         self.columnconfigure(1, weight=1)
+
+        self.add_checkbox(
+            "shell.clear_for_new_process",
+            tr("Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"),
+            5,
+            0,
+            columnspan=2,
+            pady=(0, 10),
+        )
 
         self.add_checkbox(
             "shell.tty_mode",

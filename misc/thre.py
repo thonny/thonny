@@ -1,8 +1,8 @@
+import os
+import signal
 from _thread import interrupt_main
 from threading import Thread
 from time import sleep
-import os
-import signal
 
 
 def inter():
@@ -18,6 +18,7 @@ def inter():
 #Thread(target=inter).start()
 #"""
 import tkinter
+
 root = tkinter.Tk()
 #root.focus_set()
 root.mainloop()

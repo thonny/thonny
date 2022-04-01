@@ -1,11 +1,13 @@
-from logging import getLogger
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.ui_utils import ems_to_pixels
+
+logger = getLogger(__name__)
 
 
 class EditorConfigurationPage(ConfigurationPage):
@@ -32,12 +34,6 @@ class EditorConfigurationPage(ConfigurationPage):
         self.add_checkbox(
             "view.highlight_current_line",
             tr("Highlight current line (requires reopening the editor)"),
-        )
-
-        get_workbench().set_default("view.remember_line", False)
-        self.add_checkbox(
-            "view.remember_line",
-            tr("Remember cursor position after reloading on external modification"),
         )
 
         self.add_checkbox(

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-. venv/bin/activate
+. venv-3.9/bin/activate
 
-#echo "isorting ..."
-#isort -rc thonny
+echo "isorting ..."
+isort thonny
 
 echo
 echo "blackening ..."

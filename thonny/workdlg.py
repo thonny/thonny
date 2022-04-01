@@ -1,4 +1,3 @@
-from logging import getLogger
 import os
 import queue
 import signal
@@ -6,13 +5,14 @@ import subprocess
 import threading
 import time
 import tkinter as tk
-from tkinter import ttk, messagebox
+from logging import getLogger
+from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import tktextext
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
-from thonny.ui_utils import CommonDialog, ems_to_pixels, create_action_label, set_text_if_different
+from thonny.ui_utils import CommonDialog, create_action_label, ems_to_pixels, set_text_if_different
 
 logger = getLogger(__name__)
 

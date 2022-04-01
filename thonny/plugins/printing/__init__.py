@@ -41,7 +41,7 @@ def print_current_script():
     with os.fdopen(temp_handle, "w", encoding="utf-8") as f:
         f.write(full_html)
 
-    if platform.system() == "Darwin":
+    if sys.platform == "darwin":
         subprocess.Popen(["open", temp_fn])
     else:
         import webbrowser

@@ -1,9 +1,10 @@
 """
 Utils to handle different jedi versions
 """
-import jedi.api.classes
 from logging import getLogger
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
+import jedi.api.classes
 
 try:
     # Since 0.17
@@ -25,8 +26,7 @@ except ImportError:
     except ImportError:
         from jedi.api.classes import Definition as BaseSignature
 
-
-from thonny.common import SignatureParameter, SignatureInfo, CompletionInfo, NameReference
+from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
 
 logger = getLogger(__name__)
 
@@ -83,11 +83,10 @@ def get_completion_details(full_name: str) -> Optional[CompletionInfo]:
     # assuming this name can be found in the list of last completions
     try:
         for completion in _last_jedi_completions:
-            if _jedi_verion_is_at_least("0.15"):
+            if completion.type in {"function", "class"} and _jedi_verion_is_at_least("0.15"):
                 signatures = [_export_signature(s) for s in completion.get_signatures()]
                 raw_docstring = True
             else:
-                # Too much hassle...
                 signatures = None
                 raw_docstring = False
 
@@ -367,16 +366,18 @@ def _get_completion_name_with_symbols(
         if not signatures:
             # signatures not found or haven't been computed yet
             return completion.name + "("
-
-    if signatures:
-        # logger.info("name: %s, type: %s, sigs: %s", completion.name, completion.type, signatures)
-        # assuming type=instance can also have signature
-        # if it can only be called with 0 params, then add closing paren as well
-        different_param_counts = {len(sig.params) for sig in signatures}
-        if different_param_counts == {0}:
-            return completion.name + "()"
         else:
-            return completion.name + "("
+            # logger.info("name: %s, type: %s, sigs: %s", completion.name, completion.type, signatures)
+            # assuming type=instance can also have signature
+            # if it can only be called with 0 params, then add closing paren as well
+            different_param_counts = {len(sig.params) for sig in signatures}
+            if different_param_counts == {0}:
+                return completion.name + "()"
+            else:
+                return completion.name + "("
+
+    elif completion.type == "keyword" and completion.name != "pass":
+        return completion.name + " "
 
     return completion.name_with_symbols
 

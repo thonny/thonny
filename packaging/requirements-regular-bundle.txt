@@ -1,12 +1,13 @@
 jedi==0.18.*
 pyserial==3.5
-pylint==2.11.*
+pylint==2.12.*
 docutils==0.18.*
-mypy==0.910.*
+mypy==0.941.*
 asttokens==2.0.*
-Send2Trash==1.8.*
-esptool==3.2.*
-paramiko==2.8.*
+Send2Trash==1.8.1b0
+esptool==3.3.*
+paramiko==2.10.*
 ptyprocess==0.7.*
 websockets==10.*
+adafruit_board_toolkit==1.1.0
 

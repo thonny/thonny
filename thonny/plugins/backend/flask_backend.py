@@ -1,6 +1,6 @@
 import ast
 
-from thonny.plugins.cpython.cpython_backend import get_backend
+from thonny.plugins.cpython_backend import get_backend
 
 
 def augment_source(source, cmd):

@@ -1,7 +1,7 @@
 import os.path
-import platform
+import sys
 
-from thonny.plugins.cpython.cpython_backend import get_backend
+from thonny.plugins.cpython_backend import get_backend
 
 local_conf_file = "matplotlibrc"
 user_conf_file1 = os.path.expanduser("~/.config/matplotlib/matplotlibrc")
@@ -37,7 +37,7 @@ def set_default_backend(matplotlib):
 
 
 def load_plugin():
-    if platform.system() == "Darwin":
+    if sys.platform == "darwin":
         # https://github.com/thonny/thonny/issues/676
         backend = get_backend()
         backend.add_import_handler("matplotlib", set_default_backend)

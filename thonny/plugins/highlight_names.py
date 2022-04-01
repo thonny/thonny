@@ -1,10 +1,9 @@
-from logging import getLogger
+import time
 import tkinter as tk
+from logging import getLogger
 from tkinter import messagebox
 
-import time
-
-from thonny import get_workbench, get_runner
+from thonny import get_runner, get_workbench
 from thonny.codeview import SyntaxText
 from thonny.common import InlineCommand
 from thonny.editor_helpers import get_text_filename
@@ -68,7 +67,7 @@ class OccurrencesHighlighter:
         self._clear()
         row, column = map(int, self.text.index("insert").split("."))
         runner = get_runner()
-        if not runner:
+        if not runner or runner.is_running():
             return
 
         runner.send_command(

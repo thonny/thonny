@@ -1,25 +1,27 @@
 import datetime
-from logging import getLogger
 import os.path
+import shutil
+import stat
 import subprocess
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk, simpledialog
-import stat, shutil
+from logging import getLogger
+from tkinter import messagebox, simpledialog, ttk
+from typing import Optional
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, get_dirs_children_info
+from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows, sizeof_fmt, running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
+    ask_one_from_choices,
+    ask_string,
     create_string_var,
+    get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
     show_dialog,
-    ask_string,
-    ask_one_from_choices,
-    get_hyperlink_cursor,
 )
 
 _dummy_node_text = "..."
@@ -644,7 +646,7 @@ class BaseFileBrowser(ttk.Frame):
 
             if self.is_active_browser():
                 self.menu.add_command(
-                    label=tr("Open in system default app"),
+                    label=tr("Open in default external app"),
                     command=lambda: self.open_path_with_system_app(selected_path),
                 )
 
@@ -694,27 +696,15 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_tree()
 
     def add_middle_menu_items(self, context):
-        if self.supports_trash():
-            if running_on_windows():
-                trash_label = tr("Move to Recycle Bin")
-            else:
-                trash_label = tr("Move to Trash")
-            self.menu.add_command(label=trash_label, command=self.move_to_trash)
-        else:
-            self.menu.add_command(label=tr("Delete"), command=self.delete)
+        if self.supports_new_file():
+            self.menu.add_command(label=tr("New file") + "...", command=self.create_new_file)
 
         if self.supports_directories():
             self.menu.add_command(label=tr("New directory") + "...", command=self.mkdir)
 
-        if self.supports_new_file():
-            self.menu.add_command(label=tr("New file"), command=self.create_new_file)
-
-        if self.supports_rename():
-            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
-
         if self.supports_copypaste():
-            self.menu.add_command(label=tr("Copy"), command=self.copy_files)
             self.menu.add_command(label=tr("Cut"), command=self.cut_files)
+            self.menu.add_command(label=tr("Copy"), command=self.copy_files)
             target = self.get_selected_file()
             self.menu.add_command(label=tr("Paste"), command=self.paste_files)
             if (
@@ -723,6 +713,15 @@ class BaseFileBrowser(ttk.Frame):
                 or self.copypaste.conflicts(target)
             ):
                 self.menu.entryconfig(tr("Paste"), state="disabled")
+
+        if self.supports_rename():
+            self.menu.add_command(label=tr("Rename"), command=self.rename_file)
+
+        if self.supports_trash():
+            trash_label = tr("Move to Trash")
+            self.menu.add_command(label=trash_label, command=self.move_to_trash)
+        else:
+            self.menu.add_command(label=tr("Delete"), command=self.delete)
 
     def add_last_menu_items(self, context):
         self.menu.add_command(label=tr("Properties"), command=self.show_properties)
@@ -809,7 +808,7 @@ class BaseFileBrowser(ttk.Frame):
             return
 
         confirmation = "Are you sure want to delete %s?" % selection["description"]
-        confirmation += "\n\nNB! Recycle bin won't be used (no way to undelete)!"
+        confirmation += "\n\nNB! Trash bin won't be used (no way to undelete)!"
         if "dir" in selection["kinds"]:
             confirmation += "\n" + "Directories will be deleted with content."
 
@@ -826,17 +825,16 @@ class BaseFileBrowser(ttk.Frame):
         if not selection:
             return
 
-        trash = tr("Recycle Bin") if running_on_windows() else tr("Trash")
         if not messagebox.askokcancel(
-            tr("Moving to %s") % trash,
-            tr("Move %s to %s?") % (selection["description"], trash),
+            tr("Moving to Trash"),
+            tr("Move %s to Trash?") % selection["description"],
             icon="info",
             master=self,
         ):
             return
 
         self.perform_move_to_trash(
-            selection["paths"], tr("Moving %s to %s") % (selection["description"], trash)
+            selection["paths"], tr("Moving %s to Trash") % (selection["description"])
         )
         self.refresh_tree()
 
@@ -887,11 +885,8 @@ class BaseFileBrowser(ttk.Frame):
     def supports_new_file(self):
         return False
 
-    def create_new_file(self):
-        raise NotImplementedError()
-
     def get_selected_file(self):
-        selection = self.get_selection_info(True)
+        selection = self.get_selection_info(False)
         if not selection or len(selection["paths"]) > 1:
             return
         return selection["paths"][0]
@@ -909,9 +904,8 @@ class BaseFileBrowser(ttk.Frame):
             tr("Rename '%s'") % file_name, tr("Enter new name"), initialvalue=file_name, parent=self
         )
         if new_name:
-            rc = self.perform_rename(old_name, new_name)
-            if rc:
-                messagebox.showerror(tr("Rename of '%s' failed") % old_name, rc, parent=self)
+            self.perform_rename(old_name, new_name)
+            self.refresh_tree()
 
     def perform_rename(self, old_name, new_name):
         raise Exception("overload this in subclass")
@@ -1054,10 +1048,10 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         try:
             open_with_default_app(path)
         except Exception as e:
-            logger.error("Could not open %r in system app", path, exc_info=e)
+            logger.error("Could not open %r in external. app", path, exc_info=e)
             messagebox.showerror(
                 "Error",
-                "Could not open '%s' in system app\nError: %s" % (path, e),
+                "Could not open '%s' in external app\nError: %s" % (path, e),
                 parent=self.winfo_toplevel(),
             )
 
@@ -1105,19 +1099,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
     def supports_new_file(self):
         return True
 
-    def create_new_file(self):
-        path = self.get_selected_file()
-        if os.path.isfile(path):
-            path = os.path.dirname(path)
-        n = 0
-        while True:
-            fnam = os.path.join(path, "new_file{}.py".format("_" + str(n) if n > 0 else ""))
-            if not os.path.exists(fnam):
-                break
-            n += 1
-        with open(fnam, "a") as f:
-            pass
-
     def supports_rename(self):
         return self.get_selected_file()
 
@@ -1128,8 +1109,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
         if old_name == full_path:
             return
+
         if os.path.exists(full_path):
-            return tr("File already exists")
+            raise UserError(tr("File already exists"))
 
         os.rename(old_name, full_path)
 
@@ -1191,9 +1173,18 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def open_path_with_system_app(self, path):
         messagebox.showinfo(
-            "Not supported",
-            "Opening remote files in system app is not supported.\n\n"
-            + "Please download the file to a local directory and open it from there!",
+            tr("Not supported"),
+            tr("Opening remote files in external app is not supported.")
+            + "\n\n"
+            + tr(
+                "If it is a text file, then you can configure it to open in Thonny "
+                "by right-clicking it and selecting 'Configure ... files'."
+            )
+            + "\n\n"
+            + tr(
+                "If the file needs to be opened in external app, then download it to a local "
+                "directory and open it from there!"
+            ),
             master=self,
         )
 
@@ -1270,6 +1261,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             return
 
         super().cmd_refresh_tree()
+
+    def perform_rename(self, old_name, new_name):
+        # TODO:
+        raise NotImplementedError()
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):

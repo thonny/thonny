@@ -47,9 +47,9 @@ Note
 If you’re not seeing anything change on your Neopixel strip,
 make sure you have show() at least somewhere otherwise your updates won’t be shown.
 """
-from typing import Union, Tuple
+from typing import Tuple, Union
 
-from . microbit import MicroBitAnalogDigitalPin
+from .microbit import MicroBitAnalogDigitalPin
 
 def NeoPixel(pin: MicroBitAnalogDigitalPin, n: int, bpp=...)-> None:
     """
