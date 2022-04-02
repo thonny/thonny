@@ -618,10 +618,6 @@ class Runner:
     def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
 
-        if not first:
-            get_shell().restart(automatic=automatic)
-            get_shell().update_idletasks()
-
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
@@ -637,6 +633,10 @@ class Runner:
         self._proxy = backend_class(clean)
 
         self._poll_backend_messages()
+
+        if not first:
+            get_shell().restart(automatic=automatic)
+            get_shell().update_idletasks()
 
         get_workbench().event_generate("BackendRestart", full=True)
 

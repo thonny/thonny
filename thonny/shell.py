@@ -892,6 +892,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self, automatic: bool = False):
+        logger.info("BaseShellText.restart(%r)", automatic)
         self.set_read_only(False)
         if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
             self._clear_content("end")
@@ -1373,6 +1374,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._clear_content(end_index)
 
     def _on_backend_terminated(self, event=None):
+        logger.info("BaseShellText._on_backend_terminated")
         # make sure dead values are not clickable anymore
         self._invalidate_current_data()
         self.set_read_only(True)
