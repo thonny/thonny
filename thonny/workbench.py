@@ -2338,6 +2338,10 @@ class Workbench(tk.Tk):
 
             self._closing = True
 
+            runner = get_runner()
+            if runner != None:
+                runner.destroy_backend()
+
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
             # https://bugs.python.org/issue1207592
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
@@ -2360,12 +2364,7 @@ class Workbench(tk.Tk):
             logger.exception("Error while destroying workbench")
 
         finally:
-            try:
-                super().destroy()
-            finally:
-                runner = get_runner()
-                if runner != None:
-                    runner.destroy_backend()
+            super().destroy()
 
     def _on_configure(self, event) -> None:
         # called when window is moved or resized

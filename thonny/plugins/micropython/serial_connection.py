@@ -7,7 +7,7 @@ from textwrap import dedent
 
 OUTPUT_ENQ = b"\x05"
 OUTPUT_ACK = b"\x06"
-from .connection import ConnectionFailedException, MicroPythonConnection
+from .connection import MicroPythonConnection
 
 NORMAL_PROMPT = b">>> "
 FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
@@ -76,7 +76,7 @@ class SerialConnection(MicroPythonConnection):
             elif error.errno == 16:
                 message += "\n\n" + "Try restarting the device."
 
-            raise ConnectionFailedException(message)
+            raise ConnectionRefusedError(message)
 
         if skip_reader:
             self._reading_thread = None

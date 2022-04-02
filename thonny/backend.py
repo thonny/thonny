@@ -16,8 +16,8 @@ from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Unio
 
 import thonny
 from thonny import report_time
-from thonny.common import IGNORED_FILES_AND_DIRS  # TODO: try to get rid of this
-from thonny.common import (
+from thonny.common import (  # TODO: try to get rid of this
+    IGNORED_FILES_AND_DIRS,
     BackendEvent,
     CommandToBackend,
     EOFCommand,
@@ -29,6 +29,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    UserSystemExit,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
@@ -57,13 +58,14 @@ class BaseBackend(ABC):
         # NB! This approach is used only in MicroPython and SshCPython backend.
         # MainCPython backend uses main thread for reading commands
         # https://github.com/thonny/thonny/issues/1363
-        _thread.start_new_thread(self._read_incoming_messages, ())
+        threading.Thread(target=self._read_incoming_messages, daemon=True).start()
 
     def mainloop(self):
         report_time("Beginning of mainloop")
 
         try:
-            while self._should_keep_going():
+            while True:
+                self._check_for_connection_error()
                 try:
                     try:
                         msg = self._fetch_next_incoming_message(timeout=0.01)
@@ -84,8 +86,19 @@ class BaseBackend(ABC):
                     # Error in Thonny's code
                     logger.exception("mainloop error")
                     self._report_internal_exception("mainloop error")
-        except ConnectionError:
-            sys.exit(0)
+        except ConnectionError as e:
+            self.handle_connection_error(e)
+
+        sys.exit(17)
+
+    def handle_connection_error(self, error=None):
+        logger.info("Handling connection error")
+        message = "Connection lost"
+        if error:
+            message += " -- " + str(error)
+        self._send_output("\n" + message + "\n", "stderr")
+        self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
+        sys.exit(1)
 
     def _current_command_is_interrupted(self):
         return getattr(self._current_command, "interrupted", False)
@@ -122,7 +135,7 @@ class BaseBackend(ABC):
 
     def _read_incoming_messages(self):
         # works in a separate thread
-        while self._should_keep_going():
+        while True:
             if not self._read_one_incoming_message():
                 break
 
@@ -204,9 +217,8 @@ class BaseBackend(ABC):
         print(user_msg, file=sys.stderr)
 
     @abstractmethod
-    def _should_keep_going(self) -> bool:
-        """Returns False when there is no point in processing more commands
-        (eg. connection to the target process is lost or target process has exited)"""
+    def _check_for_connection_error(self) -> None:
+        ...
 
     @abstractmethod
     def _handle_user_input(self, msg: InputSubmission) -> None:
@@ -279,9 +291,6 @@ class MainBackend(BaseBackend, ABC):
                     response = {}
                 else:
                     response = {"error": "Interrupted", "interrupted": True}
-            except ConnectionError as e:
-                response = False
-                self._on_connection_error(e)
             except Exception as e:
                 logger.exception("Exception while handling %r", cmd.name)
                 self._report_internal_exception("Exception while handling %r" % cmd.name)
@@ -294,8 +303,10 @@ class MainBackend(BaseBackend, ABC):
         real_response = self._prepare_command_response(response, cmd)
         self.send_message(real_response)
 
-    def _on_connection_error(self, error=None):
-        pass
+        # TODO: temp hack
+        if isinstance(response, UserSystemExit):
+            print("hola")
+            sys.exit(response.returncode)
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""
@@ -719,7 +730,7 @@ class SshMixin(UploadDownloadMixin):
                 " Install it from 'Tools => Manage plug-ins' or via your system package manager.",
                 file=sys.stderr,
             )
-            sys.exit()
+            sys.exit(1)
 
         self._host = host
         self._user = user

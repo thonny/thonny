@@ -1371,7 +1371,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         end_index = self.index("output_end")
         self._clear_content(end_index)
 
-    def _on_backend_restart(self, event=None):
+    def _on_backend_terminated(self, event=None):
         # make sure dead values are not clickable anymore
         self._invalidate_current_data()
 
@@ -1579,7 +1579,7 @@ class ShellText(BaseShellText):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
-        get_workbench().bind("BackendRestart", self._on_backend_restart, True)
+        get_workbench().bind("BackendTerminated", self._on_backend_terminated, True)
         get_workbench().bind(
             "HideTrailingOutput", lambda msg: self._hide_trailing_output(msg.text), True
         )

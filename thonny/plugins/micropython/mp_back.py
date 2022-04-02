@@ -75,7 +75,6 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.plugins.micropython.connection import MicroPythonConnection
-from thonny.running import EXPECTED_TERMINATION_CODE
 
 ENCODING = "utf-8"
 
@@ -160,7 +159,7 @@ class MicroPythonBackend(MainBackend, ABC):
             report_time("sent ready")
             self.mainloop()
         except ConnectionError as e:
-            self._on_connection_error(e)
+            self.handle_connection_error(e)
         except Exception:
             logger.exception("Exception in MicroPython main method")
             self._report_internal_exception("Internal error")
@@ -352,11 +351,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._check_perform_just_in_case_gc()
         report_time("after " + cmd.name)
 
-    def _should_keep_going(self) -> bool:
-        return self._is_connected()
-
-    def _is_connected(self) -> bool:
-        raise NotImplementedError()
+    def _check_for_connection_error(self) -> None:
+        self.get_connection().check_for_error()
 
     def _connected_to_microbit(self):
         if not self._welcome_text:
@@ -1086,15 +1082,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
         return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
-    def _on_connection_error(self, error=None):
-        logger.info("Handling closed connection")
+    def handle_connection_error(self, error=None):
         self._forward_unexpected_output("stderr")
-        message = "Connection lost"
-        if error:
-            message += " (" + str(error) + ")"
-        self._send_output("\n" + message + "\n", "stderr")
-        self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
-        sys.exit(EXPECTED_TERMINATION_CODE)
+        super().handle_connection_error(error)
 
     def _show_error(self, msg, end="\n"):
         self._send_output(msg + end, "stderr")

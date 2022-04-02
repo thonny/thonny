@@ -45,7 +45,7 @@ report_time("After defining report_time")
 
 import logging
 import os.path
-from typing import TYPE_CHECKING, Optional, cast, List
+from typing import TYPE_CHECKING, List, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
 BACKEND_LOG_MARKER = "Thonny's backend.log"
