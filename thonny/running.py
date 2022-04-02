@@ -278,7 +278,7 @@ class Runner:
             # This may be only logical restart, which does not look like restart to the runner
             get_workbench().event_generate("BackendRestart", full=False)
 
-    def send_command_and_wait(self, cmd: CommandToBackend, dialog_title: str) -> MessageFromBackend:
+    def send_command_and_wait(self, cmd: InlineCommand, dialog_title: str) -> MessageFromBackend:
         dlg = InlineCommandDialog(get_workbench(), cmd, title=dialog_title + " ...")
         show_dialog(dlg)
         return dlg.response
@@ -367,6 +367,10 @@ class Runner:
                 return
         else:
             filename = UNTITLED
+
+        if not self._proxy:
+            # Saving the file may have killed the proxy
+            return
 
         if (
             is_remote_path(filename)
@@ -1491,6 +1495,8 @@ class InlineCommandDialog(WorkDialog):
             self.report_done(success)
 
     def _on_backend_terminated(self, msg):
+        self.set_action_text("Error!")
+        self.response = dict(error="Backend terminated")
         self.report_done(False)
 
     def _on_progress(self, msg):
