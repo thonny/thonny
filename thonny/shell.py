@@ -892,6 +892,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self, automatic: bool = False):
+        self.set_read_only(False)
         if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
             self._clear_content("end")
         else:
@@ -1374,6 +1375,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _on_backend_terminated(self, event=None):
         # make sure dead values are not clickable anymore
         self._invalidate_current_data()
+        self.set_read_only(True)
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
