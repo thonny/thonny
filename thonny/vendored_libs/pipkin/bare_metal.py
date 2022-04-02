@@ -673,7 +673,7 @@ class SerialPortAdapter(BareMetalAdapter):
 
         try:
             self._write_file_via_serial(path, content)
-        except ReadOnlyFilesystemError as e:
+        except ReadOnlyFilesystemError:
             self._read_only_filesystem = True
             self._write_file_via_mount(path, content)
 
