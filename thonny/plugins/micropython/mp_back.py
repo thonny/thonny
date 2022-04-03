@@ -406,6 +406,9 @@ class MicroPythonBackend(MainBackend, ABC):
         if self._connected_to_microbit():
             return None
 
+        if self._connected_to_circuitpython() and "rtc" not in self._builtin_modules:
+            return self._resolve_unknown_epoch()
+
         # The proper solution would be to query time.gmtime, but most devices don't have this function.
         # Luckily, time.localtime is good enough for deducing 1970 vs 2000 epoch.
 

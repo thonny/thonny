@@ -331,6 +331,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._connected_to_microbit():
             return
         elif self._connected_to_circuitpython():
+            if "rtc" not in self._builtin_modules:
+                logger.warning("Can't sync time as 'rtc' module is missing")
+                return
+
             specific_script = dedent(
                 """
                 from rtc import RTC as __thonny_RTC
