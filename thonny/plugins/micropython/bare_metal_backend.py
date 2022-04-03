@@ -1288,12 +1288,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         out, err = self._execute(
             dedent(
                 """
-            try:
                 __thonny_path = '{path}'
                 __thonny_written = 0
                 __thonny_fp = __thonny_helper.builtins.open(__thonny_path, 'wb')
-            except __thonny_helper.builtins.Exception as e:
-                __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
             capture_output=True,
