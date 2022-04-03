@@ -82,6 +82,8 @@ class BareMetalAdapter(BaseAdapter, ABC):
 
         self._interrupt_to_prompt()
         self._prepare_helper()
+        self._builtin_modules = self._fetch_builtin_modules()
+        logger.debug("Builtin modules: %r", self._builtin_modules)
 
     def get_dir_sep(self) -> str:
         return "/"
@@ -106,6 +108,30 @@ class BareMetalAdapter(BaseAdapter, ABC):
                 write_block_delay = 0.0
 
         return submit_mode, write_block_size, write_block_delay
+
+    def _fetch_builtin_modules(self) -> List[str]:
+        script = "__pipkin_helper.builtins.help('modules')"
+        out, err = self._execute_and_capture_output(script)
+        if err or not out:
+            logger.warning("Could not query builtin modules")
+            return []
+
+        modules_str_lines = out.strip().splitlines()
+
+        last_line = modules_str_lines[-1].strip()
+        if last_line.count(" ") > 0 and "  " not in last_line and "\t" not in last_line:
+            # probably something like "plus any modules on the filesystem"
+            # (can be in different languages)
+            modules_str_lines = modules_str_lines[:-1]
+
+        modules_str = (
+            " ".join(modules_str_lines)
+            .replace("/__init__", "")
+            .replace("__main__", "")
+            .replace("/", ".")
+        )
+
+        return modules_str.split()
 
     def _interrupt_to_prompt(self) -> None:
         # It's safer to thoroughly interrupt before poking with RAW_MODE_CMD
@@ -169,14 +195,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
 
         hex_mode = self._should_hexlify(path)
 
-        open_script = dedent(
-            f"""
-            try:
-                __pipkin_fp = __pipkin_helper.builtins.open({path!r}, 'rb')
-            except OSError as e:
-                print(e)
-        """
-        )
+        open_script = f"__pipkin_fp = __pipkin_helper.builtins.open({path!r}, 'rb')"
         out, err = self._execute_and_capture_output(open_script)
 
         if (out + err).strip():
@@ -228,10 +247,11 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
-                __pipkin_helper.os.remove({path!r})
-            except OSError as e:
-                if e.errno not in [{errno.ENOENT}, {errno.ENODEV}]:
-                    raise
+                __pipkin_helper.os.stat({path!r})
+            except __pipkin_helper.builtins.OSError:
+                pass
+            else:
+                __pipkin_helper.os.remove({path!r})            
         """
             )
         )
@@ -254,10 +274,9 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
+                __pipkin_helper.os.stat({path!r})
+            except __pipkin_helper.builtins.OSError:
                 __pipkin_helper.os.mkdir({path!r})
-            except __pipkin_helper.builtins.OSError as e:
-                if e.errno != {errno.EEXIST}:
-                    raise
         """
             )
         )
@@ -277,11 +296,8 @@ class BareMetalAdapter(BaseAdapter, ABC):
                     in __pipkin_helper.os.listdir({path!r}) 
                     if name.endswith('.dist-info') {dist_name_condition}
                 ])
-            except OSError as e:
-                if e.errno in [{errno.ENODEV}, {errno.ENOENT}]:
-                    __pipkin_helper.print_mgmt_value([])
-                else:
-                    raise
+            except __pipkin_helper.builtins.OSError as e:
+                __pipkin_helper.print_mgmt_value([])
 """
             )
         )
@@ -610,7 +626,10 @@ class BareMetalAdapter(BaseAdapter, ABC):
         assert num_bytes == len(data)
 
     def _should_hexlify(self, path):
-        for ext in (".py", ".txt", ".csv"):
+        if "binascii" not in self._builtin_modules and "ubinascii" not in self._builtin_modules:
+            return False
+
+        for ext in (".py", ".txt", ".csv", "METADATA", "RECORD"):
             if path.lower().endswith(ext):
                 return False
 
@@ -699,16 +718,14 @@ class SerialPortAdapter(BareMetalAdapter):
 
         assert bytes_written == len(content)
 
-    def _write_file_via_serial(self, target_path: str, content: bytes) -> None:
+    def _write_file_via_serial(self, target_path: str, content: bytes,
+                               can_hexlify:bool=True) -> None:
         out, err = self._execute_and_capture_output(
             dedent(
                 """
-            try:
                 __pipkin_path = '{path}'
                 __pipkin_written = 0
                 __pipkin_fp = __pipkin_helper.builtins.open(__pipkin_path, 'wb')
-            except __pipkin_helper.builtins.Exception as e:
-                __pipkin_helper.builtins.print(__pipkin_helper.builtins.str(e))
             """
             ).format(path=target_path),
         )
