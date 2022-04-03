@@ -22,6 +22,7 @@ class WorkDialog(CommonDialog):
         super(WorkDialog, self).__init__(master)
 
         self._autostart = autostart
+        self._has_been_started = False
         self._state = "idle"
         self.success = False
         self._work_events_queue = queue.Queue()
@@ -43,7 +44,14 @@ class WorkDialog(CommonDialog):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
         if self._autostart:
-            self.on_ok()
+            self.bind("<Map>", self._start_on_map, True)
+
+    def _start_on_map(self, event) -> None:
+        if self._has_been_started:
+            return
+
+        self._has_been_started = True
+        self.start_work_and_update_ui()
 
     def populate_main_frame(self):
         pass
@@ -93,7 +101,7 @@ class WorkDialog(CommonDialog):
         self._ok_button = ttk.Button(
             self.action_frame,
             text=self.get_ok_text(),
-            command=self.on_ok,
+            command=self.start_work_and_update_ui,
             state="disabled",
             default="active",
         )
@@ -163,7 +171,8 @@ class WorkDialog(CommonDialog):
 
     def _keep_updating_ui(self):
         if self._state != "closed":
-            self.update_ui()
+            if self.winfo_ismapped():
+                self.update_ui()
             self._update_scheduler = self.after(200, self._keep_updating_ui)
         else:
             self._update_scheduler = None
@@ -199,7 +208,7 @@ class WorkDialog(CommonDialog):
     def get_cancel_text(self):
         return tr("Cancel")
 
-    def on_ok(self, event=None):
+    def start_work_and_update_ui(self, event=None):
         assert self._state == "idle"
         if self.start_work() is not False:
             self._state = "working"
