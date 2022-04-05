@@ -1,5 +1,5 @@
 import os.path
-import platform
+import sys
 import subprocess
 
 from thonny import get_workbench
