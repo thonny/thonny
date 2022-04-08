@@ -217,11 +217,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             print(vars(p))
         """
         last_backs = {}  # get_workbench().get_option("serial.last_backend_per_vid_pid")
-        return [
-            (p.device, p.description)
-            for p in all_ports
-            if cls._is_potential_port(p) or last_backs.get((p.vid, p.pid), None) == cls.backend_name
-        ]
+        return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
 
     @classmethod
     def _is_for_micropython(cls):
@@ -243,9 +239,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if "CircuitPython CDC " in (p.interface or ""):
             return cls._is_for_circuitpython()
 
-        if "MicroPython" in (p.manufacturer or ""):
-            return cls._is_for_micropython()
-
         return (
             (p.vid, p.pid) in cls.get_known_usb_vids_pids()
             or (p.vid, None) in cls.get_known_usb_vids_pids()
@@ -258,6 +251,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 or "DAPLink" in p.description
                 or "STLink" in p.description
                 or "python" in p.description.lower()
+                or "MicroPython" in (p.manufacturer or "")
             )
         )
 

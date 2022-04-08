@@ -11,6 +11,8 @@ from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 logger = getLogger(__name__)
 
+VIDS_PIDS_TO_AVOID_IN_RP2040 = set()
+
 
 class RP2040BackendProxy(BareMetalMicroPythonProxy):
     @classmethod
@@ -36,7 +38,7 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_vids_pids_to_avoid(self):
-        return get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids() | VIDS_PIDS_TO_AVOID_IN_RP2040
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):
