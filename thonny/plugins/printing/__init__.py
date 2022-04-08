@@ -1,6 +1,6 @@
 import os.path
-import sys
 import subprocess
+import sys
 
 from thonny import get_workbench
 from thonny.languages import tr
