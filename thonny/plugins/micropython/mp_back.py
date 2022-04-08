@@ -698,7 +698,7 @@ class MicroPythonBackend(MainBackend, ABC):
             "attributes": {},
         }
 
-        info.update(self._get_object_info_extras(type_name))
+        info.update(self._get_object_info_extras(type_name, repr_str=basic_info["repr"]))
         if cmd.include_attributes:
             info["attributes"] = self._get_object_attributes(cmd.all_attributes)
 
@@ -801,7 +801,7 @@ class MicroPythonBackend(MainBackend, ABC):
             if not name.startswith("__") or all_attributes
         }
 
-    def _get_object_info_extras(self, type_name):
+    def _get_object_info_extras(self, type_name: str, repr_str: str):
         """object is given in __thonny_helper.object_info"""
         if type_name in ("list", "tuple", "set"):
             items = self._evaluate(
@@ -818,6 +818,38 @@ class MicroPythonBackend(MainBackend, ABC):
                     (ValueInfo(x[0][0], x[0][1]), ValueInfo(x[1][0], x[1][1])) for x in items
                 ]
             }
+        elif type_name == "MicroBitImage":
+            if repr_str.startswith("Image('") and repr_str.count(":") == 5:
+                # ■ █ □ ●*✶•∙
+                data = repr_str.replace("Image('", "").replace("')", "")
+                content = (
+                    data.replace(":", "\n")
+                    .replace("0", "  ")
+                    .replace("1", " ∙")
+                    .replace("2", " ∙")
+                    .replace("3", " •")
+                    .replace("4", " •")
+                    .replace("5", " ✶")
+                    .replace("6", " ✶")
+                    .replace("7", " *")
+                    .replace("8", " *")
+                    .replace("9", " ●")
+                    + "\n\n"
+                    + data.replace(":", "\n")
+                    .replace("0", " 0")
+                    .replace("1", " 1")
+                    .replace("2", " 2")
+                    .replace("3", " 3")
+                    .replace("4", " 4")
+                    .replace("5", " 5")
+                    .replace("6", " 6")
+                    .replace("7", " 7")
+                    .replace("8", " 8")
+                    .replace("9", " 9")
+                )
+                return {"microbit_image": content}
+            else:
+                return {}
         else:
             return {}
 
