@@ -235,15 +235,15 @@ class MicroPythonBackend(MainBackend, ABC):
                 except builtins.ImportError:
                     import os
                 import sys
+                last_non_none_repl_value = None
                 
                 # for object inspector
                 inspector_values = builtins.dict()
                 @builtins.classmethod
                 def print_repl_value(cls, obj):
-                    global _
                     if obj is not None:
                         cls.builtins.print({start_marker!r} % cls.builtins.id(obj), cls.builtins.repr(obj), {end_marker!r}, sep='')
-                        _ = obj
+                        cls.last_non_none_repl_value = obj
                 
                 @builtins.classmethod
                 def print_mgmt_value(cls, obj):
@@ -641,6 +641,7 @@ class MicroPythonBackend(MainBackend, ABC):
         # TODO: clear last object inspector requests dictionary
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
+            source = self._replace_last_repl_value_variables(source)
             report_time("befexeccc")
             self._execute(source, capture_output=False)
             self._check_prepare()
@@ -704,6 +705,7 @@ class MicroPythonBackend(MainBackend, ABC):
         # need to keep the reference corresponding to object_id so that it can be later found as next context object
         # remove non-relevant items
         # TODO: add back links
+        # TODO: release old links
         # relevant = set([cmd.object_id] + cmd.back_links + cmd.forward_links)
         self._execute(
             dedent(
@@ -727,7 +729,8 @@ class MicroPythonBackend(MainBackend, ABC):
             dedent(
                 """
                 for __thonny_helper.object_info in (
-                        __thonny_helper.builtins.list(__thonny_helper.builtins.globals().values()) 
+                        [__thonny_helper.last_non_none_repl_value]
+                        + __thonny_helper.builtins.list(__thonny_helper.builtins.globals().values()) 
                         + __thonny_helper.builtins.list(__thonny_helper.inspector_values.values())):
                     if __thonny_helper.builtins.id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
@@ -1091,6 +1094,45 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _show_error(self, msg, end="\n"):
         self._send_output(msg + end, "stderr")
+
+    def _replace_last_repl_value_variables(self, source: str) -> str:
+        try:
+            root = ast.parse(source)
+        except SyntaxError:
+            return source
+
+        load_nodes = []
+        has_store_nodes = False
+        for node in ast.walk(root):
+            if (
+                isinstance(node, ast.arg)
+                and node.arg == "_"
+                or isinstance(node, ast.Name)
+                and node.id == "_"
+                and isinstance(node.ctx, ast.Store)
+            ):
+                has_store_nodes = True
+            elif isinstance(node, ast.Name) and node.id == "_" and isinstance(node.ctx, ast.Load):
+                load_nodes.append(node)
+
+        if not load_nodes:
+            return source
+
+        if load_nodes and has_store_nodes:
+            print("WARNING: Could not infer REPL _-variables", file=sys.stderr)
+            return source
+
+        lines = source.splitlines(keepends=True)
+        for node in reversed(load_nodes):
+            lines[node.lineno - 1] = (
+                lines[node.lineno - 1][: node.col_offset]
+                + "__thonny_helper.builtins.globals().get('_', __thonny_helper.last_non_none_repl_value)"
+                + lines[node.lineno - 1][node.col_offset + 1 :]
+            )
+
+        new_source = "".join(lines)
+        logger.debug("New source with replaced _-s: %r", new_source)
+        return new_source
 
     def _add_expression_statement_handlers(self, source):
         try:
