@@ -2,7 +2,7 @@
 Version history
 ===============
 
-4.0.0b2 (2022-04-??)
+4.0.0b2 (2022-04-09)
 ====================
 
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
