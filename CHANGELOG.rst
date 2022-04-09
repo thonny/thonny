@@ -11,10 +11,7 @@ Version history
 * Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
 * Fix parameter completions where name of local variable was proposed with trailing '='
 * Fix error with printing (regression introduced in b1), #2233
-* Add Tamil translation, by Kamala Kannan K and அனிச்பிரபு தி, #2211
-* Add Thai translation, by Tomzt Pimai and Game of
-* Update translations for German, Spanish, Japanese, Slovak, Korean, Brazilian Portuguese, Albanian
-* Fix Find & replace, #2208
+* Fix Find & replace dialog not appearing, #2208
 * Fix display of debugger frames (regression introduced in 4.0.0b1), #2216
 * Warn when environment value is provided with quotes, #2184
 * Let macOS installer know the bundle is able to run in arm64 mode, #2201
@@ -26,7 +23,9 @@ Version history
 * Don't assume all CircuitPython boards have RTC, #1760
 * Fix error with evaluating ``globals()`` on MicroPython device, #1938
 * Add MicrobitImage inspector for Object inspector
-* Use better wording for unknown backend, #2228
+* Add Tamil translation, by Kamala Kannan K and அனிச்பிரபு தி, #2211
+* Add Thai translation, by Tomzt Pimai and Game of
+* Update translations for German, Spanish, Japanese, Slovak, Korean, Brazilian Portuguese, Albanian
 
 
 4.0.0b1 (2022-03-21)
