@@ -1203,8 +1203,7 @@ class Workbench(tk.Tk):
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
         proxy_class.backend_description = description  # type: ignore
-        if not getattr(config_page_constructor, "backend_name", None):
-            config_page_constructor.backend_name = name
+        config_page_constructor.backend_name = name
 
     def add_ui_theme(
         self,
