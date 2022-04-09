@@ -11,6 +11,7 @@ Version history
 * Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
 * Fix parameter completions where name of local variable was proposed with trailing '='
 * Fix error with printing (regression introduced in b1), #2233
+* Add Tamil translation, by Kamala Kannan K and அனிச்பிரபு தி, #2211
 
 4.0.0b1 (2022-03-21)
 ====================
