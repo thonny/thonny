@@ -622,9 +622,7 @@ class Runner:
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError(
-                "Can't find backend '{}'. Please select another backend from options".format(
-                    backend_name
-                )
+                f"Unknown interpreter kind '{backend_name}'. Please select another interpreter from options"
             )
 
         backend_class = get_workbench().get_backends()[backend_name].proxy_class
