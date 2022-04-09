@@ -19,7 +19,7 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.misc_utils import find_volumes_by_name
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
     EOT,
     NORMAL_MODE_CMD,
@@ -331,6 +331,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._connected_to_microbit():
             return
         elif self._connected_to_circuitpython():
+            if "rtc" not in self._builtin_modules:
+                logger.warning("Can't sync time as 'rtc' module is missing")
+                return
+
             specific_script = dedent(
                 """
                 from rtc import RTC as __thonny_RTC
@@ -1288,12 +1292,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         out, err = self._execute(
             dedent(
                 """
-            try:
                 __thonny_path = '{path}'
                 __thonny_written = 0
                 __thonny_fp = __thonny_helper.builtins.open(__thonny_path, 'wb')
-            except __thonny_helper.builtins.Exception as e:
-                __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
             capture_output=True,
@@ -1699,11 +1700,12 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
 
         backend = backend_class(connection, clean=args["clean"], args=args)
 
-    except ConnectionFailedException as e:
+    except ConnectionError as e:
         text = "\n" + str(e) + "\n"
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

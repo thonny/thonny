@@ -15,7 +15,7 @@ from thonny import report_time
 from thonny.backend import SshMixin
 from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
     ENCODING,
     EOT,
@@ -65,12 +65,12 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         try:
             self._interpreter = self._resolve_executable(args["interpreter"])
             self._connection = self._create_connection()
-        except ConnectionFailedException as e:
+        except ConnectionRefusedError as e:
             text = "\n" + str(e) + "\n"
             msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
             sys.stdout.write(serialize_message(msg) + "\n")
             sys.stdout.flush()
-            return
+            sys.exit(1)
 
         MicroPythonBackend.__init__(self, None, args)
 
@@ -85,7 +85,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             msg = "Executable '%s' not found. Please check your configuration!" % executable
             if not executable.startswith("/"):
                 msg += " You may need to provide its absolute path."
-            raise ConnectionFailedException(msg)
+            raise ConnectionRefusedError(msg)
 
     def _which(self, executable):
         raise NotImplementedError()
@@ -279,9 +279,6 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             }
         except Exception as e:
             raise ManagementError("Could not parse disk information", script, out, err) from e
-
-    def _is_connected(self):
-        return not self._connection._error
 
     def _get_epoch_offset(self) -> int:
         try:

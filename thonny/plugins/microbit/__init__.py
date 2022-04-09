@@ -18,9 +18,9 @@ LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/relea
 
 class MicrobitProxy(BareMetalMicroPythonProxy):
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.microbit.microbit_backend
+        import thonny.plugins.microbit.microbit_back
 
-        return thonny.plugins.microbit.microbit_backend.__file__
+        return thonny.plugins.microbit.microbit_back.__file__
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -42,7 +42,7 @@ class MicrobitProxy(BareMetalMicroPythonProxy):
         return False
 
     @classmethod
-    def get_known_usb_vids_pids(self):
+    def get_known_usb_vids_pids(cls):
         return {(0x0D28, 0x0204)}
 
 
@@ -66,11 +66,6 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
     def _open_flashing_dialog(self):
         dlg = MicrobitFlashingDialog(self)
         ui_utils.show_dialog(dlg)
-
-    def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.microbit.microbit_backend
-
-        return thonny.plugins.microbit.microbit_backend.__file__
 
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
@@ -180,6 +175,7 @@ def load_plugin():
     import thonny.plugins.circuitpython
     import thonny.plugins.esp
     import thonny.plugins.micropython
+    import thonny.plugins.rp2040
 
     thonny.plugins.circuitpython.cirpy_front.VIDS_PIDS_TO_AVOID.update(
         MicrobitProxy.get_known_usb_vids_pids()
@@ -188,5 +184,8 @@ def load_plugin():
         MicrobitProxy.get_known_usb_vids_pids()
     )
     thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.rp2040.VIDS_PIDS_TO_AVOID_IN_RP2040.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )

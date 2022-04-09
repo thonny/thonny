@@ -215,6 +215,15 @@ class BackendEvent(MessageFromBackend):
         self.event_type = event_type
 
 
+class UserSystemExit(BackendEvent):
+    def __init__(self, returncode: int):
+        self.returncode = returncode
+        super().__init__("UserSystemExit")
+
+    def __repr__(self):
+        return f"UserSystemExit({self.returncode})"
+
+
 class InlineResponse(MessageFromBackend):
     def __init__(self, command_name: str, **kw) -> None:
         super().__init__(**kw)

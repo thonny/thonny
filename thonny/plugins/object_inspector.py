@@ -137,6 +137,7 @@ class ObjectInspector(ttk.Frame):
             [
                 FileHandleInspector(self.content_page),
                 FunctionInspector(self.content_page),
+                MicrobitImageInspector(self.content_page),
                 StringInspector(self.content_page),
                 ElementsInspector(self.content_page),
                 DictInspector(self.content_page),
@@ -415,6 +416,20 @@ class StringInspector(TextFrame, ContentInspector):
                            line_count_term,
                            "line" if line_count_term == 1 else "lines"))
         """
+
+
+class MicrobitImageInspector(TextFrame, ContentInspector):
+    def __init__(self, master):
+        ContentInspector.__init__(self, master)
+        TextFrame.__init__(self, master, read_only=True)
+
+    def applies_to(self, object_info):
+        return "microbit_image" in object_info
+
+    def set_object_info(self, object_info):
+        content = object_info["microbit_image"]
+        # self.text.configure(height=min(line_count_sep, 10))
+        self.text.set_content(content)
 
 
 class IntInspector(TextFrame, ContentInspector):

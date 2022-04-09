@@ -1406,6 +1406,10 @@ class BackendFileDialog(CommonDialog):
         assert path.endswith(self.name_var.get())
         self.on_ok()
 
+    def set_initial_focus(self, node=None) -> bool:
+        self.name_entry.focus_set()
+        return True
+
 
 class NodeChoiceDialog(CommonDialog):
     def __init__(self, master, prompt):

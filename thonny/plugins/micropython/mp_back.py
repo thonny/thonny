@@ -75,7 +75,6 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.plugins.micropython.connection import MicroPythonConnection
-from thonny.running import EXPECTED_TERMINATION_CODE
 
 ENCODING = "utf-8"
 
@@ -160,7 +159,7 @@ class MicroPythonBackend(MainBackend, ABC):
             report_time("sent ready")
             self.mainloop()
         except ConnectionError as e:
-            self._on_connection_error(e)
+            self.handle_connection_error(e)
         except Exception:
             logger.exception("Exception in MicroPython main method")
             self._report_internal_exception("Internal error")
@@ -236,15 +235,15 @@ class MicroPythonBackend(MainBackend, ABC):
                 except builtins.ImportError:
                     import os
                 import sys
+                last_non_none_repl_value = None
                 
                 # for object inspector
                 inspector_values = builtins.dict()
                 @builtins.classmethod
                 def print_repl_value(cls, obj):
-                    global _
                     if obj is not None:
                         cls.builtins.print({start_marker!r} % cls.builtins.id(obj), cls.builtins.repr(obj), {end_marker!r}, sep='')
-                        _ = obj
+                        cls.last_non_none_repl_value = obj
                 
                 @builtins.classmethod
                 def print_mgmt_value(cls, obj):
@@ -352,11 +351,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._check_perform_just_in_case_gc()
         report_time("after " + cmd.name)
 
-    def _should_keep_going(self) -> bool:
-        return self._is_connected()
-
-    def _is_connected(self) -> bool:
-        raise NotImplementedError()
+    def _check_for_connection_error(self) -> None:
+        self.get_connection().check_for_error()
 
     def _connected_to_microbit(self):
         if not self._welcome_text:
@@ -409,6 +405,9 @@ class MicroPythonBackend(MainBackend, ABC):
     def _fetch_epoch_year(self):
         if self._connected_to_microbit():
             return None
+
+        if self._connected_to_circuitpython() and "rtc" not in self._builtin_modules:
+            return self._resolve_unknown_epoch()
 
         # The proper solution would be to query time.gmtime, but most devices don't have this function.
         # Luckily, time.localtime is good enough for deducing 1970 vs 2000 epoch.
@@ -642,6 +641,7 @@ class MicroPythonBackend(MainBackend, ABC):
         # TODO: clear last object inspector requests dictionary
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
+            source = self._replace_last_repl_value_variables(source)
             report_time("befexeccc")
             self._execute(source, capture_output=False)
             self._check_prepare()
@@ -698,13 +698,14 @@ class MicroPythonBackend(MainBackend, ABC):
             "attributes": {},
         }
 
-        info.update(self._get_object_info_extras(type_name))
+        info.update(self._get_object_info_extras(type_name, repr_str=basic_info["repr"]))
         if cmd.include_attributes:
             info["attributes"] = self._get_object_attributes(cmd.all_attributes)
 
         # need to keep the reference corresponding to object_id so that it can be later found as next context object
         # remove non-relevant items
         # TODO: add back links
+        # TODO: release old links
         # relevant = set([cmd.object_id] + cmd.back_links + cmd.forward_links)
         self._execute(
             dedent(
@@ -728,7 +729,8 @@ class MicroPythonBackend(MainBackend, ABC):
             dedent(
                 """
                 for __thonny_helper.object_info in (
-                        __thonny_helper.builtins.list(__thonny_helper.builtins.globals().values()) 
+                        [__thonny_helper.last_non_none_repl_value]
+                        + __thonny_helper.builtins.list(__thonny_helper.builtins.globals().values()) 
                         + __thonny_helper.builtins.list(__thonny_helper.inspector_values.values())):
                     if __thonny_helper.builtins.id(__thonny_helper.object_info) == %d:
                         __thonny_helper.print_mgmt_value({
@@ -799,7 +801,7 @@ class MicroPythonBackend(MainBackend, ABC):
             if not name.startswith("__") or all_attributes
         }
 
-    def _get_object_info_extras(self, type_name):
+    def _get_object_info_extras(self, type_name: str, repr_str: str):
         """object is given in __thonny_helper.object_info"""
         if type_name in ("list", "tuple", "set"):
             items = self._evaluate(
@@ -816,6 +818,38 @@ class MicroPythonBackend(MainBackend, ABC):
                     (ValueInfo(x[0][0], x[0][1]), ValueInfo(x[1][0], x[1][1])) for x in items
                 ]
             }
+        elif type_name == "MicroBitImage":
+            if repr_str.startswith("Image('") and repr_str.count(":") == 5:
+                # ■ █ □ ●*✶•∙
+                data = repr_str.replace("Image('", "").replace("')", "")
+                content = (
+                    data.replace(":", "\n")
+                    .replace("0", "  ")
+                    .replace("1", " ∙")
+                    .replace("2", " ∙")
+                    .replace("3", " •")
+                    .replace("4", " •")
+                    .replace("5", " ✶")
+                    .replace("6", " ✶")
+                    .replace("7", " *")
+                    .replace("8", " *")
+                    .replace("9", " ●")
+                    + "\n\n"
+                    + data.replace(":", "\n")
+                    .replace("0", " 0")
+                    .replace("1", " 1")
+                    .replace("2", " 2")
+                    .replace("3", " 3")
+                    .replace("4", " 4")
+                    .replace("5", " 5")
+                    .replace("6", " 6")
+                    .replace("7", " 7")
+                    .replace("8", " 8")
+                    .replace("9", " 9")
+                )
+                return {"microbit_image": content}
+            else:
+                return {}
         else:
             return {}
 
@@ -1086,18 +1120,51 @@ class MicroPythonBackend(MainBackend, ABC):
 
         return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
-    def _on_connection_error(self, error=None):
-        logger.info("Handling closed connection")
+    def handle_connection_error(self, error=None):
         self._forward_unexpected_output("stderr")
-        message = "Connection lost"
-        if error:
-            message += " (" + str(error) + ")"
-        self._send_output("\n" + message + "\n", "stderr")
-        self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
-        sys.exit(EXPECTED_TERMINATION_CODE)
+        super().handle_connection_error(error)
 
     def _show_error(self, msg, end="\n"):
         self._send_output(msg + end, "stderr")
+
+    def _replace_last_repl_value_variables(self, source: str) -> str:
+        try:
+            root = ast.parse(source)
+        except SyntaxError:
+            return source
+
+        load_nodes = []
+        has_store_nodes = False
+        for node in ast.walk(root):
+            if (
+                isinstance(node, ast.arg)
+                and node.arg == "_"
+                or isinstance(node, ast.Name)
+                and node.id == "_"
+                and isinstance(node.ctx, ast.Store)
+            ):
+                has_store_nodes = True
+            elif isinstance(node, ast.Name) and node.id == "_" and isinstance(node.ctx, ast.Load):
+                load_nodes.append(node)
+
+        if not load_nodes:
+            return source
+
+        if load_nodes and has_store_nodes:
+            print("WARNING: Could not infer REPL _-variables", file=sys.stderr)
+            return source
+
+        lines = source.splitlines(keepends=True)
+        for node in reversed(load_nodes):
+            lines[node.lineno - 1] = (
+                lines[node.lineno - 1][: node.col_offset]
+                + "__thonny_helper.builtins.globals().get('_', __thonny_helper.last_non_none_repl_value)"
+                + lines[node.lineno - 1][node.col_offset + 1 :]
+            )
+
+        new_source = "".join(lines)
+        logger.debug("New source with replaced _-s: %r", new_source)
+        return new_source
 
     def _add_expression_statement_handlers(self, source):
         try:

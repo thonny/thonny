@@ -1,9 +1,23 @@
 """Support for audio mixing"""
 
+from __future__ import annotations
+
+from typing import Tuple
+
+import circuitpython_typing
+
 class Mixer:
     """Mixes one or more audio samples together into one sample."""
 
-    def __init__(self, voice_count: int = 2, buffer_size: int = 1024, channel_count: int = 2, bits_per_sample: int = 16, samples_signed: bool = True, sample_rate: int = 8000):
+    def __init__(
+        self,
+        voice_count: int = 2,
+        buffer_size: int = 1024,
+        channel_count: int = 2,
+        bits_per_sample: int = 16,
+        samples_signed: bool = True,
+        sample_rate: int = 8000,
+    ) -> None:
         """Create a Mixer object that can mix multiple channels with the same sample rate.
         Samples are accessed and controlled with the mixer's `audiomixer.MixerVoice` objects.
 
@@ -39,43 +53,44 @@ class Mixer:
             time.sleep(1)
           print("stopped")"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the Mixer and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> Mixer:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    playing: Any = ...
+    playing: bool
     """True when any voice is being output. (read-only)"""
 
-    sample_rate: Any = ...
+    sample_rate: int
     """32 bit value that dictates how quickly samples are played in Hertz (cycles per second)."""
 
-    voice: Any = ...
+    voice: Tuple[MixerVoice, ...]
     """A tuple of the mixer's `audiomixer.MixerVoice` object(s).
 
     .. code-block:: python
 
        >>> mixer.voice
        (<MixerVoice>,)"""
-    def play(self, sample: Any, *, voice: Any = 0, loop: Any = False) -> Any:
+    def play(
+        self,
+        sample: circuitpython_typing.AudioSample,
+        *,
+        voice: int = 0,
+        loop: bool = False,
+    ) -> None:
         """Plays the sample once when loop=False and continuously when loop=True.
         Does not block. Use `playing` to block.
 
-        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, or `audiomixer.Mixer`.
+        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, `audiomixer.Mixer` or `audiomp3.MP3Decoder`.
 
         The sample must match the Mixer's encoding settings given in the constructor."""
         ...
-
-    def stop_voice(self, voice: Any = 0) -> Any:
+    def stop_voice(self, voice: int = 0) -> None:
         """Stops playback of the sample on the given voice."""
         ...
 
@@ -84,26 +99,24 @@ class MixerVoice:
 
     Used to access and control samples with `audiomixer.Mixer`."""
 
-    def __init__(self, ):
+    def __init__(self) -> None:
         """MixerVoice instance object(s) created by `audiomixer.Mixer`."""
         ...
-
-    def play(self, sample: Any, *, loop: Any = False) -> Any:
+    def play(
+        self, sample: circuitpython_typing.AudioSample, *, loop: bool = False
+    ) -> None:
         """Plays the sample once when ``loop=False``, and continuously when ``loop=True``.
         Does not block. Use `playing` to block.
 
-        Sample must be an `audiocore.WaveFile`, `audiomixer.Mixer` or `audiocore.RawSample`.
+        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, `audiomixer.Mixer` or `audiomp3.MP3Decoder`.
 
         The sample must match the `audiomixer.Mixer`'s encoding settings given in the constructor."""
         ...
-
-    def stop(self, ) -> Any:
+    def stop(self) -> None:
         """Stops playback of the sample on this voice."""
         ...
-
-    level: Any = ...
+    level: float
     """The volume level of a voice, as a floating point number between 0 and 1."""
 
-    playing: Any = ...
+    playing: bool
     """True when this voice is being output. (read-only)"""
-

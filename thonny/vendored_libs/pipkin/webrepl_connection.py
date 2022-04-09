@@ -3,7 +3,7 @@ import threading
 from logging import DEBUG, getLogger
 from queue import Queue
 
-from .connection import ConnectionFailedException, MicroPythonConnection
+from .connection import MicroPythonConnection
 
 logger = getLogger(__name__)
 
@@ -76,7 +76,7 @@ class WebReplConnection(MicroPythonConnection):
                 self._ws = await websockets.connect(self._url, ping_interval=None)
         except OSError as e:
             # print("\nCould not connect:", e, file=sys.stderr)
-            raise ConnectionFailedException(str(e)) from e
+            raise ConnectionRefusedError(str(e)) from e
         logger.debug("GOT WS: %r", self._ws)
 
         # read password prompt and send password

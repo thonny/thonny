@@ -10,10 +10,23 @@ call :py:meth:`!deinit` or use a context manager. See
 Since CircuitPython 5, `Mixer`, `RawSample` and `WaveFile` are moved
 to :mod:`audiocore`."""
 
+from __future__ import annotations
+
+from typing import Optional
+
+import circuitpython_typing
+import microcontroller
+
 class PWMAudioOut:
     """Output an analog audio signal by varying the PWM duty cycle."""
 
-    def __init__(self, left_channel: microcontroller.Pin, *, right_channel: microcontroller.Pin = None, quiescent_value: int = 0x8000):
+    def __init__(
+        self,
+        left_channel: microcontroller.Pin,
+        *,
+        right_channel: Optional[microcontroller.Pin] = None,
+        quiescent_value: int = 0x8000,
+    ) -> None:
         """Create a PWMAudioOut object associated with the given pin(s). This allows you to
         play audio signals out on the given pin(s).  In contrast to mod:`audioio`,
         the pin(s) specified are digital pins, and are driven with a device-dependent PWM
@@ -66,45 +79,38 @@ class PWMAudioOut:
             pass
           print("stopped")"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the PWMAudioOut and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> PWMAudioOut:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-    def play(self, sample: Any, *, loop: Any = False) -> Any:
+    def play(
+        self, sample: circuitpython_typing.AudioSample, *, loop: bool = False
+    ) -> None:
         """Plays the sample once when loop=False and continuously when loop=True.
         Does not block. Use `playing` to block.
 
-        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, or `audiomixer.Mixer`.
+        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, `audiomixer.Mixer` or `audiomp3.MP3Decoder`.
 
         The sample itself should consist of 16 bit samples. Microcontrollers with a lower output
-        resolution will use the highest order bits to output. For example, the SAMD21 has a 10 bit
-        DAC that ignores the lowest 6 bits when playing 16 bit samples."""
+        resolution will use the highest order bits to output."""
         ...
-
-    def stop(self, ) -> Any:
+    def stop(self) -> None:
         """Stops playback and resets to the start of the sample."""
         ...
-
-    playing: Any = ...
+    playing: bool
     """True when an audio sample is being output even if `paused`. (read-only)"""
 
-    def pause(self, ) -> Any:
+    def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...
-
-    def resume(self, ) -> Any:
+    def resume(self) -> None:
         """Resumes sample playback after :py:func:`pause`."""
         ...
-
-    paused: Any = ...
+    paused: bool
     """True when playback is paused. (read-only)"""
-

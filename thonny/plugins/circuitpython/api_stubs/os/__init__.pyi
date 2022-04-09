@@ -4,40 +4,54 @@ The `os` module is a strict subset of the CPython `cpython:os` module. So,
 code written in CircuitPython will work in CPython but not necessarily the
 other way around."""
 
-def uname() -> Any:
+from __future__ import annotations
+
+import typing
+from typing import Tuple
+
+def uname() -> _Uname:
     """Returns a named tuple of operating specific and CircuitPython port
     specific information."""
     ...
 
-def chdir(path: Any) -> Any:
+class _Uname(typing.NamedTuple):
+    """The type of values that :py:func:`.uname()` returns"""
+
+    sysname: str
+    nodename: str
+    release: str
+    version: str
+    machine: str
+
+def chdir(path: str) -> None:
     """Change current directory."""
     ...
 
-def getcwd() -> Any:
-    """Get the current directory."""
+def getcwd() -> str:
+    """Get the current directory. cciii p"""
     ...
 
-def listdir(dir: Any) -> Any:
+def listdir(dir: str) -> str:
     """With no argument, list the current directory.  Otherwise list the given directory."""
     ...
 
-def mkdir(path: Any) -> Any:
+def mkdir(path: str) -> None:
     """Create a new directory."""
     ...
 
-def remove(path: Any) -> Any:
+def remove(path: str) -> None:
     """Remove a file."""
     ...
 
-def rmdir(path: Any) -> Any:
+def rmdir(path: str) -> None:
     """Remove a directory."""
     ...
 
-def rename(old_path: Any, new_path: Any) -> Any:
+def rename(old_path: str, new_path: str) -> str:
     """Rename a file."""
     ...
 
-def stat(path: Any) -> Any:
+def stat(path: str) -> Tuple[int, int, int, int, int, int, int, int, int, int]:
     """Get the status of a file or directory.
 
     .. note:: On builds without long integers, the number of seconds
@@ -46,7 +60,7 @@ def stat(path: Any) -> Any:
        which is the number of seconds corresponding to 1999-12-31."""
     ...
 
-def statvfs(path: Any) -> Any:
+def statvfs(path: str) -> Tuple[int, int, int, int, int, int, int, int, int, int]:
     """Get the status of a filesystem.
 
     Returns a tuple with the filesystem information in the following order:
@@ -67,16 +81,14 @@ def statvfs(path: Any) -> Any:
     in a port-specific implementation."""
     ...
 
-def sync() -> Any:
+def sync() -> None:
     """Sync all filesystems."""
     ...
 
-def urandom(size: Any) -> Any:
+def urandom(size: int) -> str:
     """Returns a string of *size* random bytes based on a hardware True Random
     Number Generator. When not available, it will raise a NotImplementedError."""
     ...
 
-""".. data:: sep
-
-  Separator used to delineate path components such as folder and file names."""
-
+sep: str
+"""Separator used to delineate path components such as folder and file names."""

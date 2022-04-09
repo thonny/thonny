@@ -10,6 +10,10 @@ are no longer needed if the program continues after use. To do so, either
 call :py:meth:`!deinit` or use a context manager. See
 :ref:`lifetime-and-contextmanagers` for more info."""
 
+from __future__ import annotations
+
+import microcontroller
+
 class Ps2:
     """Communicate with a PS/2 keyboard or mouse
 
@@ -19,7 +23,9 @@ class Ps2:
     level converters must be used to connect the I/O lines to pins
     of 3.3V boards."""
 
-    def __init__(self, data_pin: microcontroller.Pin, clock_pin: microcontroller.Pin):
+    def __init__(
+        self, data_pin: microcontroller.Pin, clock_pin: microcontroller.Pin
+    ) -> None:
         """Create a Ps2 object associated with the given pins.
 
         :param ~microcontroller.Pin data_pin: Pin tied to data wire.
@@ -40,26 +46,21 @@ class Ps2:
           print(kbd.sendcmd(0xed))
           print(kbd.sendcmd(0x01))"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the Ps2 and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> Ps2:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    def popleft(self, ) -> Any:
+    def popleft(self) -> int:
         """Removes and returns the oldest received byte. When buffer
         is empty, raises an IndexError exception."""
         ...
-
-    def sendcmd(self, byte: int) -> Any:
+    def sendcmd(self, byte: int) -> int:
         """Sends a command byte to PS/2. Returns the response byte, typically
         the general ack value (0xFA). Some commands return additional data
         which is available through :py:func:`popleft()`.
@@ -71,8 +72,7 @@ class Ps2:
 
         :param int byte: byte value of the command"""
         ...
-
-    def clear_errors(self, ) -> Any:
+    def clear_errors(self) -> None:
         """Returns and clears a bitmap with latest recorded communication errors.
 
         Reception errors (arise asynchronously, as data is received):
@@ -101,9 +101,8 @@ class Ps2:
 
         0x2000: device didn't send a response byte in time"""
         ...
-
-    def __len__(self, ) -> Any:
+    def __bool__(self) -> bool: ...
+    def __len__(self) -> int:
         """Returns the number of received bytes in buffer, available
         to :py:func:`popleft()`."""
         ...
-

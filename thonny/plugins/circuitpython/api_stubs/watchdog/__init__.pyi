@@ -18,49 +18,47 @@ Example usage::
     w.mode = WatchDogMode.RAISE
     w.feed()"""
 
+from __future__ import annotations
+
 class WatchDogMode:
     """run state of the watchdog timer"""
 
-    def __init__(self, ):
+    def __init__(self) -> None:
         """Enum-like class to define the run mode of the watchdog timer."""
-
-    RAISE: Any = ...
+    RAISE: WatchDogMode
     """Raise an exception when the WatchDogTimer expires.
 
-    :type watchdog.WatchDogMode:"""
+    :type WatchDogMode:"""
 
-    RESET: Any = ...
+    RESET: WatchDogMode
     """Reset the system if the WatchDogTimer expires.
 
-    :type watchdog.WatchDogMode:"""
+    :type WatchDogMode:"""
 
 class WatchDogTimer:
     """Timer that is used to detect code lock ups and automatically reset the microcontroller
-       when one is detected.
+    when one is detected.
 
-       A lock up is detected when the watchdog hasn't been fed after a given duration. So, make
-       sure to call `feed` within the timeout.
+    A lock up is detected when the watchdog hasn't been fed after a given duration. So, make
+    sure to call `feed` within the timeout.
     """
 
-    def __init__(self, ):
+    def __init__(self) -> None:
         """Not currently dynamically supported. Access the sole instance through `microcontroller.watchdog`."""
         ...
-
-    def feed(self):
+    def feed(self) -> None:
         """Feed the watchdog timer. This must be called regularly, otherwise
         the timer will expire."""
         ...
-
-    def deinit(self):
+    def deinit(self) -> None:
         """Stop the watchdog timer. This may raise an error if the watchdog
         timer cannot be disabled on this platform."""
         ...
-
-    timeout: float = ...
+    timeout: float
     """The maximum number of seconds that can elapse between calls
     to feed()"""
 
-    mode: watchdog.WatchDogMode = ...
+    mode: WatchDogMode
     """The current operating mode of the WatchDogTimer `watchdog.WatchDogMode`.
 
     Setting a WatchDogMode activates the WatchDog::
@@ -74,4 +72,3 @@ class WatchDogTimer:
 
 
     Once set, the WatchDogTimer will perform the specified action if the timer expires."""
-

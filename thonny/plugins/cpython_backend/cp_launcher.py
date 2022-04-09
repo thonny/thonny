@@ -30,7 +30,7 @@ if __name__ == "__main__":
             + "Choose another interpreter from Tools => Options => Interpreter",
             file=sys.stderr,
         )
-        sys.exit()
+        sys.exit(1)
     import thonny
     from thonny import report_time
 

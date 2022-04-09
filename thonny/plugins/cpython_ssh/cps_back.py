@@ -91,7 +91,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         self._response_forwarder.start()
 
     def _forward_main_responses(self):
-        while self._should_keep_going():
+        while self._check_for_connection_error():
             line = self._proc.stdout.readline()
             if self._main_backend_is_fresh and self._looks_like_echo(line):
                 # In the beginning the backend may echo commands sent to it (perhaps this echo-avoiding trick
@@ -108,8 +108,9 @@ class SshCPythonBackend(BaseBackend, SshMixin):
     def _looks_like_echo(self, line):
         return line.startswith("^B")
 
-    def _should_keep_going(self) -> bool:
-        return self._proc is not None and self._proc.poll() is None
+    def _check_for_connection_error(self) -> None:
+        if self._proc is None or self._proc.poll() is not None:
+            raise ConnectionAbortedError()
 
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}

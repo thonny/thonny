@@ -892,6 +892,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self, automatic: bool = False):
+        logger.info("BaseShellText.restart(%r)", automatic)
+        self.set_read_only(False)
         if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
             self._clear_content("end")
         else:
@@ -1371,9 +1373,11 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         end_index = self.index("output_end")
         self._clear_content(end_index)
 
-    def _on_backend_restart(self, event=None):
+    def _on_backend_terminated(self, event=None):
+        logger.info("BaseShellText._on_backend_terminated")
         # make sure dead values are not clickable anymore
         self._invalidate_current_data()
+        self.set_read_only(True)
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
@@ -1579,7 +1583,7 @@ class ShellText(BaseShellText):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
-        get_workbench().bind("BackendRestart", self._on_backend_restart, True)
+        get_workbench().bind("BackendTerminated", self._on_backend_terminated, True)
         get_workbench().bind(
             "HideTrailingOutput", lambda msg: self._hide_trailing_output(msg.text), True
         )
