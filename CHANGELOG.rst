@@ -2,7 +2,7 @@
 Version history
 ===============
 
-4.0.0b2 (2022-??-??)
+4.0.0b2 (2022-04-??)
 ====================
 
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
@@ -14,6 +14,19 @@ Version history
 * Add Tamil translation, by Kamala Kannan K and அனிச்பிரபு தி, #2211
 * Add Thai translation, by Tomzt Pimai and Game of
 * Update translations for German, Spanish, Japanese, Slovak, Korean, Brazilian Portuguese, Albanian
+* Fix Find & replace, #2208
+* Fix display of debugger frames (regression introduced in 4.0.0b1), #2216
+* Warn when environment value is provided with quotes, #2184
+* Let macOS installer know the bundle is able to run in arm64 mode, #2201
+* Update completion stubs for MicroPython and CircuitPython (from @hlovatt and @adafruit)
+* Add compatibility with Python 3.8 via Windows launcher, #2206
+* Disable "Run" command when MicroPython device is disconnected
+* Make Shell read-only when device is disconnected
+* Fix various problems with managing files on CircuitPython devices
+* Don't assume all CircuitPython boards have RTC, #1760
+* Fix error with evaluating ``globals()`` on MicroPython device, #1938
+* Add MicrobitImage inspector for Object inspector
+* Use better wording for unknown backend, #2228
 
 
 4.0.0b1 (2022-03-21)
