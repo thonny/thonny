@@ -9,5 +9,5 @@ esptool==3.3.*
 paramiko==2.10.*
 ptyprocess==0.7.*
 websockets==10.*
-adafruit_board_toolkit==1.1.0
+adafruit_board_toolkit==1.1.0; sys_platform in ["darwin", "win32"]
 
