@@ -125,7 +125,7 @@ cp ../../*LICENSE.txt $TARGET_DIR
 
 # put it together
 mkdir -p dist
-tar -cvzf dist/${VERSION_NAME}-alt.tar.gz -C build thonny
+tar -cvzf dist/${VERSION_NAME}.tar.gz -C build thonny
 
 # XXL ###########################################################
 

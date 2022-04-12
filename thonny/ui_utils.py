@@ -2142,17 +2142,17 @@ def show_dialog(dlg, master=None, geometry=None):
             _place_window(dlg, master)
 
     dlg.lift()
-
-    if hasattr(dlg, "set_initial_focus"):
-        dlg.set_initial_focus()
-    else:
-        dlg.focus_set()
-
     dlg.wait_visibility()
+
     try:
         dlg.grab_set()
     except TclError as e:
         logger.warning("Can't grab: %s", e)
+
+    dlg.update_idletasks()
+    dlg.focus_set()
+    if hasattr(dlg, "set_initial_focus"):
+        dlg.set_initial_focus()
 
     dlg.wait_window(dlg)
     dlg.grab_release()
