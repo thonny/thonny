@@ -4,7 +4,7 @@ Version history
 
 4.0.0b3 (2022-??-??)
 ====================
-*
+* Add command "Run => Visualize current script at Python Tutor", #2242
 
 4.0.0b2 (2022-04-09)
 ====================
