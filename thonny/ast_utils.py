@@ -170,13 +170,13 @@ def get_last_child(node, skip_incorrect=True):
     return None
 
 
-def mark_text_ranges(node, source: str, fallback_to_one_char=False):
+def mark_text_ranges(node, source: Union[str, bytes], fallback_to_one_char=False):
     """
     Node is an AST, source is corresponding source as string.
     Function adds recursively attributes end_lineno and end_col_offset to each node
     which has attributes lineno and col_offset.
     """
-    assert isinstance(source, str)
+    assert isinstance(source, (str, bytes))
     from asttokens.asttokens import ASTTokens
 
     ASTTokens(source, tree=node)
