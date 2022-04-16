@@ -10,7 +10,7 @@ from typing import BinaryIO, Callable, List, Optional, Union
 
 import thonny
 from thonny import report_time
-from thonny.backend import UploadDownloadMixin
+from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
     BackendEvent,
     EOFCommand,
@@ -1236,8 +1236,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
+        make_shebang_scripts_executable: bool,
     ) -> None:
         start_time = time.time()
+
+        if make_shebang_scripts_executable:
+            source_fp, _ = convert_newlines_if_has_shebang(source_fp)
+            # No need (or not possible?) to set mode on bare metal
 
         if self._connected_over_webrepl():
             self._write_file_via_webrepl_file_protocol(source_fp, target_path, file_size, callback)

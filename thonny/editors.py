@@ -324,6 +324,12 @@ class Editor(ttk.Frame):
         return save_filename
 
     def write_local_file(self, save_filename, content_bytes, save_copy):
+        process_shebang = content_bytes.startswith(b"#!/") and get_workbench().get_option(
+            "file.make_saved_shebang_scripts_executable"
+        )
+        if process_shebang:
+            content_bytes = content_bytes.replace(b"\r\n", b"\n")
+
         try:
             f = open(save_filename, mode="wb")
             f.write(content_bytes)
@@ -331,6 +337,8 @@ class Editor(ttk.Frame):
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             os.fsync(f)
             f.close()
+            if process_shebang:
+                os.chmod(save_filename, 0o755)
             if not save_copy or save_filename == self._filename:
                 self._last_known_mtime = os.path.getmtime(save_filename)
             get_workbench().event_generate(
@@ -378,6 +386,9 @@ class Editor(ttk.Frame):
                     editor_id=id(self),
                     blocking=True,
                     description=tr("Saving to %s") % target_filename,
+                    make_shebang_scripts_executable=get_workbench().get_option(
+                        "file.make_saved_shebang_scripts_executable"
+                    ),
                 ),
                 dialog_title=tr("Saving"),
             )
@@ -597,6 +608,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.show_line_numbers", True)
         get_workbench().set_default("view.recommended_line_length", 0)
         get_workbench().set_default("edit.indent_with_tabs", False)
+        get_workbench().set_default("file.make_saved_shebang_scripts_executable", True)
 
         self._recent_menu = tk.Menu(
             get_workbench().get_menu("file"), postcommand=self._update_recent_menu

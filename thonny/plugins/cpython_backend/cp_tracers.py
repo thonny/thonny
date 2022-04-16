@@ -458,7 +458,7 @@ class NiceTracer(Tracer):
             if not hasattr(builtins, name):
                 setattr(builtins, name, getattr(self, name))
 
-    def _prepare_ast(self, source:Union[str, bytes], filename: str, mode:str):
+    def _prepare_ast(self, source: Union[str, bytes], filename: str, mode: str):
         # ast_utils need to be imported after asttokens
         # is (custom-)imported
         try_load_modules_with_frontend_sys_path(["asttokens", "six", "astroid"])

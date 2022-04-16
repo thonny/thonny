@@ -195,9 +195,16 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         self._interpreter_var = self._add_text_field(
             "Interpreter",
             self._conf_group + ".executable",
-            30,
+            row=30,
             pady=(2 * inner_pad, inner_pad),
             width=30,
+        )
+
+        self.add_checkbox(
+            f"{self.backend_name}.make_uploaded_shebang_scripts_executable",
+            tr("Make uploaded shebang scripts executable"),
+            row=35,
+            pady=(ems_to_pixels(4), 0),
         )
 
     def _on_change(self):
