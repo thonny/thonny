@@ -169,7 +169,4 @@ class SshCPythonProxy(SubprocessProxy):
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):
-    backend_name = None  # Will be overwritten on Workbench.add_backend
-
-    def __init__(self, master):
-        super().__init__(master, "SshCPython")
+    pass

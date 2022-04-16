@@ -1,3 +1,12 @@
+"""
+/usr/bin/pybricks-repl content:
+#!/bin/sh
+brickrun -r -- pybricks-micropython -i -c 'from core import *'
+
+using pybricks-micropython instead
+
+"""
+
 from thonny import get_workbench
 from thonny.languages import tr
 from thonny.plugins.micropython import (
@@ -16,7 +25,7 @@ class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
     pass
 
 
-def _load_plugin():
+def load_plugin():
     add_micropython_backend(
         "EV3MicroPython",
         EV3MicroPythonProxy,
@@ -25,6 +34,7 @@ def _load_plugin():
         sort_key="23",
     )
     get_workbench().set_default("EV3MicroPython.executable", "pybricks-micropython")
+    get_workbench().set_default("EV3MicroPython.make_uploaded_shebang_scripts_executable", True)
     get_workbench().set_default("EV3MicroPython.cwd", None)
     get_workbench().set_default("EV3MicroPython.host", "")
     get_workbench().set_default("EV3MicroPython.user", "robot")

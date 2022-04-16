@@ -968,10 +968,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
-    backend_name = None  # Will be overwritten on Workbench.add_backend
-
-    def __init__(self, master):
-        super().__init__(master, "SshMicroPython")
+    pass
 
 
 def list_serial_ports():
