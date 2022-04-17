@@ -4,6 +4,7 @@ Version history
 
 4.0.0b3 (2022-??-??)
 ====================
+* Add LEGO EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
 * Add command "Run => Visualize current script at Python Tutor", #2242
 * Fix debugger error when importing user modules (regression introduced in 4.0.0b1), #2246
 * Add options for automatically making uploaded or saved shebang scripts executable (includes changing Windows line breaks to Unix ones). See "Editor" and SSH-backends' config pages.

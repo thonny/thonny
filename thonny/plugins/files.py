@@ -348,7 +348,9 @@ class UploadDialog(TransferDialog):
             self._cmd = InlineCommand(
                 "upload",
                 items=picked_items,
-                make_shebang_scripts_executable=get_workbench().get_option(f"{backend_name}.make_uploaded_shebang_scripts_executable"),
+                make_shebang_scripts_executable=get_workbench().get_option(
+                    f"{backend_name}.make_uploaded_shebang_scripts_executable"
+                ),
             )
             get_runner().send_command(self._cmd)
             return True

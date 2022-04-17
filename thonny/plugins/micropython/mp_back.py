@@ -1121,7 +1121,10 @@ class MicroPythonBackend(MainBackend, ABC):
         return {name: self._expand_stat(raw_data[name], name) for name in raw_data}
 
     def handle_connection_error(self, error=None):
-        self._forward_unexpected_output("stderr")
+        try:
+            self._forward_unexpected_output("stderr")
+        except:
+            logger.warning("Could not forward output", exc_info=True)
         super().handle_connection_error(error)
 
     def _show_error(self, msg, end="\n"):

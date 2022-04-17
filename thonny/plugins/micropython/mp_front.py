@@ -831,9 +831,9 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
 
 class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
-        self._host = get_workbench().get_option("SshMicroPython.host")
-        self._user = get_workbench().get_option("SshMicroPython.user")
-        self._target_executable = get_workbench().get_option("SshMicroPython.executable")
+        self._host = get_workbench().get_option(f"{self.backend_name}.host")
+        self._user = get_workbench().get_option(f"{self.backend_name}.user")
+        self._target_executable = get_workbench().get_option(f"{self.backend_name}.executable")
 
         super().__init__(clean)
 
@@ -841,7 +841,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         import thonny.plugins.micropython.os_mp_backend
 
         args = {
-            "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
+            "cwd": get_workbench().get_option(f"{self.backend_name}.cwd") or "",
             "interpreter": self._target_executable,
             "host": self._host,
             "user": self._user,
@@ -858,7 +858,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def _send_initial_input(self) -> None:
         assert self._proc is not None
-        self._proc.stdin.write((get_ssh_password("SshMicroPython") or "") + "\n")
+        self._proc.stdin.write((get_ssh_password(self.backend_name) or "") + "\n")
         self._proc.stdin.flush()
 
     def _get_extra_launcher_args(self):
@@ -878,10 +878,10 @@ class SshMicroPythonProxy(MicroPythonProxy):
         return super().send_command(cmd)
 
     def _get_initial_cwd(self):
-        return get_workbench().get_option("SshMicroPython.cwd")
+        return get_workbench().get_option(f"{self.backend_name}.cwd")
 
     def _publish_cwd(self, cwd):
-        return get_workbench().set_option("SshMicroPython.cwd", cwd)
+        return get_workbench().set_option(f"{self.backend_name}.cwd", cwd)
 
     def supports_remote_files(self):
         return True
