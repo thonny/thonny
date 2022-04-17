@@ -3,7 +3,28 @@
 #!/bin/sh
 brickrun -r -- pybricks-micropython -i -c 'from core import *'
 
-using pybricks-micropython instead
+help("modules"):
+
+__main__          mmap              pybricks/tools    ufcntl
+_thread           nxtdevices_c      pybricks/uev3dev/__init__           uhashlib
+array             parameters_c      pybricks/uev3dev/_alsa              uheapq
+bluetooth_c       pybricks/__init__ pybricks/uev3dev/_wand              uio
+btree             pybricks/bluetooth                  pybricks/uev3dev/display            ujson
+builtins          pybricks/display  pybricks/uev3dev/i2c                umachine
+cmath             pybricks/ev3brick pybricks/uev3dev/messaging          uos
+core              pybricks/ev3devices                 pybricks/uev3dev/sound              urandom
+ev3devices_c      pybricks/ev3devio pybricks/uev3dev/util               ure
+experimental_c    pybricks/experimental               robotics_c        uselect
+ffi               pybricks/hubs     sys               usignal
+framebuf          pybricks/iodevices                  termios           usocket
+gc                pybricks/media/ev3dev               tools             ussl
+hubs_c            pybricks/messaging                  ubinascii         ustruct
+iodevices_c       pybricks/nxtdevices                 ucollections      utime
+math              pybricks/parameters                 ucryptolib        utimeq
+media_ev3dev_c    pybricks/robotics uctypes           uwebsocket
+micropython       pybricks/speaker  uerrno            uzlib
+Plus any modules on the filesystem
+
 
 """
 
