@@ -89,6 +89,7 @@ class BaseBackend(ABC):
             logger.exception("mainloop error")
             self._report_internal_exception("mainloop error")
 
+        logger.info("After mainloop")
         sys.exit(17)
 
     def handle_connection_error(self, error=None):
