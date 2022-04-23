@@ -235,6 +235,10 @@ class BaseFileBrowser(ttk.Frame):
 
     def on_open_node(self, event):
         node_id = self.get_selected_node()
+        if self.get_selected_kind() == "file":
+            # can happen in Windows when pressing ENTER on file
+            return "break"
+
         path = self.tree.set(node_id, "path")
         if path:  # and path not in self._cached_child_data:
             self.render_children_from_cache(node_id)
@@ -383,14 +387,17 @@ class BaseFileBrowser(ttk.Frame):
                 self.tree.selection_set(child_id)
                 return
 
-            if self.tree.item(child_id, "open"):
+            if self._is_open_dir_node(child_id):
                 self.select_path_if_visible(path, child_id)
+
+    def _is_open_dir_node(self, node_id) -> bool:
+        # In Windows a node may get open=True simply by pressing ENTER on it
+        return self.tree.item(node_id, "open") and self.tree.set(node_id, "kind") != "file"
 
     def get_open_paths(self, node_id=ROOT_NODE_ID):
         if self.tree.set(node_id, "kind") == "file":
             return set()
-
-        elif node_id == ROOT_NODE_ID or self.tree.item(node_id, "open"):
+        elif node_id == ROOT_NODE_ID or self._is_open_dir_node(node_id):
             result = {self.tree.set(node_id, "path")}
             for child_id in self.tree.get_children(node_id):
                 result.update(self.get_open_paths(child_id))
@@ -411,6 +418,12 @@ class BaseFileBrowser(ttk.Frame):
         """This node is supposed to be a directory and
         its contents needs to be shown and/or refreshed"""
         path = self.tree.set(node_id, "path")
+        kind = self.tree.set(node_id, "kind")
+        if kind == "file":
+            logger.warning("File %r is treated as dir", path)
+            return
+
+        logger.debug("Rendering %r from cache", path)
 
         if path not in self._cached_child_data:
             self.request_dirs_child_data(node_id, self.get_open_paths() | {path})
@@ -474,7 +487,7 @@ class BaseFileBrowser(ttk.Frame):
 
             # recursively update open children
             for child_id in ids_sorted_by_name:
-                if self.tree.item(child_id, "open"):
+                if self._is_open_dir_node(child_id):
                     self.render_children_from_cache(child_id)
 
     def show_error(self, msg, node_id=""):
