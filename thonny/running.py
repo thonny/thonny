@@ -1089,11 +1089,13 @@ class SubprocessProxy(BackendProxy, ABC):
             try:
                 data = read_one_incoming_message_str(stdout.readline)
             except IOError:
+                # TODO: What's this ???
                 sleep(0.1)
                 continue
 
             # debug("... read some stdout data", repr(data))
             if data == "":
+                logger.info("Reader got EOF")
                 break
             else:
                 try:
