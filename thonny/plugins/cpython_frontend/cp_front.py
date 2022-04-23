@@ -431,7 +431,7 @@ def get_default_cpython_executable_for_backend() -> str:
         # Private venv. Make an exception and use base Python for default backend.
         default_path = get_base_executable()
     else:
-        default_path = get_front_interpreter_for_subprocess()
+        default_path = sys.executable.replace("pythonw.exe", "python.exe")
 
     # In macOS bundle the path may have ..-s
     default_path = os.path.normpath(default_path)
