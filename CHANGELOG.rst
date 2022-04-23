@@ -10,6 +10,7 @@ Version history
 * Add options for automatically making uploaded or saved shebang scripts executable (includes changing Windows line breaks to Unix ones). See "Editor" and SSH-backends' config pages.
 * Don't propose pythonw.exe as initial backend, #2236
 * Fix error when trying to open a file from file browser with ENTER, #1785
+* Fix support for remote Python 3 over SSH (regression introduced in one of the 4.0.0 betas), #2249
 
 4.0.0b2 (2022-04-09)
 ====================
