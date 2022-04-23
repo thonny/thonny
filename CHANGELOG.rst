@@ -14,6 +14,13 @@ Version history
 4.0.0b2 (2022-04-09)
 ====================
 
+Breaking changes
+----------------
+* Don't SetProcessDpiAwareness for user programs anymore. This means for-example, that Tkinter and Pygame programs on Windows run as if they were executed with plain Python (ie they may become blurry on modern displays). For clear picture, start your program with ``import ctypes; ctypes.OleDLL("shcore").SetProcessDpiAwareness(1)``, #2159
+
+Other changes
+-------------
+
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
 * Don't clear shell after automatic restart
 * Fixes certain problems with running Flask and multiprocessing programs, #2062
