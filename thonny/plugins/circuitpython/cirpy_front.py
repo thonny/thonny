@@ -74,6 +74,10 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def _is_potential_port(cls, p):
+        # micro:bit's v2's CircuitPython does not have CircuitPython's port attributes
+        if (p.vid, p.pid) == (0x0D28, 0x0204):
+            return True
+
         if "adafruit_board_toolkit" in sys.modules or sys.platform == "linux":
             # can trust p.interface value
             return "CircuitPython CDC " in (p.interface or "")
