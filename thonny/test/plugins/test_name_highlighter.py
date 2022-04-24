@@ -3,7 +3,7 @@ import tkinter
 import warnings
 from typing import Sequence, Set  # @UnusedImport
 
-from thonny.plugins.highlight_names import VariablesHighlighter
+from thonny.plugins.highlight_names import OccurrencesHighlighter
 
 TEST_STR1 = """def foo():
     foo()
@@ -103,7 +103,7 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
     text_widget = tkinter.Text()
     text_widget.insert("end", input_str)
 
-    nh = VariablesHighlighter(text_widget)
+    nh = OccurrencesHighlighter(text_widget)
     for i, group in enumerate(insert_pos_groups):
         for insert_pos in group:
             text_widget.mark_set("insert", insert_pos)
