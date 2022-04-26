@@ -2,12 +2,30 @@
 Version history
 ===============
 
+4.0.0b3 (2022-??-??)
+====================
+* Add LEGO EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
+* Add command "Run => Visualize current script at Python Tutor", #2242
+* Fix debugger error when importing user modules (regression introduced in 4.0.0b1), #2246
+* Add options for automatically making uploaded or saved shebang scripts executable (includes changing Windows line breaks to Unix ones). See "Editor" and SSH-backends' config pages.
+* Don't propose pythonw.exe as initial backend, #2236
+* Fix error when trying to open a file from file browser with ENTER, #1785
+* Fix support for remote Python 3 over SSH (regression introduced in one of the 4.0.0 betas), #2249
+* Support CircuitPython with micro:bit, #2251
+
 4.0.0b2 (2022-04-09)
 ====================
 
+Breaking changes
+----------------
+* Don't SetProcessDpiAwareness for user programs anymore. This means for-example, that Tkinter and Pygame programs on Windows run as if they were executed with plain Python (ie they may become blurry on modern displays). For clear picture, start your program with ``import ctypes; ctypes.OleDLL("shcore").SetProcessDpiAwareness(1)``, #2159
+
+Other changes
+-------------
+
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
 * Don't clear shell after automatic restart
-* Fixes certain problems with running Flask programs, #2062
+* Fixes certain problems with running Flask and multiprocessing programs, #2062
 * Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
 * Fix parameter completions where name of local variable was proposed with trailing '='
 * Fix error with printing (regression introduced in b1), #2233

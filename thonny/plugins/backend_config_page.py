@@ -164,18 +164,17 @@ class BackendConfigurationPage(ConfigurationPage):
 class BaseSshProxyConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
-    def __init__(self, master, conf_group):
+    def __init__(self, master):
         super().__init__(master)
         self._changed = False
-        self._conf_group = conf_group
 
         inner_pad = ems_to_pixels(0.6)
 
         self._host_var = self._add_text_field(
-            "Host", self._conf_group + ".host", 1, pady=(0, inner_pad), width=20
+            "Host", self.backend_name + ".host", 1, pady=(0, inner_pad), width=20
         )
         self._user_var = self._add_text_field(
-            "Username", self._conf_group + ".user", 3, pady=(0, inner_pad), width=20
+            "Username", self.backend_name + ".user", 3, pady=(0, inner_pad), width=20
         )
 
         from thonny.misc_utils import (
@@ -186,7 +185,7 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
 
         self._method_var = self._add_combobox_field(
             "Authentication method",
-            self._conf_group + ".auth_method",
+            self.backend_name + ".auth_method",
             5,
             [PASSWORD_METHOD, PUBLIC_KEY_NO_PASS_METHOD, PUBLIC_KEY_WITH_PASS_METHOD],
             pady=(0, inner_pad),
@@ -194,10 +193,17 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         )
         self._interpreter_var = self._add_text_field(
             "Interpreter",
-            self._conf_group + ".executable",
-            30,
+            self.backend_name + ".executable",
+            row=30,
             pady=(2 * inner_pad, inner_pad),
             width=30,
+        )
+
+        self.add_checkbox(
+            f"{self.backend_name}.make_uploaded_shebang_scripts_executable",
+            tr("Make uploaded shebang scripts executable"),
+            row=35,
+            pady=(ems_to_pixels(4), 0),
         )
 
     def _on_change(self):
@@ -205,17 +211,17 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
 
     def apply(self):
         if self._changed:
-            get_workbench().set_option(self._conf_group + ".host", self._host_var.get())
-            get_workbench().set_option(self._conf_group + ".user", self._user_var.get())
-            get_workbench().set_option(self._conf_group + ".auth_method", self._method_var.get())
+            get_workbench().set_option(self.backend_name + ".host", self._host_var.get())
+            get_workbench().set_option(self.backend_name + ".user", self._user_var.get())
+            get_workbench().set_option(self.backend_name + ".auth_method", self._method_var.get())
             get_workbench().set_option(
-                self._conf_group + ".executable", self._interpreter_var.get()
+                self.backend_name + ".executable", self._interpreter_var.get()
             )
 
             delete_stored_ssh_password()
 
             # reset cwd setting to default
-            get_workbench().set_option(self._conf_group + ".cwd", "")
+            get_workbench().set_option(self.backend_name + ".cwd", "")
 
     def should_restart(self):
         return self._changed

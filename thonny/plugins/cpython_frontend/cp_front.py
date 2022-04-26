@@ -165,7 +165,7 @@ class LocalCPythonProxy(SubprocessProxy):
     @classmethod
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
         exe = conf[f"{cls.backend_name}.executable"]
-        if is_private_python(exe) and exe == get_default_cpython_path_for_backend():
+        if is_private_python(exe) and exe == get_default_cpython_executable_for_backend():
             exe_label = tr("Thonny's Python")
         else:
             exe_label = exe
@@ -177,7 +177,7 @@ class LocalCPythonProxy(SubprocessProxy):
         confs = sorted(
             cls.get_last_configurations(), key=lambda conf: conf[f"{cls.backend_name}.executable"]
         )
-        default_exe = get_default_cpython_path_for_backend()
+        default_exe = get_default_cpython_executable_for_backend()
         default_conf = cls._get_switcher_conf_for_executable(default_exe)
         if default_conf not in confs:
             confs.insert(0, default_conf)
@@ -419,19 +419,19 @@ def _get_interpreters():
     sorted_result = sorted(result)
 
     # bundled python
-    default_path = get_default_cpython_path_for_backend()
+    default_path = get_default_cpython_executable_for_backend()
     if is_private_python(default_path):
         sorted_result.insert(0, default_path)
 
     return sorted_result
 
 
-def get_default_cpython_path_for_backend() -> str:
+def get_default_cpython_executable_for_backend() -> str:
     if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
         # Private venv. Make an exception and use base Python for default backend.
         default_path = get_base_executable()
     else:
-        default_path = get_front_interpreter_for_subprocess()
+        default_path = sys.executable.replace("pythonw.exe", "python.exe")
 
     # In macOS bundle the path may have ..-s
     default_path = os.path.normpath(default_path)

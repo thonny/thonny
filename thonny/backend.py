@@ -12,7 +12,7 @@ import traceback
 import warnings
 from abc import ABC, abstractmethod
 from logging import getLogger
-from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import thonny
 from thonny import report_time
@@ -67,28 +67,29 @@ class BaseBackend(ABC):
             while True:
                 self._check_for_connection_error()
                 try:
-                    try:
-                        msg = self._fetch_next_incoming_message(timeout=0.01)
-                    except queue.Empty:
-                        self._perform_idle_tasks()
+                    msg = self._fetch_next_incoming_message(timeout=0.01)
+                except queue.Empty:
+                    self._perform_idle_tasks()
+                else:
+                    if isinstance(msg, InputSubmission):
+                        self._handle_user_input(msg)
+                    elif isinstance(msg, EOFCommand):
+                        self._handle_eof_command(msg)
                     else:
-                        if isinstance(msg, InputSubmission):
-                            self._handle_user_input(msg)
-                        elif isinstance(msg, EOFCommand):
-                            self._handle_eof_command(msg)
-                        else:
-                            self._current_command = msg
-                            self._handle_normal_command(msg)
-                except KeyboardInterrupt:
-                    self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
-                    self.send_message(ToplevelResponse())
-                except Exception:
-                    # Error in Thonny's code
-                    logger.exception("mainloop error")
-                    self._report_internal_exception("mainloop error")
+                        self._current_command = msg
+                        self._handle_normal_command(msg)
+        except KeyboardInterrupt:
+            self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
+            # TODO: is it safe to call it normal exit? And cause automatic reconnect?
+            sys.exit(0)
         except ConnectionError as e:
             self.handle_connection_error(e)
+        except Exception:
+            # Error in Thonny's code
+            logger.exception("mainloop error")
+            self._report_internal_exception("mainloop error")
 
+        logger.info("After mainloop")
         sys.exit(17)
 
     def handle_connection_error(self, error=None):
@@ -534,10 +535,15 @@ class UploadDownloadMixin(ABC):
         return {"errors": errors}
 
     def _cmd_upload(self, cmd):
+        def upload_file_wrapper(source_path, target_path, callback):
+            self._upload_file(
+                source_path, target_path, callback, cmd["make_shebang_scripts_executable"]
+            )
+
         errors = self._transfer_files_and_dirs(
             cmd.items,
             self._ensure_remote_directory,
-            self._upload_file,
+            upload_file_wrapper,
             cmd,
             pathlib.PurePosixPath,
         )
@@ -561,7 +567,13 @@ class UploadDownloadMixin(ABC):
         with io.BytesIO() as fp:
             fp.write(cmd["content_bytes"])
             fp.seek(0)
-            self._write_file(fp, cmd["path"], len(cmd["content_bytes"]), callback)
+            self._write_file(
+                fp,
+                cmd["path"],
+                file_size=len(cmd["content_bytes"]),
+                callback=callback,
+                make_shebang_scripts_executable=cmd["make_shebang_scripts_executable"],
+            )
 
         return InlineResponse(
             command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
@@ -628,13 +640,16 @@ class UploadDownloadMixin(ABC):
         with open(target_path, "bw") as target_fp:
             self._read_file(source_path, target_fp, callback)
 
-    def _upload_file(self, source_path, target_path, callback):
+    def _upload_file(
+        self, source_path, target_path, callback, make_shebang_scripts_executable: bool
+    ):
         with open(source_path, "br") as source_fp:
             self._write_file(
                 source_fp,
                 target_path,
                 os.path.getsize(source_path),
                 callback,
+                make_shebang_scripts_executable,
             )
 
     def _get_dir_transfer_cost(self):
@@ -670,6 +685,7 @@ class UploadDownloadMixin(ABC):
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
+        make_shebang_scripts_executable: bool,
     ) -> None:
         raise NotImplementedError()
 
@@ -833,10 +849,25 @@ class SshMixin(UploadDownloadMixin):
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
+        make_shebang_scripts_executable: bool,
     ) -> None:
+        logger.info("Writing bytes to %r", target_path)
+        if make_shebang_scripts_executable:
+            source_fp, has_shebang = convert_newlines_if_has_shebang(source_fp)
+        else:
+            has_shebang = None
+
         self._perform_sftp_operation_with_retry(
             lambda sftp: sftp.putfo(source_fp, target_path, callback)
         )
+
+        logger.debug(
+            "make_shebang_scripts_executable: %r, has_shebang: %r",
+            make_shebang_scripts_executable,
+            has_shebang,
+        )
+        if make_shebang_scripts_executable and has_shebang:
+            self._perform_sftp_operation_with_retry(lambda sftp: sftp.chmod(target_path, 0o755))
 
     def _perform_sftp_operation_with_retry(self, operation) -> Any:
         try:
@@ -933,6 +964,19 @@ def delete_stored_ssh_password():
     if os.path.exists(get_ssh_password_file_path()):
         # invalidate stored password
         os.remove(get_ssh_password_file_path())
+
+
+def convert_newlines_if_has_shebang(fp: BinaryIO) -> Tuple[BinaryIO, bool]:
+    if fp.read(3) == b"#!/":
+        fp.seek(0)
+        new_fp = io.BytesIO()
+        new_fp.write(fp.read().replace(b"\r\n", b"\n"))
+        fp.close()
+        new_fp.seek(0)
+        return new_fp, True
+    else:
+        fp.seek(0)
+        return fp, False
 
 
 if __name__ == "__main__":

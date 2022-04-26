@@ -55,3 +55,4 @@ def load_plugin():
     get_workbench().set_default("SshMicroPython.host", "")
     get_workbench().set_default("SshMicroPython.user", "")
     get_workbench().set_default("SshMicroPython.auth_method", "password")
+    get_workbench().set_default("SshMicroPython.make_uploaded_shebang_scripts_executable", True)
