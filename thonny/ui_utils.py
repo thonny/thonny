@@ -970,15 +970,39 @@ class AutoScrollbar(SafeScrollbar):
     # works if you use the grid geometry manager.
 
     def __init__(self, master=None, **kw):
+        self.hide_count = 0
+        self.gridded = False
         super().__init__(master=master, **kw)
 
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
-            self.grid_remove()
+            # Need to accept 1 automatic hide, otherwise even narrow files
+            # get horizontal scrollbar
+            if self.gridded and self.hide_count < 2:
+                self.grid_remove()
         elif float(first) > 0.001 or float(last) < 0.999:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
-            self.grid()
+            if not self.gridded:
+                self.grid()
         ttk.Scrollbar.set(self, first, last)
+
+    def grid(self, *args, **kwargs):
+        super().grid(*args, **kwargs)
+        self.gridded = True
+
+    def grid_configure(self, *args, **kwargs):
+        super().grid_configure(*args, **kwargs)
+        self.gridded = True
+
+    def grid_remove(self):
+        super().grid_remove()
+        self.gridded = False
+        self.hide_count += 1
+
+    def grid_forget(self):
+        super().grid_forget()
+        self.gridded = False
+        self.hide_count += 1
 
     def pack(self, **kw):
         raise tk.TclError("cannot use pack with this widget")
