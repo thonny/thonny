@@ -1071,11 +1071,15 @@ class EnhancedTextFrame(TextFrame):
                 delta = 0
 
             if margin_line_visible_col > -1:
-                x = (
-                    get_text_font(self.text).measure((margin_line_visible_col - 1) * "M")
-                    + delta
-                    + self.text["padx"]
-                )
+                try:
+                    x = (
+                        get_text_font(self.text).measure((margin_line_visible_col - 1) * "M")
+                        + delta
+                        + self.text["padx"]
+                    )
+                except TclError:
+                    logger.exception("Could not measure text")
+                    x = -10
             else:
                 x = -10
 
