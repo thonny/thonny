@@ -82,7 +82,7 @@ class EditorConfigurationPage(ConfigurationPage):
             exportselection=False,
             textvariable=self._line_length_var,
             state="readonly",
-            values=[0, 60, 70, 80, 90, 100, 110, 120],
+            values=[0, 60, 70, 80, 88, 90, 100, 110, 120],
         )
         self._line_length_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
