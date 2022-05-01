@@ -1614,26 +1614,37 @@ def _place_window(w, parent=None, width=None, height=None):
     maxwidth = w.winfo_vrootwidth()
     maxheight = w.winfo_vrootheight()
     if parent is not None and parent.winfo_ismapped():
+        logger.info(
+            f"Parent y: {parent.winfo_y()}, rooty: {parent.winfo_rooty()}, vrooty: {parent.winfo_vrooty()}"
+        )
         x = parent.winfo_rootx() + (parent.winfo_width() - minwidth) // 2
-        y = parent.winfo_rooty() + (parent.winfo_height() - minheight) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - minheight) // 2
         vrootx = w.winfo_vrootx()
         vrooty = w.winfo_vrooty()
         x = min(x, vrootx + maxwidth - minwidth)
         x = max(x, vrootx)
         y = min(y, vrooty + maxheight - minheight)
-        y = max(y, vrooty)
+        # don't allow the dialog go higher than parent. This way the title bar remains visible.
+        y = max(y, vrooty, parent.winfo_y())
         if w._windowingsystem == "aqua":
             # Avoid the native menu bar which sits on top of everything.
             y = max(y, ems_to_pixels(2))
+
+        if y + minheight > maxheight:
+            logger.debug("Aligning top with parent (%s vs %s)", y + minheight, maxheight)
+            y = parent.winfo_y()
     else:
         x = (w.winfo_screenwidth() - minwidth) // 2
         y = (w.winfo_screenheight() - minheight) // 2
 
     w.wm_maxsize(maxwidth, maxheight)
     if width and height:
-        w.wm_geometry("%dx%d+%d+%d" % (width, height, x, y))
+        geometry = "%dx%d+%d+%d" % (width, height, x, y)
     else:
-        w.wm_geometry("+%d+%d" % (x, y))
+        geometry = "+%d+%d" % (x, y)
+
+    logger.info(f"Placing {w} with geometry {geometry}")
+    w.wm_geometry(geometry)
     w.wm_deiconify()  # Become visible at the desired location
 
 
