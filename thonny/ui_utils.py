@@ -1604,13 +1604,13 @@ def remove_line_numbers(s):
 
 # Place a toplevel window at the center of parent or screen
 # It is a Python implementation of ::tk::PlaceWindow.
-# Copied from tkinter.simpledialog of Python 3.10.2
-def _place_window(w, parent=None):
+# Copied and adapted from tkinter.simpledialog of Python 3.10.2
+def _place_window(w, parent=None, width=None, height=None):
     w.wm_withdraw()  # Remain invisible while we figure out the geometry
     w.update_idletasks()  # Actualize geometry information
 
-    minwidth = w.winfo_reqwidth()
-    minheight = w.winfo_reqheight()
+    minwidth = width or w.winfo_reqwidth()
+    minheight = height or w.winfo_reqheight()
     maxwidth = w.winfo_vrootwidth()
     maxheight = w.winfo_vrootheight()
     if parent is not None and parent.winfo_ismapped():
@@ -1624,13 +1624,16 @@ def _place_window(w, parent=None):
         y = max(y, vrooty)
         if w._windowingsystem == "aqua":
             # Avoid the native menu bar which sits on top of everything.
-            y = max(y, 22)
+            y = max(y, ems_to_pixels(2))
     else:
         x = (w.winfo_screenwidth() - minwidth) // 2
         y = (w.winfo_screenheight() - minheight) // 2
 
     w.wm_maxsize(maxwidth, maxheight)
-    w.wm_geometry("+%d+%d" % (x, y))
+    if width and height:
+        w.wm_geometry("%dx%d+%d+%d" % (width, height, x, y))
+    else:
+        w.wm_geometry("+%d+%d" % (x, y))
     w.wm_deiconify()  # Become visible at the desired location
 
 
@@ -2135,7 +2138,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, geometry=None):
+def show_dialog(dlg, master=None, width=None, height=None):
     if getattr(dlg, "closed", False):
         return
 
@@ -2150,20 +2153,12 @@ def show_dialog(dlg, master=None, geometry=None):
     if master.winfo_toplevel().winfo_viewable():
         dlg.transient(master.winfo_toplevel())
 
-    if isinstance(geometry, str):
-        dlg.geometry(geometry)
-        dlg.wm_deiconify()
-    else:
-        saved_size = get_workbench().get_option(get_size_option_name(dlg))
-        if saved_size:
-            width = min(max(saved_size[0], ems_to_pixels(10)), ems_to_pixels(1000))
-            height = min(max(saved_size[0], ems_to_pixels(8)), ems_to_pixels(800))
-            left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
-            top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
-            dlg.geometry("%dx%d+%d+%d" % (width, height, left, top))
-            dlg.wm_deiconify()
-        else:
-            _place_window(dlg, master)
+    saved_size = get_workbench().get_option(get_size_option_name(dlg))
+    if saved_size:
+        width = min(max(saved_size[0], ems_to_pixels(10)), ems_to_pixels(500))
+        height = min(max(saved_size[1], ems_to_pixels(8)), ems_to_pixels(300))
+
+    _place_window(dlg, master, width=width, height=height)
 
     dlg.lift()
     dlg.wait_visibility()

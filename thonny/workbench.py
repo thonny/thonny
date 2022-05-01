@@ -2147,7 +2147,7 @@ class Workbench(tk.Tk):
         if page_key:
             dlg.select_page(page_key)
 
-        ui_utils.show_dialog(dlg)
+        ui_utils.show_dialog(dlg, width=ems_to_pixels(60), height=ems_to_pixels(50))
 
         if dlg.backend_restart_required:
             get_runner().restart_backend(False)
