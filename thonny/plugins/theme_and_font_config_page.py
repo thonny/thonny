@@ -134,7 +134,13 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             row=20, column=1, sticky="w", pady=(5, 2), columnspan=5
         )
         self._preview_codeview = CodeView(
-            self, height=6, font="EditorFont", relief="groove", borderwidth=1, line_numbers=True
+            self,
+            height=6,
+            width=30,
+            font="EditorFont",
+            relief="groove",
+            borderwidth=1,
+            line_numbers=True,
         )
 
         self._preview_codeview.set_content(
@@ -161,6 +167,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             self,
             text_class=BaseShellText,
             height=4,
+            width=30,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,

@@ -47,6 +47,7 @@ class AssistantConfigPage(ConfigurationPage):
             padx=5,
             pady=5,
             height=4,
+            width=30,
             borderwidth=1,
             relief="groove",
         )
