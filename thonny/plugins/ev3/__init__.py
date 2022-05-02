@@ -27,14 +27,17 @@ Plus any modules on the filesystem
 
 
 """
+from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.languages import tr
+from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import (
     SshMicroPythonConfigPage,
     SshMicroPythonProxy,
     add_micropython_backend,
 )
+from thonny.ui_utils import create_url_label, ems_to_pixels
 
 
 class EV3MicroPythonProxy(SshMicroPythonProxy):
@@ -62,7 +65,15 @@ class EV3MicroPythonProxy(SshMicroPythonProxy):
 
 
 class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
-    pass
+    def __init__(self, master):
+        super().__init__(master)
+        inner_pad = ems_to_pixels(0.6)
+
+        preps_label = ttk.Label(self, text=tr("Preparations (skip the VS Code part)"))
+        preps_label.grid(row=0, column=0, pady=(0, inner_pad), sticky="w")
+
+        pybricks_url = create_url_label(self, "https://pybricks.com/ev3-micropython/")
+        pybricks_url.grid(row=0, column=1, pady=(0, inner_pad), padx=ems_to_pixels(1), sticky="w")
 
 
 def load_plugin():
@@ -77,6 +88,8 @@ def load_plugin():
     get_workbench().set_default("EV3MicroPython.executable", "pybricks-micropython")
     get_workbench().set_default("EV3MicroPython.make_uploaded_shebang_scripts_executable", True)
     get_workbench().set_default("EV3MicroPython.cwd", None)
-    get_workbench().set_default("EV3MicroPython.host", "")
+    get_workbench().set_default(
+        "EV3MicroPython.host", "ev3dev" if running_on_windows() else "ev3dev.local"
+    )
     get_workbench().set_default("EV3MicroPython.user", "robot")
     get_workbench().set_default("EV3MicroPython.auth_method", "password")
