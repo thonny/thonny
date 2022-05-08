@@ -5,7 +5,7 @@ from typing import Optional
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog, ems_to_pixels
+from thonny.ui_utils import CommonDialog
 
 logger = getLogger(__name__)
 
@@ -15,9 +15,6 @@ class ConfigurationDialog(CommonDialog):
 
     def __init__(self, master, page_records_with_order):
         super().__init__(master)
-        width = ems_to_pixels(60)
-        height = ems_to_pixels(50)
-        self.geometry("%dx%d" % (width, height))
         self.title(tr("Thonny options"))
 
         self.columnconfigure(0, weight=1)

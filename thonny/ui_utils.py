@@ -970,15 +970,39 @@ class AutoScrollbar(SafeScrollbar):
     # works if you use the grid geometry manager.
 
     def __init__(self, master=None, **kw):
+        self.hide_count = 0
+        self.gridded = False
         super().__init__(master=master, **kw)
 
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
-            self.grid_remove()
+            # Need to accept 1 automatic hide, otherwise even narrow files
+            # get horizontal scrollbar
+            if self.gridded and self.hide_count < 2:
+                self.grid_remove()
         elif float(first) > 0.001 or float(last) < 0.999:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
-            self.grid()
+            if not self.gridded:
+                self.grid()
         ttk.Scrollbar.set(self, first, last)
+
+    def grid(self, *args, **kwargs):
+        super().grid(*args, **kwargs)
+        self.gridded = True
+
+    def grid_configure(self, *args, **kwargs):
+        super().grid_configure(*args, **kwargs)
+        self.gridded = True
+
+    def grid_remove(self):
+        super().grid_remove()
+        self.gridded = False
+        self.hide_count += 1
+
+    def grid_forget(self):
+        super().grid_forget()
+        self.gridded = False
+        self.hide_count += 1
 
     def pack(self, **kw):
         raise tk.TclError("cannot use pack with this widget")
@@ -1580,33 +1604,47 @@ def remove_line_numbers(s):
 
 # Place a toplevel window at the center of parent or screen
 # It is a Python implementation of ::tk::PlaceWindow.
-# Copied from tkinter.simpledialog of Python 3.10.2
-def _place_window(w, parent=None):
+# Copied and adapted from tkinter.simpledialog of Python 3.10.2
+def _place_window(w, parent=None, width=None, height=None):
     w.wm_withdraw()  # Remain invisible while we figure out the geometry
     w.update_idletasks()  # Actualize geometry information
 
-    minwidth = w.winfo_reqwidth()
-    minheight = w.winfo_reqheight()
+    minwidth = width or w.winfo_reqwidth()
+    minheight = height or w.winfo_reqheight()
     maxwidth = w.winfo_vrootwidth()
     maxheight = w.winfo_vrootheight()
     if parent is not None and parent.winfo_ismapped():
+        logger.info(
+            f"Parent y: {parent.winfo_y()}, rooty: {parent.winfo_rooty()}, vrooty: {parent.winfo_vrooty()}"
+        )
         x = parent.winfo_rootx() + (parent.winfo_width() - minwidth) // 2
-        y = parent.winfo_rooty() + (parent.winfo_height() - minheight) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - minheight) // 2
         vrootx = w.winfo_vrootx()
         vrooty = w.winfo_vrooty()
         x = min(x, vrootx + maxwidth - minwidth)
         x = max(x, vrootx)
         y = min(y, vrooty + maxheight - minheight)
-        y = max(y, vrooty)
+        # don't allow the dialog go higher than parent. This way the title bar remains visible.
+        y = max(y, vrooty, parent.winfo_y())
         if w._windowingsystem == "aqua":
             # Avoid the native menu bar which sits on top of everything.
-            y = max(y, 22)
+            y = max(y, ems_to_pixels(2))
+
+        if y + minheight > maxheight:
+            logger.debug("Aligning top with parent (%s vs %s)", y + minheight, maxheight)
+            y = parent.winfo_y()
     else:
         x = (w.winfo_screenwidth() - minwidth) // 2
         y = (w.winfo_screenheight() - minheight) // 2
 
     w.wm_maxsize(maxwidth, maxheight)
-    w.wm_geometry("+%d+%d" % (x, y))
+    if width and height:
+        geometry = "%dx%d+%d+%d" % (width, height, x, y)
+    else:
+        geometry = "+%d+%d" % (x, y)
+
+    logger.info(f"Placing {w} with geometry {geometry}")
+    w.wm_geometry(geometry)
     w.wm_deiconify()  # Become visible at the desired location
 
 
@@ -2111,7 +2149,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, geometry=None):
+def show_dialog(dlg, master=None, width=None, height=None):
     if getattr(dlg, "closed", False):
         return
 
@@ -2126,20 +2164,12 @@ def show_dialog(dlg, master=None, geometry=None):
     if master.winfo_toplevel().winfo_viewable():
         dlg.transient(master.winfo_toplevel())
 
-    if isinstance(geometry, str):
-        dlg.geometry(geometry)
-        dlg.wm_deiconify()
-    else:
-        saved_size = get_workbench().get_option(get_size_option_name(dlg))
-        if saved_size:
-            width = min(max(saved_size[0], ems_to_pixels(10)), ems_to_pixels(1000))
-            height = min(max(saved_size[0], ems_to_pixels(8)), ems_to_pixels(800))
-            left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
-            top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
-            dlg.geometry("%dx%d+%d+%d" % (width, height, left, top))
-            dlg.wm_deiconify()
-        else:
-            _place_window(dlg, master)
+    saved_size = get_workbench().get_option(get_size_option_name(dlg))
+    if saved_size:
+        width = min(max(saved_size[0], ems_to_pixels(10)), ems_to_pixels(500))
+        height = min(max(saved_size[1], ems_to_pixels(8)), ems_to_pixels(300))
+
+    _place_window(dlg, master, width=width, height=height)
 
     dlg.lift()
     dlg.wait_visibility()

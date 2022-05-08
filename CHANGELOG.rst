@@ -12,6 +12,7 @@ Version history
 * Fix error when trying to open a file from file browser with ENTER, #1785
 * Fix support for remote Python 3 over SSH (regression introduced in one of the 4.0.0 betas), #2249
 * Support CircuitPython with micro:bit, #2251
+* Avoid wobbling of AutomaticScrollbar, helpful report by @TooLazy0x00, #2258
 
 4.0.0b2 (2022-04-09)
 ====================
