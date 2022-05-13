@@ -1,8 +1,10 @@
 import os
 from abc import ABC
 
-from thonny import get_runner
+import thonny
+from thonny import get_runner, is_private_python
 from thonny.common import normpath_with_actual_case
+from thonny.languages import tr
 from thonny.plugins.cpython_frontend.cp_front import LocalCPythonProxy
 from thonny.plugins.pip_gui import BackendPipDialog
 
@@ -31,7 +33,34 @@ class CPythonPipDialog(BackendPipDialog, ABC):
             return normpath_with_actual_case(sp)
 
     def _use_user_install(self):
-        return not self._targets_virtual_environment()
+        return not (
+            self._targets_virtual_environment()
+            or thonny.is_portable()
+            and is_private_python(self._backend_proxy.get_target_executable())
+        )
+
+    def _show_instructions_about_target(self):
+        self._append_info_text(tr("Target") + "\n", ("caption",))
+        if self._use_user_install():
+            self.info_text.direct_insert(
+                "end",
+                tr(
+                    "This dialog lists all available packages,"
+                    + " but allows upgrading and uninstalling only packages from"
+                )
+                + " ",
+            )
+            self._append_info_text(self._get_target_directory(), ("url"))
+            self.info_text.direct_insert(
+                "end",
+                ". "
+                + tr(
+                    "New packages will be also installed into this directory."
+                    + " Other locations must be managed by alternative means."
+                ),
+            )
+        else:
+            self._append_info_text(self._get_target_directory(), ("url"))
 
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
