@@ -14,6 +14,7 @@ Version history
 * Fix support for remote Python 3 over SSH (regression introduced in one of the 4.0.0 betas), #2249
 * Support CircuitPython with micro:bit, #2251
 * Avoid wobbling of AutomaticScrollbar, helpful report by @TooLazy0x00, #2258
+* Fix problem uninstalling MicroPython packages
 * Updated Estonian, Thai and Brazilian Portuguese translations
 
 4.0.0b2 (2022-04-09)

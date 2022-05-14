@@ -911,7 +911,6 @@ class MicroPythonBackend(MainBackend, ABC):
         return {"distributions": new_state}
 
     def _cmd_uninstall_distributions(self, cmd):
-        assert not any([arg.startswith("-") for arg in cmd.args])
         try:
             new_state = self._perform_pipkin_operation_and_list(
                 command="uninstall", packages=cmd.args, yes=True
