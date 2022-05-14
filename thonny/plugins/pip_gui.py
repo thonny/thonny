@@ -407,7 +407,27 @@ class PipDialog(CommonDialog, ABC):
         )
 
     def _show_instructions_about_target(self):
-        raise NotImplementedError()
+        self._append_info_text(tr("Target") + "\n", ("caption",))
+        if self._use_user_install():
+            self.info_text.direct_insert(
+                "end",
+                tr(
+                    "This dialog lists all available packages,"
+                    + " but allows upgrading and uninstalling only packages from"
+                )
+                + " ",
+            )
+            self._append_info_text(self._get_target_directory(), ("url"))
+            self.info_text.direct_insert(
+                "end",
+                ". "
+                + tr(
+                    "New packages will be also installed into this directory."
+                    + " Other locations must be managed by alternative means."
+                ),
+            )
+        else:
+            self._append_info_text(self._get_target_directory(), ("url"))
 
     def _get_package_metadata_url(self, name: str, version_str: Optional[str]) -> str:
         # Fetch info from PyPI
@@ -1097,10 +1117,6 @@ class PluginsPipDialog(PipDialog):
 
     def _get_title(self):
         return tr("Thonny plug-ins")
-
-    def _show_instructions_about_target(self):
-        self._append_info_text(tr("Target") + "\n", ("caption",))
-        self._append_info_text(self._get_target_directory(), ("url"))
 
     def _run_pip_with_dialog(self, command: str, args: Dict, title: str) -> Tuple[int, str, str]:
         cmd = ["-m", "pip", "--disable-pip-version-check", "--no-color", command]

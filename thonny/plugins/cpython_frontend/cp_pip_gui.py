@@ -39,29 +39,6 @@ class CPythonPipDialog(BackendPipDialog, ABC):
             and is_private_python(self._backend_proxy.get_target_executable())
         )
 
-    def _show_instructions_about_target(self):
-        self._append_info_text(tr("Target") + "\n", ("caption",))
-        if self._use_user_install():
-            self.info_text.direct_insert(
-                "end",
-                tr(
-                    "This dialog lists all available packages,"
-                    + " but allows upgrading and uninstalling only packages from"
-                )
-                + " ",
-            )
-            self._append_info_text(self._get_target_directory(), ("url"))
-            self.info_text.direct_insert(
-                "end",
-                ". "
-                + tr(
-                    "New packages will be also installed into this directory."
-                    + " Other locations must be managed by alternative means."
-                ),
-            )
-        else:
-            self._append_info_text(self._get_target_directory(), ("url"))
-
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
 
