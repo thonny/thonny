@@ -20,7 +20,7 @@ Version history
 * Allow back-end plugins to modify sys.path, #2281
 * Use %run instead of %Run when skipping interpreter restart, #1565
 * Updated Estonian, Thai and Brazilian Portuguese translations
-* EXPERIMENTAL: Add LEGO EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
+* EXPERIMENTAL: Add LEGO® EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
 
 4.0.0b2 (2022-04-09)
 ====================
