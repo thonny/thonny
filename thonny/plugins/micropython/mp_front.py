@@ -165,9 +165,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "interrupt_on_connect": get_workbench().get_option(
                 self.backend_name + ".interrupt_on_connect"
             ),
-            "restart_interpreter_before_run": get_workbench().get_option(
-                self.backend_name + ".restart_interpreter_before_run"
-            ),
             "write_block_size": self._get_write_block_size(),
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
@@ -184,6 +181,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         ]
 
         return cmd
+
+    def should_restart_interpreter_before_run(self):
+        return get_workbench().get_option(self.backend_name + ".restart_interpreter_before_run")
 
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.micropython.bare_metal_backend

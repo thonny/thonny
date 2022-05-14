@@ -342,7 +342,12 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
-        assert command_name[0].isupper()
+
+        assert (
+            command_name[0].isupper()
+            or command_name == "run"
+            and not self._proxy.should_restart_interpreter_before_run()
+        )
 
         if not self.is_waiting_toplevel_command():
             self._proxy.interrupt()
@@ -428,7 +433,10 @@ class Runner:
         if get_workbench().in_simple_mode():
             get_workbench().hide_view("VariablesView")
         report_time("Before Run")
-        self.execute_current("Run")
+        if self._proxy and self._proxy.should_restart_interpreter_before_run():
+            self.execute_current("Run")
+        else:
+            self.execute_current("run")
         report_time("After Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
@@ -809,6 +817,9 @@ class BackendProxy(ABC):
 
     def uses_local_filesystem(self):
         """Whether it runs code from local files"""
+        return True
+
+    def should_restart_interpreter_before_run(self) -> bool:
         return True
 
     def supports_remote_directories(self):

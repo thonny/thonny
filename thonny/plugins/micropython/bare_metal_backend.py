@@ -1003,8 +1003,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 self.send_message(ToplevelResponse())
 
     def _cmd_Run(self, cmd):
+        return self._cmd_Run_or_run(cmd, True)
+
+    def _cmd_run(self, cmd):
+        return self._cmd_Run_or_run(cmd, False)
+
+    def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
-        restart_interpreter_before_run = self._args["restart_interpreter_before_run"]
         if cmd.get("source"):
             if restart_interpreter_before_run:
                 self._clear_repl()
