@@ -41,8 +41,8 @@ $TARGET_DIR/bin/python3.10 -s -m pip install distro
 $TARGET_DIR/bin/python3.10 -s -m pip install certifi
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
-#$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0.dev0-py3-none-any.whl
+#$TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
+$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0b3.dev0-py3-none-any.whl
 
 VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
