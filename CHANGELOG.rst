@@ -2,16 +2,10 @@
 Version history
 ===============
 
-4.0.0b3 (2022-??-??)
+4.0.0b3 (2022-05-15)
 ====================
 
-Breaking changes
-----------------
-* Don't SetProcessDpiAwareness for user programs anymore. This means for-example, that Tkinter and Pygame programs on Windows run as if they were executed with plain Python (ie they may become blurry on modern displays). For clear picture, start your program with ``import ctypes; ctypes.OleDLL("shcore").SetProcessDpiAwareness(1)``, #2159
-
-Other changes
--------------
-* EXPERIMENTAL: Add LEGO EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
+* BREAKING: Don't SetProcessDpiAwareness for user programs anymore. This means for example, that Tkinter and Pygame programs on Windows run as if they were executed with plain Python (ie they may become blurry on modern displays). For clear picture, start your program with ``import ctypes; ctypes.OleDLL("shcore").SetProcessDpiAwareness(1)``, #2159
 * Add "Assistant" help page explaining the possibility to omit selected Pylint checks, #1978
 * Add command "Run => Visualize current script at Python Tutor", #2242
 * Fix debugger error when importing user modules (regression introduced in 4.0.0b1), #2246
@@ -26,6 +20,7 @@ Other changes
 * Allow back-end plugins to modify sys.path, #2281
 * Use %run instead of %Run when skipping interpreter restart, #1565
 * Updated Estonian, Thai and Brazilian Portuguese translations
+* EXPERIMENTAL: Add LEGO EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
 
 4.0.0b2 (2022-04-09)
 ====================

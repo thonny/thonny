@@ -78,3 +78,12 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 @echo ............... CREATING INSTALLER ..........................
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-py38 /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
+
+@echo ............... CREATING ZIP ..........................
+SET PATH=%PATH%;C:\Program Files\7-Zip
+copy ..\portable_thonny.ini %BUILDDIR%
+cd %BUILDDIR%
+7z a -tzip ..\dist\thonny-py38-%VERSION%-windows-portable.zip *
+del portable_thonny.ini
+cd ..
+
