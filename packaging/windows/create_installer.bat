@@ -19,7 +19,7 @@ copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
-@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0.dev0-py3-none-any.whl
+@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b3.dev0-py3-none-any.whl
 
 @echo ............... CLEANING PYTHON ............................
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
@@ -76,11 +76,13 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
-@rem @echo ............... CREATING ZIP ..........................
-@rem SET PATH=%PATH%;C:\Program Files\7-Zip
-@rem cd %BUILDDIR%
-@rem 7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
-@rem cd ..
+@echo ............... CREATING ZIP ..........................
+SET PATH=%PATH%;C:\Program Files\7-Zip
+copy ..\portable_thonny.ini %BUILDDIR%
+cd %BUILDDIR%
+7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
+del portable_thonny.ini
+cd ..
 
 @rem @echo ............... XXL ..........................
 @rem %BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt

@@ -230,7 +230,8 @@ msgstr "แสดงหมายเลขบรรทัด"
 #: thonny/plugins/editor_config_page.py:76
 msgid "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
-msgstr ""
+msgstr "ความยาวสายสูงสุดที่แนะนำ\n"
+"(ตั้งค่าเป็น 0 เพื่อปิดเส้นระยะขอบ)"
 
 #: thonny/plugins/editor_config_page.py:97
 msgid "Editor"
@@ -262,7 +263,7 @@ msgstr "แทนที่ด้วย:"
 
 #: thonny/plugins/find_replace.py:92
 msgid "Case sensitive"
-msgstr ""
+msgstr "Case sensitive"
 
 #: thonny/plugins/find_replace.py:99
 msgid "Up"
@@ -315,11 +316,12 @@ msgstr "โหมดปรับขนาดอักษร"
 #: thonny/plugins/heap.py:37
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
-msgstr ""
+msgstr "โหมดฮีปเปิดอยู่\n"
+"ปิดมุมมองฮีปเพื่อปิด"
 
 #: thonny/plugins/heap.py:86
 msgid "Heap"
-msgstr ""
+msgstr "ฮีป"
 
 #: thonny/plugins/general_config_page.py:53
 msgid "Language"
@@ -735,19 +737,19 @@ msgstr "ก้าวเข้าสู่"
 
 #: thonny/plugins/debugger.py:1365
 msgid "Into"
-msgstr ""
+msgstr "เข้าไป"
 
 #: thonny/plugins/debugger.py:1376
 msgid "Step out"
-msgstr ""
+msgstr "ออกมา"
 
 #: thonny/plugins/debugger.py:1378
 msgid "Out"
-msgstr ""
+msgstr "ออก"
 
 #: thonny/plugins/debugger.py:1413
 msgid "Step back"
-msgstr ""
+msgstr "ถอยหลัง"
 
 #: thonny/plugins/debugger.py:1415
 msgid "Back"
@@ -755,7 +757,7 @@ msgstr "ย้อนกลับ"
 
 #: thonny/plugins/debugger.py:1421
 msgid "Stack"
-msgstr ""
+msgstr "ซ้อนกัน"
 
 #: thonny/plugins/debugger.py:1422
 msgid "Exception"
@@ -1030,7 +1032,7 @@ msgstr "หมายเหตุ! ค่าขนาดใหญ่อาจท�
 
 #: thonny/plugins/shell_config_page.py:58
 msgid "Maximum length of line fragments before squeezing"
-msgstr ""
+msgstr "ความยาวสูงสุดของเศษเส้นก่อนบีบ"
 
 #: thonny/plugins/terminal_config_page.py:12
 msgid "Running current script in terminal"
@@ -1790,7 +1792,7 @@ msgstr "ไม่สามารถหาคำนิยามได้"
 
 #: thonny/plugins/shell_config_page.py:17
 msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
-msgstr ""
+msgstr "ล้างเชลล์ก่อนเริ่มกระบวนการใหม่ (เรียกใช้, ดีบัก, หยุด/รีสตาร์ท, ...)"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:169
 msgid "Thonny's Python"
@@ -1852,7 +1854,7 @@ msgstr "ดูเหมือนว่า '%s' ถูกปรับเปลี
 
 #: thonny/plugins/cpython_frontend/cp_front.py:228
 msgid "NB! Thonny only supports Python %s and later"
-msgstr "หมายเหตุ Thonny รองรับ Python %S เท่านั้นและใหม่กว่า"
+msgstr "หมายเหตุ Thonny รองรับ Python %s เท่านั้นและใหม่กว่า"
 
 #: thonny/editors.py:973
 msgid "Go to line"
@@ -1864,14 +1866,15 @@ msgstr "การสนับสนุน"
 
 #: thonny/editors.py:386 thonny/editors.py:401
 msgid "Could not save"
-msgstr ""
+msgstr "ไม่สามารถบันทึกได้"
 
 #: thonny/plugins/general_config_page.py:129
 msgid "Warning"
-msgstr ""
+msgstr "คำเตือน"
 
 #: thonny/plugins/general_config_page.py:130
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
-msgstr ""
+msgstr "หากคุณอ้างอิงค่าของตัวแปรสภาพแวดล้อม เครื่องหมายคำพูดจะเป็นส่วนหนึ่งของค่านั้น\n"
+"คุณตั้งใจสิ่งนี้หรือไม่?"
 

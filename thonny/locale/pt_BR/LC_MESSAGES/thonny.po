@@ -1866,14 +1866,15 @@ msgstr "Apoie"
 
 #: thonny/editors.py:386 thonny/editors.py:401
 msgid "Could not save"
-msgstr ""
+msgstr "Não foi possível salvar"
 
 #: thonny/plugins/general_config_page.py:129
 msgid "Warning"
-msgstr ""
+msgstr "Advertência"
 
 #: thonny/plugins/general_config_page.py:130
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
-msgstr ""
+msgstr "Se você usar aspas no valor de uma variável de ambiente, as aspas se tornarão parte do valor.\n"
+"É isto que você deseja fazer?"
 

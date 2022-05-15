@@ -737,12 +737,14 @@ def execute_with_frontend_sys_path(function: Callable) -> Any:
         logger.debug("Could not get THONNY_FRONTEND_SYS_PATH", exc_info=e)
         frontend_sys_path = []
 
-    old_sys_path = sys.path
-    sys.path = sys.path + frontend_sys_path
+    extra_items = [item for item in frontend_sys_path if item not in sys.path]
+    sys.path = sys.path + extra_items
     try:
         return function()
     finally:
-        sys.path = old_sys_path
+        for item in extra_items:
+            if item in sys.path:
+                sys.path.remove(item)
 
 
 def try_load_modules_with_frontend_sys_path(module_names):
