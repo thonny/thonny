@@ -802,8 +802,9 @@ class Workbench(tk.Tk):
             menu_conf = get_style_configuration("Menu")
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
-        # Set up the button
-        self._backend_button = ttk.Button(self._statusbar, text="☰", style="Toolbutton")
+        # Set up the button.
+        # Using ≡ ("Identical to"), because ☰ ("Trigram for heaven") looks too heavy in Windows
+        self._backend_button = ttk.Button(self._statusbar, text="≡", style="Toolbutton")
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -882,7 +883,7 @@ class Workbench(tk.Tk):
             value = "n/a"
 
         self._backend_conf_variable.set(value=value)
-        self._backend_button.configure(text=desc + " ☰")
+        self._backend_button.configure(text=desc)
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
