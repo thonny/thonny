@@ -137,6 +137,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Syed Nasim
 * Taavi Ilp
 * TANAKA Masayuki
+* TooLazy0x00
 * Toomas Mölder
 * Tusamten
 * Vytenis (svajoklis-1)
