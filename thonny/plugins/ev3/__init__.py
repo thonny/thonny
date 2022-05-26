@@ -75,6 +75,19 @@ class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
         pybricks_url = create_url_label(self, "https://pybricks.com/ev3-micropython/")
         pybricks_url.grid(row=0, column=1, pady=(0, inner_pad), padx=ems_to_pixels(1), sticky="w")
 
+        ttk.Label(self, text=tr("Default password")).grid(
+            row=6, column=0, pady=(0, inner_pad), sticky="w"
+        )
+        default_pw_box = ttk.Entry(self)
+        default_pw_box.insert(0, "maker")
+        default_pw_box["state"] = "disabled"
+        default_pw_box.grid(
+            row=6, column=1, pady=(0, inner_pad), padx=ems_to_pixels(1), sticky="we"
+        )
+
+    def has_editable_interpreter(self) -> bool:
+        return False
+
 
 def load_plugin():
     add_micropython_backend(
