@@ -86,6 +86,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Gabriel Slørdahl
 * Gagan Saksena
 * Georges Khaznadar
+* Helmut Ascheid
 * Hyungseok Choi
 * IhorNehrutsa
 * Ingo Blechschmidt
