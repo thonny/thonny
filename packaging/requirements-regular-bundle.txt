@@ -5,7 +5,7 @@ docutils==0.18.*
 mypy==0.950.*
 asttokens==2.0.*
 Send2Trash==1.8.1b0
-esptool==4.0.*
+esptool==4.1.*
 paramiko==2.11.*
 ptyprocess==0.7.*
 websockets==10.*

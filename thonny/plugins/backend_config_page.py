@@ -23,7 +23,14 @@ class BackendDetailsConfigPage(ConfigurationPage):
         pass
 
     def _add_text_field(
-        self, label_text, variable_name, row, show=None, pady: Union[int, tuple] = 0, width=None
+        self,
+        label_text,
+        variable_name,
+        row,
+        show=None,
+        pady: Union[int, tuple] = 0,
+        width=None,
+        **kwargs,
     ):
 
         if isinstance(pady, int):
@@ -33,7 +40,7 @@ class BackendDetailsConfigPage(ConfigurationPage):
         entry_label.grid(row=row, column=0, sticky="w", pady=pady)
 
         variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
-        entry = ttk.Entry(self, textvariable=variable, show=show, width=width)
+        entry = ttk.Entry(self, textvariable=variable, show=show, width=width, **kwargs)
         entry.grid(row=row, column=1, sticky="we", pady=pady, padx=ems_to_pixels(1))
         return variable
 
@@ -197,6 +204,7 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
             row=30,
             pady=(2 * inner_pad, inner_pad),
             width=30,
+            state="enabled" if self.has_editable_interpreter() else "disabled",
         )
 
         self.add_checkbox(
@@ -205,6 +213,9 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
             row=35,
             pady=(ems_to_pixels(4), 0),
         )
+
+    def has_editable_interpreter(self) -> bool:
+        return True
 
     def _on_change(self):
         self._changed = True

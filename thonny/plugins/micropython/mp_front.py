@@ -573,7 +573,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                 + "\n"
                 + result
                 + "\n\n"
-                + ("Connecting via WebREPL (EXPERIMENTAL):")
+                + ("Connecting via WebREPL:")
                 + "\n"
                 + (
                     "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
