@@ -618,6 +618,9 @@ def get_windows_network_locations():
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
     ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf)
     shortcuts_dir = buf.value
+    if not buf.value:
+        logger.warning("Could not determine windows shortcuts directory")
+        return {}
 
     result = {}
     for entry in os.scandir(shortcuts_dir):
