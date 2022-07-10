@@ -2094,9 +2094,9 @@ class _ZenityDialogProvider:
         if result.returncode == 0:
             return result.stdout.strip()
         else:
-            # TODO: log problems
-            print(result.stderr, file=sys.stderr)
-            # could check stderr, but it may contain irrelevant warnings
+            logger.warning(
+                "Zenity returned code %r and stderr %r", result.returncode, result.stderr
+            )
             return None
 
 

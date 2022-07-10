@@ -262,35 +262,38 @@ def normpath_with_actual_case(name: str) -> str:
     if not os.path.exists(name):
         return os.path.normpath(name)
 
-    assert os.path.isabs(name) or os.path.ismount(name), "Not abs nor mount: " + name
-    assert os.path.exists(name), "Not exists: " + name
-
     if os.name == "nt":
-        # https://stackoverflow.com/questions/2113822/python-getting-filename-case-as-stored-in-windows/2114975
-        name = os.path.normpath(name)
+        try:
+            # https://stackoverflow.com/questions/2113822/python-getting-filename-case-as-stored-in-windows/2114975
+            norm_name = os.path.normpath(name)
 
-        from ctypes import create_unicode_buffer, windll
+            from ctypes import create_unicode_buffer, windll
 
-        buf = create_unicode_buffer(512)
-        # GetLongPathNameW alone doesn't fix filename part
-        windll.kernel32.GetShortPathNameW(name, buf, 512)  # @UndefinedVariable
-        windll.kernel32.GetLongPathNameW(buf.value, buf, 512)  # @UndefinedVariable
-        result = buf.value
-
-        if result.casefold() != name.casefold():
-            # Sometimes GetShortPathNameW + GetLongPathNameW doesn't work
-            # see eg. https://github.com/thonny/thonny/issues/925
-            windll.kernel32.GetLongPathNameW(name, buf, 512)  # @UndefinedVariable
+            buf = create_unicode_buffer(512)
+            # GetLongPathNameW alone doesn't fix filename part
+            windll.kernel32.GetShortPathNameW(norm_name, buf, 512)  # @UndefinedVariable
+            windll.kernel32.GetLongPathNameW(buf.value, buf, 512)  # @UndefinedVariable
             result = buf.value
 
-            if result.casefold() != name.casefold():
-                result = name
+            if result.casefold() != norm_name.casefold():
+                # Sometimes GetShortPathNameW + GetLongPathNameW doesn't work
+                # see eg. https://github.com/thonny/thonny/issues/925
+                windll.kernel32.GetLongPathNameW(norm_name, buf, 512)  # @UndefinedVariable
+                result = buf.value
 
-        if result[1] == ":":
-            # ensure drive letter is capital
-            return result[0].upper() + result[1:]
-        else:
-            return result
+                if result.casefold() != norm_name.casefold():
+                    result = norm_name
+
+            if result[1] == ":":
+                # ensure drive letter is capital
+                return result[0].upper() + result[1:]
+            else:
+                return result
+        except Exception:
+            logger.warning(
+                "Could not compute normpath_with_actual_case for %r", name, exc_info=True
+            )
+            return os.path.normpath(name)
     else:
         # easy on Linux
         # too difficult on mac
@@ -615,6 +618,9 @@ def get_windows_network_locations():
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
     ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf)
     shortcuts_dir = buf.value
+    if not buf.value:
+        logger.warning("Could not determine windows shortcuts directory")
+        return {}
 
     result = {}
     for entry in os.scandir(shortcuts_dir):
