@@ -36,7 +36,7 @@ PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
 logger = getLogger(__name__)
 
-_EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
+_EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
 
 class PipDialog(CommonDialog, ABC):
