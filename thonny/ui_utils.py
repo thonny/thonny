@@ -56,11 +56,14 @@ class CommonDialog(tk.Toplevel):
             if focussed_widget:
                 focussed_widget.focus_set()
 
-    def get_padding(self):
-        return ems_to_pixels(2)
+    def get_large_padding(self):
+        return ems_to_pixels(1.5)
 
-    def get_internal_padding(self):
-        return self.get_padding() // 4
+    def get_medium_padding(self):
+        return ems_to_pixels(1)
+
+    def get_small_padding(self):
+        return ems_to_pixels(0.6)
 
     def set_initial_focus(self, node=None) -> bool:
         if node is None:
@@ -90,14 +93,20 @@ class CommonDialog(tk.Toplevel):
 
 
 class CommonDialogEx(CommonDialog):
-    def __init__(self, master=None, cnf={}, **kw):
-        super().__init__(master=master, cnf=cnf, **kw)
+    def __init__(self, master=None, **kw):
+        super().__init__(master=master, **kw)
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
 
         # Need to fill the dialog with a frame to gain theme support
         self.main_frame = ttk.Frame(self)
-        self.main_frame.grid(row=0, column=0, sticky="nsew")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+
+        # ipady doesn't work right, at least on Linux (it only applies to the first gridded child)
+        # therefore only providing common padding for left and right edges
+        self.main_frame.grid(row=0, column=0, sticky="nsew", ipadx=self.get_large_padding())
+        self.main_frame.rowconfigure(0, weight=1)
+        self.main_frame.columnconfigure(0, weight=1)
 
         self.bind("<Escape>", self.on_close, True)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -120,7 +129,7 @@ class QueryDialog(CommonDialogEx):
         self.var = tk.StringVar(value=initial_value)
         self.result = None
 
-        margin = self.get_padding()
+        margin = self.get_large_padding()
         spacing = margin // 2
 
         self.title(title)

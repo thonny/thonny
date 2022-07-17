@@ -11,42 +11,26 @@ import thonny
 from thonny import get_workbench, ui_utils
 from thonny.common import get_python_version_string
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog, get_hyperlink_cursor
+from thonny.ui_utils import CommonDialog, CommonDialogEx, create_url_label, get_hyperlink_cursor
 
 
-class AboutDialog(CommonDialog):
+class AboutDialog(CommonDialogEx):
     def __init__(self, master):
-        import webbrowser
-
         super().__init__(master)
-
-        main_frame = ttk.Frame(self)
-        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
-        main_frame.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(0, weight=1)
 
         self.title(tr("About Thonny"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.protocol("WM_DELETE_WINDOW", self._ok)
 
-        # bg_frame = ttk.Frame(self) # gives proper color in aqua
-        # bg_frame.grid()
-
-        heading_font = tkinter.font.nametofont("TkHeadingFont").copy()
-        heading_font.configure(size=19, weight="bold")
+        default_heading_font = tkinter.font.nametofont("TkHeadingFont")
+        heading_font = default_heading_font.copy()
+        heading_font.configure(size=int(default_heading_font["size"] * 1.7), weight="bold")
         heading_label = ttk.Label(
-            main_frame, text="Thonny " + thonny.get_version(), font=heading_font
+            self.main_frame, text="Thonny " + thonny.get_version(), font=heading_font
         )
-        heading_label.grid()
+        heading_label.grid(pady=(self.get_large_padding(), self.get_small_padding()))
 
-        url = "https://thonny.org"
-        url_font = tkinter.font.nametofont("TkDefaultFont").copy()
-        url_font.configure(underline=1)
-        url_label = ttk.Label(
-            main_frame, text=url, style="Url.TLabel", cursor=get_hyperlink_cursor(), font=url_font
-        )
+        url_label = create_url_label(self.main_frame, "https://thonny.org", justify=tk.CENTER)
         url_label.grid()
-        url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
 
         if sys.platform == "linux":
             try:
@@ -64,7 +48,7 @@ class AboutDialog(CommonDialog):
             )
 
         platform_label = ttk.Label(
-            main_frame,
+            self.main_frame,
             justify=tk.CENTER,
             text=system_desc
             + "\n"
@@ -74,11 +58,12 @@ class AboutDialog(CommonDialog):
             + "Tk "
             + ui_utils.get_tk_version_str(),
         )
-        platform_label.grid(pady=20)
+        platform_label.grid(pady=self.get_medium_padding())
 
-        credits_label = ttk.Label(
-            main_frame,
-            text=tr(
+        credits_label = create_url_label(
+            self.main_frame,
+            "https://github.com/thonny/thonny/blob/master/CREDITS.rst",
+            tr(
                 "Made in\n"
                 + "University of Tartu, Estonia,\n"
                 + "with the help from\n"
@@ -86,21 +71,15 @@ class AboutDialog(CommonDialog):
                 + "Raspberry Pi Foundation\n"
                 + "and Cybernetica AS"
             ),
-            style="Url.TLabel",
-            cursor=get_hyperlink_cursor(),
-            font=url_font,
-            justify="center",
+            justify=tk.CENTER,
         )
         credits_label.grid()
-        credits_label.bind(
-            "<Button-1>",
-            lambda _: webbrowser.open("https://github.com/thonny/thonny/blob/master/CREDITS.rst"),
-        )
 
-        license_font = tkinter.font.nametofont("TkDefaultFont").copy()
-        license_font.configure(size=7)
+        default_font = tkinter.font.nametofont("TkDefaultFont")
+        license_font = default_font.copy()
+        license_font.configure(size=round(default_font["size"] * 0.7))
         license_label = ttk.Label(
-            main_frame,
+            self.main_frame,
             text="Copyright (©) "
             + str(datetime.datetime.now().year)
             + " Aivar Annamaa\n"
@@ -115,17 +94,15 @@ class AboutDialog(CommonDialog):
             justify=tk.CENTER,
             font=license_font,
         )
-        license_label.grid(pady=20)
+        license_label.grid(pady=self.get_medium_padding())
 
-        ok_button = ttk.Button(main_frame, text=tr("OK"), command=self._ok, default="active")
-        ok_button.grid(pady=(0, 15))
+        ok_button = ttk.Button(
+            self.main_frame, text=tr("OK"), command=self.on_close, default="active"
+        )
+        ok_button.grid(pady=(0, self.get_large_padding()))
         ok_button.focus_set()
 
-        self.bind("<Return>", self._ok, True)
-        self.bind("<Escape>", self._ok, True)
-
-    def _ok(self, event=None):
-        self.destroy()
+        self.bind("<Return>", self.on_close, True)
 
     def get_os_word_size_guess(self):
         if "32" in platform.machine() and "64" not in platform.machine():
@@ -137,7 +114,7 @@ class AboutDialog(CommonDialog):
 
 
 def load_plugin() -> None:
-    def open_about(*args):
+    def open_about():
         ui_utils.show_dialog(AboutDialog(get_workbench()))
 
     def open_url(url):

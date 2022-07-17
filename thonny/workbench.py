@@ -699,7 +699,7 @@ class Workbench(tk.Tk):
 
     def _init_containers(self) -> None:
 
-        margin = 10
+        margin = ems_to_pixels(0.6)
         # Main frame functions as
         # - a background behind padding of main_pw, without this OS X leaves white border
         # - a container to be hidden, when a view is maximized and restored when view is back home
@@ -711,16 +711,18 @@ class Workbench(tk.Tk):
         self._maximized_view = None  # type: Optional[tk.Widget]
 
         self._toolbar = ttk.Frame(main_frame, padding=0)
-        self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=margin, pady=(5, 0))
+        self._toolbar.grid(
+            column=0, row=0, sticky=tk.NSEW, padx=margin, pady=(ems_to_pixels(0.5), 0)
+        )
 
-        self.set_default("layout.west_pw_width", self.scale(150))
-        self.set_default("layout.east_pw_width", self.scale(150))
+        self.set_default("layout.west_pw_width", ems_to_pixels(15))
+        self.set_default("layout.east_pw_width", ems_to_pixels(15))
 
-        self.set_default("layout.s_nb_height", self.scale(150))
-        self.set_default("layout.nw_nb_height", self.scale(150))
-        self.set_default("layout.sw_nb_height", self.scale(150))
-        self.set_default("layout.ne_nb_height", self.scale(150))
-        self.set_default("layout.se_nb_height", self.scale(150))
+        self.set_default("layout.s_nb_height", ems_to_pixels(15))
+        self.set_default("layout.nw_nb_height", ems_to_pixels(15))
+        self.set_default("layout.sw_nb_height", ems_to_pixels(15))
+        self.set_default("layout.ne_nb_height", ems_to_pixels(15))
+        self.set_default("layout.se_nb_height", ems_to_pixels(15))
 
         self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
 

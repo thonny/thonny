@@ -33,8 +33,8 @@ class Uf2FlashingDialog(WorkDialog):
         self._start_downloading_release_info()
 
     def populate_main_frame(self):
-        pad = self.get_padding()
-        inpad = self.get_internal_padding()
+        pad = self.get_large_padding()
+        inpad = self.get_small_padding()
 
         latest_ver_caption = tr("Version to be installed")
         version_caption_label = ttk.Label(self.main_frame, text=latest_ver_caption + ":")

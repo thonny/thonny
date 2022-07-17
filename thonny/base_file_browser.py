@@ -18,6 +18,7 @@ from thonny.ui_utils import (
     ask_one_from_choices,
     ask_string,
     create_string_var,
+    ems_to_pixels,
     get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
@@ -116,8 +117,8 @@ class BaseFileBrowser(ttk.Frame):
             height=1,
             font="TkDefaultFont",
             wrap="word",
-            padx=6,
-            pady=5,
+            padx=ems_to_pixels(0.6),
+            pady=ems_to_pixels(0.5),
             insertwidth=0,
             highlightthickness=0,
             background=lookup_style_option("ViewToolbar.TFrame", "background"),
@@ -1317,25 +1318,56 @@ class BackendFileDialog(CommonDialog):
         self.rowconfigure(0, weight=1)
 
         self.browser = DialogRemoteFileBrowser(background, self)
-        self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=20, padx=20)
+        self.browser.grid(
+            row=0,
+            column=0,
+            columnspan=4,
+            sticky="nsew",
+            pady=self.get_large_padding(),
+            padx=self.get_large_padding(),
+        )
         self.browser.configure(borderwidth=1, relief="groove")
         self.browser.tree.configure(selectmode="browse")
 
         self.name_label = ttk.Label(background, text=tr("File name:"))
-        self.name_label.grid(row=1, column=0, pady=(0, 20), padx=20, sticky="w")
+        self.name_label.grid(
+            row=1,
+            column=0,
+            pady=(0, self.get_large_padding()),
+            padx=self.get_large_padding(),
+            sticky="w",
+        )
 
         self.name_var = create_string_var("")
         self.name_entry = ttk.Entry(
             background, textvariable=self.name_var, state="normal" if kind == "save" else "disabled"
         )
-        self.name_entry.grid(row=1, column=1, pady=(0, 20), padx=(0, 20), sticky="we")
+        self.name_entry.grid(
+            row=1,
+            column=1,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="we",
+        )
         self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
 
         self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok)
-        self.ok_button.grid(row=1, column=2, pady=(0, 20), padx=(0, 20), sticky="e")
+        self.ok_button.grid(
+            row=1,
+            column=2,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="e",
+        )
 
         self.cancel_button = ttk.Button(background, text=tr("Cancel"), command=self.on_cancel)
-        self.cancel_button.grid(row=1, column=3, pady=(0, 20), padx=(0, 20), sticky="e")
+        self.cancel_button.grid(
+            row=1,
+            column=3,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="e",
+        )
 
         background.rowconfigure(0, weight=1)
         background.columnconfigure(1, weight=1)
