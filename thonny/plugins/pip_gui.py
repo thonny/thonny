@@ -36,7 +36,7 @@ PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
 logger = getLogger(__name__)
 
-_EXTRA_MARKER_RE = re.compile(r"""^\s*extra\s*==\s*("(?:[^"]|\\")*"|'(?:[^']|\\')*')\s*$""")
+_EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
 
 class PipDialog(CommonDialog, ABC):
@@ -50,7 +50,7 @@ class PipDialog(CommonDialog, ABC):
         super().__init__(master)
 
         main_frame = ttk.Frame(self)
-        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
+        main_frame.grid(sticky=tk.NSEW, ipadx=self.get_medium_padding())
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
@@ -81,12 +81,19 @@ class PipDialog(CommonDialog, ABC):
     def _create_widgets(self, parent):
 
         header_frame = ttk.Frame(parent)
-        header_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=(15, 0))
+        header_frame.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
+            padx=self.get_medium_padding(),
+            pady=(self.get_medium_padding(), 0),
+        )
         header_frame.columnconfigure(0, weight=1)
         header_frame.rowconfigure(1, weight=1)
 
-        name_font = tk_font.nametofont("TkDefaultFont").copy()
-        name_font.configure(size=16)
+        default_font = tk_font.nametofont("TkDefaultFont")
+        name_font = default_font.copy()
+        name_font.configure(size=default_font["size"] * 2)
         self.search_box = ttk.Entry(header_frame)
         self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
@@ -98,15 +105,21 @@ class PipDialog(CommonDialog, ABC):
         self.search_button = ttk.Button(
             header_frame, text=self.get_search_button_text(), command=self._on_search, width=25
         )
-        self.search_button.grid(row=1, column=1, sticky="nse", padx=(10, 0))
+        self.search_button.grid(row=1, column=1, sticky="nse", padx=(self.get_small_padding(), 0))
 
         main_pw = tk.PanedWindow(
             parent,
             orient=tk.HORIZONTAL,
             background=lookup_style_option("TPanedWindow", "background"),
-            sashwidth=15,
+            sashwidth=self.get_large_padding(),
         )
-        main_pw.grid(row=2, column=0, sticky="nsew", padx=15, pady=15)
+        main_pw.grid(
+            row=2,
+            column=0,
+            sticky="nsew",
+            padx=self.get_medium_padding(),
+            pady=(self.get_medium_padding(), self.get_medium_padding()),
+        )
         parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
 
@@ -144,7 +157,9 @@ class PipDialog(CommonDialog, ABC):
         main_pw.add(info_frame)
 
         self.title_label = ttk.Label(info_frame, text="", font=name_font)
-        self.title_label.grid(row=0, column=0, sticky="w", padx=5, pady=(0, ems_to_pixels(1)))
+        self.title_label.grid(
+            row=0, column=0, sticky="w", padx=0, pady=(0, self.get_large_padding())
+        )
 
         info_text_frame = tktextext.TextFrame(
             info_frame,
@@ -154,6 +169,8 @@ class PipDialog(CommonDialog, ABC):
             vertical_scrollbar_class=AutoScrollbar,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
+            padx=ems_to_pixels(0.1),
+            pady=0,
             width=70,
             height=10,
         )
@@ -192,7 +209,6 @@ class PipDialog(CommonDialog, ABC):
             "install_file", "<Leave>", lambda e: self.info_text.config(cursor="")
         )
 
-        default_font = tk_font.nametofont("TkDefaultFont")
         self.info_text.configure(font=default_font, wrap="word")
 
         bold_font = default_font.copy()
@@ -221,7 +237,7 @@ class PipDialog(CommonDialog, ABC):
             width=20,
         )
 
-        self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5, 0))
+        self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(self.get_small_padding(), 0))
 
         self.advanced_button = ttk.Button(
             self.command_frame,
@@ -230,7 +246,7 @@ class PipDialog(CommonDialog, ABC):
             command=lambda: self._perform_pip_action("advanced"),
         )
 
-        self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5, 0))
+        self.advanced_button.grid(row=0, column=2, sticky="w", padx=(self.get_small_padding(), 0))
 
         self.close_button = ttk.Button(info_frame, text=tr("Close"), command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
@@ -1111,7 +1127,7 @@ class PluginsPipDialog(PipDialog):
         )
 
         banner_text = ttk.Label(banner, text=banner_msg, style="Tip.TLabel", justify="left")
-        banner_text.grid(pady=10, padx=10)
+        banner_text.grid(pady=self.get_medium_padding(), padx=self.get_medium_padding())
 
         PipDialog._create_widgets(self, parent)
 
@@ -1162,7 +1178,14 @@ class DetailsDialog(CommonDialog):
         main_frame.columnconfigure(0, weight=1)
 
         version_label = ttk.Label(main_frame, text=tr("Desired version"))
-        version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15, 0), sticky="w")
+        version_label.grid(
+            row=0,
+            column=0,
+            columnspan=2,
+            padx=self.get_medium_padding(),
+            pady=(self.get_medium_padding(), 0),
+            sticky="w",
+        )
 
         def version_sort_key(s):
             # Trying to massage understandable versions into valid StrictVersions
@@ -1191,10 +1214,24 @@ class DetailsDialog(CommonDialog):
         )
 
         self.version_combo.state(["!disabled", "readonly"])
-        self.version_combo.grid(row=1, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew")
+        self.version_combo.grid(
+            row=1,
+            column=0,
+            columnspan=2,
+            pady=(0, self.get_medium_padding()),
+            padx=self.get_medium_padding(),
+            sticky="ew",
+        )
 
         self.requires_label = ttk.Label(main_frame, text="")
-        self.requires_label.grid(row=2, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew")
+        self.requires_label.grid(
+            row=2,
+            column=0,
+            columnspan=2,
+            pady=(0, self.get_medium_padding()),
+            padx=self.get_medium_padding(),
+            sticky="ew",
+        )
 
         self.update_deps_var = tk.IntVar()
         self.update_deps_var.set(0)
@@ -1202,14 +1239,28 @@ class DetailsDialog(CommonDialog):
             main_frame, text=tr("Upgrade dependencies"), variable=self.update_deps_var
         )
         if support_update_deps_switch:
-            self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
+            self.update_deps_cb.grid(
+                row=3, column=0, columnspan=2, padx=self.get_medium_padding(), sticky="w"
+            )
 
         self.ok_button = ttk.Button(
             main_frame, text=master.get_install_button_text(), command=self._ok
         )
-        self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
+        self.ok_button.grid(
+            row=4,
+            column=0,
+            pady=self.get_medium_padding(),
+            padx=(self.get_medium_padding(), 0),
+            sticky="se",
+        )
         self.cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
-        self.cancel_button.grid(row=4, column=1, pady=15, padx=(5, 20), sticky="se")
+        self.cancel_button.grid(
+            row=4,
+            column=1,
+            pady=self.get_medium_padding(),
+            padx=(self.get_small_padding(), self.get_medium_padding()),
+            sticky="se",
+        )
 
         # self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.version_combo.focus_set()
@@ -1262,12 +1313,15 @@ class DetailsDialog(CommonDialog):
             return
 
         self._version_data = info
+        reqs = ""
         if (
             not error_code
             and "requires_dist" in info["info"]
             and isinstance(info["info"]["requires_dist"], list)
         ):
-            reqs = tr("Requires:") + "\n  * " + "\n  * ".join(info["info"]["requires_dist"])
+            deps = [d for d in info["info"]["requires_dist"] if not _EXTRA_MARKER_RE.match(d)]
+            if deps:
+                reqs = tr("Requires:") + "\n  * " + "\n  * ".join(deps)
         elif error_code:
             reqs = tr("Error code:") + " " + str(error_code)
             if "error" in info:

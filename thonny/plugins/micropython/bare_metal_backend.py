@@ -137,7 +137,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size is None:
             self._read_block_size = self._infer_read_block_size()
 
-        logger.debug(
+        logger.info(
             "Initial submit_mode: %s, "
             "write_block_size: %s, "
             "write_block_delay: %s, "
@@ -226,10 +226,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
 
         # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
-        # paste mode and larger block sizes (problem confirmed with 128, 64 and bytes blocks)
+        # paste mode and larger block sizes (problem confirmed with 128, 64 and 30 bytes blocks)
         # https://github.com/thonny/thonny/issues/2143
         # Don't know any other good solutions besides avoiding paste mode for this device.
-        return 255
+        return 127
 
     def _infer_read_block_size(self):
         # TODO:

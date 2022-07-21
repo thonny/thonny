@@ -245,7 +245,7 @@ class PasswordDialog(CommonDialogEx):
         self.password = ""
         self.save_password = False
 
-        margin = self.get_padding()
+        margin = self.get_large_padding()
         spacing = margin // 2
 
         self.title(tr("Authentication"))

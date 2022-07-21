@@ -140,8 +140,8 @@ class ESPFlashingDialog(WorkDialog):
         return 35
 
     def populate_main_frame(self):
-        epadx = self.get_padding()
-        ipadx = self.get_internal_padding()
+        epadx = self.get_large_padding()
+        ipadx = self.get_small_padding()
         epady = epadx
         ipady = ipadx
 
@@ -163,11 +163,13 @@ class ESPFlashingDialog(WorkDialog):
         firmware_label = ttk.Label(self.main_frame, text="Firmware")
         firmware_label.grid(row=2, column=1, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
 
-        self._firmware_entry = ttk.Entry(self.main_frame, width=55)
+        self._firmware_entry = ttk.Entry(self.main_frame, width=50)
         self._firmware_entry.grid(row=2, column=2, sticky="nsew", padx=ipadx, pady=(ipady, 0))
 
         browse_button = ttk.Button(self.main_frame, text="Browse...", command=self._browse)
         browse_button.grid(row=2, column=3, sticky="we", padx=(0, epadx), pady=(ipady, 0))
+
+        self.main_frame.columnconfigure(2, weight=1)
 
         # FLASH_MODE
         self._flashmode = tk.StringVar(None, "keep")

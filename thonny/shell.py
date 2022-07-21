@@ -50,7 +50,7 @@ _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 
-TERMINAL_CONTROL_REGEX_STR = r"\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]"
+TERMINAL_CONTROL_REGEX_STR = r"\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|\x1B\].+\a"
 TERMINAL_CONTROL_REGEX = re.compile(TERMINAL_CONTROL_REGEX_STR)
 OUTPUT_SPLIT_REGEX = re.compile(
     "(%s|%s|%s)"
