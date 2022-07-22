@@ -51,6 +51,9 @@ ENCODING = "utf-8"
 # Commands
 
 # Output tokens
+ESC = b"\x1b"
+ST = b"\x1b\\"
+OSC = b"\x1b]0;.*\x1b\\"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 NORMAL_PROMPT = b">>> "
@@ -892,6 +895,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 # This looks like prompt.
                 # Make sure it is not followed by anything.
                 follow_up = self._connection.soft_read(1, timeout=0.01)
+                if follow_up == ESC:
+                    # See if it's followed by a OSC code, like the one output by CircuitPython 8
+                    follow_up += self._connection.soft_read_until(ST)
+                    if follow_up.endswith(ST):
+                        logger.info("Suspending OSC %r", follow_up)
+                    follow_up = b""
+
                 if follow_up:
                     # Nope, the prompt is not active.
                     # (Actually it may be that a background thread has produced this follow up,
