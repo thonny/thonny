@@ -193,13 +193,17 @@ class Uf2FlashingDialog(WorkDialog):
         return self._possible_targets and self._release_info
 
     @classmethod
-    def get_possible_targets(cls):
+    def get_possible_targets(cls, board_id: Optional[str] = None):
         all_vol_infos = [
             (vol, cls.find_device_board_id_and_model(vol))
             for vol in list_volumes(skip_letters=["A"])
         ]
 
-        return [(info[0], info[1][0], info[1][1]) for info in all_vol_infos if info[1] is not None]
+        return [
+            (info[0], info[1][0], info[1][1])
+            for info in all_vol_infos
+            if info[1] is not None and (info[1][0] == board_id or board_id is None)
+        ]
 
     def start_work(self):
         if len(self._possible_targets) > 1:

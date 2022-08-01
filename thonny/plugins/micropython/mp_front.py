@@ -22,6 +22,7 @@ logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 WEBREPL_PORT_VALUE = "webrepl"
+BOOTLOADER_PORT_VALUE = "bootloader"
 
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
@@ -373,15 +374,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
+        elif port == BOOTLOADER_PORT_VALUE:
+            return f"{cls.backend_description}  •  BOOTLOADER"
         else:
             return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
         def should_show(conf):
-            if cls.device_is_present_in_bootloader_mode():
-                return True
-
             port = conf[f"{cls.backend_name}.port"]
             if port == WEBREPL_PORT_VALUE:
                 return True
@@ -401,6 +401,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             conf = {"run.backend_name": cls.backend_name, f"{cls.backend_name}.port": device}
             if conf not in relevant_confs:
                 relevant_confs.append(conf)
+
+        if cls.device_is_present_in_bootloader_mode():
+            relevant_confs.append(
+                {
+                    "run.backend_name": cls.backend_name,
+                    f"{cls.backend_name}.port": BOOTLOADER_PORT_VALUE,
+                }
+            )
 
         sorted_confs = sorted(relevant_confs, key=cls.get_switcher_configuration_label)
         return [(conf, cls.get_switcher_configuration_label(conf)) for conf in sorted_confs]

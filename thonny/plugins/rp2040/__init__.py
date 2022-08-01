@@ -26,7 +26,9 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def device_is_present_in_bootloader_mode(cls):
-        return bool(Uf2FlashingDialog.get_possible_targets())
+        targets = Uf2FlashingDialog.get_possible_targets("RPI-RP2")
+        logger.info("Bootloader targets: %r", targets)
+        return bool(targets)
 
     def get_node_label(self):
         return "RP2040 device"

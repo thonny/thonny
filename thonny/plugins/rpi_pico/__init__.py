@@ -23,9 +23,6 @@ class RaspberryPiPicoBackendProxy(RP2040BackendProxy):
         return {(0x2E8A, 0x0005)}
 
     @classmethod
-    def device_is_present_in_bootloader_mode(cls):
-        return bool(Uf2FlashingDialog.get_possible_targets())
-
     def get_node_label(self):
         return "Raspberry Pi Pico"
 
