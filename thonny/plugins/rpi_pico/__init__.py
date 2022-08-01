@@ -26,11 +26,6 @@ class RaspberryPiPicoBackendProxy(RP2040BackendProxy):
     def get_node_label(self):
         return "Raspberry Pi Pico"
 
-    def _propose_install_firmware(self):
-        dlg = PicoFlashingDialog(get_workbench())
-        show_dialog(dlg)
-        return dlg.success
-
 
 class RaspberryPiPicoBackendConfigPage(RP2040BackendConfigPage):
     def _has_flashing_dialog(self):
@@ -44,7 +39,7 @@ class RaspberryPiPicoBackendConfigPage(RP2040BackendConfigPage):
 class PicoFlashingDialog(Uf2FlashingDialog):
     def get_instructions(self) -> Optional[str]:
         return (
-            "Here you can install or update MicroPython firmware on Raspberry Pi Pico.\n"
+            "Here you can install or update MicroPython for Raspberry Pi Pico.\n"
             "\n"
             "1. Plug in your Pico while holding the BOOTSEL button.\n"
             "2. Wait until device information appears.\n"
@@ -80,7 +75,7 @@ class PicoFlashingDialog(Uf2FlashingDialog):
         return "RPI" in board_id
 
     def get_title(self):
-        return "Install MicroPython firmware for Raspberry Pi Pico"
+        return "Install MicroPython for Raspberry Pi Pico"
 
     def _get_vid_pids_to_wait_for(self):
         return RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()

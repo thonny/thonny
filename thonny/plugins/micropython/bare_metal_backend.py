@@ -827,7 +827,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     + "  - use Ctrl+C to interrupt current work;\n"
                     + "  - reset the device and try again;\n"
                     + "  - check connection properties;\n"
-                    + "  - make sure the device has suitable firmware;\n"
+                    + "  - make sure the device has suitable MicroPython / CircuitPython / firmware;\n"
                     + "  - make sure the device is not in bootloader mode.\n"
                 )
                 have_given_advice = True

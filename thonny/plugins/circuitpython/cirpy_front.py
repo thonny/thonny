@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Optional
 
 from thonny import ui_utils
+from thonny.languages import tr
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
@@ -96,6 +97,9 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
         dlg = CircuitPythonFlashingDialog(self)
         ui_utils.show_dialog(dlg)
 
+    def _get_flasher_link_title(self) -> str:
+        return tr("Install or update %s") % "CircuitPython"
+
 
 class CircuitPythonFlashingDialog(Uf2FlashingDialog):
     def __init__(self, master):
@@ -104,7 +108,7 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows you to install or update CircuitPython firmware on your device.\n"
+            "This dialog allows you to install or update CircuitPython on your device.\n"
             "\n"
             "1. Plug in your device into bootloader mode by double-pressing the reset button.\n"
             "2. Wait until device information appears.\n"
@@ -151,7 +155,7 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
             raise RuntimeError(
                 "Could not find your board (%s) or its download url from %s (consider making a PR). "
                 % (board_id, self._get_devices_info_url())
-                + "Please find the firmware from https://circuitpython.org/ and install it manually."
+                + "Please download CircuitPython from https://circuitpython.org/ and install it manually."
             )
 
         url = self._devices_info[board_id]["FIRMWARE_DOWNLOAD"].format(
@@ -167,7 +171,10 @@ class CircuitPythonFlashingDialog(Uf2FlashingDialog):
         return False
 
     def get_title(self):
-        return "Install CircuitPython firmware for your device"
+        return "Install CircuitPython for your device"
+
+    def get_target_filename(self):
+        return "circuitpython"
 
     def _get_vid_pids_to_wait_for(self):
         return CircuitPythonProxy.get_known_usb_vids_pids()

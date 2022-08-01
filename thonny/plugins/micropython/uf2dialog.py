@@ -134,7 +134,7 @@ class Uf2FlashingDialog(WorkDialog):
                 set_text_if_different(self.target_label, "\n".join(unpacked[0]))
                 model_changed = set_text_if_different(self.model_label, "\n".join(unpacked[2]))
 
-            desc = self.get_firmware_description()
+            desc = self.get_uf2_description()
             if desc is None:
                 set_text_if_different(self._version_label, self.get_unknown_version_text())
             else:
@@ -148,7 +148,7 @@ class Uf2FlashingDialog(WorkDialog):
     def model_changed(self):
         pass
 
-    def get_firmware_description(self):
+    def get_uf2_description(self):
         if self._release_info is None:
             return None
         else:
@@ -360,7 +360,7 @@ class Uf2FlashingDialog(WorkDialog):
                     self.replace_last_line(percent_str)
 
     def get_target_filename(self):
-        return "firmware"
+        return "micropython"
 
     def get_title(self):
-        return "Install MicroPython firmware"
+        return "Install MicroPython"
