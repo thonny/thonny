@@ -78,7 +78,8 @@ EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
 INTERRUPT_SEQUENCE = "<Control-c>"
 
-ANSI_CODE_TERMINATOR = re.compile("[@-~]")
+CSI_TERMINATOR = re.compile("[@-~]")
+OSC_TERMINATOR = re.compile(r"\a|\x1B\\")
 
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
@@ -1251,13 +1252,20 @@ class SubprocessProxy(BackendProxy, ABC):
 
 
 def _ends_with_incomplete_ansi_code(data):
-    pos = data.rfind("\033")
+    pos = max(data.rfind("\033["), data.rfind("\033]"))
+
     if pos == -1:
         return False
 
-    # note ANSI_CODE_TERMINATOR also includes [
+    if len(data) < 3:
+        return True
+
+    # note CSI_TERMINATOR also includes [
     params_and_terminator = data[pos + 2 :]
-    return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
+    if data[1] == "[":
+        return not CSI_TERMINATOR.search(params_and_terminator)
+    elif data[1] == "]":
+        return not OSC_TERMINATOR.search(params_and_terminator)
 
 
 def create_frontend_python_process(

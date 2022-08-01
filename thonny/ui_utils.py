@@ -2414,6 +2414,14 @@ def add_messagebox_parent_checker():
         setattr(messagebox, name, wrap_with_parent_checker(fun))
 
 
+def replace_unsupported_chars(text: str) -> str:
+    if get_tk_version_info() < (8, 6, 12):
+        # can crash with emojis
+        return "".join(c if c < "\U00010000" else "□" for c in text)
+    else:
+        return text
+
+
 def windows_known_extensions_are_hidden() -> bool:
     assert running_on_windows()
     import winreg
