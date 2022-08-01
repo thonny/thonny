@@ -644,10 +644,6 @@ class BaseFileBrowser(ttk.Frame):
                 command=lambda: self.open_path_with_system_app(selected_path),
             )
 
-            hidden_files_label = (
-                tr("Hide hidden files") if show_hidden_files() else tr("Show hidden files")
-            )
-            self.menu.add_command(label=hidden_files_label, command=self.toggle_hidden_files)
         else:
             if selected_kind == "dir":
                 self.menu.add_command(
@@ -670,6 +666,11 @@ class BaseFileBrowser(ttk.Frame):
                         label=tr("Configure %s files") % ext + "...",
                         command=lambda: self.open_extension_dialog(ext),
                     )
+
+        hidden_files_label = (
+            tr("Hide hidden files") if show_hidden_files() else tr("Show hidden files")
+        )
+        self.menu.add_command(label=hidden_files_label, command=self.toggle_hidden_files)
 
     def toggle_hidden_files(self):
         get_workbench().set_option(
