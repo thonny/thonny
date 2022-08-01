@@ -899,6 +899,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # See if it's followed by a OSC code, like the one output by CircuitPython 8
                     follow_up += self._connection.soft_read_until(ST)
                     if follow_up.endswith(ST):
+                        logger.debug("Found OSC sequence %r", follow_up)
                         self._send_output(follow_up.decode("utf-8"), "stdout")
                     follow_up = b""
 
