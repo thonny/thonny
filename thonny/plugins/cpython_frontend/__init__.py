@@ -21,7 +21,7 @@ def load_plugin():
     wb.add_backend(
         "LocalCPython",
         LocalCPythonProxy,
-        "Python 3",
+        tr("Local Python 3"),
         LocalCPythonConfigurationPage,
         "02",
     )

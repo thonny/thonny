@@ -827,7 +827,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     + "  - use Ctrl+C to interrupt current work;\n"
                     + "  - reset the device and try again;\n"
                     + "  - check connection properties;\n"
-                    + "  - make sure the device has suitable firmware;\n"
+                    + "  - make sure the device has suitable MicroPython / CircuitPython / firmware;\n"
                     + "  - make sure the device is not in bootloader mode.\n"
                 )
                 have_given_advice = True
@@ -899,7 +899,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # See if it's followed by a OSC code, like the one output by CircuitPython 8
                     follow_up += self._connection.soft_read_until(ST)
                     if follow_up.endswith(ST):
-                        logger.info("Suspending OSC %r", follow_up)
+                        logger.debug("Found OSC sequence %r", follow_up)
+                        self._send_output(follow_up.decode("utf-8"), "stdout")
                     follow_up = b""
 
                 if follow_up:

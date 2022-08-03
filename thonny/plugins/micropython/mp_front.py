@@ -22,6 +22,7 @@ logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 WEBREPL_PORT_VALUE = "webrepl"
+BOOTLOADER_PORT_VALUE = "bootloader"
 
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
@@ -117,7 +118,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 self._port = potential[0][0]
             else:
                 if not potential and self.device_is_present_in_bootloader_mode():
-                    if self._propose_install_firmware():
+                    if self._propose_install_python():
                         return self._fix_port()
 
                 self._port = None
@@ -137,13 +138,13 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         elif not port_exists(self._port):
             if self.device_is_present_in_bootloader_mode():
                 self._port = None
-                self._propose_install_firmware()
+                self._propose_install_python()
 
-    def _propose_install_firmware(self):
-        """Subclass may show firmware installation dialog and return True if installation succeeds"""
+    def _propose_install_python(self):
+        """Subclass may show python installation dialog and return True if installation succeeds"""
         self._show_error(
             "Your device seems to be in bootloader mode.\n"
-            "In this mode you can install or upgrade MicroPython firmware.\n\n"
+            "In this mode you can install or upgrade MicroPython python.\n\n"
             "If your device already has MicroPython, then you can start using it after you put it into normal mode."
         )
 
@@ -373,15 +374,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
+        elif port == BOOTLOADER_PORT_VALUE:
+            return f"{cls.backend_description}  •  BOOTLOADER"
         else:
             return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
         def should_show(conf):
-            if cls.device_is_present_in_bootloader_mode():
-                return True
-
             port = conf[f"{cls.backend_name}.port"]
             if port == WEBREPL_PORT_VALUE:
                 return True
@@ -401,6 +401,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             conf = {"run.backend_name": cls.backend_name, f"{cls.backend_name}.port": device}
             if conf not in relevant_confs:
                 relevant_confs.append(conf)
+
+        if cls.device_is_present_in_bootloader_mode():
+            relevant_confs.append(
+                {
+                    "run.backend_name": cls.backend_name,
+                    f"{cls.backend_name}.port": BOOTLOADER_PORT_VALUE,
+                }
+            )
 
         sorted_confs = sorted(relevant_confs, key=cls.get_switcher_configuration_label)
         return [(conf, cls.get_switcher_configuration_label(conf)) for conf in sorted_confs]
@@ -450,7 +458,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
 
-        self._has_opened_firmware_flasher = False
+        self._has_opened_python_flasher = False
 
         intro_label = ttk.Label(self, text=self._get_intro_text())
         intro_label.grid(row=0, column=0, sticky="nw")
@@ -542,18 +550,21 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         # advanced_link.grid(row=0, column=1, sticky="e")
 
         if self._has_flashing_dialog():
-            firmware_link = ui_utils.create_action_label(
+            python_link = ui_utils.create_action_label(
                 last_row,
-                tr("Install or update firmware"),
-                self._on_click_firmware_installer_link,
+                self._get_flasher_link_title(),
+                self._on_click_python_installer_link,
             )
-            firmware_link.grid(row=1, column=1, sticky="e")
+            python_link.grid(row=1, column=1, sticky="e")
 
         self._on_change_port()
 
-    def _on_click_firmware_installer_link(self, event=None):
+    def _get_flasher_link_title(self) -> str:
+        return tr("Install or update %s") % "MicroPython"
+
+    def _on_click_python_installer_link(self, event=None):
         self._open_flashing_dialog()
-        self._has_opened_firmware_flasher = True
+        self._has_opened_python_flasher = True
 
     def _show_advanced_options(self):
         pass
@@ -636,7 +647,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return self.get_selected_port_name() == WEBREPL_PORT_VALUE
 
     def should_restart(self):
-        return self.is_modified() or self._has_opened_firmware_flasher
+        return self.is_modified() or self._has_opened_python_flasher
 
     def apply(self):
         if not self.is_modified():

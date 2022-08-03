@@ -6,10 +6,11 @@ import tkinter as tk
 import traceback
 from logging import getLogger
 from tkinter import ttk
+from typing import cast
 
 from _tkinter import TclError
 
-from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
+from thonny import get_runner, get_shell, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return
 from thonny.common import (
     OBJECT_LINK_END,
@@ -33,6 +34,7 @@ from thonny.ui_utils import (
     get_beam_cursor,
     get_hyperlink_cursor,
     lookup_style_option,
+    replace_unsupported_chars,
     scrollbar_style,
     select_sequence,
     show_dialog,
@@ -50,7 +52,7 @@ _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 
-TERMINAL_CONTROL_REGEX_STR = r"\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|\x1B\].+\a"
+TERMINAL_CONTROL_REGEX_STR = r"\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r]|\x1B\].+?(?:\a|\x1B\\)"
 TERMINAL_CONTROL_REGEX = re.compile(TERMINAL_CONTROL_REGEX_STR)
 OUTPUT_SPLIT_REGEX = re.compile(
     "(%s|%s|%s)"
@@ -137,6 +139,20 @@ class ShellView(tk.PanedWindow):
 
         self.init_plotter()
         self.menu = ShellMenu(self.text, self)
+
+    def set_title(self, text: str) -> None:
+        if not hasattr(self, "home_widget"):
+            logger.warning("No home widget")
+            return
+
+        container = cast(ttk.Frame, getattr(self, "home_widget"))
+        notebook = cast(ttk.Notebook, container.master)
+
+        title = tr("Shell")
+        if text:
+            title += " • " + replace_unsupported_chars(text)
+
+        notebook.tab(container, text=title)
 
     def init_plotter(self):
         self.plotter = None
@@ -544,6 +560,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
+            elif data.startswith("\x1B]"):
+                self._handle_osc_sequence(data)
             elif data.endswith("D") or data.endswith("C"):
                 self._change_io_cursor_offset_csi(data)
             elif stream_name == "stdout":
@@ -704,6 +722,19 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._ansi_underline = False
         self._ansi_conceal = False
         self._ansi_strikethrough = False
+
+    def _handle_osc_sequence(self, data: str) -> None:
+        assert data.startswith("\x1b]") and (data.endswith("\a") or data.endswith("\x1b\\"))
+        if data.endswith("\a"):
+            inner = data[2:-1]
+        else:
+            inner = data[2:-2]
+
+        # https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#window-title
+        if inner[:2] in ["0;", "2;"]:
+            get_shell().set_title(inner[2:])
+        else:
+            logger.warning("Unsupported OSC sequence %r", data)
 
     def _update_ansi_attributes(self, marker):
         if not marker.endswith("m"):
@@ -911,6 +942,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             )
 
         self.see("end")
+        get_shell().set_title("")
 
     def intercept_insert(self, index, chars, tags=None, **kw):
         if tags is None:
@@ -1234,6 +1266,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                         "shell.clear_for_new_process"
                     ):
                         self._clear_shell()
+                        get_shell().set_title("")
 
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
@@ -1378,6 +1411,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         # make sure dead values are not clickable anymore
         self._invalidate_current_data()
         self.set_read_only(True)
+        get_shell().set_title("")
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
