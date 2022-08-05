@@ -877,17 +877,33 @@ class BackendProxy(ABC):
 
 
 class EnvFile(object):
-    def __init__(self, fnam=None):
-        self.fnam = fnam if fnam else ".env"
+    def __init__(self):
         self._env = collections.OrderedDict()
         self.err_lines = []
         self.excep = None
 
-    def load(self):
-        self.excep = None
+        r_ex = r"[^\\](\${\s*([a-zA-Z_]+[a-zA-Z_0-9]*)\s*})"
+        self._r_match = re.compile(r_ex)
+
+    @staticmethod
+    def build_env_file_path(basedir):
+        # todo: configuration menu -> Tools > Options > Run & Debug
+        env_file = os.environ.get("THONNY_ENV_FILE", ".env")
+        env_file = os.path.join(basedir, env_file)
+        return env_file
+
+    def clear(self):
         self._env.clear()
+        self.clear_errors()
+
+    def clear_errors(self):
         self.err_lines.clear()
+        self.excep = None
+
+    def load(self, fnam):
+        self.fnam = fnam
         lineno = 0
+        self.clear_errors()
         try:
             with open(self.fnam) as f:
                 while True:
@@ -907,7 +923,7 @@ class EnvFile(object):
                         continue
                     key = line[:pos].strip()
                     val = line[pos + 1 :].strip()
-                    self._env[key] = val
+                    self._env[key] = self._expand_vars(val, lineno)
 
         except Exception as ex:
             self.err_lines.append(lineno)
@@ -915,8 +931,19 @@ class EnvFile(object):
 
         return self
 
-    def expand_vars(self):
-        raise NotImplementedError()
+    def _expand_vars(self, val, lineno):
+        if val.startswith("${"):
+            # add leading space so regex capturing works
+            val = " " + val
+        matches = self._r_match.finditer(val)
+        if matches:
+            for m in matches:
+                subst_val, g_var = m.groups()[:2]
+                if g_var in self._env:
+                    val = val.replace(subst_val, self._env[g_var])
+                else:
+                    self.err_lines.append(lineno)
+        return val.strip()
 
     def remove_unused(self):
         for key, val in list(self._env.items()):
@@ -1019,40 +1046,30 @@ class SubprocessProxy(BackendProxy, ABC):
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
 
-        add_env_file = self._load_env_file()
+        result_env = self._load_env_file_with_overlay(overlay_env=env)
+        return result_env
 
-        chained_env = collections.ChainMap(add_env_file, env)
-        chained_env = dict(chained_env)
-
-        # un-set keys
-        env = EnvFile()
-        env.set_env(chained_env)
-        env.remove_unused()
-
-        return env.get_env()
-
-    def _load_env_file(self):
-        # todo: configuration menu -> Tools > Options > Run & Debug
-        env_file = os.environ.get("THONNY_ENV_FILE", ".env")
-        script_dir = self._get_launcher_python_script_dir()
-
-        env_file = os.path.join(script_dir, env_file)
+    def _load_env_file_with_overlay(self, overlay_env):
+        """
+        supports assignments like
+            PATH= ${PATH};c:\\mydesk;
+        if PATH is given in overlay_env
+        """
+        env_file = EnvFile.build_env_file_path(self.get_cwd())
 
         if os.path.exists(env_file) and os.path.isfile(env_file):
-            env = EnvFile(env_file)
-            env.load()
+            env = EnvFile()
+            env.set_env(overlay_env)
+            env.load(env_file)
             if env.has_errors():
                 logger.error("env-file errors in lines: " + str(env.err_lines))
                 if env.excep:
                     logger.exception("env-file" + str(env.excep))
             env = env.get_env()
         else:
-            env = {}
+            env = overlay_env
 
         return env
-
-    def _get_launcher_python_script_dir(self):
-        return self._get_launcher_with_args()[-1]
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
