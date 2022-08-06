@@ -22,6 +22,7 @@ class WorkDialog(CommonDialog):
         super(WorkDialog, self).__init__(master)
 
         self._autostart = autostart
+        self._has_been_started = False
         self._state = "idle"
         self.success = False
         self._work_events_queue = queue.Queue()
@@ -43,7 +44,14 @@ class WorkDialog(CommonDialog):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
         if self._autostart:
-            self.on_ok()
+            self.bind("<Map>", self._start_on_map, True)
+
+    def _start_on_map(self, event) -> None:
+        if self._has_been_started:
+            return
+
+        self._has_been_started = True
+        self.start_work_and_update_ui()
 
     def populate_main_frame(self):
         pass
@@ -58,7 +66,7 @@ class WorkDialog(CommonDialog):
         self.instructions_frame.rowconfigure(0, weight=1)
         self.instructions_frame.columnconfigure(0, weight=1)
 
-        pad = self.get_padding()
+        pad = self.get_large_padding()
         self.instructions_label = ttk.Label(self, style="Tip.TLabel", text=instructions)
         self.instructions_label.grid(row=0, column=0, sticky="w", padx=pad, pady=pad)
 
@@ -70,8 +78,8 @@ class WorkDialog(CommonDialog):
         self.main_frame.grid(row=1, column=0, sticky="nsew")
 
     def init_action_frame(self):
-        padding = self.get_padding()
-        intpad = self.get_internal_padding()
+        padding = self.get_large_padding()
+        intpad = self.get_small_padding()
 
         self.action_frame = ttk.Frame(self)
         self.action_frame.grid(row=2, column=0, sticky="nsew")
@@ -93,7 +101,7 @@ class WorkDialog(CommonDialog):
         self._ok_button = ttk.Button(
             self.action_frame,
             text=self.get_ok_text(),
-            command=self.on_ok,
+            command=self.start_work_and_update_ui,
             state="disabled",
             default="active",
         )
@@ -130,7 +138,7 @@ class WorkDialog(CommonDialog):
             read_only=True,
         )
 
-        padding = self.get_padding()
+        padding = self.get_large_padding()
         self.log_text.grid(row=1, column=1, sticky="nsew", padx=padding, pady=(0, padding))
 
     def update_ui(self):
@@ -163,7 +171,8 @@ class WorkDialog(CommonDialog):
 
     def _keep_updating_ui(self):
         if self._state != "closed":
-            self.update_ui()
+            if self.winfo_ismapped():
+                self.update_ui()
             self._update_scheduler = self.after(200, self._keep_updating_ui)
         else:
             self._update_scheduler = None
@@ -199,7 +208,7 @@ class WorkDialog(CommonDialog):
     def get_cancel_text(self):
         return tr("Cancel")
 
-    def on_ok(self, event=None):
+    def start_work_and_update_ui(self, event=None):
         assert self._state == "idle"
         if self.start_work() is not False:
             self._state = "working"
@@ -211,8 +220,8 @@ class WorkDialog(CommonDialog):
                 self._current_action_label["text"] = tr("Starting") + "..."
 
     def grid_progress_widgets(self):
-        padding = self.get_padding()
-        intpad = self.get_internal_padding()
+        padding = self.get_large_padding()
+        intpad = self.get_small_padding()
         self._progress_bar.grid(row=1, column=1, sticky="w", padx=(padding, intpad), pady=padding)
 
     def on_cancel(self, event=None):

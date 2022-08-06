@@ -282,7 +282,7 @@ class Editor(ttk.Frame):
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
 
-    def save_file(self, ask_filename=False, save_copy=False, node=None) -> str:
+    def save_file(self, ask_filename=False, save_copy=False, node=None) -> Optional[str]:
         if self._filename is not None and not ask_filename:
             save_filename = self._filename
             get_workbench().event_generate("Save", editor=self, filename=save_filename)
@@ -324,6 +324,12 @@ class Editor(ttk.Frame):
         return save_filename
 
     def write_local_file(self, save_filename, content_bytes, save_copy):
+        process_shebang = content_bytes.startswith(b"#!/") and get_workbench().get_option(
+            "file.make_saved_shebang_scripts_executable"
+        )
+        if process_shebang:
+            content_bytes = content_bytes.replace(b"\r\n", b"\n")
+
         try:
             f = open(save_filename, mode="wb")
             f.write(content_bytes)
@@ -331,6 +337,8 @@ class Editor(ttk.Frame):
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             os.fsync(f)
             f.close()
+            if process_shebang:
+                os.chmod(save_filename, 0o755)
             if not save_copy or save_filename == self._filename:
                 self._last_known_mtime = os.path.getmtime(save_filename)
             get_workbench().event_generate(
@@ -370,7 +378,7 @@ class Editor(ttk.Frame):
         if get_runner().ready_for_remote_file_operations(show_message=True):
             target_filename = extract_target_path(save_filename)
 
-            get_runner().send_command_and_wait(
+            result = get_runner().send_command_and_wait(
                 InlineCommand(
                     "write_file",
                     path=target_filename,
@@ -378,9 +386,16 @@ class Editor(ttk.Frame):
                     editor_id=id(self),
                     blocking=True,
                     description=tr("Saving to %s") % target_filename,
+                    make_shebang_scripts_executable=get_workbench().get_option(
+                        "file.make_saved_shebang_scripts_executable"
+                    ),
                 ),
                 dialog_title=tr("Saving"),
             )
+
+            if "error" in result:
+                messagebox.showerror(tr("Could not save"), str(result["error"]))
+                return False
 
             if not save_copy:
                 self._code_view.text.edit_modified(False)
@@ -394,6 +409,7 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("RemoteFilesChanged")
             return True
         else:
+            messagebox.showerror(tr("Could not save"), "Back-end is not ready")
             return False
 
     def ask_new_path(self, node=None):
@@ -592,6 +608,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.show_line_numbers", True)
         get_workbench().set_default("view.recommended_line_length", 0)
         get_workbench().set_default("edit.indent_with_tabs", False)
+        get_workbench().set_default("file.make_saved_shebang_scripts_executable", True)
 
         self._recent_menu = tk.Menu(
             get_workbench().get_menu("file"), postcommand=self._update_recent_menu
@@ -1121,8 +1138,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         if confirm:
             for editor_ in modified_editors:
+                assert isinstance(editor_, Editor)
                 if editor_.get_filename(True):
-                    editor_.save_file()
+                    if not editor_.save_file():
+                        return False
                 else:
                     return False
             return True

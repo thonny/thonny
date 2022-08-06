@@ -3,159 +3,201 @@
 The `math` module provides some basic mathematical functions for
 working with floating-point numbers."""
 
-e: Any = ...
+from __future__ import annotations
+
+from typing import Tuple
+
+e: float
 """base of the natural logarithm"""
 
-pi: Any = ...
+pi: float
 """the ratio of a circle's circumference to its diameter"""
 
-def acos(x: Any) -> Any:
+def acos(x: float) -> float:
     """Return the inverse cosine of ``x``."""
     ...
 
-def asin(x: Any) -> Any:
+def asin(x: float) -> float:
     """Return the inverse sine of ``x``."""
     ...
 
-def atan(x: Any) -> Any:
+def atan(x: float) -> float:
     """Return the inverse tangent of ``x``."""
     ...
 
-def atan2(y: Any, x: Any) -> Any:
+def atan2(y: float, x: float) -> float:
     """Return the principal value of the inverse tangent of ``y/x``."""
     ...
 
-def ceil(x: Any) -> Any:
+def ceil(x: float) -> int:
     """Return an integer, being ``x`` rounded towards positive infinity."""
     ...
 
-def copysign(x: Any, y: Any) -> Any:
+def copysign(x: float, y: float) -> float:
     """Return ``x`` with the sign of ``y``."""
     ...
 
-def cos(x: Any) -> Any:
+def cos(x: float) -> float:
     """Return the cosine of ``x``."""
     ...
 
-def degrees(x: Any) -> Any:
+def degrees(x: float) -> float:
     """Return radians ``x`` converted to degrees."""
     ...
 
-def exp(x: Any) -> Any:
+def exp(x: float) -> float:
     """Return the exponential of ``x``."""
     ...
 
-def fabs(x: Any) -> Any:
+def fabs(x: float) -> float:
     """Return the absolute value of ``x``."""
     ...
 
-def floor(x: Any) -> Any:
+def floor(x: float) -> int:
     """Return an integer, being ``x`` rounded towards negative infinity."""
     ...
 
-def fmod(x: Any, y: Any) -> Any:
+def fmod(x: float, y: float) -> int:
     """Return the remainder of ``x/y``."""
     ...
 
-def frexp(x: Any) -> Any:
+def frexp(x: float) -> Tuple[int, int]:
     """Decomposes a floating-point number into its mantissa and exponent.
     The returned value is the tuple ``(m, e)`` such that ``x == m * 2**e``
     exactly.  If ``x == 0`` then the function returns ``(0.0, 0)``, otherwise
     the relation ``0.5 <= abs(m) < 1`` holds."""
     ...
 
-def isfinite(x: Any) -> Any:
+def isfinite(x: float) -> bool:
     """Return ``True`` if ``x`` is finite."""
     ...
 
-def isinf(x: Any) -> Any:
+def isinf(x: float) -> bool:
     """Return ``True`` if ``x`` is infinite."""
     ...
 
-def isnan(x: Any) -> Any:
+def isnan(x: float) -> bool:
     """Return ``True`` if ``x`` is not-a-number"""
     ...
 
-def ldexp(x: Any, exp: Any) -> Any:
+def ldexp(x: float, exp: float) -> float:
     """Return ``x * (2**exp)``."""
     ...
 
-def modf(x: Any) -> Any:
+def modf(x: float) -> Tuple[float, float]:
     """Return a tuple of two floats, being the fractional and integral parts of
     ``x``.  Both return values have the same sign as ``x``."""
     ...
 
-def pow(x: Any, y: Any) -> Any:
+def pow(x: float, y: float) -> float:
     """Returns ``x`` to the power of ``y``."""
 
-def radians(x: Any) -> Any:
+def radians(x: float) -> float:
     """Return degrees ``x`` converted to radians."""
 
-def sin(x: Any) -> Any:
+def sin(x: float) -> float:
     """Return the sine of ``x``."""
     ...
 
-def sqrt(x: Any) -> Any:
+def sqrt(x: float) -> float:
     """Returns the square root of ``x``."""
     ...
 
-def tan(x: Any) -> Any:
+def tan(x: float) -> float:
     """Return the tangent of ``x``."""
     ...
 
-def trunc(x: Any) -> Any:
+def trunc(x: float) -> int:
     """Return an integer, being ``x`` rounded towards 0."""
     ...
 
-def expm1(x):
-    """Return ``exp(x) - 1``."""
+def expm1(x: float) -> float:
+    """Return ``exp(x) - 1``.
+
+    May not be available on some boards.
+    """
     ...
 
-def log2(x):
-    """Return the base-2 logarithm of ``x``."""
+def log2(x: float) -> float:
+    """Return the base-2 logarithm of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def log10(x):
-    """Return the base-10 logarithm of ``x``."""
+def log10(x: float) -> float:
+    """Return the base-10 logarithm of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def cosh(x):
-    """Return the hyperbolic cosine of ``x``."""
+def cosh(x: float) -> float:
+    """Return the hyperbolic cosine of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def sinh(x):
-    """Return the hyperbolic sine of ``x``."""
+def sinh(x: float) -> float:
+    """Return the hyperbolic sine of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def tanh(x):
-    """Return the hyperbolic tangent of ``x``."""
+def tanh(x: float) -> float:
+    """Return the hyperbolic tangent of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def acosh(x):
-    """Return the inverse hyperbolic cosine of ``x``."""
+def acosh(x: float) -> float:
+    """Return the inverse hyperbolic cosine of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def asinh(x):
-    """Return the inverse hyperbolic sine of ``x``."""
+def asinh(x: float) -> float:
+    """Return the inverse hyperbolic sine of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def atanh(x):
-    """Return the inverse hyperbolic tangent of ``x``."""
+def atanh(x: float) -> float:
+    """Return the inverse hyperbolic tangent of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def erf(x):
-    """Return the error function of ``x``."""
+def erf(x: float) -> float:
+    """Return the error function of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def erfc(x):
-    """Return the complementary error function of ``x``."""
+def erfc(x: float) -> float:
+    """Return the complementary error function of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def gamma(x):
-    """Return the gamma function of ``x``."""
+def gamma(x: float) -> float:
+    """Return the gamma function of ``x``.
+
+    May not be available on some boards.
+    """
     ...
 
-def lgamma(x):
-    """Return the natural logarithm of the gamma function of ``x``."""
-    ...
+def lgamma(x: float) -> float:
+    """Return the natural logarithm of the gamma function of ``x``.
 
+    May not be available on some boards.
+    """
+    ...

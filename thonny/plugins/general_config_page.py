@@ -97,7 +97,13 @@ class GeneralConfigurationPage(ConfigurationPage):
         env_label = ttk.Label(self, text=tr("Environment variables (one KEY=VALUE per line)"))
         env_label.grid(row=90, column=0, sticky=tk.W, pady=(20, 0), columnspan=2)
         self.env_box = tktextext.TextFrame(
-            self, horizontal_scrollbar=False, height=4, borderwidth=1, undo=True, wrap="none"
+            self,
+            horizontal_scrollbar=False,
+            height=4,
+            width=30,
+            borderwidth=1,
+            undo=True,
+            wrap="none",
         )
         self.env_box.grid(row=100, column=0, sticky="nsew", pady=(0, 10), columnspan=2)
         for entry in get_workbench().get_option("general.environment"):

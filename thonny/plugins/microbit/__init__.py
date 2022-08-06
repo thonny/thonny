@@ -18,9 +18,9 @@ LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/relea
 
 class MicrobitProxy(BareMetalMicroPythonProxy):
     def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.microbit.microbit_backend
+        import thonny.plugins.microbit.microbit_back
 
-        return thonny.plugins.microbit.microbit_backend.__file__
+        return thonny.plugins.microbit.microbit_back.__file__
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -42,7 +42,7 @@ class MicrobitProxy(BareMetalMicroPythonProxy):
         return False
 
     @classmethod
-    def get_known_usb_vids_pids(self):
+    def get_known_usb_vids_pids(cls):
         return {(0x0D28, 0x0204)}
 
 
@@ -67,23 +67,18 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
         dlg = MicrobitFlashingDialog(self)
         ui_utils.show_dialog(dlg)
 
-    def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.microbit.microbit_backend
-
-        return thonny.plugins.microbit.microbit_backend.__file__
-
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
     def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows you to install or update MicroPython firmware on your micro:bit.\n"
+            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
             "\n"
             "1. Plug in your micro:bit.\n"
             "2. Wait until device information appears.\n"
             "3. Click 'Install' and wait for some seconds until done.\n"
             "4. Close the dialog and start programming!\n"
             "\n"
-            "NB! Installing a new firmware will erase all files you may have on your\n"
+            "NB! Installing MicroPython will erase all files you may have on your\n"
             "device. Make sure you have important files backed up!"
         )
 
@@ -93,34 +88,34 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
     def get_unknown_version_text(self):
         return "?"
 
-    def get_firmware_description(self):
-        info = self._get_latest_firmware_info_for_current_device()
+    def get_uf2_description(self):
+        info = self._get_latest_micropython_info_for_current_device()
         if info is None:
             return None
         return "%s (%s)" % (info["version"], info["date"])
 
-    def _get_latest_firmware_info_for_current_device(self):
+    def _get_latest_micropython_info_for_current_device(self):
         if self._possible_targets is None or len(self._possible_targets) != 1:
             return None
         else:
             board_id = self._possible_targets[0][1]
-            return self._get_latest_firmware_info_for_device(board_id)
+            return self._get_latest_micropython_info_for_device(board_id)
 
-    def _get_latest_firmware_info_for_device(self, board_id):
+    def _get_latest_micropython_info_for_device(self, board_id):
         if self._release_info is None:
             return None
         else:
             return self._release_info["latest_firmwares"].get(board_id, None)
 
     def get_download_url_and_size(self, board_id):
-        info = self._get_latest_firmware_info_for_device(board_id)
+        info = self._get_latest_micropython_info_for_device(board_id)
         if info is None:
             return None
 
         return info["hex_download"], info["size"]
 
     def get_target_filename(self):
-        return "firmware.hex"
+        return "micropython.hex"
 
     @classmethod
     def find_device_board_id_and_model(cls, mount_path):
@@ -156,7 +151,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
         return None
 
     def get_title(self):
-        return "Install MicroPython firmware for BBC micro:bit"
+        return "Install MicroPython for BBC micro:bit"
 
     def _get_vid_pids_to_wait_for(self):
         return MicrobitProxy.get_known_usb_vids_pids()
@@ -180,6 +175,7 @@ def load_plugin():
     import thonny.plugins.circuitpython
     import thonny.plugins.esp
     import thonny.plugins.micropython
+    import thonny.plugins.rp2040
 
     thonny.plugins.circuitpython.cirpy_front.VIDS_PIDS_TO_AVOID.update(
         MicrobitProxy.get_known_usb_vids_pids()
@@ -188,5 +184,8 @@ def load_plugin():
         MicrobitProxy.get_known_usb_vids_pids()
     )
     thonny.plugins.esp.VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS.update(
+        MicrobitProxy.get_known_usb_vids_pids()
+    )
+    thonny.plugins.rp2040.VIDS_PIDS_TO_AVOID_IN_RP2040.update(
         MicrobitProxy.get_known_usb_vids_pids()
     )

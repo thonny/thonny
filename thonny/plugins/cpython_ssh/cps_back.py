@@ -24,7 +24,7 @@ from thonny.common import (
     serialize_message,
 )
 
-logger = getLogger(__name__)
+logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
@@ -70,7 +70,9 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         # It is possible that there is a command being executed both in the local and remote process,
         # interrupt them both
         with self._interrupt_lock:
-            interrupt_local_process()
+            # TODO: interrupt local process only if it's going on
+            # otherwise the whole backend comes down
+            # interrupt_local_process()
             self._proc.stdin.write("\x03")
 
     def send_message(self, msg: MessageFromBackend) -> None:
@@ -87,29 +89,41 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         self._proc.stdin.write("\n")
 
     def _start_response_forwarder(self):
+        logger.info("Starting response forwarder")
         self._response_forwarder = Thread(target=self._forward_main_responses, daemon=True)
         self._response_forwarder.start()
 
     def _forward_main_responses(self):
-        while self._should_keep_going():
+        while True:
+            try:
+                self._check_for_connection_error()
+            except ConnectionError:
+                logger.info("Breaking forwarding loop because of connection error")
+                break
+
             line = self._proc.stdout.readline()
             if self._main_backend_is_fresh and self._looks_like_echo(line):
                 # In the beginning the backend may echo commands sent to it (perhaps this echo-avoiding trick
                 # takes time). Don't forward those lines.
+                logger.info("Skipping forwarding %r", line)
                 continue
 
             if not line:
+                logger.info("Breaking forwarding loop")
                 break
             with self._response_lock:
                 sys.stdout.write(line)
                 sys.stdout.flush()
                 self._main_backend_is_fresh = False
 
+        logger.info("Completed _forward_main_responses")
+
     def _looks_like_echo(self, line):
         return line.startswith("^B")
 
-    def _should_keep_going(self) -> bool:
-        return self._proc is not None and self._proc.poll() is None
+    def _check_for_connection_error(self) -> None:
+        if self._proc is None or self._proc.poll() is not None:
+            raise ConnectionAbortedError()
 
     def _start_main_backend(self) -> RemoteProcess:
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
@@ -139,6 +153,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         return f"/tmp/thonny-backend-{thonny.get_version()}-{self._user}"
 
     def _upload_main_backend(self):
+        logger.info("Uploading main backend")
         import thonny
 
         launch_dir = self._get_remote_program_directory()

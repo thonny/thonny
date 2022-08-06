@@ -42,7 +42,7 @@ $TARGET_DIR/bin/python3.10 -s -m pip install certifi
 
 # INSTALL THONNY ###################################
 $TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
-#$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0.dev0-py3-none-any.whl
+#$TARGET_DIR/bin/python3.10 -s -m pip install ../setuptools/thonny-4.0.0b3.dev0-py3-none-any.whl
 
 VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
@@ -125,7 +125,7 @@ cp ../../*LICENSE.txt $TARGET_DIR
 
 # put it together
 mkdir -p dist
-tar -cvzf dist/${VERSION_NAME}-alt.tar.gz -C build thonny
+tar -cvzf dist/${VERSION_NAME}.tar.gz -C build thonny
 
 # XXL ###########################################################
 

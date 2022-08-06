@@ -10,15 +10,12 @@ from pipkin.session import Session
 
 logger = logging.getLogger("pipkin")
 
-__version__ = "1.0b1"
+__version__ = "1.0b2"
 
 
 def error(msg):
     msg = "ERROR: " + msg
-    if sys.stderr.isatty():
-        print("\x1b[31m", msg, "\x1b[0m", sep="", file=sys.stderr)
-    else:
-        print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr)
 
     return 1
 

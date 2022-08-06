@@ -699,7 +699,7 @@ class Workbench(tk.Tk):
 
     def _init_containers(self) -> None:
 
-        margin = 10
+        margin = ems_to_pixels(0.6)
         # Main frame functions as
         # - a background behind padding of main_pw, without this OS X leaves white border
         # - a container to be hidden, when a view is maximized and restored when view is back home
@@ -711,16 +711,18 @@ class Workbench(tk.Tk):
         self._maximized_view = None  # type: Optional[tk.Widget]
 
         self._toolbar = ttk.Frame(main_frame, padding=0)
-        self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=margin, pady=(5, 0))
+        self._toolbar.grid(
+            column=0, row=0, sticky=tk.NSEW, padx=margin, pady=(ems_to_pixels(0.5), 0)
+        )
 
-        self.set_default("layout.west_pw_width", self.scale(150))
-        self.set_default("layout.east_pw_width", self.scale(150))
+        self.set_default("layout.west_pw_width", ems_to_pixels(15))
+        self.set_default("layout.east_pw_width", ems_to_pixels(15))
 
-        self.set_default("layout.s_nb_height", self.scale(150))
-        self.set_default("layout.nw_nb_height", self.scale(150))
-        self.set_default("layout.sw_nb_height", self.scale(150))
-        self.set_default("layout.ne_nb_height", self.scale(150))
-        self.set_default("layout.se_nb_height", self.scale(150))
+        self.set_default("layout.s_nb_height", ems_to_pixels(15))
+        self.set_default("layout.nw_nb_height", ems_to_pixels(15))
+        self.set_default("layout.sw_nb_height", ems_to_pixels(15))
+        self.set_default("layout.ne_nb_height", ems_to_pixels(15))
+        self.set_default("layout.se_nb_height", ems_to_pixels(15))
 
         self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
 
@@ -802,8 +804,9 @@ class Workbench(tk.Tk):
             menu_conf = get_style_configuration("Menu")
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
-        # Set up the button
-        self._backend_button = ttk.Button(self._statusbar, text="☰", style="Toolbutton")
+        # Set up the button.
+        # Using ≡ ("Identical to"), because ☰ ("Trigram for heaven") looks too heavy in Windows
+        self._backend_button = ttk.Button(self._statusbar, text="≡", style="Toolbutton")
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -882,7 +885,7 @@ class Workbench(tk.Tk):
             value = "n/a"
 
         self._backend_conf_variable.set(value=value)
-        self._backend_button.configure(text=desc + " ☰")
+        self._backend_button.configure(text=desc)
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
@@ -1203,8 +1206,7 @@ class Workbench(tk.Tk):
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
         proxy_class.backend_description = description  # type: ignore
-        if not getattr(config_page_constructor, "backend_name", None):
-            config_page_constructor.backend_name = name
+        config_page_constructor.backend_name = name
 
     def add_ui_theme(
         self,
@@ -2338,6 +2340,10 @@ class Workbench(tk.Tk):
 
             self._closing = True
 
+            runner = get_runner()
+            if runner != None:
+                runner.destroy_backend()
+
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
             # https://bugs.python.org/issue1207592
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
@@ -2360,12 +2366,7 @@ class Workbench(tk.Tk):
             logger.exception("Error while destroying workbench")
 
         finally:
-            try:
-                super().destroy()
-            finally:
-                runner = get_runner()
-                if runner != None:
-                    runner.destroy_backend()
+            super().destroy()
 
     def _on_configure(self, event) -> None:
         # called when window is moved or resized

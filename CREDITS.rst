@@ -86,6 +86,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Gabriel Slørdahl
 * Gagan Saksena
 * Georges Khaznadar
+* Helmut Ascheid
 * Hyungseok Choi
 * IhorNehrutsa
 * Ingo Blechschmidt
@@ -136,8 +137,11 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Sven Duzont
 * Syed Nasim
 * Taavi Ilp
+* tabreturn
 * TANAKA Masayuki
+* TooLazy0x00
 * Toomas Mölder
+* Tristan Bunn
 * Tusamten
 * Vytenis (svajoklis-1)
 * Xin Rong

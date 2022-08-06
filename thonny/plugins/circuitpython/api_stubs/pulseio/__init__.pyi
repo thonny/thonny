@@ -1,113 +1,29 @@
-"""Support for pulse based protocols
+"""Support for individual pulse based protocols
 
 The `pulseio` module contains classes to provide access to basic pulse IO.
+Individual pulses are commonly used in infrared remotes and in DHT
+temperature sensors.
 
 All classes change hardware state and should be deinitialized when they
 are no longer needed if the program continues after use. To do so, either
 call :py:meth:`!deinit` or use a context manager. See
-:ref:`lifetime-and-contextmanagers` for more info.
+:ref:`lifetime-and-contextmanagers` for more info."""
 
-For example::
+from __future__ import annotations
 
-  import pulseio
-  import time
-  from board import *
+from typing import Optional
 
-  pwm = pulseio.PWMOut(D13)
-  pwm.duty_cycle = 2 ** 15
-  time.sleep(0.1)
-
-This example will initialize the the device, set
-:py:data:`~pulseio.PWMOut.duty_cycle`, and then sleep 0.1 seconds.
-CircuitPython will automatically turn off the PWM when it resets all
-hardware after program completion. Use ``deinit()`` or a ``with`` statement
-to do it yourself."""
-
-class PWMOut:
-    """Output a Pulse Width Modulated signal on a given pin."""
-
-    def __init__(self, pin: microcontroller.Pin, *, duty_cycle: int = 0, frequency: int = 500, variable_frequency: bool = False):
-        """Create a PWM object associated with the given pin. This allows you to
-        write PWM signals out on the given pin. Frequency is fixed after init
-        unless ``variable_frequency`` is True.
-
-        .. note:: When ``variable_frequency`` is True, further PWM outputs may be
-          limited because it may take more internal resources to be flexible. So,
-          when outputting both fixed and flexible frequency signals construct the
-          fixed outputs first.
-
-        :param ~microcontroller.Pin pin: The pin to output to
-        :param int duty_cycle: The fraction of each pulse which is high. 16-bit
-        :param int frequency: The target frequency in Hertz (32-bit)
-        :param bool variable_frequency: True if the frequency will change over time
-
-        Simple LED fade::
-
-          import pulseio
-          import board
-
-          pwm = pulseio.PWMOut(board.D13)     # output on D13
-          pwm.duty_cycle = 2 ** 15            # Cycles the pin with 50% duty cycle (half of 2 ** 16) at the default 500hz
-
-        PWM at specific frequency (servos and motors)::
-
-          import pulseio
-          import board
-
-          pwm = pulseio.PWMOut(board.D13, frequency=50)
-          pwm.duty_cycle = 2 ** 15                  # Cycles the pin with 50% duty cycle (half of 2 ** 16) at 50hz
-
-        Variable frequency (usually tones)::
-
-          import pulseio
-          import board
-          import time
-
-          pwm = pulseio.PWMOut(board.D13, duty_cycle=2 ** 15, frequency=440, variable_frequency=True)
-          time.sleep(0.2)
-          pwm.frequency = 880
-          time.sleep(0.1)"""
-        ...
-
-    def deinit(self, ) -> Any:
-        """Deinitialises the PWMOut and releases any hardware resources for reuse."""
-        ...
-
-    def __enter__(self, ) -> Any:
-        """No-op used by Context Managers."""
-        ...
-
-    def __exit__(self, ) -> Any:
-        """Automatically deinitializes the hardware when exiting a context. See
-        :ref:`lifetime-and-contextmanagers` for more info."""
-        ...
-
-    duty_cycle: Any = ...
-    """16 bit value that dictates how much of one cycle is high (1) versus low
-    (0). 0xffff will always be high, 0 will always be low and 0x7fff will
-    be half high and then half low.
-
-    Depending on how PWM is implemented on a specific board, the internal
-    representation for duty cycle might have less than 16 bits of resolution.
-    Reading this property will return the value from the internal representation,
-    so it may differ from the value set."""
-
-    frequency: Any = ...
-    """32 bit value that dictates the PWM frequency in Hertz (cycles per
-    second). Only writeable when constructed with ``variable_frequency=True``.
-
-    Depending on how PWM is implemented on a specific board, the internal value
-    for the PWM's duty cycle may need to be recalculated when the frequency
-    changes. In these cases, the duty cycle is automatically recalculated
-    from the original duty cycle value. This should happen without any need
-    to manually re-set the duty cycle."""
+import microcontroller
+from circuitpython_typing import ReadableBuffer
 
 class PulseIn:
     """Measure a series of active and idle pulses. This is commonly used in infrared receivers
-       and low cost temperature sensors (DHT). The pulsed signal consists of timed active and
-       idle periods. Unlike PWM, there is no set duration for active and idle pairs."""
+    and low cost temperature sensors (DHT). The pulsed signal consists of timed active and
+    idle periods. Unlike PWM, there is no set duration for active and idle pairs."""
 
-    def __init__(self, pin: microcontroller.Pin, maxlen: int = 2, *, idle_state: bool = False):
+    def __init__(
+        self, pin: microcontroller.Pin, maxlen: int = 2, *, idle_state: bool = False
+    ) -> None:
         """Create a PulseIn object associated with the given pin. The object acts as
         a read-only sequence of pulse lengths with a given max length. When it is
         active, new pulse lengths are added to the end of the list. When there is
@@ -142,25 +58,20 @@ class PulseIn:
           # Resume with an 80 microsecond active pulse
           pulses.resume(80)"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the PulseIn and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> PulseIn:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    def pause(self, ) -> Any:
+    def pause(self) -> None:
         """Pause pulse capture"""
         ...
-
-    def resume(self, trigger_duration: int = 0) -> Any:
+    def resume(self, trigger_duration: int = 0) -> None:
         """Resumes pulse capture after an optional trigger pulse.
 
         .. warning:: Using trigger pulse with a device that drives both high and
@@ -170,33 +81,30 @@ class PulseIn:
 
         :param int trigger_duration: trigger pulse duration in microseconds"""
         ...
-
-    def clear(self, ) -> Any:
+    def clear(self) -> None:
         """Clears all captured pulses"""
         ...
-
-    def popleft(self, ) -> Any:
+    def popleft(self) -> int:
         """Removes and returns the oldest read pulse."""
         ...
-
-    maxlen: Any = ...
+    maxlen: int
     """The maximum length of the PulseIn. When len() is equal to maxlen,
     it is unclear which pulses are active and which are idle."""
 
-    paused: Any = ...
+    paused: bool
     """True when pulse capture is paused as a result of :py:func:`pause` or an error during capture
     such as a signal that is too fast."""
 
-    def __len__(self, ) -> Any:
-        """Returns the current pulse length
+    def __bool__(self) -> bool: ...
+    def __len__(self) -> int:
+        """Returns the number of pulse durations currently stored.
 
         This allows you to::
 
           pulses = pulseio.PulseIn(pin)
           print(len(pulses))"""
         ...
-
-    def __getitem__(self, index: Any) -> Any:
+    def __getitem__(self, index: int) -> Optional[int]:
         """Returns the value at the given index or values in slice.
 
         This allows you to::
@@ -207,23 +115,34 @@ class PulseIn:
 
 class PulseOut:
     """Pulse PWM "carrier" output on and off. This is commonly used in infrared remotes. The
-       pulsed signal consists of timed on and off periods. Unlike PWM, there is no set duration
-       for on and off pairs."""
+    pulsed signal consists of timed on and off periods. Unlike PWM, there is no set duration
+    for on and off pairs."""
 
-    def __init__(self, carrier: pulseio.PWMOut):
-        """Create a PulseOut object associated with the given PWMout object.
+    def __init__(
+        self,
+        pin: microcontroller.Pin,
+        *,
+        frequency: int = 38000,
+        duty_cycle: int = 1 << 15,
+    ) -> None:
+        """Create a PulseOut object associated with the given pin.
 
-        :param ~pulseio.PWMOut carrier: PWMOut that is set to output on the desired pin.
+        :param ~microcontroller.Pin pin: Signal output pin
+        :param int frequency: Carrier signal frequency in Hertz
+        :param int duty_cycle: 16-bit duty cycle of carrier frequency (0 - 65536)
+
+        For backwards compatibility, ``pin`` may be a PWMOut object used as the carrier. This
+        compatibility will be removed in CircuitPython 8.0.0.
 
         Send a short series of pulses::
 
           import array
           import pulseio
+          import pwmio
           import board
 
           # 50% duty cycle at 38kHz.
-          pwm = pulseio.PWMOut(board.D13, frequency=38000, duty_cycle=32768)
-          pulse = pulseio.PulseOut(pwm)
+          pulse = pulseio.PulseOut(board.LED, frequency=38000, duty_cycle=32768)
           #                             on   off     on    off    on
           pulses = array.array('H', [65000, 1000, 65000, 65000, 1000])
           pulse.send(pulses)
@@ -232,21 +151,17 @@ class PulseOut:
           pulses[0] = 200
           pulse.send(pulses)"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the PulseOut and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> PulseOut:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    def send(self, pulses: array.array) -> Any:
+    def send(self, pulses: ReadableBuffer) -> None:
         """Pulse alternating on and off durations in microseconds starting with on.
         ``pulses`` must be an `array.array` with data type 'H' for unsigned
         halfword (two bytes).
@@ -256,4 +171,3 @@ class PulseOut:
 
         :param array.array pulses: pulse durations in microseconds"""
         ...
-

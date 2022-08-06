@@ -39,6 +39,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    UserSystemExit,
     is_same_path,
     parse_message,
     path_startswith,
@@ -75,11 +76,10 @@ RUN_COMMAND_LABEL = ""  # init later when gettext is ready
 RUN_COMMAND_CAPTION = ""
 EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
-EXPECTED_TERMINATION_CODE = 123
-
 INTERRUPT_SEQUENCE = "<Control-c>"
 
-ANSI_CODE_TERMINATOR = re.compile("[@-~]")
+CSI_TERMINATOR = re.compile("[@-~]")
+OSC_TERMINATOR = re.compile(r"\a|\x1B\\")
 
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
@@ -279,7 +279,7 @@ class Runner:
             # This may be only logical restart, which does not look like restart to the runner
             get_workbench().event_generate("BackendRestart", full=False)
 
-    def send_command_and_wait(self, cmd: CommandToBackend, dialog_title: str) -> MessageFromBackend:
+    def send_command_and_wait(self, cmd: InlineCommand, dialog_title: str) -> MessageFromBackend:
         dlg = InlineCommandDialog(get_workbench(), cmd, title=dialog_title + " ...")
         show_dialog(dlg)
         return dlg.response
@@ -343,7 +343,12 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
-        assert command_name[0].isupper()
+
+        assert (
+            command_name[0].isupper()
+            or command_name == "run"
+            and not self._proxy.should_restart_interpreter_before_run()
+        )
 
         if not self.is_waiting_toplevel_command():
             self._proxy.interrupt()
@@ -368,6 +373,10 @@ class Runner:
                 return
         else:
             filename = UNTITLED
+
+        if not self._proxy:
+            # Saving the file may have killed the proxy
+            return
 
         if (
             is_remote_path(filename)
@@ -410,7 +419,9 @@ class Runner:
             return []
 
     def cmd_run_current_script_enabled(self) -> bool:
-        return get_workbench().get_editor_notebook().get_current_editor() is not None
+        return (
+            self._proxy and get_workbench().get_editor_notebook().get_current_editor() is not None
+        )
 
     def _cmd_run_current_script_in_terminal_enabled(self) -> bool:
         return (
@@ -423,7 +434,10 @@ class Runner:
         if get_workbench().in_simple_mode():
             get_workbench().hide_view("VariablesView")
         report_time("Before Run")
-        self.execute_current("Run")
+        if self._proxy and self._proxy.should_restart_interpreter_before_run():
+            self.execute_current("Run")
+        else:
+            self.execute_current("run")
         report_time("After Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
@@ -547,19 +561,21 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
-                # logger.debug(
-                #    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
-                # )
+                logger.debug(
+                    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
+                )
 
                 msg_count += 1
             except BackendTerminatedError as exc:
-                self._report_backend_crash(exc)
-                self.destroy_backend()
+                self._handle_backend_termination(
+                    exc.returncode, getattr(self._proxy, "user_exit", False)
+                )
                 return False
 
-            if msg.get("SystemExit", False):
-                self.restart_backend(True, automatic=True)
-                return False
+            # TODO: temp hack
+            # Remember there was user exit, before the exit actually arrives
+            if isinstance(msg, UserSystemExit):
+                self._proxy.user_exit = True
 
             # change state
             if isinstance(msg, ToplevelResponse):
@@ -590,39 +606,32 @@ class Runner:
 
         self._send_postponed_commands()
 
-    def _report_backend_crash(self, exc: Exception) -> None:
-        returncode = getattr(exc, "returncode", "?")
-        err = "Backend terminated or disconnected."
+    def _handle_backend_termination(self, returncode: int, user_exit: bool) -> None:
+        err = f"Process ended with exit code {returncode}."
 
         try:
             faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
             if os.path.exists(faults_file):
-                with open(faults_file, encoding="ASCII") as fp:
+                with open(faults_file, encoding="ASCII", errors="replace") as fp:
                     err += fp.read()
         except Exception:
             logger.exception("Failed retrieving backend faults")
 
-        err = err.strip() + " Use 'Stop/Restart' to restart.\n"
-
-        if returncode != EXPECTED_TERMINATION_CODE:
-            get_workbench().event_generate("ProgramOutput", stream_name="stderr", data="\n" + err)
+        get_workbench().event_generate("ProgramOutput", stream_name="stderr", data="\n" + err)
 
         get_workbench().become_active_window(False)
+        self.destroy_backend()
+        if user_exit:
+            self.restart_backend(clean=True, automatic=True)
 
     def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
-
-        if not first:
-            get_shell().restart(automatic=automatic)
-            get_shell().update_idletasks()
 
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError(
-                "Can't find backend '{}'. Please select another backend from options".format(
-                    backend_name
-                )
+                f"Unknown interpreter kind '{backend_name}'. Please select another interpreter from options"
             )
 
         backend_class = get_workbench().get_backends()[backend_name].proxy_class
@@ -631,6 +640,10 @@ class Runner:
         self._proxy = backend_class(clean)
 
         self._poll_backend_messages()
+
+        if not first:
+            get_shell().restart(automatic=automatic)
+            get_shell().update_idletasks()
 
         get_workbench().event_generate("BackendRestart", full=True)
 
@@ -643,8 +656,7 @@ class Runner:
         if self._proxy:
             self._proxy.destroy(for_restart=for_restart)
             self._proxy = None
-
-        get_workbench().event_generate("BackendTerminated")
+            get_workbench().event_generate("BackendTerminated")
 
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
@@ -806,6 +818,9 @@ class BackendProxy(ABC):
 
     def uses_local_filesystem(self):
         """Whether it runs code from local files"""
+        return True
+
+    def should_restart_interpreter_before_run(self) -> bool:
         return True
 
     def supports_remote_directories(self):
@@ -1178,11 +1193,13 @@ class SubprocessProxy(BackendProxy, ABC):
             try:
                 data = read_one_incoming_message_str(stdout.readline)
             except IOError:
+                # TODO: What's this ???
                 sleep(0.1)
                 continue
 
             # debug("... read some stdout data", repr(data))
             if data == "":
+                logger.info("Reader got EOF")
                 break
             else:
                 try:
@@ -1327,13 +1344,20 @@ class SubprocessProxy(BackendProxy, ABC):
 
 
 def _ends_with_incomplete_ansi_code(data):
-    pos = data.rfind("\033")
+    pos = max(data.rfind("\033["), data.rfind("\033]"))
+
     if pos == -1:
         return False
 
-    # note ANSI_CODE_TERMINATOR also includes [
+    if len(data) < 3:
+        return True
+
+    # note CSI_TERMINATOR also includes [
     params_and_terminator = data[pos + 2 :]
-    return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
+    if data[1] == "[":
+        return not CSI_TERMINATOR.search(params_and_terminator)
+    elif data[1] == "]":
+        return not OSC_TERMINATOR.search(params_and_terminator)
 
 
 def create_frontend_python_process(
@@ -1545,6 +1569,7 @@ class InlineCommandDialog(WorkDialog):
         get_workbench().bind("InlineResponse", self._on_response, True)
         get_workbench().bind("InlineProgress", self._on_progress, True)
         get_workbench().bind("ProgramOutput", self._on_output, True)
+        get_workbench().bind("BackendTerminated", self._on_backend_terminated, True)
 
         super().__init__(master, autostart=autostart)
 
@@ -1579,6 +1604,11 @@ class InlineCommandDialog(WorkDialog):
                     )
 
             self.report_done(success)
+
+    def _on_backend_terminated(self, msg):
+        self.set_action_text("Error!")
+        self.response = dict(error="Backend terminated")
+        self.report_done(False)
 
     def _on_progress(self, msg):
         if msg.get("command_id") != getattr(self._cmd, "id"):
