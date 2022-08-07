@@ -74,32 +74,15 @@ class MicroPythonPipDialog(BackendPipDialog):
         return True
 
     def _show_instructions_about_target(self):
-        self._append_info_text(tr("Scope") + "\n", ("caption",))
+        self._append_info_text(tr("Target") + "\n", ("caption",))
 
         if isinstance(self._backend_proxy, LocalMicroPythonProxy):
             dir_tags = ("url",)
         else:
             dir_tags = ()
 
-        if len(self._backend_proxy.get_lib_dirs()) == 1:
-            self._append_info_text(self._get_target_directory(), dir_tags)
-            self._append_info_text("\n")
-        else:
-
-            self.info_text.direct_insert(
-                "end", tr("This dialog lists top-level modules from following directories:\n")
-            )
-
-            for path in self._backend_proxy.get_lib_dirs():
-                self._append_info_text("• ")
-                self._append_info_text(path, dir_tags)
-                self._append_info_text("\n")
-
-            self._append_info_text("\n")
-            self._append_info_text(tr("New packages will be installed to") + "\n")
-            self._append_info_text("• ")
-            self._append_info_text(self._get_target_directory(), dir_tags)
-            self._append_info_text("\n")
+        self._append_info_text(self._get_target_directory(), dir_tags)
+        self._append_info_text("\n")
 
     def _show_extra_instructions(self):
         self._append_info_text("\n\n")

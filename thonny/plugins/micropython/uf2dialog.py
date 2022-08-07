@@ -33,8 +33,8 @@ class Uf2FlashingDialog(WorkDialog):
         self._start_downloading_release_info()
 
     def populate_main_frame(self):
-        pad = self.get_padding()
-        inpad = self.get_internal_padding()
+        pad = self.get_large_padding()
+        inpad = self.get_small_padding()
 
         latest_ver_caption = tr("Version to be installed")
         version_caption_label = ttk.Label(self.main_frame, text=latest_ver_caption + ":")
@@ -134,7 +134,7 @@ class Uf2FlashingDialog(WorkDialog):
                 set_text_if_different(self.target_label, "\n".join(unpacked[0]))
                 model_changed = set_text_if_different(self.model_label, "\n".join(unpacked[2]))
 
-            desc = self.get_firmware_description()
+            desc = self.get_uf2_description()
             if desc is None:
                 set_text_if_different(self._version_label, self.get_unknown_version_text())
             else:
@@ -148,7 +148,7 @@ class Uf2FlashingDialog(WorkDialog):
     def model_changed(self):
         pass
 
-    def get_firmware_description(self):
+    def get_uf2_description(self):
         if self._release_info is None:
             return None
         else:
@@ -193,13 +193,17 @@ class Uf2FlashingDialog(WorkDialog):
         return self._possible_targets and self._release_info
 
     @classmethod
-    def get_possible_targets(cls):
+    def get_possible_targets(cls, board_id: Optional[str] = None):
         all_vol_infos = [
             (vol, cls.find_device_board_id_and_model(vol))
             for vol in list_volumes(skip_letters=["A"])
         ]
 
-        return [(info[0], info[1][0], info[1][1]) for info in all_vol_infos if info[1] is not None]
+        return [
+            (info[0], info[1][0], info[1][1])
+            for info in all_vol_infos
+            if info[1] is not None and (info[1][0] == board_id or board_id is None)
+        ]
 
     def start_work(self):
         if len(self._possible_targets) > 1:
@@ -356,7 +360,7 @@ class Uf2FlashingDialog(WorkDialog):
                     self.replace_last_line(percent_str)
 
     def get_target_filename(self):
-        return "firmware"
+        return "micropython"
 
     def get_title(self):
-        return "Install MicroPython firmware"
+        return "Install MicroPython"

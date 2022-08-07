@@ -17,9 +17,14 @@ boards.)
   pixel_off = bytearray([0, 0, 0])
   neopixel_write.neopixel_write(pin, pixel_off)"""
 
-def neopixel_write(digitalinout: digitalio.DigitalInOut, buf: bytearray) -> None:
-  """Write buf out on the given DigitalInOut.
+from __future__ import annotations
 
-  :param digitalinout: the DigitalInOut to output with
-  :param buf: The bytes to clock out. No assumption is made about color order"""
-  ...
+import digitalio
+from circuitpython_typing import ReadableBuffer
+
+def neopixel_write(digitalinout: digitalio.DigitalInOut, buf: ReadableBuffer) -> None:
+    """Write buf out on the given DigitalInOut.
+
+    :param ~digitalio.DigitalInOut digitalinout: the DigitalInOut to output with
+    :param ~circuitpython_typing.ReadableBuffer buf: The bytes to clock out. No assumption is made about color order"""
+    ...

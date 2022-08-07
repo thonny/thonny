@@ -40,6 +40,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    UserSystemExit,
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
@@ -168,8 +169,7 @@ class MainCPythonBackend(MainBackend):
         self._input_queue.put(msg)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
-        self.send_message(ToplevelResponse(SystemExit=True))
-        sys.exit()
+        sys.exit(0)
 
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         if cmd.name == "process_gui_events":
@@ -208,8 +208,8 @@ class MainCPythonBackend(MainBackend):
 
         raise NotImplementedError()
 
-    def _should_keep_going(self) -> bool:
-        return True
+    def _check_for_connection_error(self) -> None:
+        pass
 
     def get_option(self, name, default=None):
         section, subname = self._parse_option_name(name)
@@ -770,6 +770,11 @@ class MainCPythonBackend(MainBackend):
             return self._current_executor.execute_source(
                 source, filename, execution_mode, ast_postprocessors
             )
+        except SystemExit as e:
+            # TODO: hack
+            # let frontend know the exit was caused by the user code
+            self.send_message(UserSystemExit(e.code))
+            sys.exit(e.code)
         finally:
             self._current_executor = None
 
@@ -1149,8 +1154,6 @@ def return_execution_result(method):
             return {}
         except (Exception, KeyboardInterrupt):
             return {"user_exception": self._backend._prepare_user_exception()}
-        except SystemExit:
-            return {"SystemExit": True}
 
     return wrapper
 

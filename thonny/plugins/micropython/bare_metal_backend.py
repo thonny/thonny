@@ -10,7 +10,7 @@ from typing import BinaryIO, Callable, List, Optional, Union
 
 import thonny
 from thonny import report_time
-from thonny.backend import UploadDownloadMixin
+from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
     BackendEvent,
     EOFCommand,
@@ -19,7 +19,7 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.misc_utils import find_volumes_by_name
-from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
     EOT,
     NORMAL_MODE_CMD,
@@ -51,6 +51,9 @@ ENCODING = "utf-8"
 # Commands
 
 # Output tokens
+ESC = b"\x1b"
+ST = b"\x1b\\"
+OSC = b"\x1b]0;.*\x1b\\"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 NORMAL_PROMPT = b">>> "
@@ -137,7 +140,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._read_block_size is None:
             self._read_block_size = self._infer_read_block_size()
 
-        logger.debug(
+        logger.info(
             "Initial submit_mode: %s, "
             "write_block_size: %s, "
             "write_block_delay: %s, "
@@ -166,7 +169,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._prepare_after_soft_reboot(False)
 
     def _get_helper_code(self):
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             return super()._get_helper_code()
 
         result = super()._get_helper_code()
@@ -226,10 +229,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
 
         # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
-        # paste mode and larger block sizes (problem confirmed with 128, 64 and bytes blocks)
+        # paste mode and larger block sizes (problem confirmed with 128, 64 and 30 bytes blocks)
         # https://github.com/thonny/thonny/issues/2143
         # Don't know any other good solutions besides avoiding paste mode for this device.
-        return 255
+        return 127
 
     def _infer_read_block_size(self):
         # TODO:
@@ -328,9 +331,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         now = self._get_time_for_rtc()
 
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             return
         elif self._connected_to_circuitpython():
+            if "rtc" not in self._builtin_modules:
+                logger.warning("Can't sync time as 'rtc' module is missing")
+                return
+
             specific_script = dedent(
                 """
                 from rtc import RTC as __thonny_RTC
@@ -383,7 +390,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             print("WARNING: Could not sync device's clock: " + val)
 
     def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             return "This device does not have a real-time clock"
         elif self._connected_to_circuitpython():
             specific_script = dedent(
@@ -445,7 +452,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return self._evaluate(script)
 
     def _update_cwd(self):
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             self._cwd = ""
         else:
             super()._update_cwd()
@@ -820,7 +827,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     + "  - use Ctrl+C to interrupt current work;\n"
                     + "  - reset the device and try again;\n"
                     + "  - check connection properties;\n"
-                    + "  - make sure the device has suitable firmware;\n"
+                    + "  - make sure the device has suitable MicroPython / CircuitPython / firmware;\n"
                     + "  - make sure the device is not in bootloader mode.\n"
                 )
                 have_given_advice = True
@@ -888,6 +895,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 # This looks like prompt.
                 # Make sure it is not followed by anything.
                 follow_up = self._connection.soft_read(1, timeout=0.01)
+                if follow_up == ESC:
+                    # See if it's followed by a OSC code, like the one output by CircuitPython 8
+                    follow_up += self._connection.soft_read_until(ST)
+                    if follow_up.endswith(ST):
+                        logger.debug("Found OSC sequence %r", follow_up)
+                        self._send_output(follow_up.decode("utf-8"), "stdout")
+                    follow_up = b""
+
                 if follow_up:
                     # Nope, the prompt is not active.
                     # (Actually it may be that a background thread has produced this follow up,
@@ -999,8 +1014,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 self.send_message(ToplevelResponse())
 
     def _cmd_Run(self, cmd):
+        return self._cmd_Run_or_run(cmd, True)
+
+    def _cmd_run(self, cmd):
+        return self._cmd_Run_or_run(cmd, False)
+
+    def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
         """Only for %run $EDITOR_CONTENT. start runs will be handled differently."""
-        restart_interpreter_before_run = self._args["restart_interpreter_before_run"]
         if cmd.get("source"):
             if restart_interpreter_before_run:
                 self._clear_repl()
@@ -1024,7 +1044,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             used = self._evaluate(
                 dedent(
                     """
@@ -1232,8 +1252,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         target_path: str,
         file_size: int,
         callback: Callable[[int, int], None],
+        make_shebang_scripts_executable: bool,
     ) -> None:
         start_time = time.time()
+
+        if make_shebang_scripts_executable:
+            source_fp, _ = convert_newlines_if_has_shebang(source_fp)
+            # No need (or not possible?) to set mode on bare metal
 
         if self._connected_over_webrepl():
             self._write_file_via_webrepl_file_protocol(source_fp, target_path, file_size, callback)
@@ -1288,12 +1313,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         out, err = self._execute(
             dedent(
                 """
-            try:
                 __thonny_path = '{path}'
                 __thonny_written = 0
                 __thonny_fp = __thonny_helper.builtins.open(__thonny_path, 'wb')
-            except __thonny_helper.builtins.Exception as e:
-                __thonny_helper.builtins.print(__thonny_helper.builtins.str(e))
             """
             ).format(path=target_path),
             capture_output=True,
@@ -1322,7 +1344,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             """
                 )
             )
-        elif self._connected_to_microbit():
+        elif self._using_microbit_micropython():
             # doesn't have neither BytesIO.flush, nor os.sync
             self._execute_without_output(
                 dedent(
@@ -1607,7 +1629,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _get_file_operation_block_size(self):
         # don't forget that the size may be expanded up to 4x where converted to Python
         # bytes literal
-        if self._connected_to_microbit():
+        if self._using_microbit_micropython():
             return 512
         else:
             return 1024
@@ -1699,11 +1721,12 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
 
         backend = backend_class(connection, clean=args["clean"], args=args)
 
-    except ConnectionFailedException as e:
+    except ConnectionError as e:
         text = "\n" + str(e) + "\n"
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

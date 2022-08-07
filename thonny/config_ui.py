@@ -5,7 +5,7 @@ from typing import Optional
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog, ems_to_pixels
+from thonny.ui_utils import CommonDialog
 
 logger = getLogger(__name__)
 
@@ -15,9 +15,6 @@ class ConfigurationDialog(CommonDialog):
 
     def __init__(self, master, page_records_with_order):
         super().__init__(master)
-        width = ems_to_pixels(60)
-        height = ems_to_pixels(50)
-        self.geometry("%dx%d" % (width, height))
         self.title(tr("Thonny options"))
 
         self.columnconfigure(0, weight=1)
@@ -32,12 +29,29 @@ class ConfigurationDialog(CommonDialog):
         main_frame.rowconfigure(0, weight=1)
 
         self._notebook = ttk.Notebook(main_frame)
-        self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
+        self._notebook.grid(
+            row=0,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=self.get_medium_padding(),
+            pady=(self.get_medium_padding(), 0),
+        )
 
         self._ok_button = ttk.Button(main_frame, text=tr("OK"), command=self._ok, default="active")
         self._cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
-        self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
-        self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
+        self._ok_button.grid(
+            row=1,
+            column=1,
+            padx=(0, self.get_medium_padding()),
+            pady=(self.get_medium_padding(), self.get_medium_padding()),
+        )
+        self._cancel_button.grid(
+            row=1,
+            column=2,
+            padx=(0, self.get_medium_padding()),
+            pady=(self.get_medium_padding(), self.get_medium_padding()),
+        )
 
         self._page_records = []
         for key, title, page_class, _ in sorted(

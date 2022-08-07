@@ -23,7 +23,14 @@ class BackendDetailsConfigPage(ConfigurationPage):
         pass
 
     def _add_text_field(
-        self, label_text, variable_name, row, show=None, pady: Union[int, tuple] = 0, width=None
+        self,
+        label_text,
+        variable_name,
+        row,
+        show=None,
+        pady: Union[int, tuple] = 0,
+        width=None,
+        **kwargs,
     ):
 
         if isinstance(pady, int):
@@ -33,7 +40,7 @@ class BackendDetailsConfigPage(ConfigurationPage):
         entry_label.grid(row=row, column=0, sticky="w", pady=pady)
 
         variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
-        entry = ttk.Entry(self, textvariable=variable, show=show, width=width)
+        entry = ttk.Entry(self, textvariable=variable, show=show, width=width, **kwargs)
         entry.grid(row=row, column=1, sticky="we", pady=pady, padx=ems_to_pixels(1))
         return variable
 
@@ -164,18 +171,17 @@ class BackendConfigurationPage(ConfigurationPage):
 class BaseSshProxyConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
-    def __init__(self, master, conf_group):
+    def __init__(self, master):
         super().__init__(master)
         self._changed = False
-        self._conf_group = conf_group
 
         inner_pad = ems_to_pixels(0.6)
 
         self._host_var = self._add_text_field(
-            "Host", self._conf_group + ".host", 1, pady=(0, inner_pad), width=20
+            "Host", self.backend_name + ".host", 1, pady=(0, inner_pad), width=20
         )
         self._user_var = self._add_text_field(
-            "Username", self._conf_group + ".user", 3, pady=(0, inner_pad), width=20
+            "Username", self.backend_name + ".user", 3, pady=(0, inner_pad), width=20
         )
 
         from thonny.misc_utils import (
@@ -186,7 +192,7 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
 
         self._method_var = self._add_combobox_field(
             "Authentication method",
-            self._conf_group + ".auth_method",
+            self.backend_name + ".auth_method",
             5,
             [PASSWORD_METHOD, PUBLIC_KEY_NO_PASS_METHOD, PUBLIC_KEY_WITH_PASS_METHOD],
             pady=(0, inner_pad),
@@ -194,28 +200,39 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         )
         self._interpreter_var = self._add_text_field(
             "Interpreter",
-            self._conf_group + ".executable",
-            30,
+            self.backend_name + ".executable",
+            row=30,
             pady=(2 * inner_pad, inner_pad),
             width=30,
+            state="enabled" if self.has_editable_interpreter() else "disabled",
         )
+
+        self.add_checkbox(
+            f"{self.backend_name}.make_uploaded_shebang_scripts_executable",
+            tr("Make uploaded shebang scripts executable"),
+            row=35,
+            pady=(ems_to_pixels(4), 0),
+        )
+
+    def has_editable_interpreter(self) -> bool:
+        return True
 
     def _on_change(self):
         self._changed = True
 
     def apply(self):
         if self._changed:
-            get_workbench().set_option(self._conf_group + ".host", self._host_var.get())
-            get_workbench().set_option(self._conf_group + ".user", self._user_var.get())
-            get_workbench().set_option(self._conf_group + ".auth_method", self._method_var.get())
+            get_workbench().set_option(self.backend_name + ".host", self._host_var.get())
+            get_workbench().set_option(self.backend_name + ".user", self._user_var.get())
+            get_workbench().set_option(self.backend_name + ".auth_method", self._method_var.get())
             get_workbench().set_option(
-                self._conf_group + ".executable", self._interpreter_var.get()
+                self.backend_name + ".executable", self._interpreter_var.get()
             )
 
             delete_stored_ssh_password()
 
             # reset cwd setting to default
-            get_workbench().set_option(self._conf_group + ".cwd", "")
+            get_workbench().set_option(self.backend_name + ".cwd", "")
 
     def should_restart(self):
         return self._changed
@@ -228,7 +245,7 @@ class PasswordDialog(CommonDialogEx):
         self.password = ""
         self.save_password = False
 
-        margin = self.get_padding()
+        margin = self.get_large_padding()
         spacing = margin // 2
 
         self.title(tr("Authentication"))

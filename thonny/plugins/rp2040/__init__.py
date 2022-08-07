@@ -11,6 +11,8 @@ from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
 
 logger = getLogger(__name__)
 
+VIDS_PIDS_TO_AVOID_IN_RP2040 = set()
+
 
 class RP2040BackendProxy(BareMetalMicroPythonProxy):
     @classmethod
@@ -24,7 +26,9 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def device_is_present_in_bootloader_mode(cls):
-        return bool(Uf2FlashingDialog.get_possible_targets())
+        targets = Uf2FlashingDialog.get_possible_targets("RPI-RP2")
+        logger.info("Bootloader targets: %r", targets)
+        return bool(targets)
 
     def get_node_label(self):
         return "RP2040 device"
@@ -36,7 +40,7 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
     @classmethod
     def get_vids_pids_to_avoid(self):
-        return get_uart_adapter_vids_pids()
+        return get_uart_adapter_vids_pids() | VIDS_PIDS_TO_AVOID_IN_RP2040
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):

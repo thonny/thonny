@@ -18,6 +18,7 @@ from thonny.ui_utils import (
     ask_one_from_choices,
     ask_string,
     create_string_var,
+    ems_to_pixels,
     get_hyperlink_cursor,
     lookup_style_option,
     scrollbar_style,
@@ -116,8 +117,8 @@ class BaseFileBrowser(ttk.Frame):
             height=1,
             font="TkDefaultFont",
             wrap="word",
-            padx=6,
-            pady=5,
+            padx=ems_to_pixels(0.6),
+            pady=ems_to_pixels(0.5),
             insertwidth=0,
             highlightthickness=0,
             background=lookup_style_option("ViewToolbar.TFrame", "background"),
@@ -235,6 +236,10 @@ class BaseFileBrowser(ttk.Frame):
 
     def on_open_node(self, event):
         node_id = self.get_selected_node()
+        if self.get_selected_kind() == "file":
+            # can happen in Windows when pressing ENTER on file
+            return "break"
+
         path = self.tree.set(node_id, "path")
         if path:  # and path not in self._cached_child_data:
             self.render_children_from_cache(node_id)
@@ -383,14 +388,17 @@ class BaseFileBrowser(ttk.Frame):
                 self.tree.selection_set(child_id)
                 return
 
-            if self.tree.item(child_id, "open"):
+            if self._is_open_dir_node(child_id):
                 self.select_path_if_visible(path, child_id)
+
+    def _is_open_dir_node(self, node_id) -> bool:
+        # In Windows a node may get open=True simply by pressing ENTER on it
+        return self.tree.item(node_id, "open") and self.tree.set(node_id, "kind") != "file"
 
     def get_open_paths(self, node_id=ROOT_NODE_ID):
         if self.tree.set(node_id, "kind") == "file":
             return set()
-
-        elif node_id == ROOT_NODE_ID or self.tree.item(node_id, "open"):
+        elif node_id == ROOT_NODE_ID or self._is_open_dir_node(node_id):
             result = {self.tree.set(node_id, "path")}
             for child_id in self.tree.get_children(node_id):
                 result.update(self.get_open_paths(child_id))
@@ -411,6 +419,12 @@ class BaseFileBrowser(ttk.Frame):
         """This node is supposed to be a directory and
         its contents needs to be shown and/or refreshed"""
         path = self.tree.set(node_id, "path")
+        kind = self.tree.set(node_id, "kind")
+        if kind == "file":
+            logger.warning("File %r is treated as dir", path)
+            return
+
+        logger.debug("Rendering %r from cache", path)
 
         if path not in self._cached_child_data:
             self.request_dirs_child_data(node_id, self.get_open_paths() | {path})
@@ -474,7 +488,7 @@ class BaseFileBrowser(ttk.Frame):
 
             # recursively update open children
             for child_id in ids_sorted_by_name:
-                if self.tree.item(child_id, "open"):
+                if self._is_open_dir_node(child_id):
                     self.render_children_from_cache(child_id)
 
     def show_error(self, msg, node_id=""):
@@ -630,10 +644,6 @@ class BaseFileBrowser(ttk.Frame):
                 command=lambda: self.open_path_with_system_app(selected_path),
             )
 
-            hidden_files_label = (
-                tr("Hide hidden files") if show_hidden_files() else tr("Show hidden files")
-            )
-            self.menu.add_command(label=hidden_files_label, command=self.toggle_hidden_files)
         else:
             if selected_kind == "dir":
                 self.menu.add_command(
@@ -656,6 +666,11 @@ class BaseFileBrowser(ttk.Frame):
                         label=tr("Configure %s files") % ext + "...",
                         command=lambda: self.open_extension_dialog(ext),
                     )
+
+        hidden_files_label = (
+            tr("Hide hidden files") if show_hidden_files() else tr("Show hidden files")
+        )
+        self.menu.add_command(label=hidden_files_label, command=self.toggle_hidden_files)
 
     def toggle_hidden_files(self):
         get_workbench().set_option(
@@ -1304,25 +1319,56 @@ class BackendFileDialog(CommonDialog):
         self.rowconfigure(0, weight=1)
 
         self.browser = DialogRemoteFileBrowser(background, self)
-        self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=20, padx=20)
+        self.browser.grid(
+            row=0,
+            column=0,
+            columnspan=4,
+            sticky="nsew",
+            pady=self.get_large_padding(),
+            padx=self.get_large_padding(),
+        )
         self.browser.configure(borderwidth=1, relief="groove")
         self.browser.tree.configure(selectmode="browse")
 
         self.name_label = ttk.Label(background, text=tr("File name:"))
-        self.name_label.grid(row=1, column=0, pady=(0, 20), padx=20, sticky="w")
+        self.name_label.grid(
+            row=1,
+            column=0,
+            pady=(0, self.get_large_padding()),
+            padx=self.get_large_padding(),
+            sticky="w",
+        )
 
         self.name_var = create_string_var("")
         self.name_entry = ttk.Entry(
             background, textvariable=self.name_var, state="normal" if kind == "save" else "disabled"
         )
-        self.name_entry.grid(row=1, column=1, pady=(0, 20), padx=(0, 20), sticky="we")
+        self.name_entry.grid(
+            row=1,
+            column=1,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="we",
+        )
         self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
 
         self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok)
-        self.ok_button.grid(row=1, column=2, pady=(0, 20), padx=(0, 20), sticky="e")
+        self.ok_button.grid(
+            row=1,
+            column=2,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="e",
+        )
 
         self.cancel_button = ttk.Button(background, text=tr("Cancel"), command=self.on_cancel)
-        self.cancel_button.grid(row=1, column=3, pady=(0, 20), padx=(0, 20), sticky="e")
+        self.cancel_button.grid(
+            row=1,
+            column=3,
+            pady=(0, self.get_large_padding()),
+            padx=(0, self.get_large_padding()),
+            sticky="e",
+        )
 
         background.rowconfigure(0, weight=1)
         background.columnconfigure(1, weight=1)
@@ -1405,6 +1451,10 @@ class BackendFileDialog(CommonDialog):
     def double_click_file(self, path):
         assert path.endswith(self.name_var.get())
         self.on_ok()
+
+    def set_initial_focus(self, node=None) -> bool:
+        self.name_entry.focus_set()
+        return True
 
 
 class NodeChoiceDialog(CommonDialog):

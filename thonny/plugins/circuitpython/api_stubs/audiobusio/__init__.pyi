@@ -5,14 +5,27 @@ over digital buses. These protocols are used to communicate audio to other
 chips in the same circuit. It doesn't include audio interconnect protocols
 such as S/PDIF.
 
-All libraries change hardware state and should be deinitialized when they
+All classes change hardware state and should be deinitialized when they
 are no longer needed. To do so, either call :py:meth:`!deinit` or use a
 context manager."""
+
+from __future__ import annotations
+
+import circuitpython_typing
+import microcontroller
+from circuitpython_typing import WriteableBuffer
 
 class I2SOut:
     """Output an I2S audio signal"""
 
-    def __init__(self, bit_clock: microcontroller.Pin, word_select: microcontroller.Pin, data: microcontroller.Pin, *, left_justified: bool):
+    def __init__(
+        self,
+        bit_clock: microcontroller.Pin,
+        word_select: microcontroller.Pin,
+        data: microcontroller.Pin,
+        *,
+        left_justified: bool,
+    ) -> None:
         """Create a I2SOut object associated with the given pins.
 
         :param ~microcontroller.Pin bit_clock: The bit clock (or serial clock) pin
@@ -46,7 +59,6 @@ class I2SOut:
         Playing a wave file from flash::
 
           import board
-          import audioio
           import audiocore
           import audiobusio
           import digitalio
@@ -63,51 +75,55 @@ class I2SOut:
             pass
           print("stopped")"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the I2SOut and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> I2SOut:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context. See
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
-
-    def play(self, sample: Any, *, loop: Any = False) -> Any:
+    def play(
+        self, sample: circuitpython_typing.AudioSample, *, loop: bool = False
+    ) -> None:
         """Plays the sample once when loop=False and continuously when loop=True.
         Does not block. Use `playing` to block.
 
-        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, or `audiomixer.Mixer`.
+        Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, `audiomixer.Mixer` or `audiomp3.MP3Decoder`.
 
         The sample itself should consist of 8 bit or 16 bit samples."""
         ...
-
-    def stop(self, ) -> Any:
+    def stop(self) -> None:
         """Stops playback."""
         ...
-
-    playing: Any = ...
+    playing: bool
     """True when the audio sample is being output. (read-only)"""
 
-    def pause(self, ) -> Any:
+    def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...
-
-    def resume(self, ) -> Any:
+    def resume(self) -> None:
         """Resumes sample playback after :py:func:`pause`."""
         ...
-
-    paused: Any = ...
+    paused: bool
     """True when playback is paused. (read-only)"""
 
 class PDMIn:
     """Record an input PDM audio stream"""
 
-    def __init__(self, clock_pin: microcontroller.Pin, data_pin: microcontroller.Pin, *, sample_rate: int = 16000, bit_depth: int = 8, mono: bool = True, oversample: int = 64, startup_delay: float = 0.11):
+    def __init__(
+        self,
+        clock_pin: microcontroller.Pin,
+        data_pin: microcontroller.Pin,
+        *,
+        sample_rate: int = 16000,
+        bit_depth: int = 8,
+        mono: bool = True,
+        oversample: int = 64,
+        startup_delay: float = 0.11,
+    ) -> None:
         """Create a PDMIn object associated with the given pins. This allows you to
         record audio signals from the given pins. Individual ports may put further
         restrictions on the recording parameters. The overall sample rate is
@@ -149,20 +165,16 @@ class PDMIn:
           with audiobusio.PDMIn(board.MICROPHONE_CLOCK, board.MICROPHONE_DATA, sample_rate=16000, bit_depth=16) as mic:
               mic.record(b, len(b))"""
         ...
-
-    def deinit(self, ) -> Any:
+    def deinit(self) -> None:
         """Deinitialises the PDMIn and releases any hardware resources for reuse."""
         ...
-
-    def __enter__(self, ) -> Any:
+    def __enter__(self) -> PDMIn:
         """No-op used by Context Managers."""
         ...
-
-    def __exit__(self, ) -> Any:
+    def __exit__(self) -> None:
         """Automatically deinitializes the hardware when exiting a context."""
         ...
-
-    def record(self, destination: Any, destination_length: Any) -> Any:
+    def record(self, destination: WriteableBuffer, destination_length: int) -> None:
         """Records destination_length bytes of samples to destination. This is
         blocking.
 
@@ -173,8 +185,6 @@ class PDMIn:
         :return: The number of samples recorded. If this is less than ``destination_length``,
           some samples were missed due to processing time."""
         ...
-
-    sample_rate: Any = ...
+    sample_rate: int
     """The actual sample_rate of the recording. This may not match the constructed
     sample rate due to internal clock limitations."""
-

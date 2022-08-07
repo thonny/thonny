@@ -22,6 +22,7 @@ logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 WEBREPL_PORT_VALUE = "webrepl"
+BOOTLOADER_PORT_VALUE = "bootloader"
 
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
@@ -117,7 +118,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 self._port = potential[0][0]
             else:
                 if not potential and self.device_is_present_in_bootloader_mode():
-                    if self._propose_install_firmware():
+                    if self._propose_install_python():
                         return self._fix_port()
 
                 self._port = None
@@ -137,13 +138,13 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         elif not port_exists(self._port):
             if self.device_is_present_in_bootloader_mode():
                 self._port = None
-                self._propose_install_firmware()
+                self._propose_install_python()
 
-    def _propose_install_firmware(self):
-        """Subclass may show firmware installation dialog and return True if installation succeeds"""
+    def _propose_install_python(self):
+        """Subclass may show python installation dialog and return True if installation succeeds"""
         self._show_error(
             "Your device seems to be in bootloader mode.\n"
-            "In this mode you can install or upgrade MicroPython firmware.\n\n"
+            "In this mode you can install or upgrade MicroPython python.\n\n"
             "If your device already has MicroPython, then you can start using it after you put it into normal mode."
         )
 
@@ -165,9 +166,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "interrupt_on_connect": get_workbench().get_option(
                 self.backend_name + ".interrupt_on_connect"
             ),
-            "restart_interpreter_before_run": get_workbench().get_option(
-                self.backend_name + ".restart_interpreter_before_run"
-            ),
             "write_block_size": self._get_write_block_size(),
             "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
@@ -184,6 +182,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         ]
 
         return cmd
+
+    def should_restart_interpreter_before_run(self):
+        return get_workbench().get_option(self.backend_name + ".restart_interpreter_before_run")
 
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.micropython.bare_metal_backend
@@ -217,11 +218,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             print(vars(p))
         """
         last_backs = {}  # get_workbench().get_option("serial.last_backend_per_vid_pid")
-        return [
-            (p.device, p.description)
-            for p in all_ports
-            if cls._is_potential_port(p) or last_backs.get((p.vid, p.pid), None) == cls.backend_name
-        ]
+        return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
 
     @classmethod
     def _is_for_micropython(cls):
@@ -243,9 +240,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if "CircuitPython CDC " in (p.interface or ""):
             return cls._is_for_circuitpython()
 
-        if "MicroPython" in (p.manufacturer or ""):
-            return cls._is_for_micropython()
-
         return (
             (p.vid, p.pid) in cls.get_known_usb_vids_pids()
             or (p.vid, None) in cls.get_known_usb_vids_pids()
@@ -258,6 +252,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 or "DAPLink" in p.description
                 or "STLink" in p.description
                 or "python" in p.description.lower()
+                or "MicroPython" in (p.manufacturer or "")
             )
         )
 
@@ -379,15 +374,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
+        elif port == BOOTLOADER_PORT_VALUE:
+            return f"{cls.backend_description}  •  BOOTLOADER"
         else:
             return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
         def should_show(conf):
-            if cls.device_is_present_in_bootloader_mode():
-                return True
-
             port = conf[f"{cls.backend_name}.port"]
             if port == WEBREPL_PORT_VALUE:
                 return True
@@ -407,6 +401,14 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             conf = {"run.backend_name": cls.backend_name, f"{cls.backend_name}.port": device}
             if conf not in relevant_confs:
                 relevant_confs.append(conf)
+
+        if cls.device_is_present_in_bootloader_mode():
+            relevant_confs.append(
+                {
+                    "run.backend_name": cls.backend_name,
+                    f"{cls.backend_name}.port": BOOTLOADER_PORT_VALUE,
+                }
+            )
 
         sorted_confs = sorted(relevant_confs, key=cls.get_switcher_configuration_label)
         return [(conf, cls.get_switcher_configuration_label(conf)) for conf in sorted_confs]
@@ -456,7 +458,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
 
-        self._has_opened_firmware_flasher = False
+        self._has_opened_python_flasher = False
 
         intro_label = ttk.Label(self, text=self._get_intro_text())
         intro_label.grid(row=0, column=0, sticky="nw")
@@ -548,18 +550,21 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         # advanced_link.grid(row=0, column=1, sticky="e")
 
         if self._has_flashing_dialog():
-            firmware_link = ui_utils.create_action_label(
+            python_link = ui_utils.create_action_label(
                 last_row,
-                tr("Install or update firmware"),
-                self._on_click_firmware_installer_link,
+                self._get_flasher_link_title(),
+                self._on_click_python_installer_link,
             )
-            firmware_link.grid(row=1, column=1, sticky="e")
+            python_link.grid(row=1, column=1, sticky="e")
 
         self._on_change_port()
 
-    def _on_click_firmware_installer_link(self, event=None):
+    def _get_flasher_link_title(self) -> str:
+        return tr("Install or update %s") % "MicroPython"
+
+    def _on_click_python_installer_link(self, event=None):
         self._open_flashing_dialog()
-        self._has_opened_firmware_flasher = True
+        self._has_opened_python_flasher = True
 
     def _show_advanced_options(self):
         pass
@@ -579,7 +584,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                 + "\n"
                 + result
                 + "\n\n"
-                + ("Connecting via WebREPL (EXPERIMENTAL):")
+                + ("Connecting via WebREPL:")
                 + "\n"
                 + (
                     "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
@@ -642,7 +647,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return self.get_selected_port_name() == WEBREPL_PORT_VALUE
 
     def should_restart(self):
-        return self.is_modified() or self._has_opened_firmware_flasher
+        return self.is_modified() or self._has_opened_python_flasher
 
     def apply(self):
         if not self.is_modified():
@@ -837,9 +842,9 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
 
 class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
-        self._host = get_workbench().get_option("SshMicroPython.host")
-        self._user = get_workbench().get_option("SshMicroPython.user")
-        self._target_executable = get_workbench().get_option("SshMicroPython.executable")
+        self._host = get_workbench().get_option(f"{self.backend_name}.host")
+        self._user = get_workbench().get_option(f"{self.backend_name}.user")
+        self._target_executable = get_workbench().get_option(f"{self.backend_name}.executable")
 
         super().__init__(clean)
 
@@ -847,7 +852,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
         import thonny.plugins.micropython.os_mp_backend
 
         args = {
-            "cwd": get_workbench().get_option("SshMicroPython.cwd") or "",
+            "cwd": get_workbench().get_option(f"{self.backend_name}.cwd") or "",
             "interpreter": self._target_executable,
             "host": self._host,
             "user": self._user,
@@ -864,7 +869,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def _send_initial_input(self) -> None:
         assert self._proc is not None
-        self._proc.stdin.write((get_ssh_password("SshMicroPython") or "") + "\n")
+        self._proc.stdin.write((get_ssh_password(self.backend_name) or "") + "\n")
         self._proc.stdin.flush()
 
     def _get_extra_launcher_args(self):
@@ -884,10 +889,10 @@ class SshMicroPythonProxy(MicroPythonProxy):
         return super().send_command(cmd)
 
     def _get_initial_cwd(self):
-        return get_workbench().get_option("SshMicroPython.cwd")
+        return get_workbench().get_option(f"{self.backend_name}.cwd")
 
     def _publish_cwd(self, cwd):
-        return get_workbench().set_option("SshMicroPython.cwd", cwd)
+        return get_workbench().set_option(f"{self.backend_name}.cwd", cwd)
 
     def supports_remote_files(self):
         return True
@@ -974,10 +979,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
-    backend_name = None  # Will be overwritten on Workbench.add_backend
-
-    def __init__(self, master):
-        super().__init__(master, "SshMicroPython")
+    pass
 
 
 def list_serial_ports():
@@ -1069,7 +1071,7 @@ def add_micropython_backend(
     config_page,
     bare_metal=True,
     sort_key=None,
-    validate_time=True,
+    validate_time=False,
     sync_time=None,
     local_rtc=True,
     submit_mode=None,

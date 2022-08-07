@@ -1,4 +1,4 @@
-set PATH=C:\Python310\Scripts;%PATH%
+set PATH=C:\Python310-64\Scripts;%PATH%
 @echo ............... CHANGING TO PROJECT ROOT ......................
 cd ..\..
 

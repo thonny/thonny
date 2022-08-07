@@ -4,7 +4,11 @@ The `rtc` module provides support for a Real Time Clock. You can access and mana
 RTC using :class:`rtc.RTC`. It also backs the :func:`time.time` and :func:`time.localtime`
 functions using the onboard RTC if present."""
 
-def set_time_source(rtc: Any) -> Any:
+from __future__ import annotations
+
+import time
+
+def set_time_source(rtc: RTC) -> None:
     """Sets the RTC time source used by :func:`time.localtime`.
     The default is :class:`rtc.RTC`, but it's useful to use this to override the
     time source for testing purposes. For example::
@@ -24,11 +28,10 @@ def set_time_source(rtc: Any) -> Any:
 class RTC:
     """Real Time Clock"""
 
-    def __init__(self, ):
+    def __init__(self) -> None:
         """This class represents the onboard Real Time Clock. It is a singleton and will always return the same instance."""
         ...
-
-    datetime: time.struct_time = ...
+    datetime: time.struct_time
     """The current date and time of the RTC as a `time.struct_time`.
 
     This must be set to the current date and time whenever the board loses power::
@@ -47,9 +50,14 @@ class RTC:
       print(current_time)
       # struct_time(tm_year=2019, tm_month=5, ...)"""
 
-    calibration: int = ...
+    calibration: int
     """The RTC calibration value as an `int`.
 
     A positive value speeds up the clock and a negative value slows it down.
-    Range and value is hardware specific, but one step is often approximately 1 ppm."""
+    Range and value is hardware specific, but one step is often approximately 1 ppm::
 
+      import rtc
+      import time
+
+      r = rtc.RTC()
+      r.calibration = 1"""

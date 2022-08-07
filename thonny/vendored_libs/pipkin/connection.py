@@ -41,7 +41,7 @@ class MicroPythonConnection:
         timer = TimeHelper(timeout)
 
         while len(self._read_buffer) < size:
-            self._check_for_error()
+            self.check_for_error()
 
             try:
                 self._read_buffer.extend(self._read_queue.get(True, timer.time_left))
@@ -80,7 +80,7 @@ class MicroPythonConnection:
         assert isinstance(terminator, re.Pattern)
 
         while True:
-            self._check_for_error()
+            self.check_for_error()
 
             match = re.search(terminator, self._read_buffer)
             if match:
@@ -115,7 +115,7 @@ class MicroPythonConnection:
         self._fetch_to_buffer()
 
         if len(self._read_buffer) == 0 and check_error:
-            self._check_for_error()
+            self.check_for_error()
 
         try:
             return self._read_buffer
@@ -128,7 +128,7 @@ class MicroPythonConnection:
         assert expected == actual, "Expected %r, got %r" % (expected, actual)
         return actual
 
-    def _check_for_error(self) -> None:
+    def check_for_error(self) -> None:
         if self._error is None:
             return
 
@@ -185,10 +185,6 @@ class MicroPythonConnection:
 
     def close(self) -> None:
         raise NotImplementedError()
-
-
-class ConnectionFailedException(ConnectionError):
-    pass
 
 
 class ReadingTimeoutError(TimeoutError):

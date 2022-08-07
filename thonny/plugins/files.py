@@ -344,7 +344,14 @@ class UploadDialog(TransferDialog):
             )
         )
         if picked_items:
-            self._cmd = InlineCommand("upload", items=picked_items)
+            backend_name = get_runner().get_backend_proxy().get_backend_name()
+            self._cmd = InlineCommand(
+                "upload",
+                items=picked_items,
+                make_shebang_scripts_executable=get_workbench().get_option(
+                    f"{backend_name}.make_uploaded_shebang_scripts_executable"
+                ),
+            )
             get_runner().send_command(self._cmd)
             return True
         else:

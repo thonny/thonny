@@ -1,0 +1,1880 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: th\n"
+
+#: thonny/workbench.py:361
+msgid "File"
+msgstr "ไฟล์"
+
+#: thonny/workbench.py:362
+msgid "Edit"
+msgstr "แก้ไข"
+
+#: thonny/workbench.py:363
+msgid "View"
+msgstr "ดู"
+
+#: thonny/running.py:115 thonny/workbench.py:364
+#, fuzzy
+msgid "Run"
+msgstr "เรียกใช้"
+
+#: thonny/workbench.py:365
+msgid "Tools"
+msgstr "เครื่องมือ"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:366
+msgid "Help"
+msgstr "ช่วยเหลือ"
+
+#: thonny/workbench.py:583
+msgid "Exit"
+msgstr "ออก"
+
+#: thonny/workbench.py:610
+msgid "Decrease font size"
+msgstr "ลดขนาดฟอนต์"
+
+#: thonny/workbench.py:622
+msgid "Focus editor"
+msgstr "โฟกัสตัวแก้ไข"
+
+#: thonny/workbench.py:631
+msgid "Focus shell"
+msgstr "โฟกัส Shell"
+
+#: thonny/workbench.py:642
+msgid "Maximize view"
+msgstr "ขยายมุมมองสูงสุด"
+
+#: thonny/workbench.py:654
+msgid "Full screen"
+msgstr "เต็มหน้าจอ"
+
+#: thonny/workbench.py:1437
+msgid "Program arguments"
+msgstr "อาร์กิวเมนต์ของโปรแกรม"
+
+#: thonny/plugins/about.py:28 thonny/plugins/about.py:163
+msgid "About Thonny"
+msgstr "เกี่ยวกับ Thonny"
+
+#: thonny/plugins/about.py:81
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "พัฒนาโดย\n"
+"มหาวิทยาลัยแห่ง Tartu, Estonia,\n"
+"ด้วยความช่วยเหลือจาก\n"
+"ชุมชน Open-source,\n"
+"Raspberry Pi Foundation\n"
+"และ Cybernetica AS"
+
+#: thonny/plugins/about.py:107
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "โปรแกรมนี้\n"
+"ไม่มีการรับประกัน!\n"
+"นี่คือซอฟต์แวร์ฟรี และคุณสามารถ\n"
+"แจกจ่ายภายใต้เงื่อนไข ดูที่\n"
+"https://opensource.org/licenses/MIT\n"
+"สำหรับรายละเอียด"
+
+#: thonny/plugins/about.py:152
+msgid "Version history"
+msgstr "ประวัติของเวอร์ชั่นต่างๆ"
+
+#: thonny/plugins/about.py:159
+msgid "Report problems"
+msgstr "แจ้งปัญหา"
+
+#. Exception ไม่ใช่ "ข้อยกเว้น" แต่หมายถึงข้อผิดพลาดของโค้ด Python
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "เปิดผู้ช่วยทันที เมื่อโปรแกรมขัดข้องพร้อมข้อผิดพลาด"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "เปิดผู้ช่วยทันที เมื่อมีการเตือนในโค้ดของคุณ"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "ตรวจสอบส่วนที่เลือกด้วย Pylint"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "ทำการตรวจสอบ MyPy"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "ปิดการตรวจสอบ (หนึ่ง ID ต่อบรรทัด)"
+
+#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:73
+msgid "Assistant"
+msgstr "ผู้ช่วย"
+
+#: thonny/plugins/autocomplete.py:512
+msgid "Auto-complete"
+msgstr "Auto-complete"
+
+#: thonny/plugins/backend_config_page.py:320
+msgid "Interpreter"
+msgstr "อินเตอร์พรีทเตอร์"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "เกี่ยวกับ Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:56
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "Birdseye เป็นดีบักเกอร์ของ Python ที่ต้องติดตั้งแยกต่างหาก"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "ดีบักสคริปต์ปัจจุบัน (birdseye)"
+
+#: thonny/plugins/commenting_indenting.py:172
+#, fuzzy
+msgid "Toggle comment"
+msgstr "สลับคอมเมนต์"
+
+#: thonny/plugins/commenting_indenting.py:182
+msgid "Comment out"
+msgstr "ทำเป็นคอมเมนต์"
+
+#: thonny/plugins/commenting_indenting.py:192
+msgid "Uncomment"
+msgstr "ยกเลิกคอมเมนต์"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "เลิกทำ"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "คืนค่า"
+
+#: thonny/base_file_browser.py:706 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2255
+msgid "Cut"
+msgstr "ตัด"
+
+#: thonny/base_file_browser.py:707 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2256
+msgid "Copy"
+msgstr "คัดลอก"
+
+#: thonny/base_file_browser.py:709 thonny/base_file_browser.py:715
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2257
+msgid "Paste"
+msgstr "วาง"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "เลือกทั้งหมด"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
+msgid "Run to cursor"
+msgstr "วิ่งไปที่เคอร์เซอร์"
+
+#: thonny/plugins/debugger.py:982
+msgid "Can't close yet"
+msgstr "ยังปิดไม่ได้"
+
+#: thonny/plugins/debugger.py:983
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "ใช้คำสั่ง \"หยุด\" หากคุณต้องการยกเลิกการดีบัก"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "หน้าต่างผู้ใช้ Dock"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "ไฮไลต์ชื่อที่ตรงกัน"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "ไฮไลต์ตัวแปรโลคอล"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "ไฮไลต์วงเล็บ"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "ไฮไลต์องค์ประกอบไวยากรณ์"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "ไฮไลต์บรรทัดปัจจุบัน (ต้องเปิดโปรแกรมแก้ไขอีกครั้ง)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "แสดงหมายเลขบรรทัด"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "ความยาวสายสูงสุดที่แนะนำ\n"
+"(ตั้งค่าเป็น 0 เพื่อปิดเส้นระยะขอบ)"
+
+#: thonny/plugins/editor_config_page.py:97
+msgid "Editor"
+msgstr "เอดิเตอร์"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "ส่งออกบันทึกการใช้งาน..."
+
+#: thonny/plugins/event_view.py:39
+msgid "Events"
+msgstr "เหตุการณ์"
+
+#: thonny/plugins/files.py:551
+msgid "Files"
+msgstr "ไฟล์"
+
+#: thonny/plugins/find_replace.py:57 thonny/plugins/find_replace.py:417
+msgid "Find & Replace"
+msgstr "ค้นหาและแทนที่"
+
+#: thonny/plugins/find_replace.py:63
+msgid "Find:"
+msgstr "ค้นหา"
+
+#: thonny/plugins/find_replace.py:74
+msgid "Replace with:"
+msgstr "แทนที่ด้วย:"
+
+#: thonny/plugins/find_replace.py:92
+msgid "Case sensitive"
+msgstr "Case sensitive"
+
+#: thonny/plugins/find_replace.py:99
+msgid "Up"
+msgstr "ขึ้นบน"
+
+#: thonny/plugins/find_replace.py:103
+msgid "Down"
+msgstr "ลงล่าง"
+
+#: thonny/plugins/find_replace.py:112
+msgid "Find"
+msgstr "ค้นหา"
+
+#: thonny/plugins/find_replace.py:122
+msgid "Replace"
+msgstr "แทนที่"
+
+#: thonny/plugins/find_replace.py:130
+msgid "Replace+Find"
+msgstr "แทนที่+ค้นหา"
+
+#: thonny/plugins/find_replace.py:140
+msgid "Replace all"
+msgstr "แทนที่ทั้งหมด"
+
+#: thonny/plugins/find_replace.py:236
+msgid "Enter string to be replaced."
+msgstr "ป้อนสตริงที่จะแทนที่"
+
+#: thonny/plugins/find_replace.py:320
+msgid "The specified text was not found!"
+msgstr "ไม่พบข้อความที่ระบุ!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "อนุญาตเพียงอินสแตนซ์ Thonny เดียวเท่านั้น"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "เปิดไฟล์ทั้งหมดจากเซสชันก่อนหน้าอีกครั้ง"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "ปิดเสียงการแจ้งเตือน"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "โหมดปรับขนาดอักษร"
+
+#: thonny/plugins/heap.py:37
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "โหมดฮีปเปิดอยู่\n"
+"ปิดมุมมองฮีปเพื่อปิด"
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "ฮีป"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "ภาษา"
+
+#: thonny/plugins/notes.py:35
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "กล่องนี้มีไว้สำหรับบันทึกการทำงานของคุณ -- คำแนะนำในการมอบหมาย ข้อมูลโค้ด หรืออะไรก็ตาม\n"
+"\n"
+"ทุกอย่างจะถูกบันทึกโดยอัตโนมัติและโหลดเมื่อคุณเปิด Thonny ในครั้งต่อไป\n"
+"\n"
+"อย่าลังเลที่จะลบข้อความนี้เพื่อให้มีที่ว่างสำหรับบันทึกย่อของคุณเอง"
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "โน๊ต"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "ออปเจ็กต์ก่อนหน้า"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "ออปเจ็กต์ถัดไป"
+
+#: thonny/plugins/object_inspector.py:733
+msgid "Object inspector"
+msgstr "ผู้ตรวจสอบออปเจ็กต์"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "เค้าร่าง"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "โหมด Pygame Zero"
+
+#: thonny/plugins/pip_gui.py:79
+msgid "Uninstall"
+msgstr "ถอนการติดตั้ง"
+
+#: thonny/editors.py:663 thonny/plugins/pip_gui.py:235 thonny/ui_utils.py:482
+#: thonny/ui_utils.py:1824 thonny/workdlg.py:162
+msgid "Close"
+msgstr "ปิด"
+
+#: thonny/plugins/pip_gui.py:381
+msgid "Click "
+msgstr "คลิ๊ก "
+
+#: thonny/plugins/pip_gui.py:382 thonny/plugins/pip_gui.py:393
+msgid "here"
+msgstr "ที่นี่"
+
+#: thonny/plugins/pip_gui.py:76
+msgid "Upgrade"
+msgstr "อัปเกรด"
+
+#: thonny/plugins/esp/__init__.py:347
+#: thonny/plugins/micropython/uf2dialog.py:93 thonny/plugins/pip_gui.py:73
+msgid "Install"
+msgstr "ติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:521
+msgid "Could not find the package from PyPI."
+msgstr "ไม่พบแพ็คเกจจาก PyPI"
+
+#: thonny/plugins/pip_gui.py:543
+msgid "Latest stable version"
+msgstr "เวอร์ชันเสถียรล่าสุด"
+
+#: thonny/plugins/pip_gui.py:545
+msgid "Latest version"
+msgstr "เวอร์ชั่นล่าสุด"
+
+#: thonny/plugins/pip_gui.py:547
+msgid "Summary"
+msgstr "สรุป"
+
+#: thonny/plugins/pip_gui.py:549
+msgid "Author"
+msgstr "ผู้แต่ง"
+
+#: thonny/plugins/pip_gui.py:551
+msgid "Homepage"
+msgstr "โฮมเพจ"
+
+#: thonny/plugins/pip_gui.py:553
+msgid "Bugtracker"
+msgstr "ตัวติดตามบั๊ก"
+
+#: thonny/plugins/pip_gui.py:555
+msgid "Documentation"
+msgstr "เอกสาร"
+
+#: thonny/plugins/pip_gui.py:557
+msgid "PyPI page"
+msgstr "เพจ PyPI"
+
+#: thonny/plugins/pip_gui.py:597
+msgid "Requires"
+msgstr "จำเป็น"
+
+#: thonny/plugins/pip_gui.py:729
+msgid "Really uninstall?"
+msgstr "ต้องการถอนการติดตั้งจริงหรือ?"
+
+#: thonny/plugins/pip_gui.py:734
+msgid "Are you sure you want to uninstall it?"
+msgstr "คุณแน่ใจหรือไม่ว่าต้องการถอนการติดตั้ง?"
+
+#: thonny/plugins/variables.py:22
+msgid "Back to\n"
+"current frame"
+msgstr "กลับไปยัง\n"
+"เฟรมปัจจุบัน"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "ตัวแปร"
+
+#: thonny/base_file_browser.py:1512
+msgid "This computer"
+msgstr "คอมพิวเตอร์เครื่องนี้"
+
+#: thonny/base_file_browser.py:627
+msgid "Refresh"
+msgstr "รีเฟรช"
+
+#: thonny/base_file_browser.py:640
+msgid "Focus into"
+msgstr "โฟกัสไปที่"
+
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
+#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+msgid "Error"
+msgstr "ผิดพลาด"
+
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
+msgid "You need to select a file!"
+msgstr "คุณจำเป็นต้องเลือกไฟล์!"
+
+#: thonny/base_file_browser.py:1363
+msgid "Overwrite?"
+msgstr "เขียนทับหรือเปล่า?"
+
+#: thonny/base_file_browser.py:1363
+msgid "Do you want to overwrite '%s' ?"
+msgstr "คุณต้องการเขียนทับ '%s' หรือไม่?"
+
+#: thonny/editors.py:628 thonny/editors.py:630
+msgid "New"
+msgstr "ใหม่"
+
+#: thonny/editors.py:641
+msgid "Open..."
+msgstr "เปิด..."
+
+#: thonny/editors.py:643
+msgid "Load"
+msgstr "โหลด"
+
+#: thonny/editors.py:652
+msgid "Recent files"
+msgstr "ไฟล์ล่าสุด"
+
+#: thonny/editors.py:674 thonny/ui_utils.py:484
+msgid "Close all"
+msgstr "ปิดทั้งหมด"
+
+#: thonny/editors.py:684 thonny/editors.py:686
+msgid "Save"
+msgstr "บันทึก"
+
+#: thonny/editors.py:709
+msgid "Save as..."
+msgstr "บันทึกเป็น..."
+
+#: thonny/editors.py:720
+msgid "Save copy..."
+msgstr "บันทึกสำเนา..."
+
+#: thonny/config_ui.py:21
+msgid "Thonny options"
+msgstr "ตัวเลือก Thonny"
+
+#: thonny/running.py:114
+msgid "Run current script"
+msgstr "เรียกใช้สคริปต์ปัจจุบัน"
+
+#: thonny/running.py:145
+msgid "Run current script in terminal"
+msgstr "เรียกใช้สคริปต์ปัจจุบันในเทอร์มินัล"
+
+#: thonny/running.py:158
+msgid "Stop/Restart backend"
+msgstr "หยุด/รีสตาร์ทแบ็กเอนด์"
+
+#: thonny/running.py:159
+msgid "Stop"
+msgstr "หยุด"
+
+#: thonny/running.py:170
+msgid "Interrupt execution"
+msgstr "การดำเนินการขัดจังหวะ"
+
+#: thonny/running.py:183
+msgid "Send EOF / Soft reboot"
+msgstr "สิ้นสุด EOF / ซอฟต์รีบูต"
+
+#: thonny/running.py:194
+msgid "Disconnect"
+msgstr "ตัดการเชื่อมต่อ"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:256
+msgid "Python interpreters"
+msgstr "Python อินเตอร์พรีทเตอร์"
+
+#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:257
+#: thonny/plugins/pip_gui.py:775 thonny/plugins/pip_gui.py:788
+msgid "all files"
+msgstr "ไฟล์ทั้งหมด"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:285
+msgid "Select empty directory for new virtual environment"
+msgstr "เลือกไดเร็กทอรีว่างสำหรับสภาพแวดล้อมเสมือนใหม่"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:292
+msgid "Bad directory"
+msgstr "ไดเรกทอรีที่ไม่ดี"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:293
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "ไดเรกทอรีที่เลือกไม่ว่าง\n"
+"เลือกไดเรกทอรีอื่นหรือยกเลิก"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:310
+msgid "Creating virtual environment"
+msgstr "การสร้างสภาพแวดล้อมเสมือนจริง"
+
+#: thonny/shell.py:98
+msgid "Clear shell"
+msgstr "เคลียร์เชลล์"
+
+#: thonny/shell.py:154
+msgid "Plotter"
+msgstr "พล็อตเตอร์"
+
+#: thonny/shell.py:286
+msgid "Clear"
+msgstr "เคลียร์"
+
+#: thonny/shell.py:299
+msgid "Show Plotter"
+msgstr "แสดงพล็อตเตอร์"
+
+#: thonny/shell.py:1610
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "ด้วยเหตุผลด้านประสิทธิภาพ Shell หลีกเลี่ยงการแสดงบรรทัดที่ยาวมาก (ดู เครื่องมือ => ตัวเลือก => เชลล์)\n"
+"คุณสามารถโต้ตอบกับส่วนข้อความต้นฉบับได้ที่นี่"
+
+#: thonny/shell.py:1621
+msgid "Wrap text (may be slow)"
+msgstr "ตัดข้อความ (อาจช้า)"
+
+#: thonny/ui_utils.py:1819
+msgid "Copy to clipboard"
+msgstr "คัดลอกไปยังคลิปบอร์ด"
+
+#: thonny/shell.py:1663
+msgid "Squeezed text (%d characters)"
+msgstr "บีบข้อความ (%d อักขระ)"
+
+#: thonny/shell.py:1833
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "พล็อตเตอร์แสดงภาพชุดของ\n"
+"ตัวเลขที่พิมพ์ไปที่เชลล์"
+
+#: thonny/shell.py:1835
+msgid "See Help for details."
+msgstr "ดูความช่วยเหลือสำหรับรายละเอียด"
+
+#: thonny/ui_utils.py:483
+msgid "Close others"
+msgstr "ปิดอันอื่น"
+
+#: thonny/ui_utils.py:1675
+msgid "Copying"
+msgstr "กำลังคัดลอก"
+
+#: thonny/ui_utils.py:1678
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "กำลังคัดลอก\n"
+"  %s\n"
+"ไปยัง\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1324 thonny/config_ui.py:38 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1210
+#: thonny/ui_utils.py:148 thonny/ui_utils.py:1686 thonny/ui_utils.py:1771
+#: thonny/workdlg.py:164 thonny/workdlg.py:209
+msgid "Cancel"
+msgstr "ยกเลิก"
+
+#: thonny/base_file_browser.py:1321 thonny/config_ui.py:37 thonny/export.py:25
+#: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
+#: thonny/ui_utils.py:145 thonny/ui_utils.py:1768 thonny/workdlg.py:206
+msgid "OK"
+msgstr "ตกลง"
+
+#: thonny/ui_utils.py:2261
+msgid "Select All"
+msgstr "เลือกทั้งหมด"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/workbench.py:162
+msgid "Shell"
+msgstr "เชลล์"
+
+#: thonny/workbench.py:593
+msgid "Options..."
+msgstr "ตัวเลือก..."
+
+#: thonny/workbench.py:600
+msgid "Increase font size"
+msgstr "เพิ่มขนาดฟอนต์"
+
+#: thonny/workbench.py:665
+msgid "Change font size"
+msgstr "เปลี่ยนขนาดฟอนต์"
+
+#: thonny/workbench.py:666
+msgid "Zoom"
+msgstr "ซูม"
+
+#: thonny/workbench.py:675
+msgid "Exit Thonny"
+msgstr "ออกจาก Thonny"
+
+#: thonny/workbench.py:678
+msgid "Quit"
+msgstr "จบการทำงาน"
+
+#: thonny/workbench.py:1216 thonny/workbench.py:1224
+msgid "Overwriting theme '%s'"
+msgstr "การเขียนทับธีม '%s'"
+
+#: thonny/workbench.py:1408
+msgid "Program arguments:"
+msgstr "โปรแกรมอาร์กิวเมนต์"
+
+#: thonny/workbench.py:1462
+msgid "Regular mode"
+msgstr "โหมดปกติ"
+
+#: thonny/workbench.py:1463
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "อัปเดตการกำหนดค่าแล้ว รีสตาร์ท Thonny เพื่อเริ่มทำงานในโหมดปกติ\n"
+"\n"
+"(ดู 'เครื่องมือ → ตัวเลือก → ทั่วไป' หากคุณเปลี่ยนใจในภายหลัง)"
+
+#: thonny/plugins/ast_view.py:212
+msgid "Program tree"
+msgstr "โครงสร้างโปรแกรม"
+
+#: thonny/plugins/debugger.py:1283
+msgid "Resume"
+msgstr "เล่นต่อ"
+
+#: thonny/plugins/debugger.py:1299
+msgid "Run / resume"
+msgstr "เรียกใช้ / เล่นต่อ"
+
+#: thonny/plugins/debugger.py:1314
+msgid "Debug current script"
+msgstr "ดีบักสคริปต์ปัจจุบัน"
+
+#: thonny/plugins/debugger.py:1316
+msgid "Debug"
+msgstr "ดีบัก"
+
+#: thonny/plugins/debugger.py:1327
+msgid "Debug current script (nicer)"
+msgstr "ดีบักสคริปต์ปัจจุบัน (ดีกว่า)"
+
+#: thonny/plugins/debugger.py:1339
+msgid "Debug current script (faster)"
+msgstr "ดีบักสคริปต์ปัจจุบัน (เร็วกว่า)"
+
+#: thonny/plugins/debugger.py:1350
+msgid "Step over"
+msgstr "ก้าวข้าม"
+
+#: thonny/plugins/debugger.py:1352
+msgid "Over"
+msgstr "เกินต้องการ"
+
+#: thonny/plugins/debugger.py:1363
+msgid "Step into"
+msgstr "ก้าวเข้าสู่"
+
+#: thonny/plugins/debugger.py:1365
+msgid "Into"
+msgstr "เข้าไป"
+
+#: thonny/plugins/debugger.py:1376
+msgid "Step out"
+msgstr "ออกมา"
+
+#: thonny/plugins/debugger.py:1378
+msgid "Out"
+msgstr "ออก"
+
+#: thonny/plugins/debugger.py:1413
+msgid "Step back"
+msgstr "ถอยหลัง"
+
+#: thonny/plugins/debugger.py:1415
+msgid "Back"
+msgstr "ย้อนกลับ"
+
+#: thonny/plugins/debugger.py:1421
+msgid "Stack"
+msgstr "ซ้อนกัน"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Exception"
+msgstr "ยกเว้น"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "บันทึกเหตุการณ์การใช้งานโปรแกรม"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "โหมดดีบัก (ให้บันทึกการวินิจฉัยที่มีรายละเอียดมากขึ้น)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "โหมด UI"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "ปัจจัยการปรับขนาด UI"
+
+#: thonny/plugins/general_config_page.py:108
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "หมายเหตุ! รีสตาร์ท Thonny หลังจากเปลี่ยนตัวเลือกเหล่านี้!"
+
+#: thonny/plugins/general_config_page.py:142
+msgid "General"
+msgstr "ทั่วไป"
+
+#: thonny/plugins/pip_gui.py:129
+msgid "INSTALL"
+msgstr "ติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:351
+msgid "Browse the packages"
+msgstr "เรียกดูแพ็คเกจ"
+
+#: thonny/plugins/pip_gui.py:354
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "ด้วยอินเตอร์พรีทเตอร์ปัจจุบัน คุณสามารถเรียกดูแพ็คเกจได้ที่นี่เท่านั้น\n"
+"ใช้ 'เครื่องมือ → เปิดเชลล์ระบบ...' เพื่อติดตั้ง อัปเกรด หรือถอนการติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:362
+msgid "Packages' directory"
+msgstr "ไดเรกทอรีของแพ็คเกจ"
+
+#: thonny/plugins/pip_gui.py:366
+msgid "Install from PyPI"
+msgstr "ติดตั้งจาก PyPI"
+
+#: thonny/plugins/pip_gui.py:369
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "หากคุณไม่รู้ว่าจะรับแพ็คเกจจากที่ใด เป็นไปได้มากว่าคุณจะต้องการค้นหา Python Package Index เริ่มต้นด้วยการป้อนชื่อแพ็คเกจในช่องค้นหาด้านบนแล้วกด ENTER"
+
+#: thonny/plugins/pip_gui.py:386
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "เพื่อค้นหาไฟล์ requirements.txt และติดตั้งแพ็คเกจที่ระบุ"
+
+#: thonny/plugins/pip_gui.py:392
+msgid "Click"
+msgstr "คลิ๊ก"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "เพื่อค้นหาและติดตั้งไฟล์แพ็คเกจ (ปกติจะมีนามสกุล .whl, .tar.gz หรือ .zip)"
+
+#: thonny/plugins/pip_gui.py:404
+msgid "Upgrade or uninstall"
+msgstr "อัปเกรดหรือถอนการติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:406
+msgid "Start by selecting the package from the left."
+msgstr "เริ่มต้นด้วยการเลือกแพ็คเกจจากด้านซ้าย"
+
+#: thonny/plugins/pip_gui.py:410
+msgid "Target:"
+msgstr "เป้าหมาย:"
+
+#: thonny/plugins/pip_gui.py:414
+msgid "virtual environment"
+msgstr "สภาพแวดล้อมเสมือนจริง"
+
+#: thonny/plugins/pip_gui.py:412
+msgid "user site packages"
+msgstr "แพ็คเกจไซต์ผู้ใช้"
+
+#: thonny/plugins/pip_gui.py:418
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "กล่องโต้ตอบนี้แสดงรายการแพ็คเกจที่มีอยู่ทั้งหมด แต่อนุญาตให้อัปเกรดและถอนการติดตั้งเฉพาะแพ็คเกจจาก"
+
+#: thonny/plugins/pip_gui.py:428
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "แพ็คเกจใหม่จะถูกติดตั้งลงในไดเร็กทอรีนี้ด้วย สถานที่อื่นต้องได้รับการจัดการด้วยวิธีอื่น"
+
+#: thonny/plugins/pip_gui.py:471
+msgid "Installed version:"
+msgstr "เวอร์ชั่นที่ติดตั้ง:"
+
+#: thonny/plugins/pip_gui.py:473
+msgid "Installed to:"
+msgstr "ติดตั้งไปที่:"
+
+#: thonny/plugins/pip_gui.py:524
+msgid "Please check your spelling!"
+msgstr "กรุณาตรวจสอบการสะกดคำของคุณ!"
+
+#: thonny/plugins/pip_gui.py:528
+msgid "Could not find the package info from PyPI."
+msgstr "ไม่พบข้อมูลแพ็คเกจจาก PyPI"
+
+#: thonny/plugins/pip_gui.py:530 thonny/plugins/pip_gui.py:1271
+msgid "Error code:"
+msgstr "รหัสข้อผิดพลาด:"
+
+#: thonny/plugins/pip_gui.py:675
+msgid "Can't find package name from the list:"
+msgstr "ไม่พบชื่อแพ็คเกจจากรายการ:"
+
+#: thonny/plugins/pip_gui.py:730
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "ต้องใช้แพ็คเกจ '{}' สำหรับการติดตั้งและถอนการติดตั้งแพ็คเกจอื่น"
+
+#: thonny/plugins/pip_gui.py:775
+msgid "Package"
+msgstr "แพคเก็จ"
+
+#: thonny/plugins/pip_gui.py:885
+msgid "Manage packages for %s"
+msgstr "จัดการแพคเก็จสำหรับ %s"
+
+#: thonny/editors.py:571 thonny/plugins/micropython/pip_gui.py:23
+#: thonny/plugins/pip_gui.py:936
+msgid "Confirmation"
+msgstr "การยืนยัน"
+
+#: thonny/plugins/pip_gui.py:937
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "ดูเหมือนว่าคุณกำลังติดตั้งแพ็คเกจที่เกี่ยวข้องกับ Thonny\n"
+"หากคุณต้องการติดตั้งปลั๊กอิน Thonny คุณควร\n"
+"เลือก 'เครื่องมือ → จัดการปลั๊กอิน...' แทน\n"
+"\n"
+"คุณแน่ใจหรือไม่ว่าต้องการติดตั้ง %s สำหรับส่วนหลัง"
+
+#: thonny/plugins/pip_gui.py:1042
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "หมายเหตุ! อาจมีรุ่นอื่นที่เข้ากันได้กับรุ่น Thonny ปัจจุบัน คลิกที่ปุ่ม '...' เพื่อเลือกเวอร์ชันที่จะติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:1050
+msgid "Thonny plugin without requirements"
+msgstr "ปลั๊กอิน Thonny ที่ไม่มีข้อกำหนด"
+
+#: thonny/plugins/pip_gui.py:1066
+msgid "Unsuitable requirements"
+msgstr "ข้อกำหนดที่ไม่เหมาะสม"
+
+#: thonny/plugins/pip_gui.py:1067
+msgid "This package requires different Thonny version:"
+msgstr "แพ็คเกจนี้ต้องใช้ Thonny เวอร์ชันอื่น:"
+
+#: thonny/plugins/pip_gui.py:1071
+msgid "If you still want it, then please install it from the command line."
+msgstr "หากคุณยังต้องการอยู่ โปรดติดตั้งจากคอมมานด์ไลน์"
+
+#: thonny/plugins/pip_gui.py:1108
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "หมายเหตุ! คุณต้องรีสตาร์ท Thonny หลังจากติดตั้ง / อัปเกรด / ถอนการติดตั้งปลั๊กอิน"
+
+#: thonny/plugins/pip_gui.py:1118
+msgid "Thonny plug-ins"
+msgstr "ปลั๊กอิน Thonny"
+
+#: thonny/plugins/pip_gui.py:1154
+msgid "Advanced install / upgrade / downgrade"
+msgstr "การติดตั้ง/อัปเกรด/ดาวน์เกรด ขั้นสูง"
+
+#: thonny/plugins/pip_gui.py:1163
+msgid "Desired version"
+msgstr "รุ่นที่ต้องการ"
+
+#: thonny/plugins/pip_gui.py:1201
+msgid "Upgrade dependencies"
+msgstr "อัพเกรดการพึ่งพา"
+
+#: thonny/plugins/pip_gui.py:1269
+msgid "Requires:"
+msgstr "จำเป็น:"
+
+#: thonny/plugins/pip_gui.py:1273
+msgid "Error:"
+msgstr "ผิดพลาด:"
+
+#: thonny/plugins/pip_gui.py:1486
+msgid "Manage packages..."
+msgstr "จัดการแพคเก็จ"
+
+#: thonny/plugins/pip_gui.py:1492
+msgid "Manage plug-ins..."
+msgstr "จัดการปลั๊กอิน"
+
+#: thonny/plugins/replayer.py:365
+msgid "Open replayer..."
+msgstr "เปิดเล่นซ้ำ..."
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "เปลี่ยนไดเร็กทอรีการทำงานเป็นไดเร็กทอรีสคริปต์บน เรียกใช้ / ดีบัก"
+
+#: thonny/plugins/run_debug_config_page.py:22
+msgid "Show function calls (frames) in separate windows"
+msgstr "แสดงการเรียกใช้ฟังก์ชัน (เฟรม) ในหน้าต่างแยกกัน"
+
+#: thonny/plugins/run_debug_config_page.py:23
+msgid "Uncheck if you want more traditional experience."
+msgstr "ยกเลิกการเลือกหากคุณต้องการประสบการณ์แบบเดิมๆ"
+
+#: thonny/plugins/run_debug_config_page.py:29
+msgid "Open and close Stack view automatically"
+msgstr "เปิดและปิดสแต็คมุมมองโดยอัตโนมัติ"
+
+#: thonny/plugins/run_debug_config_page.py:30
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "เปิดมุมมอง Stack ในการโทรครั้งแรกและปิดเมื่อโปรแกรมกลับสู่เฟรมหลัก"
+
+#: thonny/plugins/run_debug_config_page.py:39
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "อนุญาตให้เข้าสู่ไลบรารี (เช่น นอกไดเร็กทอรีสคริปต์หลัก)"
+
+#: thonny/plugins/run_debug_config_page.py:40
+msgid "May make debugging slower."
+msgstr "อาจทำให้การดีบักช้าลง"
+
+#: thonny/plugins/run_debug_config_page.py:45
+msgid "Preferred debugger"
+msgstr "ดีบักเกอร์ที่ต้องการ"
+
+#: thonny/plugins/run_debug_config_page.py:57
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(ใช้เมื่อคลิกปุ่ม ทุลบาร์ดีบัก)"
+
+#: thonny/plugins/run_debug_config_page.py:62
+msgid "Birdseye port"
+msgstr "พอร์ตเบิร์ดอาย"
+
+#: thonny/plugins/run_debug_config_page.py:66
+msgid "(restart Thonny after changing this)"
+msgstr "(รีสตาร์ท Thonny หลังจากเปลี่ยนสิ่งนี้)"
+
+#: thonny/plugins/run_debug_config_page.py:74
+msgid "Run & Debug"
+msgstr "เรียกใช้ & ดีบัก"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "การจำลองเทอร์มินัล"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "รองรับสีและสไตล์ ANSI พื้นฐาน"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "จำนวนบรรทัดสูงสุดที่จะเก็บไว้"
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "หมายเหตุ! ค่าขนาดใหญ่อาจทำให้ประสิทธิภาพต่ำ!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "ความยาวสูงสุดของเศษเส้นก่อนบีบ"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "เรียกใช้สคริปต์ปัจจุบันในเทอร์มินัล"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "นำเสนอ Python REPL หลังจากสิ้นสุดโปรแกรม"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "เปิดหน้าต่างเทอร์มินัลไว้หลังจากกระบวนการ Python สิ้นสุดลง"
+
+#: thonny/plugins/terminal_config_page.py:31
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "หมายเหตุ! ต้องเปิดใช้งานการปิดอัตโนมัติในการตั้งค่าของเทอร์มินัล\n"
+"(โปรไฟล์ → เชลล์ → เมื่อออกจากเชลล์)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "เทอร์มินัล"
+
+#: thonny/plugins/theme_and_font_config_page.py:40
+msgid "UI theme"
+msgstr "ธีม UI"
+
+#: thonny/plugins/theme_and_font_config_page.py:53
+msgid "Syntax theme"
+msgstr "ธีมไวยากรณ์"
+
+#: thonny/plugins/theme_and_font_config_page.py:85
+msgid "Editor font"
+msgstr "ฟอนต์ของตัวแก้ไข"
+
+#: thonny/plugins/theme_and_font_config_page.py:108
+msgid "IO font"
+msgstr "ฟอนต์ IO"
+
+#: thonny/plugins/theme_and_font_config_page.py:133
+msgid "Preview"
+msgstr "ตัวอย่าง"
+
+#: thonny/plugins/theme_and_font_config_page.py:145
+msgid "This is a comment"
+msgstr "นี่คือคอมเมนต์"
+
+#: thonny/plugins/theme_and_font_config_page.py:148
+msgid "The answer is"
+msgstr "คำตอบคือ"
+
+#: thonny/plugins/theme_and_font_config_page.py:152
+msgid "unclosed_string"
+msgstr "unclosed_string"
+
+#: thonny/plugins/theme_and_font_config_page.py:154
+msgid "blah, blah"
+msgstr "บลา บลา"
+
+#: thonny/plugins/theme_and_font_config_page.py:177
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "หมายเหตุ! องค์ประกอบสไตล์บางอย่างเปลี่ยนแปลงหลังจากรีสตาร์ท Thonny!"
+
+#: thonny/plugins/theme_and_font_config_page.py:216
+msgid "Enter an integer"
+msgstr "ใส่จำนวนเต็ม"
+
+#: thonny/plugins/theme_and_font_config_page.py:229
+msgid "Theme & Font"
+msgstr "ธีมและฟอนต์"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "เปิดโฟลเดอร์โปรแกรม Thonny..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "เปิดโฟลเดอร์ข้อมูล Thonny..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "บ้าน"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "เนื้อหาช่วยเหลือ"
+
+#: thonny/plugins/micropython/mp_front.py:318
+msgid "CircuitPython device"
+msgstr "อุปกรณ์ CircuitPython"
+
+#: thonny/plugins/micropython/mp_front.py:322
+msgid "MicroPython device"
+msgstr "อุปกรณ์ MicroPython"
+
+#: thonny/plugins/micropython/mp_front.py:563
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "เชื่อมต่ออุปกรณ์ของคุณกับคอมพิวเตอร์และเลือกพอร์ตที่เกี่ยวข้องด้านล่าง"
+
+#: thonny/plugins/micropython/mp_front.py:566
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "ค้นหาชื่ออุปกรณ์ของคุณ \"USB Serial\" หรือ \"UART\""
+
+#: thonny/plugins/micropython/mp_front.py:568
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "หากหาไม่พบ คุณอาจต้องติดตั้งไดรเวอร์ USB ที่เหมาะสมก่อน"
+
+#: thonny/plugins/micropython/mp_front.py:464
+msgid "Port"
+msgstr "พอร์ต"
+
+#: thonny/plugins/micropython/mp_front.py:474
+msgid "Try to detect port automatically"
+msgstr "พยายามตรวจจับพอร์ตโดยอัตโนมัติ"
+
+#: thonny/plugins/micropython/__init__.py:25
+msgid "MicroPython (generic)"
+msgstr "MicroPython (ทั่วไป)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "พิมพ์..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "เปิดเชลล์ระบบ..."
+
+#: thonny/plugins/backend_config_page.py:103
+msgid "Details"
+msgstr "รายละเอียด"
+
+#: thonny/plugins/pip_gui.py:379
+msgid "Install from requirements file"
+msgstr "ติดตั้งจากไฟล์ข้อกำหนด"
+
+#: thonny/plugins/pip_gui.py:391
+msgid "Install from local file"
+msgstr "ติดตั้งจากไฟล์ในเครื่อง"
+
+#: thonny/plugins/pip_gui.py:1101
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "ไดอะล็อกนี้ใช้สำหรับจัดการปลั๊กอิน Thonny และการขึ้นต่อกัน\n"
+"หากคุณต้องการติดตั้งแพ็คเกจสำหรับโปรแกรมของคุณเอง ให้เลือก 'เครื่องมือ → จัดการแพ็คเกจ...'"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (ทั่วไป)"
+
+#: thonny/plugins/commenting_indenting.py:143
+msgid "Indent selected lines"
+msgstr "เยื้องบรรทัดที่เลือก"
+
+#: thonny/plugins/commenting_indenting.py:153
+msgid "Dedent selected lines"
+msgstr "เยื้องบรรทัดที่เลือก"
+
+#: thonny/workbench.py:1451
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "เปลี่ยนเป็น\n"
+"ปกติ\n"
+"โหมด"
+
+#: thonny/plugins/microbit/__init__.py:57
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "ตรวจสอบให้แน่ใจว่าได้ติดตั้ง MicroPython ลงใน micro:bit ของคุณแล้ว"
+
+#: thonny/plugins/microbit/__init__.py:59
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "อย่าลืมว่า main.py ใช้งานได้โดยไม่ต้องฝังสคริปต์หลักเท่านั้น"
+
+#: thonny/plugins/micropython/uf2dialog.py:44
+msgid "please wait"
+msgstr "กรุณารอสักครู๋"
+
+#: thonny/misc_utils.py:151
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "ไม่พบดิสก์ '%s' คุณต้องการค้นหาด้วยตัวเองหรือไม่?"
+
+#: thonny/misc_utils.py:154
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "พบดิสก์ '%s' หลายแผ่น คุณต้องการเลือกด้วยตัวเองหรือไม่?"
+
+#: thonny/misc_utils.py:170
+msgid "Can't find suitable disk"
+msgstr "ไม่พบดิสก์ที่เหมาะสม"
+
+#: thonny/base_file_browser.py:282
+msgid "%d items"
+msgstr "%d รายการ"
+
+#: thonny/base_file_browser.py:721
+msgid "Move to Trash"
+msgstr "ย้ายไปยังถังขยะ"
+
+#: thonny/base_file_browser.py:724
+msgid "Delete"
+msgstr "ลบ"
+
+#: thonny/base_file_browser.py:703 thonny/base_file_browser.py:854
+msgid "New directory"
+msgstr "ไดเร็คทอรี่ใหม่"
+
+#: thonny/base_file_browser.py:727
+msgid "Properties"
+msgstr "คุณสมบัติ"
+
+#: thonny/base_file_browser.py:729
+msgid "Storage space"
+msgstr "พื้นที่จัดเก็บ"
+
+#: thonny/base_file_browser.py:739
+msgid "Path"
+msgstr "เส้นทาง"
+
+#: thonny/base_file_browser.py:741
+msgid "Directory properties"
+msgstr "คุณสมบัติไดเร็กทอรี"
+
+#: thonny/base_file_browser.py:743
+msgid "File properties"
+msgstr "คุณสมบัติของไฟล์"
+
+#: thonny/base_file_browser.py:745
+msgid "bytes"
+msgstr "ไบต์"
+
+#: thonny/base_file_browser.py:748
+msgid "Size"
+msgstr "ขนาด"
+
+#: thonny/base_file_browser.py:92 thonny/base_file_browser.py:759
+msgid "Modified"
+msgstr "ที่ได้รับการแก้ไข"
+
+#: thonny/base_file_browser.py:818
+msgid "Deleting %s"
+msgstr "กำลังลบ %s"
+
+#: thonny/editors.py:264
+msgid "Loading"
+msgstr "กำลังโหลด"
+
+#: thonny/editors.py:382
+msgid "Saving"
+msgstr "กำลังบันทึก"
+
+#: thonny/plugins/files.py:216
+msgid "Upload to %s"
+msgstr "อัพโหลดไปยัง %s"
+
+#: thonny/plugins/files.py:362
+msgid "Downloading %s to %s"
+msgstr "กำลังดาวน์โหลด %s ไปยัง %s"
+
+#: thonny/plugins/files.py:275
+msgid "Download to %s"
+msgstr "ดาวนืโหลดไปยัง %s"
+
+#: thonny/base_file_browser.py:629
+msgid "Open in system file manager"
+msgstr "เปิดในตัวจัดการไฟล์ระบบ"
+
+#: thonny/base_file_browser.py:634
+msgid "Hide hidden files"
+msgstr "ซ่อนไฟล์ที่ซ่อนอยู่"
+
+#: thonny/base_file_browser.py:634
+msgid "Show hidden files"
+msgstr "แสดงไฟล์ที่ซ่อนอยู่"
+
+#: thonny/base_file_browser.py:644
+msgid "Open in Thonny"
+msgstr "เปิดใน Thonny"
+
+#: thonny/base_file_browser.py:670
+msgid "Open in system default app"
+msgstr "เปิดในแอปเริ่มต้นของระบบ"
+
+#: thonny/base_file_browser.py:656 thonny/base_file_browser.py:678
+msgid "Configure %s files"
+msgstr "กำหนดค่า %s ไฟล์"
+
+#: thonny/base_file_browser.py:679
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "จะทำอย่างไรกับไฟล์ %s เมื่อคุณดับเบิลคลิกในไฟล์เบราว์เซอร์ของ Thonny"
+
+#: thonny/base_file_browser.py:1225 thonny/editors.py:949 thonny/editors.py:951
+msgid "Deleting"
+msgstr "กำลังลบ"
+
+#: thonny/base_file_browser.py:1232
+msgid "Creating directory"
+msgstr "สร้างไดเร็คทอรี่"
+
+#: thonny/editors.py:262
+msgid "Loading %s"
+msgstr "กำลังโหลด %s"
+
+#: thonny/editors.py:380
+msgid "Saving to %s"
+msgstr "บันทึกไปยัง %s"
+
+#: thonny/editors.py:698 thonny/editors.py:700
+msgid "Save All files"
+msgstr "บันทึกไฟล์ทั้งหมด"
+
+#: thonny/plugins/backend_config_page.py:323 thonny/workbench.py:849
+msgid "Configure interpreter..."
+msgstr "ปรับแต่งอินเตอร์พรีทเตอร์..."
+
+#: thonny/workbench.py:1561
+msgid "Device"
+msgstr "อุปกรณ์"
+
+#: thonny/workdlg.py:193
+msgid "Cancelling"
+msgstr "กำลังยกเลิก"
+
+#: thonny/workdlg.py:220
+msgid "Starting"
+msgstr "กำลังเริ่มต้น"
+
+#: thonny/plugins/backend_config_page.py:234
+msgid "Authentication"
+msgstr "Authentication"
+
+#: thonny/plugins/backend_config_page.py:236
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "ป้อนรหัสผ่านของรหัสส่วนตัวของคุณสำหรับ\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:239
+msgid "Enter your password for\n"
+"{}"
+msgstr "ป้อนรหัสผ่านของคุณสำหรับ\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr "การเป็นตัวแทนข้างต้นเป็นค่าโดยประมาณของโฟลตนี้ ค่าที่เก็บไว้ที่แน่นอนคือ %s ซึ่งเป็นเรื่องเกี่ยวกับ %s"
+
+#: thonny/plugins/pip_gui.py:631
+msgid "Search results"
+msgstr "ผลการค้นหา"
+
+#: thonny/plugins/pip_gui.py:632
+msgid "Searching"
+msgstr "กำลังค้นหา"
+
+#: thonny/plugins/pip_gui.py:714 thonny/plugins/pip_gui.py:803
+msgid "Installing '%s'"
+msgstr "กำลังติดตั้ง '%s'"
+
+#: thonny/plugins/pip_gui.py:720
+msgid "Upgrading '%s'"
+msgstr "กำลังอัพเกรด '%s'"
+
+#: thonny/plugins/pip_gui.py:727
+msgid "Uninstalling '%s'"
+msgstr "กำลังถอนการติดตั้ง '%s'"
+
+#: thonny/plugins/pip_gui.py:741
+msgid "Installing"
+msgstr "กำลังติดตั้ง"
+
+#: thonny/plugins/pip_gui.py:1447
+msgid "Package manager is not available for this interpreter"
+msgstr "ไม่มีตัวจัดการแพ็คเกจสำหรับอินเตอร์พรีทเตอร์นี้"
+
+#: thonny/base_file_browser.py:1176 thonny/plugins/pip_gui.py:1461
+msgid "Not supported"
+msgstr "ไม่รองรับแล้ว"
+
+#: thonny/plugins/micropython/pip_gui.py:117 thonny/plugins/pip_gui.py:1466
+msgid "Not available"
+msgstr "ไม่ว่าง"
+
+#: thonny/plugins/pip_gui.py:1467
+msgid "You need to stop your program before launching the package manager."
+msgstr "คุณต้องหยุดโปรแกรมของคุณก่อนที่จะเปิดตัวจัดการแพ็คเกจ"
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "เปิดค่าที่ประเมินในตัวตรวจสอบออปเจ็ค"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:207
+msgid "Python executable"
+msgstr "Python executable"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:230
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr "หมายเหตุ! ปุ่มเลือกไฟล์อาจทำงานไม่ถูกต้องเมื่อเลือกไฟล์ปฏิบัติการ\n"
+"จากสภาพแวดล้อมเสมือนจริง ในกรณีนี้ให้เลือกสคริปต์ 'เปิดใช้งาน' แทน\n"
+"ของอินเตอร์พรีทเตอร์ (หรือป้อนเส้นทางไปยังกล่องโดยตรง)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:16
+msgid "Remote Python 3 (SSH)"
+msgstr "Python ระยะไกล 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:328
+msgid "Not connected"
+msgstr "ไม่ได้เชื่อมต่อ"
+
+#: thonny/plugins/micropython/mp_front.py:540
+msgid "Advanced options"
+msgstr "ตัวเลือกขั้นสูง"
+
+#: thonny/plugins/micropython/mp_front.py:547
+msgid "Install or update firmware"
+msgstr "ติดตั้งหรืออัพเดทเฟิร์มแวร์"
+
+#: thonny/plugins/micropython/__init__.py:36
+msgid "MicroPython (local)"
+msgstr "MicroPython (local)"
+
+#: thonny/plugins/micropython/__init__.py:47
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:77
+msgid "Scope"
+msgstr "ขอบเขต"
+
+#: thonny/plugins/micropython/pip_gui.py:90
+msgid "This dialog lists top-level modules from following directories:\n"
+""
+msgstr "กล่องโต้ตอบนี้แสดงรายการโมดูลระดับบนสุดจากไดเรกทอรีต่อไปนี้:"
+
+#: thonny/plugins/micropython/pip_gui.py:99
+msgid "New packages will be installed to"
+msgstr "แพคเกจใหม่จะถูกติดตั้งไปยัง"
+
+#: thonny/plugins/micropython/pip_gui.py:119
+msgid "no absolute lib directory in sys.path"
+msgstr "ไม่มีไดเรกทอรี lib แน่นอนใน sys.path"
+
+#: thonny/plugins/micropython/uf2dialog.py:39
+msgid "Version to be installed"
+msgstr "รุ่นที่จะติดตั้ง"
+
+#: thonny/plugins/micropython/uf2dialog.py:47
+msgid "Target device location"
+msgstr "ตำแหน่งอุปกรณ์เป้าหมาย"
+
+#: thonny/plugins/micropython/uf2dialog.py:58
+msgid "Target device model"
+msgstr "รุ่นอุปกรณ์เป้าหมาย"
+
+#: thonny/plugins/micropython/uf2dialog.py:146
+msgid "Please wait"
+msgstr "กรุณารอสักครู่"
+
+#: thonny/plugins/pip_gui.py:70
+msgid "Search on PyPI"
+msgstr "ค้นหาใน PyPI"
+
+#: thonny/base_file_browser.py:671
+msgid "Open in Thonny's text editor"
+msgstr "เปิดในโปรแกรมแก้ไขข้อความของ Thonny"
+
+#: thonny/base_file_browser.py:334
+msgid "Storage space on this drive or filesystem"
+msgstr "พื้นที่เก็บข้อมูลในไดรฟ์หรือระบบไฟล์นี้"
+
+#: thonny/base_file_browser.py:335
+msgid "total space"
+msgstr "พื้นที่ทั้งหมด"
+
+#: thonny/base_file_browser.py:337
+msgid "used space"
+msgstr "พื้นที่ที่ใช้"
+
+#: thonny/base_file_browser.py:338
+msgid "free space"
+msgstr "พื้นที่ว่าง"
+
+#: thonny/base_file_browser.py:345
+msgid "Storage info"
+msgstr "ข้อมูลการสตอร์เรจ"
+
+#: thonny/plugins/commenting_indenting.py:163
+msgid "Replace tabs with spaces"
+msgstr "แทนที่แท็บด้วยช่องว่าง"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "ไฮไลต์อักขระแท็บ"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "เยื้องกับตัวละครแท็บ (ไม่แนะนำสำหรับ Python)"
+
+#: thonny/base_file_browser.py:90 thonny/memory.py:63
+msgid "Name"
+msgstr "ชื่อ"
+
+#: thonny/base_file_browser.py:94
+msgid "Size (bytes)"
+msgstr "ขนาด (ไบต์)"
+
+#: thonny/base_file_browser.py:855
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr "ป้อนชื่อสำหรับไดเรกทอรีใหม่ภายใต้\n"
+"%s"
+
+#: thonny/base_file_browser.py:878
+msgid "Nothing selected"
+msgstr "ไม่มีอะไรที่เลือก"
+
+#: thonny/base_file_browser.py:878
+msgid "Select an item and try again!"
+msgstr "เลือกรายการแล้วลองอีกครั้ง!"
+
+#: thonny/base_file_browser.py:1296
+msgid "Open from %s"
+msgstr "เปิดจาก %s"
+
+#: thonny/base_file_browser.py:1299
+msgid "Save to %s"
+msgstr "บันทึกไปยัง %s"
+
+#: thonny/base_file_browser.py:1311
+msgid "File name:"
+msgstr "ชื่อไฟล์:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value ID"
+msgstr "ค่า ID"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:540
+#: thonny/plugins/object_inspector.py:619
+msgid "Value"
+msgstr "ค่า"
+
+#: thonny/plugins/backend_config_page.py:257
+msgid "Save password"
+msgstr "บันทึกรหัสผ่าน"
+
+#: thonny/plugins/debugger.py:553
+msgid "Function call at %s"
+msgstr "ฟังก์ชั่นเรียกที่ %s"
+
+#: thonny/plugins/debugger.py:1003
+msgid "Local variables"
+msgstr "ตัวแปรโลคอล"
+
+#: thonny/plugins/debugger.py:1035
+msgid "Function"
+msgstr "ฟังก์ชั่น"
+
+#: thonny/plugins/debugger.py:1036
+msgid "Location"
+msgstr "ที่ตั้ง"
+
+#: thonny/plugins/debugger.py:1112
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "หากคำสั่งสุดท้ายยกข้อยกเว้นจากนั้นมุมมองนี้จะแสดง stackstrace"
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "ID"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "ข้อมูล"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "แอททริบิวต์"
+
+#: thonny/plugins/object_inspector.py:538
+msgid "Index"
+msgstr "อินเด็กซ์"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key ID"
+msgstr "ID คีย์"
+
+#: thonny/plugins/object_inspector.py:617
+msgid "Key"
+msgstr "คีย์"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "กลับไปยัง\n"
+" %s"
+
+#: thonny/plugins/micropython/mp_front.py:464
+msgid "Port or WebREPL"
+msgstr "พอร์ตหรือ WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:605
+msgid "Password"
+msgstr "รหัสผ่าน"
+
+#: thonny/plugins/debugger.py:961
+msgid "Source code"
+msgstr "Source code"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "ใช้กล่องโต้ตอบไฟล์ tk แทน Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "เลือกหากกล่องโต้ตอบไฟล์จบลงหลังหน้าต่างหลัก"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "ตัวแปรสภาพแวดล้อม (หนึ่งค่า = ค่า ต่อบรรทัด)"
+
+#: thonny/base_file_browser.py:700
+msgid "New file"
+msgstr "ไฟล์ใหม่"
+
+#: thonny/base_file_browser.py:718
+msgid "Rename"
+msgstr "เปลี่ยนชื่อ"
+
+#: thonny/base_file_browser.py:904
+msgid "Rename '%s'"
+msgstr "เปลี่ยนชื่อ '%s'"
+
+#: thonny/base_file_browser.py:904
+msgid "Enter new name"
+msgstr "ใส่ชื่อใหม่"
+
+#: thonny/base_file_browser.py:992
+msgid "Paste failed"
+msgstr "การวางล้มเหลว"
+
+#: thonny/base_file_browser.py:992
+msgid "There are conflicting folders"
+msgstr "มีโฟลเดอร์ที่ขัดแย้งกัน"
+
+#: thonny/base_file_browser.py:1114
+msgid "File already exists"
+msgstr "มีไฟล์อยู่แล้ว"
+
+#: thonny/base_file_browser.py:1179
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr "หากเป็นไฟล์ข้อความคุณสามารถกำหนดค่าให้เปิดใน Thonny ได้โดยคลิกขวาและเลือก 'กำหนดค่า ... ไฟล์'"
+
+#: thonny/editors.py:35
+msgid "Python files"
+msgstr "ไฟล์ Python"
+
+#: thonny/editors.py:120 thonny/editors.py:193
+msgid "<untitled>"
+msgstr "<ไม่มีชื่อ>"
+
+#: thonny/editors.py:155
+msgid "File is gone"
+msgstr "ไฟล์หายไป"
+
+#: thonny/editors.py:158
+msgid "Do you want to also close the editor?"
+msgstr "คุณต้องการปิดเอดิเตอร์รหรือไม่"
+
+#: thonny/editors.py:170
+msgid "External modification"
+msgstr "การปรับเปลี่ยนจากภายนอก"
+
+#: thonny/editors.py:173
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr "คุณต้องการยกเลิกเนื้อหาของโปรแกรมที่แก้ไขปัจจุบันและโหลดไฟล์ใหม่จากดิสก์ใช่หรือไม่?"
+
+#: thonny/editors.py:572
+msgid "Python files usually have .py extension."
+msgstr "ไฟล์ Python มักจะมีนามสกุล .py"
+
+#: thonny/editors.py:574
+msgid "Did you mean '%s'?"
+msgstr "คุณหมายถึง '%s' หรือไม่?"
+
+#: thonny/editors.py:729
+msgid "Move / rename..."
+msgstr "ย้าย/ เปลี่ยนชื่อ..."
+
+#: thonny/editors.py:738
+msgid "Go to line..."
+msgstr "ไปยังบรรทัด..."
+
+#: thonny/editors.py:973
+msgid "Line number"
+msgstr "หมายเลขบรรทัด"
+
+#: thonny/editors.py:1119
+msgid "Do you want to save files before closing?"
+msgstr "คุณต้องการบันทึกไฟล์ก่อนปิดหรือไม่?"
+
+#: thonny/editors.py:1121
+msgid "Do you want to save file before closing?"
+msgstr "คุณต้องการบันทึกไฟล์ก่อนปิดหรือไม่?"
+
+#: thonny/editors.py:1124
+msgid "Save On Close"
+msgstr "บันทึกตอนปิด"
+
+#: thonny/misc_utils.py:513
+msgid "Command not available"
+msgstr "ไม่สามารถใช้คำสั่งได้"
+
+#: thonny/misc_utils.py:514
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "คำสั่งนี้ไม่สามารถใช้ได้หาก Thonny ทำงานผ่าน Flatpak"
+
+#: thonny/workbench.py:686 thonny/workbench.py:784
+msgid "Support Ukraine"
+msgstr "สนับสนุนยูเครน"
+
+#: thonny/plugins/backend_config_page.py:84
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Thonny ควรใช้อินเตอร์พรีทเตอร์ประเภทใดในการรันโค้ดของคุณ?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "แสดงข้อมูลพารามิเตอร์"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "แสดงข้อมูลพารามิเตอร์โดยอัตโนมัติหลังจากพิมพ์ '('"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "เสนอให้เสร็จสมบูรณ์โดยอัตโนมัติขณะพิมพ์"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "แสดงเอกสารโดยอัตโนมัติสำหรับความสำเร็จ"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "ขอให้เสร็จสมบูรณ์ด้วยแท็บคีย์ในเอดิเตอร์"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "ขอให้เสร็จสมบูรณ์ด้วยแท็บคีย์ในเชลล์"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "ปัญหา"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "ไม่สามารถหาคำนิยามได้"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "ล้างเชลล์ก่อนเริ่มกระบวนการใหม่ (เรียกใช้, ดีบัก, หยุด/รีสตาร์ท, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:169
+msgid "Thonny's Python"
+msgstr "Python ของ Thonny"
+
+#: thonny/plugins/micropython/mp_front.py:512
+msgid "Interrupt working program on connect"
+msgstr "โปรแกรมการทำงานขัดจังหวะในการเชื่อมต่อ"
+
+#: thonny/plugins/micropython/mp_front.py:519
+msgid "Synchronize device's real time clock"
+msgstr "ซิงโครไนซ์อุปกรณ์นาฬิกาเวลาจริง"
+
+#: thonny/plugins/micropython/mp_front.py:525
+msgid "Use local time in real time clock"
+msgstr "ใช้เวลาท้องถิ่นในนาฬิกาแบบเรียลไทม์"
+
+#: thonny/plugins/micropython/mp_front.py:531
+msgid "Restart interpreter before running a script"
+msgstr "รีสตาร์ทอินเตอร์พรีทเตอร์ก่อนเรียกใช้สคริปต์"
+
+#: thonny/plugins/micropython/pip_gui.py:24
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr "สิ่งนี้ดูไม่เหมือนแพ็คเกจ Micropython / Circuitpython\n"
+"คุณแน่ใจหรือว่าต้องการติดตั้ง?"
+
+#: thonny/base_file_browser.py:829
+msgid "Moving to Trash"
+msgstr "กำลังย้ายไปถังขยะ"
+
+#: thonny/base_file_browser.py:830
+msgid "Move %s to Trash?"
+msgstr "ย้าย %s ไปยังถังขยะหรือไม่?"
+
+#: thonny/base_file_browser.py:837
+msgid "Moving %s to Trash"
+msgstr "ย้าย %s ไปยังถังขยะ"
+
+#: thonny/base_file_browser.py:649
+msgid "Open in default external app"
+msgstr "เปิดในแอปภายนอกเริ่มต้น"
+
+#: thonny/base_file_browser.py:1177
+msgid "Opening remote files in external app is not supported."
+msgstr "ไม่รองรับการเปิดไฟล์ระยะไกลในแอปภายนอกไม่รองรับ"
+
+#: thonny/base_file_browser.py:1184
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "หากไฟล์จะต้องเปิดในแอปภายนอกให้ดาวน์โหลดไปยังไดเรกทอรีท้องถิ่นและเปิดจากที่นั่น!"
+
+#: thonny/editors.py:156
+msgid "Looks like '%s' was deleted or moved."
+msgstr "ดูเหมือนว่า '%s' ถูกลบหรือย้าย"
+
+#: thonny/editors.py:171
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "ดูเหมือนว่า '%s' ถูกปรับเปลี่ยนนอกเอดิเตอร์"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:228
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "หมายเหตุ Thonny รองรับ Python %s เท่านั้นและใหม่กว่า"
+
+#: thonny/editors.py:973
+msgid "Go to line"
+msgstr "ไปยังบรรทัด"
+
+#: thonny/workbench.py:689
+msgid "Support"
+msgstr "การสนับสนุน"
+
+#: thonny/editors.py:386 thonny/editors.py:401
+msgid "Could not save"
+msgstr "ไม่สามารถบันทึกได้"
+
+#: thonny/plugins/general_config_page.py:129
+msgid "Warning"
+msgstr "คำเตือน"
+
+#: thonny/plugins/general_config_page.py:130
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr "หากคุณอ้างอิงค่าของตัวแปรสภาพแวดล้อม เครื่องหมายคำพูดจะเป็นส่วนหนึ่งของค่านั้น\n"
+"คุณตั้งใจสิ่งนี้หรือไม่?"
+

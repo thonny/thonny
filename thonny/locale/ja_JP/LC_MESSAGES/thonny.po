@@ -7,79 +7,63 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: ja\n"
 
-#: thonny/workbench.py:338
+#: thonny/workbench.py:361
 msgid "File"
 msgstr "ファイル"
 
-#: thonny/workbench.py:339
+#: thonny/workbench.py:362
 msgid "Edit"
 msgstr "編集"
 
-#: thonny/workbench.py:340
+#: thonny/workbench.py:363
 msgid "View"
 msgstr "表示"
 
-#: thonny/workbench.py:341
+#: thonny/running.py:115 thonny/workbench.py:364
 msgid "Run"
 msgstr "実行"
 
-#: thonny/workbench.py:342
-msgid "Device"
-msgstr "デバイス"
-
-#: thonny/workbench.py:343
+#: thonny/workbench.py:365
 msgid "Tools"
 msgstr "ツール"
 
-#: thonny/workbench.py:344
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:366
 msgid "Help"
 msgstr "ヘルプ"
 
-#: thonny/workbench.py:478
-msgid "Alternative Python 3 interpreter or virtual environment"
-msgstr "代替のPython 3インタプリタまたは仮想環境"
-
-#: thonny/workbench.py:486
-msgid "A special virtual environment (deprecated)"
-msgstr "特別な仮想環境（非推奨）"
-
-#: thonny/workbench.py:523
+#: thonny/workbench.py:583
 msgid "Exit"
 msgstr "終了"
 
-#: thonny/workbench.py:540
-msgid "(Increase font size"
-msgstr "文字を大きくする"
-
-#: thonny/workbench.py:550
+#: thonny/workbench.py:610
 msgid "Decrease font size"
 msgstr "文字を小さくする"
 
-#: thonny/workbench.py:562
+#: thonny/workbench.py:622
 msgid "Focus editor"
 msgstr "エディタにフォーカス"
 
-#: thonny/workbench.py:571
+#: thonny/workbench.py:631
 msgid "Focus shell"
 msgstr "シェルにフォーカス"
 
-#: thonny/workbench.py:582
+#: thonny/workbench.py:642
 msgid "Maximize view"
 msgstr "最大化"
 
-#: thonny/workbench.py:594
+#: thonny/workbench.py:654
 msgid "Full screen"
 msgstr "全画面表示"
 
-#: thonny/workbench.py:1195
+#: thonny/workbench.py:1437
 msgid "Program arguments"
 msgstr "プログラムの引数"
 
-#: thonny/plugins/about.py:24 thonny/plugins/about.py:160
+#: thonny/plugins/about.py:28 thonny/plugins/about.py:163
 msgid "About Thonny"
 msgstr "Thonnyについて"
 
-#: thonny/plugins/about.py:80
+#: thonny/plugins/about.py:81
 msgid "Made in\n"
 "University of Tartu, Estonia,\n"
 "with the help from\n"
@@ -91,9 +75,9 @@ msgstr "このアプリケーションは\n"
 "Cybernetica ASと\n"
 "Raspberry Pi財団の助けを得て\n"
 "エストニアのタルトゥ大学で\n"
-"作られています。"
+"作られています"
 
-#: thonny/plugins/about.py:106
+#: thonny/plugins/about.py:107
 msgid "This program comes with\n"
 "ABSOLUTELY NO WARRANTY!\n"
 "It is free software, and you are welcome to\n"
@@ -101,546 +85,1794 @@ msgid "This program comes with\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
 msgstr "このプログラムの使用によって起きた\n"
-"いかなる事象に対しても一切の保証はありません。\n"
+"いかなる事象に対しても一切の保証はありません!\n"
 "このプログラムはフリーソフトウェアであり、\n"
 "https://opensource.org/licenses/MIT\n"
 "に記載された条件のもとで\n"
-"自由に再配布することが出来ます。"
+"自由に再配布することが出来ます"
 
-#: thonny/plugins/about.py:149
+#: thonny/plugins/about.py:152
 msgid "Version history"
 msgstr "バージョン履歴"
 
-#: thonny/plugins/about.py:156
+#: thonny/plugins/about.py:159
 msgid "Report problems"
 msgstr "問題を報告"
 
-#: thonny/plugins/assistant_config_page.py:15
+#: thonny/plugins/assistant_config_page.py:16
 msgid "Open Assistant automatically when program crashes with an exception"
 msgstr "プログラムが例外を送出して停止したら自動的にアシスタントを開く"
 
-#: thonny/plugins/assistant_config_page.py:21
+#: thonny/plugins/assistant_config_page.py:23
 msgid "Open Assistant automatically when it has warnings for your code"
 msgstr "コードに警告がある場合にアシスタントを自動的に開く"
 
-#: thonny/plugins/assistant_config_page.py:28
+#: thonny/plugins/assistant_config_page.py:30
 msgid "Perform selected Pylint checks"
 msgstr "Pylintでチェックする"
 
-#: thonny/plugins/assistant_config_page.py:35
+#: thonny/plugins/assistant_config_page.py:34
 msgid "Perform MyPy checks"
 msgstr "Mypyでチェックする"
 
-#: thonny/plugins/assistant_config_page.py:40
+#: thonny/plugins/assistant_config_page.py:36
 msgid "Disabled checks (one id per line)"
 msgstr "無効にするチェック項目（1行に1つのid）"
 
-#: thonny/plugins/assistant_config_page.py:80
+#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:73
 msgid "Assistant"
 msgstr "アシスタント"
 
-#: thonny/plugins/autocomplete.py:329
+#: thonny/plugins/autocomplete.py:512
 msgid "Auto-complete"
 msgstr "オートコンプリート"
 
-#: thonny/plugins/backend_config_page.py:44
-msgid "Which interpreter or device should Thonny use for running your code?"
-msgstr "Thonnyはコードの実行にどのインタプリタまたはデバイスを使用すればよいですか？"
-
-#: thonny/plugins/backend_config_page.py:128
+#: thonny/plugins/backend_config_page.py:320
 msgid "Interpreter"
 msgstr "インタプリタ"
 
-#: thonny/plugins/birdseye_frontend.py:30
+#: thonny/plugins/birdseye_frontend.py:55
 msgid "About Birdseye"
 msgstr "Birdseyeについて"
 
-#: thonny/plugins/birdseye_frontend.py:31
+#: thonny/plugins/birdseye_frontend.py:56
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
-msgstr "BirdseyeはPythonデバッガであり、別にインストールする必要があります。"
+msgstr "BirdseyeはPythonデバッガであり、別にインストールする必要があります。\n"
+"\n"
+"ヘルプページを開いて詳細を確認しますか?"
 
-#: thonny/plugins/birdseye_frontend.py:55
+#: thonny/plugins/birdseye_frontend.py:84
 msgid "Debug current script (birdseye)"
-msgstr "Birdseyeで現在のスクリプトをデバッグする"
+msgstr "現在のスクリプトをデバッグ(birdseye)"
 
-#: thonny/plugins/cells.py:182
-msgid "Run cell"
-msgstr "セルを実行"
-
-#: thonny/plugins/cells.py:192
-msgid "Run cell and advance"
-msgstr "セルを実行して次へ"
-
-#: thonny/plugins/cells.py:202
-msgid "Run selection or current line"
-msgstr "選択範囲または現在選択されている行を実行"
-
-#: thonny/plugins/commenting.py:113
+#: thonny/plugins/commenting_indenting.py:172
 msgid "Toggle comment"
 msgstr "コメントの切り替え"
 
-#: thonny/plugins/commenting.py:123
+#: thonny/plugins/commenting_indenting.py:182
 msgid "Comment out"
 msgstr "コメントアウト"
 
-#: thonny/plugins/commenting.py:133
+#: thonny/plugins/commenting_indenting.py:192
 msgid "Uncomment"
 msgstr "コメント解除"
 
-#: thonny/plugins/common_editing_commands.py:32
+#: thonny/plugins/common_editing_commands.py:21
 msgid "Undo"
 msgstr "元に戻す"
 
-#: thonny/plugins/common_editing_commands.py:44
+#: thonny/plugins/common_editing_commands.py:33
 msgid "Redo"
 msgstr "やり直す"
 
-#: thonny/plugins/common_editing_commands.py:60
+#: thonny/base_file_browser.py:706 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2255
 msgid "Cut"
 msgstr "切り取り"
 
-#: thonny/plugins/common_editing_commands.py:72
+#: thonny/base_file_browser.py:707 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2256
 msgid "Copy"
 msgstr "コピー"
 
-#: thonny/plugins/common_editing_commands.py:84
+#: thonny/base_file_browser.py:709 thonny/base_file_browser.py:715
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2257
 msgid "Paste"
 msgstr "貼り付け"
 
-#: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:123
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
 msgid "Select all"
-msgstr "全て選択"
+msgstr "すべてを選択"
 
-#: thonny/plugins/debugger.py:114
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
 msgid "Run to cursor"
 msgstr "カーソル位置まで実行"
 
-#: thonny/plugins/debugger.py:831
+#: thonny/plugins/debugger.py:982
 msgid "Can't close yet"
 msgstr "まだ閉じられません"
 
-#: thonny/plugins/debugger.py:832
+#: thonny/plugins/debugger.py:983
 msgid "Use \"Stop\" command if you want to cancel debugging"
-msgstr "デバッグをキャンセルするためにStopコマンドを使う"
+msgstr "デバッグをキャンセルするために\"Stop\"コマンドを使う"
 
-#: thonny/plugins/dock_user_windows_frontend.py:27
+#: thonny/plugins/dock_user_windows_frontend.py:28
 msgid "Dock user windows"
 msgstr "ユーザーウインドウをドッキング"
 
-#: thonny/plugins/editor_config_page.py:14
+#: thonny/plugins/editor_config_page.py:20
 msgid "Highlight matching names"
 msgstr "対応する名前を強調表示"
 
-#: thonny/plugins/editor_config_page.py:20
+#: thonny/plugins/editor_config_page.py:26
 msgid "Highlight local variables"
 msgstr "ローカル変数を強調表示"
 
-#: thonny/plugins/editor_config_page.py:25
+#: thonny/plugins/editor_config_page.py:31
 msgid "Highlight parentheses"
 msgstr "カッコを強調表示"
 
-#: thonny/plugins/editor_config_page.py:26
+#: thonny/plugins/editor_config_page.py:32
 msgid "Highlight syntax elements"
 msgstr "文法要素を強調表示"
 
-#: thonny/plugins/editor_config_page.py:29
+#: thonny/plugins/editor_config_page.py:36
 msgid "Highlight current line (requires reopening the editor)"
 msgstr "現在の行を強調表示（エディタの再起動が必要）"
 
-#: thonny/plugins/editor_config_page.py:34
-msgid "Allow code completion with Tab-key in editors"
-msgstr "エディタ内でタブキーによるコード補完をする"
-
-#: thonny/plugins/editor_config_page.py:40
-msgid "Allow code completion with Tab-key in Shell"
-msgstr "シェル内でタブキーによるコード補完をする"
-
-#: thonny/plugins/editor_config_page.py:44
+#: thonny/plugins/editor_config_page.py:73
 msgid "Show line numbers"
 msgstr "行数を表示"
 
-#: thonny/plugins/editor_config_page.py:50
+#: thonny/plugins/editor_config_page.py:76
 msgid "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
-msgstr "1行の推奨最大文字数（0でガイドラインを非表示）"
+msgstr "1行の推奨最大文字数\n"
+"（0でガイドラインを非表示）"
 
-#: thonny/plugins/editor_config_page.py:71
+#: thonny/plugins/editor_config_page.py:97
 msgid "Editor"
 msgstr "エディタ"
 
-#: thonny/plugins/event_logging.py:24
+#: thonny/plugins/event_logging.py:207
 msgid "Export usage logs..."
 msgstr "使用履歴をエクスポート..."
 
-#: thonny/plugins/event_view.py:41
+#: thonny/plugins/event_view.py:39
 msgid "Events"
 msgstr "イベント"
 
-#: thonny/plugins/files.py:113
+#: thonny/plugins/files.py:551
 msgid "Files"
 msgstr "ファイル"
 
-#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:422
+#: thonny/plugins/find_replace.py:57 thonny/plugins/find_replace.py:417
 msgid "Find & Replace"
 msgstr "検索と置換"
 
-#: thonny/plugins/find_replace.py:66
+#: thonny/plugins/find_replace.py:63
 msgid "Find:"
 msgstr "検索:"
 
-#: thonny/plugins/find_replace.py:81
+#: thonny/plugins/find_replace.py:74
 msgid "Replace with:"
 msgstr "置換:"
 
-#: thonny/plugins/find_replace.py:99
+#: thonny/plugins/find_replace.py:92
 msgid "Case sensitive"
 msgstr "大文字小文字の区別"
 
-#: thonny/plugins/find_replace.py:106
+#: thonny/plugins/find_replace.py:99
 msgid "Up"
 msgstr "上へ"
 
-#: thonny/plugins/find_replace.py:110
+#: thonny/plugins/find_replace.py:103
 msgid "Down"
 msgstr "下へ"
 
-#: thonny/plugins/find_replace.py:117
+#: thonny/plugins/find_replace.py:112
 msgid "Find"
 msgstr "検索"
 
-#: thonny/plugins/find_replace.py:126
+#: thonny/plugins/find_replace.py:122
 msgid "Replace"
 msgstr "置換"
 
-#: thonny/plugins/find_replace.py:133
+#: thonny/plugins/find_replace.py:130
 msgid "Replace+Find"
 msgstr "置換して次を検索"
 
-#: thonny/plugins/find_replace.py:142
+#: thonny/plugins/find_replace.py:140
 msgid "Replace all"
 msgstr "すべて置換"
 
 #: thonny/plugins/find_replace.py:236
 msgid "Enter string to be replaced."
-msgstr "置換される文字列"
+msgstr "置換される文字列."
 
-#: thonny/plugins/find_replace.py:324
+#: thonny/plugins/find_replace.py:320
 msgid "The specified text was not found!"
-msgstr "指定された文字列が見つかりません"
+msgstr "指定された文字列が見つかりません!"
 
-#: thonny/plugins/general_config_page.py:14
+#: thonny/plugins/general_config_page.py:15
 msgid "Allow only single Thonny instance"
 msgstr "Thonnyが1つしか起動しないようにする"
 
-#: thonny/plugins/general_config_page.py:20
-msgid "Debug mode (provides more detailed logs)"
-msgstr "デバッグモード（より詳細なログを出力します）"
-
-#: thonny/plugins/general_config_page.py:26
+#: thonny/plugins/general_config_page.py:22
 msgid "Reopen all files from previous session"
 msgstr "前回開いていたファイルをすべて開く"
 
-#: thonny/plugins/general_config_page.py:32
+#: thonny/plugins/general_config_page.py:37
 msgid "Disable notification sound"
 msgstr "通知音を鳴らさないようにする"
 
-#: thonny/plugins/general_config_page.py:65
+#: thonny/plugins/general_config_page.py:86
 msgid "Font scaling mode"
 msgstr "文字の拡大縮小モード"
 
-#: thonny/plugins/general_config_page.py:83
-msgid "NB! Restart Thonny after changing these options\n"
-"in order to see the full effect"
-msgstr "注意：これらの設定を反映させるためにはThonnyの再起動が必要です。"
-
-#: thonny/plugins/heap.py:39
+#: thonny/plugins/heap.py:37
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
 msgstr "ヒープモードがオンです。\n"
 "オフにするにはヒープビューを閉じてください。"
 
-#: thonny/plugins/heap.py:89
+#: thonny/plugins/heap.py:86
 msgid "Heap"
 msgstr "ヒープ"
 
-#: thonny/plugins/language.py:13 thonny/plugins/language.py:39
+#: thonny/plugins/general_config_page.py:53
 msgid "Language"
 msgstr "言語"
 
-#: thonny/plugins/language.py:30
-msgid "You must restart Thonny for language change to take effect."
-msgstr "言語の変更を反映するにはThonnyを再起動してください。"
-
-#: thonny/plugins/notes.py:32
+#: thonny/plugins/notes.py:35
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
 "\n"
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "ここにはメモをとることができます。例えば、やることリスト・コードスニペットなど、なんでも書き込めます。\n"
+msgstr "ここにはメモをとることができ、例えばやることリスト・コードスニペットなど、なんでも書き込めます。\n"
 "\n"
 "すべてのメモは自動で保存され、次にThonnyを起動した時に読み込まれます。\n"
 "\n"
 "この文章は消してしまっても大丈夫です。"
 
-#: thonny/plugins/notes.py:57
+#: thonny/plugins/notes.py:63
 msgid "Notes"
 msgstr "メモ"
 
-#: thonny/plugins/object_inspector.py:110
+#: thonny/plugins/object_inspector.py:116
 msgid "Previous object"
 msgstr "前のオブジェクト"
 
-#: thonny/plugins/object_inspector.py:113
+#: thonny/plugins/object_inspector.py:119
 msgid "Next object"
 msgstr "次のオブジェクト"
 
-#: thonny/plugins/object_inspector.py:614
+#: thonny/plugins/object_inspector.py:733
 msgid "Object inspector"
 msgstr "オブジェクトインスペクタ"
 
-#: thonny/plugins/outline.py:154
+#: thonny/plugins/outline.py:148
 msgid "Outline"
 msgstr "アウトライン"
 
-#: thonny/plugins/pgzero_frontend.py:26
+#: thonny/plugins/pgzero_frontend.py:27
 msgid "Pygame Zero mode"
 msgstr "Pygame Zeroモード"
 
-#: thonny/plugins/pip_gui.py:83
-msgid "Find package from PyPI"
-msgstr "PyPIでパッケージを検索"
-
-#: thonny/plugins/pip_gui.py:184
-msgid " Upgrade "
-msgstr "アップグレード"
-
-#: thonny/plugins/pip_gui.py:191
+#: thonny/plugins/pip_gui.py:79
 msgid "Uninstall"
 msgstr "アンインストール"
 
-#: thonny/plugins/pip_gui.py:206
+#: thonny/editors.py:663 thonny/plugins/pip_gui.py:235 thonny/ui_utils.py:482
+#: thonny/ui_utils.py:1824 thonny/workdlg.py:162
 msgid "Close"
 msgstr "閉じる"
 
-#: thonny/plugins/pip_gui.py:244
-msgid "Installing pip\n"
-"\n"
-""
-msgstr "Pipをインストール中"
-
-#: thonny/plugins/pip_gui.py:247
-msgid "pip, a required module for managing packages is missing or too old.\n"
-"\n"
-"Downloading pip installer (about 1.5 MB), please wait ...\n"
-""
-msgstr "パッケージの管理に必要なモジュールpipが見つからないか、バージョンが古すぎます。\n"
-"\n"
-"pipインストーラ（約1.5MB）をダウンロードしています。少々お待ちください ..."
-
-#: thonny/plugins/pip_gui.py:255
-msgid "Installing pip, please wait ...\n"
-""
-msgstr "pipをインストールしています。少々お待ちください ..."
-
-#: thonny/plugins/pip_gui.py:279
-msgid "You seem to have problems with pip\n"
-"\n"
-""
-msgstr "pipに問題があるようです"
-
-#: thonny/plugins/pip_gui.py:283
-msgid "pip, a required module for managing packages is missing or too old for Thonny.\n"
-"\n"
-"If your system package manager doesn't provide recent pip (9.0.0 or later), then you can install newest version by downloading "
-msgstr "パッケージの管理に必要なモジュールpipが見つからないか、Thonnyで使うにはバージョンが古すぎます。\n"
-"\n"
-"もしシステムのパッケージマネージャが新しいバージョンのpip（9.0.0以上）を提供していない場合は最新のバージョンを"
-
-#: thonny/plugins/pip_gui.py:290
-msgid " and running it with "
-msgstr "からダウンロードして"
-
-#: thonny/plugins/pip_gui.py:292
-msgid " (probably needs admin privileges).\n"
-"\n"
-""
-msgstr "を実行することでインストールできます（おそらく管理者権限が必要です）。"
-
-#: thonny/plugins/pip_gui.py:302
-msgid "Alternatively, if you have an older pip installed, then you can install packages on the command line (Tools → Open system shell...)"
-msgstr "もしくは、古いpipがインストールされていればコマンドライン（ツール→システムシェルを開く...）でパッケージをインストールできます。"
-
-#: thonny/plugins/pip_gui.py:351
-msgid "With current interpreter you can only browse the packages here.\n"
-"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n"
-"\n"
-""
-msgstr "現在のインタプリタではこれらのパッケージのみ閲覧できます。\n"
-"インストール・アップグレード・アンインストールするには「ツール→システムシェルを開く...」を使用してください。"
-
-#: thonny/plugins/pip_gui.py:357
-msgid "Packages' directory\n"
-""
-msgstr "パッケージのディレクトリ"
-
-#: thonny/plugins/pip_gui.py:363
-msgid "Install from PyPI\n"
-""
-msgstr "PyPIからインストール"
-
-#: thonny/plugins/pip_gui.py:366
-msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER.\n"
-"\n"
-""
-msgstr "どこからパッケージを取得すればいいかわからない場合はPython Package Indexで探すと良いでしょう。パッケージの名前を上にある検索ボックスに入力し、ENTERを押してください。"
-
-#: thonny/plugins/pip_gui.py:372
-msgid "Install from local file\n"
-""
-msgstr "ローカルファイルからインストール"
-
-#: thonny/plugins/pip_gui.py:374
+#: thonny/plugins/pip_gui.py:381
 msgid "Click "
-msgstr " "
+msgstr "クリック "
 
-#: thonny/plugins/pip_gui.py:375
+#: thonny/plugins/pip_gui.py:382 thonny/plugins/pip_gui.py:393
 msgid "here"
 msgstr "ここ"
 
-#: thonny/plugins/pip_gui.py:378
-msgid " to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n"
-"\n"
-""
-msgstr "をクリックしてパッケージファイル（拡張子が.whl, .tar.gz, .zipのもの）をインストール"
-
-#: thonny/plugins/pip_gui.py:381
-msgid "Upgrade or uninstall\n"
-""
-msgstr "アップグレードもしくはアンインストール"
-
-#: thonny/plugins/pip_gui.py:383
-msgid "Start by selecting the package from the left.\n"
-"\n"
-""
-msgstr "左からパッケージを選択してください。"
-
-#: thonny/plugins/pip_gui.py:387
-msgid "Target:  "
-msgstr "対象:"
-
-#: thonny/plugins/pip_gui.py:390
-msgid "virtual environment\n"
-""
-msgstr "仮想環境"
-
-#: thonny/plugins/pip_gui.py:394
-msgid "user site packages\n"
-""
-msgstr "ユーザーのsiteパッケージ"
-
-#: thonny/plugins/pip_gui.py:399
-msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from "
-msgstr "このダイアログではすべてのパッケージを表示していますが、アップグレードとアンインストールができるのは次のパッケージのみです"
-
-#: thonny/plugins/pip_gui.py:407
-msgid ". New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr "新しいパッケージもこのディレクトリにインストールされます。これ以外の場所は別の方法で管理してください。"
-
-#: thonny/plugins/pip_gui.py:430
-msgid "Installed version: "
-msgstr "インストールされているバージョン:"
-
-#: thonny/plugins/pip_gui.py:432
-msgid "Installed to: "
-msgstr "インストールする場所:"
-
-#: thonny/plugins/pip_gui.py:452
+#: thonny/plugins/pip_gui.py:76
 msgid "Upgrade"
 msgstr "アップグレード"
 
-#: thonny/plugins/pip_gui.py:457
+#: thonny/plugins/esp/__init__.py:347
+#: thonny/plugins/micropython/uf2dialog.py:93 thonny/plugins/pip_gui.py:73
 msgid "Install"
 msgstr "インストール"
 
-#: thonny/plugins/pip_gui.py:479
+#: thonny/plugins/pip_gui.py:521
 msgid "Could not find the package from PyPI."
 msgstr "PyPIでパッケージを見つけられませんでした。"
 
-#: thonny/plugins/pip_gui.py:482
-msgid "\n"
-"Please check your spelling!"
-msgstr "スペルを確認してください。"
-
-#: thonny/plugins/pip_gui.py:482
-msgid "\n"
-"You need to enter "
-msgstr "正しいパッケージ名を"
-
-#: thonny/plugins/pip_gui.py:483
-msgid "exact package name"
-msgstr "入力してください"
-
-#: thonny/plugins/pip_gui.py:488
-msgid "Could not find the package info from PyPI. Error code: "
-msgstr "PyPIでパッケージを見つけられませんでした。エラーコード:"
-
-#: thonny/plugins/pip_gui.py:500
+#: thonny/plugins/pip_gui.py:543
 msgid "Latest stable version"
 msgstr "最新の安定版"
 
-#: thonny/plugins/pip_gui.py:502
+#: thonny/plugins/pip_gui.py:545
 msgid "Latest version"
 msgstr "最新版"
 
-#: thonny/plugins/pip_gui.py:503
+#: thonny/plugins/pip_gui.py:547
 msgid "Summary"
 msgstr "まとめ"
 
-#: thonny/plugins/pip_gui.py:504
+#: thonny/plugins/pip_gui.py:549
 msgid "Author"
 msgstr "作者"
 
-#: thonny/plugins/pip_gui.py:505
+#: thonny/plugins/pip_gui.py:551
 msgid "Homepage"
 msgstr "ホームページ"
 
-#: thonny/plugins/pip_gui.py:507
+#: thonny/plugins/pip_gui.py:553
 msgid "Bugtracker"
 msgstr "バグの追跡"
 
-#: thonny/plugins/pip_gui.py:509
+#: thonny/plugins/pip_gui.py:555
 msgid "Documentation"
 msgstr "ドキュメント"
 
-#: thonny/plugins/pip_gui.py:511
+#: thonny/plugins/pip_gui.py:557
 msgid "PyPI page"
 msgstr "PyPIページ"
 
-#: thonny/plugins/pip_gui.py:515
+#: thonny/plugins/pip_gui.py:597
 msgid "Requires"
 msgstr "必須"
 
-#: thonny/plugins/pip_gui.py:553
-msgid "Can't find package name from the list: "
-msgstr "一覧からパッケージ名を見つけられませんでした:"
-
-#: thonny/plugins/pip_gui.py:586
+#: thonny/plugins/pip_gui.py:729
 msgid "Really uninstall?"
 msgstr "本当にアンインストールしますか？"
 
-#: thonny/plugins/pip_gui.py:590
+#: thonny/plugins/pip_gui.py:734
 msgid "Are you sure you want to uninstall it?"
 msgstr "本当にアンインストールしますか？"
 
-#: thonny/plugins/variables.py:19
+#: thonny/plugins/variables.py:22
 msgid "Back to\n"
 "current frame"
-msgstr "現在のフレームへ戻る"
+msgstr "現在のフレーム\n"
+"へ戻る"
 
-#: thonny/plugins/variables.py:142
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
 msgid "Variables"
 msgstr "変数"
+
+#: thonny/base_file_browser.py:1512
+msgid "This computer"
+msgstr "このコンピュータ"
+
+#: thonny/base_file_browser.py:627
+msgid "Refresh"
+msgstr "更新"
+
+#: thonny/base_file_browser.py:640
+msgid "Focus into"
+msgstr "フォーカスに入る"
+
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
+#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+msgid "Error"
+msgstr "エラー"
+
+#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
+msgid "You need to select a file!"
+msgstr "ファイルを選択する必要がある!"
+
+#: thonny/base_file_browser.py:1363
+msgid "Overwrite?"
+msgstr "上書く?"
+
+#: thonny/base_file_browser.py:1363
+msgid "Do you want to overwrite '%s' ?"
+msgstr "'%s' を上書きしますか?"
+
+#: thonny/editors.py:628 thonny/editors.py:630
+msgid "New"
+msgstr "新規ファイル"
+
+#: thonny/editors.py:641
+msgid "Open..."
+msgstr "ファイルを開く..."
+
+#: thonny/editors.py:643
+msgid "Load"
+msgstr "ファイルを開く"
+
+#: thonny/editors.py:652
+msgid "Recent files"
+msgstr "最近利用したファイル"
+
+#: thonny/editors.py:674 thonny/ui_utils.py:484
+msgid "Close all"
+msgstr "すべて閉じる"
+
+#: thonny/editors.py:684 thonny/editors.py:686
+msgid "Save"
+msgstr "保存"
+
+#: thonny/editors.py:709
+msgid "Save as..."
+msgstr "名前を付けて保存..."
+
+#: thonny/editors.py:720
+msgid "Save copy..."
+msgstr "コピーを保存..."
+
+#: thonny/config_ui.py:21
+msgid "Thonny options"
+msgstr "Thonnyオプション"
+
+#: thonny/running.py:114
+msgid "Run current script"
+msgstr "現在のスクリプトを実行"
+
+#: thonny/running.py:145
+msgid "Run current script in terminal"
+msgstr "ターミナルで現在のスクリプトを実行"
+
+#: thonny/running.py:158
+msgid "Stop/Restart backend"
+msgstr "停止/リスタート バックエンド"
+
+#: thonny/running.py:159
+msgid "Stop"
+msgstr "停止"
+
+#: thonny/running.py:170
+msgid "Interrupt execution"
+msgstr "割り込み発生"
+
+#: thonny/running.py:183
+msgid "Send EOF / Soft reboot"
+msgstr "EOF / ソフトリセットを送信"
+
+#: thonny/running.py:194
+msgid "Disconnect"
+msgstr "切断"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:256
+msgid "Python interpreters"
+msgstr "Pythonインタープリタ"
+
+#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:257
+#: thonny/plugins/pip_gui.py:775 thonny/plugins/pip_gui.py:788
+msgid "all files"
+msgstr "すべてのファイル"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:285
+msgid "Select empty directory for new virtual environment"
+msgstr "新しい仮想環境用に空のディレクトリを選択します"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:292
+msgid "Bad directory"
+msgstr "不正なディレクトリ"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:293
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "選択したディレクトリは空ではありません。\n"
+"他を選択するかキャンセルしてください。"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:310
+msgid "Creating virtual environment"
+msgstr "仮想環境を作成中"
+
+#: thonny/shell.py:98
+msgid "Clear shell"
+msgstr "シェルをクリア"
+
+#: thonny/shell.py:154
+msgid "Plotter"
+msgstr "プロッター"
+
+#: thonny/shell.py:286
+msgid "Clear"
+msgstr "クリア"
+
+#: thonny/shell.py:299
+msgid "Show Plotter"
+msgstr "プロッターを表示"
+
+#: thonny/shell.py:1610
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "パフォーマンスの理由から、シェルは非常に長い行を表示することを避けています (ツール => オプション => シェル).\n"
+"ここで元のテキストフラグメントを操作できます。"
+
+#: thonny/shell.py:1621
+msgid "Wrap text (may be slow)"
+msgstr "テキスト折返し(遅い場合があります)"
+
+#: thonny/ui_utils.py:1819
+msgid "Copy to clipboard"
+msgstr "クリップボードにコピー"
+
+#: thonny/shell.py:1663
+msgid "Squeezed text (%d characters)"
+msgstr "スクイーズテキスト(%d 文字)"
+
+#: thonny/shell.py:1833
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "プロッターはシェルの一連の数値を\n"
+"可視化します。"
+
+#: thonny/shell.py:1835
+msgid "See Help for details."
+msgstr "ヘルプで詳細を見る."
+
+#: thonny/ui_utils.py:483
+msgid "Close others"
+msgstr "その他を閉じる"
+
+#: thonny/ui_utils.py:1675
+msgid "Copying"
+msgstr "コピー中"
+
+#: thonny/ui_utils.py:1678
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "コピー中\n"
+"  %s\n"
+"から\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1324 thonny/config_ui.py:38 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1210
+#: thonny/ui_utils.py:148 thonny/ui_utils.py:1686 thonny/ui_utils.py:1771
+#: thonny/workdlg.py:164 thonny/workdlg.py:209
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: thonny/base_file_browser.py:1321 thonny/config_ui.py:37 thonny/export.py:25
+#: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
+#: thonny/ui_utils.py:145 thonny/ui_utils.py:1768 thonny/workdlg.py:206
+msgid "OK"
+msgstr "OK"
+
+#: thonny/ui_utils.py:2261
+msgid "Select All"
+msgstr "すべてを選択"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/workbench.py:162
+msgid "Shell"
+msgstr "シェル"
+
+#: thonny/workbench.py:593
+msgid "Options..."
+msgstr "オプション..."
+
+#: thonny/workbench.py:600
+msgid "Increase font size"
+msgstr "文字を大きくする"
+
+#: thonny/workbench.py:665
+msgid "Change font size"
+msgstr "フォントサイズを変更"
+
+#: thonny/workbench.py:666
+msgid "Zoom"
+msgstr "ズーム"
+
+#: thonny/workbench.py:675
+msgid "Exit Thonny"
+msgstr "Thonnyを終了"
+
+#: thonny/workbench.py:678
+msgid "Quit"
+msgstr "終了"
+
+#: thonny/workbench.py:1216 thonny/workbench.py:1224
+msgid "Overwriting theme '%s'"
+msgstr "テーマ '%s' を上書く?"
+
+#: thonny/workbench.py:1408
+msgid "Program arguments:"
+msgstr "プログラムの引数:"
+
+#: thonny/workbench.py:1462
+msgid "Regular mode"
+msgstr "通常モード"
+
+#: thonny/workbench.py:1463
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "構成が更新されました。Thonnyを再起動して、通常モードで開始します。\n"
+"\n"
+"('ツール → オプション → ジェネラル' あとで変更することができます。)"
+
+#: thonny/plugins/ast_view.py:212
+msgid "Program tree"
+msgstr "プログラムツリー"
+
+#: thonny/plugins/debugger.py:1283
+msgid "Resume"
+msgstr "再開"
+
+#: thonny/plugins/debugger.py:1299
+msgid "Run / resume"
+msgstr "実行 / 再開"
+
+#: thonny/plugins/debugger.py:1314
+msgid "Debug current script"
+msgstr "現在のスクリプトをデバッグ"
+
+#: thonny/plugins/debugger.py:1316
+msgid "Debug"
+msgstr "デバッグ"
+
+#: thonny/plugins/debugger.py:1327
+msgid "Debug current script (nicer)"
+msgstr "現在のスクリプトをデバッグ(nicer)"
+
+#: thonny/plugins/debugger.py:1339
+msgid "Debug current script (faster)"
+msgstr "現在のスクリプトをデバッグ(faster)"
+
+#: thonny/plugins/debugger.py:1350
+msgid "Step over"
+msgstr "ステップ オーバー"
+
+#: thonny/plugins/debugger.py:1352
+msgid "Over"
+msgstr "オーバー"
+
+#: thonny/plugins/debugger.py:1363
+msgid "Step into"
+msgstr "ステップ イン"
+
+#: thonny/plugins/debugger.py:1365
+msgid "Into"
+msgstr "中に"
+
+#: thonny/plugins/debugger.py:1376
+msgid "Step out"
+msgstr "ステップ アウト"
+
+#: thonny/plugins/debugger.py:1378
+msgid "Out"
+msgstr "アウト"
+
+#: thonny/plugins/debugger.py:1413
+msgid "Step back"
+msgstr "ステップ バック"
+
+#: thonny/plugins/debugger.py:1415
+msgid "Back"
+msgstr "戻る"
+
+#: thonny/plugins/debugger.py:1421
+msgid "Stack"
+msgstr "ストック"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Exception"
+msgstr "例外"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "プログラム利用イベントを記録する"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "デバッグモード (詳細な診断ログを提供します)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "UIモード"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "UIスケーリング係数"
+
+#: thonny/plugins/general_config_page.py:108
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "NB! これらのオプションを変更したらThonnyを再起動してください!"
+
+#: thonny/plugins/general_config_page.py:142
+msgid "General"
+msgstr "ジェネラル"
+
+#: thonny/plugins/pip_gui.py:129
+msgid "INSTALL"
+msgstr "インストール"
+
+#: thonny/plugins/pip_gui.py:351
+msgid "Browse the packages"
+msgstr "パッケージを閲覧する"
+
+#: thonny/plugins/pip_gui.py:354
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "現在のインタプリタではこのパッケージを閲覧できます。\n"
+"インストール、アップグレード、アンインストールは 'ツール → システムシェルを開く...' を利用。"
+
+#: thonny/plugins/pip_gui.py:362
+msgid "Packages' directory"
+msgstr "パッケージのディレクトリ"
+
+#: thonny/plugins/pip_gui.py:366
+msgid "Install from PyPI"
+msgstr "PyPIからインストール"
+
+#: thonny/plugins/pip_gui.py:369
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "パッケージの入手方法がわからない場合には、Python Package Indexを検索することをおすすめします。上の検索ボックスにパッケージ名を入力し、エンターキーを押してください。"
+
+#: thonny/plugins/pip_gui.py:386
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "探した requirements.txt ファイルに指定されているパッケージをインストールします。"
+
+#: thonny/plugins/pip_gui.py:392
+msgid "Click"
+msgstr "クリック"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "パッケージファイルを探してインストールします (通常 .whl か .tar.gz, .zipの拡張子)。"
+
+#: thonny/plugins/pip_gui.py:404
+msgid "Upgrade or uninstall"
+msgstr "アップグレード or アンインストール"
+
+#: thonny/plugins/pip_gui.py:406
+msgid "Start by selecting the package from the left."
+msgstr "左からパッケージを選択するところから開始。"
+
+#: thonny/plugins/pip_gui.py:410
+msgid "Target:"
+msgstr "ターゲット:"
+
+#: thonny/plugins/pip_gui.py:414
+msgid "virtual environment"
+msgstr "仮想環境"
+
+#: thonny/plugins/pip_gui.py:412
+msgid "user site packages"
+msgstr "ユーザーサイトパッケージ"
+
+#: thonny/plugins/pip_gui.py:418
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "このダイアログは、利用可能なペッケージの一覧でが、インストールやアンインストールできるのは以下のパッケージだけです"
+
+#: thonny/plugins/pip_gui.py:428
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "新しいパッケージもこのディレクトリにインストールされます。他の場所は別の方法で管理する必要があります。"
+
+#: thonny/plugins/pip_gui.py:471
+msgid "Installed version:"
+msgstr "インストールバージョン:"
+
+#: thonny/plugins/pip_gui.py:473
+msgid "Installed to:"
+msgstr "インストール先:"
+
+#: thonny/plugins/pip_gui.py:524
+msgid "Please check your spelling!"
+msgstr "スペルをチェックしてください!"
+
+#: thonny/plugins/pip_gui.py:528
+msgid "Could not find the package info from PyPI."
+msgstr "PyPIでパッケージ情報を見つけられませんでした。"
+
+#: thonny/plugins/pip_gui.py:530 thonny/plugins/pip_gui.py:1271
+msgid "Error code:"
+msgstr "エラーコード:"
+
+#: thonny/plugins/pip_gui.py:675
+msgid "Can't find package name from the list:"
+msgstr "リストからパッケージ名が見つかりません:"
+
+#: thonny/plugins/pip_gui.py:730
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "パッケージ '{}' は他のパッケージのインストールとアンインストールに必要です。"
+
+#: thonny/plugins/pip_gui.py:775
+msgid "Package"
+msgstr "パッケージ"
+
+#: thonny/plugins/pip_gui.py:885
+msgid "Manage packages for %s"
+msgstr "%s のパッケージを管理する"
+
+#: thonny/editors.py:571 thonny/plugins/micropython/pip_gui.py:23
+#: thonny/plugins/pip_gui.py:936
+msgid "Confirmation"
+msgstr "確認"
+
+#: thonny/plugins/pip_gui.py:937
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "Thonny関連パッケージをインストールしているようです。\n"
+"Thonnyプラグインをインストールする場合には、\n"
+"メニューから 'ツール → プラグインを管理...' を選択してください\n"
+"\n"
+"バックエンドに %s をインストールしますか?"
+
+#: thonny/plugins/pip_gui.py:1042
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "NB! 現在と互換性のあるThonnyバージョンが利用できます。'...'ボタンをクリックしてインストールしてください。"
+
+#: thonny/plugins/pip_gui.py:1050
+msgid "Thonny plugin without requirements"
+msgstr "要件のないThonnyプラグイン"
+
+#: thonny/plugins/pip_gui.py:1066
+msgid "Unsuitable requirements"
+msgstr "要件が不適切"
+
+#: thonny/plugins/pip_gui.py:1067
+msgid "This package requires different Thonny version:"
+msgstr "このパッケージには別のThonnyバージョンが必要です:"
+
+#: thonny/plugins/pip_gui.py:1071
+msgid "If you still want it, then please install it from the command line."
+msgstr "必要な場合、コマンドラインからインストールしてください。"
+
+#: thonny/plugins/pip_gui.py:1108
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "NB! インストール / アップグレード / プラグインのアンインストール後にはThonnyを再起動してください。"
+
+#: thonny/plugins/pip_gui.py:1118
+msgid "Thonny plug-ins"
+msgstr "Thonnyプラグイン"
+
+#: thonny/plugins/pip_gui.py:1154
+msgid "Advanced install / upgrade / downgrade"
+msgstr "高度なインストール / アップグレード / ダウングレード"
+
+#: thonny/plugins/pip_gui.py:1163
+msgid "Desired version"
+msgstr "希望バージョン"
+
+#: thonny/plugins/pip_gui.py:1201
+msgid "Upgrade dependencies"
+msgstr "依存関係をアップグレードする"
+
+#: thonny/plugins/pip_gui.py:1269
+msgid "Requires:"
+msgstr "必須:"
+
+#: thonny/plugins/pip_gui.py:1273
+msgid "Error:"
+msgstr "エラー:"
+
+#: thonny/plugins/pip_gui.py:1486
+msgid "Manage packages..."
+msgstr "パッケージを管理..."
+
+#: thonny/plugins/pip_gui.py:1492
+msgid "Manage plug-ins..."
+msgstr "プラグインを管理..."
+
+#: thonny/plugins/replayer.py:365
+msgid "Open replayer..."
+msgstr "リプレイヤーを開く..."
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "作業ディレクトリを実行/デバッグ時に変更します"
+
+#: thonny/plugins/run_debug_config_page.py:22
+msgid "Show function calls (frames) in separate windows"
+msgstr "別ウインドウに関数呼び出し(フレーム)を表示"
+
+#: thonny/plugins/run_debug_config_page.py:23
+msgid "Uncheck if you want more traditional experience."
+msgstr "より伝統的な体験が必要な場合チェックを外してください。"
+
+#: thonny/plugins/run_debug_config_page.py:29
+msgid "Open and close Stack view automatically"
+msgstr "自動的にスタックビューを開閉します"
+
+#: thonny/plugins/run_debug_config_page.py:30
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "最初の呼び出しでスタックビューを開き、プログラムがメインフレームに戻ったときに閉じます。"
+
+#: thonny/plugins/run_debug_config_page.py:39
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "ライブラリへのステップインを許可します(つまり、メインスクリプトのディレクトリ外。)"
+
+#: thonny/plugins/run_debug_config_page.py:40
+msgid "May make debugging slower."
+msgstr "デバッグが遅くなる可能性があります。"
+
+#: thonny/plugins/run_debug_config_page.py:45
+msgid "Preferred debugger"
+msgstr "優先デバッガー"
+
+#: thonny/plugins/run_debug_config_page.py:57
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(デバッグツールバーボタンをクリックすると使われます)"
+
+#: thonny/plugins/run_debug_config_page.py:62
+msgid "Birdseye port"
+msgstr "バードアイポート"
+
+#: thonny/plugins/run_debug_config_page.py:66
+msgid "(restart Thonny after changing this)"
+msgstr "(変更した後、Thonnyを再起動します)"
+
+#: thonny/plugins/run_debug_config_page.py:74
+msgid "Run & Debug"
+msgstr "実行 & デバッグ"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "ターミナルエミュレーション"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "基本的なANSIカラーとスタイルをサポート"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "保持する行の最大値。"
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "NB! 大きな値の場合パフォーマンスが低下します!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "スクイーズする前のラインフラグメント最大長"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "ターミナルで現在のスクリプトを実行中"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "プログラム終了時に Python REPL を提示"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Pythonプロセスが終わってもターミナルウインドウを開いたままにします"
+
+#: thonny/plugins/terminal_config_page.py:31
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "NB! 自動クローズをターミナルの設定から有効にする必要があります\n"
+"(プロファイル → シェル → シェル終了時)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "ターミナル"
+
+#: thonny/plugins/theme_and_font_config_page.py:40
+msgid "UI theme"
+msgstr "UIテーマ"
+
+#: thonny/plugins/theme_and_font_config_page.py:53
+msgid "Syntax theme"
+msgstr "構文テーマ"
+
+#: thonny/plugins/theme_and_font_config_page.py:85
+msgid "Editor font"
+msgstr "エディタフォント"
+
+#: thonny/plugins/theme_and_font_config_page.py:108
+msgid "IO font"
+msgstr "IOフォント"
+
+#: thonny/plugins/theme_and_font_config_page.py:133
+msgid "Preview"
+msgstr "プレビュー"
+
+#: thonny/plugins/theme_and_font_config_page.py:145
+msgid "This is a comment"
+msgstr "これはコメント"
+
+#: thonny/plugins/theme_and_font_config_page.py:148
+msgid "The answer is"
+msgstr "答えは"
+
+#: thonny/plugins/theme_and_font_config_page.py:152
+msgid "unclosed_string"
+msgstr "unclosed_string"
+
+#: thonny/plugins/theme_and_font_config_page.py:154
+msgid "blah, blah"
+msgstr "などなど"
+
+#: thonny/plugins/theme_and_font_config_page.py:177
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "NB! 一部のスタイルはThonnyを再起動したら反映されます!"
+
+#: thonny/plugins/theme_and_font_config_page.py:216
+msgid "Enter an integer"
+msgstr "整数を入力"
+
+#: thonny/plugins/theme_and_font_config_page.py:229
+msgid "Theme & Font"
+msgstr "テーマ & フォント"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Thonnyプログラムフォルダを開く..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Thonnyデータフォルダを開く..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "ホーム"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "ヘルプコンテンツ"
+
+#: thonny/plugins/micropython/mp_front.py:318
+msgid "CircuitPython device"
+msgstr "CircuitPythonデバイス"
+
+#: thonny/plugins/micropython/mp_front.py:322
+msgid "MicroPython device"
+msgstr "MicroPythonデバイス"
+
+#: thonny/plugins/micropython/mp_front.py:563
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "デバイスをコンピュータに接続し、ポートを選択します"
+
+#: thonny/plugins/micropython/mp_front.py:566
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "\"USBシリアル\"または\"UART\"のデバイス名を探す"
+
+#: thonny/plugins/micropython/mp_front.py:568
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "見つからない場合には、最初にUSBドライバーをインストールする必要があります。"
+
+#: thonny/plugins/micropython/mp_front.py:464
+msgid "Port"
+msgstr "ポート"
+
+#: thonny/plugins/micropython/mp_front.py:474
+msgid "Try to detect port automatically"
+msgstr "ポートの自動検出を試す"
+
+#: thonny/plugins/micropython/__init__.py:25
+msgid "MicroPython (generic)"
+msgstr "MicroPython (ジェネリック)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "印刷..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "システムシェルを開く..."
+
+#: thonny/plugins/backend_config_page.py:103
+msgid "Details"
+msgstr "詳細"
+
+#: thonny/plugins/pip_gui.py:379
+msgid "Install from requirements file"
+msgstr "設定ファイルからインストール"
+
+#: thonny/plugins/pip_gui.py:391
+msgid "Install from local file"
+msgstr "ローカルファイルからインストール"
+
+#: thonny/plugins/pip_gui.py:1101
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "このダイアログはThonny プラグインとその依存関係を管理。\n"
+"独自のパッケージをインストール場合は 'ツール → パッケージ管理...' を選択"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (ジェネリック)"
+
+#: thonny/plugins/commenting_indenting.py:143
+msgid "Indent selected lines"
+msgstr "選択した行をインデントする"
+
+#: thonny/plugins/commenting_indenting.py:153
+msgid "Dedent selected lines"
+msgstr "選択した行をインデントする"
+
+#: thonny/workbench.py:1451
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "通常\n"
+"モードに\n"
+"変更"
+
+#: thonny/plugins/microbit/__init__.py:57
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "MicroPythonがmicro:bitにインストールされていることを確認してください。"
+
+#: thonny/plugins/microbit/__init__.py:59
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "メインスクリプトが埋め込まれていない場合のみ main.py が動くことを忘れないでください。"
+
+#: thonny/plugins/micropython/uf2dialog.py:44
+msgid "please wait"
+msgstr "お待ち下さい"
+
+#: thonny/misc_utils.py:151
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "ディスク '%s' が見つかりません。自分で選択しますか?"
+
+#: thonny/misc_utils.py:154
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "複数の '%s' ディスクが見つかりました。自分で選択しますか？"
+
+#: thonny/misc_utils.py:170
+msgid "Can't find suitable disk"
+msgstr "適切なディスクが見つかりません"
+
+#: thonny/base_file_browser.py:282
+msgid "%d items"
+msgstr "%d アイテム"
+
+#: thonny/base_file_browser.py:721
+msgid "Move to Trash"
+msgstr "ごみ箱に移動"
+
+#: thonny/base_file_browser.py:724
+msgid "Delete"
+msgstr "削除"
+
+#: thonny/base_file_browser.py:703 thonny/base_file_browser.py:854
+msgid "New directory"
+msgstr "新しいディレクトリ"
+
+#: thonny/base_file_browser.py:727
+msgid "Properties"
+msgstr "プロパティ"
+
+#: thonny/base_file_browser.py:729
+msgid "Storage space"
+msgstr "ストレージ容量"
+
+#: thonny/base_file_browser.py:739
+msgid "Path"
+msgstr "パス"
+
+#: thonny/base_file_browser.py:741
+msgid "Directory properties"
+msgstr "ディレクトリプロパティ"
+
+#: thonny/base_file_browser.py:743
+msgid "File properties"
+msgstr "ファイルプロパティ"
+
+#: thonny/base_file_browser.py:745
+msgid "bytes"
+msgstr "バイト"
+
+#: thonny/base_file_browser.py:748
+msgid "Size"
+msgstr "サイズ"
+
+#: thonny/base_file_browser.py:92 thonny/base_file_browser.py:759
+msgid "Modified"
+msgstr "変更"
+
+#: thonny/base_file_browser.py:818
+msgid "Deleting %s"
+msgstr "削除中 %s"
+
+#: thonny/editors.py:264
+msgid "Loading"
+msgstr "読込中"
+
+#: thonny/editors.py:382
+msgid "Saving"
+msgstr "保存中"
+
+#: thonny/plugins/files.py:216
+msgid "Upload to %s"
+msgstr "%s をアップロード"
+
+#: thonny/plugins/files.py:362
+msgid "Downloading %s to %s"
+msgstr "ダウンロード中 %s から %s"
+
+#: thonny/plugins/files.py:275
+msgid "Download to %s"
+msgstr "ダウンロード中 %s"
+
+#: thonny/base_file_browser.py:629
+msgid "Open in system file manager"
+msgstr "システムファイルマネージャで開く"
+
+#: thonny/base_file_browser.py:634
+msgid "Hide hidden files"
+msgstr "隠しファイルを非表示"
+
+#: thonny/base_file_browser.py:634
+msgid "Show hidden files"
+msgstr "隠しファイルを表示"
+
+#: thonny/base_file_browser.py:644
+msgid "Open in Thonny"
+msgstr "Thonnyで開く"
+
+#: thonny/base_file_browser.py:670
+msgid "Open in system default app"
+msgstr "システムデフォルトアプリを開く"
+
+#: thonny/base_file_browser.py:656 thonny/base_file_browser.py:678
+msgid "Configure %s files"
+msgstr "設定 %s ファイル"
+
+#: thonny/base_file_browser.py:679
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "Thonnyのファイルブラウザで %s ファイルをダブルクリックするとどうなりますか？"
+
+#: thonny/base_file_browser.py:1225 thonny/editors.py:949 thonny/editors.py:951
+msgid "Deleting"
+msgstr "削除中"
+
+#: thonny/base_file_browser.py:1232
+msgid "Creating directory"
+msgstr "ディレクトリを作成"
+
+#: thonny/editors.py:262
+msgid "Loading %s"
+msgstr "読込中 %s"
+
+#: thonny/editors.py:380
+msgid "Saving to %s"
+msgstr "保存中 %s"
+
+#: thonny/editors.py:698 thonny/editors.py:700
+msgid "Save All files"
+msgstr "すべてのファイルを保存"
+
+#: thonny/plugins/backend_config_page.py:323 thonny/workbench.py:849
+msgid "Configure interpreter..."
+msgstr "インタプリタ設定..."
+
+#: thonny/workbench.py:1561
+msgid "Device"
+msgstr "デバイス"
+
+#: thonny/workdlg.py:193
+msgid "Cancelling"
+msgstr "キャンセル中"
+
+#: thonny/workdlg.py:220
+msgid "Starting"
+msgstr "開始中"
+
+#: thonny/plugins/backend_config_page.py:234
+msgid "Authentication"
+msgstr "認証"
+
+#: thonny/plugins/backend_config_page.py:236
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "秘密鍵のパスフレーズを入力してください\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:239
+msgid "Enter your password for\n"
+"{}"
+msgstr "パスワードを入力\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr "このフロートのおおよその値です。正確な値は %s でこれは約 %s です"
+
+#: thonny/plugins/pip_gui.py:631
+msgid "Search results"
+msgstr "検索結果"
+
+#: thonny/plugins/pip_gui.py:632
+msgid "Searching"
+msgstr "検索中"
+
+#: thonny/plugins/pip_gui.py:714 thonny/plugins/pip_gui.py:803
+msgid "Installing '%s'"
+msgstr "インストール中 '%s'"
+
+#: thonny/plugins/pip_gui.py:720
+msgid "Upgrading '%s'"
+msgstr "'%s' をアップグレード中"
+
+#: thonny/plugins/pip_gui.py:727
+msgid "Uninstalling '%s'"
+msgstr "'%s' をアンインストール中"
+
+#: thonny/plugins/pip_gui.py:741
+msgid "Installing"
+msgstr "インストール中"
+
+#: thonny/plugins/pip_gui.py:1447
+msgid "Package manager is not available for this interpreter"
+msgstr "パッケージマネージャはこのインタープリタでは利用できません"
+
+#: thonny/base_file_browser.py:1176 thonny/plugins/pip_gui.py:1461
+msgid "Not supported"
+msgstr "未サポート"
+
+#: thonny/plugins/micropython/pip_gui.py:117 thonny/plugins/pip_gui.py:1466
+msgid "Not available"
+msgstr "利用不可"
+
+#: thonny/plugins/pip_gui.py:1467
+msgid "You need to stop your program before launching the package manager."
+msgstr "パッケージマネージャを起動する前にプログラムを停止する必要がある。"
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "オブジェクトインスペクタで評価値を開きます"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:207
+msgid "Python executable"
+msgstr "Python実行可能ファイル"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:230
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr "NB! 仮想環境から実行可能ファイルを選択するとファイル選択ボタンが正しく起動\n"
+"しない場合があります。この場合インタプリタのかわりにアクティブスクリプトを選択します\n"
+"(またはパスをボックスに入力します)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:16
+msgid "Remote Python 3 (SSH)"
+msgstr "リモート Python 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:328
+msgid "Not connected"
+msgstr "未接続"
+
+#: thonny/plugins/micropython/mp_front.py:540
+msgid "Advanced options"
+msgstr "高度なオプション"
+
+#: thonny/plugins/micropython/mp_front.py:547
+msgid "Install or update firmware"
+msgstr "インストール or アップデートファームウエア"
+
+#: thonny/plugins/micropython/__init__.py:36
+msgid "MicroPython (local)"
+msgstr "MicroPython (ローカル)"
+
+#: thonny/plugins/micropython/__init__.py:47
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:77
+msgid "Scope"
+msgstr "スコープ"
+
+#: thonny/plugins/micropython/pip_gui.py:90
+msgid "This dialog lists top-level modules from following directories:\n"
+""
+msgstr "ディレクトリにあるトップレベルモジュールの一覧:\n"
+""
+
+#: thonny/plugins/micropython/pip_gui.py:99
+msgid "New packages will be installed to"
+msgstr "新しいパッケージがインストールされます"
+
+#: thonny/plugins/micropython/pip_gui.py:119
+msgid "no absolute lib directory in sys.path"
+msgstr "libディレクトリにsys.pathがありません"
+
+#: thonny/plugins/micropython/uf2dialog.py:39
+msgid "Version to be installed"
+msgstr "インストールするバージョン"
+
+#: thonny/plugins/micropython/uf2dialog.py:47
+msgid "Target device location"
+msgstr "ターゲットデバイスロケーション"
+
+#: thonny/plugins/micropython/uf2dialog.py:58
+msgid "Target device model"
+msgstr "ターゲットデバイスモデル"
+
+#: thonny/plugins/micropython/uf2dialog.py:146
+msgid "Please wait"
+msgstr "お待ち下さい"
+
+#: thonny/plugins/pip_gui.py:70
+msgid "Search on PyPI"
+msgstr "PyPIを検索"
+
+#: thonny/base_file_browser.py:671
+msgid "Open in Thonny's text editor"
+msgstr "Thonnyのテキストエディタで開く"
+
+#: thonny/base_file_browser.py:334
+msgid "Storage space on this drive or filesystem"
+msgstr "このドライブまたはファイルシステムのストレージ容量"
+
+#: thonny/base_file_browser.py:335
+msgid "total space"
+msgstr "トータル容量"
+
+#: thonny/base_file_browser.py:337
+msgid "used space"
+msgstr "利用容量"
+
+#: thonny/base_file_browser.py:338
+msgid "free space"
+msgstr "空き容量"
+
+#: thonny/base_file_browser.py:345
+msgid "Storage info"
+msgstr "ストレージ情報"
+
+#: thonny/plugins/commenting_indenting.py:163
+msgid "Replace tabs with spaces"
+msgstr "タブをスペースに置換する"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "タブ文字を強調表示"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "タブ文字でインデントする (Pythonでは非推奨)"
+
+#: thonny/base_file_browser.py:90 thonny/memory.py:63
+msgid "Name"
+msgstr "名前"
+
+#: thonny/base_file_browser.py:94
+msgid "Size (bytes)"
+msgstr "サイズ(バイト)"
+
+#: thonny/base_file_browser.py:855
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr "新しいディレクトリ名を入力\n"
+"%s"
+
+#: thonny/base_file_browser.py:878
+msgid "Nothing selected"
+msgstr "未選択"
+
+#: thonny/base_file_browser.py:878
+msgid "Select an item and try again!"
+msgstr "アイテムを選択して再試行してください!"
+
+#: thonny/base_file_browser.py:1296
+msgid "Open from %s"
+msgstr "%s を開く"
+
+#: thonny/base_file_browser.py:1299
+msgid "Save to %s"
+msgstr "%s を保存"
+
+#: thonny/base_file_browser.py:1311
+msgid "File name:"
+msgstr "ファイル名:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value ID"
+msgstr "値ID"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:540
+#: thonny/plugins/object_inspector.py:619
+msgid "Value"
+msgstr "値"
+
+#: thonny/plugins/backend_config_page.py:257
+msgid "Save password"
+msgstr "パスワードを保存"
+
+#: thonny/plugins/debugger.py:553
+msgid "Function call at %s"
+msgstr "%s で関数呼び出し"
+
+#: thonny/plugins/debugger.py:1003
+msgid "Local variables"
+msgstr "ローカル変数"
+
+#: thonny/plugins/debugger.py:1035
+msgid "Function"
+msgstr "関数"
+
+#: thonny/plugins/debugger.py:1036
+msgid "Location"
+msgstr "位置"
+
+#: thonny/plugins/debugger.py:1112
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "最後のコマンドで例外が発生した場合、このビューにはスタックトレースが表示されます。"
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "ID"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "データ"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "アトリビュート"
+
+#: thonny/plugins/object_inspector.py:538
+msgid "Index"
+msgstr "インデックス"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key ID"
+msgstr "キーID"
+
+#: thonny/plugins/object_inspector.py:617
+msgid "Key"
+msgstr "キー"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "戻る\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:464
+msgid "Port or WebREPL"
+msgstr "ポート か WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:605
+msgid "Password"
+msgstr "パスワード"
+
+#: thonny/plugins/debugger.py:961
+msgid "Source code"
+msgstr "ソースコード"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "ZenityのかわりにTkファイルダイアログを利用"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "ファイルダイアログをメインウインドウの後ろに表示するか選択"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "環境変数(1行には1つのKEY=VALUE)"
+
+#: thonny/base_file_browser.py:700
+msgid "New file"
+msgstr ""
+
+#: thonny/base_file_browser.py:718
+msgid "Rename"
+msgstr ""
+
+#: thonny/base_file_browser.py:904
+msgid "Rename '%s'"
+msgstr ""
+
+#: thonny/base_file_browser.py:904
+msgid "Enter new name"
+msgstr ""
+
+#: thonny/base_file_browser.py:992
+msgid "Paste failed"
+msgstr ""
+
+#: thonny/base_file_browser.py:992
+msgid "There are conflicting folders"
+msgstr ""
+
+#: thonny/base_file_browser.py:1114
+msgid "File already exists"
+msgstr ""
+
+#: thonny/base_file_browser.py:1179
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr ""
+
+#: thonny/editors.py:35
+msgid "Python files"
+msgstr ""
+
+#: thonny/editors.py:120 thonny/editors.py:193
+msgid "<untitled>"
+msgstr ""
+
+#: thonny/editors.py:155
+msgid "File is gone"
+msgstr ""
+
+#: thonny/editors.py:158
+msgid "Do you want to also close the editor?"
+msgstr ""
+
+#: thonny/editors.py:170
+msgid "External modification"
+msgstr ""
+
+#: thonny/editors.py:173
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr ""
+
+#: thonny/editors.py:572
+msgid "Python files usually have .py extension."
+msgstr ""
+
+#: thonny/editors.py:574
+msgid "Did you mean '%s'?"
+msgstr ""
+
+#: thonny/editors.py:729
+msgid "Move / rename..."
+msgstr ""
+
+#: thonny/editors.py:738
+msgid "Go to line..."
+msgstr ""
+
+#: thonny/editors.py:973
+msgid "Line number"
+msgstr ""
+
+#: thonny/editors.py:1119
+msgid "Do you want to save files before closing?"
+msgstr ""
+
+#: thonny/editors.py:1121
+msgid "Do you want to save file before closing?"
+msgstr ""
+
+#: thonny/editors.py:1124
+msgid "Save On Close"
+msgstr ""
+
+#: thonny/misc_utils.py:513
+msgid "Command not available"
+msgstr ""
+
+#: thonny/misc_utils.py:514
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr ""
+
+#: thonny/workbench.py:686 thonny/workbench.py:784
+msgid "Support Ukraine"
+msgstr ""
+
+#: thonny/plugins/backend_config_page.py:84
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr ""
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr ""
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr ""
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr ""
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:169
+msgid "Thonny's Python"
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:512
+msgid "Interrupt working program on connect"
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:519
+msgid "Synchronize device's real time clock"
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:525
+msgid "Use local time in real time clock"
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:531
+msgid "Restart interpreter before running a script"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:24
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr ""
+
+#: thonny/base_file_browser.py:829
+msgid "Moving to Trash"
+msgstr ""
+
+#: thonny/base_file_browser.py:830
+msgid "Move %s to Trash?"
+msgstr ""
+
+#: thonny/base_file_browser.py:837
+msgid "Moving %s to Trash"
+msgstr ""
+
+#: thonny/base_file_browser.py:649
+msgid "Open in default external app"
+msgstr ""
+
+#: thonny/base_file_browser.py:1177
+msgid "Opening remote files in external app is not supported."
+msgstr ""
+
+#: thonny/base_file_browser.py:1184
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr ""
+
+#: thonny/editors.py:156
+msgid "Looks like '%s' was deleted or moved."
+msgstr ""
+
+#: thonny/editors.py:171
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:228
+msgid "NB! Thonny only supports Python %s and later"
+msgstr ""
+
+#: thonny/editors.py:973
+msgid "Go to line"
+msgstr ""
+
+#: thonny/workbench.py:689
+msgid "Support"
+msgstr ""
+
+#: thonny/editors.py:386 thonny/editors.py:401
+msgid "Could not save"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:129
+msgid "Warning"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:130
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr ""
 

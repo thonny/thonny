@@ -2,13 +2,51 @@
 Version history
 ===============
 
-4.0.0b2 (2022-??-??)
+4.0.0b3 (2022-05-15)
+====================
+
+* BREAKING: Don't SetProcessDpiAwareness for user programs anymore. This means for example, that Tkinter and Pygame programs on Windows run as if they were executed with plain Python (ie they may become blurry on modern displays). For clear picture, start your program with ``import ctypes; ctypes.OleDLL("shcore").SetProcessDpiAwareness(1)``, #2159
+* Add "Assistant" help page explaining the possibility to omit selected Pylint checks, #1978
+* Add command "Run => Visualize current script at Python Tutor", #2242
+* Fix debugger error when importing user modules (regression introduced in 4.0.0b1), #2246
+* Add options for automatically making uploaded or saved shebang scripts executable (includes changing Windows line breaks to Unix ones). See "Editor" and SSH-backends' config pages.
+* Don't propose pythonw.exe as initial backend, #2236
+* Fix error when trying to open a file from file browser with ENTER, #1785
+* Fix support for remote Python 3 over SSH (regression introduced in one of the 4.0.0 betas), #2249
+* Support CircuitPython with micro:bit, #2251
+* Avoid wobbling of AutomaticScrollbar, helpful report by @TooLazy0x00, #2258
+* Fix problem uninstalling MicroPython packages
+* Install packages without --user in portable mode, #1606
+* Allow back-end plugins to modify sys.path, #2281
+* Use %run instead of %Run when skipping interpreter restart, #1565
+* Updated Estonian, Thai and Brazilian Portuguese translations
+* EXPERIMENTAL: Add LEGO® EV3 back-end: "Run => Select interpreter => MicroPython (EV3)"
+
+4.0.0b2 (2022-04-09)
 ====================
 
 * Fix the problem with scripts having declared encoding something else than UTF-8, #1650
 * Don't clear shell after automatic restart
-* Fixes certain problems with running Flask programs, #2062
+* Fixes certain problems with running Flask and multiprocessing programs, #2062
 * Fix KeyError: 'ESP32.url' when connecting to WebREPL, #2082 (regression introduced in b1)
+* Fix parameter completions where name of local variable was proposed with trailing '='
+* Fix error with printing (regression introduced in b1), #2233
+* Fix Find & replace dialog not appearing, #2208
+* Fix display of debugger frames (regression introduced in 4.0.0b1), #2216
+* Warn when environment value is provided with quotes, #2184
+* Let macOS installer know the bundle is able to run in arm64 mode, #2201
+* Update completion stubs for MicroPython and CircuitPython (from @hlovatt and @adafruit)
+* Add compatibility with Python 3.8 via Windows launcher, #2206
+* Disable "Run" command when MicroPython device is disconnected
+* Make Shell read-only when device is disconnected
+* Fix various problems with managing files on CircuitPython devices
+* Don't assume all CircuitPython boards have RTC, #1760
+* Fix error with evaluating ``globals()`` on MicroPython device, #1938
+* Add MicrobitImage inspector for Object inspector
+* Add Tamil translation, by Kamala Kannan K and அனிச்பிரபு தி, #2211
+* Add Thai translation, by Tomzt Pimai and Game of
+* Update translations for German, Spanish, Japanese, Slovak, Korean, Brazilian Portuguese, Albanian
+
 
 4.0.0b1 (2022-03-21)
 ====================

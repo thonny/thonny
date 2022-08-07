@@ -30,7 +30,7 @@ if __name__ == "__main__":
             + "Choose another interpreter from Tools => Options => Interpreter",
             file=sys.stderr,
         )
-        sys.exit()
+        sys.exit(1)
     import thonny
     from thonny import report_time
 
@@ -39,7 +39,6 @@ if __name__ == "__main__":
 
     thonny.prepare_thonny_user_dir()
     thonny.configure_backend_logging()
-    thonny.set_dpi_aware()
 
     target_cwd = sys.argv[1]
     report_time("Before constructing backend")

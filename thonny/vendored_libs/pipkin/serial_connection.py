@@ -5,7 +5,7 @@ import time
 from logging import getLogger
 from textwrap import dedent
 
-from .connection import ConnectionFailedException, MicroPythonConnection
+from .connection import MicroPythonConnection
 
 OUTPUT_ENQ = b"\x05"
 OUTPUT_ACK = b"\x06"
@@ -76,7 +76,7 @@ class SerialConnection(MicroPythonConnection):
             elif error.errno == 16:
                 message += "\n\n" + "Try restarting the device."
 
-            raise ConnectionFailedException(message) from error
+            raise ConnectionRefusedError(message) from error
 
         if skip_reader:
             self._reading_thread = None
