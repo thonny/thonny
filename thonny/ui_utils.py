@@ -12,7 +12,7 @@ import tkinter.font
 import traceback
 from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
-from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
+from typing import Callable, List, Optional, Tuple, Union, Any, Dict  # @UnusedImport
 
 from _tkinter import TclError
 
@@ -2437,6 +2437,28 @@ def windows_known_extensions_are_hidden() -> bool:
     finally:
         reg_key.Close()
 
+
+class MappingCombobox(ttk.Combobox):
+    def __init__(self, master, mapping=None, **kw):
+        super().__init__(master, **kw)
+
+        if mapping is None:
+            mapping = {}
+
+        self.mapping: Dict[str, Any]
+        self.set_mapping(mapping)
+        self.mapping_desc_variable = tk.StringVar(value="")
+        self.configure(textvariable=self.mapping_desc_variable)
+
+        self.state(["!disabled", "readonly"])
+
+    def set_mapping(self, mapping: Dict[str, Any]):
+        self.mapping = mapping
+        self["values"] = list(mapping)
+
+    def get_selected_value(self) -> Any:
+        desc = self.mapping_desc_variable.get()
+        return self.mapping.get(desc, None)
 
 if __name__ == "__main__":
     print(windows_known_extensions_are_hidden())

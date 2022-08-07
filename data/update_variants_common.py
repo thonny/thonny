@@ -27,6 +27,7 @@ def get_available_formats(page_url: str) -> Set[str]:
     return links_parser.extensions & {"hex", "uf2", "bin", "dfu"}
 
 
+
 def get_attr_value(attrs, name):
     for key, value in attrs:
         if key == name:
