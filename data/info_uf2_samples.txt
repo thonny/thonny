@@ -1,0 +1,80 @@
+UF2 Bootloader v1.21.0 SFHR
+Model: Feather M0
+Board-ID: SAMD21G18A-Feather-v0
+-----
+UF2 Bootloader v3.14.0 SFHWRO
+Model: Metro M0
+Board-ID: SAMD21G18A-Metro-v0
+-------
+UF2 Bootloader v1.23.0 SFHR
+Model: Trinket M0
+Board-ID: SAMD21E18A-Trinket-v0
+------
+UF2 Bootloader v1.23.1-adafruit.1-337-g1c691d5 SFHWRO
+Model: NeoPixel Trinkey M0
+Board-ID: SAMD21E18A-NeoTrinkey-v0
+-----------
+UF2 Bootloader v3.10.0 SFHWRO
+Model: CPlay Express
+Board-ID: SAMD21G18A-CPlay-v0
+##################################################
+UF2 Bootloader v2.0.0-adafruit.5 SFHWRO
+Model: Metro M4 Express
+Board-ID: SAMD51J19A-Metro-v0
+-----------------
+UF2 Bootloader v3.13.0 SFHWRO
+Model: Metro M4 AirLift
+Board-ID: SAMD51J19A-Metro-AirLift-v0
+-----------------
+UF2 Bootloader v3.9.0 SFHWRO
+Model: ItsyBitsy M4 Express
+Board-ID: SAMD51G19A-Itsy-v0
+##################################################
+UF2 Bootloader 0.6.0 lib/nrfx (v2.0.0) lib/tinyusb (0.10.1-41-gdf0cda2d) lib/uf2 (remotes/origin/configupdate-9-gadbb8c7)
+Model: Adafruit CLUE nRF52840
+Board-ID: nRF52840-CLUE-revA
+SoftDevice: S140 version 6.1.1
+Date: Jun 19 2021
+----------
+UF2 Bootloader 0.2.13-42-g82464f9-dirty lib/nrfx (v2.0.0) lib/tinyusb (legacy-1500-g23df777b) s140 6.1.1
+Model: nRF52840 MDK USB Dongle
+Board-ID: nRF52840-Dongle-v1
+Date: Feb  3 2020
+-------------
+UF2 Bootloader 0.2.6 lib/nrfx (v1.1.0-1-g096e770) lib/tinyusb (legacy-525-ga1c59649) s140 6.1.1
+Model: Adafruit Feather nRF52840 Express
+Board-ID: NRF52-Bluefruit-v0
+Bootloader: s140 6.1.1
+Date: Dec 21 2018
+---------------
+UF2 Bootloader 0.6.2 lib/nrfx (v2.0.0) lib/tinyusb (0.10.1-293-gaf8e5a90) lib/uf2 (remotes/origin/configupdate-9-gadbb8c7)
+Model: Nordic nRF52833 DK
+Board-ID: nRF52833-pca10100-v1
+SoftDevice: S140 version 6.1.1
+Date: Sep 10 2021
+-------------------
+UF2 Bootloader 0.2.6 lib/nrfx (v1.1.0-1-g096e770) lib/tinyusb (legacy-525-ga1c59649) s140 6.1.1
+Model: Adafruit Feather nRF52840 Express
+Board-ID: NRF52-Bluefruit-v0
+Bootloader: s140 6.1.1
+Date: Dec 21 2018
+------------------
+UF2 Bootloader 0.2.10-4-g79fe6cc-dirty lib/nrfx (v1.1.0-1-g096e770) lib/tinyusb (legacy-755-g55874813) s340 6.1.1
+Model: SparkFun Pro nRF52840 Mini
+Board-ID: SparkFun-Pro-nRF52840-Mini
+Bootloader: s340 6.1.1
+Date: Jul 12 2019
+#####################################################
+UF2 Bootloader v2.0
+Model: Raspberry Pi RP2
+Board-ID: RPI-RP2
+#######################################################
+TinyUF2 Bootloader cd9d938 - tinyusb (0.10.1-109-g9b3ec69b)
+Model: Adafruit Feather ESP32-S2 TFT
+Board-ID: ESP32S2-FeatherTFT-revA
+Date: Dec 17 2021
+-------------
+TinyUF2 Bootloader 0.8.0-34-g9104f7c-dirty - esp-idf (v4.4-dev-3608-gbbe2a1bf34) tinyusb (0.12.0-203-ga4cfd1c6)
+Model: Unexpected Maker FeatherS3
+Board-ID: ESP32S3-FeatherS3-01
+Date: Jan 29 2022

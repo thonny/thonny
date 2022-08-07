@@ -1,0 +1,1327 @@
+[
+    {
+        "board_vendor": "Actinius",
+        "model_name": "actinius_icarus",
+        "board_family": "nrf91",
+        "downloads_url": "https://micropython.org/download/actinius_icarus",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "F405 Express",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_F405_EXPRESS",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "Feather M0 Express",
+        "board_family": "samd21",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_FEATHER_M0_EXPRESS",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Feather M0 Express$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "Feather RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_FEATHER_RP2040",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "Feather nRF52840 Express",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/feather52",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "ItsyBitsy M4 Express",
+        "board_family": "samd51",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_M4_EXPRESS",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: ItsyBitsy M4 Express$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "ItsyBitsy RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_RP2040",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "QT Py RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_QTPY_RP2040",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Adafruit",
+        "model_name": "Trinket M0",
+        "board_family": "samd21",
+        "downloads_url": "https://micropython.org/download/ADAFRUIT_TRINKET_M0",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Trinket M0$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Arduino",
+        "model_name": "Arduino Nano 33 BLE Sense",
+        "board_family": "nRF52840",
+        "downloads_url": "https://micropython.org/download/arduino_nano_33_ble_sense",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Arduino",
+        "model_name": "Arduino Nano RP2040 Connect",
+        "board_family": "RP2040",
+        "downloads_url": "https://micropython.org/download/ARDUINO_NANO_RP2040_CONNECT",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Arduino",
+        "model_name": "Arduino Portenta H7",
+        "board_family": "STM32H747",
+        "downloads_url": "https://micropython.org/download/ARDUINO_PORTENTA_H7",
+        "mappings": []
+    },
+    {
+        "board_vendor": "BBC",
+        "model_name": "micro:bit v1",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/microbit",
+        "mappings": [
+            {
+                "msc_file_name": "DETAILS.TXT",
+                "msc_file_content_pattern": "^Unique ID: 990[0-2]",
+                "download_url_pattern": "micropython.*\\.hex$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "BBC",
+        "model_name": "micro:bit v1",
+        "variant_name": "micro:bit v1 (original simplified API)",
+        "board_family": "nrf51",
+        "downloads_url": "https://github.com/bbcmicrobit/micropython/releases",
+        "mappings": [
+            {
+                "msc_file_name": "DETAILS.TXT",
+                "msc_file_content_pattern": "^Unique ID: 990[0-2]",
+                "download_url_pattern": "micropython.*\\.hex$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "BBC",
+        "model_name": "micro:bit v2",
+        "variant_name": "micro:bit v2 (original simplified API)",
+        "board_family": "nrf52",
+        "downloads_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases",
+        "mappings": [
+            {
+                "msc_file_name": "DETAILS.TXT",
+                "msc_file_content_pattern": "^Unique ID: 990[3-6]",
+                "download_url_pattern": "micropython.*\\.hex$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/esp32",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32 D2WD",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/esp32-d2wd",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32 with OTA support",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/esp32-ota",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32 with SPIRAM",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/esp32spiram",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32-C3",
+        "board_family": "esp32c3",
+        "downloads_url": "https://micropython.org/download/esp32c3",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32-C3 with USB",
+        "board_family": "esp32c3",
+        "downloads_url": "https://micropython.org/download/esp32c3-usb",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32-S2",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/GENERIC_S2",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: ESP32-S2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32-S2 WROVER",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/ESP32_S2_WROVER",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: ESP32-S2 WROVER$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP32-S3",
+        "board_family": "esp32s3",
+        "downloads_url": "https://micropython.org/download/GENERIC_S3",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: ESP32-S3$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP8266 with 1MiB flash",
+        "board_family": "esp8266",
+        "downloads_url": "https://micropython.org/download/esp8266-1m",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP8266 with 2MiB+ flash",
+        "board_family": "esp8266",
+        "downloads_url": "https://micropython.org/download/esp8266",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "ESP8266 with 512kiB flash",
+        "board_family": "esp8266",
+        "downloads_url": "https://micropython.org/download/esp8266-512k",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Espressif",
+        "model_name": "Generic ESP32-S3 (SPIRAM)",
+        "board_family": "esp32s3",
+        "downloads_url": "https://micropython.org/download/GENERIC_S3_SPIRAM",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Generic ESP32-S3 \\(SPIRAM\\)$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Espruino",
+        "model_name": "Pico",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/ESPRUINO_PICO",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard D-series SF2",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/PYBD-SF2",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard D-series SF3",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/PYBD-SF3",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard D-series SF6",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/PYBD-SF6",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard Lite v1.0",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/pyblitev10",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard v1.0",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/pybv10",
+        "mappings": []
+    },
+    {
+        "board_vendor": "George Robotics",
+        "model_name": "Pyboard v1.1",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/pybv11",
+        "mappings": []
+    },
+    {
+        "board_vendor": "I-SYST",
+        "model_name": "blueio_tag_evim",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/blueio_tag_evim",
+        "mappings": []
+    },
+    {
+        "board_vendor": "I-SYST",
+        "model_name": "ibk_blyst_nano",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/ibk_blyst_nano",
+        "mappings": []
+    },
+    {
+        "board_vendor": "I-SYST",
+        "model_name": "idk_blyst_nano",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/idk_blyst_nano",
+        "mappings": []
+    },
+    {
+        "board_vendor": "LILYGO",
+        "model_name": "LILYGO TTGO LoRa32",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/LILYGO_TTGO_LORA32",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Laird Connectivity",
+        "model_name": "dvk_bl652",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/dvk_bl652",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Lego",
+        "model_name": "Hub No.6",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/LEGO_HUB_NO6",
+        "mappings": []
+    },
+    {
+        "board_vendor": "M5 Stack",
+        "model_name": "M5 Stack Atom",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/M5STACK_ATOM",
+        "mappings": []
+    },
+    {
+        "board_vendor": "McHobby",
+        "model_name": "GARATRONIC_NADHAT_F405",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/GARATRONIC_NADHAT_F405",
+        "mappings": []
+    },
+    {
+        "board_vendor": "McHobby",
+        "model_name": "GARATRONIC_PYBSTICK26_F411",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/GARATRONIC_PYBSTICK26_F411",
+        "mappings": []
+    },
+    {
+        "board_vendor": "McHobby",
+        "model_name": "PYBSTICK26 RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/GARATRONIC_PYBSTICK26_RP2040",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Microchip",
+        "model_name": "SAMD21 Xplained Pro",
+        "board_family": "samd21",
+        "downloads_url": "https://micropython.org/download/SAMD21_XPLAINED_PRO",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: SAMD21 Xplained Pro$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "MikroElektronika",
+        "model_name": "MikroE Clicker 2 for STM32",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/MIKROE_CLICKER2_STM32",
+        "mappings": []
+    },
+    {
+        "board_vendor": "MikroElektronika",
+        "model_name": "MikroE Quail",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/MIKROE-QUAIL",
+        "mappings": []
+    },
+    {
+        "board_vendor": "MikroElektronika",
+        "model_name": "Mikroe RA4M1 Clicker",
+        "board_family": "RA4M1",
+        "downloads_url": "https://micropython.org/download/RA4M1-CLICKER",
+        "mappings": []
+    },
+    {
+        "board_vendor": "MiniFig Boards",
+        "model_name": "Mini SAM M4",
+        "board_family": "samd51",
+        "downloads_url": "https://micropython.org/download/MINISAM_M4",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Mini SAM M4$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1010_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1010_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1015_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1015_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1020_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1020_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1050_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1050_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1060_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1060_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "NXP",
+        "model_name": "MIMXRT1064_EVK",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/MIMXRT1064_EVK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10000",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/pca10000",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10001",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/pca10001",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10028",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/pca10028",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10031",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/pca10031",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10040",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/pca10040",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10056",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/pca10056",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10059",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/pca10059",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Nordic Semiconductor",
+        "model_name": "pca10090",
+        "board_family": "nrf91",
+        "downloads_url": "https://micropython.org/download/pca10090",
+        "mappings": []
+    },
+    {
+        "board_vendor": "OLIMEX",
+        "model_name": "E407",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/OLIMEX_E407",
+        "mappings": []
+    },
+    {
+        "board_vendor": "OLIMEX",
+        "model_name": "H407",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/OLIMEX_H407",
+        "mappings": []
+    },
+    {
+        "board_vendor": "OLIMEX",
+        "model_name": "Olimex_RT1010Py",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/OLIMEX_RT1010",
+        "mappings": []
+    },
+    {
+        "board_vendor": "PJRC",
+        "model_name": "Teensy 4.0",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/TEENSY40",
+        "mappings": []
+    },
+    {
+        "board_vendor": "PJRC",
+        "model_name": "Teensy 4.1",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/TEENSY41",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Particle",
+        "model_name": "Xenon",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/particle_xenon",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Badger 2040",
+        "variant_name": "Badger 2040 (with Pimoroni libraries and BadgerOS)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "pimoroni-badger2040-v.+\\-micropython\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Badger 2040",
+        "variant_name": "Badger 2040 (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "pimoroni-badger2040-v.+-micropython-without-badger-os\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Pico LiPo (16MiB)",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/PIMORONI_PICOLIPO_16MB",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Pico LiPo (4MiB)",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/PIMORONI_PICOLIPO_4MB",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Pimoroni Pico LiPo (16MB)",
+        "variant_name": "Pimoroni Pico LiPo (16MB) (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-picolipo_16mb-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Pimoroni Pico LiPo (4MB)",
+        "variant_name": "Pimoroni Pico LiPo (4MB) (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-picolipo_4mb-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Tiny 2040",
+        "variant_name": "Tiny 2040 (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-tiny2040-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Tiny2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/PIMORONI_TINY2040",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pimoroni",
+        "model_name": "Tufty 2040",
+        "variant_name": "Tufty 2040 (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-tufty2040-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Pycom",
+        "model_name": "WiPy Module",
+        "board_family": "cc3200",
+        "downloads_url": "https://micropython.org/download/wipy",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Raspberry Pi",
+        "model_name": "Pico",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/rp2-pico",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Raspberry Pi",
+        "model_name": "Pico",
+        "variant_name": "Pico (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-pico-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Raspberry Pi",
+        "model_name": "Pico W",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/rp2-pico-w",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Raspberry Pi",
+        "model_name": "Pico W",
+        "variant_name": "Pico W (with Pimoroni libraries)",
+        "board_family": "RP2040",
+        "downloads_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "/pimoroni-picow-v.+-micropython.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Renesas Electronics",
+        "model_name": "EK-RA4M1",
+        "board_family": "RA4M1",
+        "downloads_url": "https://micropython.org/download/EK-RA4M1",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Renesas Electronics",
+        "model_name": "EK-RA4W1",
+        "board_family": "RA4W1",
+        "downloads_url": "https://micropython.org/download/EK-RA4W1",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Renesas Electronics",
+        "model_name": "EK-RA6M1",
+        "board_family": "RA6M1",
+        "downloads_url": "https://micropython.org/download/EK-RA6M1",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Renesas Electronics",
+        "model_name": "EK-RA6M2",
+        "board_family": "RA6M2",
+        "downloads_url": "https://micropython.org/download/EK-RA6M2",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "B_L072Z_LRWAN1",
+        "board_family": "stm32l0",
+        "downloads_url": "https://micropython.org/download/B_L072Z_LRWAN1",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "B_L475E_IOT01A",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/B_L475E_IOT01A",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery F4",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/STM32F4DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery F411",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/STM32F411DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery F429",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/STM32F429DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery F7",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/STM32F7DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery F769",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/STM32F769DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery Kit H7",
+        "board_family": "stm32h7",
+        "downloads_url": "https://micropython.org/download/STM32H7B3I_DK",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery L476",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/STM32L476DISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Discovery L496G",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/STM32L496GDISC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F091RC",
+        "board_family": "stm32f0",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F091RC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F401RE",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F401RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F411RE",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F411RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F412ZG",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F412ZG",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F413ZH",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F413ZH",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F429ZI",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F429ZI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F439ZI",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F439ZI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F446RE",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F446RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F722ZE",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F722ZE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F746ZG",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F746ZG",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo F767ZI",
+        "board_family": "stm32f7",
+        "downloads_url": "https://micropython.org/download/NUCLEO_F767ZI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo G0B1RE",
+        "board_family": "stm32g0",
+        "downloads_url": "https://micropython.org/download/NUCLEO_G0B1RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo G474RE",
+        "board_family": "stm32g4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_G474RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo H743ZI",
+        "board_family": "stm32h7",
+        "downloads_url": "https://micropython.org/download/NUCLEO_H743ZI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo H743ZI2",
+        "board_family": "stm32",
+        "downloads_url": "https://micropython.org/download/NUCLEO_H743ZI2",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo L073RZ",
+        "board_family": "stm32l0",
+        "downloads_url": "https://micropython.org/download/NUCLEO_L073RZ",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo L432KC",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_L432KC",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo L452RE",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_L452RE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo L476RG",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/NUCLEO_L476RG",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo WB55",
+        "board_family": "stm32wb",
+        "downloads_url": "https://micropython.org/download/NUCLEO_WB55",
+        "mappings": []
+    },
+    {
+        "board_vendor": "ST Microelectronics",
+        "model_name": "Nucleo WL55",
+        "board_family": "stm32wl",
+        "downloads_url": "https://micropython.org/download/NUCLEO_WL55",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Seeed Studio",
+        "model_name": "Seeeduino XIAO",
+        "board_family": "samd21",
+        "downloads_url": "https://micropython.org/download/SEEED_XIAO",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Seeeduino XIAO$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Seeed Studio",
+        "model_name": "Wio Terminal D51R",
+        "board_family": "samd51",
+        "downloads_url": "https://micropython.org/download/SEEED_WIO_TERMINAL",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Wio Terminal D51R$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Seeed Technology Co.,Ltd.",
+        "model_name": "Arch Mix",
+        "board_family": "mimxrt",
+        "downloads_url": "https://micropython.org/download/SEEED_ARCH_MIX",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Silicognition LLC",
+        "model_name": "SIL WESP32",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/wesp32",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Sparkfun",
+        "model_name": "Micromod STM32",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/SPARKFUN_MICROMOD_STM32",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Sparkfun",
+        "model_name": "Pro Micro RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/SPARKFUN_PROMICRO",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Sparkfun",
+        "model_name": "Thing Plus RP2040",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/SPARKFUN_THINGPLUS",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "Feather S2",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/featherS2",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Feather S2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "Feather S2 Neo",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/featherS2neo",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Feather S2 Neo$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "FeatherS3",
+        "board_family": "esp32s3",
+        "downloads_url": "https://micropython.org/download/feathers3",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: FeatherS3$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "ProS3",
+        "board_family": "esp32s3",
+        "downloads_url": "https://micropython.org/download/pros3",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: ProS3$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "Tiny S2",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/tinys2",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: Tiny S2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "TinyPICO",
+        "board_family": "esp32",
+        "downloads_url": "https://micropython.org/download/tinypico",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unexpected Maker",
+        "model_name": "TinyS3",
+        "board_family": "esp32s3",
+        "downloads_url": "https://micropython.org/download/tinys3",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: TinyS3$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "CERB40",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/CERB40",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "HYDRABUS",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/HYDRABUS",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "LIMIFROG",
+        "board_family": "stm32l4",
+        "downloads_url": "https://micropython.org/download/LIMIFROG",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "NETDUINO_PLUS_2",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/NETDUINO_PLUS_2",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "STM32F439",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/STM32F439",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "USBDONGLE_WB55",
+        "board_family": "stm32wb",
+        "downloads_url": "https://micropython.org/download/USBDONGLE_WB55",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "arduino_primo",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/arduino_primo",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Unknown",
+        "model_name": "nrf52840-mdk-usb-dongle",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/nrf52840-mdk-usb-dongle",
+        "mappings": []
+    },
+    {
+        "board_vendor": "VCC-GND Studio",
+        "model_name": "F407VE",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/VCC_GND_F407VE",
+        "mappings": []
+    },
+    {
+        "board_vendor": "VCC-GND Studio",
+        "model_name": "F407ZG",
+        "board_family": "stm32f4",
+        "downloads_url": "https://micropython.org/download/VCC_GND_F407ZG",
+        "mappings": []
+    },
+    {
+        "board_vendor": "VCC-GND Studio",
+        "model_name": "H743VI",
+        "board_family": "stm32h7",
+        "downloads_url": "https://micropython.org/download/VCC_GND_H743VI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Wemos",
+        "model_name": "C3 mini",
+        "board_family": "esp32c3",
+        "downloads_url": "https://micropython.org/download/LOLIN_C3_MINI",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Wemos",
+        "model_name": "S2 mini",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/LOLIN_S2_MINI",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: S2 mini$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Wemos",
+        "model_name": "S2 pico",
+        "board_family": "esp32s2",
+        "downloads_url": "https://micropython.org/download/LOLIN_S2_PICO",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Model: S2 pico$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "Wireless-Tag",
+        "model_name": "wt51822_s4at",
+        "board_family": "nrf51",
+        "downloads_url": "https://micropython.org/download/wt51822_s4at",
+        "mappings": []
+    },
+    {
+        "board_vendor": "Wiznet",
+        "model_name": "Wiznet W5100S-EVB-Pico",
+        "board_family": "rp2040",
+        "downloads_url": "https://micropython.org/download/W5100S_EVB_PICO",
+        "mappings": [
+            {
+                "msc_file_name": "INFO_UF2.TXT",
+                "msc_file_content_pattern": "^Board-ID: RPI-RP2$",
+                "download_url_pattern": "micropython.*\\.uf2$"
+            }
+        ]
+    },
+    {
+        "board_vendor": "u-blox",
+        "model_name": "evk_nina_b1",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/evk_nina_b1",
+        "mappings": []
+    },
+    {
+        "board_vendor": "u-blox",
+        "model_name": "evk_nina_b3",
+        "board_family": "nrf52",
+        "downloads_url": "https://micropython.org/download/evk_nina_b3",
+        "mappings": []
+    }
+]
