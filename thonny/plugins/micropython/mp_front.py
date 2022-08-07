@@ -1044,9 +1044,12 @@ def list_serial_ports_with_descriptions():
 def get_uart_adapter_vids_pids():
     # https://github.com/per1234/zzInoVIDPID
     # https://github.com/per1234/zzInoVIDPID/blob/master/zzInoVIDPID/boards.txt
+    # http://esp32.net/usb-uart/
+    # https://www.usb.org/developers
     return {
         (0x1A86, 0x7523),  # CH340 (HL-340?)
         (0x1A86, 0x5523),  # CH341
+        (0x1A86, 0x55D4),  # CH9102F, seen at Adafruit Feather ESP32 V2
         (0x10C4, 0xEA60),  # CP210x,
         (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
         (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
@@ -1054,6 +1057,7 @@ def get_uart_adapter_vids_pids():
         (0x0403, 0x6014),  # FT232H
         (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
         (0x0403, 0x601C),  # FT4222H
+        (0x303A, 0x1001),  # Espressif's built-in USB-to-Serial, seen at QtPy C3
     }
 
 
