@@ -74,6 +74,11 @@ Model: Adafruit Feather ESP32-S2 TFT
 Board-ID: ESP32S2-FeatherTFT-revA
 Date: Dec 17 2021
 -------------
+TinyUF2 Bootloader 0.10.2 - tinyusb (0.12.0-203-ga4cfd1c69)
+Model: LILYGO TTGO_T8_S2
+Board-ID: ESP32S2-TTGOS2-v1.1
+Date: Jun 24 2022
+############################################################
 TinyUF2 Bootloader 0.8.0-34-g9104f7c-dirty - esp-idf (v4.4-dev-3608-gbbe2a1bf34) tinyusb (0.12.0-203-ga4cfd1c6)
 Model: Unexpected Maker FeatherS3
 Board-ID: ESP32S3-FeatherS3-01

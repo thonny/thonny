@@ -2,7 +2,7 @@ import re
 import json
 import urllib.request
 from html.parser import HTMLParser
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Tuple
 
 FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
@@ -11,20 +11,36 @@ def re_escape_model_name(name: str) -> str:
     return re.escape(name).replace('\\ ', ' ').replace('\\-', '-').replace('\\_', '_')
 
 
-def get_available_formats(page_url: str) -> Set[str]:
-    req = urllib.request.Request(
-        page_url,
-        data=None,
-        headers={
-            "User-Agent": FAKE_USER_AGENT,
-            "Cache-Control": "no-cache",
-        },
-    )
-    links_parser = FileLinksParser()
-    with urllib.request.urlopen(req) as fp:
-        links_parser.feed(fp.read().decode("utf-8"))
 
-    return links_parser.extensions & {"hex", "uf2", "bin", "dfu"}
+def find_keywords(page_url: str, selection: Set[str]) -> Set[str]:
+    with urlopen_ua(page_url) as fp:
+        content = fp.read().decode("utf-8")
+
+    return {kw for kw in selection if kw.lower() in content.lower()}
+
+def find_download_links(page_url: str,
+                        stable_pattern: str,
+                        max_stable_count: int = 3,
+                        unstable_pattern: str = "",
+                        max_unstable_count: int = 0) -> List[str]:
+    with urlopen_ua(page_url) as fp:
+        content = fp.read().decode("utf-8")
+
+    parser = FileLinksParser()
+    parser.feed(content)
+
+    stables = []
+    unstables = []
+
+    for link in parser.links:
+        if len(stables) < max_stable_count and re.search(stable_pattern, link):
+            stables.append(link)
+        elif len(unstables) < max_unstable_count and re.search(unstable_pattern, link):
+            unstables.append(link)
+
+    return stables + unstables
+
+
 
 
 
@@ -35,52 +51,15 @@ def get_attr_value(attrs, name):
 
     return None
 
-def add_mappings(variant, url_keyword):
-    formats = list(sorted(get_available_formats(variant["downloads_url"])))
-    mappings: List[Dict[str, str]] = []
-    if "uf2" in formats:
-        if variant["board_family"].upper() in ["RP2040", "RASPBERRYPI"]:
-            content_pattern = "^Board-ID: RPI-RP2$"
-        else:
-            content_pattern = f"^Model: {re_escape_model_name(variant['model_name'])}$"
-
-        mappings.append(
-            {
-                "msc_file_name": "INFO_UF2.TXT",
-                "msc_file_content_pattern": content_pattern,
-                "download_url_pattern":
-                    variant.get("_download_url_pattern", rf"{url_keyword}.*\.uf2$"),
-            }
-        )
-
-    if "hex" in formats and variant["model_name"].startswith("micro:bit"):
-        if variant["model_name"] == "micro:bit v1":
-            content_pattern = "^Unique ID: 990[0-2]"
-        elif variant["model_name"] == "micro:bit v2":
-            content_pattern = "^Unique ID: 990[3-6]"
-        else:
-            raise ValueError(f"Unexpected model name {variant['model_name']}")
-        mappings.append(
-            {
-                "msc_file_name": "DETAILS.TXT",
-                "msc_file_content_pattern": content_pattern,
-                "download_url_pattern": variant.get("_download_url_pattern", rf"{url_keyword}.*\.hex$"),
-            }
-        )
-
-    variant["mappings"] = mappings
-
 
 class FileLinksParser(HTMLParser):
     def __init__(self, *, convert_charrefs=True):
         super().__init__(convert_charrefs=convert_charrefs)
-        self.extensions = set()
+        self.links = []
 
     def handle_starttag(self, tag: str, attrs: Dict[str, str]):
         if tag == "a" and get_attr_value(attrs, "href"):
-            href = get_attr_value(attrs, "href")
-            if "." in href:
-                self.extensions.add(href.split(".")[-1])
+            self.links.append(get_attr_value(attrs, "href"))
 
 def urlopen_ua(url):
     req = urllib.request.Request(
@@ -91,7 +70,7 @@ def urlopen_ua(url):
             "Cache-Control": "no-cache",
         },
     )
-    return urllib.request.urlopen(req)
+    return urllib.request.urlopen(req, timeout=5)
 
 def save_variants(variants, file_path):
     variants.sort(key=lambda b: (b["board_vendor"], b.get("variant_name", b["model_name"])))

@@ -49,10 +49,20 @@ for mcu in map(str.strip, mcu_list.split(",")):
 
     print(f"Adding {len(parser.variants)} boards ..........................................")
     for pvariant in parser.variants:
+
+        if mcu.lower().startswith("nrf51"):
+            board_family = "nrf51"
+        elif mcu.lower().startswith("nrf52"):
+            board_family = "nrf52"
+        elif mcu.lower() == "rp2040":
+            board_family = "rp2040"
+        else:
+            board_family = mcu
+
         variant = {
             "board_vendor": pvariant["board-vendor"],
             "model_name": pvariant["board-product"],
-            "board_family": mcu,
+            "board_family": board_family,
             "downloads_url": base_url + pvariant["id"],
         }
         all_variants.append(variant)
