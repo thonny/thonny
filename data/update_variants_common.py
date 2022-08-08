@@ -79,9 +79,21 @@ def read_page(url) -> str:
 
 
 def save_variants(variants: List, flasher: str, families: Set[str], file_path):
-    variants = filter(lambda v: v["_flasher"] == flasher and v["family"] in families, variants)
+    variants = list(
+        filter(lambda v: v["_flasher"] == flasher and v["family"] in families, variants)
+    )
+
+    for variant in variants:
+        if (variant["model"].lower() + " ").startswith(variant["vendor"].lower()):
+            variant["title"] = variant["model"][len(variant["model"]) :].strip()
+
     variants = sorted(
-        variants, key=lambda b: (b["vendor"].upper(), b["model"].upper(), b.get("variant", ""))
+        variants,
+        key=lambda b: (
+            b["vendor"].upper(),
+            b.get("title", b["model"]).upper(),
+            b.get("variant", ""),
+        ),
     )
 
     # get rid of temporary/private attributes
@@ -96,5 +108,5 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path):
 
         final_variants.append(variant)
 
-    with open(file_path, mode="w", encoding="utf-8") as fp:
+    with open(file_path, mode="w", encoding="utf-8", newline="\n") as fp:
         json.dump(final_variants, fp, indent=4)
