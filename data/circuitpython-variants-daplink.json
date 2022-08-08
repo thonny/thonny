@@ -1,0 +1,34 @@
+[
+    {
+        "vendor": "BBC",
+        "model": "micro:bit v2",
+        "family": "nrf52",
+        "info_url": "https://circuitpython.org/board/microbit_v2/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-7.3.2.combined.hex"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-8.0.0-alpha.1.combined.hex"
+            }
+        ]
+    },
+    {
+        "vendor": "MakerDiary",
+        "model": "nRF52840 Micro Dev Kit",
+        "family": "nrf52",
+        "info_url": "https://circuitpython.org/board/makerdiary_nrf52840_mdk/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-7.3.2.hex"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-8.0.0-alpha.1.hex"
+            }
+        ]
+    }
+]
