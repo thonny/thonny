@@ -24,7 +24,7 @@ class TodoView(ui_utils.TreeFrame):
 
         # todo bind to reload event for update
 
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
         get_workbench().bind_class("Text", "<Double-Button-1>", self._update, True)
