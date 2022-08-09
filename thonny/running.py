@@ -876,64 +876,6 @@ class BackendProxy(ABC):
         raise NotImplementedError()
 
 
-class EnvFile(object):
-    def __init__(self, fnam=None):
-        self.fnam = fnam if fnam else ".env"
-        self._env = collections.OrderedDict()
-        self.err_lines = []
-        self.excep = None
-
-    def load(self):
-        self.excep = None
-        self._env.clear()
-        self.err_lines.clear()
-        lineno = 0
-        try:
-            with open(self.fnam) as f:
-                while True:
-                    lineno += 1
-                    line = f.readline()
-                    if len(line) == 0:
-                        break
-                    line = line.strip()
-                    pos = line.find("#")
-                    if pos >= 0:
-                        line = line[:pos]
-                    if len(line) == 0:
-                        continue
-                    pos = line.find("=")
-                    if pos < 0:
-                        self.err_lines.append(lineno)
-                        continue
-                    key = line[:pos].strip()
-                    val = line[pos + 1 :].strip()
-                    self._env[key] = val
-
-        except Exception as ex:
-            self.err_lines.append(lineno)
-            self.excep = ex
-
-        return self
-
-    def expand_vars(self):
-        raise NotImplementedError()
-
-    def remove_unused(self):
-        for key, val in list(self._env.items()):
-            if len(val) == 0:
-                del self._env[key]
-        return self
-
-    def has_errors(self):
-        return len(self.err_lines) > 0 or self.excep
-
-    def get_env(self):
-        return self._env
-
-    def set_env(self, env):
-        self._env = env
-
-
 class SubprocessProxy(BackendProxy, ABC):
     def __init__(self, clean: bool, mgmt_executable: Optional[str] = None) -> None:
         super().__init__(clean)
@@ -1018,37 +960,6 @@ class SubprocessProxy(BackendProxy, ABC):
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
-
-        add_env_file = self._load_env_file()
-
-        chained_env = collections.ChainMap(add_env_file, env)
-        chained_env = dict(chained_env)
-
-        # un-set keys
-        env = EnvFile()
-        env.set_env(chained_env)
-        env.remove_unused()
-
-        return env.get_env()
-
-    def _load_env_file(self):
-        # todo: configuration menu -> Tools > Options > Run & Debug
-        env_file = os.environ.get("THONNY_ENV_FILE", ".env")
-        script_dir = self._get_launcher_python_script_dir()
-
-        env_file = os.path.join(script_dir, env_file)
-
-        if os.path.exists(env_file) and os.path.isfile(env_file):
-            env = EnvFile(env_file)
-            env.load()
-            if env.has_errors():
-                logger.error("env-file errors in lines: " + str(env.err_lines))
-                if env.excep:
-                    logger.exception("env-file" + str(env.excep))
-            env = env.get_env()
-        else:
-            env = {}
-
         return env
 
     def _get_launcher_python_script_dir(self):
