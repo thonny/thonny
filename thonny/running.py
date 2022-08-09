@@ -960,11 +960,7 @@ class SubprocessProxy(BackendProxy, ABC):
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
-
         return env
-
-    def _get_launcher_python_script_dir(self):
-        return self._get_launcher_with_args()[-1]
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
