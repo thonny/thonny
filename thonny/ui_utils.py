@@ -2460,5 +2460,6 @@ class MappingCombobox(ttk.Combobox):
         desc = self.mapping_desc_variable.get()
         return self.mapping.get(desc, None)
 
+
 if __name__ == "__main__":
     print(windows_known_extensions_are_hidden())
