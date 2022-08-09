@@ -65,5 +65,4 @@ def load_plugin() -> None:
         _open_system_shell,
         group=80,
         image="terminal",
-        default_sequence=select_sequence("<Shift-Control-T>", "<Shift-Command-T>"),
     )
