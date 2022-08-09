@@ -67,7 +67,7 @@ for i, variant in enumerate(all_variants):
     add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
     if variant["family"] == "raspberrypi":
-        variant["family"] = "rp2040"
+        variant["family"] = "rp2"
     elif variant["family"].startswith("nrf52"):
         variant["family"] = "nrf52"
     elif variant["family"] == "atmel-samd":
@@ -99,14 +99,14 @@ for variant in cant_determine_samd:
 save_variants(
     all_variants,
     "uf2",
-    {"rp2040", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "circuitpython-variants-uf2.json",
 )
 
 save_variants(
     all_variants,
     "daplink",
-    {"rp2040", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "circuitpython-variants-daplink.json",
 )
 

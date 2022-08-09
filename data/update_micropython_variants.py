@@ -11,6 +11,7 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
+UNSTABLE_VERSION = "20220805-unstable-v1.19.1-240-g9dfabcd6d"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
@@ -68,7 +69,7 @@ for mcu in map(str.strip, mcu_list.split(",")):
         elif mcu.lower().startswith("nrf52"):
             board_family = "nrf52"
         elif mcu.lower() == "rp2040":
-            board_family = "rp2040"
+            board_family = "rp2"
         else:
             board_family = mcu
 
@@ -87,14 +88,14 @@ pimoroni_variants = [
         "_id": "pimoroni-badger2040",
         "vendor": "Pimoroni",
         "model": "Badger 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})-micropython-without-badger-os\.uf2$",
     },
     {
         "_id": "pimoroni-badger2040-with-badger-os",
         "vendor": "Pimoroni",
         "model": "Badger 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "variant": "with Pimoroni libraries and BadgerOS",
         "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython\.uf2$",
     },
@@ -102,37 +103,37 @@ pimoroni_variants = [
         "_id": "pimoroni-pico",
         "vendor": "Raspberry Pi",
         "model": "Pico",
-        "family": "rp2040",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-picolipo_16mb",
         "vendor": "Pimoroni",
         "model": "Pimoroni Pico LiPo (16MB)",
-        "family": "rp2040",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-picolipo_4mb",
         "vendor": "Pimoroni",
         "model": "Pimoroni Pico LiPo (4MB)",
-        "family": "rp2040",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow",
         "vendor": "Raspberry Pi",
         "model": "Pico W",
-        "family": "rp2040",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-tiny2040",
         "vendor": "Pimoroni",
         "model": "Tiny 2040",
-        "family": "rp2040",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-tufty2040",
         "vendor": "Pimoroni",
         "model": "Tufty 2040",
-        "family": "rp2040",
+        "family": "rp2",
     },
 ]
 
@@ -220,7 +221,7 @@ for i, variant in enumerate(all_variants):
             variant["info_url"],
             r"v(\d+(?:\.\d+)+)\." + extension,
             1,
-            r"(\d{8}-unstable.+)\." + extension,
+            rf"({UNSTABLE_VERSION})\." + extension,
             1,
             url_prefix="https://micropython.org/",
         )
@@ -232,7 +233,7 @@ for i, variant in enumerate(all_variants):
 save_variants(
     all_variants,
     "uf2",
-    {"rp2040", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "micropython-variants-uf2.json",
 )
 
@@ -240,7 +241,7 @@ save_variants(
 save_variants(
     all_variants,
     "daplink",
-    {"rp2040", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "micropython-variants-daplink.json",
 )
 

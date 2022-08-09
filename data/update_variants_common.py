@@ -85,7 +85,7 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path):
 
     for variant in variants:
         if (variant["model"].lower() + " ").startswith(variant["vendor"].lower()):
-            variant["title"] = variant["model"][len(variant["model"]) :].strip()
+            variant["title"] = variant["model"][len(variant["vendor"]) :].strip()
 
     variants = sorted(
         variants,
