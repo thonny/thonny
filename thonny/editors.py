@@ -1211,7 +1211,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 tx = ""
                 tx += tr("Some files where manipulated outside")
                 tx += "\n"
-                tx += tr("Do you want to reload them, or close the deleted unsaved in the editor?")
+                tx += tr("Do you want to reload them, and close the deleted unsaved in the editor?")
 
                 dialog = simpledialog.SimpleDialog(
                     get_workbench(),
