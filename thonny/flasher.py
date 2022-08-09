@@ -1,12 +1,16 @@
+import os.path
+import re
+import sys
 import threading
 import tkinter as tk
+from dataclasses import dataclass
 from tkinter import ttk
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Tuple
 import urllib.request
 
 from thonny import ui_utils
 from thonny.languages import tr
-from thonny.misc_utils import list_volumes
+from thonny.misc_utils import list_volumes, get_win_volume_name
 from thonny.ui_utils import MappingCombobox, AutoScrollbar, scrollbar_style, create_url_label
 from thonny.workdlg import WorkDialog
 from logging import getLogger
@@ -15,13 +19,25 @@ logger = getLogger(__name__)
 
 FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
+
+@dataclass
+class TargetInfo:
+    description: str
+
+
+class Uf2TargetInfo:
+    path: str
+    family: Optional[str]
+    model: Optional[str]
+
+
 class BaseFlasher(WorkDialog):
     def __init__(self, master, autostart=False):
         self._variants: List[Dict[str, Any]] = []
+        self._targets: Dict[str, str] = {}
         threading.Thread(target=self._download_variants, daemon=True).start()
 
         super().__init__(master, autostart)
-
 
     def populate_main_frame(self):
         epadx = self.get_large_padding()
@@ -32,22 +48,30 @@ class BaseFlasher(WorkDialog):
         target_label = ttk.Label(self.main_frame, text="Target volume")
         target_label.grid(row=1, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
         self._target_combo = MappingCombobox(self.main_frame, exportselection=False)
-        self._target_combo.grid(row=1, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0))
+        self._target_combo.grid(
+            row=1, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
+        )
 
         variant_label = ttk.Label(self.main_frame, text="MicroPython variant")
         variant_label.grid(row=2, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_combo = MappingCombobox(self.main_frame, exportselection=False)
-        self._variant_combo.grid(row=2, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0))
+        self._variant_combo.grid(
+            row=2, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+        )
 
         info_label = ttk.Label(self.main_frame, text="info")
         info_label.grid(row=4, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
-        self._info_url_label = create_url_label(self.main_frame, "https://circuitpython.org/board/lilygo_ttgo_t8_s2/")
+        self._info_url_label = create_url_label(
+            self.main_frame, "https://circuitpython.org/board/lilygo_ttgo_t8_s2/"
+        )
         self._info_url_label.grid(row=4, column=2, sticky="w", padx=(ipadx, epadx), pady=(ipady, 0))
 
         version_label = ttk.Label(self.main_frame, text="version")
         version_label.grid(row=3, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._version_combo = MappingCombobox(self.main_frame, exportselection=False)
-        self._version_combo.grid(row=3, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0))
+        self._version_combo.grid(
+            row=3, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+        )
 
         """
         # Filter
@@ -94,7 +118,54 @@ class BaseFlasher(WorkDialog):
         self.main_frame.columnconfigure(2, weight=1)
 
     def _get_variants_url(self) -> str:
-        return "https://raw.githubusercontent.com/thonny/thonny/master/data/micropython-variants.json"
+        return "https://raw.githubusercontent.com/thonny/thonny/master/data/micropython-variants-uf2.json"
+
+    def _look_up_targets(self) -> Dict[str, TargetInfo]:
+        paths = [
+            vol
+            for vol in list_volumes(skip_letters=["A"])
+            if os.path.isfile(os.path.join(vol, "INFO_UF2.TXT"))
+        ]
+        return {self._describe_target_path(path): self._create_target_info(path) for path in paths}
+
+    def _describe_target_path(self, path: str) -> str:
+        if sys.platform == "win32":
+            try:
+                label = get_win_volume_name(path)
+                disk = path.strip("\\")
+                return f"{label} ({disk})"
+            except:
+                logger.error("Could not query volume name for %r", path)
+                return path
+        else:
+            return path
+
+    def _create_target_info(self, path: str) -> Uf2TargetInfo:
+        info_path = os.path.join(path, "INFO_UF2.TXT")
+        assert os.path.isfile(info_path)
+        with open(info_path, encoding="utf-8") as fp:
+            info_content = fp.read()
+        info_lines = info_content.splitlines()
+        normalized_content = info_content.lower().replace(" ", "").replace("_", "").replace("-", "")
+
+        if "boardid:rpirp2" in normalized_content:
+            family = "rp2"
+            description = (
+                "".join([line for line in info_lines if line.startswith("Board-ID:")])
+                .replace("Board-ID:", "Family:")
+                .strip()
+            )
+            model = None
+        else:
+            for keyword in ["samd21", "samd51", "nrf51", "nrf52", "esp32s3", "esp32s3"]:
+                if keyword in normalized_content:
+                    family = keyword
+                    description = "".join(
+                        [line for line in info_lines if line.startswith("Model:")]
+                    )
+                    model = description[len("Model:") :].strip()
+
+        re.search()
 
     def _download_variants(self):
         import json
@@ -111,10 +182,12 @@ class BaseFlasher(WorkDialog):
             )
             with urlopen(req) as fp:
                 json_str = fp.read().decode("UTF-8")
-                #logger.debug("Variants info: %r", json_str)
+                # logger.debug("Variants info: %r", json_str)
                 self._variants = json.loads(json_str)
         except Exception as e:
-            self.append_text("Could not download variants info from %s\n" % self._get_variants_url())
+            self.append_text(
+                "Could not download variants info from %s\n" % self._get_variants_url()
+            )
             self.set_action_text("Error!")
             self.grid_progress_widgets()
 
@@ -134,8 +207,6 @@ class BaseFlasher(WorkDialog):
             if info[1] is not None and (info[1][0] == board_id or board_id is None)
         ]
 
-
-
     def get_instructions(self) -> Optional[str]:
         return (
             "Here you can install or update MicroPython for devices having an UF2 bootloader\n"
@@ -152,4 +223,3 @@ class BaseFlasher(WorkDialog):
 
     def _on_variant_select(self, *args):
         pass
-

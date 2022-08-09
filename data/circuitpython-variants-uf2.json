@@ -21,70 +21,6 @@
     },
     {
         "vendor": "Adafruit",
-        "model": "Adafruit ESP32-S2 Camera",
-        "family": "esp32s2",
-        "info_url": "https://circuitpython.org/board/adafruit_esp32s2_camera/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-8.0.0-alpha.1.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Adafruit",
-        "model": "Adafruit KB2040",
-        "family": "rp2040",
-        "info_url": "https://circuitpython.org/board/adafruit_kb2040/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_kb2040/en_US/adafruit-circuitpython-adafruit_kb2040-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_kb2040/en_US/adafruit-circuitpython-adafruit_kb2040-en_US-8.0.0-alpha.1.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Adafruit",
-        "model": "Adafruit QT Py ESP32-S2 (including uFL version)",
-        "family": "esp32s2",
-        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s2/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-8.0.0-alpha.1.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Adafruit",
-        "model": "Adafruit QT Py ESP32-S3 No PSRAM",
-        "family": "esp32s3",
-        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s3_nopsram/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-8.0.0-alpha.1.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Adafruit",
         "model": "BLM Badge",
         "family": "samd21",
         "info_url": "https://circuitpython.org/board/blm_badge/",
@@ -262,6 +198,23 @@
                 "url": "https://downloads.circuitpython.org/bin/edgebadge/en_US/adafruit-circuitpython-edgebadge-en_US-6.3.0.uf2"
             }
         ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit ESP32-S2 Camera",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_esp32s2_camera/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-8.0.0-alpha.1.uf2"
+            }
+        ],
+        "title": "ESP32-S2 Camera"
     },
     {
         "vendor": "Adafruit",
@@ -554,7 +507,7 @@
     {
         "vendor": "Adafruit",
         "model": "Feather RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/adafruit_feather_rp2040/",
         "downloads": [
             {
@@ -754,7 +707,7 @@
     {
         "vendor": "Adafruit",
         "model": "ItsyBitsy RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/adafruit_itsybitsy_rp2040/",
         "downloads": [
             {
@@ -770,6 +723,23 @@
                 "url": "https://downloads.circuitpython.org/bin/adafruit_itsybitsy_rp2040/en_US/adafruit-circuitpython-adafruit_itsybitsy_rp2040-en_US-6.3.0.uf2"
             }
         ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit KB2040",
+        "family": "rp2",
+        "info_url": "https://circuitpython.org/board/adafruit_kb2040/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_kb2040/en_US/adafruit-circuitpython-adafruit_kb2040-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_kb2040/en_US/adafruit-circuitpython-adafruit_kb2040-en_US-8.0.0-alpha.1.uf2"
+            }
+        ],
+        "title": "KB2040"
     },
     {
         "vendor": "Adafruit",
@@ -790,7 +760,7 @@
     {
         "vendor": "Adafruit",
         "model": "MacroPad RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/adafruit_macropad_rp2040/",
         "downloads": [
             {
@@ -1197,6 +1167,40 @@
     },
     {
         "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32-S2 (including uFL version)",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s2/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-8.0.0-alpha.1.uf2"
+            }
+        ],
+        "title": "QT Py ESP32-S2 (including uFL version)"
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32-S3 No PSRAM",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s3_nopsram/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-8.0.0-alpha.1.uf2"
+            }
+        ],
+        "title": "QT Py ESP32-S3 No PSRAM"
+    },
+    {
+        "vendor": "Adafruit",
         "model": "QT Py Haxpress",
         "family": "samd21",
         "info_url": "https://circuitpython.org/board/qtpy_m0_haxpress/",
@@ -1218,7 +1222,7 @@
     {
         "vendor": "Adafruit",
         "model": "QT Py RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_rp2040/",
         "downloads": [
             {
@@ -1298,7 +1302,7 @@
     {
         "vendor": "Adafruit",
         "model": "Trinkey QT2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/adafruit_qt2040_trinkey/",
         "downloads": [
             {
@@ -1514,7 +1518,7 @@
     {
         "vendor": "Arduino",
         "model": "Nano RP2040 Connect",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/arduino_nano_rp2040_connect/",
         "downloads": [
             {
@@ -1585,7 +1589,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "ESP32-S2"
     },
     {
         "vendor": "BDMICRO, LLC",
@@ -1801,12 +1806,13 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "CrumpS2"
     },
     {
         "vendor": "Cytron Technologies",
         "model": "Maker Nano RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/cytron_maker_nano_rp2040/",
         "downloads": [
             {
@@ -1822,7 +1828,7 @@
     {
         "vendor": "Cytron Technologies",
         "model": "Maker Pi RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/cytron_maker_pi_rp2040/",
         "downloads": [
             {
@@ -1890,7 +1896,7 @@
     {
         "vendor": "ELECFREAKS",
         "model": "ELECFREAKS Pico:ed",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/elecfreaks_picoed/",
         "downloads": [
             {
@@ -1901,7 +1907,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/elecfreaks_picoed/en_US/adafruit-circuitpython-elecfreaks_picoed-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "Pico:ed"
     },
     {
         "vendor": "Electronic Cats",
@@ -2335,7 +2342,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "WiFi Wroom"
     },
     {
         "vendor": "Franzininho",
@@ -2355,7 +2363,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "WiFi Wrover"
     },
     {
         "vendor": "Gravitech",
@@ -2475,7 +2484,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/ikigaisense_vita/en_US/adafruit-circuitpython-ikigaisense_vita-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "Vita"
     },
     {
         "vendor": "Invector Labs",
@@ -2496,7 +2506,7 @@
     {
         "vendor": "Invector Labs",
         "model": "Challenger NB RP2040 WiFi",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/challenger_nb_rp2040_wifi/",
         "downloads": [
             {
@@ -2512,7 +2522,7 @@
     {
         "vendor": "Invector Labs",
         "model": "Challenger RP2040 LoRa",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/challenger_rp2040_lora/",
         "downloads": [
             {
@@ -2524,7 +2534,7 @@
     {
         "vendor": "Invector Labs",
         "model": "Challenger RP2040 LTE",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/challenger_rp2040_lte/",
         "downloads": [
             {
@@ -2540,7 +2550,7 @@
     {
         "vendor": "Invector Labs",
         "model": "Challenger RP2040 WiFi",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/challenger_rp2040_wifi/",
         "downloads": [
             {
@@ -2688,7 +2698,7 @@
     {
         "vendor": "JPConstantineau",
         "model": "EncoderPad RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/jpconstantineau_encoderpad_rp2040/",
         "downloads": [
             {
@@ -2704,7 +2714,7 @@
     {
         "vendor": "JPConstantineau",
         "model": "PyKey18 Numpad",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/jpconstantineau_pykey18/",
         "downloads": [
             {
@@ -2720,7 +2730,7 @@
     {
         "vendor": "JPConstantineau",
         "model": "PyKey44 Ergo Keyboard",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/jpconstantineau_pykey44/",
         "downloads": [
             {
@@ -2736,7 +2746,7 @@
     {
         "vendor": "JPConstantineau",
         "model": "PyKey60 Keyboard",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/jpconstantineau_pykey60/",
         "downloads": [
             {
@@ -2752,7 +2762,7 @@
     {
         "vendor": "JPConstantineau",
         "model": "PyKey87 Ten Key Less (TKL) Keyboard",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/jpconstantineau_pykey87/",
         "downloads": [
             {
@@ -2851,7 +2861,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "S2 Mini"
     },
     {
         "vendor": "LOLIN",
@@ -2867,7 +2878,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "S2 Pico"
     },
     {
         "vendor": "MakerDiary",
@@ -2992,7 +3004,7 @@
     {
         "vendor": "Melopero",
         "model": "Shake RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/melopero_shake_rp2040/",
         "downloads": [
             {
@@ -3260,7 +3272,7 @@
     {
         "vendor": "Oak Development Technologies",
         "model": "Bread 2040 Dev Board",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/odt_bread_2040/",
         "downloads": [
             {
@@ -3276,7 +3288,7 @@
     {
         "vendor": "Oak Development Technologies",
         "model": "CAST-AWAY RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/odt_cast_away_rp2040/",
         "downloads": [
             {
@@ -3464,7 +3476,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Badger 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_badger2040/",
         "downloads": [
             {
@@ -3480,7 +3492,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Interstate 75",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_interstate75/",
         "downloads": [
             {
@@ -3496,7 +3508,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Keybow 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_keybow2040/",
         "downloads": [
             {
@@ -3516,7 +3528,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Motor 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_motor2040/",
         "downloads": [
             {
@@ -3532,7 +3544,7 @@
     {
         "vendor": "Pimoroni",
         "model": "PGA2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_pga2040/",
         "downloads": [
             {
@@ -3547,8 +3559,50 @@
     },
     {
         "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo (16MB)",
+        "family": "rp2",
+        "info_url": "https://circuitpython.org/board/pimoroni_picolipo_16mb/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-8.0.0-alpha.1.uf2"
+            },
+            {
+                "version": "6.3.0",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-6.3.0.uf2"
+            }
+        ],
+        "title": "Pico LiPo (16MB)"
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo (4MB)",
+        "family": "rp2",
+        "info_url": "https://circuitpython.org/board/pimoroni_picolipo_4mb/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-8.0.0-alpha.1.uf2"
+            },
+            {
+                "version": "6.3.0",
+                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-6.3.0.uf2"
+            }
+        ],
+        "title": "Pico LiPo (4MB)"
+    },
+    {
+        "vendor": "Pimoroni",
         "model": "PicoSystem",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_picosystem/",
         "downloads": [
             {
@@ -3567,48 +3621,8 @@
     },
     {
         "vendor": "Pimoroni",
-        "model": "Pimoroni Pico LiPo (16MB)",
-        "family": "rp2040",
-        "info_url": "https://circuitpython.org/board/pimoroni_picolipo_16mb/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-8.0.0-alpha.1.uf2"
-            },
-            {
-                "version": "6.3.0",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_16mb/en_US/adafruit-circuitpython-pimoroni_picolipo_16mb-en_US-6.3.0.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Pimoroni",
-        "model": "Pimoroni Pico LiPo (4MB)",
-        "family": "rp2040",
-        "info_url": "https://circuitpython.org/board/pimoroni_picolipo_4mb/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-8.0.0-alpha.1.uf2"
-            },
-            {
-                "version": "6.3.0",
-                "url": "https://downloads.circuitpython.org/bin/pimoroni_picolipo_4mb/en_US/adafruit-circuitpython-pimoroni_picolipo_4mb-en_US-6.3.0.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "Pimoroni",
         "model": "Plasma 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_plasma2040/",
         "downloads": [
             {
@@ -3624,7 +3638,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Servo 2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_servo2040/",
         "downloads": [
             {
@@ -3640,7 +3654,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Tiny 2040 (2MB)",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_tiny2040_2mb/",
         "downloads": [
             {
@@ -3656,7 +3670,7 @@
     {
         "vendor": "Pimoroni",
         "model": "Tiny 2040 (8MB)",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/pimoroni_tiny2040/",
         "downloads": [
             {
@@ -3844,7 +3858,7 @@
     {
         "vendor": "Raspberry Pi",
         "model": "Pico",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/raspberry_pi_pico/",
         "downloads": [
             {
@@ -3946,22 +3960,6 @@
     },
     {
         "vendor": "SEEED",
-        "model": "Seeed XIAO nRF52840 Sense",
-        "family": "nrf52",
-        "info_url": "https://circuitpython.org/board/Seeed_XIAO_nRF52840_Sense/",
-        "downloads": [
-            {
-                "version": "7.3.2",
-                "url": "https://downloads.circuitpython.org/bin/Seeed_XIAO_nRF52840_Sense/en_US/adafruit-circuitpython-Seeed_XIAO_nRF52840_Sense-en_US-7.3.2.uf2"
-            },
-            {
-                "version": "8.0.0-alpha.1",
-                "url": "https://downloads.circuitpython.org/bin/Seeed_XIAO_nRF52840_Sense/en_US/adafruit-circuitpython-Seeed_XIAO_nRF52840_Sense-en_US-8.0.0-alpha.1.uf2"
-            }
-        ]
-    },
-    {
-        "vendor": "SEEED",
         "model": "Seeeduino Wio Terminal",
         "family": "samd51",
         "info_url": "https://circuitpython.org/board/seeeduino_wio_terminal/",
@@ -3978,7 +3976,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/seeeduino_wio_terminal/en_US/adafruit-circuitpython-seeeduino_wio_terminal-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "uino Wio Terminal"
     },
     {
         "vendor": "SEEED",
@@ -3998,7 +3997,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/seeeduino_xiao/en_US/adafruit-circuitpython-seeeduino_xiao-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "uino XIAO"
     },
     {
         "vendor": "SEEED",
@@ -4014,12 +4014,13 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/seeeduino_xiao_kb/en_US/adafruit-circuitpython-seeeduino_xiao_kb-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "uino XIAO - Keyboard Optimized"
     },
     {
         "vendor": "SEEED",
         "model": "Seeeduino XIAO RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/seeeduino_xiao_rp2040/",
         "downloads": [
             {
@@ -4030,7 +4031,25 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/seeeduino_xiao_rp2040/en_US/adafruit-circuitpython-seeeduino_xiao_rp2040-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "uino XIAO RP2040"
+    },
+    {
+        "vendor": "SEEED",
+        "model": "Seeed XIAO nRF52840 Sense",
+        "family": "nrf52",
+        "info_url": "https://circuitpython.org/board/Seeed_XIAO_nRF52840_Sense/",
+        "downloads": [
+            {
+                "version": "7.3.2",
+                "url": "https://downloads.circuitpython.org/bin/Seeed_XIAO_nRF52840_Sense/en_US/adafruit-circuitpython-Seeed_XIAO_nRF52840_Sense-en_US-7.3.2.uf2"
+            },
+            {
+                "version": "8.0.0-alpha.1",
+                "url": "https://downloads.circuitpython.org/bin/Seeed_XIAO_nRF52840_Sense/en_US/adafruit-circuitpython-Seeed_XIAO_nRF52840_Sense-en_US-8.0.0-alpha.1.uf2"
+            }
+        ],
+        "title": "XIAO nRF52840 Sense"
     },
     {
         "vendor": "senseBox",
@@ -4046,7 +4065,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/sensebox_mcu/en_US/adafruit-circuitpython-sensebox_mcu-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "MCU"
     },
     {
         "vendor": "Silicognition LLC",
@@ -4071,7 +4091,7 @@
     {
         "vendor": "Silicognition LLC",
         "model": "RP2040-Shim",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/silicognition-rp2040-shim/",
         "downloads": []
     },
@@ -4098,7 +4118,7 @@
     {
         "vendor": "Solder Party",
         "model": "RP2040 Stamp",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/solderparty_rp2040_stamp/",
         "downloads": [
             {
@@ -4154,7 +4174,7 @@
     {
         "vendor": "SparkFun",
         "model": "MicroMod RP2040 Processor",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/sparkfun_micromod_rp2040/",
         "downloads": [
             {
@@ -4190,7 +4210,7 @@
     {
         "vendor": "SparkFun",
         "model": "Pro Micro - RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/sparkfun_pro_micro_rp2040/",
         "downloads": [
             {
@@ -4350,7 +4370,7 @@
     {
         "vendor": "SparkFun",
         "model": "Thing Plus - RP2040",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/sparkfun_thing_plus_rp2040/",
         "downloads": [
             {
@@ -4385,7 +4405,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/stackrduino_m0_pro/en_US/adafruit-circuitpython-stackrduino_m0_pro-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "M0+ PRO"
     },
     {
         "vendor": "Switch Science, Inc",
@@ -4457,7 +4478,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "ESP32-S2 Module Clip (WROOM)"
     },
     {
         "vendor": "Targett",
@@ -4477,7 +4499,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "ESP32-S2 Module Clip (WROVER)"
     },
     {
         "vendor": "Teknikio",
@@ -4557,7 +4580,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "FeatherS2"
     },
     {
         "vendor": "Unexpected Maker",
@@ -4573,7 +4597,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "FeatherS2 Neo"
     },
     {
         "vendor": "Unexpected Maker",
@@ -4589,7 +4614,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "FeatherS3"
     },
     {
         "vendor": "Unexpected Maker",
@@ -4605,7 +4631,8 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "ProS3"
     },
     {
         "vendor": "Unexpected Maker",
@@ -4625,7 +4652,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "TinyS2"
     },
     {
         "vendor": "Unexpected Maker",
@@ -4641,12 +4669,13 @@
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "TinyS3"
     },
     {
         "vendor": "Waveshare",
         "model": "RP2040-Zero",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/waveshare_rp2040_zero/",
         "downloads": [
             {
@@ -4662,19 +4691,20 @@
     {
         "vendor": "WeAct Studio",
         "model": "WeAct Studio Pico",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/weact_studio_pico/",
         "downloads": [
             {
                 "version": "8.0.0-alpha.1",
                 "url": "https://downloads.circuitpython.org/bin/weact_studio_pico/en_US/adafruit-circuitpython-weact_studio_pico-en_US-8.0.0-alpha.1.uf2"
             }
-        ]
+        ],
+        "title": "Pico"
     },
     {
         "vendor": "WIZnet",
         "model": "W5100S-EVB-Pico",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/wiznet_w5100s_evb_pico/",
         "downloads": [
             {
@@ -4690,7 +4720,7 @@
     {
         "vendor": "WIZnet",
         "model": "W5500-EVB-Pico",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/wiznet_w5500_evb_pico/",
         "downloads": []
     },
@@ -4712,7 +4742,8 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/xinabox_cc03/en_US/adafruit-circuitpython-xinabox_cc03-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "CC03"
     },
     {
         "vendor": "XinaBox",
@@ -4732,12 +4763,13 @@
                 "version": "6.3.0",
                 "url": "https://downloads.circuitpython.org/bin/xinabox_cs11/en_US/adafruit-circuitpython-xinabox_cs11-en_US-6.3.0.uf2"
             }
-        ]
+        ],
+        "title": "CS11"
     },
     {
         "vendor": "Zach Richard",
         "model": "RP2.65-F",
-        "family": "rp2040",
+        "family": "rp2",
         "info_url": "https://circuitpython.org/board/zrichard_rp2.65-f/",
         "downloads": [
             {
