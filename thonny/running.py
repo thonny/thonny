@@ -960,7 +960,6 @@ class SubprocessProxy(BackendProxy, ABC):
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
             del env["THONNY_DEBUG"]
-
         return env
 
     def _start_background_process(self, clean=None, extra_args=[]):
