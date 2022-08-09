@@ -650,7 +650,11 @@ class BaseFileBrowser(ttk.Frame):
 
     def do_activate_venv(self):
         venv_path = self._get_venv_path()
-        backend_python = os.path.join(venv_path, "bin", "python")
+
+        if running_on_windows():
+            backend_python = os.path.join(venv_path, "Scripts", "python.exe")
+        else:
+            backend_python = os.path.join(venv_path, "bin", "python")
 
         get_workbench().set_option("run.backend_name", "LocalCPython")
         get_workbench().set_option("LocalCPython.executable", backend_python)
