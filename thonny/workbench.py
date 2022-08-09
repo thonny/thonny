@@ -228,12 +228,13 @@ class Workbench(tk.Tk):
         self.event_generate("WorkbenchReady")
         self._editor_notebook.update_appearance()
 
-        from thonny.flasher import BaseFlasher
-        from thonny.ui_utils import show_dialog
+        if "--dev" in sys.argv:
+            from thonny.flasher import BaseFlasher
+            from thonny.ui_utils import show_dialog
 
-        dlg = BaseFlasher(self)
-        show_dialog(dlg)
-        self.destroy()
+            dlg = BaseFlasher(self)
+            show_dialog(dlg)
+            self.destroy()
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
