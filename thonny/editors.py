@@ -661,6 +661,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.preferred_size_in_pw = None
 
         get_workbench().bind("WindowFocusIn", self.on_focus_window, True)
+        get_workbench().bind("ToplevelResponse", self.on_focus_window, True)
 
     def _set_asking_about_external_change(self, mode=False):
         get_workbench()._asking_about_external_change = mode
