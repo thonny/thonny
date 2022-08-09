@@ -61,9 +61,6 @@ class Editor(ttk.Frame):
         assert isinstance(master, EditorNotebook)
         self.notebook = master  # type: EditorNotebook
 
-        # keep this in the beginning
-        self.set_confirm_all()
-
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
             get_workbench(),
@@ -133,26 +130,6 @@ class Editor(ttk.Frame):
 
         return result
 
-    def get_external_change_reason(self):
-        if self._filename is None:
-            return
-
-        if is_remote_path(self._filename):
-            return
-
-        if self._last_known_mtime is None:
-            return
-
-        if not os.path.exists(self._filename):
-            return "deleted"
-
-        if os.path.getmtime(self._filename) != self._last_known_mtime:
-            return "modified"
-
-    def set_confirm_all(self, confirm_all=False, canceled=False):
-        self._confirm_all = confirm_all
-        self._confirm_all_canceled = canceled
-
     def check_for_external_changes(self):
         if self._asking_about_external_change:
             # otherwise method will be re-entered when focus
@@ -174,15 +151,12 @@ class Editor(ttk.Frame):
             elif not os.path.exists(self._filename):
                 self.master.select(self)
 
-                if not self._confirm_all_canceled and (
-                    self._confirm_all
-                    or messagebox.askyesno(
-                        tr("File is gone"),
-                        tr("Looks like '%s' was deleted or moved.") % self._filename
-                        + "\n\n"
-                        + tr("Do you want to also close the editor?"),
-                        master=self,
-                    )
+                if messagebox.askyesno(
+                    tr("File is gone"),
+                    tr("Looks like '%s' was deleted or moved.") % self._filename
+                    + "\n\n"
+                    + tr("Do you want to also close the editor?"),
+                    master=self,
                 ):
                     self.master.close_editor(self)
                 else:
@@ -192,17 +166,14 @@ class Editor(ttk.Frame):
             elif os.path.getmtime(self._filename) != self._last_known_mtime:
                 self.master.select(self)
 
-                if not self._confirm_all_canceled and (
-                    self._confirm_all
-                    or messagebox.askyesno(
-                        tr("External modification"),
-                        tr("Looks like '%s' was modified outside of the editor.") % self._filename
-                        + "\n\n"
-                        + tr(
-                            "Do you want to discard current editor content and reload the file from disk?"
-                        ),
-                        master=self,
-                    )
+                if messagebox.askyesno(
+                    tr("External modification"),
+                    tr("Looks like '%s' was modified outside of the editor.") % self._filename
+                    + "\n\n"
+                    + tr(
+                        "Do you want to discard current editor content and reload the file from disk?"
+                    ),
+                    master=self,
                 ):
                     cur_line = self.get_text_widget().index("insert")
                     # convert cursor position to line number
@@ -211,10 +182,8 @@ class Editor(ttk.Frame):
                     self._load_file(self._filename, keep_undo=True)
 
                     self.select_line(cur_line)
-
-                # reload every time an external change was detected
-                self._last_known_mtime = os.path.getmtime(self._filename)
-
+                else:
+                    self._last_known_mtime = os.path.getmtime(self._filename)
         finally:
             self._asking_about_external_change = False
 
@@ -631,8 +600,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def __init__(self, master):
         super().__init__(master, padding=0)
 
-        self._set_asking_about_external_change()
-
         get_workbench().set_default("file.reopen_all_files", False)
         get_workbench().set_default("file.open_files", [])
         get_workbench().set_default("file.current_file", None)
@@ -661,12 +628,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.preferred_size_in_pw = None
 
         get_workbench().bind("WindowFocusIn", self.on_focus_window, True)
-
-    def _set_asking_about_external_change(self, mode=False):
-        get_workbench()._asking_about_external_change = mode
-
-    def _get_asking_about_external_change(self):
-        return get_workbench()._asking_about_external_change
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -1191,53 +1152,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return True
 
     def on_focus_window(self, event=None):
-
-        if self._get_asking_about_external_change():
-            return
-
-        try:
-            self._set_asking_about_external_change(True)
-
-            reasons = []
-            for editor in self.get_all_editors():
-                reasons.append(editor.get_external_change_reason())
-
-            confirm_all = False
-            confirm_all_canceld = False
-
-            # ony ask options when more than one file was changed external
-            if len(list(filter(lambda x: x, reasons))) > 1:
-                tx = ""
-                tx += tr("Some files where manipulated outside")
-                tx += "\n"
-                tx += tr("Do you want to reload them, or close the deleted unsaved in the editor?")
-
-                dialog = simpledialog.SimpleDialog(
-                    get_workbench(),
-                    text=tx,
-                    buttons=[tr("Yes to all"), tr("Decide each manually"), tr("Cancel")],
-                    default=0,
-                    cancel=2,
-                    title=tr("Please Confirm"),
-                )
-
-                rc = dialog.go()
-
-                if rc == 0:
-                    confirm_all = True
-                elif rc == 1:
-                    confirm_all = False
-                else:
-                    confirm_all_canceld = True
-
-            for reason, editor in zip(reasons, self.get_all_editors()):
-                if reason:
-                    editor.set_confirm_all(confirm_all, confirm_all_canceld)
-                    editor.check_for_external_changes()
-                editor.set_confirm_all()
-
-        finally:
-            self._set_asking_about_external_change(False)
+        for editor in self.get_all_editors():
+            editor.check_for_external_changes()
 
 
 def get_current_breakpoints():
