@@ -87,14 +87,14 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path):
         title = variant.get("title", variant["model"])
         if (title.lower() + " ").startswith(variant["vendor"].lower()):
             variant["title"] = title[len(variant["vendor"]) :].strip()
+        title = variant.get("title", variant["model"])
 
         # special treatment for Pico
         if variant["vendor"] == "Raspberry Pi":
-            variant["popular"] = True
             if variant["model"] == "Pico":
-                variant["title"] = "Pico / Pico H"
+                variant["title"] = title.replace("Pico", "Pico / Pico H")
             elif variant["model"] == "Pico W":
-                variant["title"] = "Pico W / Pico WH"
+                variant["title"] = title.replace("Pico W", "Pico W / Pico WH")
 
     variants = sorted(
         variants,

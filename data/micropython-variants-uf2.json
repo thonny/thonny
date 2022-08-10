@@ -465,14 +465,13 @@
                 "url": "https://micropython.org/resources/firmware/rp2-pico-20220117-v1.18.uf2"
             }
         ],
-        "popular": true,
         "title": "Pico / Pico H"
     },
     {
         "vendor": "Raspberry Pi",
         "model": "Pico",
         "family": "rp2",
-        "title": "Pico / Pico H",
+        "title": "Pico / Pico H (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
@@ -483,8 +482,7 @@
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-pico-v1.18.7-micropython.uf2"
             }
-        ],
-        "popular": true
+        ]
     },
     {
         "vendor": "Raspberry Pi",
@@ -497,22 +495,20 @@
                 "url": "https://micropython.org//resources/firmware/rp2-pico-w-20220810-unstable-v1.19.1-253-g5cfbf18d5.uf2"
             }
         ],
-        "popular": true,
         "title": "Pico W / Pico WH"
     },
     {
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
-        "title": "Pico W / Pico WH",
+        "title": "Pico W / Pico WH (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
                 "version": "1.19.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-picow-v1.19.6-micropython.uf2"
             }
-        ],
-        "popular": true
+        ]
     },
     {
         "vendor": "Seeed Studio",
