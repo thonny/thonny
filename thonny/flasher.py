@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from thonny.languages import tr
 from thonny.misc_utils import get_win_volume_name, list_volumes
-from thonny.ui_utils import MappingCombobox, create_url_label, set_text_if_different, AdvancedLabel
+from thonny.ui_utils import AdvancedLabel, MappingCombobox, create_url_label, set_text_if_different
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -96,7 +96,7 @@ class BaseFlasher(WorkDialog):
                 self._variant_combo.set_mapping({})
                 self._variant_combo.select_none()
             elif current_target != self._last_handled_target and self._downloaded_variants:
-                self._handle_new_target(current_target)
+                self._present_variants_for_target(current_target)
                 self._last_handled_target = current_target
                 self._last_handled_variant = None
             self._update_target_info()
@@ -106,7 +106,7 @@ class BaseFlasher(WorkDialog):
                 self._version_combo.select_none()
                 self._version_combo.set_mapping({})
             elif current_variant != self._last_handled_variant:
-                self._handle_new_variant(current_variant)
+                self._present_versions_for_variant(current_variant)
                 self._last_handled_variant = current_variant
             self._update_variant_info()
 
@@ -189,7 +189,7 @@ class BaseFlasher(WorkDialog):
         set_text_if_different(self._variant_info_content_label, text)
         self._variant_info_content_label.set_url(url)
 
-    def _handle_new_target(self, target: Uf2TargetInfo) -> None:
+    def _present_variants_for_target(self, target: Uf2TargetInfo) -> None:
         assert self._downloaded_variants
 
         whole_mapping = {self._create_variant_description(v): v for v in self._downloaded_variants}
@@ -207,7 +207,27 @@ class BaseFlasher(WorkDialog):
 
         prev_variant = self._variant_combo.get_selected_value()
 
-        self._variant_combo.set_mapping(filtered_mapping)
+        populars = {
+            key: variant
+            for key, variant in filtered_mapping.items()
+            if variant.get("popular", False)
+        }
+        if populars:
+            enhanced_mapping = {}
+            enhanced_mapping["--- MOST POPULAR " + "-" * 100] = {}
+            for variant in populars.values():
+                popular_variant = variant.copy()
+                # need different title to distinguish it from the same item in ALL VARIANTS
+                popular_title = self._create_variant_description(variant) + " "
+                popular_variant["title"] = popular_title
+                enhanced_mapping[popular_title] = popular_variant
+
+            enhanced_mapping["--- ALL VARIANTS " + "-" * 100] = {}
+            enhanced_mapping.update(filtered_mapping)
+        else:
+            enhanced_mapping = filtered_mapping
+
+        self._variant_combo.set_mapping(enhanced_mapping)
         matches = list(
             filter(
                 lambda v: self._variant_is_meant_for_target(v, target), filtered_mapping.values()
@@ -219,7 +239,7 @@ class BaseFlasher(WorkDialog):
         elif prev_variant and prev_variant in filtered_mapping.values():
             self._variant_combo.select_value(prev_variant)
 
-    def _handle_new_variant(self, variant: Dict[str, Any]) -> None:
+    def _present_versions_for_variant(self, variant: Dict[str, Any]) -> None:
         versions_mapping = {d["version"]: d["url"] for d in variant["downloads"]}
         self._version_combo.set_mapping(versions_mapping)
         if len(versions_mapping) > 0:

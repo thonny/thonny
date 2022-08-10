@@ -16,7 +16,7 @@ PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
 PIMORONI_LATEST_STABLE_VERSION = "1.19.6"
-PIMORONI_LATEST_UNSTABLE_VERSION = "------"
+PIMORONI_LATEST_UNSTABLE_VERSION = "1.19.7"
 PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
 
 
@@ -124,6 +124,13 @@ pimoroni_variants = [
         "family": "rp2",
     },
     {
+        "_id": "pimoroni-picow_enviro",
+        "vendor": "Raspberry Pi",
+        "model": "Pico W",
+        "family": "rp2",
+        "title": "Pico W (with Pimoroni libs for Enviro)",
+    },
+    {
         "_id": "pimoroni-tiny2040",
         "vendor": "Pimoroni",
         "model": "Tiny 2040",
@@ -143,7 +150,7 @@ for variant in pimoroni_variants:
 
     stable_url_pattern = variant.get(
         "_download_url_pattern",
-        rf"/{variant['_id']}-v({PIMORONI_LATEST_STABLE_VERSION})-micropython.uf2$",
+        rf"/{variant['_id']}-v?({PIMORONI_LATEST_STABLE_VERSION})-micropython.uf2$",
     )
 
     unstable_url_pattern = stable_url_pattern.replace(
@@ -163,7 +170,10 @@ for variant in pimoroni_variants:
         url_prefix="https://github.com",
     )
     variant["downloads"] += find_download_links(
-        "https://github.com/pimoroni/pimoroni-pico/releases",
+        [
+            "https://github.com/pimoroni/pimoroni-pico/releases",
+            "https://github.com/pimoroni/pimoroni-pico/releases?page=2",
+        ],
         old_url_pattern,
         1,
         url_prefix="https://github.com",

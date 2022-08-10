@@ -334,6 +334,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-picolipo_16mb-v1.19.6-micropython.uf2"
             },
             {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-picolipo_16mb-1.19.7-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-picolipo_16mb-v1.18.7-micropython.uf2"
             }
@@ -369,6 +373,10 @@
             {
                 "version": "1.19.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-picolipo_4mb-v1.19.6-micropython.uf2"
+            },
+            {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-picolipo_4mb-1.19.7-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -408,6 +416,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-tiny2040-v1.19.6-micropython.uf2"
             },
             {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-tiny2040-1.19.7-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-tiny2040-v1.18.7-micropython.uf2"
             }
@@ -443,6 +455,10 @@
             {
                 "version": "1.19.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-tufty2040-v1.19.6-micropython.uf2"
+            },
+            {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-tufty2040-1.19.7-micropython.uf2"
             }
         ]
     },
@@ -465,6 +481,7 @@
                 "url": "https://micropython.org/resources/firmware/rp2-pico-20220117-v1.18.uf2"
             }
         ],
+        "popular": true,
         "title": "Pico / Pico H"
     },
     {
@@ -477,6 +494,10 @@
             {
                 "version": "1.19.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-pico-v1.19.6-micropython.uf2"
+            },
+            {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-pico-1.19.7-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -495,6 +516,7 @@
                 "url": "https://micropython.org//resources/firmware/rp2-pico-w-20220810-unstable-v1.19.1-253-g5cfbf18d5.uf2"
             }
         ],
+        "popular": true,
         "title": "Pico W / Pico WH"
     },
     {
@@ -507,6 +529,23 @@
             {
                 "version": "1.19.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.6/pimoroni-picow-v1.19.6-micropython.uf2"
+            },
+            {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-picow-1.19.7-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Raspberry Pi",
+        "model": "Pico W",
+        "family": "rp2",
+        "title": "Pico W / Pico WH (with Pimoroni libs for Enviro)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "downloads": [
+            {
+                "version": "1.19.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/1.19.7/pimoroni-picow_enviro-1.19.7-micropython.uf2"
             }
         ]
     },
