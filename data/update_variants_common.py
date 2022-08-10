@@ -84,16 +84,21 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path):
     )
 
     for variant in variants:
-        if (variant["model"].lower() + " ").startswith(variant["vendor"].lower()):
-            variant["title"] = variant["model"][len(variant["vendor"]) :].strip()
+        title = variant.get("title", variant["model"])
+        if (title.lower() + " ").startswith(variant["vendor"].lower()):
+            variant["title"] = title[len(variant["vendor"]) :].strip()
+
+        # special treatment for Pico
+        if variant["vendor"] == "Raspberry Pi":
+            variant["popular"] = True
+            if variant["model"] == "Pico":
+                variant["title"] = "Pico / Pico H"
+            elif variant["model"] == "Pico W":
+                variant["title"] = "Pico W / Pico WH"
 
     variants = sorted(
         variants,
-        key=lambda b: (
-            b["vendor"].upper(),
-            b.get("title", b["model"]).upper(),
-            b.get("variant", ""),
-        ),
+        key=lambda b: (b["vendor"].upper(), b.get("title", b["model"]).upper()),
     )
 
     # get rid of temporary/private attributes

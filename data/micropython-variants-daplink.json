@@ -6,8 +6,8 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20220805-unstable-v1.19.1-240-g9dfabcd6d",
-                "url": "https://micropython.org//resources/firmware/microbit-20220805-unstable-v1.19.1-240-g9dfabcd6d.hex"
+                "version": "20220810-unstable-v1.19.1-253-g5cfbf18d5",
+                "url": "https://micropython.org//resources/firmware/microbit-20220810-unstable-v1.19.1-253-g5cfbf18d5.hex"
             }
         ]
     },
@@ -15,7 +15,7 @@
         "vendor": "BBC",
         "model": "micro:bit v1",
         "family": "nrf51",
-        "variant": "original simplified API",
+        "title": "micro:bit v1 (original simplified API)",
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
             {
@@ -27,7 +27,7 @@
     {
         "vendor": "BBC",
         "model": "micro:bit v2",
-        "variant": "original simplified API",
+        "title": "micro:bit v2 (original simplified API)",
         "family": "nrf52",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [

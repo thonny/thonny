@@ -11,7 +11,7 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = "20220805-unstable-v1.19.1-240-g9dfabcd6d"
+UNSTABLE_VERSION = "20220810-unstable-v1.19.1-253-g5cfbf18d5"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
@@ -96,7 +96,7 @@ pimoroni_variants = [
         "vendor": "Pimoroni",
         "model": "Badger 2040",
         "family": "rp2",
-        "variant": "with Pimoroni libraries and BadgerOS",
+        "title": "Badger 2040 (with Pimoroni libraries and BadgerOS)",
         "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython\.uf2$",
     },
     {
@@ -138,8 +138,8 @@ pimoroni_variants = [
 ]
 
 for variant in pimoroni_variants:
-    if "variant" not in variant:
-        variant["variant"] = "with Pimoroni libraries"
+    if "title" not in variant:
+        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
 
     stable_url_pattern = variant.get(
         "_download_url_pattern",
@@ -178,7 +178,7 @@ simplified_microbits = [
         "vendor": "BBC",
         "model": "micro:bit v1",
         "family": "nrf51",
-        "variant": "original simplified API",
+        "title": "micro:bit v1 (original simplified API)",
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
             {
@@ -190,7 +190,7 @@ simplified_microbits = [
     {
         "vendor": "BBC",
         "model": "micro:bit v2",
-        "variant": "original simplified API",
+        "title": "micro:bit v2 (original simplified API)",
         "family": "nrf52",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
@@ -206,7 +206,7 @@ all_variants += simplified_microbits
 
 print(f"Got {len(all_variants)} boards")
 
-print("Adding mappings")
+print("Adding downloads")
 for i, variant in enumerate(all_variants):
     print("Processing", i + 1, "of", len(all_variants), variant)
     if "micro:bit" in variant["model"]:
@@ -228,7 +228,6 @@ for i, variant in enumerate(all_variants):
 
         prev_major_url = f"https://micropython.org/resources/firmware/{variant['_id']}-{PREV_RELEVANT_VERSION_IN_URL}.uf2"
         add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
-
 
 save_variants(
     all_variants,
