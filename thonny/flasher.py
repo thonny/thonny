@@ -1,15 +1,18 @@
 import os.path
 import sys
 import threading
+import time
+import traceback
 import urllib.request
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
 from typing import Any, Dict, List, Optional, Set
 
+from thonny import get_runner
 from thonny.languages import tr
 from thonny.misc_utils import get_win_volume_name, list_volumes
-from thonny.ui_utils import AdvancedLabel, MappingCombobox, create_url_label, set_text_if_different
+from thonny.ui_utils import AdvancedLabel, MappingCombobox, set_text_if_different
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
@@ -30,16 +33,18 @@ class Uf2TargetInfo(TargetInfo):
     board_id: Optional[str]
 
 
-class BaseFlasher(WorkDialog):
-    def __init__(self, master, autostart=False):
+class Uf2Flasher(WorkDialog):
+    def __init__(self, master, firmware_name: str, variants_url: str):
         self._downloaded_variants: List[Dict[str, Any]] = []
 
         self._last_handled_target = None
         self._last_handled_variant = None
+        self._firmare_name = firmware_name
+        self._variants_url = variants_url
 
         threading.Thread(target=self._download_variants, daemon=True).start()
 
-        super().__init__(master, autostart)
+        super().__init__(master, autostart=False)
 
     def populate_main_frame(self):
         epadx = self.get_large_padding()
@@ -61,7 +66,7 @@ class BaseFlasher(WorkDialog):
             row=2, column=2, sticky="w", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
-        variant_label = ttk.Label(self.main_frame, text="MicroPython variant")
+        variant_label = ttk.Label(self.main_frame, text=f"{self._firmare_name} variant")
         variant_label.grid(row=5, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
         self._variant_combo = MappingCombobox(self.main_frame, exportselection=False)
         self._variant_combo.grid(
@@ -111,9 +116,6 @@ class BaseFlasher(WorkDialog):
             self._update_variant_info()
 
         super().update_ui()
-
-    def _get_variants_url(self) -> str:
-        return "https://raw.githubusercontent.com/thonny/thonny/master/data/micropython-variants-uf2.json"
 
     def find_targets(self) -> Dict[str, TargetInfo]:
         paths = [
@@ -213,8 +215,7 @@ class BaseFlasher(WorkDialog):
             if variant.get("popular", False)
         }
         if populars:
-            enhanced_mapping = {}
-            enhanced_mapping["--- MOST POPULAR " + "-" * 100] = {}
+            enhanced_mapping = {"--- MOST POPULAR " + "-" * 100: {}}
             for variant in populars.values():
                 popular_variant = variant.copy()
                 # need different title to distinguish it from the same item in ALL VARIANTS
@@ -240,7 +241,7 @@ class BaseFlasher(WorkDialog):
             self._variant_combo.select_value(prev_variant)
 
     def _present_versions_for_variant(self, variant: Dict[str, Any]) -> None:
-        versions_mapping = {d["version"]: d["url"] for d in variant["downloads"]}
+        versions_mapping = {d["version"]: d for d in variant["downloads"]}
         self._version_combo.set_mapping(versions_mapping)
         if len(versions_mapping) > 0:
             self._version_combo.select_value(list(versions_mapping.values())[0])
@@ -316,13 +317,13 @@ class BaseFlasher(WorkDialog):
         )
 
     def _download_variants(self):
-        logger.info("Downloading %r", self._get_variants_url())
+        logger.info("Downloading %r", self._variants_url)
         import json
         from urllib.request import urlopen
 
         try:
             req = urllib.request.Request(
-                self._get_variants_url(),
+                self._variants_url,
                 data=None,
                 headers={
                     "User-Agent": FAKE_USER_AGENT,
@@ -335,7 +336,7 @@ class BaseFlasher(WorkDialog):
             self._downloaded_variants = json.loads(json_str)
             logger.info("Got %r variants", len(self._downloaded_variants))
         except Exception:
-            msg = f"Could not download variants info from {self._get_variants_url()}"
+            msg = f"Could not download variants info from {self._variants_url}"
             logger.exception(msg)
             self.append_text(msg + "\n")
             self.set_action_text("Error!")
@@ -346,7 +347,7 @@ class BaseFlasher(WorkDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "Here you can install or update MicroPython for devices having an UF2 bootloader\n"
+            f"Here you can install or update {self._firmare_name} for devices having an UF2 bootloader\n"
             "(this includes most boards meant for beginners).\n"
             "\n"
             "1. Put your device into bootloader mode: \n"
@@ -360,6 +361,142 @@ class BaseFlasher(WorkDialog):
 
     def _on_variant_select(self, *args):
         pass
+
+    def get_title(self):
+        return f"Install {self._firmare_name}"
+
+    def is_ready_for_work(self):
+        return self._target_combo.get_selected_value() and self._version_combo.get_selected_value()
+
+    def start_work(self):
+        from thonny.plugins.micropython import BareMetalMicroPythonProxy
+
+        download_info: Dict[str, Any] = self._version_combo.get_selected_value()
+        assert download_info
+        target: Uf2TargetInfo = self._target_combo.get_selected_value()
+        assert target
+
+        target_filename = download_info.get("filename", download_info["url"].split("/")[-1])
+
+        self.report_progress(0, 100)
+        proxy = get_runner().get_backend_proxy()
+        if isinstance(proxy, BareMetalMicroPythonProxy):
+            proxy.disconnect()
+
+        threading.Thread(
+            target=self._perform_work,
+            args=[
+                download_info["url"],
+                download_info.get("size", None),
+                target.path,
+                target_filename,
+            ],
+            daemon=True,
+        ).start()
+        return True
+
+    def _perform_work(
+        self, download_url: str, size: Optional[int], target_dir: str, target_filename: str
+    ) -> None:
+        from thonny.plugins.micropython import list_serial_ports
+
+        try:
+            ports_before = list_serial_ports()
+            self._download_to_the_device(download_url, size, target_dir, target_filename)
+            if self._state == "working":
+                self._wait_for_new_ports(ports_before)
+        except Exception as e:
+            self.append_text("\n" + "".join(traceback.format_exc()))
+            self.set_action_text("Error...")
+            self.report_done(False)
+            return
+
+        if self._state == "working":
+            self.append_text("\nDone!\n")
+            self.set_action_text("Done!")
+            self.report_done(True)
+        else:
+            assert self._state == "cancelling"
+            self.append_text("\nCancelled\n")
+            self.set_action_text("Cancelled")
+            self.report_done(False)
+
+    def _download_to_the_device(
+        self, download_url: str, size: Optional[int], target_dir: str, target_filename: str
+    ):
+        from urllib.request import urlopen
+
+        """Running in a bg thread"""
+        target_path = os.path.join(target_dir, target_filename)
+        logger.debug("Downloading from %s to %s", download_url, target_path)
+
+        self.set_action_text("Starting...")
+        self.append_text("Downloading from %s\n" % download_url)
+
+        req = urllib.request.Request(
+            download_url,
+            data=None,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+            },
+        )
+
+        with urlopen(req, timeout=5) as fsrc:
+            if size is None:
+                size = int(fsrc.getheader("Content-Length", str(500 * 1024)))
+
+            bytes_copied = 0
+            self.append_text("Writing to %s\n" % target_path)
+            self.append_text("Starting...")
+            if fsrc.length:
+                # override (possibly inaccurate) size
+                size = fsrc.length
+
+            block_size = 8 * 1024
+            with open(target_path, "wb") as fdst:
+                while True:
+
+                    block = fsrc.read(block_size)
+                    if not block:
+                        break
+
+                    if self._state == "cancelling":
+                        break
+
+                    fdst.write(block)
+                    fdst.flush()
+                    os.fsync(fdst.fileno())
+                    bytes_copied += len(block)
+                    percent_str = "%.0f%%" % (bytes_copied / size * 100)
+                    self.set_action_text("Copying... " + percent_str)
+                    self.report_progress(bytes_copied, size)
+                    self.replace_last_line(percent_str)
+
+    def _wait_for_new_ports(self, old_ports):
+        from thonny.plugins.micropython import list_serial_ports
+
+        self.append_text("\nWaiting for the port...\n")
+        self.set_action_text("Waiting for the port...")
+
+        wait_time = 0
+        step = 0.2
+        while wait_time < 10:
+            new_ports = list_serial_ports()
+            added_ports = set(new_ports) - set(old_ports)
+            if added_ports:
+                for p in added_ports:
+                    self.append_text("Found %s at %s\n" % ("%04x:%04x" % (p.vid, p.pid), p.device))
+                    self.set_action_text("Found port")
+                return
+            if self._state == "cancelling":
+                return
+            time.sleep(step)
+            wait_time += step
+        else:
+            self.set_action_text("Warning: Could not find port")
+            self.append_text("Warning: Could not find port in %s seconds\n" % int(wait_time))
+            # leave some time to see the warning
+            time.sleep(2)
 
 
 def find_uf2_property(lines: List[str], prop_name: str) -> Optional[str]:
