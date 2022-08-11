@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Optional
 
 from thonny import ui_utils
+from thonny.flasher import Uf2Flasher
 from thonny.languages import tr
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
@@ -94,7 +95,11 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = CircuitPythonFlashingDialog(self)
+        dlg = Uf2Flasher(
+            self,
+            firmware_name="CircuitPython",
+            variants_url="https://raw.githubusercontent.com/thonny/thonny/master/data/circuitpython-variants-uf2.json",
+        )
         ui_utils.show_dialog(dlg)
 
     def _get_flasher_link_title(self) -> str:
