@@ -12,6 +12,8 @@ from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import command_is_pressed, control_is_pressed, get_hyperlink_cursor
 
+from thonny.plugins.code_navigation_view import add_code_history
+
 logger = getLogger(__name__)
 
 
@@ -38,6 +40,12 @@ class GotoHandler:
         filename = get_text_filename(text)
         if not get_runner() or not get_runner().get_backend_proxy():
             return
+
+        # todo workbench view / event ?
+        add_code_history(
+            filename,
+            row,
+        )
 
         get_runner().send_command(
             InlineCommand(
@@ -68,6 +76,13 @@ class GotoHandler:
 
         module_name = defs[0].module_name
         row = defs[0].row
+
+        # todo workbench view / event ?
+        add_code_history(
+            module_path,
+            row,
+        )
+
         if module_path and row is not None:
             get_workbench().get_editor_notebook().show_file(module_path, row)
         elif module_name == "" and row is not None:  # current editor
