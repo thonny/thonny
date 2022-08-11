@@ -132,7 +132,8 @@ def add_code_history(file, line, comment=None):
         except:
             pass
     code_nav_history.insert(0, CodeNavigationItem(file, line, comment))
-
+    if code_nav:
+        code_nav._update(None)
 
 #
 # todo
