@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 
 from thonny import get_workbench
@@ -16,6 +17,8 @@ from thonny.ui_utils import CommonDialog, select_sequence, show_dialog
 # Communicates with the codeview that is passed to the constructor as a parameter.
 
 _active_find_dialog = None
+
+logger = getLogger(__name__)
 
 
 class FindDialog(CommonDialog):
@@ -64,7 +67,17 @@ class FindDialog(CommonDialog):
         self.find_label.grid(column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0))
 
         # Find text field
-        self.find_entry_var = tk.StringVar()
+        initial_text = ""
+        try:
+            widget = get_workbench().focus_get()
+            if isinstance(widget, tk.Text):
+                selected_lines = widget.selection_get().splitlines()
+                if selected_lines:
+                    initial_text = selected_lines[0]
+        except Exception:
+            logger.exception("Could not get initial text")
+
+        self.find_entry_var = tk.StringVar(value=initial_text)
         self.find_entry = ttk.Entry(main_frame, textvariable=self.find_entry_var)
         self.find_entry.grid(column=1, row=0, columnspan=2, padx=(0, 10), pady=(pady, 0))
         if FindDialog.last_searched_word is not None:
