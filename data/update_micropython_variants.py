@@ -11,7 +11,7 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = "20220810-unstable-v1.19.1-253-g5cfbf18d5"
+UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
@@ -233,7 +233,7 @@ for i, variant in enumerate(all_variants):
             1,
             rf"({UNSTABLE_VERSION})\." + extension,
             1,
-            url_prefix="https://micropython.org/",
+            url_prefix="https://micropython.org",
         )
 
         prev_major_url = f"https://micropython.org/resources/firmware/{variant['_id']}-{PREV_RELEVANT_VERSION_IN_URL}.uf2"
