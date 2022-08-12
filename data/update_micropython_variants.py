@@ -196,6 +196,7 @@ simplified_microbits = [
                 "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex",
             }
         ],
+        "popular": True,
     },
     {
         "vendor": "BBC",
