@@ -210,6 +210,7 @@ simplified_microbits = [
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
             }
         ],
+        "popular": True,
     },
 ]
 print(f"Adding {len(simplified_microbits)} simplified micro:bit-s")

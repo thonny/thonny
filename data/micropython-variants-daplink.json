@@ -36,6 +36,7 @@
                 "version": "2.0.0",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex"
             }
-        ]
+        ],
+        "popular": true
     }
 ]
