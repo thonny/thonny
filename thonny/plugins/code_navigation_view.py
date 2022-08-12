@@ -106,6 +106,9 @@ class CodeNavigationItem(object):
         self.line = line_no
         self.comment = comment
 
+    def __eq__(self, a):
+        return self.file == a.file and self.line == a.line
+
 
 # todo singleton, replace by ... ???
 code_nav = None
@@ -131,9 +134,19 @@ def add_code_history(file, line, comment=None):
                 comment = lines[line - 1].rstrip()
         except:
             pass
-    code_nav_history.insert(0, CodeNavigationItem(file, line, comment))
+
+    hist = CodeNavigationItem(file, line, comment)
+
+    if len(code_nav_history) > 0:
+        if code_nav_history[0] == hist:
+            # do not add same reference again
+            return
+
+    code_nav_history.insert(0, hist)
+
     if code_nav:
         code_nav._update(None)
+
 
 #
 # todo
