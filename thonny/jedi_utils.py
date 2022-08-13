@@ -6,6 +6,8 @@ from typing import Dict, List, Optional
 
 import jedi.api.classes
 
+from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
+
 try:
     # Since 0.17
     from jedi.api.classes import ParamName
@@ -26,7 +28,6 @@ except ImportError:
     except ImportError:
         from jedi.api.classes import Definition as BaseSignature
 
-from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
 
 logger = getLogger(__name__)
 

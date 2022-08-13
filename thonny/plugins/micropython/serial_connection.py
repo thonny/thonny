@@ -5,9 +5,10 @@ import time
 from logging import getLogger
 from textwrap import dedent
 
+from .connection import MicroPythonConnection
+
 OUTPUT_ENQ = b"\x05"
 OUTPUT_ACK = b"\x06"
-from .connection import MicroPythonConnection
 
 NORMAL_PROMPT = b">>> "
 FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
