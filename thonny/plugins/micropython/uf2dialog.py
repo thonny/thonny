@@ -511,3 +511,19 @@ def find_uf2_property(lines: List[str], prop_name: str) -> Optional[str]:
             return line[len(marker) :]
 
     return None
+
+
+def show_uf2_installer(master, firmware_name: str) -> None:
+    dlg = Uf2FlashingDialog(master, firmware_name=firmware_name)
+    from thonny import ui_utils
+
+    ui_utils.show_dialog(dlg)
+
+
+def uf2_device_is_present_in_bootloader_mode() -> bool:
+    for vol in list_volumes(skip_letters=["A"]):
+        info_path = os.path.join(vol, "INFO_UF2.TXT")
+        if os.path.isfile(info_path):
+            return True
+
+    return False

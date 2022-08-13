@@ -1,8 +1,5 @@
-import os.path
 from logging import getLogger
 
-from thonny import ui_utils
-from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import add_micropython_backend
 from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
 from thonny.plugins.micropython.mp_front import (
@@ -10,7 +7,7 @@ from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonProxy,
     get_uart_adapter_vids_pids,
 )
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
 logger = getLogger(__name__)
 
@@ -26,18 +23,6 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
     def get_known_usb_vids_pids(cls):
         # can be anything
         return set()
-
-    @classmethod
-    def device_is_present_in_bootloader_mode(cls):
-        for vol in list_volumes(skip_letters=["A"]):
-            info_path = os.path.join(vol, "INFO_UF2.TXT")
-            if os.path.isfile(info_path):
-                with open(info_path, encoding="utf-8", errors="replace") as fp:
-                    for line in fp:
-                        if line.startswith("Board-ID: RPI-RP2"):
-                            return True
-
-        return False
 
     def get_node_label(self):
         return "RP2040 device"
@@ -57,8 +42,7 @@ class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = Uf2FlashingDialog(self, firmware_name="MicroPython")
-        ui_utils.show_dialog(dlg)
+        show_uf2_installer(self, firmware_name="MicroPython")
 
 
 def load_plugin():

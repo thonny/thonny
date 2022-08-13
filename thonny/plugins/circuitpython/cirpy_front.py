@@ -1,13 +1,12 @@
 import sys
 from logging import getLogger
 
-from thonny import ui_utils
 from thonny.languages import tr
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
 )
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
 logger = getLogger(__name__)
 
@@ -93,8 +92,7 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = Uf2FlashingDialog(self, firmware_name="CircuitPython")
-        ui_utils.show_dialog(dlg)
+        show_uf2_installer(self, firmware_name="CircuitPython")
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "CircuitPython"

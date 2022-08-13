@@ -812,6 +812,11 @@ class Workbench(tk.Tk):
         self._backend_button.configure(command=self._post_backend_menu)
 
     def _post_backend_menu(self):
+        from thonny.plugins.micropython.uf2dialog import (
+            show_uf2_installer,
+            uf2_device_is_present_in_bootloader_mode,
+        )
+
         menu_font = tk_font.nametofont("TkMenuFont")
 
         def choose_backend():
@@ -848,6 +853,18 @@ class Workbench(tk.Tk):
         # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
 
         self._backend_menu.add_separator()
+
+        if uf2_device_is_present_in_bootloader_mode():
+            self._backend_menu.add_command(
+                label=tr("Install MicroPython") + "...",
+                command=lambda: show_uf2_installer(self, "MicroPython"),
+            )
+            self._backend_menu.add_command(
+                label=tr("Install CircuitPython") + "...",
+                command=lambda: show_uf2_installer(self, "CircuitPython"),
+            )
+            self._backend_menu.add_separator()
+
         self._backend_menu.add_command(
             label=tr("Configure interpreter..."),
             command=lambda: self.show_options("interpreter"),
