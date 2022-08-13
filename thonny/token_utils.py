@@ -7,7 +7,12 @@ def matches_any(name, alternates):
     return "(?P<%s>" % name + "|".join(alternates) + ")"
 
 
-KEYWORD = r"\b" + matches_any("keyword", keyword.kwlist) + r"\b"
+# not perfect, but hopefully good enough
+_SOFT_KEYWORDS = [
+    r"[ \t]*match[ \t]+(?!=)",
+    r"[ \t]*case[ \t]+(?!=)",
+]
+KEYWORD = r"\b" + matches_any("keyword", list(keyword.kwlist) + _SOFT_KEYWORDS) + r"\b"
 _builtinlist = [
     str(name) for name in dir(builtins) if not name.startswith("_") and name not in keyword.kwlist
 ]
