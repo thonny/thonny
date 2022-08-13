@@ -1,4 +1,3 @@
-# These minimal deps are meant to match available packages on Ubuntu 20.04LTS
 jedi>=0.18
 setuptools>=45.2
 pyserial>=3.4
