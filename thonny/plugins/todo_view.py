@@ -20,6 +20,9 @@ class TodoView(ui_utils.TreeFrame):
             displaycolumns=(0, 1),
         )
 
+        self._current_code_view = None
+        self._current_source = None
+
         self.tree.bind("<<TreeviewSelect>>", self._on_click, True)
         self.tree.bind("<Map>", self._update, True)
 
@@ -31,6 +34,7 @@ class TodoView(ui_utils.TreeFrame):
         get_workbench().bind_class("Text", "<<NewLine>>", self._update, True)
 
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
+        get_workbench().bind_class("EditorCodeViewText", "<<TextChange>>", self._text_change, True)
 
         self.tree.column("line_no", width=70, anchor=tk.W)
         self.tree.column("todo_text", width=750, anchor=tk.W)
@@ -40,10 +44,40 @@ class TodoView(ui_utils.TreeFrame):
 
         self.tree["show"] = ["headings"]
 
-        self._current_code_view = None
-        self._current_source = None
-
         self._update(None)
+
+    def _last_op_delta(self):
+        last_op = self._current_code_view.text.get_last_operation_time()
+        now = time.time()
+        return now - last_op
+
+    def _text_change(self, event):
+        if self._current_code_view is None:
+            return
+
+        if not hasattr(self._current_code_view, "_update_already_scheduled"):
+            self._current_code_view._update_already_scheduled = False
+
+        if self._current_code_view._update_already_scheduled:
+            return
+
+        if self._last_op_delta() < 0.3:
+            self._current_code_view._update_already_scheduled = True
+
+            def delay_update():
+                if self._last_op_delta() < 0.3:
+                    # still typing
+                    self._current_code_view.text.after(100, delay_update)
+                    return
+
+                print("idled", time.time())
+                self._current_code_view._update_already_scheduled = False
+                self._update(None)
+
+            self._current_code_view.text.after_idle(delay_update)
+
+        else:
+            self._update(event)
 
     def _update(self, event):
 
@@ -83,6 +117,8 @@ class TodoView(ui_utils.TreeFrame):
                     self.tree.insert("", "end", values=(line_no, todo_text))
 
         if len(self.tree.get_children()) == 0:
+            # todo enhance the regex so that a todo within quotes are not shown in the list
+            # low prio
             self.tree.insert("", "end", values=("INFO", tr("No line marked with #todo found")))
 
     def clear(self):
