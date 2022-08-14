@@ -56,6 +56,8 @@ EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
 LF = b"\n"
 OK = b"OK"
+ESC = b"\x1b"
+ST = b"\x1b\\"
 
 ENCODING = "utf-8"
 TRACEBACK_MARKER = b"Traceback (most recent call last):"
@@ -559,6 +561,12 @@ class BareMetalAdapter(BaseAdapter, ABC):
 
             # Check if it's really active prompt
             follow_up = self._connection.soft_read(1, timeout=0.01)
+            if follow_up == ESC:
+                # See if it's followed by a OSC code, like the one output by CircuitPython 8
+                follow_up += self._connection.soft_read_until(ST)
+                if follow_up.endswith(ST):
+                    logger.debug("Dropping OSC sequence %r", follow_up)
+                follow_up = b""
             if follow_up:
                 # Nope, the prompt is not active.
                 # (Actually it may be that a background thread has produced this follow up,
@@ -718,8 +726,9 @@ class SerialPortAdapter(BareMetalAdapter):
 
         assert bytes_written == len(content)
 
-    def _write_file_via_serial(self, target_path: str, content: bytes,
-                               can_hexlify:bool=True) -> None:
+    def _write_file_via_serial(
+        self, target_path: str, content: bytes, can_hexlify: bool = True
+    ) -> None:
         out, err = self._execute_and_capture_output(
             dedent(
                 """

@@ -54,7 +54,6 @@ ENCODING = "utf-8"
 # Output tokens
 ESC = b"\x1b"
 ST = b"\x1b\\"
-OSC = b"\x1b]0;.*\x1b\\"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 NORMAL_PROMPT = b">>> "
