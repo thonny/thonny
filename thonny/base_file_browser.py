@@ -629,42 +629,6 @@ class BaseFileBrowser(ttk.Frame):
     def is_active_browser(self):
         return False
 
-    def _get_venv_path(self):
-        CFGFILE = "pyvenv.cfg"
-        path = self.get_selected_path()
-        fnam = self.get_selected_name()
-        try:
-            if os.path.exists(path):
-                if os.path.isdir(path):
-                    cfgfile = os.path.join(path, CFGFILE)
-                    if os.path.exists(cfgfile) and os.path.isfile(cfgfile):
-                        return path
-                else:
-                    if fnam == CFGFILE:
-                        return os.path.dirname(path)
-        except Exception as ex:
-            logger.error("_get_venv_path", ex)
-
-    def check_for_venv(self):
-        return self._get_venv_path() is not None
-
-    def do_activate_venv(self):
-        venv_path = self._get_venv_path()
-
-        if running_on_windows():
-            backend_python = os.path.join(venv_path, "Scripts", "python.exe")
-        else:
-            backend_python = os.path.join(venv_path, "bin", "python")
-
-        get_workbench().set_option("run.backend_name", "LocalCPython")
-        get_workbench().set_option("LocalCPython.executable", backend_python)
-
-        try:
-            # just like pressing the button
-            get_runner().cmd_stop_restart()
-        except Exception as ex:
-            print(ex)
-
     def add_first_menu_items(self, context):
         if context == "item":
             selected_path = self.get_selected_path()
@@ -681,11 +645,6 @@ class BaseFileBrowser(ttk.Frame):
             )
 
         else:
-            if self.check_for_venv():
-                self.menu.add_command(
-                    label=tr("Activate venv"), command=lambda: self.do_activate_venv()
-                )
-
             if selected_kind == "dir":
                 self.menu.add_command(
                     label=tr("Focus into"), command=lambda: self.request_focus_into(selected_path)
