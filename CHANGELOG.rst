@@ -2,6 +2,10 @@
 Version history
 ===============
 
+4.0.0b4 (2022-08-14)
+====================
+* Automatic reload for saved files after external modification (with help from @kr-g), #1589, #1455, #1968
+
 4.0.0b3 (2022-05-15)
 ====================
 

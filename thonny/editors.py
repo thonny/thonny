@@ -170,13 +170,9 @@ class Editor(ttk.Frame):
                 ),
                 master=self,
             ):
-                cur_line = self.get_text_widget().index("insert")
-                # convert cursor position to line number
-                cur_line = int(float(cur_line))
-
+                prev_location = self.get_text_widget().index("insert")
                 self._load_file(self._filename, keep_undo=True)
-
-                self.select_line(cur_line)
+                self.get_text_widget().mark_set("insert", prev_location)
 
             self._last_known_mtime = os.path.getmtime(self._filename)
 
