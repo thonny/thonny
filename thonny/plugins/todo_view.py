@@ -1,3 +1,4 @@
+import time
 import re
 from logging import getLogger
 
@@ -19,15 +20,17 @@ class TodoView(ui_utils.TreeFrame):
             displaycolumns=(0, 1),
         )
 
-        self.tree.bind("<<TreeviewSelect>>", self._on_click)
+        self.tree.bind("<<TreeviewSelect>>", self._on_click, True)
         self.tree.bind("<Map>", self._update, True)
 
-        # todo bind to reload event for update
-
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
+        get_workbench().bind("WorkbenchReady", self._update, True)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
+
         get_workbench().bind_class("Text", "<Double-Button-1>", self._update, True)
+        get_workbench().bind_class("Text", "<<NewLine>>", self._update, True)
+
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
 
         self.tree.column("line_no", width=70, anchor=tk.W)
         self.tree.column("todo_text", width=750, anchor=tk.W)
@@ -44,10 +47,6 @@ class TodoView(ui_utils.TreeFrame):
 
     def _update(self, event):
 
-        # todo: not updated on first run
-
-        self.clear()
-
         if not self.winfo_ismapped():
             return
 
@@ -58,13 +57,15 @@ class TodoView(ui_utils.TreeFrame):
             self._current_source = None
             return
 
-        new_cw = editor.get_code_view()
-        new_source = new_cw.get_content_as_bytes()
+        new_codeview = editor.get_code_view()
+        new_source = new_codeview.get_content()
 
-        if self._current_code_view == new_cw and self._current_source == new_source:
+        if self._current_code_view == new_codeview and self._current_source == new_source:
             return
 
-        self._current_code_view = new_cw
+        self.clear()
+
+        self._current_code_view = new_codeview
         self._current_source = new_source
 
         # todo support of other file types and introducing comment tags
@@ -75,7 +76,7 @@ class TodoView(ui_utils.TreeFrame):
         line_no = 0
         for line in new_source.splitlines():
             line_no += 1
-            matches = r_match.finditer(line.decode())
+            matches = r_match.finditer(line)
             if matches:
                 for m in matches:
                     todo_text = m.groups()[0]
@@ -102,4 +103,4 @@ class TodoView(ui_utils.TreeFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(TodoView, tr("Todo's"), "s")
+    get_workbench().add_view(TodoView, tr("TODO"), "s")
