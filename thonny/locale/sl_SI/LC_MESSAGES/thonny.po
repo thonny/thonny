@@ -1,0 +1,1961 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: sl\n"
+
+#: thonny/workbench.py:361
+msgid "File"
+msgstr "Datoteka"
+
+#: thonny/workbench.py:362
+msgid "Edit"
+msgstr "Uredi"
+
+#: thonny/workbench.py:363
+msgid "View"
+msgstr "Pogled"
+
+#: thonny/running.py:116 thonny/workbench.py:364
+msgid "Run"
+msgstr "Poženi"
+
+#: thonny/workbench.py:365
+msgid "Tools"
+msgstr "Orodja"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:366
+msgid "Help"
+msgstr "Pomoč"
+
+#: thonny/workbench.py:583
+msgid "Exit"
+msgstr "Izhod"
+
+#: thonny/workbench.py:610
+msgid "Decrease font size"
+msgstr "Zmanjšaj velikost pisave"
+
+#: thonny/workbench.py:622
+msgid "Focus editor"
+msgstr "Fokusiraj se v urejevalnik"
+
+#: thonny/workbench.py:631
+msgid "Focus shell"
+msgstr "Fokusiraj se v terminal"
+
+#: thonny/workbench.py:642
+msgid "Maximize view"
+msgstr "Povečaj pogled"
+
+#: thonny/workbench.py:654
+msgid "Full screen"
+msgstr "Celozaslonsko"
+
+#: thonny/workbench.py:1457
+msgid "Program arguments"
+msgstr "Argumenti programa"
+
+#: thonny/plugins/about.py:21 thonny/plugins/about.py:140
+msgid "About Thonny"
+msgstr "O programu Thonny"
+
+#: thonny/plugins/about.py:66
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "Narejeno na \n"
+"Univerzi v Tartuju (UT), Estonija, \n"
+"s pomočjo \n"
+"odprtokodne skupnosti, \n"
+"Raspberry Pi Foundation\n"
+"in Cybernetica AS"
+
+#: thonny/plugins/about.py:86
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "Ta program je \n"
+"POVSEM BREZ GARANCIJE!\n"
+"Je brezplačna programska oprema, vabljeni ste, da jo \n"
+"razširjate pod določenimi pogoji, glej \n"
+"https://opensource.org/licenses/MIT \n"
+"za podrobnosti"
+
+#: thonny/plugins/about.py:129
+msgid "Version history"
+msgstr "Zgodovina različic"
+
+#: thonny/plugins/about.py:136
+msgid "Report problems"
+msgstr "Prijavi težave"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "Samodejno odprite pomočnika, ko se program zruši z napako"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "Samodejno odprite pomočnika, ko ima opozorila za vašo kodo"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "Izvedi izbrana preverjanja Pylint"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "Izvedi preverjanja MyPy"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "Onemogočeno preverjanje (en ID na vrstico)"
+
+#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "Pomočnik"
+
+#: thonny/plugins/autocomplete.py:512
+msgid "Auto-complete"
+msgstr "Samoizpolnjevanje"
+
+#: thonny/plugins/backend_config_page.py:337
+msgid "Interpreter"
+msgstr "Tolmač"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "O programu Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:56
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "Birdseye je razhroščevalnik Python, ki ga je treba namestiti ločeno. \n"
+"\n"
+"Ali želite odpreti stran s pomočjo in izvedeti več?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "Odpravljanje napak v trenutni skripti (birdseye)"
+
+#: thonny/plugins/commenting_indenting.py:172
+msgid "Toggle comment"
+msgstr "Preklopi komentar"
+
+#: thonny/plugins/commenting_indenting.py:182
+msgid "Comment out"
+msgstr "Komentiraj"
+
+#: thonny/plugins/commenting_indenting.py:192
+msgid "Uncomment"
+msgstr "Odkomentiraj"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "Razveljavi"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "Ponovi"
+
+#: thonny/base_file_browser.py:721 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2294
+msgid "Cut"
+msgstr "Izreži"
+
+#: thonny/base_file_browser.py:722 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2295
+msgid "Copy"
+msgstr "Kopiraj"
+
+#: thonny/base_file_browser.py:724 thonny/base_file_browser.py:730
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2296
+msgid "Paste"
+msgstr "Prilepi"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "Izberi vse"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
+msgid "Run to cursor"
+msgstr "Izvedi do kazalca"
+
+#: thonny/plugins/debugger.py:982
+msgid "Can't close yet"
+msgstr "Še ne morem zapreti"
+
+#: thonny/plugins/debugger.py:983
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "Uporabite ukaz \"Stop\", če želite ustaviti razhroščevanje"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "Priklopi uporabniška okna"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "Označi ujemajoča se imena"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "Označi lokalne spremenljivke"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "Označi oklepaje"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "Označi sintaksne elemente"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "Označi trenutno vrstico (zahteva ponovno odpiranje urejevalnika)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "Pokaži številke vrstic"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "Priporočena največja dolžina vrstice \n"
+"(Nastavite na 0, da izklopite robno črto)"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "Urejevalnik"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "Izvozi dnevnike uporabe ..."
+
+#: thonny/plugins/event_view.py:39
+msgid "Events"
+msgstr "Dogodki"
+
+#: thonny/plugins/files.py:606
+msgid "Files"
+msgstr "Datoteke"
+
+#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:430
+msgid "Find & Replace"
+msgstr "Najdi & zamenjaj"
+
+#: thonny/plugins/find_replace.py:66
+msgid "Find:"
+msgstr "Išči:"
+
+#: thonny/plugins/find_replace.py:87
+msgid "Replace with:"
+msgstr "Zamenjaj z:"
+
+#: thonny/plugins/find_replace.py:105
+msgid "Case sensitive"
+msgstr "Razlikovanje velikih in malih črk"
+
+#: thonny/plugins/find_replace.py:112
+msgid "Up"
+msgstr "Gor"
+
+#: thonny/plugins/find_replace.py:116
+msgid "Down"
+msgstr "Dol"
+
+#: thonny/plugins/find_replace.py:125
+msgid "Find"
+msgstr "Poišči"
+
+#: thonny/plugins/find_replace.py:135
+msgid "Replace"
+msgstr "Zamenjaj"
+
+#: thonny/plugins/find_replace.py:143
+msgid "Replace+Find"
+msgstr "Zamenjaj + Najdi"
+
+#: thonny/plugins/find_replace.py:153
+msgid "Replace all"
+msgstr "Zamenjaj vse"
+
+#: thonny/plugins/find_replace.py:249
+msgid "Enter string to be replaced."
+msgstr "Vnesite niz, ki ga želite zamenjati."
+
+#: thonny/plugins/find_replace.py:333
+msgid "The specified text was not found!"
+msgstr "Določenega besedila ni bilo mogoče najti!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "Dovoli samo eno okno Thonny"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "Ponovno odprite vse datoteke iz prejšnje seje"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "Onemogoči zvok obvestil"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "Način skaliranja pisave"
+
+#: thonny/plugins/heap.py:37
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "Način kopice je vklopljen.\n"
+"Zaprite pogled kopice, da ga izklopite."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "Kopica"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "Jezik"
+
+#: thonny/plugins/notes.py:35
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "To polje je namenjeno vašim delovnim zapiskom -- navodilom za dodelitev, odrezkom kode, karkoli.\n"
+"\n"
+"Vse bo samodejno shranjeno in naloženo, ko naslednjič odprete Thonny.\n"
+"\n"
+"Lahko izbrišete to besedilo, da naredite prostor za svoje zapiske."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "Opombe"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "Prejšnji predmet"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "Naslednji predmet"
+
+#: thonny/plugins/object_inspector.py:733
+msgid "Object inspector"
+msgstr "Pregledovalnik objektov"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "Oris"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "Način Pygame Zero"
+
+#: thonny/plugins/pip_gui.py:79
+msgid "Uninstall"
+msgstr "Odstrani"
+
+#: thonny/editors.py:667 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:491
+#: thonny/ui_utils.py:1871 thonny/workdlg.py:162
+msgid "Close"
+msgstr "Zapri"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "Click "
+msgstr "Kliknite "
+
+#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+msgid "here"
+msgstr "tukaj"
+
+#: thonny/plugins/pip_gui.py:76
+msgid "Upgrade"
+msgstr "Nadgradnja"
+
+#: thonny/plugins/esp/__init__.py:349
+#: thonny/plugins/micropython/uf2dialog.py:348 thonny/plugins/pip_gui.py:73
+msgid "Install"
+msgstr "Namestitev"
+
+#: thonny/plugins/pip_gui.py:535
+msgid "Could not find the package from PyPI."
+msgstr "Paketa iz PyPI ni mogoče najti."
+
+#: thonny/plugins/pip_gui.py:557
+msgid "Latest stable version"
+msgstr "Najnovejša stabilna različica"
+
+#: thonny/plugins/pip_gui.py:559
+msgid "Latest version"
+msgstr "Najnovejša različica"
+
+#: thonny/plugins/pip_gui.py:561
+msgid "Summary"
+msgstr "Povzetek"
+
+#: thonny/plugins/pip_gui.py:563
+msgid "Author"
+msgstr "Avtor"
+
+#: thonny/plugins/pip_gui.py:565
+msgid "Homepage"
+msgstr "Domača stran"
+
+#: thonny/plugins/pip_gui.py:567
+msgid "Bugtracker"
+msgstr "Iskalnik hroščev"
+
+#: thonny/plugins/pip_gui.py:569
+msgid "Documentation"
+msgstr "Dokumentacija"
+
+#: thonny/plugins/pip_gui.py:571
+msgid "PyPI page"
+msgstr "Stran PyPI"
+
+#: thonny/plugins/pip_gui.py:611
+msgid "Requires"
+msgstr "Zahteva"
+
+#: thonny/plugins/pip_gui.py:743
+msgid "Really uninstall?"
+msgstr "Zares odstraniti?"
+
+#: thonny/plugins/pip_gui.py:748
+msgid "Are you sure you want to uninstall it?"
+msgstr "Ali ste prepričani, da ga želite odstraniti?"
+
+#: thonny/plugins/variables.py:22
+msgid "Back to\n"
+"current frame"
+msgstr "Nazaj k\n"
+"trenutnemu okvirju"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "Spremenljivke"
+
+#: thonny/base_file_browser.py:1558
+msgid "This computer"
+msgstr "Ta računalnik"
+
+#: thonny/base_file_browser.py:641
+msgid "Refresh"
+msgstr "Osveži"
+
+#: thonny/base_file_browser.py:650
+msgid "Focus into"
+msgstr "Osredotoči se na"
+
+#: thonny/base_file_browser.py:1393 thonny/base_file_browser.py:1405
+#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+msgid "Error"
+msgstr "Napaka"
+
+#: thonny/base_file_browser.py:1393 thonny/base_file_browser.py:1405
+msgid "You need to select a file!"
+msgstr "Izbrati morate datoteko!"
+
+#: thonny/base_file_browser.py:1409
+msgid "Overwrite?"
+msgstr "Prepišem?"
+
+#: thonny/base_file_browser.py:1409
+msgid "Do you want to overwrite '%s' ?"
+msgstr "Ali želite prepisati '%s'?"
+
+#: thonny/editors.py:632 thonny/editors.py:634
+msgid "New"
+msgstr "Nov"
+
+#: thonny/editors.py:645
+msgid "Open..."
+msgstr "Odpri..."
+
+#: thonny/editors.py:647
+msgid "Load"
+msgstr "Naloži"
+
+#: thonny/editors.py:656
+msgid "Recent files"
+msgstr "Nedavne datoteke"
+
+#: thonny/editors.py:678 thonny/ui_utils.py:493
+msgid "Close all"
+msgstr "Zapri vse"
+
+#: thonny/editors.py:688 thonny/editors.py:690
+msgid "Save"
+msgstr "Shrani"
+
+#: thonny/editors.py:713
+msgid "Save as..."
+msgstr "Shrani kot..."
+
+#: thonny/editors.py:724
+msgid "Save copy..."
+msgstr "Shrani kopijo ..."
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "Thonny možnosti"
+
+#: thonny/running.py:115
+msgid "Run current script"
+msgstr "Zaženi trenutno skripto"
+
+#: thonny/running.py:146
+msgid "Run current script in terminal"
+msgstr "Zaženi trenutno skripto v terminalu"
+
+#: thonny/running.py:159
+msgid "Stop/Restart backend"
+msgstr "Zaustavi/ponovno zaženi proces v ozadju"
+
+#: thonny/running.py:160
+msgid "Stop"
+msgstr "Ustavi"
+
+#: thonny/running.py:171
+msgid "Interrupt execution"
+msgstr "Prekini izvajanje"
+
+#: thonny/running.py:184
+msgid "Send EOF / Soft reboot"
+msgstr "Pošlji EOF / mehki ponovni zagon"
+
+#: thonny/running.py:195
+msgid "Disconnect"
+msgstr "Prekini povezavo"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:268
+msgid "Python interpreters"
+msgstr "Tolmači za Python"
+
+#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:269
+#: thonny/plugins/pip_gui.py:789 thonny/plugins/pip_gui.py:802
+msgid "all files"
+msgstr "vse datoteke"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:297
+msgid "Select empty directory for new virtual environment"
+msgstr "Izberite prazen imenik za novo virtualno okolje"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:304
+msgid "Bad directory"
+msgstr "Napačen imenik"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:305
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "Izbrani imenik ni prazen.\n"
+"Izberite drugega ali prekliči."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:322
+msgid "Creating virtual environment"
+msgstr "Ustvarjanje virtualnega okolja"
+
+#: thonny/shell.py:100
+msgid "Clear shell"
+msgstr "Počisti lupino"
+
+#: thonny/shell.py:174
+msgid "Plotter"
+msgstr "Risalnik"
+
+#: thonny/shell.py:306
+msgid "Clear"
+msgstr "Počisti"
+
+#: thonny/shell.py:319
+msgid "Show Plotter"
+msgstr "Prikaži risalnik"
+
+#: thonny/shell.py:1648
+#, fuzzy
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "Zaradi zmogljivosti se lupina izogiba prikazovanju zelo dolgih vrstic v celoti (glejte Orodja => Možnosti => lupina).\n"
+"Tukaj lahko upravljate z izvirnim fragmentom besedila."
+
+#: thonny/shell.py:1659
+msgid "Wrap text (may be slow)"
+msgstr "Prelomi besedilo (lahko počasno)"
+
+#: thonny/ui_utils.py:1866
+msgid "Copy to clipboard"
+msgstr "Kopiraj v odložišče"
+
+#: thonny/shell.py:1701
+msgid "Squeezed text (%d characters)"
+msgstr "Stisnjeno besedilo (%d znakov)"
+
+#: thonny/shell.py:1871
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "Risalnik vizualizira serijo\n"
+"številk, prikazane v lupini."
+
+#: thonny/shell.py:1873
+msgid "See Help for details."
+msgstr "Za podrobnosti glejte pomoč."
+
+#: thonny/ui_utils.py:492
+msgid "Close others"
+msgstr "Zaprite druge"
+
+#: thonny/ui_utils.py:1722
+msgid "Copying"
+msgstr "Kopiranje"
+
+#: thonny/ui_utils.py:1725
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "Kopiranje\n"
+"  %s\n"
+"v\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1364 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:290 thonny/plugins/pip_gui.py:1256
+#: thonny/ui_utils.py:157 thonny/ui_utils.py:1733 thonny/ui_utils.py:1818
+#: thonny/workdlg.py:164 thonny/workdlg.py:209
+msgid "Cancel"
+msgstr "Prekliči"
+
+#: thonny/base_file_browser.py:1355 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:100 thonny/plugins/backend_config_page.py:285
+#: thonny/ui_utils.py:154 thonny/ui_utils.py:1815 thonny/workdlg.py:206
+msgid "OK"
+msgstr "V redu"
+
+#: thonny/ui_utils.py:2300
+msgid "Select All"
+msgstr "Izberi vse"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:155
+#: thonny/workbench.py:162
+msgid "Shell"
+msgstr "Lupina"
+
+#: thonny/workbench.py:593
+msgid "Options..."
+msgstr "Opcije..."
+
+#: thonny/workbench.py:600
+msgid "Increase font size"
+msgstr "Povečaj velikost pisave"
+
+#: thonny/workbench.py:665
+msgid "Change font size"
+msgstr "Spremeni velikost pisave"
+
+#: thonny/workbench.py:666
+msgid "Zoom"
+msgstr "Povečava"
+
+#: thonny/workbench.py:675
+msgid "Exit Thonny"
+msgstr "Zapusti Thonny"
+
+#: thonny/workbench.py:678
+msgid "Quit"
+msgstr "Izhod"
+
+#: thonny/workbench.py:1236 thonny/workbench.py:1244
+msgid "Overwriting theme '%s'"
+msgstr "Prepisovanje teme '%s'"
+
+#: thonny/workbench.py:1428
+msgid "Program arguments:"
+msgstr "Argumenti programa:"
+
+#: thonny/workbench.py:1482
+msgid "Regular mode"
+msgstr "Navaden način"
+
+#: thonny/workbench.py:1483
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "Konfiguracija je bila posodobljena. Znova zaženite Thonny, da začnete delovati v običajnem načinu.\n"
+"\n"
+"(Če si pozneje premislite, glejte 'Orodja → Možnosti → Splošno'.)"
+
+#: thonny/plugins/ast_view.py:212
+msgid "Program tree"
+msgstr "Programsko drevo"
+
+#: thonny/plugins/debugger.py:1283
+msgid "Resume"
+msgstr "Nadaljuj"
+
+#: thonny/plugins/debugger.py:1299
+msgid "Run / resume"
+msgstr "Zaženi/nadaljuj"
+
+#: thonny/plugins/debugger.py:1314
+msgid "Debug current script"
+msgstr "Razhroščevanje trenutne skripte"
+
+#: thonny/plugins/debugger.py:1316
+msgid "Debug"
+msgstr "Razhroščevanje"
+
+#: thonny/plugins/debugger.py:1327
+msgid "Debug current script (nicer)"
+msgstr "Razhroščevanje trenutne skripte (lepše)"
+
+#: thonny/plugins/debugger.py:1339
+msgid "Debug current script (faster)"
+msgstr "Razhroščevanje trenutne skripte (hitrejše)"
+
+#: thonny/plugins/debugger.py:1350
+msgid "Step over"
+msgstr "Stopi čez"
+
+#: thonny/plugins/debugger.py:1352
+msgid "Over"
+msgstr "Konec"
+
+#: thonny/plugins/debugger.py:1363
+msgid "Step into"
+msgstr "Stopi v"
+
+#: thonny/plugins/debugger.py:1365
+msgid "Into"
+msgstr "V"
+
+#: thonny/plugins/debugger.py:1376
+msgid "Step out"
+msgstr "Stopi ven"
+
+#: thonny/plugins/debugger.py:1378
+msgid "Out"
+msgstr "Ven"
+
+#: thonny/plugins/debugger.py:1413
+msgid "Step back"
+msgstr "Stopi nazaj"
+
+#: thonny/plugins/debugger.py:1415
+msgid "Back"
+msgstr "Nazaj"
+
+#: thonny/plugins/debugger.py:1421
+msgid "Stack"
+msgstr "Kopica"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Exception"
+msgstr "Izjema"
+
+#: thonny/plugins/general_config_page.py:18
+#, fuzzy
+msgid "Log program usage events"
+msgstr "Zabeležite dogodke uporabe programa"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "Način razhroščevanja (zagotavlja podrobnejše diagnostične dnevnike)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "Način uporabniškega vmesnika"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "Faktor skaliranja uporabniškega vmesnika"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "Po spremembi teh možnosti znova zaženite Thonny!"
+
+#: thonny/plugins/general_config_page.py:148
+#, fuzzy
+msgid "General"
+msgstr "General"
+
+#: thonny/plugins/pip_gui.py:142
+msgid "INSTALL"
+msgstr "NAMESTITEV"
+
+#: thonny/plugins/pip_gui.py:367
+#, fuzzy
+msgid "Browse the packages"
+msgstr "Išči po paketih"
+
+#: thonny/plugins/pip_gui.py:370
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "S trenutnim tolmačem lahko brskate samo po paketih tukaj.\n"
+"Za namestitev, nadgradnjo ali odstranitev uporabite 'Orodja → Odpri sistemsko lupino...'."
+
+#: thonny/plugins/pip_gui.py:378
+msgid "Packages' directory"
+msgstr "Imenik paketov"
+
+#: thonny/plugins/pip_gui.py:382
+msgid "Install from PyPI"
+msgstr "Namesti iz PyPI"
+
+#: thonny/plugins/pip_gui.py:385
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "Če ne veste, kje dobiti paket, boste najverjetneje želeli preiskati indeks paketov Python. Začnite tako, da v zgornje iskalno polje vnesete ime paketa in pritisnete ENTER."
+
+#: thonny/plugins/pip_gui.py:402
+#, fuzzy
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "da poiščete datoteko requirements.txt in namestite v njej navedene pakete."
+
+#: thonny/plugins/pip_gui.py:408
+#, fuzzy
+msgid "Click"
+msgstr "Kliknite"
+
+#: thonny/plugins/pip_gui.py:413
+#, fuzzy
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "da poiščete in namestite datoteko paketa (običajno s pripono .whl, .tar.gz ali .zip)."
+
+#: thonny/plugins/pip_gui.py:420
+msgid "Upgrade or uninstall"
+msgstr "Nadgradi ali odstrani"
+
+#: thonny/plugins/pip_gui.py:422
+msgid "Start by selecting the package from the left."
+msgstr "Začnite z izbiro paketa na levi."
+
+#: thonny/plugins/pip_gui.py:410
+msgid "Target:"
+msgstr "Cilj:"
+
+#: thonny/plugins/pip_gui.py:414
+msgid "virtual environment"
+msgstr "virtualno okolje"
+
+#: thonny/plugins/pip_gui.py:412
+msgid "user site packages"
+msgstr "pakete uporabnika"
+
+#: thonny/plugins/pip_gui.py:430
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "V tem pogovornem oknu so navedeni vsi razpoložljivi paketi, vendar omogoča nadgradnjo in odstranitev samo paketov iz"
+
+#: thonny/plugins/pip_gui.py:440
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "V ta imenik bodo nameščeni tudi novi paketi. Druge lokacije je treba upravljati z alternativnimi sredstvi."
+
+#: thonny/plugins/pip_gui.py:485
+msgid "Installed version:"
+msgstr "Nameščena različica:"
+
+#: thonny/plugins/pip_gui.py:487
+msgid "Installed to:"
+msgstr "Nameščen v:"
+
+#: thonny/plugins/pip_gui.py:538
+msgid "Please check your spelling!"
+msgstr "Prosimo, preverite črkovanje!"
+
+#: thonny/plugins/pip_gui.py:542
+msgid "Could not find the package info from PyPI."
+msgstr "Podatkov o paketu iz PyPI ni bilo mogoče najti."
+
+#: thonny/plugins/pip_gui.py:544 thonny/plugins/pip_gui.py:1326
+msgid "Error code:"
+msgstr "Koda napake:"
+
+#: thonny/plugins/pip_gui.py:689
+msgid "Can't find package name from the list:"
+msgstr "Na seznamu ni mogoče najti imena paketa:"
+
+#: thonny/plugins/pip_gui.py:744
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "Paket '{}' je potreben za namestitev in odstranitev drugih paketov."
+
+#: thonny/plugins/pip_gui.py:789
+msgid "Package"
+msgstr "Paket"
+
+#: thonny/plugins/pip_gui.py:902
+msgid "Manage packages for %s"
+msgstr "Upravljajte pakete za %s"
+
+#: thonny/editors.py:571 thonny/plugins/micropython/pip_gui.py:23
+#: thonny/plugins/pip_gui.py:953
+msgid "Confirmation"
+msgstr "Potrditev"
+
+#: thonny/plugins/pip_gui.py:954
+#, fuzzy
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "Videti je, da nameščate paket, povezan s Thonnyjem.\n"
+"Če ste želeli namestiti vtičnik Thonny, namesto tega\n"
+"izberite »Orodja → Upravljanje vtičnikov...«.\n"
+"\n"
+"Ali ste prepričani, da želite namestiti %s za ozadje?"
+
+#: thonny/plugins/pip_gui.py:1059
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "Opomba! Morda je na voljo še ena različica, ki je združljiva s trenutno različico Thonnyja. Kliknite '...', da izberete različico za namestitev."
+
+#: thonny/plugins/pip_gui.py:1067
+msgid "Thonny plugin without requirements"
+msgstr "Thonny vtičnik brez zahtev"
+
+#: thonny/plugins/pip_gui.py:1083
+msgid "Unsuitable requirements"
+msgstr "Neustrezne zahteve"
+
+#: thonny/plugins/pip_gui.py:1084
+msgid "This package requires different Thonny version:"
+msgstr "Ta paket zahteva drugo različico Thonnyja:"
+
+#: thonny/plugins/pip_gui.py:1088
+msgid "If you still want it, then please install it from the command line."
+msgstr "Če ga še vedno želite, ga namestite iz ukazne vrstice."
+
+#: thonny/plugins/pip_gui.py:1125
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "Opomba! Po namestitvi / nadgradnji / odstranitvi vtičnika morate znova zagnati Thonny."
+
+#: thonny/plugins/pip_gui.py:1135
+msgid "Thonny plug-ins"
+msgstr "Thonny vtičniki"
+
+#: thonny/plugins/pip_gui.py:1171
+msgid "Advanced install / upgrade / downgrade"
+msgstr "Napredna namestitev / nadgradnja / posodobitev"
+
+#: thonny/plugins/pip_gui.py:1180
+msgid "Desired version"
+msgstr "Želena različica"
+
+#: thonny/plugins/pip_gui.py:1239
+msgid "Upgrade dependencies"
+msgstr "Nadgradi potrebne pakete"
+
+#: thonny/plugins/pip_gui.py:1324
+msgid "Requires:"
+msgstr "Zahteva:"
+
+#: thonny/plugins/pip_gui.py:1328
+msgid "Error:"
+msgstr "Napaka:"
+
+#: thonny/plugins/pip_gui.py:1541
+msgid "Manage packages..."
+msgstr "Upravljanje paketov ..."
+
+#: thonny/plugins/pip_gui.py:1547
+msgid "Manage plug-ins..."
+msgstr "Upravljanje vtičnikov ..."
+
+#: thonny/plugins/replayer.py:365
+msgid "Open replayer..."
+msgstr "Odpri replayer ..."
+
+#: thonny/plugins/run_debug_config_page.py:14
+#, fuzzy
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "Spremenite delovni imenik v imenik skripte pri Poženi/Razhroščevanje"
+
+#: thonny/plugins/run_debug_config_page.py:22
+msgid "Show function calls (frames) in separate windows"
+msgstr "Prikaži klice funkcij (okvirje) v ločenih oknih"
+
+#: thonny/plugins/run_debug_config_page.py:23
+#, fuzzy
+msgid "Uncheck if you want more traditional experience."
+msgstr "Odkljukajte, če želite bolj tradicionalno izkušnjo."
+
+#: thonny/plugins/run_debug_config_page.py:29
+msgid "Open and close Stack view automatically"
+msgstr "Samodejno odpiranje in zapiranje pogleda sklada"
+
+#: thonny/plugins/run_debug_config_page.py:30
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "Odpre pogled sklada ob prvem klicu in ga zapri, ko se program vrne v glavni okvir."
+
+#: thonny/plugins/run_debug_config_page.py:39
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "Dovoli vstop v knjižnice (tj. zunaj glavnega imenika skriptov)"
+
+#: thonny/plugins/run_debug_config_page.py:40
+msgid "May make debugging slower."
+msgstr "Lahko upočasni razhroščevanje."
+
+#: thonny/plugins/run_debug_config_page.py:45
+msgid "Preferred debugger"
+msgstr "Prednostni razhroščevalnik"
+
+#: thonny/plugins/run_debug_config_page.py:57
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(uporablja se ob kliku gumba za razhroščevanje v orodni vrstici)"
+
+#: thonny/plugins/run_debug_config_page.py:62
+msgid "Birdseye port"
+msgstr "Birdseye port"
+
+#: thonny/plugins/run_debug_config_page.py:66
+msgid "(restart Thonny after changing this)"
+msgstr "(po spremembi, znova zaženite Thonny)"
+
+#: thonny/plugins/run_debug_config_page.py:74
+msgid "Run & Debug"
+msgstr "Zaženi in razhroščuj"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "Emulacija terminala"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "podpira osnovne barve in sloge ANSI"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "Največje dovoljeno število vrstic."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "Opomba! Velike vrednosti lahko povzročijo slabše delovanje!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "Največja dolžina odlomkov vrstice pred stiskanjem"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "Poganjanje trenutne skripte v terminalu"
+
+#: thonny/plugins/terminal_config_page.py:17
+#, fuzzy
+msgid "Present Python REPL after program ends"
+msgstr "Predstavite Python REPL po koncu programa"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Po končanem procesu Pythona pusti terminalsko okno odprto"
+
+#: thonny/plugins/terminal_config_page.py:31
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "Opomba! Samodejno zapiranje mora biti omogočeno v nastavitvah terminala\n"
+"(Profili → Lupina → Ko lupina zapusti)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "Terminal"
+
+#: thonny/plugins/theme_and_font_config_page.py:40
+msgid "UI theme"
+msgstr "Tema uporabniškega vmesnika"
+
+#: thonny/plugins/theme_and_font_config_page.py:53
+msgid "Syntax theme"
+msgstr "Tema sintakse"
+
+#: thonny/plugins/theme_and_font_config_page.py:85
+msgid "Editor font"
+msgstr "Pisava urejevalnika"
+
+#: thonny/plugins/theme_and_font_config_page.py:108
+msgid "IO font"
+msgstr "IO pisava"
+
+#: thonny/plugins/theme_and_font_config_page.py:133
+msgid "Preview"
+msgstr "Predogled"
+
+#: thonny/plugins/theme_and_font_config_page.py:151
+msgid "This is a comment"
+msgstr "To je komentar"
+
+#: thonny/plugins/theme_and_font_config_page.py:154
+msgid "The answer is"
+msgstr "Odgovor je"
+
+#: thonny/plugins/theme_and_font_config_page.py:158
+msgid "unclosed_string"
+msgstr "nezaprti_niz"
+
+#: thonny/plugins/theme_and_font_config_page.py:160
+msgid "blah, blah"
+msgstr "bla, bla"
+
+#: thonny/plugins/theme_and_font_config_page.py:184
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "Opomba! Nekateri elementi sloga se spremenijo šele po ponovnem zagonu Thonnyja!"
+
+#: thonny/plugins/theme_and_font_config_page.py:223
+msgid "Enter an integer"
+msgstr "Vnesite celo število"
+
+#: thonny/plugins/theme_and_font_config_page.py:236
+msgid "Theme & Font"
+msgstr "Tema & pisava"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Odpri programsko mapo Thonny ..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Odpri podatkovno mapo Thonny ..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "Domov"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "Vsebina pomoči"
+
+#: thonny/plugins/micropython/mp_front.py:300
+msgid "CircuitPython device"
+msgstr "Naprava CircuitPython"
+
+#: thonny/plugins/micropython/mp_front.py:304
+msgid "MicroPython device"
+msgstr "Naprava MicroPython"
+
+#: thonny/plugins/micropython/mp_front.py:541
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "Povežite napravo z računalnikom in spodaj izberite ustrezna vrata"
+
+#: thonny/plugins/micropython/mp_front.py:544
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "poiščite ime svoje naprave, \"USB Serial\" ali \"UART\""
+
+#: thonny/plugins/micropython/mp_front.py:546
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "Če je ne najdete, boste morda morali najprej namestiti ustrezen gonilnik USB."
+
+#: thonny/plugins/micropython/mp_front.py:439
+msgid "Port"
+msgstr "Vrata"
+
+#: thonny/plugins/micropython/mp_front.py:449
+msgid "Try to detect port automatically"
+msgstr "Samodejno zaznaj vrata"
+
+#: thonny/plugins/micropython/__init__.py:25
+msgid "MicroPython (generic)"
+msgstr "MicroPython (generično)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "Natisni ..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "Odpri sistemsko lupino ..."
+
+#: thonny/plugins/backend_config_page.py:110
+msgid "Details"
+msgstr "Podrobnosti"
+
+#: thonny/plugins/pip_gui.py:395
+msgid "Install from requirements file"
+msgstr "Namesti iz datoteke z zahtevami"
+
+#: thonny/plugins/pip_gui.py:407
+msgid "Install from local file"
+msgstr "Namesti iz lokalne datoteke"
+
+#: thonny/plugins/pip_gui.py:1118
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "To pogovorno okno je namenjeno upravljanju vtičnikov Thonny in njihovih zahtev.\n"
+"Če želite namestiti pakete za svoje programe, izberite 'Orodja → Upravljanje paketov...'"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (generičen)"
+
+#: thonny/plugins/commenting_indenting.py:143
+msgid "Indent selected lines"
+msgstr "Zamakni izbrane vrstice"
+
+#: thonny/plugins/commenting_indenting.py:153
+msgid "Dedent selected lines"
+msgstr "Odstrani zamik izbranih vrstic"
+
+#: thonny/workbench.py:1471
+#, fuzzy
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "Preklopite na\n"
+"osnoven\n"
+"način"
+
+#: thonny/plugins/microbit/__init__.py:58
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Prepričajte se, da je MicroPython nameščen na micro:bit-u."
+
+#: thonny/plugins/microbit/__init__.py:60
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Ne pozabite, da main.py deluje samo brez vdelane glavne skripte."
+
+#: thonny/plugins/micropython/uf2dialog.py:44
+msgid "please wait"
+msgstr "prosim, počakajte"
+
+#: thonny/misc_utils.py:151
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "Ni bilo mogoče najti diska '%s'. Ali ga želite poiskati sami?"
+
+#: thonny/misc_utils.py:154
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "Najdenih je bilo več diskov '%s'. Ali želite izbrati pravega?"
+
+#: thonny/misc_utils.py:170
+msgid "Can't find suitable disk"
+msgstr "Ustrezen disk ni bil najden"
+
+#: thonny/base_file_browser.py:287
+msgid "%d items"
+msgstr "%d elementov"
+
+#: thonny/base_file_browser.py:736
+msgid "Move to Trash"
+msgstr "Premakni v koš"
+
+#: thonny/base_file_browser.py:739
+msgid "Delete"
+msgstr "Izbriši"
+
+#: thonny/base_file_browser.py:718 thonny/base_file_browser.py:869
+msgid "New directory"
+msgstr "Nov imenik"
+
+#: thonny/base_file_browser.py:742
+msgid "Properties"
+msgstr "Lastnosti"
+
+#: thonny/base_file_browser.py:744
+msgid "Storage space"
+msgstr "Prostor za shranjevanje"
+
+#: thonny/base_file_browser.py:754
+msgid "Path"
+msgstr "Pot"
+
+#: thonny/base_file_browser.py:756
+msgid "Directory properties"
+msgstr "Lastnosti imenika"
+
+#: thonny/base_file_browser.py:758
+msgid "File properties"
+msgstr "Lastnosti datoteke"
+
+#: thonny/base_file_browser.py:760
+msgid "bytes"
+msgstr "bajtov"
+
+#: thonny/base_file_browser.py:763
+msgid "Size"
+msgstr "Velikost"
+
+#: thonny/base_file_browser.py:93 thonny/base_file_browser.py:774
+msgid "Modified"
+msgstr "Spremenjeno"
+
+#: thonny/base_file_browser.py:833
+msgid "Deleting %s"
+msgstr "Brisanje %s"
+
+#: thonny/editors.py:253
+msgid "Loading"
+msgstr "Nalaganje"
+
+#: thonny/editors.py:382
+msgid "Saving"
+msgstr "Shranjevanje"
+
+#: thonny/plugins/files.py:219
+msgid "Upload to %s"
+msgstr "Naloži v %s"
+
+#: thonny/plugins/files.py:417
+msgid "Downloading %s to %s"
+msgstr "Prenašanje %s v %s"
+
+#: thonny/plugins/files.py:323
+msgid "Download to %s"
+msgstr "Prenesi v %s"
+
+#: thonny/base_file_browser.py:643
+msgid "Open in system file manager"
+msgstr "Odprite v sistemskem urejevalniku datotek"
+
+#: thonny/base_file_browser.py:671
+msgid "Hide hidden files"
+msgstr "Skrij skrite datoteke"
+
+#: thonny/base_file_browser.py:671
+msgid "Show hidden files"
+msgstr "Pokaži skrite datoteke"
+
+#: thonny/base_file_browser.py:654
+msgid "Open in Thonny"
+msgstr "Odpri v Thonnyju"
+
+#: thonny/base_file_browser.py:685
+msgid "Open in system default app"
+msgstr "Odprite v sistemski privzeti aplikaciji"
+
+#: thonny/base_file_browser.py:666 thonny/base_file_browser.py:693
+msgid "Configure %s files"
+msgstr "Konfiguriraj datoteke %s"
+
+#: thonny/base_file_browser.py:694
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "Kaj storiti z datoteko %s, ko jo dvokliknete v Thonnyjevem brskalniku datotek?"
+
+#: thonny/base_file_browser.py:1240 thonny/editors.py:953 thonny/editors.py:955
+msgid "Deleting"
+msgstr "Brisanje"
+
+#: thonny/base_file_browser.py:1247
+msgid "Creating directory"
+msgstr "Ustvarjanje imenika"
+
+#: thonny/editors.py:251
+msgid "Loading %s"
+msgstr "Nalaganje %s"
+
+#: thonny/editors.py:377
+msgid "Saving to %s"
+msgstr "Shranjevanje v %s"
+
+#: thonny/editors.py:702 thonny/editors.py:704
+msgid "Save All files"
+msgstr "Shrani vse datoteke"
+
+#: thonny/plugins/backend_config_page.py:340 thonny/workbench.py:869
+msgid "Configure interpreter..."
+msgstr "Konfiguriraj tolmača ..."
+
+#: thonny/workbench.py:1581
+msgid "Device"
+msgstr "Naprava"
+
+#: thonny/workdlg.py:193
+msgid "Cancelling"
+msgstr "Preklic"
+
+#: thonny/workdlg.py:220
+msgid "Starting"
+msgstr "Zaganjanje"
+
+#: thonny/plugins/backend_config_page.py:251
+msgid "Authentication"
+msgstr "Preverjanje pristnosti"
+
+#: thonny/plugins/backend_config_page.py:253
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "Vnesite geslo svojega zasebnega ključa za\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:256
+msgid "Enter your password for\n"
+"{}"
+msgstr "Vnesite svoje geslo za\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr "Zgornja predstavitev je približna vrednost tega float. Natančna shranjena vrednost je %s, kar je približno %s"
+
+#: thonny/plugins/pip_gui.py:645
+msgid "Search results"
+msgstr "Rezultati iskanja"
+
+#: thonny/plugins/pip_gui.py:646
+msgid "Searching"
+msgstr "Iskanje"
+
+#: thonny/plugins/pip_gui.py:728 thonny/plugins/pip_gui.py:817
+msgid "Installing '%s'"
+msgstr "Nameščanje '%s'"
+
+#: thonny/plugins/pip_gui.py:734
+msgid "Upgrading '%s'"
+msgstr "Nadgrajevanje '%s'"
+
+#: thonny/plugins/pip_gui.py:741
+msgid "Uninstalling '%s'"
+msgstr "Odstranjevanje '%s'"
+
+#: thonny/plugins/pip_gui.py:755
+msgid "Installing"
+msgstr "Nameščanje"
+
+#: thonny/plugins/pip_gui.py:1502
+msgid "Package manager is not available for this interpreter"
+msgstr "Upravitelj paketov ni na voljo za tega tolmača"
+
+#: thonny/base_file_browser.py:1191 thonny/plugins/pip_gui.py:1516
+msgid "Not supported"
+msgstr "Ni podprto"
+
+#: thonny/plugins/micropython/pip_gui.py:100 thonny/plugins/pip_gui.py:1521
+msgid "Not available"
+msgstr "Ni na voljo"
+
+#: thonny/plugins/pip_gui.py:1522
+msgid "You need to stop your program before launching the package manager."
+msgstr "Preden zaženete upravitelja paketov, morate ustaviti svoj program."
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "Odprite ocenjene vrednosti v Pregledovalniku objektov"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:208
+msgid "Python executable"
+msgstr "Izvedljiva datoteka Python"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:231
+#, fuzzy
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr "Opomba! Gumb za izbiro datoteke morda ne bo deloval pravilno pri izbiri izvedljivih datotek\n"
+"iz virtualnega okolja. V tem primeru namesto tega izberite skripto 'aktiviraj'\n"
+"namesto tolmača (ali vnesite pot neposredno do polja)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "Oddaljeni Python 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:310
+msgid "Not connected"
+msgstr "Ni povezano"
+
+#: thonny/plugins/micropython/mp_front.py:515
+msgid "Advanced options"
+msgstr "Napredne možnosti"
+
+#: thonny/plugins/micropython/mp_front.py:547
+msgid "Install or update firmware"
+msgstr "Namesti ali posodobi vdelano programsko opremo"
+
+#: thonny/plugins/micropython/__init__.py:36
+msgid "MicroPython (local)"
+msgstr "MicroPython (lokalno)"
+
+#: thonny/plugins/micropython/__init__.py:47
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:77
+msgid "Scope"
+msgstr "Obseg"
+
+#: thonny/plugins/micropython/pip_gui.py:90
+msgid "This dialog lists top-level modules from following directories:\n"
+""
+msgstr "V tem pogovornem oknu so navedeni moduli najvišje ravni iz naslednjih imenikov:\n"
+""
+
+#: thonny/plugins/micropython/pip_gui.py:99
+msgid "New packages will be installed to"
+msgstr "Novi paketi bodo nameščeni v"
+
+#: thonny/plugins/micropython/pip_gui.py:102
+msgid "no absolute lib directory in sys.path"
+msgstr "ni absolutnega imenika lib v sys.path"
+
+#: thonny/plugins/micropython/uf2dialog.py:39
+msgid "Version to be installed"
+msgstr "Različica za namestitev"
+
+#: thonny/plugins/micropython/uf2dialog.py:47
+msgid "Target device location"
+msgstr "Ciljna lokacija naprave"
+
+#: thonny/plugins/micropython/uf2dialog.py:58
+msgid "Target device model"
+msgstr "Ciljni model naprave"
+
+#: thonny/plugins/micropython/uf2dialog.py:146
+msgid "Please wait"
+msgstr "Prosim počakajte"
+
+#: thonny/plugins/pip_gui.py:70
+msgid "Search on PyPI"
+msgstr "Išči na PyPI"
+
+#: thonny/base_file_browser.py:686
+msgid "Open in Thonny's text editor"
+msgstr "Odprite v Thonnyjevem urejevalniku"
+
+#: thonny/base_file_browser.py:339
+msgid "Storage space on this drive or filesystem"
+msgstr "Prostor za shranjevanje na tem pogonu ali datotečnem sistemu"
+
+#: thonny/base_file_browser.py:340
+msgid "total space"
+msgstr "skupni prostor"
+
+#: thonny/base_file_browser.py:342
+msgid "used space"
+msgstr "uporabljen prostor"
+
+#: thonny/base_file_browser.py:343
+msgid "free space"
+msgstr "prosti prostor"
+
+#: thonny/base_file_browser.py:350
+msgid "Storage info"
+msgstr "Informacije o prostoru"
+
+#: thonny/plugins/commenting_indenting.py:163
+msgid "Replace tabs with spaces"
+msgstr "Zamenjaj tabulatorje s presledki"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "Označite znake tabulatorja"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "Zamik z znaki tabulatorja (ni priporočljivo za Python)"
+
+#: thonny/base_file_browser.py:91 thonny/memory.py:63
+msgid "Name"
+msgstr "Ime"
+
+#: thonny/base_file_browser.py:95
+msgid "Size (bytes)"
+msgstr "Velikost (bajti)"
+
+#: thonny/base_file_browser.py:870
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr "Vnesite ime za nov imenik pod\n"
+"%s"
+
+#: thonny/base_file_browser.py:893
+msgid "Nothing selected"
+msgstr "Nič ni izbrano"
+
+#: thonny/base_file_browser.py:893
+msgid "Select an item and try again!"
+msgstr "Izberite element in poskusite znova!"
+
+#: thonny/base_file_browser.py:1311
+msgid "Open from %s"
+msgstr "Odpri iz %s"
+
+#: thonny/base_file_browser.py:1314
+msgid "Save to %s"
+msgstr "Shrani v %s"
+
+#: thonny/base_file_browser.py:1333
+msgid "File name:"
+msgstr "Ime datoteke:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value ID"
+msgstr "ID vrednosti"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:540
+#: thonny/plugins/object_inspector.py:619
+msgid "Value"
+msgstr "Vrednost"
+
+#: thonny/plugins/backend_config_page.py:274
+msgid "Save password"
+msgstr "Shrani geslo"
+
+#: thonny/plugins/debugger.py:553
+msgid "Function call at %s"
+msgstr "Klic funkcije na %s"
+
+#: thonny/plugins/debugger.py:1003
+msgid "Local variables"
+msgstr "Lokalne spremenljivke"
+
+#: thonny/plugins/debugger.py:1035
+msgid "Function"
+msgstr "Funkcija"
+
+#: thonny/plugins/debugger.py:1036
+msgid "Location"
+msgstr "Lokacija"
+
+#: thonny/plugins/debugger.py:1112
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "Če je zadnji ukaz sprožil izjemo, bo ta pogled prikazal sledenje sklada."
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "ID"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "Podatki"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "Lastnosti"
+
+#: thonny/plugins/object_inspector.py:538
+msgid "Index"
+msgstr "Indeks"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key ID"
+msgstr "ID ključa"
+
+#: thonny/plugins/object_inspector.py:617
+msgid "Key"
+msgstr "Ključ"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "Nazaj k\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:439
+msgid "Port or WebREPL"
+msgstr "Vrata ali WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:583
+msgid "Password"
+msgstr "Geslo"
+
+#: thonny/plugins/debugger.py:961
+msgid "Source code"
+msgstr "Izvorna koda"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Uporabite pogovorna okna datoteke Tk namesto Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "Izberite, ali se pogovorna okna za datoteke odprejo za glavnim oknom"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "Spremenljivke okolja (en KEY=VALUE na vrstico)"
+
+#: thonny/base_file_browser.py:715
+msgid "New file"
+msgstr "Nova datoteka"
+
+#: thonny/base_file_browser.py:733
+msgid "Rename"
+msgstr "Preimenuj"
+
+#: thonny/base_file_browser.py:919
+msgid "Rename '%s'"
+msgstr "Preimenuj '%s'"
+
+#: thonny/base_file_browser.py:919
+msgid "Enter new name"
+msgstr "Vnesite novo ime"
+
+#: thonny/base_file_browser.py:1007
+msgid "Paste failed"
+msgstr "Lepljenje ni uspelo"
+
+#: thonny/base_file_browser.py:1007
+#, fuzzy
+msgid "There are conflicting folders"
+msgstr "Obstajajo sporne mape"
+
+#: thonny/base_file_browser.py:1129
+msgid "File already exists"
+msgstr "Datoteka že obstaja"
+
+#: thonny/base_file_browser.py:1194
+#, fuzzy
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr "Če je datoteka tekstovna, potem jo lahko odprete v Thonnyu, če nanjo z desnim klikom kliknete in izberete Nastavitev ... datotek."
+
+#: thonny/editors.py:35
+msgid "Python files"
+msgstr "Python datoteke"
+
+#: thonny/editors.py:119 thonny/editors.py:182
+msgid "<untitled>"
+msgstr "<Nepoimenovano>"
+
+#: thonny/editors.py:146
+msgid "File is gone"
+msgstr "Datoteka ne obstaja več"
+
+#: thonny/editors.py:149
+msgid "Do you want to also close the editor?"
+msgstr "Ali želite zapreti tudi urejevalnik?"
+
+#: thonny/editors.py:165
+msgid "External modification"
+msgstr "Zunanja modifikacija"
+
+#: thonny/editors.py:168
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr "Ali želite izgubiti trenutne spremembe in datoteko ponovno naložiti?"
+
+#: thonny/editors.py:572
+msgid "Python files usually have .py extension."
+msgstr "Python datoteke imajo .py končnico."
+
+#: thonny/editors.py:574
+msgid "Did you mean '%s'?"
+msgstr "Ali ste mislili '%s'?"
+
+#: thonny/editors.py:733
+msgid "Move / rename..."
+msgstr "Premakni / preimenuj ..."
+
+#: thonny/editors.py:742
+msgid "Go to line..."
+msgstr "Pojdi v vrstico ..."
+
+#: thonny/editors.py:977
+msgid "Line number"
+msgstr "Ševilka vrstice"
+
+#: thonny/editors.py:1123
+msgid "Do you want to save files before closing?"
+msgstr "Ali želite shraniti datoteke pred izhodom?"
+
+#: thonny/editors.py:1125
+msgid "Do you want to save file before closing?"
+msgstr "Ali želite shraniti datoteko pred izhodom?"
+
+#: thonny/editors.py:1128
+msgid "Save On Close"
+msgstr "Shrani ob izhodu"
+
+#: thonny/misc_utils.py:513
+msgid "Command not available"
+msgstr "Ukaz ni na voljo"
+
+#: thonny/misc_utils.py:514
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "Ta ukaz ni na voljo, če je Thonny pognan preko Flatpak"
+
+#: thonny/workbench.py:686 thonny/workbench.py:786
+msgid "Support Ukraine"
+msgstr "Podprite Ukrajino"
+
+#: thonny/plugins/backend_config_page.py:91
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Kakšen tolmač naj Thonny uporabi za poganjanje vaše kode?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "Prikaži informacije o parametrih"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "Samodejno prikaži informacije o parametrih, ko napišem '('"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "Samodejno predlagaj zaključitve, ko tipkam"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "Samodejno prikaži dokumentacijo, ko tipkam"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "Zahtevaj zaključitev, ko pritisnem Tab tipko v urejevalnikih"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "Zahtevaj zaključitev, ko pritisnem Tab tipko v lupini"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "Težava"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "Definicije ni bilo mogoče najti"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "Počisti lupino preden poženem nov proces (Poženi, Razhroščevanje, Ustavi/Ponovno poženi, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:170
+msgid "Thonny's Python"
+msgstr "Thonnyev Python"
+
+#: thonny/plugins/micropython/mp_front.py:487
+msgid "Interrupt working program on connect"
+msgstr "Prekini izvajanje programa ob povezavi"
+
+#: thonny/plugins/micropython/mp_front.py:494
+msgid "Synchronize device's real time clock"
+msgstr "Sinhroniziraj uro na napravi"
+
+#: thonny/plugins/micropython/mp_front.py:500
+msgid "Use local time in real time clock"
+msgstr "Uporabi lokalni čas za čas na napravi"
+
+#: thonny/plugins/micropython/mp_front.py:506
+msgid "Restart interpreter before running a script"
+msgstr "Ponovno zaženi tolmač pred zagonom skripte"
+
+#: thonny/plugins/micropython/pip_gui.py:24
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr "Ta paket ne izgleda kot paket za MicroPython/CircuitPython.\n"
+"Ali ste prepičani, da ga želite namestiti?"
+
+#: thonny/base_file_browser.py:844
+msgid "Moving to Trash"
+msgstr "Premikanje v smeti"
+
+#: thonny/base_file_browser.py:845
+msgid "Move %s to Trash?"
+msgstr "Premakni %s v smeti?"
+
+#: thonny/base_file_browser.py:852
+msgid "Moving %s to Trash"
+msgstr "Premikanje %s v smeti"
+
+#: thonny/base_file_browser.py:659
+msgid "Open in default external app"
+msgstr "Odpri v privzeti aplikaciji"
+
+#: thonny/base_file_browser.py:1192
+msgid "Opening remote files in external app is not supported."
+msgstr "Odpiranje oddaljenih datotek v zunanjih aplikacijah ni mogoče."
+
+#: thonny/base_file_browser.py:1199
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "Če mora biti datoteka odprta v zunanji aplikaciji, jo najprej prenesite v lokalen imenik in jo odprite od tam!"
+
+#: thonny/editors.py:147
+msgid "Looks like '%s' was deleted or moved."
+msgstr "Izgleda, da je bila datoteka %s izbrisana ali premaknjena."
+
+#: thonny/editors.py:166
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "Izgleda, da je bila datoteka %s spremen zunaj urejevalnika."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:229
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "Thonny podpira samo Python %s in novejši!"
+
+#: thonny/editors.py:977
+msgid "Go to line"
+msgstr "Pojdi v vrstico"
+
+#: thonny/workbench.py:689
+msgid "Support"
+msgstr "Podpora"
+
+#: thonny/editors.py:386 thonny/editors.py:401
+msgid "Could not save"
+msgstr "Shranjevanje ni bilo uspešno"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "Opozorilo"
+
+#: thonny/plugins/general_config_page.py:136
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr "Če uprabite narekovaje za spremenljivko okolja, bodo ti narekovaji del vrednosti.\n"
+"Je to v redu?"
+
+#: thonny/workbench.py:859
+msgid "Install MicroPython"
+msgstr ""
+
+#: thonny/workbench.py:863
+msgid "Install CircuitPython"
+msgstr ""
+
+#: thonny/plugins/backend_config_page.py:212
+msgid "Make uploaded shebang scripts executable"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr ""
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:77 thonny/plugins/pip_gui.py:426
+msgid "Target"
+msgstr ""
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:42
+msgid "Line"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:43
+msgid "Info"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr ""
+
+#: thonny/plugins/circuitpython/cirpy_front.py:98
+#: thonny/plugins/micropython/mp_front.py:530
+msgid "Install or update %s"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:239
+msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr ""
+
+#: thonny/plugins/ev3/__init__.py:72
+msgid "Preparations (skip the VS Code part)"
+msgstr ""
+
+#: thonny/plugins/ev3/__init__.py:78
+msgid "Default password"
+msgstr ""
+
