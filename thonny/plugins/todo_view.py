@@ -1,11 +1,11 @@
-import time
 import re
-from logging import getLogger
-
+import time
 import tkinter as tk
+from logging import getLogger
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
+from thonny.ui_utils import ems_to_pixels
 
 logger = getLogger(__name__)
 
@@ -36,8 +36,8 @@ class TodoView(ui_utils.TreeFrame):
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
         get_workbench().bind_class("EditorCodeViewText", "<<TextChange>>", self._text_change, True)
 
-        self.tree.column("line_no", width=70, anchor=tk.W)
-        self.tree.column("todo_text", width=750, anchor=tk.W)
+        self.tree.column("line_no", width=ems_to_pixels(4), anchor=tk.W)
+        self.tree.column("todo_text", width=ems_to_pixels(100), anchor=tk.W)
 
         self.tree.heading("line_no", text=tr("Line"), anchor=tk.W)
         self.tree.heading("todo_text", text=tr("Info"), anchor=tk.W)
@@ -70,7 +70,6 @@ class TodoView(ui_utils.TreeFrame):
                     self._current_code_view.text.after(100, delay_update)
                     return
 
-                print("idled", time.time())
                 self._current_code_view._update_already_scheduled = False
                 self._update(None)
 
@@ -119,7 +118,7 @@ class TodoView(ui_utils.TreeFrame):
         if len(self.tree.get_children()) == 0:
             # todo enhance the regex so that a todo within quotes is not shown in the list
             # low prio
-            self.tree.insert("", "end", values=("INFO", tr("No line marked with #todo found")))
+            self.tree.insert("", "end", values=("---", tr("No line marked with #todo found")))
 
     def clear(self):
         self.tree.delete(*self.tree.get_children())
