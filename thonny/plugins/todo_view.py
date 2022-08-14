@@ -117,7 +117,7 @@ class TodoView(ui_utils.TreeFrame):
                     self.tree.insert("", "end", values=(line_no, todo_text))
 
         if len(self.tree.get_children()) == 0:
-            # todo enhance the regex so that a todo within quotes are not shown in the list
+            # todo enhance the regex so that a todo within quotes is not shown in the list
             # low prio
             self.tree.insert("", "end", values=("INFO", tr("No line marked with #todo found")))
 
