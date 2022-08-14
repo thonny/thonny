@@ -224,6 +224,15 @@ class UserSystemExit(BackendEvent):
         return f"UserSystemExit({self.returncode})"
 
 
+class OscEvent(BackendEvent):
+    def __init__(self, text: str):
+        self.text = text
+        super().__init__("OscEvent")
+
+    def __repr__(self):
+        return f"OscEvent({self.text!r})"
+
+
 class InlineResponse(MessageFromBackend):
     def __init__(self, command_name: str, **kw) -> None:
         super().__init__(**kw)

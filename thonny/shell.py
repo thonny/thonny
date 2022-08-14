@@ -129,6 +129,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         get_workbench().bind("TextInsert", self.text_inserted, True)
         get_workbench().bind("TextDelete", self.text_deleted, True)
+        get_workbench().bind("OscEvent", self.handle_osc_event, True)
 
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.text.yview
@@ -139,6 +140,9 @@ class ShellView(tk.PanedWindow):
 
         self.init_plotter()
         self.menu = ShellMenu(self.text, self)
+
+    def handle_osc_event(self, msg):
+        self.text._handle_osc_sequence(msg.text)
 
     def set_title(self, text: str) -> None:
         if not hasattr(self, "home_widget"):
