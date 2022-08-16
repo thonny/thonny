@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. venv-3.9/bin/activate
+. venv/bin/activate
 
 echo "isorting ..."
 isort thonny

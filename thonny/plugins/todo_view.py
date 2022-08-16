@@ -9,6 +9,8 @@ from thonny.ui_utils import ems_to_pixels
 
 logger = getLogger(__name__)
 
+INFO_TEXT = "---"
+
 
 class TodoView(ui_utils.TreeFrame):
     def __init__(self, master):
@@ -118,7 +120,7 @@ class TodoView(ui_utils.TreeFrame):
         if len(self.tree.get_children()) == 0:
             # todo enhance the regex so that a todo within quotes is not shown in the list
             # low prio
-            self.tree.insert("", "end", values=("---", tr("No line marked with #todo found")))
+            self.tree.insert("", "end", values=(INFO_TEXT, tr("No line marked with #todo found")))
 
     def clear(self):
         self.tree.delete(*self.tree.get_children())
@@ -132,7 +134,7 @@ class TodoView(ui_utils.TreeFrame):
         if iid != "":
             values = self.tree.item(iid)["values"]
             line_no = values[0]
-            if line_no and line_no != "INFO":
+            if line_no and line_no != INFO_TEXT:
                 editor = get_workbench().get_editor_notebook().get_current_editor()
                 editor.select_line(line_no)
 
