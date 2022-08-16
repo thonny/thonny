@@ -9,7 +9,7 @@ from thonny.ui_utils import ems_to_pixels
 
 logger = getLogger(__name__)
 
-INFO_TEXT = "INFO"
+INFO_TEXT = "---"
 
 
 class TodoView(ui_utils.TreeFrame):
