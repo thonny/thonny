@@ -10,6 +10,9 @@ from thonny.languages import tr
 logger = getLogger(__name__)
 
 
+INFO_TEXT = "INFO"
+
+
 class CodeNavigationView(ui_utils.TreeFrame):
     def __init__(self, master):
 
@@ -66,7 +69,7 @@ class CodeNavigationView(ui_utils.TreeFrame):
                 "end",
                 values=(
                     "",
-                    "INFO",
+                    tr(INFO_TEXT),
                     tr("use goto code with <Control>+MouseClick to get the code reference here."),
                 ),
             )
@@ -86,7 +89,7 @@ class CodeNavigationView(ui_utils.TreeFrame):
             print(values)
             file = values[0]
             line_no = values[1]
-            if line_no and line_no != "INFO":
+            if line_no and line_no != tr(INFO_TEXT):
                 file = os.path.expanduser(file)
                 editor = get_workbench().get_editor_notebook().show_file(file)
                 editor.select_line(line_no)
