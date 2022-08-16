@@ -172,7 +172,11 @@ class Editor(ttk.Frame):
             ):
                 prev_location = self.get_text_widget().index("insert")
                 self._load_file(self._filename, keep_undo=True)
-                self.get_text_widget().mark_set("insert", prev_location)
+                try:
+                    self.get_text_widget().mark_set("insert", prev_location)
+                    self.see_line(int(prev_location.split(".")[0]))
+                except Exception:
+                    logger.exception("Could not restore previous location")
 
             self._last_known_mtime = os.path.getmtime(self._filename)
 
