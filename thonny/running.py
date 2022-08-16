@@ -528,7 +528,7 @@ class Runner:
                 "Can't perform this action",
                 "Ctrl+D only has effect on an empty line / prompt.\n"
                 + "Submit current input (press ENTER) and try again",
-                master=self,
+                master=get_workbench(),
             )
             return
 
