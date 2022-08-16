@@ -7,7 +7,7 @@ from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonProxy,
     get_uart_adapter_vids_pids,
 )
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
 logger = getLogger(__name__)
 
@@ -24,12 +24,6 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
         # can be anything
         return set()
 
-    @classmethod
-    def device_is_present_in_bootloader_mode(cls):
-        targets = Uf2FlashingDialog.get_possible_targets("RPI-RP2")
-        logger.info("Bootloader targets: %r", targets)
-        return bool(targets)
-
     def get_node_label(self):
         return "RP2040 device"
 
@@ -45,7 +39,10 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):
     def _has_flashing_dialog(self):
-        return False
+        return True
+
+    def _open_flashing_dialog(self):
+        show_uf2_installer(self, firmware_name="MicroPython")
 
 
 def load_plugin():

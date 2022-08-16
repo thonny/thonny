@@ -16,9 +16,9 @@ from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tupl
 
 import thonny
 from thonny import report_time
-from thonny.common import (  # TODO: try to get rid of this
+from thonny.common import BackendEvent  # TODO: try to get rid of this
+from thonny.common import (
     IGNORED_FILES_AND_DIRS,
-    BackendEvent,
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,

@@ -6,8 +6,8 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20220810-unstable-v1.19.1-253-g5cfbf18d5",
-                "url": "https://micropython.org//resources/firmware/microbit-20220810-unstable-v1.19.1-253-g5cfbf18d5.hex"
+                "version": "20220812-unstable-v1.19.1-278-gcf90e2433",
+                "url": "https://micropython.org/resources/firmware/microbit-20220812-unstable-v1.19.1-278-gcf90e2433.hex"
             }
         ]
     },
@@ -22,7 +22,8 @@
                 "version": "1.0.1",
                 "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex"
             }
-        ]
+        ],
+        "popular": true
     },
     {
         "vendor": "BBC",
@@ -35,6 +36,7 @@
                 "version": "2.0.0",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex"
             }
-        ]
+        ],
+        "popular": true
     }
 ]

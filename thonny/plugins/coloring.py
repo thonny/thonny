@@ -76,7 +76,7 @@ class SyntaxColorer:
             + FUNCTION_CALL
             + "|"
             + METHOD_CALL,
-            re.S,  # @UndefinedVariable
+            re.DOTALL | re.MULTILINE,
         )
 
         # need to notice triple-quotes inside comments and magic commands

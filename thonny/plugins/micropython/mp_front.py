@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.languages import tr
+from thonny.misc_utils import list_volumes
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
@@ -22,8 +23,6 @@ logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 WEBREPL_PORT_VALUE = "webrepl"
-BOOTLOADER_PORT_VALUE = "bootloader"
-
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
 
@@ -117,10 +116,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             if len(potential) == 1:
                 self._port = potential[0][0]
             else:
-                if not potential and self.device_is_present_in_bootloader_mode():
-                    if self._propose_install_python():
-                        return self._fix_port()
-
                 self._port = None
                 message = dedent(
                     """\
@@ -135,20 +130,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                     message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
 
                 self._show_error(message)
-        elif not port_exists(self._port):
-            if self.device_is_present_in_bootloader_mode():
-                self._port = None
-                self._propose_install_python()
-
-    def _propose_install_python(self):
-        """Subclass may show python installation dialog and return True if installation succeeds"""
-        self._show_error(
-            "Your device seems to be in bootloader mode.\n"
-            "In this mode you can install or upgrade MicroPython python.\n\n"
-            "If your device already has MicroPython, then you can start using it after you put it into normal mode."
-        )
-
-        return False
 
     def _start_background_process(self, clean=None, extra_args=[]):
         if self._port is None:
@@ -337,10 +318,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def can_run_remote_files(self):
         return False
 
-    @classmethod
-    def device_is_present_in_bootloader_mode(cls):
-        return False
-
     def _check_remember_current_configuration(self) -> None:
         super()._check_remember_current_configuration()
 
@@ -374,8 +351,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
-        elif port == BOOTLOADER_PORT_VALUE:
-            return f"{cls.backend_description}  •  BOOTLOADER"
         else:
             return f"{cls.backend_description}  •  {port}"
 
@@ -401,14 +376,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             conf = {"run.backend_name": cls.backend_name, f"{cls.backend_name}.port": device}
             if conf not in relevant_confs:
                 relevant_confs.append(conf)
-
-        if cls.device_is_present_in_bootloader_mode():
-            relevant_confs.append(
-                {
-                    "run.backend_name": cls.backend_name,
-                    f"{cls.backend_name}.port": BOOTLOADER_PORT_VALUE,
-                }
-            )
 
         sorted_confs = sorted(relevant_confs, key=cls.get_switcher_configuration_label)
         return [(conf, cls.get_switcher_configuration_label(conf)) for conf in sorted_confs]

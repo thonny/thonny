@@ -1,14 +1,17 @@
+import logging
+import os.path
+import sys
+import time
 from logging import getLogger
+from typing import TYPE_CHECKING, List, Optional, cast
 
 from thonny.common import is_private_python, is_virtual_executable
 
 _last_module_count = 0
 _last_modules = set()
-import time
 
 _last_time = time.time()
 
-import sys
 
 logger = getLogger(__name__)
 
@@ -43,9 +46,6 @@ def report_time(label: str) -> None:
 
 report_time("After defining report_time")
 
-import logging
-import os.path
-from typing import TYPE_CHECKING, List, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
 BACKEND_LOG_MARKER = "Thonny's backend.log"

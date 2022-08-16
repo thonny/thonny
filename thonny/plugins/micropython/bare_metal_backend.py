@@ -14,6 +14,7 @@ from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
     BackendEvent,
     EOFCommand,
+    OscEvent,
     ToplevelResponse,
     execute_system_command,
     serialize_message,
@@ -53,7 +54,6 @@ ENCODING = "utf-8"
 # Output tokens
 ESC = b"\x1b"
 ST = b"\x1b\\"
-OSC = b"\x1b]0;.*\x1b\\"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 NORMAL_PROMPT = b">>> "
@@ -900,7 +900,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     follow_up += self._connection.soft_read_until(ST)
                     if follow_up.endswith(ST):
                         logger.debug("Found OSC sequence %r", follow_up)
-                        self._send_output(follow_up.decode("utf-8"), "stdout")
+                        self.send_message(OscEvent(follow_up.decode("utf-8", errors="replace")))
                     follow_up = b""
 
                 if follow_up:

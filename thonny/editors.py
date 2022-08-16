@@ -82,7 +82,6 @@ class Editor(ttk.Frame):
 
         self._filename = None
         self._last_known_mtime = None
-        self._asking_about_external_change = False
 
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
@@ -131,61 +130,51 @@ class Editor(ttk.Frame):
         return result
 
     def check_for_external_changes(self):
-        if self._asking_about_external_change:
-            # otherwise method will be re-entered when focus
-            # changes because of message box
-            return
-
         if self._filename is None:
             return
 
         if is_remote_path(self._filename):
             return
 
-        try:
-            self._asking_about_external_change = True
+        if self._last_known_mtime is None:
+            return
 
-            if self._last_known_mtime is None:
-                return
+        elif not os.path.exists(self._filename):
+            self.master.select(self)
 
-            elif not os.path.exists(self._filename):
+            if messagebox.askyesno(
+                tr("File is gone"),
+                tr("Looks like '%s' was deleted or moved.") % self._filename
+                + "\n\n"
+                + tr("Do you want to also close the editor?"),
+                master=self,
+            ):
+                self.master.close_editor(self)
+            else:
+                self.get_text_widget().edit_modified(True)
+                self._last_known_mtime = None
+
+        elif os.path.getmtime(self._filename) != self._last_known_mtime:
+            skip_confirmation = not self.is_modified() and get_workbench().get_option(
+                "edit.auto_refresh_saved_files"
+            )
+            if not skip_confirmation:
                 self.master.select(self)
 
-                if messagebox.askyesno(
-                    tr("File is gone"),
-                    tr("Looks like '%s' was deleted or moved.") % self._filename
-                    + "\n\n"
-                    + tr("Do you want to also close the editor?"),
-                    master=self,
-                ):
-                    self.master.close_editor(self)
-                else:
-                    self.get_text_widget().edit_modified(True)
-                    self._last_known_mtime = None
+            if skip_confirmation or messagebox.askyesno(
+                tr("External modification"),
+                tr("Looks like '%s' was modified outside of the editor.") % self._filename
+                + "\n\n"
+                + tr(
+                    "Do you want to discard current editor content and reload the file from disk?"
+                ),
+                master=self,
+            ):
+                prev_location = self.get_text_widget().index("insert")
+                self._load_file(self._filename, keep_undo=True)
+                self.get_text_widget().mark_set("insert", prev_location)
 
-            elif os.path.getmtime(self._filename) != self._last_known_mtime:
-                self.master.select(self)
-
-                if messagebox.askyesno(
-                    tr("External modification"),
-                    tr("Looks like '%s' was modified outside of the editor.") % self._filename
-                    + "\n\n"
-                    + tr(
-                        "Do you want to discard current editor content and reload the file from disk?"
-                    ),
-                    master=self,
-                ):
-                    cur_line = self.get_text_widget().index("insert")
-                    # convert cursor position to line number
-                    cur_line = int(float(cur_line))
-
-                    self._load_file(self._filename, keep_undo=True)
-
-                    self.select_line(cur_line)
-                else:
-                    self._last_known_mtime = os.path.getmtime(self._filename)
-        finally:
-            self._asking_about_external_change = False
+            self._last_known_mtime = os.path.getmtime(self._filename)
 
     def get_long_description(self):
 
@@ -608,6 +597,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.show_line_numbers", True)
         get_workbench().set_default("view.recommended_line_length", 0)
         get_workbench().set_default("edit.indent_with_tabs", False)
+        get_workbench().set_default("edit.auto_refresh_saved_files", True)
         get_workbench().set_default("file.make_saved_shebang_scripts_executable", True)
 
         self._recent_menu = tk.Menu(
@@ -626,8 +616,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         # should be in the end, so that it can be detected when
         # constructor hasn't completed yet
         self.preferred_size_in_pw = None
+        self._checking_external_changes = False
 
-        get_workbench().bind("WindowFocusIn", self.on_focus_window, True)
+        get_workbench().bind("WindowFocusIn", self.check_for_external_changes, True)
+        get_workbench().bind("ToplevelResponse", self.check_for_external_changes, True)
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -1151,9 +1143,18 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         else:
             return True
 
-    def on_focus_window(self, event=None):
-        for editor in self.get_all_editors():
-            editor.check_for_external_changes()
+    def check_for_external_changes(self, event=None):
+        if self._checking_external_changes:
+            # otherwise the method will be re-entered when focus
+            # changes because of a confirmation message box
+            return
+
+        self._checking_external_changes = True
+        try:
+            for editor in self.get_all_editors():
+                editor.check_for_external_changes()
+        finally:
+            self._checking_external_changes = False
 
 
 def get_current_breakpoints():

@@ -34,10 +34,10 @@ process by placing your cursor on that line and selecting *Run → Run to cursor
 This makes Thonny automatically step until this line. You can take the command from there.
 
 If you have editor line numbers enabled (Tools → Options → Editor), then you can 
-also use **breakpoints**. When you double click next to a statement in the editor left margin, a dot
+also use **breakpoints**. When you click next to a statement in the editor left margin, a dot
 appears. When you now start the debugger, it doesn't stop before first statement but runs to the 
 statement marked with the dot a.k.a breakpoint. You can place as many breakpoints to your programs as 
-required. Breakpoints can be removed by double clicking on the dots.
+required. Breakpoints can be removed by clicking on the margin again.
 
 
 "Faster" mode
@@ -62,4 +62,3 @@ styles can be used with both debugging modes.
 Birdseye
 --------
 Command *Debug current script (Birdseye)* is explained at a `separate page <birdseye.rst>`_
- 

@@ -2,6 +2,31 @@
 Version history
 ===============
 
+4.0.0b4 (2022-08-14)
+====================
+* CHANGED: Require single click for toggling a breakpoint, #2293
+* Refactor MicroPython/CircuitPython flashing dialog, #2344
+* Add TODO view (by @kr-g), #2067
+* Add possibility to activate a virtual environment via Files view (by @kr-g), #2381
+* Add separate "Install ..." items to the back-end switcher menu if a device in UF2 bootloader mode is detected, #2387
+* Automatically reload saved files after external modification (with help from @kr-g), #1589, #1455, #1968
+* Add EV3 default password information to config page, #2284
+* Don't choke on relative interpreter paths, #2335
+* Don't crash when Windows network locations can't be found, #2285
+* Don't show package extra deps even when the extra is combined with another condition
+* Make paddings larger for hi-res displays
+* Take OSC commands into account when looking for prompts (relevant for CircuitPython 8), #2349
+* Support OSC sequences for setting terminal title, #2369
+* Toggle hidden files also via file-browser's context menu, #1039
+* Use "Install MicroPython" instead of "Install firmware", #2364
+* Rename "Python 3" back-end to "Local Python 3"
+* Seed find/replace with currently-selected text, #2356
+* Work around Pylint error (make Pylint work again), #2359
+* Add coloring for `match` and `case` soft keywords, #2358
+* Add Slovenian translation (by cspaier)
+* Update several translations
+* Fix translations with bad placeholders (by @abrarwali), #2253
+
 4.0.0b3 (2022-05-15)
 ====================
 

@@ -28,57 +28,7 @@ class RaspberryPiPicoBackendProxy(RP2040BackendProxy):
 
 
 class RaspberryPiPicoBackendConfigPage(RP2040BackendConfigPage):
-    def _has_flashing_dialog(self):
-        return True
-
-    def _open_flashing_dialog(self):
-        dlg = PicoFlashingDialog(self.winfo_toplevel())
-        ui_utils.show_dialog(dlg)
-
-
-class PicoFlashingDialog(Uf2FlashingDialog):
-    def get_instructions(self) -> Optional[str]:
-        return (
-            "Here you can install or update MicroPython for Raspberry Pi Pico.\n"
-            "\n"
-            "1. Plug in your Pico while holding the BOOTSEL button.\n"
-            "2. Wait until device information appears.\n"
-            "3. Click 'Install'.\n"
-            "\n"
-            "When the process finishes, your Pico will be running the latest version of\n"
-            "MicroPython. Close the dialog and start programming!"
-        )
-
-    def _get_release_info_url(self):
-        return "https://raw.githubusercontent.com/thonny/thonny/master/data/rpi-pico-firmware.json"
-
-    def get_download_url_and_size(self, board_id):
-        if self._release_info is None:
-            return None
-
-        logger.info(
-            "Assets from %s: %r", self._get_release_info_url(), self._release_info["assets"]
-        )
-        candidates = self._release_info["assets"]
-
-        if len(candidates) == 0:
-            raise RuntimeError(
-                "Could not find the right file from the release info (%s)"
-                % self._get_release_info_url()
-            )
-        else:
-            # The json is meant for Thonny, so take the first one for now
-            return (candidates[0]["browser_download_url"], candidates[0]["size"])
-
-    @classmethod
-    def _is_relevant_board_id(cls, board_id):
-        return "RPI" in board_id
-
-    def get_title(self):
-        return "Install MicroPython for Raspberry Pi Pico"
-
-    def _get_vid_pids_to_wait_for(self):
-        return RaspberryPiPicoBackendProxy.get_known_usb_vids_pids()
+    pass
 
 
 def load_plugin():

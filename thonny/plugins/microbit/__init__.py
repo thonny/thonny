@@ -1,5 +1,6 @@
 import os.path
 import sys
+import time
 from time import sleep
 from typing import Optional
 
@@ -11,7 +12,7 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import TargetInfo, Uf2FlashingDialog
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -64,11 +65,19 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = MicrobitFlashingDialog(self)
+        dlg = MicrobitFlashingDialog(self, "MicroPython")
         ui_utils.show_dialog(dlg)
 
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
+    """
+    Technically micro:bit doesn't use UF2, but Uf2FlashingDialog is similar enough to be used
+    as baseclass here.
+    """
+
+    def get_variants_url(self) -> str:
+        return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-daplink.json"
+
     def get_instructions(self) -> Optional[str]:
         return (
             "This dialog allows you to install or update MicroPython on your micro:bit.\n"
@@ -82,55 +91,23 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
             "device. Make sure you have important files backed up!"
         )
 
-    def _get_release_info_url(self):
-        return "https://raw.githubusercontent.com/thonny/thonny/master/data/microbit-firmware.json"
+    def get_info_file_name(self):
+        return "DETAILS.TXT"
 
-    def get_unknown_version_text(self):
-        return "?"
-
-    def get_uf2_description(self):
-        info = self._get_latest_micropython_info_for_current_device()
-        if info is None:
-            return None
-        return "%s (%s)" % (info["version"], info["date"])
-
-    def _get_latest_micropython_info_for_current_device(self):
-        if self._possible_targets is None or len(self._possible_targets) != 1:
-            return None
-        else:
-            board_id = self._possible_targets[0][1]
-            return self._get_latest_micropython_info_for_device(board_id)
-
-    def _get_latest_micropython_info_for_device(self, board_id):
-        if self._release_info is None:
-            return None
-        else:
-            return self._release_info["latest_firmwares"].get(board_id, None)
-
-    def get_download_url_and_size(self, board_id):
-        info = self._get_latest_micropython_info_for_device(board_id)
-        if info is None:
-            return None
-
-        return info["hex_download"], info["size"]
-
-    def get_target_filename(self):
-        return "micropython.hex"
-
-    @classmethod
-    def find_device_board_id_and_model(cls, mount_path):
-        info_path = os.path.join(mount_path, "DETAILS.TXT")
-        if not os.path.isfile(info_path):
-            return None
+    def create_target_info(self, path: str) -> Optional[TargetInfo]:
+        info_path = os.path.join(path, self.get_info_file_name())
 
         # https://tech.microbit.org/latest-revision/editors/
         models = {
-            "9900": "BBC micro:bit v1.3",
-            "9901": "BBC micro:bit v1.5",
-            "9903": "BBC micro:bit v2.0 (9903)",
-            "9904": "BBC micro:bit v2.0",
-            "9905": "BBC micro:bit v2.2 (9905)",
-            "9906": "BBC micro:bit v2.2 (9906)",
+            "9900": ("BBC micro:bit v1.3", "nrf51"),
+            "9901": ("BBC micro:bit v1.5", "nrf51"),
+            "9903": ("BBC micro:bit v2.0 (9903)", "nrf52"),
+            "9904": ("BBC micro:bit v2.0", "nrf52"),
+            "9905": ("BBC micro:bit v2.2 (9905)", "nrf52"),
+            "9906": ("BBC micro:bit v2.2 (9906)", "nrf52"),
+            "9907": ("BBC micro:bit ??? (9907)", "nrf52"),
+            "9908": ("BBC micro:bit ??? (9908)", "nrf52"),
+            "9909": ("BBC micro:bit ??? (9909)", "nrf52"),
         }
 
         with open(info_path, "r", encoding="UTF-8", errors="replace") as fp:
@@ -139,22 +116,41 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                 if line.startswith(id_marker):
                     board_id = line[len(id_marker) :].strip()[:4]
                     if board_id in models:
-                        return board_id, models[board_id]
+                        model, family = models[board_id]
+                        return TargetInfo(
+                            title=self.describe_target_path(path),
+                            path=path,
+                            family=family,
+                            model=model,
+                            board_id=board_id,
+                        )
 
             # With older bootloaders, the file may be different
             fp.seek(0)
             for line in fp:
                 if "Version: 0234" in line:
                     board_id = "9900"
-                    return board_id, models[board_id]
+                    model, family = models[board_id]
+                    return TargetInfo(
+                        title=self.describe_target_path(path),
+                        path=path,
+                        family=family,
+                        model=model,
+                        board_id=board_id,
+                    )
 
+        # probably not micro:bit
         return None
 
     def get_title(self):
-        return "Install MicroPython for BBC micro:bit"
+        return f"Install {self.firmware_name} for BBC micro:bit"
 
-    def _get_vid_pids_to_wait_for(self):
-        return MicrobitProxy.get_known_usb_vids_pids()
+    def perform_post_installation_steps(self, ports_before):
+        # can't check the ports as in the superclass, because the port is always there
+        # simply wait for a couple of seconds, just in case
+        self.append_text("\nWaiting for device to restart...\n")
+        self.set_action_text("Waiting for device to restart...")
+        time.sleep(5)
 
 
 def load_plugin():

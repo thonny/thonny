@@ -9,6 +9,8 @@ from thonny.running import get_front_interpreter_for_subprocess
 
 logger = getLogger(__name__)
 
+RESULT_MARKER = "ForThonny: "
+
 
 class PylintAnalyzer(SubprocessProgramAnalyzer):
     def is_enabled(self):
@@ -44,7 +46,9 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             "--max-line-length=120",
             "--output-format=text",
             "--reports=n",
-            "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}, 'category' : {C!r} }}",
+            "--msg-template="
+            + RESULT_MARKER
+            + "{abspath},,{line},,{column},,{symbol},,{msg},,{msg_id},,{C}",
         ]
 
         # disallow unused globals only in main script
@@ -82,44 +86,59 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
         warnings = []
         for line in out_lines:
-            if line.startswith("{"):
-                try:
-                    atts = ast.literal_eval(line.strip())
-                except SyntaxError:
-                    logging.error("Can't parse Pylint line: " + line)
+            if line.startswith(RESULT_MARKER):
+                # See https://github.com/thonny/thonny/issues/2359 for the background of this format
+                atts_tuple = line[len(RESULT_MARKER) :].strip().split(",,")
+                if len(atts_tuple) != 7:
+                    logger.error("Can't parse Pylint line %r (%r)", line, atts_tuple)
                     continue
+                try:
+                    atts = {
+                        "filename": atts_tuple[0],
+                        "lineno": int(atts_tuple[1]),
+                        "col_offset": int(atts_tuple[2]),
+                        "symbol": atts_tuple[3],
+                        "msg": atts_tuple[4],
+                        "msg_id": atts_tuple[5],
+                        "category": atts_tuple[6],
+                    }
+                except ValueError:
+                    logger.exception("Can't parse Pylint line %r (%r)", line, atts_tuple)
+                    continue
+
+                if atts["msg_id"] not in checks_by_id:
+                    logger.warning("Unknown msg_id %r", atts["msg_id"])
+                    continue
+
+                check = checks_by_id[atts["msg_id"]]
+                if check.get("tho_xpln"):
+                    explanation = check["tho_xpln"]
                 else:
-                    check = checks_by_id[atts["msg_id"]]
-                    if check.get("tho_xpln"):
-                        explanation = check["tho_xpln"]
-                    else:
-                        explanation = check["msg_xpln"]
+                    explanation = check["msg_xpln"]
 
-                    if explanation.startswith("Used when an "):
-                        explanation = "It looks like the " + explanation[(len("Used when an ")) :]
-                    elif explanation.startswith("Emitted when an "):
-                        explanation = (
-                            "It looks like the " + explanation[(len("Emitted when an ")) :]
-                        )
-                    elif explanation.startswith("Used when a "):
-                        explanation = "It looks like the " + explanation[(len("Used when a ")) :]
-                    elif explanation.startswith("Emitted when a "):
-                        explanation = "It looks like the " + explanation[(len("Emitted when a ")) :]
-                    elif explanation.startswith("Used when "):
-                        explanation = "It looks like " + explanation[(len("Used when ")) :]
-                    elif explanation.startswith("Emitted when "):
-                        explanation = "It looks like " + explanation[(len("Emitted when ")) :]
+                if explanation.startswith("Used when an "):
+                    explanation = "It looks like the " + explanation[(len("Used when an ")) :]
+                elif explanation.startswith("Emitted when an "):
+                    explanation = "It looks like the " + explanation[(len("Emitted when an ")) :]
+                elif explanation.startswith("Used when a "):
+                    explanation = "It looks like the " + explanation[(len("Used when a ")) :]
+                elif explanation.startswith("Emitted when a "):
+                    explanation = "It looks like the " + explanation[(len("Emitted when a ")) :]
+                elif explanation.startswith("Used when "):
+                    explanation = "It looks like " + explanation[(len("Used when ")) :]
+                elif explanation.startswith("Emitted when "):
+                    explanation = "It looks like " + explanation[(len("Emitted when ")) :]
 
-                    atts["explanation"] = explanation
+                atts["explanation"] = explanation
 
-                    if check.get("tho_xpln_rst"):
-                        atts["explanation_rst"] = check["tho_xpln_rst"]
+                if check.get("tho_xpln_rst"):
+                    atts["explanation_rst"] = check["tho_xpln_rst"]
 
-                    if atts["category"] in ("I", "F"):
-                        atts["msg"] = "INTERNAL ERROR when analyzing the code: " + atts["msg"]
+                if atts["category"] in ("I", "F"):
+                    atts["msg"] = "INTERNAL ERROR when analyzing the code: " + atts["msg"]
 
-                    # atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
-                    warnings.append(atts)
+                # atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
+                warnings.append(atts)
 
         self.completion_handler(self, warnings)
 

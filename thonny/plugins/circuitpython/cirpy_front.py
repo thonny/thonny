@@ -1,15 +1,12 @@
 import sys
 from logging import getLogger
-from typing import Optional
 
-from thonny import ui_utils
-from thonny.flasher import Uf2Flasher
 from thonny.languages import tr
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
 )
-from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
 logger = getLogger(__name__)
 
@@ -95,91 +92,7 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = Uf2Flasher(
-            self,
-            firmware_name="CircuitPython",
-            variants_url="https://raw.githubusercontent.com/thonny/thonny/master/data/circuitpython-variants-uf2.json",
-        )
-        ui_utils.show_dialog(dlg)
+        show_uf2_installer(self, firmware_name="CircuitPython")
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "CircuitPython"
-
-
-class CircuitPythonFlashingDialog(Uf2FlashingDialog):
-    def __init__(self, master):
-        self._devices_info = {}
-        super(CircuitPythonFlashingDialog, self).__init__(master)
-
-    def get_instructions(self) -> Optional[str]:
-        return (
-            "This dialog allows you to install or update CircuitPython on your device.\n"
-            "\n"
-            "1. Plug in your device into bootloader mode by double-pressing the reset button.\n"
-            "2. Wait until device information appears.\n"
-            "3. (If nothing happens in 10 seconds, then try shorter or longer pauses between presses.)\n"
-            "4. Click 'Install' and wait until done.\n"
-            "5. Close the dialog and start programming!"
-        )
-
-    def _get_release_info_url(self):
-        return "https://api.github.com/repos/adafruit/circuitpython/releases/latest"
-
-    def _get_devices_info_url(self):
-        # use the master version, not bundled version
-        return "https://raw.githubusercontent.com/thonny/thonny/master/thonny/plugins/circuitpython/devices.json"
-
-    def _download_release_info(self):
-        # First download devices
-        import json
-        from urllib.request import urlopen
-
-        try:
-            with urlopen(self._get_devices_info_url()) as fp:
-                self._devices_info = json.loads(fp.read().decode("UTF-8"))
-        except Exception as e:
-            logger.warning(
-                "Could not find release info from %s", self._get_release_info_url(), exc_info=e
-            )
-            return
-
-        # ... and then release
-        super(CircuitPythonFlashingDialog, self)._download_release_info()
-
-    def get_download_url_and_size(self, board_id):
-        # TODO: should take vid/pid also into account. It looks like different models may have same board_id
-        if self._release_info is None or self._devices_info is None:
-            return None
-
-        if not "tag_name" in self._release_info:
-            raise RuntimeError("Could not find tag_name from %s" % self._get_release_info_url())
-
-        release = self._release_info["tag_name"]
-
-        if not self._devices_info.get(board_id, {}).get("FIRMWARE_DOWNLOAD", None):
-            raise RuntimeError(
-                "Could not find your board (%s) or its download url from %s (consider making a PR). "
-                % (board_id, self._get_devices_info_url())
-                + "Please download CircuitPython from https://circuitpython.org/ and install it manually."
-            )
-
-        url = self._devices_info[board_id]["FIRMWARE_DOWNLOAD"].format(
-            lang="en_US", release=release
-        )
-
-        # reporting approximate size for now. Downloader can take precise value from the header later
-        size = 2**20  # 1 MiB
-        return (url, size)
-
-    def _is_suitable_asset(self, asset, model_id):
-        # not used here
-        return False
-
-    def get_title(self):
-        return "Install CircuitPython for your device"
-
-    def get_target_filename(self):
-        return "circuitpython"
-
-    def _get_vid_pids_to_wait_for(self):
-        return CircuitPythonProxy.get_known_usb_vids_pids()
