@@ -371,6 +371,19 @@ class Completer:
         else:
             get_workbench().bell()
 
+    def _should_open_box_automatically(self, event):
+        assert isinstance(event.widget, tk.Text)
+        if not get_workbench().get_option("edit.automatic_completions"):
+            return False
+
+        # Don't autocomplete inside comments
+        line_prefix = event.widget.get("insert linestart", "insert")
+        if "#" in line_prefix:
+            # not very precise (eg. when inside a string), but good enough
+            return False
+
+        return True
+
     def _box_is_visible(self):
         if not self._completions_box:
             return False
@@ -403,10 +416,7 @@ class Completer:
         if widget.is_read_only():
             return
 
-        if (
-            not get_workbench().get_option("edit.automatic_completions")
-            and not self._box_is_visible()
-        ):
+        if not self._box_is_visible() and not self._should_open_box_automatically(event):
             return
 
         if event.keysym == "Escape":
