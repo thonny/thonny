@@ -143,7 +143,9 @@ class EditorInfoBox(tk.Toplevel):
 
     def _show_on_screen(self, x: int, y: int) -> None:
         global a_box_is_appearing
-        assert not a_box_is_appearing
+        if a_box_is_appearing:
+            logger.debug("Box already appearing, skipping _show_on_screen")
+            return
 
         try:
             a_box_is_appearing = True
