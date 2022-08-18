@@ -18,8 +18,8 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -s -m pip install --no-warn-script-location --no-cache-dir --no-binary mypy -r ..\requirements-regular-bundle.txt
 
 @echo ............... INSTALLING THONNY ...................................
-@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
-%BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b4.dev1-py3-none-any.whl
+%BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
+@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b4.dev1-py3-none-any.whl
 
 @echo ............... CLEANING PYTHON ............................
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
