@@ -1,4 +1,4 @@
-jedi>=0.18
+jedi>=0.18.1
 setuptools>=45.2
 pyserial>=3.4
 pylint>=2.4
