@@ -48,7 +48,7 @@ class MicrobitProxy(BareMetalMicroPythonProxy):
 
 
 class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
-    def _get_usb_driver_url(self):
+    def _get_intro_url(self):
         return "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html"
 
     def _get_intro_text(self):
