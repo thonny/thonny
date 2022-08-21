@@ -543,7 +543,7 @@ def format_items(items):
         return items[0]
     msg = "• " + "\n• ".join(items[:max_count])
     if len(items) > max_count:
-        msg += "\n ... %d more ..."
+        msg += "\n ... %d more ..." % (len(items) - max_count)
 
     return msg
 
