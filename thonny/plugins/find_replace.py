@@ -409,7 +409,7 @@ class FindDialog(CommonDialog):
 
 
 def load_plugin() -> None:
-    def cmd_open_find_dialog():
+    def cmd_open_find_dialog(event=None):
         if _active_find_dialog is not None:
             _active_find_dialog.focus_set()
         else:
@@ -432,5 +432,7 @@ def load_plugin() -> None:
         default_sequence=select_sequence("<Control-f>", "<Command-f>"),
         extra_sequences=["<Control-Greek_phi>"],
     )
+
+    get_workbench().bind("<<CtrlFInText>>", cmd_open_find_dialog, True)
 
     get_workbench().bind("<F3>", find_f3, True)

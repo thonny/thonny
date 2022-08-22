@@ -250,6 +250,7 @@ class EnhancedText(TweakableText):
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
         self.bind("<Control-d>", self._redirect_ctrld, True)
         self.bind("<Control-t>", self._redirect_ctrlt, True)
+        self.bind("<Control-f>", self._redirect_ctrlf, True)
         self.bind("<Shift-Control-space>", self._redirect_shift_control_space, True)
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
@@ -336,6 +337,12 @@ class EnhancedText(TweakableText):
         # I want to disable the swap effect of Ctrl-T in the text but still
         # keep the event for other purposes
         self.event_generate("<<CtrlTInText>>")
+        return "break"
+
+    def _redirect_ctrlf(self, event):
+        # I want to disable the Tk effect of Ctrl-T in the text but still
+        # keep the event for other purposes
+        self.event_generate("<<CtrlFInText>>")
         return "break"
 
     def tag_reset(self, tag_name):
