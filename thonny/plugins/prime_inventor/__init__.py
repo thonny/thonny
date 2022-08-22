@@ -12,7 +12,6 @@ LEGO_INVENTOR_PRIME_VIDS_PIDS = {
 }
 
 
-
 class PrimeInventorMicroPythonProxy(BareMetalMicroPythonProxy):
     @classmethod
     def should_consider_unknown_devices(cls):
@@ -63,4 +62,3 @@ def _load_plugin():
         sync_time=False,
     )
     VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(LEGO_INVENTOR_PRIME_VIDS_PIDS)
-
