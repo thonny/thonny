@@ -170,9 +170,7 @@ class CodeNavigationView(ui_utils.TreeFrame):
             pos = self.tree.get_children().index(iid)
             history_goto(pos)
 
-
 #
-
 
 def _history_backward_enabled():
     l = len(code_nav_view_history)
@@ -217,8 +215,8 @@ def history_forward():
         code_nav_view_pos -= 1
     history_goto(code_nav_view_pos)
 
-
 #
+
 
 
 def load_plugin() -> None:
