@@ -11,7 +11,6 @@ LEGO_INVENTOR_PRIME_VIDS_PIDS = {
     (0x0694, 0x0010),  # Robot Inventor
 }
 
-VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(LEGO_INVENTOR_PRIME_VIDS_PIDS)
 
 
 class PrimeInventorMicroPythonProxy(BareMetalMicroPythonProxy):
@@ -52,7 +51,7 @@ class PrimeInventorMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
         return False
 
 
-def load_plugin():
+def _load_plugin():
     add_micropython_backend(
         "PrimeInventorMicroPython",
         PrimeInventorMicroPythonProxy,
@@ -63,3 +62,5 @@ def load_plugin():
         validate_time=False,
         sync_time=False,
     )
+    VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND.update(LEGO_INVENTOR_PRIME_VIDS_PIDS)
+
