@@ -257,6 +257,6 @@ def load_plugin() -> None:
         caption=CLRHIST,
         tester=lambda: _history_clear_enabled(),
         group=30,
-        image="new-file_Linux",
+        image="delete",
         include_in_toolbar=not get_workbench().in_simple_mode(),
     )
