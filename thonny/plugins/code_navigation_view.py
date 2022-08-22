@@ -270,7 +270,7 @@ def _late_bind_buttons():
 def load_plugin() -> None:
     get_workbench().add_view(CodeNavigationView, tr("Code Navigation"), "s")
 
-    BACK = tr("Backward History")
+    BACK = tr("Back in code navigation history. Click right for more...")
     get_workbench().add_command(
         CMD_HISTORY_BACK,
         "edit",
@@ -283,7 +283,7 @@ def load_plugin() -> None:
         include_in_toolbar=not get_workbench().in_simple_mode(),
     )
 
-    FORWARD = tr("Forward History")
+    FORWARD = tr("Forward in code navigation history. Click right for more...")
     get_workbench().add_command(
         CMD_HISTORY_FORWARD,
         "edit",
@@ -296,7 +296,7 @@ def load_plugin() -> None:
         include_in_toolbar=not get_workbench().in_simple_mode(),
     )
 
-    CLRHIST = tr("Clear History")
+    CLRHIST = tr("Clear code navigation history")
     get_workbench().add_command(
         "history_clear",
         "edit",
