@@ -4,21 +4,97 @@ from logging import getLogger
 
 import tkinter as tk
 
-from thonny import get_workbench, ui_utils
+from thonny import get_workbench
+from thonny import ui_utils
+from thonny.ui_utils import ems_to_pixels
+
 from thonny.languages import tr
 
 logger = getLogger(__name__)
 
 
-INFO_TEXT = "INFO"
+INFO_TEXT = tr("---")
+
+user_root = os.path.expanduser("~")
+
+code_nav_view_history = []
+code_nav_view_pos = -1
+
+code_nav_view = None
+
+
+class CodeNavigationItem(object):
+    def __init__(self, file, line_no, comment):
+        self.file = file
+        if self.file.startswith(user_root + os.sep):
+            self.file = self.file.replace(user_root, "~")
+        self.line = line_no
+        self.comment = comment
+
+    def get_path(self):
+        return os.path.expanduser(self.file)
+
+    def __eq__(self, a):
+        return self.file == a.file and self.line == a.line
+
+
+#
+
+
+def clr_code_history():
+
+    # todo
+    # clear on backend restart event ?
+
+    global code_nav_view_history
+    code_nav_view_history.clear()
+
+    global code_nav_view_pos
+    code_nav_view_pos = -1
+
+    if code_nav_view:
+        code_nav_view._update(None)
+
+
+def add_code_history(file, line, comment=None):
+    global code_nav_view_history
+    global code_nav_view_pos
+
+    if comment is None:
+        comment = ""
+        try:
+            with open(file) as f:
+                lines = f.read().splitlines()
+                comment = lines[line - 1].rstrip()
+        except:
+            pass
+
+    hist = CodeNavigationItem(file, line, comment)
+
+    if code_nav_view_pos >= 0:
+        code_nav_view_history = code_nav_view_history[code_nav_view_pos:]
+
+    if len(code_nav_view_history) > 0:
+        if code_nav_view_history[0] == hist:
+            # do not add same reference again
+            return
+
+    code_nav_view_history.insert(0, hist)
+    code_nav_view_pos = 0
+
+    if code_nav_view:
+        code_nav_view._update(None)
+
+
+#
 
 
 class CodeNavigationView(ui_utils.TreeFrame):
     def __init__(self, master):
 
         # todo workbench view / event ?
-        global code_nav
-        code_nav = self
+        global code_nav_view
+        code_nav_view = self
 
         ui_utils.TreeFrame.__init__(
             self,
@@ -31,16 +107,16 @@ class CodeNavigationView(ui_utils.TreeFrame):
             ),
         )
 
-        # todo bind to reload event for update
+        # todo bind to reload event for update -> clear history
 
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
+        # get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
 
         self.tree.bind("<<TreeviewSelect>>", self._on_click)
         self.tree.bind("<Map>", self._update, True)
 
-        self.tree.column("file", width=250, anchor=tk.W)
-        self.tree.column("line_no", width=150, anchor=tk.W)
-        self.tree.column("code_info", width=500, anchor=tk.W)
+        self.tree.column("file", width=ems_to_pixels(30), anchor=tk.W)
+        self.tree.column("line_no", width=ems_to_pixels(4), anchor=tk.W)
+        self.tree.column("code_info", width=ems_to_pixels(30), anchor=tk.W)
 
         self.tree.heading("file", text=tr("File"), anchor=tk.W)
         self.tree.heading("line_no", text=tr("Line"), anchor=tk.W)
@@ -55,12 +131,9 @@ class CodeNavigationView(ui_utils.TreeFrame):
 
     def _update(self, event):
 
-        self.clear()
+        self._clear()
 
-        # if not self.winfo_ismapped():
-        #    return
-
-        for hist in code_nav_history:
+        for hist in code_nav_view_history:
             self.add(hist.file, hist.line, hist.comment)
 
         if len(self.tree.get_children()) == 0:
@@ -69,92 +142,123 @@ class CodeNavigationView(ui_utils.TreeFrame):
                 "end",
                 values=(
                     "",
-                    tr(INFO_TEXT),
+                    INFO_TEXT,
                     tr("use goto code with <Control>+MouseClick to get the code reference here."),
                 ),
             )
+        else:
+            self.set_nav_selection()
 
-    def clear(self):
+    def set_nav_selection(self):
+        if code_nav_view_pos >= 0:
+            self.tree.selection_clear()
+            sel = self.tree.get_children()[code_nav_view_pos]
+            self.tree.selection_add(sel)
+
+    def _clear(self):
         self.tree.delete(*self.tree.get_children())
 
     def add(self, file, line_no, code_info):
         self.tree.insert("", "end", values=(file, line_no, code_info))
 
     def _on_click(self, event):
-
         iid = self.tree.focus()
-
         if iid != "":
             values = self.tree.item(iid)["values"]
-            print(values)
-            file = values[0]
-            line_no = values[1]
-            if line_no and line_no != tr(INFO_TEXT):
-                file = os.path.expanduser(file)
-                editor = get_workbench().get_editor_notebook().show_file(file)
-                editor.select_line(line_no)
+            if values[1] == INFO_TEXT:
+                return
+            pos = self.tree.get_children().index(iid)
+            history_goto(pos)
 
 
 #
 
-code_nav_history = []
-user_root = os.path.expanduser("~")
+
+def _history_backward_enabled():
+    l = len(code_nav_view_history)
+    if l == 0:
+        return False
+    return code_nav_view_pos < l - 1
 
 
-class CodeNavigationItem(object):
-    def __init__(self, file, line_no, comment):
-        self.file = file
-        if self.file.startswith(user_root + os.sep):
-            self.file = self.file.replace(user_root, "~")
-        self.line = line_no
-        self.comment = comment
-
-    def __eq__(self, a):
-        return self.file == a.file and self.line == a.line
+def _history_forward_enabled():
+    if len(code_nav_view_history) == 0:
+        return False
+    return code_nav_view_pos > 0
 
 
-# todo singleton, replace by ... ???
-code_nav = None
+def _history_clear_enabled():
+    return len(code_nav_view_history) > 0
 
 
-def clr_code_history():
+def history_goto(pos):
+    global code_nav_view_pos
+    code_nav_view_pos = pos
 
-    # todo
-    # clear on backend restart event, and separate toolbar button
+    nav = code_nav_view_history[pos]
 
-    global code_nav_history
-    code_nav_history.clear()
+    editor = get_workbench().get_editor_notebook().show_file(nav.get_path())
+    editor.select_line(nav.line)
+
+    if code_nav_view:
+        code_nav_view._update(None)
 
 
-def add_code_history(file, line, comment=None):
-    print("add_code_history", file, line)
-    global code_nav_history
-    if comment is None:
-        comment = ""
-        try:
-            with open(file) as f:
-                lines = f.read().splitlines()
-                comment = lines[line - 1].rstrip()
-        except:
-            pass
+def history_backward():
+    global code_nav_view_pos
+    if code_nav_view_pos < len(code_nav_view_history) - 1:
+        code_nav_view_pos += 1
+    history_goto(code_nav_view_pos)
 
-    hist = CodeNavigationItem(file, line, comment)
 
-    if len(code_nav_history) > 0:
-        if code_nav_history[0] == hist:
-            # do not add same reference again
-            return
-
-    code_nav_history.insert(0, hist)
-
-    if code_nav:
-        code_nav._update(None)
+def history_forward():
+    global code_nav_view_pos
+    if code_nav_view_pos > 0:
+        code_nav_view_pos -= 1
+    history_goto(code_nav_view_pos)
 
 
 #
-# todo
-# separate toolbar button for going backward amd forward ?
 
 
 def load_plugin() -> None:
     get_workbench().add_view(CodeNavigationView, tr("Code Navigation"), "s")
+
+    BACK = tr("Backward History")
+    get_workbench().add_command(
+        "history_back",
+        "edit",
+        BACK,
+        lambda: history_backward(),
+        caption=BACK,
+        tester=lambda: _history_backward_enabled(),
+        group=30,
+        image="nav-backward",
+        include_in_toolbar=not get_workbench().in_simple_mode(),
+    )
+
+    FORWARD = tr("Forward History")
+    get_workbench().add_command(
+        "history_forward",
+        "edit",
+        FORWARD,
+        lambda: history_forward(),
+        caption=FORWARD,
+        tester=lambda: _history_forward_enabled(),
+        group=30,
+        image="nav-forward",
+        include_in_toolbar=not get_workbench().in_simple_mode(),
+    )
+
+    CLRHIST = tr("Clear History")
+    get_workbench().add_command(
+        "history_clear",
+        "edit",
+        CLRHIST,
+        lambda: clr_code_history(),
+        caption=CLRHIST,
+        tester=lambda: _history_clear_enabled(),
+        group=30,
+        image="new-file_Linux",
+        include_in_toolbar=not get_workbench().in_simple_mode(),
+    )
