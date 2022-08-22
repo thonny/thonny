@@ -15,12 +15,17 @@ logger = getLogger(__name__)
 
 INFO_TEXT = tr("---")
 
+CMD_HISTORY_BACK = "history_back"
+CMD_HISTORY_FORWARD = "history_forward"
+
 user_root = os.path.expanduser("~")
 
 code_nav_view_history = []
 code_nav_view_pos = -1
 
 code_nav_view = None
+
+code_nav_bind_late = False
 
 
 class CodeNavigationItem(object):
@@ -59,6 +64,9 @@ def clr_code_history():
 def add_code_history(file, line, comment=None):
     global code_nav_view_history
     global code_nav_view_pos
+
+    # todo ?
+    _late_bind_buttons()
 
     if comment is None:
         comment = ""
@@ -170,7 +178,9 @@ class CodeNavigationView(ui_utils.TreeFrame):
             pos = self.tree.get_children().index(iid)
             history_goto(pos)
 
+
 #
+
 
 def _history_backward_enabled():
     l = len(code_nav_view_history)
@@ -215,8 +225,55 @@ def history_forward():
         code_nav_view_pos -= 1
     history_goto(code_nav_view_pos)
 
+
 #
 
+
+def _show_history_menu(event, element_range):
+    popup_menu = tk.Menu()
+    for pos in element_range:
+        nav = code_nav_view_history[pos]
+        fnam = os.path.basename(nav.file)
+        lbl = fnam + " : " + str(nav.line)
+
+        def _goto(x):
+            return lambda: history_goto(x)
+
+        popup_menu.add_command(label=lbl, compound="left", command=_goto(pos))
+    popup_menu.tk_popup(event.x_root, event.y_root)
+
+
+def _show_back_menu(event):
+    element_range = range(code_nav_view_pos + 1, len(code_nav_view_history))
+    _show_history_menu(event, element_range)
+
+
+def _show_forward_menu(event):
+    element_range = reversed(range(0, code_nav_view_pos))
+    _show_history_menu(event, element_range)
+
+
+#
+
+
+def _late_bind_buttons():
+
+    # todo ?
+
+    global code_nav_bind_late
+    if code_nav_bind_late:
+        return
+
+    code_nav_bind_late = True
+    get_workbench().get_toolbar_button(CMD_HISTORY_BACK).bind(
+        "<Button-3>", lambda x: _show_back_menu(x)
+    )
+    get_workbench().get_toolbar_button(CMD_HISTORY_FORWARD).bind(
+        "<Button-3>", lambda x: _show_forward_menu(x)
+    )
+
+
+#
 
 
 def load_plugin() -> None:
@@ -224,7 +281,7 @@ def load_plugin() -> None:
 
     BACK = tr("Backward History")
     get_workbench().add_command(
-        "history_back",
+        CMD_HISTORY_BACK,
         "edit",
         BACK,
         lambda: history_backward(),
@@ -237,7 +294,7 @@ def load_plugin() -> None:
 
     FORWARD = tr("Forward History")
     get_workbench().add_command(
-        "history_forward",
+        CMD_HISTORY_FORWARD,
         "edit",
         FORWARD,
         lambda: history_forward(),
@@ -257,6 +314,6 @@ def load_plugin() -> None:
         caption=CLRHIST,
         tester=lambda: _history_clear_enabled(),
         group=30,
-        image="delete",
+        image="clear_co",
         include_in_toolbar=not get_workbench().in_simple_mode(),
     )
