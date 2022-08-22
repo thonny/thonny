@@ -48,8 +48,7 @@ class CodeNavigationItem(object):
 
 def clr_code_history():
 
-    # todo
-    # clear on backend restart event ?
+    # todo, clear on backend restart event ?
 
     global code_nav_view_history
     code_nav_view_history.clear()
@@ -65,7 +64,6 @@ def add_code_history(file, line, comment=None):
     global code_nav_view_history
     global code_nav_view_pos
 
-    # todo ?
     _late_bind_buttons()
 
     if comment is None:
@@ -100,7 +98,6 @@ def add_code_history(file, line, comment=None):
 class CodeNavigationView(ui_utils.TreeFrame):
     def __init__(self, master):
 
-        # todo workbench view / event ?
         global code_nav_view
         code_nav_view = self
 
@@ -114,10 +111,6 @@ class CodeNavigationView(ui_utils.TreeFrame):
                 2,
             ),
         )
-
-        # todo bind to reload event for update -> clear history
-
-        # get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
 
         self.tree.bind("<<TreeviewSelect>>", self._on_click)
         self.tree.bind("<Map>", self._update, True)
@@ -257,8 +250,6 @@ def _show_forward_menu(event):
 
 
 def _late_bind_buttons():
-
-    # todo ?
 
     global code_nav_bind_late
     if code_nav_bind_late:
