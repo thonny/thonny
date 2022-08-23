@@ -21,6 +21,7 @@ Several companies and organizations have provided us with free hardware for test
 * M5Stack (https://m5stack.com/)
 * Micro:bit educational foundation (https://microbit.org/)
 * Calliope (https://calliope.cc/en)
+* @bwshockley (https://minifigboards.com/)
 
 Python
 ------
