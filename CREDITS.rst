@@ -56,6 +56,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Anders Pamdal
 * Andrew Scheller
 * André Roberge
+* Andy Piper
 * Ankith
 * Antonio Carlos
 * atesin
