@@ -2,6 +2,18 @@
 Version history
 ===============
 
+4.0.0 (2022-08-22)
+==================
+* Fix error when pressing Ctrl-D with unsubmitted input, #2388
+* Fix the error when clicking info line in TODO view (by @kr-g), #2389
+* Show previous location when re-loading externally modified file, #1589, #1455, #1968
+* Don't propose completions automatically in comments, #2393
+* Fix a_box_is_appearing completion error, #2256
+* INTERNAL: Simplify jedi_utils, drop support for versions below 0.18.1
+* Upgrade deps in XXL bundle
+* Fix "Seed find/replace with currently-selected text" for Linux, #2356
+* Update German translations (by the contributors in POEditor)
+
 4.0.0b4 (2022-08-14)
 ====================
 * CHANGED: Require single click for toggling a breakpoint, #2293

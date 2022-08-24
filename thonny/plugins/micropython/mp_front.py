@@ -427,13 +427,15 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._has_opened_python_flasher = False
 
-        intro_label = ttk.Label(self, text=self._get_intro_text())
-        intro_label.grid(row=0, column=0, sticky="nw")
+        intro_text = self._get_intro_text()
+        if intro_text:
+            intro_label = ttk.Label(self, text=intro_text)
+            intro_label.grid(row=0, column=0, sticky="nw")
 
-        driver_url = self._get_usb_driver_url()
-        if driver_url:
-            driver_url_label = create_url_label(self, driver_url)
-            driver_url_label.grid(row=1, column=0, sticky="nw")
+        intro_url = self._get_intro_url()
+        if intro_url:
+            intro_url_label = create_url_label(self, intro_url)
+            intro_url_label.grid(row=1, column=0, sticky="nw")
 
         port_label = ttk.Label(
             self, text=tr("Port or WebREPL") if self.allow_webrepl else tr("Port")
@@ -488,17 +490,18 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             pady=(ems_to_pixels(2.0), 0),
         )
 
-        self.add_checkbox(
-            self.backend_name + ".sync_time",
-            row=11,
-            description=tr("Synchronize device's real time clock"),
-        )
+        if self.may_have_rtc():
+            self.add_checkbox(
+                self.backend_name + ".sync_time",
+                row=11,
+                description=tr("Synchronize device's real time clock"),
+            )
 
-        self.add_checkbox(
-            self.backend_name + ".local_rtc",
-            row=12,
-            description=tr("Use local time in real time clock"),
-        )
+            self.add_checkbox(
+                self.backend_name + ".local_rtc",
+                row=12,
+                description=tr("Use local time in real time clock"),
+            )
 
         self.add_checkbox(
             self.backend_name + ".restart_interpreter_before_run",
@@ -638,7 +641,10 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
 
-    def _get_usb_driver_url(self) -> Optional[str]:
+    def may_have_rtc(self):
+        return True
+
+    def _get_intro_url(self) -> Optional[str]:
         return None
 
     def _has_flashing_dialog(self):

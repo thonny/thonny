@@ -85,7 +85,7 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
 
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
-    def _get_usb_driver_url(self):
+    def _get_intro_url(self):
         return "https://learn.adafruit.com/welcome-to-circuitpython/installing-circuitpython"
 
     def _has_flashing_dialog(self):

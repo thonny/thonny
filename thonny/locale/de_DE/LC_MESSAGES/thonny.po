@@ -1876,36 +1876,37 @@ msgstr "Unterstützung"
 
 #: thonny/editors.py:386 thonny/editors.py:401
 msgid "Could not save"
-msgstr ""
+msgstr "Konnte nicht gespeichert werden"
 
 #: thonny/plugins/general_config_page.py:135
 msgid "Warning"
-msgstr ""
+msgstr "Warnung"
 
 #: thonny/plugins/general_config_page.py:136
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
-msgstr ""
+msgstr "Wenn der Wert einer Umgebungsvariable in Anführungszeichen gesetzt wird, werden die Anführungszeichen Teil des Werts.\n"
+"Ist das beabsichtigt?"
 
 #: thonny/workbench.py:859
 msgid "Install MicroPython"
-msgstr ""
+msgstr "MicroPython installieren"
 
 #: thonny/workbench.py:863
 msgid "Install CircuitPython"
-msgstr ""
+msgstr "CircuitPython installieren"
 
 #: thonny/plugins/backend_config_page.py:212
 msgid "Make uploaded shebang scripts executable"
-msgstr ""
+msgstr "Hochgeladene Shebang-Skripte ausführbar machen"
 
 #: thonny/plugins/editor_config_page.py:91
 msgid "Make saved shebang scripts executable"
-msgstr ""
+msgstr "Gespeicherte Shebang-Skripte ausführbar machen"
 
 #: thonny/plugins/files.py:224
 msgid "Activate virtual environment"
-msgstr ""
+msgstr "Virtuelle Umgebung aktivieren"
 
 #: thonny/plugins/micropython/pip_gui.py:77 thonny/plugins/pip_gui.py:426
 msgid "Target"
@@ -1913,11 +1914,11 @@ msgstr "Ziel"
 
 #: thonny/plugins/pythontutor.py:41
 msgid "Visualize current script at Python Tutor"
-msgstr ""
+msgstr "Aktuelles Skript im Python Tutor visualisieren"
 
 #: thonny/plugins/todo_view.py:42
 msgid "Line"
-msgstr ""
+msgstr "Zeile"
 
 #: thonny/plugins/todo_view.py:43
 msgid "Info"
@@ -1925,7 +1926,7 @@ msgstr "Info"
 
 #: thonny/plugins/todo_view.py:121
 msgid "No line marked with #todo found"
-msgstr ""
+msgstr "Keine mit #todo markierte Zeile gefunden"
 
 #: thonny/plugins/todo_view.py:141
 msgid "TODO"
@@ -1934,19 +1935,19 @@ msgstr "ToDo"
 #: thonny/plugins/circuitpython/cirpy_front.py:98
 #: thonny/plugins/micropython/mp_front.py:530
 msgid "Install or update %s"
-msgstr ""
+msgstr "%s installieren oder aktualisieren"
 
 #: thonny/plugins/cpython_frontend/__init__.py:24
 msgid "Local Python 3"
-msgstr ""
+msgstr "Lokales Python 3"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:239
 msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
-msgstr ""
+msgstr "Es kann eine vorhandene virtuelle Umgebung auch über das Rechtsklick-Kontextmenü in der Dateinavigation aktiviert werden, wenn ein virtueller Umgebungsordner oder die darin enthaltene Datei 'pyveng.cfg' ausgewählt wird."
 
 #: thonny/plugins/ev3/__init__.py:72
 msgid "Preparations (skip the VS Code part)"
-msgstr ""
+msgstr "Vorbereitungen (überspringe den VS-Code-Teil)"
 
 #: thonny/plugins/ev3/__init__.py:78
 msgid "Default password"
