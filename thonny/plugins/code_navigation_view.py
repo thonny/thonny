@@ -17,6 +17,7 @@ INFO_TEXT = tr("---")
 
 CMD_HISTORY_BACK = "history_back"
 CMD_HISTORY_FORWARD = "history_forward"
+CMD_HISTORY_CLR = "history_clear"
 
 user_root = os.path.expanduser("~")
 
@@ -267,6 +268,11 @@ def _late_bind_buttons():
 #
 
 
+def in_expert_mode():
+    # todo refactor to workbench
+    return get_workbench().get_ui_mode() == "expert"
+
+
 def load_plugin() -> None:
     get_workbench().add_view(CodeNavigationView, tr("Code Navigation"), "s")
 
@@ -280,7 +286,7 @@ def load_plugin() -> None:
         tester=lambda: _history_backward_enabled(),
         group=30,
         image="nav-backward",
-        include_in_toolbar=not get_workbench().in_simple_mode(),
+        include_in_toolbar=in_expert_mode(),
     )
 
     FORWARD = tr("Forward in code navigation history. Click right for more...")
@@ -293,12 +299,12 @@ def load_plugin() -> None:
         tester=lambda: _history_forward_enabled(),
         group=30,
         image="nav-forward",
-        include_in_toolbar=not get_workbench().in_simple_mode(),
+        include_in_toolbar=in_expert_mode(),
     )
 
     CLRHIST = tr("Clear code navigation history")
     get_workbench().add_command(
-        "history_clear",
+        CMD_HISTORY_CLR,
         "edit",
         CLRHIST,
         lambda: clr_code_history(),
@@ -306,5 +312,5 @@ def load_plugin() -> None:
         tester=lambda: _history_clear_enabled(),
         group=30,
         image="clear_co",
-        include_in_toolbar=not get_workbench().in_simple_mode(),
+        include_in_toolbar=in_expert_mode(),
     )
