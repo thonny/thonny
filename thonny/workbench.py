@@ -1715,9 +1715,12 @@ class Workbench(tk.Tk):
             return False
 
         if view.hidden:  # type: ignore
-            notebook.insert(
-                "auto", view.home_widget, text=self._view_records[view_id]["label"]  # type: ignore
-            )
+            label = None
+            if hasattr(view, "get_tab_text"):
+                label = view.get_tab_text()
+            if not label:
+                label = self._view_records[view_id]["label"]
+            notebook.insert("auto", view.home_widget, text=label)  # type: ignore
             view.hidden = False  # type: ignore
             if hasattr(view, "on_show"):  # type: ignore
                 view.on_show()
