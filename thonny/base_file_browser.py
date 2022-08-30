@@ -184,6 +184,9 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.set_children("")
         self.current_focus = None
 
+    def path_exists(self, path: str) -> Optional[bool]:
+        return None
+
     def request_focus_into(self, path):
         return self.focus_into(path)
 
@@ -808,14 +811,16 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.join(parent_path, name)
 
-        if name in self._cached_child_data[parent_path]:
-            # TODO: ignore case in windows
+        if self.path_exists(path):
             messagebox.showerror("Error", "The file '" + path + "' already exists", master=self)
             return self.create_new_file()
         else:
-            self.open_file(path)
+            self.create_new_file_editor(path)
 
         return path
+
+    def create_new_file_editor(self, path):
+        raise NotImplementedError()
 
     def delete(self):
         selection = self.get_selection_info(True)
@@ -1037,6 +1042,12 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().unbind("WindowFocusIn", self.on_window_focus_in)
         get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
 
+    def path_exists(self, path: str) -> Optional[bool]:
+        return os.path.exists(path)
+
+    def create_new_file_editor(self, path):
+        get_workbench().get_editor_notebook().open_new_file(path)
+
     def request_dirs_child_data(self, node_id, paths):
         self.cache_dirs_child_data(get_dirs_children_info(paths, show_hidden_files()))
         self.render_children_from_cache(node_id)
@@ -1152,6 +1163,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             return runner.get_node_label()
 
         return "Back-end"
+
+    def create_new_file_editor(self, path):
+        get_workbench().get_editor_notebook().open_new_file(path, remote=True)
 
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
