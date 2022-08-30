@@ -1792,6 +1792,7 @@ class ChoiceDialog(CommonDialogEx):
         choices=[],
         initial_choice_index=None,
     ) -> None:
+        self.result = None
         super().__init__(master=master)
 
         self.title(title)
