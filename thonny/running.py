@@ -993,10 +993,6 @@ class SubprocessProxy(BackendProxy, ABC):
 
         logger.info("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
 
-        extra_params = {}
-        if sys.version_info >= (3, 6):
-            extra_params["encoding"] = "utf-8"
-
         self._proc = subprocess.Popen(
             cmd_line,
             bufsize=0,
@@ -1007,7 +1003,7 @@ class SubprocessProxy(BackendProxy, ABC):
             env=self._get_environment(),
             universal_newlines=True,
             creationflags=creationflags,
-            **extra_params,
+            encoding="utf-8",
         )
 
         self._send_initial_input()
