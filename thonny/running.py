@@ -995,6 +995,7 @@ class SubprocessProxy(BackendProxy, ABC):
 
         self._proc = subprocess.Popen(
             cmd_line,
+            executable=cmd_line[0],
             bufsize=0,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
