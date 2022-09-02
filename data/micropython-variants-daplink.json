@@ -9,7 +9,8 @@
                 "version": "20220831-unstable-v1.19.1-358-g0b26efe73",
                 "url": "https://micropython.org/resources/firmware/microbit-20220831-unstable-v1.19.1-358-g0b26efe73.hex"
             }
-        ]
+        ],
+        "latest_prerelease_regex": "\\d{8}-unstable-v1.19.1-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "BBC",

@@ -17,7 +17,8 @@
                 "version": "1.18",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20220117-v1.18.uf2"
             }
-        ]
+        ],
+        "latest_prerelease_regex": "\\d{8}-unstable-v1.19.1-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "Adafruit",

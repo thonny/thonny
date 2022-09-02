@@ -194,7 +194,11 @@ simplified_microbits = [
             {
                 "version": "1.0.1",
                 "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex",
-            }
+            },
+            {
+                "version": "1.1.0-beta.1",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.0-beta.1/microbit-micropython-v1.1.0-beta.1.hex",
+            },
         ],
         "popular": True,
     },
@@ -208,7 +212,11 @@ simplified_microbits = [
             {
                 "version": "2.0.0",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
-            }
+            },
+            {
+                "version": "2.1.0-beta.1",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0-beta.1/micropython-microbit-v2.1.0-beta.1.hex",
+            },
         ],
         "popular": True,
     },
@@ -246,6 +254,7 @@ save_variants(
     "uf2",
     {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "micropython-variants-uf2.json",
+    latest_prerelease_regex=UNSTABLE_VERSION,
 )
 
 
@@ -254,6 +263,7 @@ save_variants(
     "daplink",
     {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "micropython-variants-daplink.json",
+    latest_prerelease_regex=UNSTABLE_VERSION,
 )
 
 print("Done")
