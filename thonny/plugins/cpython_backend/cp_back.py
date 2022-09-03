@@ -943,7 +943,7 @@ class MainCPythonBackend(MainBackend):
         if result is not None:
             return result, "stack"
 
-        if getattr(sys, "last_traceback"):
+        if getattr(sys, "last_traceback", None):
             result = lookup_from_tb(getattr(sys, "last_traceback"))
             if result:
                 return result, "last_traceback"
