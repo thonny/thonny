@@ -807,24 +807,26 @@ class TextFrame(ttk.Frame):
         }
         final_text_options.update(text_options)
         self.text = text_class(self, **final_text_options)
-        self.text.grid(row=0, column=2, sticky=tk.NSEW)
 
         if vertical_scrollbar:
             self._vbar = vertical_scrollbar_class(
                 self, orient=tk.VERTICAL, style=vertical_scrollbar_style
             )
-            self._vbar.grid(row=0, column=3, sticky=tk.NSEW)
             self._vbar["command"] = self._vertical_scroll
             self.text["yscrollcommand"] = self._vertical_scrollbar_update
+        else:
+            self._vbar = None
 
         if horizontal_scrollbar:
             self._hbar = horizontal_scrollbar_class(
                 self, orient=tk.HORIZONTAL, style=horizontal_scrollbar_style
             )
-            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=3)
             self._hbar["command"] = self._horizontal_scroll
             self.text["xscrollcommand"] = self._horizontal_scrollbar_update
+        else:
+            self._hbar = None
 
+        self.grid_main_widgets()
         self.columnconfigure(2, weight=1)
         self.rowconfigure(0, weight=1)
 
@@ -835,6 +837,13 @@ class TextFrame(ttk.Frame):
         # TODO: add context menu?
 
         self._reload_theme_options(None)
+
+    def grid_main_widgets(self):
+        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        if self._vbar:
+            self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+        if self._hbar:
+            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=3)
 
     def focus_set(self):
         self.text.focus_set()
