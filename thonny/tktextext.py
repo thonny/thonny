@@ -827,7 +827,7 @@ class TextFrame(ttk.Frame):
             self._hbar = None
 
         self.grid_main_widgets()
-        self.columnconfigure(2, weight=1)
+        self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
         self._ui_theme_change_binding = self.bind(
