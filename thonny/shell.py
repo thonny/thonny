@@ -163,8 +163,11 @@ class ShellView(tk.PanedWindow):
 
         # Should update tab text only if the tab is present
         for tab in notebook.tabs():
-            if container.winfo_pathname(container.winfo_id()) == tab:
-                notebook.tab(container, text=self.get_tab_text())
+            try:
+                if container.winfo_pathname(container.winfo_id()) == tab:
+                    notebook.tab(container, text=self.get_tab_text())
+            except TclError:
+                logger.exception("Could not update tab title")
 
     def init_plotter(self):
         self.plotter = None
