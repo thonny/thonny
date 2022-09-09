@@ -25,7 +25,7 @@ class AstView(ui_utils.TreeFrame):
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
         self.tree.bind("<<Copy>>", self._copy_to_clipboard)
         self.tree.bind("<Map>", self._update, True)
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update, True)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
         get_workbench().bind_class("Text", "<Double-Button-1>", self._update, True)
