@@ -408,7 +408,7 @@ class Runner:
             get_workbench().update()
             sleep(0.01)
 
-        raise TimeoutError("Backend was not restarted in time")
+        raise TimeoutError("Backend did not respond in time")
 
     def _get_active_arguments(self):
         if get_workbench().get_option("view.show_program_arguments"):
