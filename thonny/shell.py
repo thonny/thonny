@@ -162,9 +162,9 @@ class ShellView(tk.PanedWindow):
         notebook = cast(ttk.Notebook, container.master)
 
         # Should update tab text only if the tab is present
-        for tab in notebook.tabs():
+        for tab in notebook.winfo_children():
             try:
-                if container.winfo_pathname(container.winfo_id()) == tab:
+                if container == tab:
                     notebook.tab(container, text=self.get_tab_text())
             except TclError:
                 logger.exception("Could not update tab title")
