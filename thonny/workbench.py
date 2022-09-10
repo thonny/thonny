@@ -2415,6 +2415,8 @@ class Workbench(tk.Tk):
         sys.last_traceback = tb
         if isinstance(val, KeyboardInterrupt):
             # no need to report this, just let it close
+            logger.info("Got KeyboardInterrupt, closing")
+            self._on_close()
             return
         self.report_exception()
 
