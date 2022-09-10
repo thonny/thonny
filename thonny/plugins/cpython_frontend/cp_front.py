@@ -30,6 +30,7 @@ logger = getLogger(__name__)
 
 class LocalCPythonProxy(SubprocessProxy):
     def __init__(self, clean: bool) -> None:
+        logger.info("Creating LocalCPythonProxy")
         executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)

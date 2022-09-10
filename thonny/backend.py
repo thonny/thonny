@@ -29,7 +29,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    UserSystemExit,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
@@ -303,11 +302,6 @@ class MainBackend(BaseBackend, ABC):
 
         real_response = self._prepare_command_response(response, cmd)
         self.send_message(real_response)
-
-        # TODO: temp hack
-        if isinstance(response, UserSystemExit):
-            print("hola")
-            sys.exit(response.returncode)
 
     def _cmd_get_dirs_children_info(self, cmd):
         """Provides information about immediate children of paths opened in a file browser"""

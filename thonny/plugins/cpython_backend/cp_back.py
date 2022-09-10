@@ -40,7 +40,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    UserSystemExit,
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
@@ -771,9 +770,6 @@ class MainCPythonBackend(MainBackend):
                 source, filename, execution_mode, ast_postprocessors
             )
         except SystemExit as e:
-            # TODO: hack
-            # let frontend know the exit was caused by the user code
-            self.send_message(UserSystemExit(e.code))
             sys.exit(e.code)
         finally:
             self._current_executor = None

@@ -39,7 +39,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    UserSystemExit,
     is_same_path,
     parse_message,
     path_startswith,
@@ -97,6 +96,7 @@ class Runner:
         self._publishing_events = False
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
+        self._last_accepted_backend_command = None
 
     def start(self) -> None:
         global _console_allocated
@@ -269,6 +269,7 @@ class Runner:
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
+            self._last_accepted_backend_command = cmd
             if isinstance(cmd, InlineCommand):
                 self._proxy.running_inline_command = True
 
@@ -567,15 +568,8 @@ class Runner:
 
                 msg_count += 1
             except BackendTerminatedError as exc:
-                self._handle_backend_termination(
-                    exc.returncode, getattr(self._proxy, "user_exit", False)
-                )
+                self._handle_backend_termination(exc.returncode)
                 return False
-
-            # TODO: temp hack
-            # Remember there was user exit, before the exit actually arrives
-            if isinstance(msg, UserSystemExit):
-                self._proxy.user_exit = True
 
             # change state
             if isinstance(msg, ToplevelResponse):
@@ -606,7 +600,7 @@ class Runner:
 
         self._send_postponed_commands()
 
-    def _handle_backend_termination(self, returncode: int, user_exit: bool) -> None:
+    def _handle_backend_termination(self, returncode: int) -> None:
         err = f"Process ended with exit code {returncode}."
 
         try:
@@ -621,8 +615,14 @@ class Runner:
 
         get_workbench().become_active_window(False)
         self.destroy_backend()
-        if user_exit:
+        if self._should_restart_after_command(self._last_accepted_backend_command):
             self.restart_backend(clean=True, automatic=True)
+
+    def _should_restart_after_command(self, cmd: CommandToBackend):
+        if cmd is None or not hasattr(cmd, "name"):
+            return False
+
+        return cmd.name in ["Run", "run", "Debug", "debug", "execute_source"]
 
     def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
@@ -891,7 +891,6 @@ class SubprocessProxy(BackendProxy, ABC):
         self._welcome_text = ""
 
         self._proc = None
-        self._terminated_readers = 0
         self._response_queue = None
         self._sys_path = []
         self._usersitepackages = None
@@ -1010,7 +1009,6 @@ class SubprocessProxy(BackendProxy, ABC):
         self._send_initial_input()
 
         # setup asynchronous output listeners
-        self._terminated_readers = 0
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
@@ -1027,6 +1025,7 @@ class SubprocessProxy(BackendProxy, ABC):
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
             self._prepare_clean_launch()
+            logger.info("Prepared clean state for executing %r", cmd)
 
         if isinstance(cmd, ToplevelCommand):
             # required by SshCPythonBackend for creating fresh target process
@@ -1070,13 +1069,13 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def _close_backend(self):
         if self._proc is not None and self._proc.poll() is None:
+            logger.info("Killing backend process")
             self._proc.kill()
 
         self._proc = None
         self._response_queue = None
 
     def _listen_stdout(self, stdout):
-        # debug("... started listening to stdout")
         # will be called from separate thread
 
         # allow self._response_queue to be replaced while processing
@@ -1134,10 +1133,7 @@ class SubprocessProxy(BackendProxy, ABC):
                                 )
                             )
 
-        self._terminated_readers += 1
-
     def _listen_stderr(self, stderr):
-        # stderr is used only for debugger debugging
         while True:
             data = read_one_incoming_message_str(stderr.readline)
             if data == "":
@@ -1146,8 +1142,6 @@ class SubprocessProxy(BackendProxy, ABC):
                 self._response_queue.append(
                     BackendEvent("ProgramOutput", stream_name="stderr", data=data)
                 )
-
-        self._terminated_readers += 1
 
     def _store_state_info(self, msg):
         if "cwd" in msg:
@@ -1200,7 +1194,7 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
-            if self.is_terminated() and self._terminated_readers == 2:
+            if self.is_terminated():
                 raise BackendTerminatedError(self._proc.returncode if self._proc else None)
             else:
                 return None
