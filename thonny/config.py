@@ -24,27 +24,19 @@ def try_load_configuration(filename):
         # use cache so Workbench doesn't create duplicate manager
         # when FirstRunWindow already created one
         mgr = ConfigurationManager(filename)
-        _manager_cache[filename] = mgr
-        return mgr
-    except configparser.Error:
-        from tkinter import messagebox
+    except configparser.Error as e:
+        new_path = filename + ".corrupt"
+        os.replace(filename, new_path)
+        mgr = ConfigurationManager(filename, error_reading_existing_file=e)
 
-        if os.path.exists(filename) and messagebox.askyesno(
-            "Problem",
-            "Thonny's configuration file can't be read. It may be corrupt.\n\n"
-            + "Do you want to discard the file and open Thonny with default settings?",
-            master=tk._default_root,
-        ):
-            os.replace(filename, filename + "_corrupt")
-            # For some reasons Thonny styles are not loaded properly once messagebox has been shown before main window (At least Windows Py 3.5)
-            raise SystemExit("Configuration file has been discarded. Please restart Thonny!")
-        else:
-            raise
+    _manager_cache[filename] = mgr
+    return mgr
 
 
 class ConfigurationManager:
-    def __init__(self, filename):
+    def __init__(self, filename, error_reading_existing_file=None):
         self._ini = ConfigParser(interpolation=None)
+        self.error_reading_existing_file = error_reading_existing_file
         self._filename = filename
         self._defaults = {}
         self._defaults_overrides_str = {}

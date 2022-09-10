@@ -227,6 +227,14 @@ class Workbench(tk.Tk):
         self.ready = True
         self.event_generate("WorkbenchReady")
         self._editor_notebook.update_appearance()
+        if self._configuration_manager.error_reading_existing_file:
+            messagebox.showerror(
+                "Problem",
+                f"Previous configuration could not be read:\n\n"
+                f"{self._configuration_manager.error_reading_existing_file}).\n\n"
+                "Using default settings",
+                master=self,
+            )
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
@@ -2361,7 +2369,7 @@ class Workbench(tk.Tk):
             self._closing = True
 
             runner = get_runner()
-            if runner != None:
+            if runner is not None:
                 runner.destroy_backend()
 
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
@@ -2374,7 +2382,7 @@ class Workbench(tk.Tk):
                 ):
                     # Looks like the clipboard contains file name(s)
                     # Most likely this means actual file cut/copy operation
-                    # was made outside of Thonny.
+                    # was made outside Thonny.
                     # Don't want to replace this with simple string data of file names.
                     pass
                 else:

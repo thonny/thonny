@@ -246,19 +246,11 @@ def launch():
         from thonny import workbench
 
         bench = workbench.Workbench()
-        try:
-            bench.mainloop()
-        except SystemExit:
-            bench.destroy()
+        bench.mainloop()
         return 0
 
-    except SystemExit as e:
-        from tkinter import _default_root, messagebox
-
-        messagebox.showerror("System exit", str(e), master=_default_root)
-        return -1
-
     except Exception:
+        import tkinter as tk
         import traceback
         from logging import exception
 
@@ -266,7 +258,7 @@ def launch():
         from thonny import ui_utils
 
         dlg = ui_utils.LongTextDialog("Internal error", traceback.format_exc())
-        ui_utils.show_dialog(dlg, get_workbench())
+        ui_utils.show_dialog(dlg, tk._default_root)
         return -1
     finally:
         runner = get_runner()
