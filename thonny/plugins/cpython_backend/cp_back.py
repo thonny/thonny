@@ -799,7 +799,6 @@ class MainCPythonBackend(MainBackend):
         pydoc.pager = pydoc.plainpager
         site.sethelper()  # otherwise help function is not available
 
-
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
         self._original_stdout = sys.stdout
