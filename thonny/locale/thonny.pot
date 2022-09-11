@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-11 16:26+0300\n"
+"POT-Creation-Date: 2022-09-11 16:31+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -514,6 +514,14 @@ msgstr ""
 
 #: thonny/running.py:195
 msgid "Disconnect"
+msgstr ""
+
+#: thonny/running.py:338
+msgid "Information"
+msgstr ""
+
+#: thonny/running.py:339
+msgid "For debugging the program must be saved first."
 msgstr ""
 
 #: thonny/shell.py:101
@@ -1780,7 +1788,7 @@ msgid "CircuitPython (generic)"
 msgstr ""
 
 #: thonny/plugins/circuitpython/cirpy_front.py:98
-#: thonny/plugins/micropython/mp_front.py:533
+#: thonny/plugins/micropython/mp_front.py:536
 #, python-format
 msgid "Install or update %s"
 msgstr ""
@@ -1880,63 +1888,63 @@ msgstr ""
 msgid "MicroPython (SSH)"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:300
+#: thonny/plugins/micropython/mp_front.py:303
 msgid "CircuitPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:304
+#: thonny/plugins/micropython/mp_front.py:307
 msgid "MicroPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:310
+#: thonny/plugins/micropython/mp_front.py:313
 msgid "Not connected"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:441
+#: thonny/plugins/micropython/mp_front.py:444
 msgid "Port or WebREPL"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:441
+#: thonny/plugins/micropython/mp_front.py:444
 msgid "Port"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:451
+#: thonny/plugins/micropython/mp_front.py:454
 msgid "Try to detect port automatically"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:489
+#: thonny/plugins/micropython/mp_front.py:492
 msgid "Interrupt working program on connect"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:497
+#: thonny/plugins/micropython/mp_front.py:500
 msgid "Synchronize device's real time clock"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:503
+#: thonny/plugins/micropython/mp_front.py:506
 msgid "Use local time in real time clock"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:509
+#: thonny/plugins/micropython/mp_front.py:512
 msgid "Restart interpreter before running a script"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:518
+#: thonny/plugins/micropython/mp_front.py:521
 msgid "Advanced options"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:544
+#: thonny/plugins/micropython/mp_front.py:547
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:547
+#: thonny/plugins/micropython/mp_front.py:550
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:549
+#: thonny/plugins/micropython/mp_front.py:552
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:586
+#: thonny/plugins/micropython/mp_front.py:589
 msgid "Password"
 msgstr ""
 
