@@ -8,7 +8,9 @@ target_path = sys.argv[2]
 replacement = ""
 with open(source_path) as fp:
     for line in fp:
-        replacement += f"'{line.strip()}' "
+        dep = line.split("#")[0].strip()
+        if dep:
+            replacement += f"'{dep}' "
 
 with open(target_path, encoding="utf-8") as fp:
     original_text = fp.read()
