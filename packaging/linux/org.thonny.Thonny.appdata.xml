@@ -44,6 +44,13 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="4.0.1" date="2022-09-11">
+      <description>
+        <p>
+          Bug-fix release.
+        </p>
+      </description>
+    </release>
     <release version="4.0.0" date="2022-08-22">
       <description>
         <p>
