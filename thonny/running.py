@@ -333,6 +333,14 @@ class Runner:
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
 
     def execute_editor_content(self, command_name, args):
+        if command_name.lower() == "debug":
+            messagebox.showinfo(
+                tr("Information"),
+                tr("For debugging the program must be saved first."),
+                master=get_workbench(),
+            )
+            return
+
         get_shell().submit_magic_command(
             construct_cmd_line(
                 ["%" + command_name, "-c", EDITOR_CONTENT_TOKEN] + args, [EDITOR_CONTENT_TOKEN]
@@ -345,6 +353,9 @@ class Runner:
         current file/script and submit it to shell
         """
 
+        if not self._proxy:
+            return
+
         assert (
             command_name[0].isupper()
             or command_name == "run"
@@ -355,12 +366,27 @@ class Runner:
             self._proxy.interrupt()
 
             try:
-                self._wait_for_prompt(2)
-            except TimeoutError as e:
-                get_shell().print_error(
-                    "Could not interrupt current process. Please wait, try again or select Stop/Restart!"
-                )
-                return
+                self._wait_for_prompt(1)
+            except TimeoutError:
+                # turtle.mainloop, for example, is not easy to interrupt.
+                get_shell().print_error("Could not interrupt current process. ")
+                wait_instructions = "Please wait, try again or select Stop/Restart!"
+
+                if self._proxy.stop_restart_kills_user_program():
+                    get_shell().print_error("Forcing the program to stop.\n")
+                    self.cmd_stop_restart()
+                    try:
+                        self._wait_for_prompt(1)
+                    except TimeoutError:
+                        get_shell().print_error(
+                            "Could not force-stop the program. " + wait_instructions + "\n"
+                        )
+                else:
+                    # For some back-ends (e.g. BareMetalMicroPython) killing is not an option.
+                    # Besides, they may be configured to avoid refreshing the environment
+                    # before run (for performance reasons).
+                    get_shell().print_error(wait_instructions + "\n")
+                    return
 
         editor = get_workbench().get_editor_notebook().get_current_editor()
         if not editor:
@@ -509,7 +535,7 @@ class Runner:
         if get_workbench().in_simple_mode():
             get_workbench().hide_view("VariablesView")
 
-        self.restart_backend(True)
+        self.restart_backend(clean=True)
 
     def disconnect(self):
         proxy = self.get_backend_proxy()
@@ -821,6 +847,9 @@ class BackendProxy(ABC):
         return True
 
     def should_restart_interpreter_before_run(self) -> bool:
+        return True
+
+    def stop_restart_kills_user_program(self) -> bool:
         return True
 
     def supports_remote_directories(self):
