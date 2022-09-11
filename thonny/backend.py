@@ -67,6 +67,11 @@ class BaseBackend(ABC):
                 self._check_for_connection_error()
                 try:
                     msg = self._fetch_next_incoming_message(timeout=0.01)
+                except KeyboardInterrupt:
+                    self._send_output(
+                        "\nKeyboardInterrupt", "stderr"
+                    )  # CPython idle REPL does this
+                    self.send_message(ToplevelResponse())
                 except queue.Empty:
                     self._perform_idle_tasks()
                 else:
@@ -78,8 +83,7 @@ class BaseBackend(ABC):
                         self._current_command = msg
                         self._handle_normal_command(msg)
         except KeyboardInterrupt:
-            self._send_output("KeyboardInterrupt", "stderr")  # CPython idle REPL does this
-            # TODO: is it safe to call it normal exit? And cause automatic reconnect?
+            self._send_output("\nKeyboardInterrupt", "stderr")
             sys.exit(0)
         except ConnectionError as e:
             self.handle_connection_error(e)
