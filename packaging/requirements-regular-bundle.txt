@@ -6,7 +6,8 @@ mypy==0.971.*
 asttokens==2.0.*
 Send2Trash==1.8.1b0
 esptool==4.2.*
-paramiko==2.11.*; sys_platform != "linux" or platform.machine == "x86_64" # built deps not available and not easily compilable on RPi
+bcrypt==3.2.* # has builds available for RPi. Should be good enough for paramiko
+paramiko==2.11.*
 websockets==10.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
 adafruit_board_toolkit==1.1.0; sys_platform == "win32" or sys_platform == "darwin"
