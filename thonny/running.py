@@ -333,6 +333,14 @@ class Runner:
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
 
     def execute_editor_content(self, command_name, args):
+        if command_name.lower() == "debug":
+            messagebox.showinfo(
+                tr("Information"),
+                tr("For debugging the program must be saved first."),
+                master=get_workbench(),
+            )
+            return
+
         get_shell().submit_magic_command(
             construct_cmd_line(
                 ["%" + command_name, "-c", EDITOR_CONTENT_TOKEN] + args, [EDITOR_CONTENT_TOKEN]
