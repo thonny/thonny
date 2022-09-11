@@ -44,6 +44,17 @@ $PYTHON_CURRENT/bin/python3.10 -s -m pip install --pre --no-cache-dir "thonny==$
 
 rm $PYTHON_CURRENT/bin/thonny # because Thonny is not supposed to run from there
 
+# make the packages more universal
+# assuming $HOME/thonny_alt_packages/pkgs contains compatible universal2 version of cryptography
+# and arm64 version of cffi
+cp $HOME/thonny_alt_packages/pkgs/cryptography/hazmat/bindings/*.so \
+  $PYTHON_CURRENT/lib/python3.10/site-packages/cryptography/hazmat/bindings
+
+cp $HOME/thonny_alt_packages/pkgs/_cffi_backend.cpython-310-darwin.so \
+  $PYTHON_CURRENT/lib/python3.10/site-packages/_cffi_backend.cpython-310-darwin-arm46.so
+
+
+
 # save some space ###################################################
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
