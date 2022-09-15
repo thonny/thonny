@@ -214,8 +214,8 @@ simplified_microbits = [
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex",
             },
             {
-                "version": "2.1.0-beta.1",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0-beta.1/micropython-microbit-v2.1.0-beta.1.hex",
+                "version": "2.1.0-beta.2",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0-beta.2/micropython-microbit-v2.1.0-beta.2.hex",
             },
         ],
         "popular": True,
