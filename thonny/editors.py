@@ -102,6 +102,9 @@ class Editor(ttk.Frame):
     def get_content(self) -> str:
         return self._code_view.get_content()
 
+    def set_filename(self, path):
+        self._filename = path
+
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
             self.save_file()
@@ -502,6 +505,7 @@ class Editor(ttk.Frame):
         )
         self._code_view.text.update_tabs()
         self._code_view.text.event_generate("<<UpdateAppearance>>")
+        self._code_view.grid_main_widgets()
 
     def _listen_debugger_progress(self, event):
         # Go read-only
@@ -624,6 +628,16 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         get_workbench().bind("WindowFocusIn", self.check_for_external_changes, True)
         get_workbench().bind("ToplevelResponse", self.check_for_external_changes, True)
+        self.bind("<<NotebookTabChanged>>", self.on_tab_changed, True)
+
+    def on_tab_changed(self, *args):
+        if sys.platform == "darwin":
+            # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
+            # widgets disappeared, at least on Aivar's machine.
+            child = self.get_current_child()
+            if child:
+                assert isinstance(child, Editor)
+                child.get_code_view().grid_main_widgets()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -835,8 +849,16 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_option("file.open_files", open_files)
 
     def _cmd_new_file(self):
+        self.open_new_file()
+
+    def open_new_file(self, path=None, remote=False):
         new_editor = Editor(self)
         get_workbench().event_generate("NewFile", editor=new_editor)
+        if path:
+            if remote:
+                new_editor.set_filename(make_remote_path(path))
+            else:
+                new_editor.set_filename(path)
         self.add(new_editor, text=new_editor.get_title())
         self.select(new_editor)
         new_editor.focus_set()

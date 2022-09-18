@@ -174,7 +174,7 @@ end;
 
 function GetRandomQuote(): String;
 var
-    Quotes: array[0..12] of string;
+    Quotes: array[0..13] of string;
 begin
     Quotes[0] := 'Ninety-ninety rule: The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent of the code accounts for the other 90 percent of the development time.'#13#10'– Tom Cargill ';
     Quotes[1] := 'Now is better than never.'#13#10'– Tim Peters ';
@@ -189,6 +189,7 @@ begin
     Quotes[10] := 'Programming isn''t about what you know; it''s about what you can figure out.'#13#10#13#10'– Chris Pine ';
     Quotes[11] := 'The only way to learn a new programming language is by writing programs in it.'#13#10#13#10'– Dennis Ritchie ';
     Quotes[12] := 'Code is like humor. When you have to explain it, it''s bad.'#13#10#13#10'– Cory House ';
+    Quotes[13] := 'Just keep swimming!'#13#10#13#10'– Dory ';
 
     Result := Quotes[StrToInt(GetDateTimeString('ss', #0, #0)) mod Length(Quotes)];
 end;

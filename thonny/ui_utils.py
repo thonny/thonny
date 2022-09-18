@@ -535,7 +535,7 @@ class ClosableNotebook(ttk.Notebook):
         self.close_tab(self._popup_index)
 
     def _close_other_tabs(self):
-        self.close_tabs(self._popup_index)
+        self.close_tabs(except_index=self._popup_index)
 
     def close_tabs(self, except_index=None):
         for tab_index in reversed(range(len(self.winfo_children()))):
@@ -1792,6 +1792,7 @@ class ChoiceDialog(CommonDialogEx):
         choices=[],
         initial_choice_index=None,
     ) -> None:
+        self.result = None
         super().__init__(master=master)
 
         self.title(title)

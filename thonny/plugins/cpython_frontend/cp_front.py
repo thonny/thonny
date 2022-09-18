@@ -30,6 +30,7 @@ logger = getLogger(__name__)
 
 class LocalCPythonProxy(SubprocessProxy):
     def __init__(self, clean: bool) -> None:
+        logger.info("Creating LocalCPythonProxy")
         executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)
@@ -71,7 +72,7 @@ class LocalCPythonProxy(SubprocessProxy):
         Each ToplevelResponse is supposed to tell, whether gui is active
         and needs updating.
         """
-        if not "gui_is_active" in msg:
+        if "gui_is_active" not in msg:
             return
 
         if msg["gui_is_active"] and self._gui_update_loop_id is None:

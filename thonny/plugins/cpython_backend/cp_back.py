@@ -40,7 +40,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    UserSystemExit,
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
@@ -79,7 +78,7 @@ class MainCPythonBackend(MainBackend):
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {}  # WeakValueDictionary would be better, but can't store reference to None
         self._source_info_by_frame = {}
-        site.sethelper()  # otherwise help function is not available
+        self._init_help()
         self._install_fake_streams()
         self._install_repl_helper()
         self._current_executor = None
@@ -771,9 +770,6 @@ class MainCPythonBackend(MainBackend):
                 source, filename, execution_mode, ast_postprocessors
             )
         except SystemExit as e:
-            # TODO: hack
-            # let frontend know the exit was caused by the user code
-            self.send_message(UserSystemExit(e.code))
             sys.exit(e.code)
         finally:
             self._current_executor = None
@@ -792,6 +788,12 @@ class MainCPythonBackend(MainBackend):
                 builtins._ = obj
 
         setattr(builtins, _REPL_HELPER_NAME, _handle_repl_value)
+
+    def _init_help(self):
+        import pydoc
+
+        pydoc.pager = pydoc.plainpager
+        site.sethelper()  # otherwise help function is not available
 
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
@@ -943,7 +945,7 @@ class MainCPythonBackend(MainBackend):
         if result is not None:
             return result, "stack"
 
-        if getattr(sys, "last_traceback"):
+        if getattr(sys, "last_traceback", None):
             result = lookup_from_tb(getattr(sys, "last_traceback"))
             if result:
                 return result, "last_traceback"

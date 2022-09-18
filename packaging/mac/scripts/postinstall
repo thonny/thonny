@@ -28,6 +28,16 @@ echo "Compiling standard library"
     -x badsyntax \
     "$PYLIB/site-packages"
 
+
+echo "Tweaking cffi"
+if [[ $(uname -m) == 'arm64' ]]
+then
+  mv $PYLIB/site-packages/_cffi_backend.cpython-310-darwin-arm46.so $PYLIB/site-packages/_cffi_backend.cpython-310-darwin.so
+else
+  rm $PYLIB/site-packages/_cffi_backend.cpython-310-darwin-arm46.so
+fi
+
+
 echo "Done postinstall!"
 
 exit 0

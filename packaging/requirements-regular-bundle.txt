@@ -6,6 +6,7 @@ mypy==0.971.*
 asttokens==2.0.*
 Send2Trash==1.8.1b0
 esptool==4.2.*
+bcrypt==3.2.* # has builds available for RPi. Should be good enough for paramiko
 paramiko==2.11.*
 websockets==10.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"

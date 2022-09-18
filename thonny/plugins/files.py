@@ -277,6 +277,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def is_active_browser(self):
         return True
 
+    def supports_new_file(self):
+        return True
+
     def on_toplevel_response(self, msg):
         if not self.winfo_ismapped():
             return

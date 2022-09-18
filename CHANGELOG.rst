@@ -2,6 +2,26 @@
 Version history
 ===============
 
+4.0.1 (2022-09-11)
+==================
+* Fix error when running script with closed Shell, #2412
+* Fix error with programs calling `exit` (more robust handing of closing the back-end process), #1786, #2433, #2423
+* Fix blank editor after switching tabs on macOS, #2425
+* Instruct saving the program before debugging, #2415
+* Fix find not highlighting selected result in block comments, #2407
+* Fix new file creation error, #2406
+* Fix Choice Dialog closing with ESC, #2406
+* Fix the error when invoking Python's `help` function, #2435
+* Fall back to killing current process when running and interrupt doesn't work, #2420
+* Don't close the backend process when interrupting at idle prompt, #2422
+* Fix Windows 11 version in About dialog, #2406
+* Fix outdated test, #2413
+* Make the Mac installer more compatible with Arm, #2409
+* Allow downloading latest unstable MicroPython builds, #2408
+* Allow new file command for remote file browser
+* Update Estonian, German and Chinese (TW) translations
+
+
 4.0.0 (2022-08-22)
 ==================
 * Fix error when pressing Ctrl-D with unsubmitted input, #2388

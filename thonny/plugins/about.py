@@ -5,6 +5,7 @@ import platform
 import sys
 import tkinter as tk
 import tkinter.font
+from logging import getLogger
 from tkinter import ttk
 
 import thonny
@@ -12,6 +13,8 @@ from thonny import get_workbench, ui_utils
 from thonny.common import get_python_version_string
 from thonny.languages import tr
 from thonny.ui_utils import CommonDialog, CommonDialogEx, create_url_label, get_hyperlink_cursor
+
+logger = getLogger(__name__)
 
 
 class AboutDialog(CommonDialogEx):
@@ -43,9 +46,17 @@ class AboutDialog(CommonDialogEx):
             if "32" not in system_desc and "64" not in system_desc:
                 system_desc += " " + self.get_os_word_size_guess()
         else:
-            system_desc = (
-                platform.system() + " " + platform.release() + " " + self.get_os_word_size_guess()
-            )
+            release = platform.release()
+            if sys.platform == "win32":
+                # Win 10 and 11 both give 10 as release
+                try:
+                    build = int(platform.version().split(".")[2])
+                    if release == "10" and build >= 22000:
+                        release = "11"
+                except Exception:
+                    logger.exception("Could not determine Windows version")
+
+            system_desc = platform.system() + " " + release + " " + self.get_os_word_size_guess()
 
         platform_label = ttk.Label(
             self.main_frame,

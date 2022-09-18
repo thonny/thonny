@@ -1,4 +1,5 @@
 import os.path
+import re
 import sys
 import threading
 import time
@@ -335,14 +336,75 @@ class Uf2FlashingDialog(WorkDialog):
             with urlopen(req) as fp:
                 json_str = fp.read().decode("UTF-8")
                 # logger.debug("Variants info: %r", json_str)
-            self._downloaded_variants = json.loads(json_str)
-            logger.info("Got %r variants", len(self._downloaded_variants))
+            variants = json.loads(json_str)
+            logger.info("Got %r variants", len(variants))
+            self._tweak_variants(variants)
         except Exception:
             msg = f"Could not download variants info from {self.get_variants_url()}"
             logger.exception(msg)
             self.append_text(msg + "\n")
             self.set_action_text("Error!")
             self.grid_progress_widgets()
+            return
+
+        self._downloaded_variants = variants
+
+    def _tweak_variants(self, variants):
+        """
+        A hack for getting the latest pre-release for micropython.org downloads.
+        The build that is loaded from the json may already be deleted.
+        In order to avoid adding another async operation into the process (after selecting
+        a variant and before presenting versions), I'm getting the latest build substring
+        from the download page of the first board and downloading it together with the json.
+        """
+        latest_prerelease_substitute = None
+        latest_prerelease_regex: str
+        for variant in variants:
+            new_regex = variant.get("latest_prerelease_regex", None)
+            if new_regex:
+                latest_prerelease_regex = new_regex
+                import json
+                import urllib.request
+
+                logger.info("Downloading %r", variant["info_url"])
+                try:
+                    req = urllib.request.Request(
+                        variant["info_url"],
+                        data=None,
+                        headers={
+                            "User-Agent": FAKE_USER_AGENT,
+                            "Cache-Control": "no-cache",
+                        },
+                    )
+                    with urllib.request.urlopen(req) as fp:
+                        html_str = fp.read().decode("UTF-8", errors="replace")
+                        # logger.debug("Variants info: %r", json_str)
+
+                    match = re.search(latest_prerelease_regex, html_str)
+                    if match:
+                        latest_prerelease_substitute = match.group(0)
+                        logger.info(
+                            "Using %r as prerelease substitute", latest_prerelease_substitute
+                        )
+                    else:
+                        latest_prerelease_substitute = None
+                except Exception:
+                    msg = f"Could not download variants info from {self.get_variants_url()}"
+                    logger.exception(msg)
+                    self.append_text(msg + "\n")
+                    self.set_action_text("Error!")
+                    self.grid_progress_widgets()
+
+            if latest_prerelease_substitute:
+                assert latest_prerelease_regex
+                for i, download in enumerate(variant["downloads"]):
+                    patched_url = re.sub(
+                        latest_prerelease_regex, latest_prerelease_substitute, download["url"]
+                    )
+                    if patched_url != download["url"]:
+                        logger.debug("Replacing %r with %r", download["url"], patched_url)
+                        download["url"] = patched_url
+                        download["version"] = latest_prerelease_substitute
 
     def get_ok_text(self):
         return tr("Install")

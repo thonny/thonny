@@ -1,7 +1,7 @@
 import json
 import re
 from html.parser import HTMLParser
-from typing import Set, Dict, List, Union
+from typing import Set, Dict, List, Union, Optional
 
 import requests
 
@@ -88,7 +88,8 @@ def read_page(url) -> str:
     return _page_cache[url]
 
 
-def save_variants(variants: List, flasher: str, families: Set[str], file_path):
+def save_variants(variants: List, flasher: str, families: Set[str], file_path:str,
+                  latest_prerelease_regex: Optional[str]=None):
     variants = list(
         filter(lambda v: v["_flasher"] == flasher and v["family"] in families, variants)
     )
@@ -124,6 +125,12 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path):
                 del variant[key]
 
         final_variants.append(variant)
+
+    if latest_prerelease_regex:
+        # This attribute signifies Thonny should look up the version of the latest unstable
+        # from the info page of this variant and use it all variants up to the next variant
+        # which has this attribute set.
+        final_variants[0]["latest_prerelease_regex"] = latest_prerelease_regex
 
     with open(file_path, mode="w", encoding="utf-8", newline="\n") as fp:
         json.dump(final_variants, fp, indent=4)
