@@ -449,6 +449,10 @@ class RequirementsInstallerContextHandler(ShellScriptContextHandler):
             self.add_command(
                 label=tr("Upgrade requirements packages"), command=lambda: self.do_run_script("-U")
             )
+            self.add_command(
+                label=tr("Force reinstall requirements packages"),
+                command=lambda: self.do_run_script("--force-reinstall"),
+            )
             self.add_separator()
 
 
