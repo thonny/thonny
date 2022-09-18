@@ -397,7 +397,7 @@ class ShellScriptContextHandler(FileBrowserContextHandler):
 class PythonShellScriptContextHandler(ShellScriptContextHandler):
     def get_script_runtime(self, fnam):
         param = ""
-        if self.check_python_module(fnam):
+        if self.check_python_module(self.get_selected_path()):
             param = "-m"
         backend_python = self.get_backend_python()
         return " ".join([f"!{backend_python}", param, fnam])
