@@ -130,6 +130,12 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         super().__init__(master)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
+        self.ctxdisp = FileBrowserContextDispatcher(self)
+        self.ctxdisp.add_handler(VirtualEnvContextHandler())
+        self.ctxdisp.add_handler(ShellScriptContextHandler())
+        self.ctxdisp.add_handler(PythonShellScriptContextHandler())
+        self.ctxdisp.add_handler(RequirementsInstallerContextHandler())
+
     def is_active_browser(self):
         return True
 
@@ -219,18 +225,89 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
 
     def add_first_menu_items(self, context):
-        if self.check_for_venv():
-            self.menu.add_command(
-                label=tr("Activate virtual environment"), command=lambda: self.do_activate_venv()
-            )
-            self.menu.add_separator()
+        self.ctxdisp.add_first_menu_items()
 
         super().add_first_menu_items(context)
 
     def add_middle_menu_items(self, context):
+        self.ctxdisp.add_middle_menu_items()
+
         self.check_add_upload_command()
         super().add_middle_menu_items(context)
 
+
+class FileBrowserContextDispatcher(object):
+    def __init__(self, filebrowser):
+        self.filebrowser = filebrowser
+        self.ctxhandlers = []
+
+    def add_handler(self, handler):
+        handler.disp = self
+        self.ctxhandlers.append(handler)
+
+    def add_first_menu_items(self):
+        for handler in self.ctxhandlers:
+            handler.add_first_menu_items()
+
+    def add_middle_menu_items(self):
+        for handler in self.ctxhandlers:
+            handler.add_middle_menu_items()
+
+
+class FileBrowserContextHandler(object):
+    def __init__(self):
+        # this is set when adding to outer FileBrowserContextDispatcher
+        self.disp = None
+
+    # helper
+
+    def get_browser(self):
+        assert self.disp
+        return self.disp.filebrowser
+
+    def get_selected_path(self):
+        return self.get_browser().get_selected_path()
+
+    def get_selected_name(self):
+        return self.get_browser().get_selected_name()
+
+    def get_menu(self):
+        return self.get_browser().menu
+
+    def add_separator(self):
+        self.get_menu().add_separator()
+
+    def add_command(self, label, command):
+        self.get_menu().add_command(label=label, command=command)
+
+    # todo move to e.g. runner ?
+    def get_backend_python(self):
+        if running_on_windows():
+            return "python.exe"
+        else:
+            return "python3"
+
+    #
+
+    def cd_and_run_script(self, path, cmdline):
+        get_shell().submit_magic_command(["%cd", path])
+
+        def _run_code():
+            get_shell().submit_magic_command(cmdline)
+
+        # run after short delay
+        self.get_browser().after(112, _run_code)
+
+    # overwrite this
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        pass
+
+
+class VirtualEnvContextHandler(FileBrowserContextHandler):
     def _get_venv_path(self):
         CFGFILE = "pyvenv.cfg"
         path = self.get_selected_path()
@@ -266,6 +343,109 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             get_runner().cmd_stop_restart()
         else:
             messagebox.showerror("Error", f"Could not find {backend_python!r}", master=self)
+
+    def add_first_menu_items(self):
+        if self.check_for_venv():
+            self.add_command(
+                label=tr("Activate virtual environment"), command=lambda: self.do_activate_venv()
+            )
+            self.add_separator()
+
+
+class ShellScriptContextHandler(FileBrowserContextHandler):
+    def get_supported_extensions(self):
+        if running_on_windows():
+            return [".bat"]
+        else:
+            return [".sh"]
+
+    def check_shell_ext(self, fnam):
+        base, ext = os.path.splitext(fnam)
+        exts = self.get_supported_extensions()
+        return ext.lower() in exts
+
+    def get_script_runtime(self, fnam):
+        return "!" + os.path.join(".", fnam)
+
+    def do_run_script(self, param=None):
+        sel_fnam = self.get_selected_path()
+
+        path = os.path.dirname(sel_fnam)
+        fnam = os.path.basename(sel_fnam)
+        runtime = self.get_script_runtime(fnam)
+
+        # or use this
+        # -> from thonny.misc_utils import construct_cmd_line
+        cmdline = " ".join([runtime, param if param else ""])
+
+        self.cd_and_run_script(path, cmdline)
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_shell_ext(fnam):
+            self.add_command(label=tr("Run script in shell"), command=lambda: self.do_run_script())
+            self.add_separator()
+
+
+class PythonShellScriptContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        param = ""
+        if self.check_python_module(fnam):
+            param = "-m"
+        backend_python = self.get_backend_python()
+        return " ".join([f"!{backend_python}", param, fnam])
+
+    def check_python_ext(self, fnam):
+        _, ext = os.path.splitext(fnam)
+        return ext.lower() == ".py"
+
+    def check_python_module(self, fnam):
+        if os.path.isdir(fnam):
+            return os.path.exists(os.path.join(fnam, "__main__.py"))
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        found = False
+        if self.check_python_ext(fnam):
+            self.add_command(
+                label=tr("Run python script in shell"), command=lambda: self.do_run_script()
+            )
+            found = True
+        elif self.check_python_module(fnam):
+            self.add_command(
+                label=tr("Run python module in shell"), command=lambda: self.do_run_script()
+            )
+            found = True
+        if found:
+            self.add_separator()
+
+
+class RequirementsInstallerContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+        return " ".join([f"!{backend_python}", "-m", "pip", "install", "-r", fnam])
+
+    def check_req_txt(self, fnam):
+        nam = os.path.basename(fnam)
+        return nam.lower() == "requirements.txt"
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_req_txt(fnam):
+            self.add_command(
+                label=tr("Install requirements packages"), command=lambda: self.do_run_script()
+            )
+            self.add_command(
+                label=tr("Upgrade requirements packages"), command=lambda: self.do_run_script("-U")
+            )
+            self.add_separator()
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
