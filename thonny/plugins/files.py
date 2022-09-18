@@ -225,12 +225,14 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
 
     def add_first_menu_items(self, context):
-        self.ctxdisp.add_first_menu_items()
+        if self.get_selected_path():
+            self.ctxdisp.add_first_menu_items()
 
         super().add_first_menu_items(context)
 
     def add_middle_menu_items(self, context):
-        self.ctxdisp.add_middle_menu_items()
+        if self.get_selected_path():
+            self.ctxdisp.add_middle_menu_items()
 
         self.check_add_upload_command()
         super().add_middle_menu_items(context)
@@ -246,10 +248,12 @@ class FileBrowserContextDispatcher(object):
         self.ctxhandlers.append(handler)
 
     def add_first_menu_items(self):
+        assert self.filebrowser.get_selected_path()
         for handler in self.ctxhandlers:
             handler.add_first_menu_items()
 
     def add_middle_menu_items(self):
+        assert self.filebrowser.get_selected_path()
         for handler in self.ctxhandlers:
             handler.add_middle_menu_items()
 
