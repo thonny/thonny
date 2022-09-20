@@ -289,6 +289,8 @@ class FileBrowserContextHandler(object):
         if running_on_windows():
             return "python.exe"
         else:
+            # todo config / global func
+            # python or python3
             return "python3"
 
     #
