@@ -134,6 +134,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         self.ctxdisp.add_handler(VirtualEnvContextHandler())
         self.ctxdisp.add_handler(ShellScriptContextHandler())
         self.ctxdisp.add_handler(PythonShellScriptContextHandler())
+        self.ctxdisp.add_handler(RequirementsFreezeContextHandler())
         self.ctxdisp.add_handler(RequirementsInstallerContextHandler())
 
     def is_active_browser(self):
@@ -456,6 +457,32 @@ class RequirementsInstallerContextHandler(ShellScriptContextHandler):
                 command=lambda: self.do_run_script("--force-reinstall"),
             )
             self.add_separator()
+
+
+class RequirementsFreezeContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        # pip adds addtional packages automatically at the end
+        # todo
+        # document somewhere that the additional listed packages
+        # are not necessarily required for running the project
+        return " ".join([f"!{backend_python}", "-m", "pip", "freeze", "-r", fnam])
+
+    def check_req_txt(self, fnam):
+        nam = os.path.basename(fnam)
+        return nam.lower() == "requirements.txt"
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_req_txt(fnam):
+            self.add_command(
+                label=tr("Print freeze requirements packages"), command=lambda: self.do_run_script()
+            )
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
