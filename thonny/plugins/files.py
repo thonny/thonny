@@ -351,10 +351,27 @@ class VirtualEnvContextHandler(FileBrowserContextHandler):
         else:
             messagebox.showerror("Error", f"Could not find {backend_python!r}", master=self)
 
+    def do_util_install_venv(self, method):
+        venv_path = self._get_venv_path()
+
+        backend_python = self.get_backend_python()
+        cmdline = " ".join([f"!{backend_python}", "-m", "venv", method, venv_path])
+        path = os.path.dirname(venv_path)
+
+        self.cd_and_run_script(path, cmdline)
+
     def add_first_menu_items(self):
         if self.check_for_venv():
             self.add_command(
                 label=tr("Activate virtual environment"), command=lambda: self.do_activate_venv()
+            )
+            self.add_separator()
+
+    def add_middle_menu_items(self):
+        if self.check_for_venv():
+            self.add_command(
+                label=tr("Upgrade virtual environment"),
+                command=lambda: self.do_util_install_venv("--upgrade"),
             )
             self.add_separator()
 
