@@ -25,7 +25,7 @@ from thonny.common import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
-from thonny.running import InlineCommandDialog, construct_cd_command
+from thonny.running import InlineCommandDialog, construct_cd_command, WINDOWS_EXE
 from thonny.ui_utils import lookup_style_option
 
 logger = getLogger(__name__)
@@ -288,7 +288,7 @@ class FileBrowserContextHandler(object):
     # todo move to e.g. runner ?
     def get_backend_python(self):
         if running_on_windows():
-            return "python.exe"
+            return WINDOWS_EXE
         else:
             # todo config / global func
             # python or python3
