@@ -1,7 +1,6 @@
 import os.path
 import re
 import subprocess
-import sys
 from logging import getLogger
 from typing import Iterable
 
@@ -107,7 +106,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                 atts["symbol"] = "mypy-" + atts["kind"]
                 warnings.append(atts)
             else:
-                logging.error("Can't parse MyPy line: " + line.strip())
+                logger.error("Can't parse MyPy line: " + line.strip())
 
         self.completion_handler(self, warnings)
 
