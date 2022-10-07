@@ -118,6 +118,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Nicolas Despres
 * Pavel Minaev
 * Peter Marshall
+* Peter Mawhorter (@solsword)
 * Petr. moses
 * Phil Duby
 * phr0gger
