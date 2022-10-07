@@ -6,8 +6,8 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20220831-unstable-v1.19.1-358-g0b26efe73",
-                "url": "https://micropython.org/resources/firmware/microbit-20220831-unstable-v1.19.1-358-g0b26efe73.hex"
+                "version": "20220926-unstable-v1.19.1-451-gbdbc44474",
+                "url": "https://micropython.org/resources/firmware/microbit-20220926-unstable-v1.19.1-451-gbdbc44474.hex"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.19.1-\\d+-[a-z0-9]{10}"
@@ -20,12 +20,12 @@
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
             {
-                "version": "1.0.1",
-                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex"
+                "version": "1.1.0",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.0/micropython-microbit-v1.1.0.hex"
             },
             {
-                "version": "1.1.0-beta.1",
-                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.0-beta.1/microbit-micropython-v1.1.0-beta.1.hex"
+                "version": "1.0.1",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex"
             }
         ],
         "popular": true
@@ -38,12 +38,12 @@
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
             {
-                "version": "2.0.0",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex"
+                "version": "2.1.0",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0/micropython-microbit-v2.1.0.hex"
             },
             {
-                "version": "2.1.0-beta.1",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0-beta.1/micropython-microbit-v2.1.0-beta.1.hex"
+                "version": "2.0.0",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex"
             }
         ],
         "popular": true

@@ -309,15 +309,13 @@ class Runner:
         assert self.is_running()
         self._proxy.send_program_input(data)
 
-    def execute_script(
+    def execute_via_shell(
         self,
-        script_path: str,
-        args: List[str],
+        cmd_line: Union[str, List[str]],
         working_directory: Optional[str] = None,
-        command_name: str = "Run",
     ) -> None:
 
-        if self._proxy.get_cwd() != working_directory:
+        if working_directory and self._proxy.get_cwd() != working_directory:
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cd_command(working_directory) + "\n"
@@ -325,12 +323,24 @@ class Runner:
             # create simple command
             cd_cmd_line = ""
 
-        rel_filename = universal_relpath(script_path, working_directory)
-        cmd_parts = ["%" + command_name, rel_filename] + args
-        exe_cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN]) + "\n"
+        if not isinstance(cmd_line, str):
+            cmd_line = construct_cmd_line(cmd_line)
 
         # submit to shell (shell will execute it)
-        get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
+        get_shell().submit_magic_command(cd_cmd_line + cmd_line)
+
+    def execute_script(
+        self,
+        script_path: str,
+        args: List[str],
+        working_directory: Optional[str],
+        command_name: str = "Run",
+    ) -> None:
+        rel_filename = universal_relpath(script_path, working_directory)
+        cmd_parts = ["%" + command_name, rel_filename] + args
+        cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN])
+
+        self.execute_via_shell(cmd_line, working_directory)
 
     def execute_editor_content(self, command_name, args):
         if command_name.lower() == "debug":
