@@ -25,7 +25,15 @@ from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
 
 import thonny
-from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, report_time
+from thonny import (
+    THONNY_USER_DIR,
+    common,
+    get_runner,
+    get_shell,
+    get_workbench,
+    report_time,
+    get_version,
+)
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -993,6 +1001,7 @@ class SubprocessProxy(BackendProxy, ABC):
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
 
         env["THONNY_LANGUAGE"] = get_workbench().get_option("general.language")
+        env["THONNY_VERSION"] = get_version()
 
         if thonny.in_debug_mode():
             env["THONNY_DEBUG"] = "1"
