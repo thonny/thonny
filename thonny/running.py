@@ -32,7 +32,7 @@ from thonny import (
     get_shell,
     get_workbench,
     report_time,
-    THONNY_VERSION,
+    get_version,
 )
 from thonny.common import (
     BackendEvent,
@@ -991,7 +991,7 @@ class SubprocessProxy(BackendProxy, ABC):
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
 
         env["THONNY_LANGUAGE"] = get_workbench().get_option("general.language")
-        env["THONNY_VERSION"] = THONNY_VERSION
+        env["THONNY_VERSION"] = get_version()
 
         if thonny.in_debug_mode():
             env["THONNY_DEBUG"] = "1"
