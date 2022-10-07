@@ -152,6 +152,7 @@ def get_version():
         return "0.0.0"
 
 
+THONNY_VERSION = get_version()
 THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE = os.path.join(THONNY_USER_DIR, "configuration.ini")
 _CONFIGURED_DEBUG = _read_configured_debug_mode()
