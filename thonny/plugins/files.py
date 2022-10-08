@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import pathlib
 import tkinter as tk
@@ -360,6 +361,16 @@ class VirtualEnvContextHandler(FileBrowserContextHandler):
 
         self.cd_and_run_script(path, cmdline)
 
+    def do_util_install_clear_venv(self, method=""):
+        venv_path = self._get_venv_path()
+
+        # use python from thonny
+        backend_python = sys.executable
+        cmdline = " ".join([f"!{backend_python}", "-m", "venv", "--clear", method, venv_path])
+        path = os.path.dirname(venv_path)
+
+        self.cd_and_run_script(path, cmdline)
+
     def add_first_menu_items(self):
         if self.check_for_venv():
             self.add_command(
@@ -372,6 +383,14 @@ class VirtualEnvContextHandler(FileBrowserContextHandler):
             self.add_command(
                 label=tr("Upgrade virtual environment"),
                 command=lambda: self.do_util_install_venv("--upgrade"),
+            )
+            self.add_command(
+                label=tr("Clear and install virtual environment (copy)"),
+                command=lambda: self.do_util_install_clear_venv("--copies"),
+            )
+            self.add_command(
+                label=tr("Clear and install virtual environment (symlink)"),
+                command=lambda: self.do_util_install_clear_venv("--symlinks"),
             )
             self.add_separator()
 
