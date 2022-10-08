@@ -132,11 +132,15 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
         self.ctxdisp = FileBrowserContextDispatcher(self)
-        self.ctxdisp.add_handler(VirtualEnvContextHandler())
-        self.ctxdisp.add_handler(ShellScriptContextHandler())
-        self.ctxdisp.add_handler(PythonShellScriptContextHandler())
-        self.ctxdisp.add_handler(RequirementsFreezeContextHandler())
-        self.ctxdisp.add_handler(RequirementsInstallerContextHandler())
+        self.add_ctx_handler(VirtualEnvContextHandler())
+        self.add_ctx_handler(ShellScriptContextHandler())
+        self.add_ctx_handler(PythonShellScriptContextHandler())
+        self.add_ctx_handler(RequirementsFreezeContextHandler())
+        self.add_ctx_handler(RequirementsInstallerContextHandler())
+        self.add_ctx_handler(UnittestContextHandler())
+
+    def add_ctx_handler(self, handler):
+        self.ctxdisp.add_handler(handler)
 
     def is_active_browser(self):
         return True
@@ -519,6 +523,37 @@ class RequirementsFreezeContextHandler(ShellScriptContextHandler):
             self.add_command(
                 label=tr("Print freeze requirements packages"), command=lambda: self.do_run_script()
             )
+
+
+class UnittestContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        discover_ = ""
+        path = self.get_selected_path()
+        if os.path.isdir(path):
+            discover_ = "discover -s"
+
+        return " ".join([f"!{backend_python}", "-m", "unittest", discover_, fnam])
+
+    def check_unittest(self, fnam):
+        nam = os.path.basename(fnam)
+        # check if name contains "test" as pattern
+        # also test subfolder need that pattern!!!
+        return nam.lower().find("test") >= 0
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_unittest(fnam):
+            self.add_command(label=tr("Run unittest"), command=lambda: self.do_run_script())
+            self.add_command(
+                label=tr("Run unittest (verbose)"), command=lambda: self.do_run_script("-v")
+            )
+            self.add_separator()
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
