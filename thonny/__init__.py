@@ -143,11 +143,18 @@ def is_portable():
         return abs_location.startswith("/media/") or abs_location.startswith("/mnt/")
 
 
+_THONNY_VERSION = None
+
+
 def get_version():
+    global _THONNY_VERSION
+    if _THONNY_VERSION:
+        return _THONNY_VERSION
     try:
         package_dir = os.path.dirname(sys.modules["thonny"].__file__)
         with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
-            return fp.read().strip()
+            _THONNY_VERSION = fp.read().strip()
+            return _THONNY_VERSION
     except Exception:
         return "0.0.0"
 

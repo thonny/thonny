@@ -15,12 +15,12 @@ UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
-PIMORONI_LATEST_STABLE_VERSION = "1.19.6"
-PIMORONI_LATEST_UNSTABLE_VERSION = "1.19.7"
+PIMORONI_LATEST_STABLE_VERSION = "1.19.8"
+PIMORONI_LATEST_UNSTABLE_VERSION = None
 PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
 
 PIMORONI_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_LATEST_STABLE_VERSION}"
-PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/{PIMORONI_LATEST_UNSTABLE_VERSION}"
+PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS = PIMORONI_LATEST_UNSTABLE_VERSION and f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/{PIMORONI_LATEST_UNSTABLE_VERSION}"
 PIMORONI_PREV_RELEVANT_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_PREV_RELEVANT_VERSION}"
 
 
@@ -157,9 +157,6 @@ for variant in pimoroni_variants:
         rf"/{variant['_id']}-v?({PIMORONI_LATEST_STABLE_VERSION})-micropython.uf2$",
     )
 
-    unstable_url_pattern = stable_url_pattern.replace(
-        PIMORONI_LATEST_STABLE_VERSION, PIMORONI_LATEST_UNSTABLE_VERSION
-    )
     old_url_pattern = stable_url_pattern.replace(
         PIMORONI_LATEST_STABLE_VERSION, PIMORONI_PREV_RELEVANT_VERSION
     )
@@ -171,12 +168,16 @@ for variant in pimoroni_variants:
         1,
         url_prefix="https://github.com",
     )
-    variant["downloads"] += find_download_links(
-        PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS,
-        unstable_url_pattern,
-        1,
-        url_prefix="https://github.com",
-    )
+    if (PIMORONI_LATEST_UNSTABLE_VERSION):
+        unstable_url_pattern = stable_url_pattern.replace(
+            PIMORONI_LATEST_STABLE_VERSION, PIMORONI_LATEST_UNSTABLE_VERSION
+        )
+        variant["downloads"] += find_download_links(
+            PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS,
+            unstable_url_pattern,
+            1,
+            url_prefix="https://github.com",
+        )
     variant["downloads"] += find_download_links(
         [
             PIMORONI_PREV_RELEVANT_VERSION_ASSETS,
