@@ -541,7 +541,13 @@ class UnittestContextHandler(ShellScriptContextHandler):
         nam = os.path.basename(fnam)
         # check if name contains "test" as pattern
         # also test subfolder need that pattern!!!
-        return nam.lower().find("test") >= 0
+        test_nam = nam.lower().find("test") >= 0
+        if test_nam:
+            path = self.get_selected_path()
+            if os.path.isdir(path):
+                return True
+            # only for python files
+            return nam.lower().endswith(".py")
 
     def add_first_menu_items(self):
         pass
