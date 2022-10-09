@@ -583,6 +583,10 @@ class UnittestContextHandler(ShellScriptContextHandler):
 
 
 class BlackFormatContextHandler(ShellScriptContextHandler):
+
+    # todo
+    # have sort of hyperlinks in output to enable navigation to source code line
+
     def get_script_runtime(self, fnam):
         nam = os.path.basename(fnam)
 
@@ -598,7 +602,15 @@ class BlackFormatContextHandler(ShellScriptContextHandler):
 
         OUTNIL = "" if tk.TkVersion > 8.6 else "2>&0"
 
-        return " ".join([f"!{backend_python}", "-m", "black", *files, OUTNIL])
+        # since there is no workspace folder in thonny
+        # this might be confusing because the config is picked
+        # pedening on the place of call (on an expanded folder or active folder)
+        # todo deps -> workspace
+        CONFIG = ""
+        if os.path.exists(os.path.join(cur, "black.cfg")):
+            CONFIG = "--config 'black.cfg'"
+
+        return " ".join([f"!{backend_python}", "-m", "black", CONFIG, *files, OUTNIL])
 
     def add_first_menu_items(self):
         pass
@@ -616,6 +628,10 @@ class BlackFormatContextHandler(ShellScriptContextHandler):
 
 
 class Flake8ContextHandler(ShellScriptContextHandler):
+
+    # todo
+    # have sort of hyperlinks in output to enable navigation to source code line
+
     def get_script_runtime(self, fnam):
         nam = os.path.basename(fnam)
         backend_python = self.get_backend_python()
@@ -628,7 +644,15 @@ class Flake8ContextHandler(ShellScriptContextHandler):
         sel = map(lambda x: x[cut_len:], self.get_selected_paths())
         files = list(map(lambda x: f"'{x}'", sel))
 
-        return " ".join([f"!{backend_python}", "-m", "flake8", *files])
+        # since there is no workspace folder in thonny
+        # this might be confusing because the config is picked
+        # pedening on the place of call (on an expanded folder or active folder)
+        # todo deps -> workspace
+        CONFIG = ""
+        if os.path.exists(os.path.join(cur, "flake8.cfg")):
+            CONFIG = "--config 'flake8.cfg'"
+
+        return " ".join([f"!{backend_python}", "-m", "flake8", CONFIG, *files])
 
     def add_first_menu_items(self):
         pass
