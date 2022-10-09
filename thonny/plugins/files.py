@@ -138,6 +138,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         self.add_ctx_handler(RequirementsFreezeContextHandler())
         self.add_ctx_handler(RequirementsInstallerContextHandler())
         self.add_ctx_handler(UnittestContextHandler())
+        self.add_ctx_handler(BlackFormatContextHandler())
+        self.add_ctx_handler(Flake8ContextHandler())
 
     def add_ctx_handler(self, handler):
         self.ctxdisp.add_handler(handler)
@@ -275,8 +277,17 @@ class FileBrowserContextHandler(object):
         assert self.disp
         return self.disp.filebrowser
 
+    def get_active_local_dir(self):
+        return self.get_browser().get_active_directory()
+
     def get_selected_path(self):
         return self.get_browser().get_selected_path()
+
+    def get_selected_paths(self):
+        selection = self.get_browser().get_selection_info(True)
+        if selection:
+            return selection["paths"]
+        return []
 
     def get_selected_name(self):
         return self.get_browser().get_selected_name()
@@ -299,10 +310,19 @@ class FileBrowserContextHandler(object):
             # python or python3
             return "python3"
 
+    def check_python_or_module(self, fnam):
+        nam = os.path.basename(fnam)
+        path = self.get_selected_path()
+        if os.path.isdir(path):
+            return os.path.exists(os.path.join(path, "__init__.py"))
+        # only for python files
+        return nam.lower().endswith(".py")
+
     #
 
     def cd_and_run_script(self, path, cmdline):
-        get_shell().submit_magic_command(["%cd", path])
+        if path:
+            get_shell().submit_magic_command(["%cd", path])
 
         def _run_code():
             get_shell().submit_magic_command(cmdline)
@@ -414,10 +434,10 @@ class ShellScriptContextHandler(FileBrowserContextHandler):
     def get_script_runtime(self, fnam):
         return "!" + os.path.join(".", fnam)
 
-    def do_run_script(self, param=None):
+    def do_run_script(self, param=None, cd_path=True):
         sel_fnam = self.get_selected_path()
 
-        path = os.path.dirname(sel_fnam)
+        path = os.path.dirname(sel_fnam) if cd_path else None
         fnam = os.path.basename(sel_fnam)
         runtime = self.get_script_runtime(fnam)
 
@@ -558,6 +578,68 @@ class UnittestContextHandler(ShellScriptContextHandler):
             self.add_command(label=tr("Run unittest"), command=lambda: self.do_run_script())
             self.add_command(
                 label=tr("Run unittest (verbose)"), command=lambda: self.do_run_script("-v")
+            )
+            self.add_separator()
+
+
+class BlackFormatContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+
+        cur = self.get_active_local_dir()
+        cut_len = len(cur) + 1
+
+        # collect all
+        # todo ??? restrict to folder an .py only ???
+        sel = map(lambda x: x[cut_len:], self.get_selected_paths())
+        files = list(map(lambda x: f"'{x}'", sel))
+
+        backend_python = self.get_backend_python()
+
+        OUTNIL = "" if tk.TkVersion > 8.6 else "2>&0"
+
+        return " ".join([f"!{backend_python}", "-m", "black", *files, OUTNIL])
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        # this does a relaxed checking since a folder might contain also other files ...
+        # todo ???
+        if self.check_python_or_module(fnam):
+            self.add_command(
+                label=tr("Format with black PEP08"),
+                command=lambda: self.do_run_script(cd_path=False),
+            )
+            self.add_separator()
+
+
+class Flake8ContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        cur = self.get_active_local_dir()
+        cut_len = len(cur) + 1
+
+        # collect all
+        # todo ??? restrict to folder an .py only ???
+        sel = map(lambda x: x[cut_len:], self.get_selected_paths())
+        files = list(map(lambda x: f"'{x}'", sel))
+
+        return " ".join([f"!{backend_python}", "-m", "flake8", *files])
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        # this does a relaxed checking since a folder might contain also other files ...
+        # todo ???
+        if self.check_python_or_module(fnam):
+            self.add_command(
+                label=tr("Run flake8"), command=lambda: self.do_run_script(cd_path=False)
             )
             self.add_separator()
 
