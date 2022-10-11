@@ -136,6 +136,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * sourceperl
 * speedy-10
 * Stefan Rothe
+* Stewart Russell (@scruss)
 * Suk-Hyung Hwang
 * Sven Duzont
 * Syed Nasim
