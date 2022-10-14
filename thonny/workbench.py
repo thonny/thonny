@@ -28,8 +28,9 @@ from thonny import (
     get_shell,
     is_portable,
     languages,
-    ui_utils,
+    ui_utils, base_file_browser,
 )
+from thonny.base_file_browser import FsSelection, FsCommand
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
@@ -922,6 +923,27 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
         self.set_default("view.ui_theme", self.get_default_ui_theme())
 
+    def add_fs_command(
+        self,
+        command_id: str,
+        command_label: Union[str, Callable[[FsSelection], str]],
+        handler: Callable[[FsSelection], None],
+        visibility_tester: Optional[Callable[[FsSelection], bool]] = None,
+        enablement_tester: Optional[Callable[[FsSelection], bool]] = None,
+        group: int = 99,
+        position_in_group: str = "end",
+    ):
+        command = FsCommand(
+            command_id=command_id,
+            command_label=command_label,
+            handler=handler,
+            visibility_tester=visibility_tester,
+            enablement_tester=enablement_tester,
+            group=group,
+            position_in_group=position_in_group,
+        )
+        base_file_browser.fs_commands.append(command)
+
     def add_command(
         self,
         command_id: str,
@@ -998,6 +1020,9 @@ class Workbench(tk.Tk):
                 show_extra_sequences=show_extra_sequences,
             )
         )
+
+    def add_file_command(self):
+        pass
 
     def _publish_commands(self) -> None:
         for cmd in self._commands:

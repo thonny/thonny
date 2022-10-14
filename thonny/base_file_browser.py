@@ -5,12 +5,14 @@ import stat
 import subprocess
 import time
 import tkinter as tk
+from abc import abstractmethod, ABC
+from dataclasses import dataclass
 from logging import getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Optional
+from typing import Optional, List, Callable, Union, Literal
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
-from thonny.common import InlineCommand, UserError, get_dirs_children_info
+from thonny.common import InlineCommand, UserError, get_dirs_children_info, FsItemInfo
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
@@ -32,10 +34,30 @@ ROOT_NODE_ID = ""
 
 HIDDEN_FILES_OPTION = "file.show_hidden_files"
 
+fs_commands: List["FsCommand"]
+
 logger = getLogger(__name__)
 
 
-class BaseFileBrowser(ttk.Frame):
+@dataclass(frozen=True)
+class FsSelection:
+    items: List[FsItemInfo]
+    browser: "BaseFileBrowser"
+    context: Literal["tree", "button"]
+
+
+@dataclass(frozen=True)
+class FsCommand:
+    command_id: str
+    command_label: Union[str, Callable[[FsSelection], str]]
+    handler: Callable[[FsSelection], None]
+    visibility_tester: Optional[Callable[[FsSelection], bool]]
+    enablement_tester: Optional[Callable[[FsSelection], bool]]
+    group: int
+    position_in_group: str
+
+
+class BaseFileBrowser(ttk.Frame, ABC):
     def __init__(self, master, show_expand_buttons=True):
         self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
@@ -611,7 +633,7 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree.update()
 
-        self.refresh_menu(context="item")
+        self.refresh_menu(context="tree")
         self.menu.tk_popup(event.x_root, event.y_root)
 
     def post_button_menu(self):
@@ -633,7 +655,7 @@ class BaseFileBrowser(ttk.Frame):
         return False
 
     def add_first_menu_items(self, context):
-        if context == "item":
+        if context == "tree":
             selected_path = self.get_selected_path()
             selected_kind = self.get_selected_kind()
         else:
@@ -949,6 +971,15 @@ class BaseFileBrowser(ttk.Frame):
             target = os.path.dirname(target)
         self.copypaste.paste(target)
 
+    @abstractmethod
+    def get_node(self) -> Literal["remote", "local"]:
+        ...
+
+    @abstractmethod
+    def get_container(self) -> Literal["view", "dialog"]:
+        ...
+
+
 
 class CopyPaste(object):
     def __init__(self, filebrowser):
@@ -1141,6 +1172,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
         os.rename(old_name, full_path)
 
+    def get_node(self) -> Literal["remote", "local"]:
+        return "local"
+
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_expand_buttons=True):
@@ -1295,6 +1329,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         # TODO:
         raise NotImplementedError()
 
+    def get_node(self) -> Literal["remote", "local"]:
+        return "remote"
+
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, dialog):
@@ -1311,6 +1348,9 @@ class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
     def should_open_name_in_thonny(self, name):
         # In dialog, all file types are to be opened in Thonny
         return True
+
+    def get_container(self) -> Literal["view", "dialog"]:
+        return "dialog"
 
 
 class BackendFileDialog(CommonDialog):

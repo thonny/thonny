@@ -7,7 +7,7 @@ from logging import getLogger
 from pathlib import PurePath, PurePosixPath, PureWindowsPath
 from tkinter import messagebox
 from tkinter.messagebox import askokcancel, showerror
-from typing import Dict, Iterable, List, Optional, Type
+from typing import Dict, Iterable, List, Type, Literal
 
 from thonny import get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
@@ -267,6 +267,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         else:
             messagebox.showerror("Error", f"Could not find {backend_python!r}", master=self)
 
+    def get_container(self) -> Literal["view", "dialog"]:
+        return "view"
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master):
@@ -328,6 +330,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def add_middle_menu_items(self, context):
         self.add_download_command()
         super().add_middle_menu_items(context)
+
+    def get_container(self) -> Literal["view", "dialog"]:
+        return "view"
 
 
 class TransferDialog(InlineCommandDialog):

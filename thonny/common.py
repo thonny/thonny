@@ -9,7 +9,7 @@ import sys
 from collections import namedtuple
 from dataclasses import dataclass
 from logging import getLogger
-from typing import Any, Callable, Dict, List, Optional, Tuple  # @UnusedImport
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -60,6 +60,14 @@ class DistInfo:
     project_name: str
     version: str
     location: str
+
+
+@dataclass(frozen=True)
+class FsItemInfo:
+    path: str
+    kind: Literal["file", "dir"]
+    size: Optional[int]
+    mtime: Optional[int]
 
 
 class Record:
