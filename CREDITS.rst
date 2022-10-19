@@ -143,6 +143,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Taavi Ilp
 * tabreturn
 * TANAKA Masayuki
+* Thomas Helmuth
 * TooLazy0x00
 * Toomas Mölder
 * Tristan Bunn
