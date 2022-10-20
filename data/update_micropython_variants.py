@@ -15,7 +15,7 @@ UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
-PIMORONI_LATEST_STABLE_VERSION = "1.19.8"
+PIMORONI_LATEST_STABLE_VERSION = "1.19.9"
 PIMORONI_LATEST_UNSTABLE_VERSION = None
 PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
 
@@ -133,6 +133,13 @@ pimoroni_variants = [
         "model": "Pico W",
         "family": "rp2",
         "title": "Pico W (with Pimoroni libs for Enviro)",
+    },
+    {
+        "_id": "pimoroni-picow_galactic_unicorn",
+        "vendor": "Raspberry Pi",
+        "model": "Pico W",
+        "family": "rp2",
+        "title": "Pico W (with Pimoroni libs for Galactic Unicorn)",
     },
     {
         "_id": "pimoroni-tiny2040",
