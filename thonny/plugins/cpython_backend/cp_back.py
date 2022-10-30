@@ -256,8 +256,9 @@ class MainCPythonBackend(MainBackend):
 
         filename = cmd.args[0]
         if os.path.isfile(filename):
-            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
-            __main__.__dict__["__file__"] = filename
+            abs_filename = os.path.abspath(filename)
+            sys.path.insert(0, os.path.dirname(abs_filename))
+            __main__.__dict__["__file__"] = abs_filename
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
