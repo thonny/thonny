@@ -608,7 +608,21 @@ def load_plugin() -> None:
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 
-    for ext in [".py", ".pyw", ".pyi", ".txt", ".log", ".json", ".yml", ".yaml", ".md", ".rst"]:
+    for ext in [
+        ".py",
+        ".pyw",
+        ".pyi",
+        ".txt",
+        ".log",
+        ".json",
+        ".yml",
+        ".yaml",
+        ".md",
+        ".rst",
+        ".toml",
+        ".gitignore",
+        ".env",
+    ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
 
