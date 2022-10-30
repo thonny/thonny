@@ -30,9 +30,9 @@ from thonny import (
     common,
     get_runner,
     get_shell,
+    get_version,
     get_workbench,
     report_time,
-    get_version,
 )
 from thonny.common import (
     BackendEvent,
