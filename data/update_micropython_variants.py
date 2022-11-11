@@ -208,8 +208,8 @@ simplified_microbits = [
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
             {
-                "version": "1.1.0",
-                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.0/micropython-microbit-v1.1.0.hex",
+                "version": "1.1.1",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.1/micropython-microbit-v1.1.1.hex",
             },
             {
                 "version": "1.0.1",
@@ -226,8 +226,8 @@ simplified_microbits = [
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
             {
-                "version": "2.1.0",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0/micropython-microbit-v2.1.0.hex",
+                "version": "2.1.1",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.1/micropython-microbit-v2.1.1.hex",
             },
             {
                 "version": "2.0.0",
