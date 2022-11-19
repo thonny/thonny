@@ -6,8 +6,8 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20221111-unstable-v1.19.1-646-g0698dd72e",
-                "url": "https://micropython.org/resources/firmware/microbit-20221111-unstable-v1.19.1-646-g0698dd72e.hex"
+                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
+                "url": "https://micropython.org/resources/firmware/microbit-20221118-unstable-v1.19.1-705-gac5934c96.hex"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.19.1-\\d+-[a-z0-9]{10}"
