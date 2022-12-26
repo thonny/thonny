@@ -55,6 +55,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Algent Albrahimi
 * Anatoly Techtonik
 * Anders Pamdal
+* Andrea Ferrari
 * Andrew Scheller
 * André Roberge
 * Andy Piper
@@ -110,6 +111,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marian-Silviu Iuga
 * Marie Roald
 * Marko Ristin
 * Matt Iversen
