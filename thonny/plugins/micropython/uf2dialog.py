@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Set
 from thonny import get_runner
 from thonny.languages import tr
 from thonny.misc_utils import get_win_volume_name, list_volumes
+from thonny.plugins.micropython.mp_front import list_serial_port_infos
 from thonny.ui_utils import AdvancedLabel, MappingCombobox, set_text_if_different
 from thonny.workdlg import WorkDialog
 
@@ -465,7 +466,8 @@ class Uf2FlashingDialog(WorkDialog):
         from thonny.plugins.micropython import list_serial_ports
 
         try:
-            ports_before = list_serial_ports()
+            ports_before = list_serial_port_infos()
+            logger.debug("Ports before: %s", ports_before)
             self._download_to_the_device(download_url, size, target_dir, target_filename)
             if self._state == "working":
                 self.perform_post_installation_steps(ports_before)
@@ -552,11 +554,11 @@ class Uf2FlashingDialog(WorkDialog):
         wait_time = 0
         step = 0.2
         while wait_time < 10:
-            new_ports = list_serial_ports()
+            new_ports = list_serial_port_infos()
             added_ports = set(new_ports) - set(old_ports)
             if added_ports:
                 for p in added_ports:
-                    self.append_text("Found %s at %s\n" % ("%04x:%04x" % (p.vid, p.pid), p.device))
+                    self.append_text("Found port %s\n" % p)
                     self.set_action_text("Found port")
                 return
             if self._state == "cancelling":
@@ -564,6 +566,7 @@ class Uf2FlashingDialog(WorkDialog):
             time.sleep(step)
             wait_time += step
         else:
+            logger.debug("Ports after: %s", list_serial_port_infos())
             self.set_action_text("Warning: Could not find port")
             self.append_text("Warning: Could not find port in %s seconds\n" % int(wait_time))
             # leave some time to see the warning

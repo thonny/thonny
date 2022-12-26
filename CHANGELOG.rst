@@ -5,6 +5,7 @@ Version history
 4.0.2 (2022-12-??)
 ==================
 * Ignore flushing errors in the end of UF2 installation
+* Make port finding in the end of UF2 installation process more robust
 
 4.0.1 (2022-09-11)
 ==================
