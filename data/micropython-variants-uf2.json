@@ -10,8 +10,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -27,8 +27,8 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_FEATHER_M4_EXPRESS",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -43,8 +43,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -59,8 +59,8 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_M0_EXPRESS",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -75,8 +75,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -95,8 +95,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -115,8 +115,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -135,8 +135,8 @@
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -155,8 +155,8 @@
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -176,8 +176,8 @@
                 "url": "https://micropython.org/resources/firmware/GENERIC_S2-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/GENERIC_S2-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/GENERIC_S2-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -192,8 +192,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_S2_WROVER-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/ESP32_S2_WROVER-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/ESP32_S2_WROVER-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -208,8 +208,20 @@
                 "url": "https://micropython.org/resources/firmware/GENERIC_S3-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/GENERIC_S3-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/GENERIC_S3-20221220-unstable-v1.19.1-782-g699477d12.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "Generic ESP32-S3 (SPIRAM Octal)",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/GENERIC_S3_SPIRAM_OCT",
+        "downloads": [
+            {
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/GENERIC_S3_SPIRAM_OCT-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -224,8 +236,8 @@
                 "url": "https://micropython.org/resources/firmware/GENERIC_S3_SPIRAM-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/GENERIC_S3_SPIRAM-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/GENERIC_S3_SPIRAM-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -240,8 +252,8 @@
                 "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -260,8 +272,8 @@
                 "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -280,8 +292,8 @@
                 "url": "https://micropython.org/resources/firmware/MINISAM_M4-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/MINISAM_M4-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/MINISAM_M4-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -329,6 +341,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-badger2040-v1.19.10-micropython.uf2"
             },
             {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-badger2040-v1.19.11-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-badger2040-v1.18.7-micropython.uf2"
             }
@@ -344,6 +360,10 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-badger2040-v1.19.10-micropython-without-badger-os.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-badger2040-v1.19.11-micropython-without-badger-os.uf2"
             }
         ]
     },
@@ -357,6 +377,10 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-picolipo_16mb-v1.19.10-micropython.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-picolipo_16mb-v1.19.11-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -375,8 +399,8 @@
                 "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_16MB-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_16MB-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_16MB-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -396,6 +420,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-picolipo_4mb-v1.19.10-micropython.uf2"
             },
             {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-picolipo_4mb-v1.19.11-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-picolipo_4mb-v1.18.7-micropython.uf2"
             }
@@ -412,8 +440,8 @@
                 "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_4MB-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_4MB-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO_4MB-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -433,6 +461,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-tiny2040-v1.19.10-micropython.uf2"
             },
             {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-tiny2040-v1.19.11-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-tiny2040-v1.18.7-micropython.uf2"
             }
@@ -449,8 +481,8 @@
                 "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -468,6 +500,10 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-tufty2040-v1.19.10-micropython.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-tufty2040-v1.19.11-micropython.uf2"
             }
         ]
     },
@@ -482,8 +518,8 @@
                 "url": "https://micropython.org/resources/firmware/rp2-pico-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/rp2-pico-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/rp2-pico-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -505,6 +541,10 @@
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-pico-v1.19.10-micropython.uf2"
             },
             {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-pico-v1.19.11-micropython.uf2"
+            },
+            {
                 "version": "1.18.7",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-pico-v1.18.7-micropython.uf2"
             }
@@ -517,8 +557,8 @@
         "info_url": "https://micropython.org/download/rp2-pico-w",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/rp2-pico-w-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/rp2-pico-w-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ],
         "popular": true,
@@ -534,6 +574,10 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-picow-v1.19.10-micropython.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-picow-v1.19.11-micropython.uf2"
             }
         ]
     },
@@ -547,6 +591,10 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-picow_enviro-v1.19.10-micropython.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-picow_enviro-v1.19.11-micropython.uf2"
             }
         ]
     },
@@ -560,26 +608,22 @@
             {
                 "version": "1.19.10",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.10/pimoroni-picow_galactic_unicorn-v1.19.10-micropython.uf2"
+            },
+            {
+                "version": "1.19.11",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.11/pimoroni-picow_galactic_unicorn-v1.19.11-micropython.uf2"
             }
         ]
     },
     {
         "vendor": "Seeed Studio",
-        "model": "Seeeduino XIAO",
+        "model": "Seeeduino XIAO (SAMD21)",
         "family": "samd21",
-        "info_url": "https://micropython.org/download/SEEED_XIAO",
+        "info_url": "https://micropython.org/download/SEEED_XIAO_SAMD21",
         "downloads": [
             {
-                "version": "1.19.1",
-                "url": "https://micropython.org/resources/firmware/SEEED_XIAO-20220618-v1.19.1.uf2"
-            },
-            {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SEEED_XIAO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
-            },
-            {
-                "version": "1.18",
-                "url": "https://micropython.org/resources/firmware/SEEED_XIAO-20220117-v1.18.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_SAMD21-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -594,8 +638,8 @@
                 "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -614,8 +658,8 @@
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -630,8 +674,8 @@
         "info_url": "https://micropython.org/download/SPARKFUN_SAMD51_THING_PLUS",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ],
         "title": "SAMD51 Thing Plus"
@@ -647,8 +691,8 @@
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             },
             {
                 "version": "1.18",
@@ -667,8 +711,8 @@
                 "url": "https://micropython.org/resources/firmware/featherS2-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/featherS2-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/featherS2-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -683,8 +727,8 @@
                 "url": "https://micropython.org/resources/firmware/featherS2neo-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/featherS2neo-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/featherS2neo-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -699,8 +743,8 @@
                 "url": "https://micropython.org/resources/firmware/feathers3-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/feathers3-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/feathers3-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -715,8 +759,8 @@
                 "url": "https://micropython.org/resources/firmware/pros3-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/pros3-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/pros3-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -731,8 +775,8 @@
                 "url": "https://micropython.org/resources/firmware/tinys2-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/tinys2-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/tinys2-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -747,8 +791,8 @@
                 "url": "https://micropython.org/resources/firmware/tinys3-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/tinys3-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/tinys3-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -759,8 +803,8 @@
         "info_url": "https://micropython.org/download/WEACTSTUDIO",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ],
         "title": "Studio RP2040"
@@ -776,8 +820,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -792,8 +836,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ]
     },
@@ -815,8 +859,8 @@
                 "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20220618-v1.19.1.uf2"
             },
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ],
         "title": "W5100S-EVB-Pico"
@@ -828,8 +872,8 @@
         "info_url": "https://micropython.org/download/W5500_EVB_PICO",
         "downloads": [
             {
-                "version": "20221118-unstable-v1.19.1-705-gac5934c96",
-                "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20221118-unstable-v1.19.1-705-gac5934c96.uf2"
+                "version": "20221220-unstable-v1.19.1-782-g699477d12",
+                "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20221220-unstable-v1.19.1-782-g699477d12.uf2"
             }
         ],
         "title": "W5500-EVB-Pico"
