@@ -528,9 +528,16 @@ class Uf2FlashingDialog(WorkDialog):
                         break
 
                     fdst.write(block)
-                    fdst.flush()
-                    os.fsync(fdst.fileno())
                     bytes_copied += len(block)
+                    fdst.flush()
+                    try:
+                        # May fail after last block
+                        os.fsync(fdst.fileno())
+                    except Exception:
+                        if bytes_copied == size:
+                            logger.warning("Could not fsync last block")
+                        else:
+                            logger.exception("Could not fsync")
                     percent_str = "%.0f%%" % (bytes_copied / size * 100)
                     self.set_action_text("Copying... " + percent_str)
                     self.report_progress(bytes_copied, size)

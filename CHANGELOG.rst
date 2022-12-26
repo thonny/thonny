@@ -2,6 +2,10 @@
 Version history
 ===============
 
+4.0.2 (2022-12-??)
+==================
+* Ignore flushing errors in the end of UF2 installation
+
 4.0.1 (2022-09-11)
 ==================
 * Fix error when running script with closed Shell, #2412
