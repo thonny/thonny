@@ -1508,6 +1508,8 @@ class InlineCommandDialog(WorkDialog):
         self.response = None
         self._title = title
         self._instructions = instructions
+        if "id" not in cmd:
+            cmd["id"] = generate_command_id()
         self._cmd = cmd
         self.returncode = None
 
