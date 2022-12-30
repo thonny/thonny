@@ -130,7 +130,7 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
 
     common_prefix = os.path.normpath(sys.prefix).rstrip("/")
     cmds = (
-        "export THOPR=" + common_prefix + " ; " + cmds.replace(common_prefix + "/", "$THOPR" + "/")
+        " export THOPR=" + common_prefix + " ; " + cmds.replace(common_prefix + "/", "$THOPR" + "/")
     )
     print(cmds)
 
