@@ -93,6 +93,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Hyungseok Choi
 * IhorNehrutsa
 * Ingo Blechschmidt
+* Isaac Levy (@isaacl)
 * Ivanhercaz
 * Ivan.schamann
 * Илья Кругликов
