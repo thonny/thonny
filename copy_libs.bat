@@ -1,2 +1,2 @@
 xcopy ..\pipkin\pipkin\*.py thonny\vendored_libs\pipkin /s /e
-@rem pip install filelock -t thonny\vendored_libs
+pip install filelock==3.8.* -t thonny\vendored_libs

@@ -81,6 +81,43 @@ class Adapter(ABC):
         ...
 
 
+class DummyAdapter(Adapter):
+    def get_user_packages_path(self) -> Optional[str]:
+        raise NotImplementedError()
+
+    def get_default_target(self) -> str:
+        raise NotImplementedError()
+
+    def list_dists(self, paths: List[str] = None) -> Dict[str, Tuple[str, str]]:
+        raise NotImplementedError()
+
+    def remove_dist(
+        self, dist_name: str, target: Optional[str] = None, above_target: bool = False
+    ) -> None:
+        raise NotImplementedError()
+
+    def read_file(self, path: str) -> bytes:
+        raise NotImplementedError()
+
+    def write_file(self, path: str, content: bytes) -> None:
+        raise NotImplementedError()
+
+    def join_path(self, *parts: str) -> str:
+        raise NotImplementedError()
+
+    def split_dir_and_basename(self, path: str) -> Tuple[str, str]:
+        raise NotImplementedError()
+
+    def normpath(self, path: str) -> str:
+        raise NotImplementedError()
+
+    def get_implementation_name_and_version_prefix(self) -> Tuple[str, str]:
+        raise NotImplementedError()
+
+    def get_mpy_cross_args(self) -> List[str]:
+        raise NotImplementedError()
+
+
 class BaseAdapter(Adapter, ABC):
     def __init__(self):
         self._ensured_directories = set()
