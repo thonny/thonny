@@ -479,7 +479,7 @@ class Uf2FlashingDialog(WorkDialog):
 
         if self._state == "working":
             self.append_text("\nDone!\n")
-            self.set_action_text("Done!")
+            self.set_action_text(tr("Done!"))
             self.report_done(True)
         else:
             assert self._state == "cancelling"
@@ -541,7 +541,7 @@ class Uf2FlashingDialog(WorkDialog):
                         else:
                             logger.exception("Could not fsync")
                     percent_str = "%.0f%%" % (bytes_copied / size * 100)
-                    self.set_action_text(tr("Copying... ") + percent_str)
+                    self.set_action_text(tr("Copying... {}").format(percent_str))
                     self.report_progress(bytes_copied, size)
                     self.replace_last_line(percent_str)
 
@@ -549,7 +549,7 @@ class Uf2FlashingDialog(WorkDialog):
         from thonny.plugins.micropython import list_serial_ports
 
         self.append_text("\nWaiting for the port...\n")
-        self.set_action_text("Waiting for the port...")
+        self.set_action_text(tr("Waiting for the port..."))
 
         wait_time = 0
         step = 0.2

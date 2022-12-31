@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-31 20:46+0100\n"
+"POT-Creation-Date: 2022-12-31 22:28+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -2132,17 +2132,21 @@ msgstr "Inštalovať {}"
 msgid "Error..."
 msgstr "Chyba..."
 
+#: thonny/plugins/micropython/uf2dialog.py:482
+msgid "Done!"
+msgstr "Hotovo!"
+
 #: thonny/plugins/micropython/uf2dialog.py:499
-#, fuzzy
-#| msgid "Starting"
 msgid "Starting..."
-msgstr "Spúšťam"
+msgstr "Spúšťanie..."
 
 #: thonny/plugins/micropython/uf2dialog.py:544
-#, fuzzy
-#| msgid "Copying"
-msgid "Copying... "
-msgstr "Kopírujem"
+msgid "Copying... {}"
+msgstr "Kopírovanie... {}"
+
+#: thonny/plugins/micropython/uf2dialog.py:552
+msgid "Waiting for the port..."
+msgstr "Čaká sa na port..."
 
 #: thonny/plugins/printing/__init__.py:98
 msgid "Print..."
