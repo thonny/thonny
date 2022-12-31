@@ -2451,7 +2451,10 @@ class MappingCombobox(ttk.Combobox):
         self.mapping_desc_variable = tk.StringVar(value="")
         self.configure(textvariable=self.mapping_desc_variable)
 
-        self.state(["!disabled", "readonly"])
+        if kw.get("state", None) == "disabled":
+            self.state(["readonly"])
+        else:
+            self.state(["!disabled", "readonly"])
 
     def set_mapping(self, mapping: Dict[str, Any]):
         self.mapping = mapping

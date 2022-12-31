@@ -68,14 +68,18 @@ class Uf2FlashingDialog(WorkDialog):
 
         variant_label = ttk.Label(self.main_frame, text=f"{self.firmware_name} variant")
         variant_label.grid(row=5, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
-        self._variant_combo = MappingCombobox(self.main_frame, exportselection=False)
+        self._variant_combo = MappingCombobox(
+            self.main_frame, exportselection=False, state="disabled"
+        )
         self._variant_combo.grid(
             row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
 
         version_label = ttk.Label(self.main_frame, text="version")
         version_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
-        self._version_combo = MappingCombobox(self.main_frame, exportselection=False)
+        self._version_combo = MappingCombobox(
+            self.main_frame, exportselection=False, state="disabled"
+        )
         self._version_combo.grid(
             row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
@@ -101,6 +105,8 @@ class Uf2FlashingDialog(WorkDialog):
                 self._variant_combo.set_mapping({})
                 self._variant_combo.select_none()
             elif current_target != self._last_handled_target and self._downloaded_variants:
+                self._variant_combo.state(["!disabled", "readonly"])
+                self._version_combo.state(["!disabled", "readonly"])
                 self._present_variants_for_target(current_target)
                 self._last_handled_target = current_target
                 self._last_handled_variant = None
