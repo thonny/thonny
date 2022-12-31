@@ -52,7 +52,7 @@ class Uf2FlashingDialog(WorkDialog):
         epady = epadx
         ipady = ipadx
 
-        target_label = ttk.Label(self.main_frame, text="Target volume")
+        target_label = ttk.Label(self.main_frame, text=tr("Target volume"))
         target_label.grid(row=1, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
         self._target_combo = MappingCombobox(self.main_frame, exportselection=False)
         self._target_combo.grid(
@@ -73,14 +73,14 @@ class Uf2FlashingDialog(WorkDialog):
             row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
 
-        version_label = ttk.Label(self.main_frame, text="version")
+        version_label = ttk.Label(self.main_frame, text=tr("version"))
         version_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._version_combo = MappingCombobox(self.main_frame, exportselection=False)
         self._version_combo.grid(
             row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
-        variant_info_label = ttk.Label(self.main_frame, text="info")
+        variant_info_label = ttk.Label(self.main_frame, text=tr("info"))
         variant_info_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_info_content_label = AdvancedLabel(self.main_frame)
         self._variant_info_content_label.grid(
@@ -150,7 +150,7 @@ class Uf2FlashingDialog(WorkDialog):
                 if current_target.model == "Raspberry Pi RP2":
                     # too general to be called model
                     text = "RP2"
-                    label = "family"
+                    label = tr("family")
                 else:
                     text = current_target.model
                     label = "model"
@@ -161,14 +161,14 @@ class Uf2FlashingDialog(WorkDialog):
                 text = current_target.family
                 label = "family"
             else:
-                text = "Unknown board"
+                text = tr("Unknown board")
                 label = "info"
 
         elif not self._target_combo.mapping:
-            text = "[no suitable targets detected]"
+            text = "[" + tr("no suitable targets detected") + "]"
             label = ""
         else:
-            text = f"[found {len(self._target_combo.mapping)} targets, please select one]"
+            text = "[" + 'found {} targets, please select one'.format(len(self._target_combo.mapping)) + "]"
             label = ""
 
         set_text_if_different(self._target_info_content_label, text)
@@ -178,13 +178,13 @@ class Uf2FlashingDialog(WorkDialog):
         current_variant = self._variant_combo.get_selected_value()
         if not self._downloaded_variants:
             url = None
-            text = "[downloading variants info ...]"
+            text = "[" + tr("downloading variants info ...") + "]"
         elif current_variant:
             url = current_variant["info_url"]
             text = url
         elif self._variant_combo.mapping:
             url = None
-            text = f"[select one from {len(self._variant_combo.mapping)} variants]"
+            text = "[" + tr("select one from {} variants").format(len(self._variant_combo.mapping)) + "]"
         else:
             url = None
             text = ""
@@ -216,7 +216,7 @@ class Uf2FlashingDialog(WorkDialog):
             if variant.get("popular", False)
         }
         if populars and len(populars) < len(filtered_mapping):
-            enhanced_mapping = {"--- MOST POPULAR " + "-" * 100: {}}
+            enhanced_mapping = {"--- " + tr('MOST POPULAR ').ljust(100, '-'): {}}
             for variant in populars.values():
                 popular_variant = variant.copy()
                 # need different title to distinguish it from the same item in ALL VARIANTS
@@ -224,7 +224,7 @@ class Uf2FlashingDialog(WorkDialog):
                 popular_variant["title"] = popular_title
                 enhanced_mapping[popular_title] = popular_variant
 
-            enhanced_mapping["--- ALL VARIANTS " + "-" * 100] = {}
+            enhanced_mapping["--- " + tr('ALL VARIANTS ').ljust(100, '-')] = {}
             enhanced_mapping.update(filtered_mapping)
         else:
             enhanced_mapping = filtered_mapping
@@ -411,8 +411,8 @@ class Uf2FlashingDialog(WorkDialog):
         return tr("Install")
 
     def get_instructions(self) -> Optional[str]:
-        return (
-            f"Here you can install or update {self.firmware_name} for devices having an UF2 bootloader\n"
+        return tr(
+            "Here you can install or update {} for devices having an UF2 bootloader\n"
             "(this includes most boards meant for beginners).\n"
             "\n"
             "1. Put your device into bootloader mode: \n"
@@ -422,13 +422,13 @@ class Uf2FlashingDialog(WorkDialog):
             "3. Select desired variant and version.\n"
             "4. Click 'Install' and wait for some seconds until done.\n"
             "5. Close the dialog and start programming!"
-        )
+        ).format(self.firmware_name)
 
     def _on_variant_select(self, *args):
         pass
 
     def get_title(self):
-        return f"Install {self.firmware_name}"
+        return tr("Install {}").format(self.firmware_name)
 
     def is_ready_for_work(self):
         return self._target_combo.get_selected_value() and self._version_combo.get_selected_value()
@@ -473,7 +473,7 @@ class Uf2FlashingDialog(WorkDialog):
                 self.perform_post_installation_steps(ports_before)
         except Exception as e:
             self.append_text("\n" + "".join(traceback.format_exc()))
-            self.set_action_text("Error...")
+            self.set_action_text(tr("Error..."))
             self.report_done(False)
             return
 
@@ -496,7 +496,7 @@ class Uf2FlashingDialog(WorkDialog):
         target_path = os.path.join(target_dir, target_filename)
         logger.debug("Downloading from %s to %s", download_url, target_path)
 
-        self.set_action_text("Starting...")
+        self.set_action_text(tr("Starting..."))
         self.append_text("Downloading from %s\n" % download_url)
 
         req = urllib.request.Request(
@@ -541,7 +541,7 @@ class Uf2FlashingDialog(WorkDialog):
                         else:
                             logger.exception("Could not fsync")
                     percent_str = "%.0f%%" % (bytes_copied / size * 100)
-                    self.set_action_text("Copying... " + percent_str)
+                    self.set_action_text(tr("Copying... ") + percent_str)
                     self.report_progress(bytes_copied, size)
                     self.replace_last_line(percent_str)
 

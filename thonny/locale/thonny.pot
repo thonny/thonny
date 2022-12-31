@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-09-11 16:31+0300\n"
+"POT-Creation-Date: 2022-12-31 20:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.3\n"
+"Generated-By: Babel 2.11.0\n"
 
 #: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:74
 msgid "Assistant"
@@ -484,43 +484,43 @@ msgstr ""
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr ""
 
-#: thonny/running.py:115
+#: thonny/running.py:123
 msgid "Run current script"
 msgstr ""
 
-#: thonny/running.py:116 thonny/workbench.py:372
+#: thonny/running.py:124 thonny/workbench.py:372
 msgid "Run"
 msgstr ""
 
-#: thonny/running.py:146
+#: thonny/running.py:154
 msgid "Run current script in terminal"
 msgstr ""
 
-#: thonny/running.py:159
+#: thonny/running.py:167
 msgid "Stop/Restart backend"
 msgstr ""
 
-#: thonny/running.py:160
+#: thonny/running.py:168
 msgid "Stop"
 msgstr ""
 
-#: thonny/running.py:171
+#: thonny/running.py:179
 msgid "Interrupt execution"
 msgstr ""
 
-#: thonny/running.py:184
+#: thonny/running.py:192
 msgid "Send EOF / Soft reboot"
 msgstr ""
 
-#: thonny/running.py:195
+#: thonny/running.py:203
 msgid "Disconnect"
 msgstr ""
 
-#: thonny/running.py:338
+#: thonny/running.py:356
 msgid "Information"
 msgstr ""
 
-#: thonny/running.py:339
+#: thonny/running.py:357
 msgid "For debugging the program must be saved first."
 msgstr ""
 
@@ -1287,7 +1287,7 @@ msgid "Search on PyPI"
 msgstr ""
 
 #: thonny/plugins/esp/__init__.py:349
-#: thonny/plugins/micropython/uf2dialog.py:410 thonny/plugins/pip_gui.py:73
+#: thonny/plugins/micropython/uf2dialog.py:411 thonny/plugins/pip_gui.py:73
 msgid "Install"
 msgstr ""
 
@@ -1956,6 +1956,77 @@ msgstr ""
 
 #: thonny/plugins/micropython/pip_gui.py:102
 msgid "no absolute lib directory in sys.path"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:55
+msgid "Target volume"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:76
+msgid "version"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:83
+msgid "info"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:153
+msgid "family"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:164
+msgid "Unknown board"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:168
+msgid "no suitable targets detected"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:181
+msgid "downloading variants info ..."
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:187
+msgid "select one from {} variants"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:219
+msgid "MOST POPULAR "
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:227
+msgid "ALL VARIANTS "
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:414
+msgid ""
+"Here you can install or update {} for devices having an UF2 bootloader\n"
+"(this includes most boards meant for beginners).\n"
+"\n"
+"1. Put your device into bootloader mode: \n"
+"     - some devices have to be plugged in while holding the BOOTSEL "
+"button,\n"
+"     - some require double-tapping the RESET button with proper rythm.\n"
+"2. Wait for couple of seconds until the target volume appears.\n"
+"3. Select desired variant and version.\n"
+"4. Click 'Install' and wait for some seconds until done.\n"
+"5. Close the dialog and start programming!"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:431
+msgid "Install {}"
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:476
+msgid "Error..."
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:499
+msgid "Starting..."
+msgstr ""
+
+#: thonny/plugins/micropython/uf2dialog.py:544
+msgid "Copying... "
 msgstr ""
 
 #: thonny/plugins/printing/__init__.py:98
