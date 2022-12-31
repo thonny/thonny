@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-31 22:28+0100\n"
+"POT-Creation-Date: 2023-01-01 00:03+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -1755,7 +1755,7 @@ msgstr "Otvoriť sledované hodnoty v Inšpektorovi objektov"
 
 #: thonny/plugins/terminal_config_page.py:12
 msgid "Running current script in terminal"
-msgstr "Spustiť aktuálny skript v termináli"
+msgstr "Aktuálny skript sa spúšťa v termináli"
 
 #: thonny/plugins/terminal_config_page.py:17
 msgid "Present Python REPL after program ends"
@@ -1843,11 +1843,11 @@ msgstr "Info"
 
 #: thonny/plugins/todo_view.py:123
 msgid "No line marked with #todo found"
-msgstr ""
+msgstr "Žiadny riadok označený s #todo nebol nájdený"
 
 #: thonny/plugins/todo_view.py:143
 msgid "TODO"
-msgstr ""
+msgstr "TODO"
 
 #: thonny/plugins/variables.py:22
 msgid ""
@@ -1917,10 +1917,29 @@ msgid ""
 "context menu in the file navagation when selecting a virtual environment "
 "folder, or the 'pyveng.cfg' file inside."
 msgstr ""
+"Existujúce virtuálne prostredie môžete aktivovať aj cez kontextové menu, "
+"ktoré sa zobrazí po kliknutí pravého tlačidla myši na priečinok s virtuálnym "
+"prostredím alebo na súbor 'pyvenv.cfg' v ňom."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:257
+msgid "New virtual environment"
+msgstr "Nové virtuálne prostredie"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:269
 msgid "Python interpreters"
 msgstr "Interpretery Pythonu"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:288
+msgid "Creating new virtual environment"
+msgstr "Vytvorenie nového virtuálneho prostredia"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:289
+msgid ""
+"After clicking 'OK' you need to choose an empty directory, which will be the "
+"root of your new virtual environment."
+msgstr ""
+"Po kliknutí na tlačidlo 'OK' musíte vybrať prázdny priečinok, ktorý bude "
+"koreňovým priečinkom vášho nového virtuálneho prostredia."
 
 #: thonny/plugins/cpython_frontend/cp_front.py:298
 msgid "Select empty directory for new virtual environment"
@@ -2058,7 +2077,7 @@ msgstr "v sys.path nie je absolútny adresár knižnice"
 
 #: thonny/plugins/micropython/uf2dialog.py:55
 msgid "Target volume"
-msgstr ""
+msgstr "Cieľové umiestnenie"
 
 #: thonny/plugins/micropython/uf2dialog.py:76
 msgid "version"
@@ -2118,7 +2137,7 @@ msgstr ""
 "BOOTSEL,\n"
 "      - niektoré zasa vyžadujú dvojité stlačenie tlačidla RESET v správnom "
 "rytme.\n"
-"2. Počkajte niekoľko sekúnd, kým sa neobjaví cieľové zariadenie.\n"
+"2. Počkajte niekoľko sekúnd, kým sa neobjaví cieľové umiestnenie.\n"
 "3. Vyberte si požadovaný variant a verziu.\n"
 "4. Kliknite na tlačidlo \"Inštalovať\" a počkajte niekoľko sekúnd, kým sa "
 "inštalácia neskončí.\n"
@@ -2158,9 +2177,6 @@ msgstr "Otvoriť systémový shell..."
 
 #~ msgid "Target:"
 #~ msgstr "Cieľ:"
-
-#~ msgid "virtual environment"
-#~ msgstr "virtuálne prostredie"
 
 #~ msgid "user site packages"
 #~ msgstr "balíky na stránkach používateľov"

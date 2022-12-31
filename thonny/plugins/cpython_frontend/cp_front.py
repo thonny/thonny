@@ -241,7 +241,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
             "You can activate an existing virtual environment also"
             + " via the right-click context menu in the file navagation"
             + " when selecting a virtual environment folder,"
-            + " or the 'pyveng.cfg' file inside."
+            + " or the 'pyvenv.cfg' file inside."
         )
         venv_text = "\n".join(textwrap.wrap(venv_text, 80))
 
@@ -254,7 +254,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         last_row.columnconfigure(1, weight=1)
         new_venv_link = ui_utils.create_action_label(
             last_row,
-            "New virtual environment",
+            tr("New virtual environment"),
             self._create_venv,
         )
         new_venv_link.grid(row=0, column=1, sticky="e", pady=10)
@@ -285,9 +285,9 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
             return
 
         messagebox.showinfo(
-            "Creating new virtual environment",
-            "After clicking 'OK' you need to choose an empty directory, "
-            "which will be the root of your new virtual environment.",
+            tr("Creating new virtual environment"),
+            tr("After clicking 'OK' you need to choose an empty directory, "
+            "which will be the root of your new virtual environment."),
             parent=self,
         )
         path = None

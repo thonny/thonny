@@ -1,14 +1,14 @@
 # Translations template for PROJECT.
-# Copyright (C) 2022 ORGANIZATION
+# Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-31 22:28+0100\n"
+"POT-Creation-Date: 2023-01-01 00:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1826,8 +1826,22 @@ msgid ""
 " folder, or the 'pyveng.cfg' file inside."
 msgstr ""
 
+#: thonny/plugins/cpython_frontend/cp_front.py:257
+msgid "New virtual environment"
+msgstr ""
+
 #: thonny/plugins/cpython_frontend/cp_front.py:269
 msgid "Python interpreters"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:288
+msgid "Creating new virtual environment"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:289
+msgid ""
+"After clicking 'OK' you need to choose an empty directory, which will be "
+"the root of your new virtual environment."
 msgstr ""
 
 #: thonny/plugins/cpython_frontend/cp_front.py:298
