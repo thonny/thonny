@@ -25,7 +25,7 @@ msgstr "Ausführen"
 
 #: thonny/workbench.py:373
 msgid "Tools"
-msgstr "Extras"
+msgstr "Werkzeuge"
 
 #: thonny/plugins/help/__init__.py:80 thonny/workbench.py:374
 msgid "Help"
@@ -42,11 +42,11 @@ msgstr "Schrift verkleinern"
 #. Cursor in Editor workspace -> DE: Cursor in Editorfenster aktivieren
 #: thonny/workbench.py:630
 msgid "Focus editor"
-msgstr "Editor aktivieren"
+msgstr "Den Cursor im Editor aktivieren"
 
 #: thonny/workbench.py:639
 msgid "Focus shell"
-msgstr "Terminal aktivieren"
+msgstr "Den Cursor der Shell aktivieren"
 
 #: thonny/workbench.py:650
 msgid "Maximize view"
@@ -89,7 +89,7 @@ msgstr "Diese Programm wird ohne Gewährleistung zur Verfügung gestellt. Es ist
 
 #: thonny/plugins/about.py:140
 msgid "Version history"
-msgstr "Versionshinweise"
+msgstr "Versionsgeschichte"
 
 #: thonny/plugins/about.py:147
 msgid "Report problems"
@@ -184,7 +184,7 @@ msgstr "Alles auswählen"
 
 #: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
 msgid "Run to cursor"
-msgstr "Bis Cursor ausführen"
+msgstr "Bis zum Cursor ausführen"
 
 #: thonny/plugins/debugger.py:982
 msgid "Can't close yet"
@@ -226,7 +226,7 @@ msgstr "Zeilennummern anzeigen"
 msgid "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
 msgstr "Empfohlene maximale Zeilenlänge\n"
-"(Auf 0 einstellen, um die Randlinie auszuschalten.)"
+"(auf 0 einstellen, um die Randlinie auszuschalten)"
 
 #: thonny/plugins/editor_config_page.py:104
 msgid "Editor"
@@ -282,7 +282,7 @@ msgstr "Ersetzen+Suchen"
 
 #: thonny/plugins/find_replace.py:153
 msgid "Replace all"
-msgstr "Alle ersetzen"
+msgstr "Alles ersetzen"
 
 #: thonny/plugins/find_replace.py:253
 msgid "Enter string to be replaced."
@@ -322,13 +322,14 @@ msgstr "Heap"
 msgid "Language"
 msgstr "Sprache"
 
+#. Question for consistence:  Is there consent how to translate "you" in this project? The more formal "Sie", or the "Du".  It depends on personal custom, yet for me "Sie" leans more to the professional side.
 #: thonny/plugins/notes.py:35
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
 "\n"
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "Diese Box ist für Ihre Notizen gedacht (Aufgaben, Code-Snippets, etc.)\n"
+msgstr "Diese Box ist für Ihre Notizen gedacht -- Aufgaben, Code-Snippets, etc.\n"
 "\n"
 "Text wird automatisch gespeichert und beim nächsten Öffnen von Thonny geladen.\n"
 "\n"
@@ -386,7 +387,7 @@ msgstr "Installieren"
 
 #: thonny/plugins/pip_gui.py:535
 msgid "Could not find the package from PyPI."
-msgstr "Das Paket konnte nicht in PyPI gefunden werden."
+msgstr "Das Paket konnte nicht im PyPI gefunden werden."
 
 #: thonny/plugins/pip_gui.py:557
 msgid "Latest stable version"
@@ -418,7 +419,7 @@ msgstr "Dokumentation"
 
 #: thonny/plugins/pip_gui.py:571
 msgid "PyPI page"
-msgstr "PyPi-Seite"
+msgstr "PyPI-Seite"
 
 #: thonny/plugins/pip_gui.py:611
 msgid "Requires"
@@ -435,7 +436,8 @@ msgstr "Bist du sicher, dass du es deinstallieren möchtest?"
 #: thonny/plugins/variables.py:22
 msgid "Back to\n"
 "current frame"
-msgstr "Zurück zum aktuellen Frame"
+msgstr "Zurück zum\n"
+"aktuellen Frame"
 
 #: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
 #: thonny/plugins/variables.py:145
@@ -560,7 +562,8 @@ msgstr "Ordner nicht leer"
 #: thonny/plugins/cpython_frontend/cp_front.py:306
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
-msgstr "Ordner ist nicht leer, wähle einen Anderen oder breche ab."
+msgstr "Der ausgewählte Ordner ist nicht leer.\n"
+"Wählen Sie einen anderen oder brechen Sie ab."
 
 #: thonny/plugins/cpython_frontend/cp_front.py:323
 msgid "Creating virtual environment"
@@ -609,7 +612,7 @@ msgstr "Drucker visualisiert Anzahl von Nummern im Terminal."
 
 #: thonny/shell.py:1884
 msgid "See Help for details."
-msgstr "Details siehe Hilfe"
+msgstr "Konsultieren Sie die Hilfe für Details."
 
 #: thonny/ui_utils.py:492
 msgid "Close others"
@@ -677,11 +680,11 @@ msgstr "Beenden"
 
 #: thonny/workbench.py:1244 thonny/workbench.py:1252
 msgid "Overwriting theme '%s'"
-msgstr "Theme überschreiben ' %s'"
+msgstr "Theme überschreiben '%s'"
 
 #: thonny/workbench.py:1436
 msgid "Program arguments:"
-msgstr "Programm-Argumente:"
+msgstr "Programmargumente:"
 
 #: thonny/workbench.py:1490
 msgid "Regular mode"
@@ -691,8 +694,9 @@ msgstr "Standard-Modus"
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
-msgstr "Konfiguration wurde geändert.  Thonny neu starten um im Standard-Modus zu arbeiten.\n"
-"(siehe \"Extras > Optionen > Allgemeines\" wenn Sie sich anders entscheiden"
+msgstr "Die Konfiguration wurde aktualisiert. Starten Sie Thonny starten erneut, um im Standard-Modus zu arbeiten.\n"
+"\n"
+"(siehe 'Extras → Optionen → Allgemeines' wenn Sie sich anders entscheiden.)"
 
 #: thonny/plugins/ast_view.py:212
 msgid "Program tree"
@@ -718,8 +722,7 @@ msgstr "Debuggen"
 #. nice means better (besser) or only cosmetic (schöner)?
 #: thonny/plugins/debugger.py:1327
 msgid "Debug current script (nicer)"
-msgstr "Aktuelles Skript debuggen (besser)\n"
-""
+msgstr "Aktuelles Skript debuggen (besser)"
 
 #: thonny/plugins/debugger.py:1339
 msgid "Debug current script (faster)"
@@ -784,7 +787,7 @@ msgstr "UI-Skalierungsfaktor"
 
 #: thonny/plugins/general_config_page.py:114
 msgid "NB! Restart Thonny after changing these options!"
-msgstr "Notiz: Thonny nach Änderung dieser Optionen neu starten!"
+msgstr "Hinweis: Thonny nach Änderung dieser Optionen neu starten!"
 
 #: thonny/plugins/general_config_page.py:148
 msgid "General"
@@ -802,7 +805,7 @@ msgstr "Pakete durchsuchen"
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
 msgstr "Mit dem aktuellen Interpreter können Sie nur die Pakete hier durchsuchen.\n"
-"Zum Installieren, Upgraden oder Deinstallieren öffnen Sie \"Extras > Kommandozeile öffnen ...\" "
+"Zum Installieren, Aktualisieren oder Deinstallieren nutzen Sie \"Extras → Systemterminal öffnen ...\""
 
 #: thonny/plugins/pip_gui.py:378
 msgid "Packages' directory"
@@ -810,12 +813,11 @@ msgstr "Ordner für Pakete"
 
 #: thonny/plugins/pip_gui.py:382
 msgid "Install from PyPI"
-msgstr "Installiere von PyPI"
+msgstr "Installiere vom PyPI"
 
 #: thonny/plugins/pip_gui.py:385
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr "Wenn Sie nicht wissen, woher Sie das Paket beziehen können, sollten Sie den Python-Paketindex durchsuchen. Geben Sie den Anfang des Paketnamens in das Suchfeld oben ein und drücken die EINGABETASTE\n"
-"."
+msgstr "Wenn Sie nicht wissen, woher Sie das Paket beziehen können, sollten Sie den Python-Paketindex durchsuchen. Geben Sie den Anfang des Paketnamens in das Suchfeld oben ein und drücken die EINGABETASTE."
 
 #: thonny/plugins/pip_gui.py:402
 msgid "to locate requirements.txt file and install the packages specified in it."
@@ -827,19 +829,19 @@ msgstr "Klick"
 
 #: thonny/plugins/pip_gui.py:413
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr "Finde und installiere die Pakete (gewöhnlich mit Extension .whl, tar.gz oder .zip)"
+msgstr "Finde und installiere die Paketdatei (üblicherweise mit der Endung .whl, .tar.gz oder .zip)."
 
 #: thonny/plugins/pip_gui.py:420
 msgid "Upgrade or uninstall"
-msgstr "Upgrade oder Deinstallation"
+msgstr "Aktualisierung oder Deinstallation"
 
 #: thonny/plugins/pip_gui.py:422
 msgid "Start by selecting the package from the left."
-msgstr "Beginne links die Pakete auszuwählen"
+msgstr "Beginne mit der Auswahl mit dem Paket links."
 
 #: thonny/plugins/pip_gui.py:410
 msgid "Target:"
-msgstr "Ziel"
+msgstr "Ziel:"
 
 #: thonny/plugins/pip_gui.py:414
 msgid "virtual environment"
@@ -851,7 +853,7 @@ msgstr "Benutzerspezifische Pakete"
 
 #: thonny/plugins/pip_gui.py:430
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
-msgstr "Diser Dialog listet all verfügbaren Pakete, aber erlaubt nur Upgrade und Deinstallation von"
+msgstr "Dieser Dialog führt alle verfügbaren Pakete auf, erlaubt die Aktualisierung oder Deinstallation von Paketen aber nur von"
 
 #: thonny/plugins/pip_gui.py:440
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
@@ -859,11 +861,11 @@ msgstr "Neue Pakete werden ebenso in diesen Ordner installiert. Andere Ordner m�
 
 #: thonny/plugins/pip_gui.py:485
 msgid "Installed version:"
-msgstr "Installierte Version"
+msgstr "Installierte Version:"
 
 #: thonny/plugins/pip_gui.py:487
 msgid "Installed to:"
-msgstr "Installiert in"
+msgstr "Installiert in:"
 
 #: thonny/plugins/pip_gui.py:538
 msgid "Please check your spelling!"
@@ -871,7 +873,7 @@ msgstr "Bitte überprüfen Sie Ihre Rechtschreibung!"
 
 #: thonny/plugins/pip_gui.py:542
 msgid "Could not find the package info from PyPI."
-msgstr "Paketinformation von PyPI kann nicht gefunden werden"
+msgstr "Paketinformation kann nicht im PyPI gefunden werden."
 
 #: thonny/plugins/pip_gui.py:544 thonny/plugins/pip_gui.py:1326
 msgid "Error code:"
@@ -883,7 +885,7 @@ msgstr "Paketname kann in der Liste nicht gefunden werden:"
 
 #: thonny/plugins/pip_gui.py:744
 msgid "Package '{}' is required for installing and uninstalling other packages."
-msgstr "Zur Installation und Deinstallation ist Paket '{}' notwendig. "
+msgstr "Das Paket '{}' wird für die Installation und Deinstallation weiterer Pakete benötigt."
 
 #: thonny/plugins/pip_gui.py:789
 msgid "Package"
@@ -907,7 +909,7 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "Are you sure you want to install %s for the back-end?"
 msgstr "Es scheint, Sie wollen ein Thonny zugehöriges Paket installieren.\n"
 "Falls es ein Thonny Plug-in ist, dann wählen Sie bitte\n"
-"'Extras > Verwaltung Plug-ins'...\n"
+"'Extras → Verwalte Plug-ins...'\n"
 "\n"
 "Sind Sie sicher, dass Sie %s als Backend installieren wollen?"
 
@@ -929,7 +931,7 @@ msgstr "Dieses Paket erfordert eine andere Version von Thonny:"
 
 #: thonny/plugins/pip_gui.py:1088
 msgid "If you still want it, then please install it from the command line."
-msgstr "Falls Sie das trotzdem möchten, dann benutzen Sie bitte die Kommandozeile. "
+msgstr "Falls Sie das trotzdem möchten, dann benutzen Sie bitte die Kommandozeile."
 
 #: thonny/plugins/pip_gui.py:1125
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
@@ -972,7 +974,7 @@ msgstr "Verwalte Plug-ins ..."
 #. What means "replayer"? Is this a kind of Macro recorder to repeat actions?
 #: thonny/plugins/replayer.py:365
 msgid "Open replayer..."
-msgstr "Logdatei schreiben"
+msgstr "Logdatei schreiben..."
 
 #: thonny/plugins/run_debug_config_page.py:14
 msgid "Change working directory to script directory on Run / Debug"
@@ -995,9 +997,10 @@ msgstr "Stack View automatisch öffnen und schließen"
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
 msgstr "Stack View beim ersten Aufruf öffnen und bei Programmreturn schließen um zum Hauptfenster zurückzukehren."
 
+#. In German, "d.h." has to periods.  The English (well, Latin "i.e." frequently read as "that is") currently misses a period here.
 #: thonny/plugins/run_debug_config_page.py:39
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
-msgstr "Wechseln in Bibliotheken erlauben (dh außerhalb des Hauptskriptverzeichnisses)"
+msgstr "Wechseln in Bibliotheken erlauben (d.h. außerhalb des Hauptskriptverzeichnisses)"
 
 #: thonny/plugins/run_debug_config_page.py:40
 msgid "May make debugging slower."
@@ -1050,12 +1053,13 @@ msgstr "Aktuelles Skript in Terminal ausführen"
 
 #: thonny/plugins/terminal_config_page.py:17
 msgid "Present Python REPL after program ends"
-msgstr "Zeige Python REPL nach Programmende."
+msgstr "Zeige Python REPL nach Programmende"
 
 #: thonny/plugins/terminal_config_page.py:24
 msgid "Keep terminal window open after Python process ends"
-msgstr "Nach Programmende Terminal geöffnet lassen."
+msgstr "Nach Programmende Terminal geöffnet lassen"
 
+#. @Aivar A search in the English GUI of Thonny 4.0.1 (including Tools -> Options, and Tools -> Manage Plug-ins) was not successful to retrieve this string.  May you provide a hint, please?
 #: thonny/plugins/terminal_config_page.py:31
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
@@ -1075,11 +1079,11 @@ msgstr "Syntax Theme"
 
 #: thonny/plugins/theme_and_font_config_page.py:85
 msgid "Editor font"
-msgstr "Schriftart Editor "
+msgstr "Schriftart im Editor"
 
 #: thonny/plugins/theme_and_font_config_page.py:108
 msgid "IO font"
-msgstr "Schriftart Terminal"
+msgstr "Schriftart im Terminal"
 
 #: thonny/plugins/theme_and_font_config_page.py:133
 msgid "Preview"
@@ -1087,7 +1091,7 @@ msgstr "Vorschau"
 
 #: thonny/plugins/theme_and_font_config_page.py:151
 msgid "This is a comment"
-msgstr "Dies ist ein Kommentar"
+msgstr "Das ist ein Kommentar"
 
 #: thonny/plugins/theme_and_font_config_page.py:154
 msgid "The answer is"
@@ -1148,7 +1152,7 @@ msgstr "Suchen Sie nach Ihrer Geräteschnittstelle \"USB Serial\" oder \"UART\""
 
 #: thonny/plugins/micropython/mp_front.py:552
 msgid "If you can't find it, you may need to install proper USB driver first."
-msgstr "Falls Sie es nicht finden, müssen Sie ggf. erst den richtigen USB-Treiber installieren."
+msgstr "Falls Sie es nicht finden, müssen Sie möglicherweise erst den richtigen USB-Treiber installieren."
 
 #: thonny/plugins/micropython/mp_front.py:444
 msgid "Port"
@@ -1177,7 +1181,7 @@ msgstr "Details"
 #. (requirements.txt)
 #: thonny/plugins/pip_gui.py:395
 msgid "Install from requirements file"
-msgstr "Installieren mit requirements.txt Datei"
+msgstr "Installieren mit requirements Datei"
 
 #: thonny/plugins/pip_gui.py:407
 msgid "Install from local file"
@@ -1201,7 +1205,7 @@ msgstr "Ausgewählte Zeilen einrücken"
 #. evt. "Einzug verkleinern" vs "Einzug vergrößern" wie bei LibreOffice.
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Dedent selected lines"
-msgstr "Dedent selektierte Zeilen (entf. Leerzeichen am Zeilenanfang)"
+msgstr "Entferne in den ausgewählten Zeilen führende Leerzeichen"
 
 #: thonny/workbench.py:1479
 msgid "Switch to\n"
@@ -1225,11 +1229,11 @@ msgstr "bitte warten"
 
 #: thonny/misc_utils.py:151
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
-msgstr "Konnte Laufwerk '%s'  nicht finden. Möchten das Laufwerk selbst suchen?"
+msgstr "Konnte Laufwerk '%s'  nicht finden. Möchten Sie das Laufwerk selbst suchen?"
 
 #: thonny/misc_utils.py:154
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
-msgstr "Es wurden mehrere '% s' Laufwerke gefunden. Möchten Sie selbst eines auswählen?"
+msgstr "Es wurden mehrere '%s' Laufwerke gefunden. Möchten Sie selbst eines auswählen?"
 
 #: thonny/misc_utils.py:170
 msgid "Can't find suitable disk"
@@ -1266,11 +1270,11 @@ msgstr "Pfad"
 
 #: thonny/base_file_browser.py:759
 msgid "Directory properties"
-msgstr "Ordner Eigenschaften"
+msgstr "Eigenschaften des Ordners"
 
 #: thonny/base_file_browser.py:761
 msgid "File properties"
-msgstr "Datei Eigenschaften"
+msgstr "Eigenschaften der Datei"
 
 #: thonny/base_file_browser.py:763
 msgid "bytes"
@@ -1302,7 +1306,7 @@ msgstr "Upload nach %s"
 
 #: thonny/plugins/files.py:420
 msgid "Downloading %s to %s"
-msgstr "Downloading %s nach %s"
+msgstr "Download von %s nach %s"
 
 #: thonny/plugins/files.py:326
 msgid "Download to %s"
@@ -1314,11 +1318,11 @@ msgstr "Im Systemdateimanager öffnen"
 
 #: thonny/base_file_browser.py:674
 msgid "Hide hidden files"
-msgstr "Versteckte Dateien ausblenden"
+msgstr "Verborgene Dateien ausblenden"
 
 #: thonny/base_file_browser.py:674
 msgid "Show hidden files"
-msgstr "Versteckte Dateien anzeigen"
+msgstr "Verborgene Dateien anzeigen"
 
 #: thonny/base_file_browser.py:657
 msgid "Open in Thonny"
@@ -1332,9 +1336,10 @@ msgstr "Öffnen in der Systemstandard-App"
 msgid "Configure %s files"
 msgstr "Konfiguriere %s Dateien"
 
+#. The suggested revision now reads more like «what action is associated with a double click in Thonny's file browser?»
 #: thonny/base_file_browser.py:697
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
-msgstr "Was mit einer %s Datei machen, wenn Sie in Thonnys Dateibrowser darauf doppelklicken?"
+msgstr "Wie soll mit einer %s Datei umgegangen werden, wenn Sie in Thonnys Dateibrowser darauf doppelklicken?"
 
 #: thonny/base_file_browser.py:1254 thonny/editors.py:979 thonny/editors.py:981
 msgid "Deleting"
@@ -1342,7 +1347,7 @@ msgstr "Löschen"
 
 #: thonny/base_file_browser.py:1261
 msgid "Creating directory"
-msgstr "Erstelle Verzeichnis"
+msgstr "Erstelle ein Verzeichnis"
 
 #: thonny/editors.py:258
 msgid "Loading %s"
@@ -1354,11 +1359,11 @@ msgstr "Speichern nach %s"
 
 #: thonny/editors.py:720 thonny/editors.py:722
 msgid "Save All files"
-msgstr "Speicher Alle Dateien"
+msgstr "Speicher alle Dateien"
 
 #: thonny/plugins/backend_config_page.py:340 thonny/workbench.py:877
 msgid "Configure interpreter..."
-msgstr "Den Interpreter konfigurieren ..."
+msgstr "Konfiguriere den Interpreter ..."
 
 #: thonny/workbench.py:1589
 msgid "Device"
@@ -1390,7 +1395,7 @@ msgstr "geben Sie hier Ihr Passwort für\n"
 
 #: thonny/plugins/object_inspector.py:487
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
-msgstr "Der gezeigte Wert ist dieser Floatingpoint-Zahl ähnlich. Der genaue gespeicherte Wert ist %s, was ungefähr %s entspricht"
+msgstr "Der angezeigte Wert ist ein Schätzwert dieser Gleitkommazahl. Der genaue gespeicherte Wert ist %s, was ungefähr %s entspricht"
 
 #: thonny/plugins/pip_gui.py:645
 msgid "Search results"
@@ -1406,7 +1411,7 @@ msgstr "Installiere '%s'"
 
 #: thonny/plugins/pip_gui.py:734
 msgid "Upgrading '%s'"
-msgstr "Neuere Version von \"%s\""
+msgstr "Aktualisieren von '%s'"
 
 #: thonny/plugins/pip_gui.py:741
 msgid "Uninstalling '%s'"
@@ -1434,7 +1439,7 @@ msgstr "Sie müssen ihr Programm stoppen, bevor Sie den Paketmanager starten."
 
 #: thonny/plugins/shell_config_page.py:73
 msgid "Open evaluated values in Object inspector"
-msgstr "Sehen Sie  den  Wert des Ausdruckes im Objekt-Inspektor"
+msgstr "Sehen Sie den Wert des Ausdruckes im Objekt-Inspektor"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:209
 msgid "Python executable"
@@ -1448,7 +1453,7 @@ msgstr "Hinweis: Die Dateiauswahl funktioniert möglicherweise nicht richtig,  w
 
 #: thonny/plugins/cpython_ssh/__init__.py:17
 msgid "Remote Python 3 (SSH)"
-msgstr "Nichtlokales Python 3 über SSH"
+msgstr "Nichtlokales Python 3 (über SSH)"
 
 #: thonny/plugins/micropython/mp_front.py:313
 msgid "Not connected"
@@ -1485,7 +1490,7 @@ msgstr "Neue Pakete werden installiert in"
 
 #: thonny/plugins/micropython/pip_gui.py:102
 msgid "no absolute lib directory in sys.path"
-msgstr "es gibt kein -lib-Verzeichnis im sys-pfad"
+msgstr "es gibt kein lib-Verzeichnis im sys.pfad"
 
 #: thonny/plugins/micropython/uf2dialog.py:39
 msgid "Version to be installed"
@@ -1505,7 +1510,7 @@ msgstr "Bitte warten"
 
 #: thonny/plugins/pip_gui.py:70
 msgid "Search on PyPI"
-msgstr "Suche auf PyPI"
+msgstr "Suche im PyPI"
 
 #: thonny/base_file_browser.py:689
 msgid "Open in Thonny's text editor"
@@ -1554,7 +1559,8 @@ msgstr "Größe (Bytes)"
 #: thonny/base_file_browser.py:875
 msgid "Enter name for new directory under\n"
 "%s"
-msgstr "Gebe einen Namen für ein neues Verzeichnis ein unter %s"
+msgstr "Bestimmen Sie einen Namen für ein neues Verzeichnis unter\n"
+"%s"
 
 #: thonny/base_file_browser.py:898
 msgid "Nothing selected"
@@ -1589,7 +1595,7 @@ msgstr "Wert"
 
 #: thonny/plugins/backend_config_page.py:274
 msgid "Save password"
-msgstr "Passwort Speichern"
+msgstr "Passwort speichern"
 
 #: thonny/plugins/debugger.py:553
 msgid "Function call at %s"
@@ -1609,7 +1615,7 @@ msgstr "Ort"
 
 #: thonny/plugins/debugger.py:1112
 msgid "If last command raised an exception then this view will show the stacktrace."
-msgstr "Falls das letzte Kommando eine Exception (interrupt) ausgelöst hat, dann wird in diesem Fenster der zugehörige Stack gezeigt"
+msgstr "Falls das letzte Kommando eine Exception (interrupt) ausgelöst hat, dann wird in diesem Fenster der zugehörige Stack gezeigt."
 
 #: thonny/plugins/heap.py:22
 msgid "ID"
@@ -1638,11 +1644,12 @@ msgstr "Schlüssel"
 #: thonny/plugins/variables.py:39
 msgid "Back to\n"
 "%s"
-msgstr "Zurück nach %s"
+msgstr "Zurück nach\n"
+"%s"
 
 #: thonny/plugins/micropython/mp_front.py:444
 msgid "Port or WebREPL"
-msgstr "Port oder WebREBL"
+msgstr "Port oder WebREPL"
 
 #: thonny/plugins/micropython/mp_front.py:589
 msgid "Password"
@@ -1658,7 +1665,7 @@ msgstr "Benutzen Sie die TK-Dateiauswahl anstelle von Zenity"
 
 #: thonny/plugins/general_config_page.py:30
 msgid "Select if the file dialogs end up behind the main window"
-msgstr "Wähle aus, falls Dialoge hinter dem Hauptfenster verschwinden"
+msgstr "Auswählen, falls Dialoge hinter dem Hauptfenster verschwinden"
 
 #: thonny/plugins/general_config_page.py:97
 msgid "Environment variables (one KEY=VALUE per line)"
@@ -1692,9 +1699,10 @@ msgstr "Es gibt sich widersprechende Ordner"
 msgid "File already exists"
 msgstr "Datei existiert bereits"
 
+#. In the English GUI (Thonny 4.0.1), I did not identify an entry in lines of Configure -> Files
 #: thonny/base_file_browser.py:1208
 msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
-msgstr "Wenn dies eine Textdatei ist, kannst Du es automatisch mit Thonny öffnen, indem Du rechts klickst und 'Konfiguriere ... Dateien' wählst"
+msgstr "Wenn es eine Textdatei ist, kannst Du sie in Thonny öffnen, indem Du rechts klickst und 'Konfiguriere ... Dateien' wählst."
 
 #: thonny/editors.py:35
 msgid "Python files"
@@ -1716,17 +1724,18 @@ msgstr "Willst Du auch den Editor schließen?"
 msgid "External modification"
 msgstr "Externe Veränderung"
 
+#. Gibt es eine Konvention hier, wie man den Nutzer anspricht? Du, du, Sie, sie? Ich bevorzuge 'Du', weil ich 'Sie' altmodisch finde und den Großbuchstaben respektvoller. Manche finden die Großschreibung altmodisch, für mich ist es der schönste Kompromiss. Aber ich bin ja auch schon alt (Boomer ;-) ).
 #: thonny/editors.py:171
 msgid "Do you want to discard current editor content and reload the file from disk?"
-msgstr "Willst Du den jetzigen Editor-Inhalt verwerfen und die Datei von der Platte neu laden?"
+msgstr "Wollen Sie den jetzigen Editor-Inhalt verwerfen und die Datei von der Platte neu laden?"
 
 #: thonny/editors.py:580
 msgid "Python files usually have .py extension."
-msgstr "Python-Dateien haben üblicherweise die Endung '.py'."
+msgstr "Python-Dateien haben üblicherweise die Endung .py."
 
 #: thonny/editors.py:582
 msgid "Did you mean '%s'?"
-msgstr "Meintest Du '%s'?"
+msgstr "Meinten Sie '%s'?"
 
 #: thonny/editors.py:751
 msgid "Move / rename..."
@@ -1742,11 +1751,12 @@ msgstr "Zeilennummer"
 
 #: thonny/editors.py:1149
 msgid "Do you want to save files before closing?"
-msgstr "Willst Du die Dateien vor dem Schließen speichern?"
+msgstr "Wollen Sie die Dateien vor dem Schließen speichern?"
 
+#. Suggestion for the English pattern: "Do you want to save the file before closing?" (additional "the")
 #: thonny/editors.py:1151
 msgid "Do you want to save file before closing?"
-msgstr "Willst Du vor dem Schließen speichern?"
+msgstr "Wollen Sie die Datei vor dem Schließen speichern?"
 
 #: thonny/editors.py:1154
 msgid "Save On Close"
@@ -1762,7 +1772,7 @@ msgstr "Dieser Befehl ist nicht unter Flatpack verfügbar"
 
 #: thonny/workbench.py:694 thonny/workbench.py:794
 msgid "Support Ukraine"
-msgstr "Unterstütze die Ukraine"
+msgstr "Unterstützen Sie die Ukraine"
 
 #: thonny/plugins/backend_config_page.py:91
 msgid "Which kind of interpreter should Thonny use for running your code?"
@@ -1782,7 +1792,7 @@ msgstr "Biete beim Tippen Auto-Vervollständigen an"
 
 #: thonny/plugins/editor_config_page.py:52
 msgid "Automatically show documentation for completions"
-msgstr "Zeige automatisch Doku für Vervollständigungen"
+msgstr "Zeige automatisch Dokumentation für Vervollständigungen"
 
 #: thonny/plugins/editor_config_page.py:57
 msgid "Request completions with Tab-key in editors"
@@ -1802,7 +1812,7 @@ msgstr "Definition nicht gefunden"
 
 #: thonny/plugins/shell_config_page.py:17
 msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
-msgstr "Leere Terminal-Fenster vor Start des neuen Prozesses (ausführen, debuggen, Stop/Restart, ...) "
+msgstr "Leere das Terminal-Fenster vor dem Start des neuen Prozesses (ausführen, debuggen, Stop/Restart, ...)"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:171
 msgid "Thonny's Python"
@@ -1827,20 +1837,20 @@ msgstr "Vor Start des Skript Interpreter neu starten"
 #: thonny/plugins/micropython/pip_gui.py:24
 msgid "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
-msgstr "Dies scheint kein Micro-/CircuitPython-Paket zu sein.\n"
-"Willst Du es wirklich installieren?"
+msgstr "Das scheint kein Micro-/CircuitPython-Paket zu sein.\n"
+"Wollen Sie es wirklich installieren?"
 
 #: thonny/base_file_browser.py:849
 msgid "Moving to Trash"
-msgstr "In den Papierkorb schieben"
+msgstr "In den Papierkorb verschieben"
 
 #: thonny/base_file_browser.py:850
 msgid "Move %s to Trash?"
-msgstr "%s in den Papierkorb schieben?"
+msgstr "%s in den Papierkorb verschieben?"
 
 #: thonny/base_file_browser.py:857
 msgid "Moving %s to Trash"
-msgstr "Schiebe %s in den Papierkorb"
+msgstr "Verschiebe %s in den Papierkorb"
 
 #: thonny/base_file_browser.py:662
 msgid "Open in default external app"
@@ -1852,7 +1862,7 @@ msgstr "Remote-Dateien können nicht in externer App geöffnet werden."
 
 #: thonny/base_file_browser.py:1213
 msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
-msgstr "Wenn die Datei in einer externen App, geöffnet werden muss, dann lade sie in ein lokales Verzeichnis und öffne sie von dort!"
+msgstr "Wenn die Datei von einer externen App geöffnet werden muss, dann speichere sie in einem lokalen Verzeichnis und öffne sie von dort!"
 
 #: thonny/editors.py:150
 msgid "Looks like '%s' was deleted or moved."
@@ -1862,9 +1872,10 @@ msgstr "Anscheinend wurde '%s' gelöscht oder verschoben."
 msgid "Looks like '%s' was modified outside of the editor."
 msgstr "Anscheinend wurde '%s' außerhalb des Editors geändert."
 
+#. German "Hinweis:" is more gentle (such as "hint") than imperative verb with exclamation mark.
 #: thonny/plugins/cpython_frontend/cp_front.py:230
 msgid "NB! Thonny only supports Python %s and later"
-msgstr "Achtung! Thonny unterstützt nur Python %s und neuer"
+msgstr "Hinweis: Thonny unterstützt nur Python %s und neuer"
 
 #: thonny/editors.py:1003
 msgid "Go to line"
@@ -1886,7 +1897,7 @@ msgstr "Warnung"
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
 msgstr "Wenn der Wert einer Umgebungsvariable in Anführungszeichen gesetzt wird, werden die Anführungszeichen Teil des Werts.\n"
-"Ist das beabsichtigt?"
+"War das beabsichtigt?"
 
 #: thonny/workbench.py:867
 msgid "Install MicroPython"
@@ -1955,9 +1966,10 @@ msgstr "Standard-Passwort"
 
 #: thonny/running.py:338
 msgid "Information"
-msgstr ""
+msgstr "Information"
 
+#. Would it be old-fashioned to add a comma before "muss"? I would prefer it.
 #: thonny/running.py:339
 msgid "For debugging the program must be saved first."
-msgstr ""
+msgstr "Um den Programmfehler zu korrigieren muss das Program zuerst gespeichert werden."
 
