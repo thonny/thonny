@@ -405,7 +405,7 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("RemoteFilesChanged")
             return True
         else:
-            messagebox.showerror(tr("Could not save"), "Back-end is not ready")
+            messagebox.showerror(tr("Could not save"), tr("Back-end is not ready"))
             return False
 
     def ask_new_path(self, node=None):

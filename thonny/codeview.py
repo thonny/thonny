@@ -12,6 +12,7 @@ from typing import Dict, Union  # @UnusedImport
 
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
+from thonny.languages import tr
 from thonny.tktextext import EnhancedText
 from thonny.ui_utils import EnhancedTextWithLogging, ask_string, scrollbar_style
 
@@ -246,8 +247,8 @@ class CodeView(tktextext.EnhancedTextFrame):
                 pass
 
             encoding = ask_string(
-                "Bad encoding",
-                "Could not read as %s text.\nYou could try another encoding" % encoding,
+                tr("Bad encoding"),
+                tr("Could not read as {} text.\nYou could try another encoding").format(encoding),
                 initial_value=encoding,
                 options=get_proposed_encodings(),
                 master=self.winfo_toplevel(),

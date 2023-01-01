@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-01 00:32+0100\n"
+"POT-Creation-Date: 2023-01-02 00:41+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -290,7 +290,7 @@ msgstr "Chyba"
 msgid "You need to select a file!"
 msgstr "Musíte vybrať súbor!"
 
-#: thonny/base_file_browser.py:1423
+#: thonny/base_file_browser.py:1423 thonny/plugins/files.py:532
 msgid "Overwrite?"
 msgstr "Prepísať?"
 
@@ -302,6 +302,16 @@ msgstr "Chcete prepísať '%s'?"
 #: thonny/base_file_browser.py:1572
 msgid "This computer"
 msgstr "Tento počítač"
+
+#: thonny/codeview.py:250
+msgid "Bad encoding"
+msgstr "Nesprávne kódovanie"
+
+#: thonny/codeview.py:251
+msgid ""
+"Could not read as {} text.\n"
+"You could try another encoding"
+msgstr ""
 
 #: thonny/config_ui.py:18
 msgid "Thonny options"
@@ -368,6 +378,10 @@ msgstr "Ukladám"
 #: thonny/editors.py:393 thonny/editors.py:408
 msgid "Could not save"
 msgstr "Nepodarilo sa uložiť"
+
+#: thonny/editors.py:408
+msgid "Back-end is not ready"
+msgstr "Back-end nie je pripravený"
 
 #: thonny/editors.py:579 thonny/plugins/micropython/pip_gui.py:23
 #: thonny/plugins/pip_gui.py:953
@@ -1115,6 +1129,14 @@ msgstr "Prebrať do %s"
 #, python-format
 msgid "Downloading %s to %s"
 msgstr "Preberám %s do %s"
+
+#: thonny/plugins/files.py:533
+msgid ""
+"This operation will overwrite\n"
+"\n"
+msgstr ""
+"Táto operácia prepíše\n"
+"\n"
 
 #: thonny/plugins/files.py:609
 msgid "Files"

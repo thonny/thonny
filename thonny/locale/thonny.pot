@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-01 16:08+0100\n"
+"POT-Creation-Date: 2023-01-02 00:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -288,7 +288,7 @@ msgstr ""
 msgid "You need to select a file!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1423
+#: thonny/base_file_browser.py:1423 thonny/plugins/files.py:532
 msgid "Overwrite?"
 msgstr ""
 
@@ -299,6 +299,16 @@ msgstr ""
 
 #: thonny/base_file_browser.py:1572
 msgid "This computer"
+msgstr ""
+
+#: thonny/codeview.py:250
+msgid "Bad encoding"
+msgstr ""
+
+#: thonny/codeview.py:251
+msgid ""
+"Could not read as {} text.\n"
+"You could try another encoding"
 msgstr ""
 
 #: thonny/config_ui.py:18
@@ -366,6 +376,10 @@ msgstr ""
 
 #: thonny/editors.py:393 thonny/editors.py:408
 msgid "Could not save"
+msgstr ""
+
+#: thonny/editors.py:408
+msgid "Back-end is not ready"
 msgstr ""
 
 #: thonny/editors.py:579 thonny/plugins/micropython/pip_gui.py:23
@@ -1077,6 +1091,12 @@ msgstr ""
 #: thonny/plugins/files.py:420
 #, python-format
 msgid "Downloading %s to %s"
+msgstr ""
+
+#: thonny/plugins/files.py:533
+msgid ""
+"This operation will overwrite\n"
+"\n"
 msgstr ""
 
 #: thonny/plugins/files.py:609
