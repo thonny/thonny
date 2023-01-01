@@ -8,7 +8,7 @@ def recursive_files(directory):
     paths = []
     for (path, _, filenames) in os.walk(directory):
         for filename in filenames:
-            if not filename.endswith(".pyc"):
+            if not filename.endswith(".pyc") and filename != "registered.json":
                 paths.append(os.path.join('..', path, filename))
     return paths
 
