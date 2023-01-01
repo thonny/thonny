@@ -31,7 +31,8 @@ def register_locale(name: str) -> None:
                 msg = msg + "."
             new_messages.append(msg)
 
-        new_registered[entry.msgid] = entry.msgstr
+        if entry.msgstr:
+            new_registered[entry.msgid] = entry.msgstr
 
     if new_messages:
         print("\n".join(new_messages))
