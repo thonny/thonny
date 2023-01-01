@@ -879,10 +879,10 @@ class MicroPythonBackend(MainBackend, ABC):
             user = False
 
         if "--upgrade" in args:
-            update = True
+            upgrade = True
             args.remove("--upgrade")
         else:
-            update = False
+            upgrade = False
 
         if "-r" in args:
             pos = args.index("-r")
@@ -901,7 +901,7 @@ class MicroPythonBackend(MainBackend, ABC):
                 command="install",
                 specs=specs,
                 user=user,
-                update=update,
+                upgrade=upgrade,
                 requirement_files=requirement_files,
             )
         except Exception as e:

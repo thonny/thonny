@@ -18,6 +18,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import DistInfo, InlineCommand, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
+from thonny.misc_utils import construct_cmd_line
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -981,6 +982,7 @@ class BackendPipDialog(PipDialog):
             title=command,
             instructions=title,
             autostart=True,
+            output_prelude=f"{command} {construct_cmd_line(args)}\n",
         )
         ui_utils.show_dialog(dlg)
 
