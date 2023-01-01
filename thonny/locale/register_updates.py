@@ -25,8 +25,9 @@ def register_locale(name: str) -> None:
     review_messages = []
 
     for entry in po:
-        if entry.msgstr and (entry.msgid not in registered
-                             or registered[entry.msgid] != entry.msgstr):
+        if entry.msgstr and (
+            entry.msgid not in registered or registered[entry.msgid] != entry.msgstr
+        ):
 
             msg = entry.msgstr.strip().replace("\n", " ")
             if not msg.endswith("."):
