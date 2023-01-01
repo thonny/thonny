@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-01 00:03+0100\n"
+"POT-Creation-Date: 2023-01-01 00:32+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -77,7 +77,7 @@ msgstr "Otvoriť v predvolenom externom programe"
 #: thonny/base_file_browser.py:669 thonny/base_file_browser.py:696
 #, python-format
 msgid "Configure %s files"
-msgstr "Nastaviť %s súborov"
+msgstr "Nastavenie %s súborov"
 
 #: thonny/base_file_browser.py:674
 msgid "Hide hidden files"
@@ -243,8 +243,8 @@ msgid ""
 "If the file needs to be opened in external app, then download it to a local "
 "directory and open it from there!"
 msgstr ""
-"Ak potrebujete súbor otvoriť v externom program, najprv ho stiahnite do "
-"miestneho priečinka a otvorte ho odtiaľ!"
+"Ak je potrebné súbor otvoriť v externom programe, najprv ho stiahnite do "
+"lokálneho priečinku a otvorte ho odtiaľ!"
 
 #: thonny/base_file_browser.py:1254 thonny/editors.py:979 thonny/editors.py:981
 msgid "Deleting"
@@ -438,7 +438,7 @@ msgstr "Prejsť na riadok"
 
 #: thonny/editors.py:1003
 msgid "Line number"
-msgstr "Číslo riadka"
+msgstr "Číslo riadku"
 
 #: thonny/editors.py:1149
 msgid "Do you want to save files before closing?"
@@ -1404,7 +1404,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:407
 msgid "Install from local file"
-msgstr "Inštalovať z miestneho súboru"
+msgstr "Inštalovať z lokálneho súboru"
 
 #: thonny/plugins/pip_gui.py:408
 msgid "Click"
@@ -1521,7 +1521,7 @@ msgstr "Nepodarilo sa nájsť balík zo zoznamu:"
 #: thonny/plugins/pip_gui.py:728 thonny/plugins/pip_gui.py:817
 #, python-format
 msgid "Installing '%s'"
-msgstr "Inštalujem '%s'"
+msgstr "Inštaluje sa '%s'"
 
 #: thonny/plugins/pip_gui.py:734
 #, python-format
@@ -1915,7 +1915,7 @@ msgstr ""
 msgid ""
 "You can activate an existing virtual environment also via the right-click "
 "context menu in the file navagation when selecting a virtual environment "
-"folder, or the 'pyveng.cfg' file inside."
+"folder, or the 'pyvenv.cfg' file inside."
 msgstr ""
 "Existujúce virtuálne prostredie môžete aktivovať aj cez kontextové menu, "
 "ktoré sa zobrazí po kliknutí pravého tlačidla myši na priečinok s virtuálnym "
