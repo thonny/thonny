@@ -39,8 +39,8 @@ def register_locale(name: str) -> None:
 
         input("... Press ENTER to confirm! ...")
 
-        with open(registered_path, "w", encoding="utf-8") as fp:
-            json.dump(new_registered, fp, sort_keys=True, indent=4)
+    with open(registered_path, "w", encoding="utf-8") as fp:
+        json.dump(new_registered, fp, sort_keys=True, indent=4, ensure_ascii=False)
 
     print("--------------------------------------")
 
