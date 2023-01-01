@@ -1,0 +1,1951 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: vi\n"
+
+#: thonny/workbench.py:369
+msgid "File"
+msgstr "Tệp"
+
+#: thonny/workbench.py:370
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+#: thonny/workbench.py:371
+msgid "View"
+msgstr "Xem"
+
+#: thonny/running.py:116 thonny/workbench.py:372
+msgid "Run"
+msgstr "Chạy"
+
+#: thonny/workbench.py:373
+msgid "Tools"
+msgstr "Công cụ"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:374
+msgid "Help"
+msgstr "Trợ giúp"
+
+#: thonny/workbench.py:591
+msgid "Exit"
+msgstr "Thoát"
+
+#: thonny/workbench.py:618
+msgid "Decrease font size"
+msgstr "Giảm cỡ chữ"
+
+#: thonny/workbench.py:630
+msgid "Focus editor"
+msgstr "Hướng vào trình sửa mã"
+
+#: thonny/workbench.py:639
+msgid "Focus shell"
+msgstr "Hướng vào shell"
+
+#: thonny/workbench.py:650
+msgid "Maximize view"
+msgstr "Phóng to giao diện"
+
+#: thonny/workbench.py:662
+msgid "Full screen"
+msgstr "Toàn màn hình"
+
+#. What are the examples of programme arguments?
+#: thonny/workbench.py:1465
+msgid "Program arguments"
+msgstr "Đối số chương trình"
+
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:151
+msgid "About Thonny"
+msgstr "Về Thonny"
+
+#: thonny/plugins/about.py:77
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "Được tạo ra tại trường\n"
+"Đại Học Tartu, Estonia,\n"
+"với sự giúp đỡ từ\n"
+"cộng đồng mã nguồn mở,\n"
+"Quỹ Raspberry Pi\n"
+"và công ty Cybernetica AS"
+
+#: thonny/plugins/about.py:97
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "Bạn phải TỰ CHỊU TRÁCH NHIỆM\n"
+"khi thao tác với chương trình này!\n"
+"Đây là phần mềm tự do, và bạn có thể\n"
+"phân phối lại với các điều kiện phù hợp,\n"
+"tham khảo https://opensource.org/licenses/MIT\n"
+"để biết thêm chi tiết"
+
+#: thonny/plugins/about.py:140
+msgid "Version history"
+msgstr "Lịch sử phiên bản"
+
+#: thonny/plugins/about.py:147
+msgid "Report problems"
+msgstr "Báo cáo lỗi"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "Mở Trợ Lý tự động khi chương trình bị lỗi ngoại lệ"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "Mở Trợ Lý tự động khi mã nguồn của bạn gặp cảnh báo"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "Thực hiện các kiểm thử Pylint đã chọn"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "Thực hiện kiểm thử MyPy"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "Các kiểm thử bị tắt (mỗi dòng một id)"
+
+#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "Trợ lý"
+
+#: thonny/plugins/autocomplete.py:522
+msgid "Auto-complete"
+msgstr "Tự hoàn thành"
+
+#: thonny/plugins/backend_config_page.py:337
+msgid "Interpreter"
+msgstr "Trình thông dịch"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "Về Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:56
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "Birdseye là một trình gỡ lỗi Python và phải được cài riêng.\n"
+"\n"
+"Bạn có muốn mở trang hướng dẫn và tìm hiểu thêm không?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "Gỡ lỗi đoạn mã hiện tại (birdseye)"
+
+#: thonny/plugins/commenting_indenting.py:172
+msgid "Toggle comment"
+msgstr "Bật tắt chú thích"
+
+#: thonny/plugins/commenting_indenting.py:182
+msgid "Comment out"
+msgstr "Nhúng vào thẻ chú thích"
+
+#: thonny/plugins/commenting_indenting.py:192
+msgid "Uncomment"
+msgstr "Loại bỏ thẻ chú thích"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "Hoàn tác"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "Làm lại"
+
+#: thonny/base_file_browser.py:724 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2295
+msgid "Cut"
+msgstr "Cắt"
+
+#: thonny/base_file_browser.py:725 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2296
+msgid "Copy"
+msgstr "Sao chép"
+
+#: thonny/base_file_browser.py:727 thonny/base_file_browser.py:733
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2297
+msgid "Paste"
+msgstr "Dán"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "Chọn hết"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
+msgid "Run to cursor"
+msgstr "Chạy đến con trỏ"
+
+#: thonny/plugins/debugger.py:982
+msgid "Can't close yet"
+msgstr "Chưa đóng được"
+
+#: thonny/plugins/debugger.py:983
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "Sử dụng lệnh \"Dừng\" để hủy quá trình gỡ lỗi"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "Dock cửa sổ người dùng"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "Tô màu các tên trùng khớp"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "Tô màu biến cục bộ"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "Tô màu các cặp dấu ngoặc"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "Tô màu các phần tử cú pháp"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "Tô màu dòng hiện tại (yêu cầu khởi động lại trình sửa mã)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "Hiện số chỉ vị trí dòng"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "Hạn chế độ dài tối đa của dòng\n"
+"(Đặt giá trị bằng 0 để tắt đường lề)"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "Trình sửa mã"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "Xuất các bản ghi sử dụng..."
+
+#: thonny/plugins/event_view.py:39
+msgid "Events"
+msgstr "Sự kiện"
+
+#: thonny/plugins/files.py:609
+msgid "Files"
+msgstr "Tệp"
+
+#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:437
+msgid "Find & Replace"
+msgstr "Tìm và Thay Thế"
+
+#: thonny/plugins/find_replace.py:66
+msgid "Find:"
+msgstr "Tìm:"
+
+#: thonny/plugins/find_replace.py:87
+msgid "Replace with:"
+msgstr "Thay thế bằng:"
+
+#: thonny/plugins/find_replace.py:105
+msgid "Case sensitive"
+msgstr "Phân biệt thường - hoa"
+
+#: thonny/plugins/find_replace.py:112
+msgid "Up"
+msgstr "Lên"
+
+#: thonny/plugins/find_replace.py:116
+msgid "Down"
+msgstr "Xuống"
+
+#: thonny/plugins/find_replace.py:125
+msgid "Find"
+msgstr "Tìm"
+
+#: thonny/plugins/find_replace.py:135
+msgid "Replace"
+msgstr "Thay thế"
+
+#: thonny/plugins/find_replace.py:143
+msgid "Replace+Find"
+msgstr "Thay thế + tìm tiếp"
+
+#: thonny/plugins/find_replace.py:153
+msgid "Replace all"
+msgstr "Thay hết"
+
+#: thonny/plugins/find_replace.py:253
+msgid "Enter string to be replaced."
+msgstr "Nhập chuỗi cần thay thế."
+
+#: thonny/plugins/find_replace.py:338
+msgid "The specified text was not found!"
+msgstr "Không thể tìm thấy văn bản cần tìm!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "Cho phép chạy một lần chương trình Thonny"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "Mở lại tất cả các tệp từ phiên đăng nhập trước"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "Tắt tiếng thông báo"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "Chế độ chỉnh cỡ chữ"
+
+#: thonny/plugins/heap.py:37
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "Chế độ Heap đã bật.\n"
+"Đóng cửa sổ Heap để tắt."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "Heap"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+#: thonny/plugins/notes.py:35
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "Bạn có thể dùng cửa sổ này để ghi nháp bất cứ thứ gì cũng được -- từ cách gán biến đến đoạn mã ngắn (snippet), vân vân.\n"
+"\n"
+"Những gì bạn đã ghi đều sẽ được lưu tự động và được mở lại khi bạn khởi động Thonny lần sau.\n"
+"\n"
+"Bạn có thể xóa hết đoạn văn này để bắt đầu ghi chú."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "Cửa sổ nháp"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "Đối tượng trước"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "Đối tượng tiếp theo"
+
+#: thonny/plugins/object_inspector.py:733
+msgid "Object inspector"
+msgstr "Kiểm tra đối tượng"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "Cấu trúc"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "Chế độ PyGame Zero"
+
+#: thonny/plugins/pip_gui.py:79
+msgid "Uninstall"
+msgstr "Gỡ cài đặt"
+
+#: thonny/editors.py:685 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:491
+#: thonny/ui_utils.py:1872 thonny/workdlg.py:162
+msgid "Close"
+msgstr "Đóng"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "Click "
+msgstr "Nhấn chuột vào "
+
+#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+msgid "here"
+msgstr "đây"
+
+#: thonny/plugins/pip_gui.py:76
+msgid "Upgrade"
+msgstr "Nâng cấp"
+
+#: thonny/plugins/esp/__init__.py:349
+#: thonny/plugins/micropython/uf2dialog.py:410 thonny/plugins/pip_gui.py:73
+msgid "Install"
+msgstr "Cài đặt"
+
+#: thonny/plugins/pip_gui.py:535
+msgid "Could not find the package from PyPI."
+msgstr "Không thể tìm được gói từ PyPI."
+
+#: thonny/plugins/pip_gui.py:557
+msgid "Latest stable version"
+msgstr "Phiên bản bền mới nhất"
+
+#: thonny/plugins/pip_gui.py:559
+msgid "Latest version"
+msgstr "Phiên bản mới nhất"
+
+#: thonny/plugins/pip_gui.py:561
+msgid "Summary"
+msgstr "Tổng quan"
+
+#: thonny/plugins/pip_gui.py:563
+msgid "Author"
+msgstr "Tác giả"
+
+#: thonny/plugins/pip_gui.py:565
+msgid "Homepage"
+msgstr "Trang chủ"
+
+#: thonny/plugins/pip_gui.py:567
+msgid "Bugtracker"
+msgstr "Trình theo dõi lỗi bug"
+
+#: thonny/plugins/pip_gui.py:569
+msgid "Documentation"
+msgstr "Tài liệu"
+
+#: thonny/plugins/pip_gui.py:571
+msgid "PyPI page"
+msgstr "Trang PyPI"
+
+#: thonny/plugins/pip_gui.py:611
+msgid "Requires"
+msgstr "Yêu cầu"
+
+#: thonny/plugins/pip_gui.py:743
+msgid "Really uninstall?"
+msgstr "Thực sự gỡ cài đặt chứ?"
+
+#: thonny/plugins/pip_gui.py:748
+msgid "Are you sure you want to uninstall it?"
+msgstr "Bạn có muốn gỡ cài đặt nó không?"
+
+#: thonny/plugins/variables.py:22
+msgid "Back to\n"
+"current frame"
+msgstr "Trở về\n"
+"bước hiện tại"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "Các biến"
+
+#: thonny/base_file_browser.py:1572
+msgid "This computer"
+msgstr "Máy tính này"
+
+#: thonny/base_file_browser.py:644
+msgid "Refresh"
+msgstr "Làm mới"
+
+#: thonny/base_file_browser.py:653
+msgid "Focus into"
+msgstr "Hướng vào"
+
+#: thonny/base_file_browser.py:1407 thonny/base_file_browser.py:1419
+#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+msgid "Error"
+msgstr "Lỗi"
+
+#: thonny/base_file_browser.py:1407 thonny/base_file_browser.py:1419
+msgid "You need to select a file!"
+msgstr "Bạn phải chọn một tệp!"
+
+#: thonny/base_file_browser.py:1423
+msgid "Overwrite?"
+msgstr "Ghi đè?"
+
+#: thonny/base_file_browser.py:1423
+msgid "Do you want to overwrite '%s' ?"
+msgstr "Bạn có muốn ghi đè \"%s\" không?"
+
+#: thonny/editors.py:650 thonny/editors.py:652
+msgid "New"
+msgstr "Tạo mới"
+
+#: thonny/editors.py:663
+msgid "Open..."
+msgstr "Mở..."
+
+#: thonny/editors.py:665
+msgid "Load"
+msgstr "Tải lên"
+
+#: thonny/editors.py:674
+msgid "Recent files"
+msgstr "Các tệp gần đây"
+
+#: thonny/editors.py:696 thonny/ui_utils.py:493
+msgid "Close all"
+msgstr "Đóng hết"
+
+#: thonny/editors.py:706 thonny/editors.py:708
+msgid "Save"
+msgstr "Lưu"
+
+#: thonny/editors.py:731
+msgid "Save as..."
+msgstr "Lưu dưới dạng..."
+
+#: thonny/editors.py:742
+msgid "Save copy..."
+msgstr "Lưu bản sao..."
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "Thiết lập Thonny"
+
+#: thonny/running.py:115
+msgid "Run current script"
+msgstr "Chạy đoạn mã hiện tại"
+
+#: thonny/running.py:146
+msgid "Run current script in terminal"
+msgstr "Chạy đoạn mã hiện tại bằng đầu cuối"
+
+#: thonny/running.py:159
+msgid "Stop/Restart backend"
+msgstr "Dừng/Khởi động lại backend"
+
+#: thonny/running.py:160
+msgid "Stop"
+msgstr "Dừng"
+
+#: thonny/running.py:171
+msgid "Interrupt execution"
+msgstr "Ngắt thực thi"
+
+#: thonny/running.py:184
+msgid "Send EOF / Soft reboot"
+msgstr "Gửi EOF / Khởi động lại mềm"
+
+#: thonny/running.py:195
+msgid "Disconnect"
+msgstr "Ngắt kết nối"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:269
+msgid "Python interpreters"
+msgstr "Các trình thông dịch Python"
+
+#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:270
+#: thonny/plugins/pip_gui.py:789 thonny/plugins/pip_gui.py:802
+msgid "all files"
+msgstr "tất cả các tệp"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:298
+msgid "Select empty directory for new virtual environment"
+msgstr "Chọn đường dẫn trống để chứa môi trường ảo mới"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:305
+msgid "Bad directory"
+msgstr "Đường dẫn xấu"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:306
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "Đường dẫn đã chọn không phải là đường dẫn trống.\n"
+"Chọn đường dẫn khác hoặc hủy."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:323
+msgid "Creating virtual environment"
+msgstr "Đang tạo môi trường ảo"
+
+#: thonny/shell.py:101
+msgid "Clear shell"
+msgstr "Xóa màn hình shell"
+
+#: thonny/shell.py:185
+msgid "Plotter"
+msgstr "Máy vẽ"
+
+#: thonny/shell.py:317
+msgid "Clear"
+msgstr "Xóa"
+
+#: thonny/shell.py:330
+msgid "Show Plotter"
+msgstr "Hiện Máy Vẽ"
+
+#: thonny/shell.py:1659
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "Vì lý do hiệu năng, Shell thường tránh hiển thị đầy đủ các dòng dài (xem Công cụ => Thiết lập => Shell).\n"
+"Ở đây, bạn có thể tương tác với phần văn bản gốc."
+
+#: thonny/shell.py:1670
+msgid "Wrap text (may be slow)"
+msgstr "Bọc văn bản (dưới dạng nhiều dòng ngắn, tương đối chậm)"
+
+#: thonny/ui_utils.py:1867
+msgid "Copy to clipboard"
+msgstr "Sao chép vào bảng nhớ tạm"
+
+#: thonny/shell.py:1712
+msgid "Squeezed text (%d characters)"
+msgstr "Ép gọn văn bản (%d ký tự)"
+
+#: thonny/shell.py:1882
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "Máy vẽ hiển thị các chuỗi số\n"
+"được in ra Shell."
+
+#: thonny/shell.py:1884
+msgid "See Help for details."
+msgstr "Xem Trợ Giúp để biết thêm chi tiết"
+
+#: thonny/ui_utils.py:492
+msgid "Close others"
+msgstr "Đóng các cửa sổ khác"
+
+#: thonny/ui_utils.py:1722
+msgid "Copying"
+msgstr "Sao chép"
+
+#: thonny/ui_utils.py:1725
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "Đang sao chép\n"
+"  %s\n"
+"để dán vào\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1378 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:290 thonny/plugins/pip_gui.py:1256
+#: thonny/ui_utils.py:157 thonny/ui_utils.py:1733 thonny/ui_utils.py:1819
+#: thonny/workdlg.py:164 thonny/workdlg.py:209
+msgid "Cancel"
+msgstr "Hủy"
+
+#: thonny/base_file_browser.py:1369 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:111 thonny/plugins/backend_config_page.py:285
+#: thonny/ui_utils.py:154 thonny/ui_utils.py:1816 thonny/workdlg.py:206
+msgid "OK"
+msgstr "OK"
+
+#: thonny/ui_utils.py:2301
+msgid "Select All"
+msgstr "Chọn Hết"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:162
+msgid "Shell"
+msgstr "Shell"
+
+#: thonny/workbench.py:601
+msgid "Options..."
+msgstr "Thiết lập..."
+
+#: thonny/workbench.py:608
+msgid "Increase font size"
+msgstr "Tăng cỡ chữ"
+
+#: thonny/workbench.py:673
+msgid "Change font size"
+msgstr "Thay đổi cỡ chữ"
+
+#: thonny/workbench.py:674
+msgid "Zoom"
+msgstr "Phóng to"
+
+#: thonny/workbench.py:683
+msgid "Exit Thonny"
+msgstr "Thoát Thonny"
+
+#: thonny/workbench.py:686
+msgid "Quit"
+msgstr "Thoát"
+
+#: thonny/workbench.py:1244 thonny/workbench.py:1252
+msgid "Overwriting theme '%s'"
+msgstr "Đang ghi đè nền \"%s\""
+
+#: thonny/workbench.py:1436
+msgid "Program arguments:"
+msgstr "Đối số chương trình:"
+
+#: thonny/workbench.py:1490
+msgid "Regular mode"
+msgstr "Chế độ bình thường"
+
+#: thonny/workbench.py:1491
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "Cấu hình đã được cập nhật. Hãy khởi động lại Thonny để bắt đầu làm việc với chế độ bình thường.\n"
+"\n"
+"(Xem \"Công cụ → Thiết lập → Tổng quát\" nếu bạn muốn thay đổi lại sau.)"
+
+#: thonny/plugins/ast_view.py:212
+msgid "Program tree"
+msgstr "Cây chương trình"
+
+#: thonny/plugins/debugger.py:1283
+msgid "Resume"
+msgstr "Tiếp tục"
+
+#: thonny/plugins/debugger.py:1299
+msgid "Run / resume"
+msgstr "Chạy / tiếp tục"
+
+#: thonny/plugins/debugger.py:1314
+msgid "Debug current script"
+msgstr "Gỡ lỗi đoạn mã hiện tại"
+
+#: thonny/plugins/debugger.py:1316
+msgid "Debug"
+msgstr "Gỡ lỗi"
+
+#: thonny/plugins/debugger.py:1327
+msgid "Debug current script (nicer)"
+msgstr "Gỡ lỗi đoạn mã hiện tại (đẹp hơn)"
+
+#: thonny/plugins/debugger.py:1339
+msgid "Debug current script (faster)"
+msgstr "Gỡ lỗi đoạn mã hiện tại (nhanh hơn)"
+
+#: thonny/plugins/debugger.py:1350
+msgid "Step over"
+msgstr "Bước qua"
+
+#: thonny/plugins/debugger.py:1352
+msgid "Over"
+msgstr "Qua"
+
+#: thonny/plugins/debugger.py:1363
+msgid "Step into"
+msgstr "Bước vào"
+
+#: thonny/plugins/debugger.py:1365
+msgid "Into"
+msgstr "Vào"
+
+#: thonny/plugins/debugger.py:1376
+msgid "Step out"
+msgstr "Bước ra"
+
+#: thonny/plugins/debugger.py:1378
+msgid "Out"
+msgstr "Ra"
+
+#: thonny/plugins/debugger.py:1413
+msgid "Step back"
+msgstr "Bước lùi"
+
+#: thonny/plugins/debugger.py:1415
+msgid "Back"
+msgstr "Lùi"
+
+#: thonny/plugins/debugger.py:1421
+msgid "Stack"
+msgstr "Ngăn xếp"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Exception"
+msgstr "Ngoại lệ"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "Ghi các sự kiện sử dụng chương trình"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "Chế độ gỡ lỗi (cung cấp bản ghi chẩn đoán chi tiết hơn)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "Chế độ giao diện"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "Hệ số thu phóng giao diện"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "LƯU Ý! Hãy khởi động lại Thonny sau khi thay đổi thiết lập!"
+
+#: thonny/plugins/general_config_page.py:148
+msgid "General"
+msgstr "Tổng quát"
+
+#: thonny/plugins/pip_gui.py:142
+msgid "INSTALL"
+msgstr "CÀI ĐẶT"
+
+#: thonny/plugins/pip_gui.py:367
+msgid "Browse the packages"
+msgstr "Duyệt các gói"
+
+#: thonny/plugins/pip_gui.py:370
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "Với trình thông dịch hiện tại, bạn chỉ có thể duyệt các gói tại đây.\n"
+"Sử dụng \"Công cụ → Mở shell hệ thống...\" để cài đặt, nâng cấp hoặc gỡ cài."
+
+#: thonny/plugins/pip_gui.py:378
+msgid "Packages' directory"
+msgstr "Đường dẫn các gói"
+
+#: thonny/plugins/pip_gui.py:382
+msgid "Install from PyPI"
+msgstr "Cài đặt từ PyPI"
+
+#: thonny/plugins/pip_gui.py:385
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "Nếu bạn không biết tải về một gói ở đâu, chắc hẳn bạn sẽ muốn tìm kiếm nó trên Chỉ Mục Gói Python (PyPI). Hãy bắt đầu bằng cách gõ tên gói đó vào ô tìm kiếm và nhấn ENTER."
+
+#: thonny/plugins/pip_gui.py:402
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "để định vị tệp requirements.txt và cài đặt các gói được đề cập trong đó."
+
+#: thonny/plugins/pip_gui.py:408
+msgid "Click"
+msgstr "Nhấn chuột vào"
+
+#: thonny/plugins/pip_gui.py:413
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "để định vị và cài đặt tệp gói (thường có đuôi .whl, .tar.gz hoặc .zip)."
+
+#: thonny/plugins/pip_gui.py:420
+msgid "Upgrade or uninstall"
+msgstr "Nâng cấp hoặc gỡ cài"
+
+#: thonny/plugins/pip_gui.py:422
+msgid "Start by selecting the package from the left."
+msgstr "Bắt đầu bằng cách chọn gói từ bên trái."
+
+#: thonny/plugins/pip_gui.py:410
+msgid "Target:"
+msgstr "Đích:"
+
+#: thonny/plugins/pip_gui.py:414
+msgid "virtual environment"
+msgstr "môi trường ảo"
+
+#: thonny/plugins/pip_gui.py:412
+msgid "user site packages"
+msgstr "gói từ trang người dùng"
+
+#: thonny/plugins/pip_gui.py:430
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "Hộp thoại này liệt kê các gói có sẵn, nhưng cho phép bạn nâng cấp hoặc gỡ cài các gói chỉ có ở thư mục"
+
+#: thonny/plugins/pip_gui.py:440
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "Các gói mới cũng sẽ được cài đặt vào đường dẫn này. Các đường dẫn khác phải được quản lý bằng các phương thức thay thế."
+
+#: thonny/plugins/pip_gui.py:485
+msgid "Installed version:"
+msgstr "Phiên bản đã cài đặt:"
+
+#: thonny/plugins/pip_gui.py:487
+msgid "Installed to:"
+msgstr "Đã cài đến:"
+
+#: thonny/plugins/pip_gui.py:538
+msgid "Please check your spelling!"
+msgstr "Hãy xem lỗi chính tả của bạn!"
+
+#: thonny/plugins/pip_gui.py:542
+msgid "Could not find the package info from PyPI."
+msgstr "Không thể tìm được thông tin gói từ PyPI."
+
+#: thonny/plugins/pip_gui.py:544 thonny/plugins/pip_gui.py:1326
+msgid "Error code:"
+msgstr "Mã lỗi:"
+
+#: thonny/plugins/pip_gui.py:689
+msgid "Can't find package name from the list:"
+msgstr "Không thể tìm tên gói trong danh sách:"
+
+#: thonny/plugins/pip_gui.py:744
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "Yêu cầu gói \"{}\" để cài đặt và gỡ cài các gói khác."
+
+#: thonny/plugins/pip_gui.py:789
+msgid "Package"
+msgstr "Gói"
+
+#: thonny/plugins/pip_gui.py:902
+msgid "Manage packages for %s"
+msgstr "Quản lý các gói cho %s"
+
+#: thonny/editors.py:579 thonny/plugins/micropython/pip_gui.py:23
+#: thonny/plugins/pip_gui.py:953
+msgid "Confirmation"
+msgstr "Xác nhận"
+
+#: thonny/plugins/pip_gui.py:954
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "Có thể bạn đang cài một gối liên quan đến Thonny.\n"
+"Nếu bạn có ý định cài một tiện ích Thonny, bạn sẽ phải\n"
+"chọn \"Công cụ → Quản lý tiện ích...\"\n"
+"\n"
+"Bạn có muốn cài %s cho backend không?"
+
+#: thonny/plugins/pip_gui.py:1059
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "LƯU Ý! Đã có một phiên bản khác tương thích với phiên bản hiện tại của Thonny. Nhấp vào nút \"...\" để chọn phiên bản cài đặt."
+
+#: thonny/plugins/pip_gui.py:1067
+msgid "Thonny plugin without requirements"
+msgstr "Tiện ích Thonny không có quy định"
+
+#: thonny/plugins/pip_gui.py:1083
+msgid "Unsuitable requirements"
+msgstr "Các quy định không thỏa mãn"
+
+#: thonny/plugins/pip_gui.py:1084
+msgid "This package requires different Thonny version:"
+msgstr "Gói này yêu cầu phiên bản Thonny khác:"
+
+#: thonny/plugins/pip_gui.py:1088
+msgid "If you still want it, then please install it from the command line."
+msgstr "Nếu bạn vẫn muốn có nó, vui lòng cài đặt nó từ dòng lệnh."
+
+#: thonny/plugins/pip_gui.py:1125
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "LƯU Ý! Bạn cần phải khởi động lại Thonny sau khi cài đặt / cập nhật / gỡ cài một tiện ích."
+
+#: thonny/plugins/pip_gui.py:1135
+msgid "Thonny plug-ins"
+msgstr "Tiện ích Thonny"
+
+#: thonny/plugins/pip_gui.py:1171
+msgid "Advanced install / upgrade / downgrade"
+msgstr "Cài đặt / nâng cấp / hạ cấp nâng cao"
+
+#: thonny/plugins/pip_gui.py:1180
+msgid "Desired version"
+msgstr "Phiên bản mong muốn"
+
+#: thonny/plugins/pip_gui.py:1239
+msgid "Upgrade dependencies"
+msgstr "Nâng cấp các phụ thuộc"
+
+#: thonny/plugins/pip_gui.py:1324
+msgid "Requires:"
+msgstr "Yêu cầu:"
+
+#: thonny/plugins/pip_gui.py:1328
+msgid "Error:"
+msgstr "Lỗi:"
+
+#: thonny/plugins/pip_gui.py:1541
+msgid "Manage packages..."
+msgstr "Quản lý gói..."
+
+#: thonny/plugins/pip_gui.py:1547
+msgid "Manage plug-ins..."
+msgstr "Quản lý tiện ích..."
+
+#: thonny/plugins/replayer.py:365
+msgid "Open replayer..."
+msgstr "Mở replayer..."
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "Thay đổi đường dẫn làm việc thành đường dẫn đoạn mã trong chế độ Chạy / Gỡ lỗi"
+
+#: thonny/plugins/run_debug_config_page.py:22
+msgid "Show function calls (frames) in separate windows"
+msgstr "Hiện các lệnh gọi hàm (bước) tại cửa sổ riêng"
+
+#: thonny/plugins/run_debug_config_page.py:23
+msgid "Uncheck if you want more traditional experience."
+msgstr "Bỏ chọn nếu bạn muốn một trải nghiệm truyền thống hơn."
+
+#: thonny/plugins/run_debug_config_page.py:29
+msgid "Open and close Stack view automatically"
+msgstr "Tự động mở và đóng giao diện Ngăn xếp"
+
+#: thonny/plugins/run_debug_config_page.py:30
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:39
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:40
+msgid "May make debugging slower."
+msgstr "Có nguy cơ làm chậm quá trình gỡ lỗi."
+
+#: thonny/plugins/run_debug_config_page.py:45
+msgid "Preferred debugger"
+msgstr "Trình sửa lỗi đề nghị"
+
+#: thonny/plugins/run_debug_config_page.py:57
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(được sử dụng khi nhấp chuột vào nút Gỡ lỗi trên thanh công cụ)"
+
+#: thonny/plugins/run_debug_config_page.py:62
+msgid "Birdseye port"
+msgstr "Cổng Birdseye"
+
+#: thonny/plugins/run_debug_config_page.py:66
+msgid "(restart Thonny after changing this)"
+msgstr "(phải khởi động lại Thonny sau khi thay đổi thiết lập này)"
+
+#: thonny/plugins/run_debug_config_page.py:74
+msgid "Run & Debug"
+msgstr "Chạy và Gỡ lỗi"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "Mô phỏng đầu cuối"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "hỗ trợ màu và kiểu chữ ANSI cơ bản"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "Số dòng tối đa để giữ."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "LƯU Ý! Các giá trị quá lớn có thể khiến máy chạy chậm!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "Đang chạy đoạn mã hiện tại bằng đầu cuối"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Giữ cho cửa số đầu cuối được mở sau khi kết thúc lệnh Python"
+
+#: thonny/plugins/terminal_config_page.py:31
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "LƯU Ý! Phải bật chức năng tự động đóng trong phần cài đặt Đầu cuối\n"
+"(Terminal → Tùy chọn → Cấu hình → Shell → Khi shell thoát)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "Đầu cuối"
+
+#: thonny/plugins/theme_and_font_config_page.py:40
+msgid "UI theme"
+msgstr "Màu nền giao diện"
+
+#: thonny/plugins/theme_and_font_config_page.py:53
+msgid "Syntax theme"
+msgstr "Màu nền cú pháp"
+
+#: thonny/plugins/theme_and_font_config_page.py:85
+msgid "Editor font"
+msgstr "Phông chữ trình sửa mã"
+
+#: thonny/plugins/theme_and_font_config_page.py:108
+msgid "IO font"
+msgstr "Phông chữ đầu cuối"
+
+#: thonny/plugins/theme_and_font_config_page.py:133
+msgid "Preview"
+msgstr "Mẫu"
+
+#: thonny/plugins/theme_and_font_config_page.py:151
+msgid "This is a comment"
+msgstr "Đây là chú thích"
+
+#: thonny/plugins/theme_and_font_config_page.py:154
+msgid "The answer is"
+msgstr "Đáp án chính xác là "
+
+#: thonny/plugins/theme_and_font_config_page.py:158
+msgid "unclosed_string"
+msgstr "chuỗiThiếuDấuĐóngNgoặc"
+
+#: thonny/plugins/theme_and_font_config_page.py:160
+msgid "blah, blah"
+msgstr "linh ta linh tinh"
+
+#: thonny/plugins/theme_and_font_config_page.py:184
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "LƯU Ý! Một vài phần tử định dạng văn bản có thể được thay đổi sau khi khởi động lại Thonny!"
+
+#: thonny/plugins/theme_and_font_config_page.py:223
+msgid "Enter an integer"
+msgstr "Nhập số nguyên"
+
+#: thonny/plugins/theme_and_font_config_page.py:236
+msgid "Theme & Font"
+msgstr "Màu nền và phông chữ"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Mở thư mục chương trình Thonny..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Mở thư mục dữ liệu Thonny..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "Trang chính"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "Mục lục trợ giúp"
+
+#: thonny/plugins/micropython/mp_front.py:303
+msgid "CircuitPython device"
+msgstr "Thiết bị CircuitPython"
+
+#: thonny/plugins/micropython/mp_front.py:307
+msgid "MicroPython device"
+msgstr "Thiết bị MicroPython"
+
+#: thonny/plugins/micropython/mp_front.py:547
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "Kết nối thiết bị của bạn vào máy tính và chọn cổng tương ứng dưới đây"
+
+#: thonny/plugins/micropython/mp_front.py:550
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:552
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "Nếu bạn không tìm được nó, bạn có thể cần phải cài đặt driver USB thích hợp trước."
+
+#: thonny/plugins/micropython/mp_front.py:444
+msgid "Port"
+msgstr "Cổng"
+
+#: thonny/plugins/micropython/mp_front.py:454
+msgid "Try to detect port automatically"
+msgstr "Đang cố gắng tự động phát hiện cổng"
+
+#: thonny/plugins/micropython/__init__.py:25
+msgid "MicroPython (generic)"
+msgstr "MicroPython (chung)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "In..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "Mở shell hệ thống..."
+
+#: thonny/plugins/backend_config_page.py:110
+msgid "Details"
+msgstr "Chi tiết"
+
+#: thonny/plugins/pip_gui.py:395
+msgid "Install from requirements file"
+msgstr "Cài đặt từ tệp quy định"
+
+#: thonny/plugins/pip_gui.py:407
+msgid "Install from local file"
+msgstr "Cài đặt từ tệp cục bộ"
+
+#: thonny/plugins/pip_gui.py:1118
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "Hộp thoại này sẽ dành cho việc quản lý các tiện ích của Thonny và các phụ thuộc của chúng.\n"
+"Nếu bạn muốn cài đặt gói cho chương trình của riêng bạn, hãy chọn \"Công cụ→ Quản lý gói...\""
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (chung)"
+
+#: thonny/plugins/commenting_indenting.py:143
+msgid "Indent selected lines"
+msgstr "Thụt vào các dòng đã chọn"
+
+#: thonny/plugins/commenting_indenting.py:153
+msgid "Dedent selected lines"
+msgstr "Thụt ra các dòng đã chọn"
+
+#: thonny/workbench.py:1479
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "Chuyển sang\n"
+"chế độ\n"
+"bình thường"
+
+#: thonny/plugins/microbit/__init__.py:58
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Đảm bảo rằng MicroPython đã được cài đặt lên micro:bit của bạn."
+
+#: thonny/plugins/microbit/__init__.py:60
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Đừng quên rằng main.py chỉ hoạt động mà không cần nhúng đoạn mã chính."
+
+#: thonny/plugins/micropython/uf2dialog.py:44
+msgid "please wait"
+msgstr "xin hãy đợi"
+
+#: thonny/misc_utils.py:151
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "Không thể tìm thấy ổ đĩa \"%s\". Bạn có muốn tự định vị nó không?"
+
+#: thonny/misc_utils.py:154
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "Đã tìm thấy một số ổ đĩa \"%s\". Bạn có muốn tự chọn nó không?"
+
+#: thonny/misc_utils.py:170
+msgid "Can't find suitable disk"
+msgstr "Không tìm thấy ổ đĩa hợp lệ"
+
+#: thonny/base_file_browser.py:290
+msgid "%d items"
+msgstr "%d mục"
+
+#: thonny/base_file_browser.py:739
+msgid "Move to Trash"
+msgstr "Chuyển vào Thùng rác"
+
+#: thonny/base_file_browser.py:742
+msgid "Delete"
+msgstr "Xóa"
+
+#: thonny/base_file_browser.py:721 thonny/base_file_browser.py:874
+msgid "New directory"
+msgstr "Đường dẫn mới"
+
+#: thonny/base_file_browser.py:745
+msgid "Properties"
+msgstr "Thuộc tính"
+
+#: thonny/base_file_browser.py:747
+msgid "Storage space"
+msgstr "Dụng lượng lưu trữ"
+
+#: thonny/base_file_browser.py:757
+msgid "Path"
+msgstr "Đường dẫn"
+
+#: thonny/base_file_browser.py:759
+msgid "Directory properties"
+msgstr "Thuộc tính đường dẫn"
+
+#: thonny/base_file_browser.py:761
+msgid "File properties"
+msgstr "Thuộc tính tệp"
+
+#: thonny/base_file_browser.py:763
+msgid "bytes"
+msgstr "byte"
+
+#: thonny/base_file_browser.py:766
+msgid "Size"
+msgstr "Kích thước"
+
+#: thonny/base_file_browser.py:93 thonny/base_file_browser.py:777
+msgid "Modified"
+msgstr ""
+
+#: thonny/base_file_browser.py:838
+msgid "Deleting %s"
+msgstr "Đang xóa %s"
+
+#: thonny/editors.py:260
+msgid "Loading"
+msgstr "Đang tải"
+
+#: thonny/editors.py:389
+msgid "Saving"
+msgstr "Đang lưu"
+
+#: thonny/plugins/files.py:219
+msgid "Upload to %s"
+msgstr "Tải lên %s"
+
+#: thonny/plugins/files.py:420
+msgid "Downloading %s to %s"
+msgstr "Đang tải về %s đến %s"
+
+#: thonny/plugins/files.py:326
+msgid "Download to %s"
+msgstr "Tải về %s"
+
+#: thonny/base_file_browser.py:646
+msgid "Open in system file manager"
+msgstr "Mở bằng trình quản lý tệp hệ thống"
+
+#: thonny/base_file_browser.py:674
+msgid "Hide hidden files"
+msgstr "Ẩn các tệp bị ẩn"
+
+#: thonny/base_file_browser.py:674
+msgid "Show hidden files"
+msgstr "Hiện các tệp bị ẩn"
+
+#: thonny/base_file_browser.py:657
+msgid "Open in Thonny"
+msgstr "Mở bằng Thonny"
+
+#: thonny/base_file_browser.py:688
+msgid "Open in system default app"
+msgstr "Mở bằng ứng dụng mặc định của hệ thống"
+
+#: thonny/base_file_browser.py:669 thonny/base_file_browser.py:696
+msgid "Configure %s files"
+msgstr "Cấu hình %s tệp"
+
+#: thonny/base_file_browser.py:697
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "Bạn sẽ làm gì với một tệp %s khi nhấn đúp chuột vào nó trong trình duyệt tệp của Thonny?"
+
+#: thonny/base_file_browser.py:1254 thonny/editors.py:979 thonny/editors.py:981
+msgid "Deleting"
+msgstr "Đang xóa"
+
+#: thonny/base_file_browser.py:1261
+msgid "Creating directory"
+msgstr "Đang tạo đường dẫn"
+
+#: thonny/editors.py:258
+msgid "Loading %s"
+msgstr "Đang tải %s"
+
+#: thonny/editors.py:384
+msgid "Saving to %s"
+msgstr "Lưu vào %s"
+
+#: thonny/editors.py:720 thonny/editors.py:722
+msgid "Save All files"
+msgstr "Lưu hết các tệp"
+
+#: thonny/plugins/backend_config_page.py:340 thonny/workbench.py:877
+msgid "Configure interpreter..."
+msgstr "Cấu hình trình thông dịch..."
+
+#: thonny/workbench.py:1589
+msgid "Device"
+msgstr "Thiết bị"
+
+#: thonny/workdlg.py:193
+msgid "Cancelling"
+msgstr "Đang hủy"
+
+#: thonny/workdlg.py:220
+msgid "Starting"
+msgstr ""
+
+#: thonny/plugins/backend_config_page.py:251
+msgid "Authentication"
+msgstr "Xác thực"
+
+#: thonny/plugins/backend_config_page.py:253
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "Nhập mật mã khóa riêng tư của bạn cho\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:256
+msgid "Enter your password for\n"
+"{}"
+msgstr "Nhập mật khẩu cho\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:645
+msgid "Search results"
+msgstr "Kết quả tìm kiếm"
+
+#: thonny/plugins/pip_gui.py:646
+msgid "Searching"
+msgstr "Đang tìm kiếm"
+
+#: thonny/plugins/pip_gui.py:728 thonny/plugins/pip_gui.py:817
+msgid "Installing '%s'"
+msgstr "Đang cài \"%s\""
+
+#: thonny/plugins/pip_gui.py:734
+msgid "Upgrading '%s'"
+msgstr "Đang nâng cấp \"%s\""
+
+#: thonny/plugins/pip_gui.py:741
+msgid "Uninstalling '%s'"
+msgstr "Đang gỡ cài \"%s\""
+
+#: thonny/plugins/pip_gui.py:755
+msgid "Installing"
+msgstr "Đang cài đặt"
+
+#: thonny/plugins/pip_gui.py:1502
+msgid "Package manager is not available for this interpreter"
+msgstr "Trình quản lý gói không có sẵn cho trình thông dịch này"
+
+#: thonny/base_file_browser.py:1205 thonny/plugins/pip_gui.py:1516
+msgid "Not supported"
+msgstr "Không được hỗ trợ"
+
+#: thonny/plugins/micropython/pip_gui.py:100 thonny/plugins/pip_gui.py:1521
+msgid "Not available"
+msgstr "Không có sẵn"
+
+#: thonny/plugins/pip_gui.py:1522
+msgid "You need to stop your program before launching the package manager."
+msgstr "Bạn phải dừng chương trình trước khi chạy trình quản lý gói."
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:209
+msgid "Python executable"
+msgstr "Tệp thực thi Python"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:232
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr ""
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "Điều khiển từ xa Python 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:313
+msgid "Not connected"
+msgstr "Không kết nối"
+
+#: thonny/plugins/micropython/mp_front.py:521
+msgid "Advanced options"
+msgstr "Thiết lập nâng cao"
+
+#: thonny/plugins/micropython/mp_front.py:547
+msgid "Install or update firmware"
+msgstr "Cài hoặc cập nhật firmware"
+
+#: thonny/plugins/micropython/__init__.py:36
+msgid "MicroPython (local)"
+msgstr "MicroPython (cục bộ)"
+
+#: thonny/plugins/micropython/__init__.py:47
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:77
+msgid "Scope"
+msgstr "Phạm vi"
+
+#: thonny/plugins/micropython/pip_gui.py:90
+msgid "This dialog lists top-level modules from following directories:\n"
+""
+msgstr "Hộp thoại này liệt kê các module cấp cao từ các đường dẫn sau:\n"
+""
+
+#: thonny/plugins/micropython/pip_gui.py:99
+msgid "New packages will be installed to"
+msgstr "Các gói mới sẽ được cài đặt vào"
+
+#: thonny/plugins/micropython/pip_gui.py:102
+msgid "no absolute lib directory in sys.path"
+msgstr "không có đường dẫn lib chính xác trên sys.path"
+
+#: thonny/plugins/micropython/uf2dialog.py:39
+msgid "Version to be installed"
+msgstr "Các phiên bản chuẩn bị cài đặt"
+
+#: thonny/plugins/micropython/uf2dialog.py:47
+msgid "Target device location"
+msgstr "Đường dẫn thiết bị mục tiêu"
+
+#: thonny/plugins/micropython/uf2dialog.py:58
+msgid "Target device model"
+msgstr "Mẫu thiết bị mục tiêu"
+
+#: thonny/plugins/micropython/uf2dialog.py:146
+msgid "Please wait"
+msgstr "Xin hãy đợi"
+
+#: thonny/plugins/pip_gui.py:70
+msgid "Search on PyPI"
+msgstr "Tìm kiếm trên PyPI"
+
+#: thonny/base_file_browser.py:689
+msgid "Open in Thonny's text editor"
+msgstr "Mở bằng trình sửa mã của Thonny"
+
+#: thonny/base_file_browser.py:342
+msgid "Storage space on this drive or filesystem"
+msgstr "Dung lượng trên ổ đĩa hoặc hệ thống tệp này"
+
+#: thonny/base_file_browser.py:343
+msgid "total space"
+msgstr "tổng dung lương"
+
+#: thonny/base_file_browser.py:345
+msgid "used space"
+msgstr "dung lượng đã dùng"
+
+#: thonny/base_file_browser.py:346
+msgid "free space"
+msgstr "dung lượng trống"
+
+#: thonny/base_file_browser.py:353
+msgid "Storage info"
+msgstr "Thông tin dung lượng"
+
+#: thonny/plugins/commenting_indenting.py:163
+msgid "Replace tabs with spaces"
+msgstr "Thay các ký tự tab bằng khoảng trắng"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "Tô màu các ký tự tab"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "Thụt vào bằng ký tự tab (không khuyên dùng cho Python)"
+
+#: thonny/base_file_browser.py:91 thonny/memory.py:63
+msgid "Name"
+msgstr "Tên"
+
+#: thonny/base_file_browser.py:95
+msgid "Size (bytes)"
+msgstr "Kích thước (byte)"
+
+#: thonny/base_file_browser.py:875
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr ""
+
+#: thonny/base_file_browser.py:898
+msgid "Nothing selected"
+msgstr "Không chọn gì"
+
+#: thonny/base_file_browser.py:898
+msgid "Select an item and try again!"
+msgstr "Hãy chọn một mục và thử lại!"
+
+#: thonny/base_file_browser.py:1325
+msgid "Open from %s"
+msgstr "Mở từ %s"
+
+#: thonny/base_file_browser.py:1328
+msgid "Save to %s"
+msgstr "Lưu vào %s"
+
+#: thonny/base_file_browser.py:1347
+msgid "File name:"
+msgstr "Tên tệp:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value ID"
+msgstr "ID giá trị"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:540
+#: thonny/plugins/object_inspector.py:619
+msgid "Value"
+msgstr "Giá trị"
+
+#: thonny/plugins/backend_config_page.py:274
+msgid "Save password"
+msgstr "Lưu mật khẩu"
+
+#: thonny/plugins/debugger.py:553
+msgid "Function call at %s"
+msgstr "Gọi hàm tại %s"
+
+#: thonny/plugins/debugger.py:1003
+msgid "Local variables"
+msgstr "Biến cục bộ"
+
+#: thonny/plugins/debugger.py:1035
+msgid "Function"
+msgstr "Hàm"
+
+#: thonny/plugins/debugger.py:1036
+msgid "Location"
+msgstr "Vị trí"
+
+#: thonny/plugins/debugger.py:1112
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "Nếu lệnh trước đó bị lỗi ngoại lệ thì giao diện này sẽ hiện stacktrace (dấu vết ngăn xếp)."
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "ID"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "Dữ liệu"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "Thuộc tính"
+
+#: thonny/plugins/object_inspector.py:538
+msgid "Index"
+msgstr "Chỉ số"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key ID"
+msgstr "ID khóa"
+
+#: thonny/plugins/object_inspector.py:617
+msgid "Key"
+msgstr "Khóa"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "Trở về\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:444
+msgid "Port or WebREPL"
+msgstr "Cổng hoặc WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:589
+msgid "Password"
+msgstr "Mật khẩu"
+
+#: thonny/plugins/debugger.py:961
+msgid "Source code"
+msgstr "Mã nguồn"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Sử dụng hộp thoại tệp Tk thay cho Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "Các biến môi trường (mỗi dòng một KEY=VALUE)"
+
+#: thonny/base_file_browser.py:718
+msgid "New file"
+msgstr "Tệp mới"
+
+#: thonny/base_file_browser.py:736
+msgid "Rename"
+msgstr "Đổi tên"
+
+#: thonny/base_file_browser.py:924
+msgid "Rename '%s'"
+msgstr "Đổi tên \"%s\""
+
+#: thonny/base_file_browser.py:924
+msgid "Enter new name"
+msgstr "Nhập tên mới"
+
+#: thonny/base_file_browser.py:1012
+msgid "Paste failed"
+msgstr "Không thể dán được"
+
+#: thonny/base_file_browser.py:1012
+msgid "There are conflicting folders"
+msgstr "Thư mục trùng tên với các thư mục khác"
+
+#: thonny/base_file_browser.py:1140
+msgid "File already exists"
+msgstr "Tệp đã tồn tại"
+
+#: thonny/base_file_browser.py:1208
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr "Nếu đó là tệp văn bản thì bạn có thể cấu hình tệp đó để mở nó bằng Thonny bằng cách nhấp chuột phải vào nó và chọn \"Cấu hình ... tệp\"."
+
+#: thonny/editors.py:35
+msgid "Python files"
+msgstr "Các tệp Python"
+
+#: thonny/editors.py:122 thonny/editors.py:189
+msgid "<untitled>"
+msgstr "<không có tiêu đề>"
+
+#: thonny/editors.py:149
+msgid "File is gone"
+msgstr "Tệp bị mất"
+
+#: thonny/editors.py:152
+msgid "Do you want to also close the editor?"
+msgstr "Bạn có muốn đóng thêm trình sửa mã không?"
+
+#: thonny/editors.py:168
+msgid "External modification"
+msgstr "Thay đổi ngoại vi"
+
+#: thonny/editors.py:171
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr ""
+
+#: thonny/editors.py:580
+msgid "Python files usually have .py extension."
+msgstr "Các tệp Python thường có đuôi .py."
+
+#: thonny/editors.py:582
+msgid "Did you mean '%s'?"
+msgstr "Ý bạn là \"%s\"?"
+
+#: thonny/editors.py:751
+msgid "Move / rename..."
+msgstr "Di chuyển / đổi tên..."
+
+#: thonny/editors.py:760
+msgid "Go to line..."
+msgstr "Đi đến dòng..."
+
+#: thonny/editors.py:1003
+msgid "Line number"
+msgstr "Số dòng"
+
+#: thonny/editors.py:1149
+msgid "Do you want to save files before closing?"
+msgstr "Bạn có muốn lưu các tệp trước khi đóng không?"
+
+#: thonny/editors.py:1151
+msgid "Do you want to save file before closing?"
+msgstr "Bạn có muốn lưu tệp trước khi đóng không?"
+
+#: thonny/editors.py:1154
+msgid "Save On Close"
+msgstr "Lưu Trong Khi Đóng"
+
+#: thonny/misc_utils.py:513
+msgid "Command not available"
+msgstr "Lệnh không có sắn"
+
+#: thonny/misc_utils.py:514
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "Lệnh này không có sẵn nếu Thonny được chạy bằng Flatpak"
+
+#: thonny/workbench.py:694 thonny/workbench.py:794
+msgid "Support Ukraine"
+msgstr "Ủng hộ Ukraina"
+
+#: thonny/plugins/backend_config_page.py:91
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Thonny sẽ dùng trình thông dịch nào để chạy đoạn mã của bạn đây?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "Hiện thông tin tham số"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "Tự động hiện thông tin tham số sau khi gõ \"(\""
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "Tự động đề xuất các biến hoặc các hàm đầy đủ khi gõ"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "Tự động hiển thị tài liệu liên quan đến việc tự viết đầy đủ"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "Yêu cầu tự viết đầy đủ bằng phím Tab trong trình sửa mã"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "Yêu cầu tự viết đầy đủ bằng phím Tab trong Shell"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "Vấn đề"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "Không thể tìm định nghĩa khai báo"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "Xóa Shell trước khi bắt đầu thực hiện lệnh mới (Chạy, Gỡ lỗi, Dừng/Khởi động lại, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:171
+msgid "Thonny's Python"
+msgstr "Python của Thonny"
+
+#: thonny/plugins/micropython/mp_front.py:492
+msgid "Interrupt working program on connect"
+msgstr ""
+
+#: thonny/plugins/micropython/mp_front.py:500
+msgid "Synchronize device's real time clock"
+msgstr "Đồng bộ hóa đồng hồ của thiết bị"
+
+#: thonny/plugins/micropython/mp_front.py:506
+msgid "Use local time in real time clock"
+msgstr "Sử dụng giờ địa phương trong đồng hồ thật"
+
+#: thonny/plugins/micropython/mp_front.py:512
+msgid "Restart interpreter before running a script"
+msgstr "Khởi động lại trình thông dịch trước khi chạy đoạn mã"
+
+#: thonny/plugins/micropython/pip_gui.py:24
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr ""
+
+#: thonny/base_file_browser.py:849
+msgid "Moving to Trash"
+msgstr "Đang chuyển vào Thùng rác"
+
+#: thonny/base_file_browser.py:850
+msgid "Move %s to Trash?"
+msgstr "Chuyển %s vào Thùng rác?"
+
+#: thonny/base_file_browser.py:857
+msgid "Moving %s to Trash"
+msgstr "Đang chuyển %s vào Thùng rác"
+
+#: thonny/base_file_browser.py:662
+msgid "Open in default external app"
+msgstr "Mở bằng ứng dụng ngoại vi mặc định"
+
+#: thonny/base_file_browser.py:1206
+msgid "Opening remote files in external app is not supported."
+msgstr "Không hỗ trợ việc mở các tệp từ xa bằng ứng dụng ngoại vi."
+
+#: thonny/base_file_browser.py:1213
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "Nều tệp này cần được mở bằng các ứng dụng ngoài Thonny, bạn phải tải nó về một đường dẫn cục bộ và mở tệp từ đường dẫn đó!"
+
+#: thonny/editors.py:150
+msgid "Looks like '%s' was deleted or moved."
+msgstr "Có thể \"%s\" đã bị xóa hoặc bị chuyển."
+
+#: thonny/editors.py:169
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "Có thể \"%s\" đã được cập nhật ngoài trình sửa mã."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:230
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "LƯU Ý! Thonny chỉ hỗ trợ Python phiên bản %s trở lên"
+
+#: thonny/editors.py:1003
+msgid "Go to line"
+msgstr "Đi đến dòng"
+
+#: thonny/workbench.py:697
+msgid "Support"
+msgstr "Hỗ trợ"
+
+#: thonny/editors.py:393 thonny/editors.py:408
+msgid "Could not save"
+msgstr "Không thể lưu"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "Cảnh báo"
+
+#: thonny/plugins/general_config_page.py:136
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr "Nếu bạn trích dẫn giá trị của biến môi trường, phần trích dẫn đó sẽ trở thành một phần của giá trị đó.\n"
+"Bạn muốn làm như thế chứ?"
+
+#: thonny/workbench.py:867
+msgid "Install MicroPython"
+msgstr "Cài đặt MicroPython"
+
+#: thonny/workbench.py:871
+msgid "Install CircuitPython"
+msgstr "Cài đặt CircuitPython"
+
+#: thonny/plugins/backend_config_page.py:212
+msgid "Make uploaded shebang scripts executable"
+msgstr "Bật thực thi mã script shebang đã tải lên"
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr "Bật thực thi mã script shebang đã lưu"
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr "Kích hoạt môi trường ảo"
+
+#: thonny/plugins/micropython/pip_gui.py:77 thonny/plugins/pip_gui.py:426
+msgid "Target"
+msgstr "Mục tiêu"
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr "Trực quan hóa đoạn mã hiện tại trên trang Python Tutor"
+
+#: thonny/plugins/todo_view.py:44
+msgid "Line"
+msgstr "Dòng"
+
+#: thonny/plugins/todo_view.py:45
+msgid "Info"
+msgstr "Thông tin"
+
+#: thonny/plugins/todo_view.py:123
+msgid "No line marked with #todo found"
+msgstr "Không tìm thấy dòng nào đước đánh dấu bằng #todo"
+
+#: thonny/plugins/todo_view.py:143
+msgid "TODO"
+msgstr "TODO"
+
+#: thonny/plugins/circuitpython/cirpy_front.py:98
+#: thonny/plugins/micropython/mp_front.py:536
+msgid "Install or update %s"
+msgstr "Cài đặt hoặc cập nhật %s"
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr "Python 3 cục bộ"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:240
+msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr ""
+
+#: thonny/plugins/ev3/__init__.py:72
+msgid "Preparations (skip the VS Code part)"
+msgstr "Chuẩn bị (bỏ qua công đoạn VS Code)"
+
+#: thonny/plugins/ev3/__init__.py:78
+msgid "Default password"
+msgstr "Mật khẩu mặc định"
+
+#: thonny/running.py:338
+msgid "Information"
+msgstr "Thông tin"
+
+#: thonny/running.py:339
+msgid "For debugging the program must be saved first."
+msgstr "Chương trình phải được lưu trước khi gỡ lỗi."
+

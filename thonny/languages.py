@@ -32,6 +32,7 @@ LANGUAGES_DICT = {
     "fi_FI": "Suomi [BETA]",
     "sv_SE": "Svenska [BETA]",
     "sq_AL": "Shqip [ALPHA]",
+    "vi_VN": "Tiếng Việt [BETA]",
     "tr_TR": "Türkçe [BETA]",
     "uk_UA": "Українська",
     "zh_TW": "繁體中文-TW",
