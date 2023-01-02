@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-02 02:45+0100\n"
+"POT-Creation-Date: 2023-01-02 21:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1996,6 +1996,16 @@ msgstr ""
 msgid ""
 "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:89
+msgid "Under the hood"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:91
+msgid ""
+"This dialog uses `pipkin`, a new command line tool for managing "
+"MicroPython and CircuitPython packages."
 msgstr ""
 
 #: thonny/plugins/micropython/pip_gui.py:102

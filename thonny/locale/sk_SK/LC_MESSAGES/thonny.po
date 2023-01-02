@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-02 02:45+0100\n"
+"POT-Creation-Date: 2023-01-02 21:03+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -1665,7 +1665,7 @@ msgstr "Rozšírená inštalácia/aktualizácia/zníženie verzie"
 
 #: thonny/plugins/pip_gui.py:1180
 msgid "Desired version"
-msgstr "Žiadaná verze"
+msgstr "Požadovaná verzia"
 
 #: thonny/plugins/pip_gui.py:1239
 msgid "Upgrade dependencies"
@@ -2106,6 +2106,22 @@ msgid ""
 msgstr ""
 "Toto nevyzerá ako balíček pre MicroPython/CircuitPython.\n"
 "Naozaj ho chcete nainštalovať?"
+
+#: thonny/plugins/micropython/pip_gui.py:89
+msgid "Under the hood"
+msgstr "Pod kapotou"
+
+#: thonny/plugins/micropython/pip_gui.py:91
+#, fuzzy
+#| msgid ""
+#| "This dialog uses `pipkin`, a new command line tool for managing "
+#| "MicroPython and CircuitPython packages. "
+msgid ""
+"This dialog uses `pipkin`, a new command line tool for managing MicroPython "
+"and CircuitPython packages."
+msgstr ""
+"Tento dialóg používa `pipkin`, nový nástroj z príkazového riadku na správu "
+"MicroPython a CircuitPython balíčkov."
 
 #: thonny/plugins/micropython/pip_gui.py:102
 msgid "no absolute lib directory in sys.path"
