@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-02 00:41+0100\n"
+"POT-Creation-Date: 2023-01-02 02:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -536,6 +536,16 @@ msgstr ""
 
 #: thonny/running.py:357
 msgid "For debugging the program must be saved first."
+msgstr ""
+
+#: thonny/running.py:753
+msgid ""
+"Device is busy -- can't perform this action now.\n"
+"Please wait or cancel current work and try again!"
+msgstr ""
+
+#: thonny/running.py:757
+msgid "Can't complete"
 msgstr ""
 
 #: thonny/shell.py:101

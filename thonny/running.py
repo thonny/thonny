@@ -3,7 +3,7 @@
 """Code for maintaining the background process and for running
 user programs
 
-Commands get executed via shell, this way the command line in the 
+Commands get executed via shell, this way the command line in the
 shell becomes kind of title for the execution.
 
 """
@@ -750,11 +750,11 @@ class Runner:
             if not self._proxy.is_connected():
                 msg = "Device is not connected"
             else:
-                msg = (
+                msg = tr(
                     "Device is busy -- can't perform this action now."
                     + "\nPlease wait or cancel current work and try again!"
                 )
-            messagebox.showerror("Can't complete", msg, master=get_workbench())
+            messagebox.showerror(tr("Can't complete"), msg, master=get_workbench())
 
         return ready
 

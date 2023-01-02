@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Thonny\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-02 00:41+0100\n"
+"POT-Creation-Date: 2023-01-02 02:45+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Mirek Biňas <mirek@cnl.sk>\n"
 "Language-Team: Slovak\n"
@@ -369,11 +369,11 @@ msgstr "Načítavam"
 #: thonny/editors.py:384
 #, python-format
 msgid "Saving to %s"
-msgstr "Ukladám do %s"
+msgstr "Ukladanie do %s"
 
 #: thonny/editors.py:389
 msgid "Saving"
-msgstr "Ukladám"
+msgstr "Ukladanie"
 
 #: thonny/editors.py:393 thonny/editors.py:408
 msgid "Could not save"
@@ -538,6 +538,20 @@ msgstr "Informácia"
 #: thonny/running.py:357
 msgid "For debugging the program must be saved first."
 msgstr "Pre ladenie je potrebné program najskôr uložiť."
+
+#: thonny/running.py:753
+msgid ""
+"Device is busy -- can't perform this action now.\n"
+"Please wait or cancel current work and try again!"
+msgstr ""
+"Zariadenie je zaneprázdnené -- táto akcia sa teraz nedá vykonať.\n"
+"Počkajte prosím alebo zrušte aktuálnu operáciu a skúste to znova!"
+
+#: thonny/running.py:757
+#, fuzzy
+#| msgid "Can't close yet"
+msgid "Can't complete"
+msgstr "Ešte nie je možné zavrieť"
 
 #: thonny/shell.py:101
 msgid "Clear shell"
