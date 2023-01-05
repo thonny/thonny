@@ -3,7 +3,7 @@ pyserial==3.5
 pylint==2.14.*
 docutils==0.19.*
 mypy==0.971.*
-asttokens==2.0.*
+asttokens==2.2.*
 Send2Trash==1.8.1b0
 esptool==4.2.*
 bcrypt==3.2.* # has builds available for RPi. Should be good enough for paramiko
