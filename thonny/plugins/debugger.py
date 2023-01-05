@@ -354,9 +354,13 @@ class FrameVisualizer:
         self._frame_id = frame_info.id
         self._filename = frame_info.filename
         self._firstlineno = None
-        if running_on_mac_os():
+        if running_on_mac_os() and get_tk_version_info() < (8, 6, 11):
+            # Older Tk versions had glitch with placement of the expression box
+            # (closed box was not cleaned up)
             self._expression_box = ToplevelExpressionBox(text_frame)
         else:
+            # since 8.6.11 Tk on macOS has glitch with ToplevelExpressionBox
+            # (bad z-index)
             self._expression_box = PlacedExpressionBox(text_frame)
 
         self._note_box = ui_utils.NoteBox(text_frame.winfo_toplevel())
