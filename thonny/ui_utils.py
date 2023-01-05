@@ -33,7 +33,7 @@ logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
-    def __init__(self, master=None, **kw):
+    def __init__(self, master=None, skip_tk_dialog_attributes=False, **kw):
         assert master
         super().__init__(master=master, class_="Thonny", **kw)
         self.withdraw()  # remain invisible until size calculations are done
@@ -41,11 +41,14 @@ class CommonDialog(tk.Toplevel):
         # TODO: Is it still required ?
         # self.bind("<FocusIn>", self._unlock_on_focus_in, True)
 
-        # https://bugs.python.org/issue43655
-        if self._windowingsystem == "aqua":
-            self.tk.call("::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", "")
-        elif self._windowingsystem == "x11":
-            self.wm_attributes("-type", "dialog")
+        if not skip_tk_dialog_attributes:
+            # https://bugs.python.org/issue43655
+            if self._windowingsystem == "aqua":
+                self.tk.call(
+                    "::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", ""
+                )
+            elif self._windowingsystem == "x11":
+                self.wm_attributes("-type", "dialog")
 
         self.parent = master
 

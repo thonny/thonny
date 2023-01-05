@@ -29,7 +29,7 @@ class FindDialog(CommonDialog):
         padx = 15
         pady = 15
 
-        super().__init__(master, takefocus=1, background="pink")
+        super().__init__(master, skip_tk_dialog_attributes=True, takefocus=1, background="pink")
         main_frame = ttk.Frame(self)
         main_frame.grid(row=1, column=1, sticky="nsew")
         self.columnconfigure(1, weight=1)
