@@ -1979,28 +1979,60 @@ def _get_dialog_provider():
     return filedialog
 
 
+def try_restore_focus_after_file_dialog(dialog_parent):
+    if dialog_parent is None:
+        return
+
+    logger.info("Restoring focus to %s", dialog_parent)
+    old_focused_widget = dialog_parent.winfo_toplevel().focus_get()
+
+    dialog_parent.winfo_toplevel().lift()
+    dialog_parent.winfo_toplevel().focus_force()
+    dialog_parent.winfo_toplevel().grab_set()
+    if running_on_mac_os():
+        dialog_parent.winfo_toplevel().grab_release()
+
+    if old_focused_widget is not None:
+        try:
+            old_focused_widget.focus_force()
+        except TclError:
+            logger.warning("Could not restore focus to %r", old_focused_widget)
+
+
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().asksaveasfilename(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().asksaveasfilename(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askopenfilename(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askopenfilename(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askopenfilenames(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askopenfilenames(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askdirectory(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askdirectory(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def _check_dialog_parent(options):
@@ -2032,6 +2064,8 @@ def _check_dialog_parent(options):
         # TODO: Consider removing this when upgrading from Tk 8.6.8
         del options["master"]
         del options["parent"]
+
+    return parent
 
 
 class _ZenityDialogProvider:
