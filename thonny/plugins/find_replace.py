@@ -72,9 +72,12 @@ class FindDialog(CommonDialog):
         try:
             widget = get_workbench().focus_get()
             if isinstance(widget, tk.Text):
+                # NB! selection_get may give selection from another app,
+                # that's why I'm checkin that Text has sel tags
                 selected_lines = widget.selection_get().splitlines()
-                if selected_lines:
+                if selected_lines and len(widget.tag_ranges("sel")) > 0:
                     seed_text = selected_lines[0]
+                    logger.debug("Got seed text %r from widget %s", seed_text, widget)
         except Exception:
             logger.exception("Could not get seed text")
 

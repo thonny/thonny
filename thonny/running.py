@@ -528,6 +528,8 @@ class Runner:
                     return None
             elif isinstance(widget, (tk.Listbox, ttk.Entry, tk.Entry, tk.Spinbox)):
                 try:
+                    # NB! On Linux, selection_get() gives X selection
+                    # i.e. it may be from another application when Thonny has nothing selected
                     selection = widget.selection_get()
                     if isinstance(selection, str) and len(selection) > 0:
                         # Assuming user meant to copy, not interrupt
