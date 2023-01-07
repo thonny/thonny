@@ -98,6 +98,12 @@ else
     echo "[Desktop Action Edit]" >> $LAUNCHER
     echo "Exec=$TARGET/bin/thonny %F" >> $LAUNCHER
     echo "Name=Edit with Thonny" >> $LAUNCHER
+
+    UNINSTALLER="${TARGET}/bin/uninstall"
+    echo "Creating the uninstaller ($UNINSTALLER)"
+    echo "#!/usr/bin/env bash" > $UNINSTALLER
+    echo "rm -rf $TARGET"
+    echo "rm $LAUNCHER"
   else
     echo "Can't offer alternatives as your system doesn't seem to have suitable Python interpreter."
     exit 1
