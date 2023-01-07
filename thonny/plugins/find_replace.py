@@ -6,6 +6,7 @@ from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.languages import tr
+from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import CommonDialog, select_sequence, show_dialog
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -29,7 +30,7 @@ class FindDialog(CommonDialog):
         padx = 15
         pady = 15
 
-        super().__init__(master, skip_tk_dialog_attributes=True, takefocus=1, background="pink")
+        super().__init__(master, skip_tk_dialog_attributes=running_on_mac_os(), takefocus=1)
         main_frame = ttk.Frame(self)
         main_frame.grid(row=1, column=1, sticky="nsew")
         self.columnconfigure(1, weight=1)
@@ -423,7 +424,7 @@ def load_plugin() -> None:
             editor = get_workbench().get_editor_notebook().get_current_editor()
             if editor:
                 dlg = FindDialog(editor._code_view)
-                show_dialog(dlg)
+                show_dialog(dlg, modal=False)
 
     def find_f3(event):
         if _active_find_dialog is None:

@@ -2196,7 +2196,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, width=None, height=None):
+def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     if getattr(dlg, "closed", False):
         return
 
@@ -2221,10 +2221,11 @@ def show_dialog(dlg, master=None, width=None, height=None):
     dlg.lift()
     dlg.wait_visibility()
 
-    try:
-        dlg.grab_set()
-    except TclError as e:
-        logger.warning("Can't grab: %s", e)
+    if modal:
+        try:
+            dlg.grab_set()
+        except TclError as e:
+            logger.warning("Can't grab: %s", e)
 
     dlg.update_idletasks()
     dlg.focus_set()
