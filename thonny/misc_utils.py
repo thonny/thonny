@@ -45,8 +45,11 @@ def running_on_linux() -> bool:
 
 
 def running_on_rpi() -> bool:
+    machine_lower = platform.uname().machine.lower()
     return running_on_linux() and (
-        platform.uname().machine.lower().startswith("arm")
+        # not great heuristics, I know
+        machine_lower.startswith("arm")
+        or machine_lower.startswith("aarch64")
         or os.environ.get("DESKTOP_SESSION") == "LXDE-pi"
     )
 
