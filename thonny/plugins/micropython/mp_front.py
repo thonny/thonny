@@ -187,7 +187,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -716,7 +717,8 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -860,7 +862,8 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
