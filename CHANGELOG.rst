@@ -2,7 +2,7 @@
 Version history
 ===============
 
-4.0.2 (2023-01-??)
+4.0.2 (2023-01-14)
 ==================
 * Fix Mypy logging error in the Assistant, #2491 by @kr-g and @solsword
 * Fix AttributeError on save, #2454
