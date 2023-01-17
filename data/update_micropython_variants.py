@@ -15,8 +15,8 @@ UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
-PIMORONI_LATEST_STABLE_VERSION = "1.19.10"
-PIMORONI_LATEST_UNSTABLE_VERSION = "1.19.11"
+PIMORONI_LATEST_STABLE_VERSION = "1.19.12"
+PIMORONI_LATEST_UNSTABLE_VERSION = None
 PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
 
 PIMORONI_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_LATEST_STABLE_VERSION}"
@@ -132,14 +132,21 @@ pimoroni_variants = [
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
-        "title": "Pico W (with Pimoroni libs for Enviro)",
+        "title": "Pico W (with Enviro libs by Pimoroni)",
     },
     {
         "_id": "pimoroni-picow_galactic_unicorn",
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
-        "title": "Pico W (with Pimoroni libs for Galactic Unicorn)",
+        "title": "Pico W (with Galactic Unicorn libs by Pimoroni)",
+    },
+    {
+        "_id": "pimoroni-picow_inky_frame",
+        "vendor": "Raspberry Pi",
+        "model": "Pico W",
+        "family": "rp2",
+        "title": "Pico W (with Inky Frame libs by Pimorony)",
     },
     {
         "_id": "pimoroni-tiny2040",
