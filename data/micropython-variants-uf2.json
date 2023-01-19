@@ -573,8 +573,7 @@
                 "version": "1.19.12",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.12/pimoroni-picow_inky_frame-v1.19.12-micropython.uf2"
             }
-        ],
-        "popular": true
+        ]
     },
     {
         "vendor": "Raspberry Pi",
