@@ -421,7 +421,7 @@ def _get_orig_argv() -> Optional[List[str]]:
 
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
-        "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
+        "%(asctime)s.%(msecs)03d [%(threadName)s] %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
     )
 
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
