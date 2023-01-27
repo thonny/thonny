@@ -554,12 +554,19 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 try:
                     self._submit_code_via_raw_paste_mode(to_be_sent)
                 except RawPasteNotSupportedError:
-                    logger.info("WARNING: Could not use expected raw paste, falling back to raw")
-                    # raw is safest, as some M5 ESP32-s don't play nice with paste mode
+                    # raw is safest, as some M5 ESP32-s don't play nice with paste mode,
+                    # even with as small block size as 30 (echo is randomly missing characters)
                     self._submit_mode = RAW_SUBMIT_MODE
-                    self._submit_code_via_raw_mode(
-                        to_be_sent, self._infer_write_block_size(), self._infer_write_block_delay()
+                    self._write_block_size = self._infer_write_block_size()
+                    self._write_block_delay = self._infer_write_block_delay()
+                    logger.warning(
+                        "Could not use raw_paste, falling back to %s"
+                        + " with write_block_size %s and write_block_delay %s",
+                        self._submit_mode,
+                        self._write_block_size,
+                        self._write_block_delay,
                     )
+                    self._submit_code_via_raw_mode(to_be_sent)
             else:
                 self._submit_code_via_raw_mode(to_be_sent)
 
@@ -605,15 +612,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             actual_confirmation,
         )
 
-    def _submit_code_via_raw_mode(
-        self,
-        script_bytes: bytes,
-        block_size: Optional[int] = None,
-        block_delay: Optional[float] = None,
-    ) -> None:
+    def _submit_code_via_raw_mode(self, script_bytes: bytes) -> None:
         self._ensure_raw_mode()
-        block_size = block_size or self._write_block_size
-        block_delay = block_delay or self._write_block_delay
         to_be_written = script_bytes + EOT
 
         while to_be_written:
