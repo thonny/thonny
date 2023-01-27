@@ -38,7 +38,11 @@ from thonny.plugins.micropython.mp_back import (
     is_continuation_byte,
     starts_with_continuation_byte,
 )
-from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE
+from thonny.plugins.micropython.mp_common import (
+    PASTE_SUBMIT_MODE,
+    RAW_PASTE_SUBMIT_MODE,
+    RAW_SUBMIT_MODE,
+)
 from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
@@ -468,7 +472,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             W600_FIRST_RAW_PROMPT,
         ]:
             return
-        logger.debug("requesting raw mode at %r", self._last_prompt)
+
+        logger.info("Requesting raw mode at %r", self._last_prompt)
 
         # assuming we are currently on a normal prompt
         self._write(RAW_MODE_CMD)
@@ -487,12 +492,14 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 self._last_prompt,
             )
             raise ProtocolError("Could not enter raw prompt")
+        else:
+            logger.info("Entered raw prompt")
 
     def _ensure_normal_mode(self, force=False):
         if self._last_prompt == NORMAL_PROMPT and not force:
             return
 
-        logger.debug("requesting normal mode at %r", self._last_prompt)
+        logger.info("Requesting normal mode at %r", self._last_prompt)
         self._write(NORMAL_MODE_CMD)
         self._log_output_until_active_prompt()
         assert self._last_prompt == NORMAL_PROMPT, (
@@ -548,6 +555,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     self._submit_code_via_raw_paste_mode(to_be_sent)
                 except RawPasteNotSupportedError:
                     logger.info("WARNING: Could not use expected raw paste, falling back to raw")
+                    # raw is safest, as some M5 ESP32-s don't play nice with paste mode
+                    self._submit_mode = RAW_SUBMIT_MODE
                     self._submit_code_via_raw_mode(
                         to_be_sent, self._infer_write_block_size(), self._infer_write_block_delay()
                     )
@@ -629,16 +638,18 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             raise ProtocolError("Could not read command confirmation")
 
     def _submit_code_via_raw_paste_mode(self, script_bytes: bytes) -> None:
+        # Occasionally, the device initially supports raw paste but later doesn't allow it (?)
+        # https://github.com/thonny/thonny/issues/1545
+
         self._ensure_raw_mode()
         self._connection.set_text_mode(False)
         self._write(RAW_PASTE_COMMAND)
         response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
         if response != RAW_PASTE_CONFIRMATION:
-            # Occasionally, the device initially supports raw paste but later doesn't allow it
-            # https://github.com/thonny/thonny/issues/1545
-            time.sleep(0.01)
-            response += self._connection.read_all()
-            if response == FIRST_RAW_PROMPT:
+            # perhaps the device doesn't support raw paste ...
+            response += self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=0.5)
+            if response.endswith(FIRST_RAW_PROMPT):
+                # ... yup, it doesn't support it
                 self._last_prompt = FIRST_RAW_PROMPT
                 raise RawPasteNotSupportedError()
             else:
@@ -904,6 +915,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     follow_up = b""
 
                 if follow_up:
+                    logger.info("Found inactive prompt followed by %r", follow_up)
                     # Nope, the prompt is not active.
                     # (Actually it may be that a background thread has produced this follow up,
                     # but this would be too hard to consider.)
@@ -923,7 +935,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                             break
                     output_consumer(self._decode(pending), stream_name)
                     self._last_prompt = current_prompt
-                    # logger.debug("Found prompt %r", current_prompt)
+                    logger.debug("Found prompt %r", current_prompt)
                     return current_prompt
 
             if pending.endswith(LF):
