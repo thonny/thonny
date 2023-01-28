@@ -1035,6 +1035,8 @@ class FakeOutputStream(FakeStream):
         finally:
             self._backend._exit_io_function()
 
+        return len(data)
+
     def writelines(self, lines):
         try:
             self._backend._enter_io_function()
