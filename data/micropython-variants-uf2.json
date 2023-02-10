@@ -578,15 +578,14 @@
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
-        "title": "Pico W / Pico WH (with Inky Frame libs by Pimorony)",
+        "title": "Pico W / Pico WH (with Inky Frame libs by Pimoroni)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
                 "version": "1.19.12",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.12/pimoroni-picow_inky_frame-v1.19.12-micropython.uf2"
             }
-        ],
-        "popular": true
+        ]
     },
     {
         "vendor": "Raspberry Pi",

@@ -146,7 +146,7 @@ pimoroni_variants = [
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
-        "title": "Pico W (with Inky Frame libs by Pimorony)",
+        "title": "Pico W (with Inky Frame libs by Pimoroni)",
     },
     {
         "_id": "pimoroni-tiny2040",
