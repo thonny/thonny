@@ -511,8 +511,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("_create_fresh_repl")
         self._ensure_raw_mode()
         self._write(SOFT_REBOOT_CMD)
+        assuming_ok = self._connection.soft_read(2, timeout=0.1)
+        if assuming_ok != OK:
+            logger.warning("Got %r after requesting soft reboot")
         self._check_reconnect()
-        self._log_output_until_active_prompt()
+        self._forward_output_until_active_prompt()
         logger.debug("Done _create_fresh_repl")
 
     def _soft_reboot_for_restarting_user_program(self):
@@ -998,6 +1001,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         self._process_output_until_active_prompt(
             collect_output, interrupt_times=interrupt_times, poke_after=poke_after
+        )
+
+    def _forward_output_until_active_prompt(
+        self, interrupt_times: Optional[List[float]] = None, poke_after: Optional[float] = None
+    ) -> None:
+        self._process_output_until_active_prompt(
+            self._send_output, interrupt_times=interrupt_times, poke_after=poke_after
         )
 
     def _forward_unexpected_output(self, stream_name="stdout"):
