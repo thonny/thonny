@@ -7,7 +7,6 @@ class I2CDevice:
     """I2C Device Manager"""
 
     def __init__(self, i2c: busio.I2C, device_address: int, probe: bool = True) -> None:
-
         """Represents a single I2C device and manages locking the bus and the device
         address.
 
@@ -30,7 +29,6 @@ class I2CDevice:
                     device.write(bytes_read)
         """
     ...
-
     def __enter__(self) -> I2CDevice:
         """Context manager entry to lock bus."""
         ...

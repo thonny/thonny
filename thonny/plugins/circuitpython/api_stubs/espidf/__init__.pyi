@@ -20,7 +20,8 @@ def erase_nvs() -> None:
     """Erase all data in the non-volatile storage (nvs), including data stored by with `microcontroller.nvm`
 
     This is necessary when upgrading from CircuitPython 6.3.0 or earlier to CircuitPython 7.0.0, because the
-    layout of data in nvs has changed. The old data will be lost when you perform this operation."""
+    layout of data in nvs has changed. The old data will be lost when you perform this operation.
+    """
 
 import builtins
 
@@ -28,3 +29,9 @@ class MemoryError(builtins.MemoryError):
     """Raised when an ESP IDF memory allocation fails."""
 
     ...
+
+def get_total_psram() -> int:
+    """Returns the number of bytes of psram detected, or 0 if psram is not present or not configured"""
+
+def get_reserved_psram() -> int:
+    """Returns number of bytes of psram reserved for use by esp-idf, either a board-specific default value or the value defined in ``settings.toml``."""

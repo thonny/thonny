@@ -1,8 +1,6 @@
 """pseudo-random numbers and choices
 
-The `random` module is a strict subset of the CPython `cpython:random`
-module. So, code written in CircuitPython will work in CPython but not
-necessarily the other way around.
+|see_cpython_module| :mod:`cpython:random`.
 
 Like its CPython cousin, CircuitPython's random seeds itself on first use
 with a true random from os.urandom() when available or the uptime otherwise.
@@ -13,7 +11,7 @@ Once seeded, it will be deterministic, which is why its bad for cryptography.
 
 from __future__ import annotations
 
-from typing import Sequence, Tuple, TypeVar
+from typing import Sequence, TypeVar, overload
 
 _T = TypeVar("_T")
 
@@ -26,8 +24,13 @@ def getrandbits(k: int) -> int:
     """Returns an integer with *k* random bits."""
     ...
 
-def randrange(stop: Tuple[int, int, int]) -> int:
-    """Returns a randomly selected integer from ``range(start, stop, step)``."""
+@overload
+def randrange(stop: int) -> int: ...
+@overload
+def randrange(start: int, stop: int) -> int: ...
+@overload
+def randrange(start: int, stop: int, step: int) -> int:
+    """Returns a randomly selected integer from ``range(start[, stop[, step]])``."""
     ...
 
 def randint(a: int, b: int) -> int:

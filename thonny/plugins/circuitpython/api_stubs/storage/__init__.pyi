@@ -3,11 +3,16 @@
 The `storage` provides storage management functionality such as mounting and
 unmounting which is typically handled by the operating system hosting Python.
 CircuitPython does not have an OS, so this module provides this functionality
-directly."""
+directly.
+
+For more information regarding using the `storage` module, refer to the `CircuitPython
+Essentials Learn guide
+<https://learn.adafruit.com/circuitpython-essentials/circuitpython-storage>`_.
+"""
 
 from __future__ import annotations
 
-from typing import AnyStr, Iterator, Tuple, Union
+from typing import AnyStr, Iterator, Optional, Tuple, Union
 
 def mount(filesystem: VfsFat, mount_path: str, *, readonly: bool = False) -> None:
     """Mounts the given filesystem object at the given path.
@@ -47,7 +52,7 @@ def getmount(mount_path: str) -> VfsFat:
     """Retrieves the mount object associated with the mount path"""
     ...
 
-def erase_filesystem() -> None:
+def erase_filesystem(extended: Optional[bool] = None) -> None:
     """Erase and re-create the ``CIRCUITPY`` filesystem.
 
     On boards that present USB-visible ``CIRCUITPY`` drive (e.g., SAMD21 and SAMD51),
@@ -57,8 +62,16 @@ def erase_filesystem() -> None:
     This function can be called from the REPL when ``CIRCUITPY``
     has become corrupted.
 
+    :param bool extended: On boards that support ``dualbank`` module
+        and the ``extended`` parameter, the ``CIRCUITPY`` storage can be
+        extended by setting this to `True`. If this isn't provided or
+        set to `None` (default), the existing configuration will be used.
+
+    .. note:: New firmware starts with storage extended. In case of an existing
+         filesystem (e.g. uf2 load), the existing extension setting is preserved.
+
     .. warning:: All the data on ``CIRCUITPY`` will be lost, and
-         CircuitPython will restart on certain boards."""
+        CircuitPython will restart on certain boards."""
     ...
 
 def disable_usb_drive() -> None:
@@ -89,6 +102,10 @@ class VfsFat:
     """The filesystem label, up to 11 case-insensitive bytes.  Note that
     this property can only be set when the device is writable by the
     microcontroller."""
+    ...
+    readonly: bool
+    """``True`` when the device is mounted as readonly by the microcontroller.
+    This property cannot be changed, use `storage.remount` instead."""
     ...
 
     def mkfs(self) -> None:

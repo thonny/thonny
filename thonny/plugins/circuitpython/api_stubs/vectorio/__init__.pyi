@@ -42,18 +42,20 @@ class Circle:
         :param int radius: The radius of the circle in pixels
         :param int x: Initial x position of the axis.
         :param int y: Initial y position of the axis.
-        :param int color_index: Initial color_index to use when selecting color from the palette."""
+        :param int color_index: Initial color_index to use when selecting color from the palette.
+        """
     radius: int
     """The radius of the circle in pixels."""
-
     color_index: int
     """The color_index of the circle as 0 based index of the palette."""
-
     x: int
     """X position of the center point of the circle in the parent."""
 
     y: int
     """Y position of the center point of the circle in the parent."""
+
+    hidden: bool
+    """Hide the circle or not."""
 
     location: Tuple[int, int]
     """(X,Y) position of the center point of the circle in the parent."""
@@ -77,18 +79,20 @@ class Polygon:
         :param List[Tuple[int,int]] points: Vertices for the polygon
         :param int x: Initial screen x position of the 0,0 origin in the points list.
         :param int y: Initial screen y position of the 0,0 origin in the points list.
-        :param int color_index: Initial color_index to use when selecting color from the palette."""
+        :param int color_index: Initial color_index to use when selecting color from the palette.
+        """
     points: List[Tuple[int, int]]
     """Vertices for the polygon."""
-
     color_index: int
     """The color_index of the polygon as 0 based index of the palette."""
-
     x: int
     """X position of the 0,0 origin in the points list."""
 
     y: int
     """Y position of the 0,0 origin in the points list."""
+
+    hidden: bool
+    """Hide the polygon or not."""
 
     location: Tuple[int, int]
     """(X,Y) position of the 0,0 origin in the points list."""
@@ -112,21 +116,22 @@ class Rectangle:
         :param int height: The number of pixels high
         :param int x: Initial x position of the top left corner.
         :param int y: Initial y position of the top left corner.
-        :param int color_index: Initial color_index to use when selecting color from the palette."""
+        :param int color_index: Initial color_index to use when selecting color from the palette.
+        """
     width: int
     """The width of the rectangle in pixels."""
-
     height: int
     """The height of the rectangle in pixels."""
-
     color_index: int
     """The color_index of the rectangle in 1 based index of the palette."""
-
     x: int
     """X position of the top left corner of the rectangle in the parent."""
 
     y: int
     """Y position of the top left corner of the rectangle in the parent."""
+
+    hidden: bool
+    """Hide the rectangle or not."""
 
     location: Tuple[int, int]
     """(X,Y) position of the top left corner of the rectangle in the parent."""

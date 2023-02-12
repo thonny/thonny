@@ -25,7 +25,6 @@ class ByteArray:
        import microcontroller
        microcontroller.nvm[0:3] = b"\xcc\x10\x00"
     """
-
     def __init__(self) -> None:
         """Not currently dynamically supported. Access the sole instance through `microcontroller.nvm`."""
         ...

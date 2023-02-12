@@ -20,6 +20,33 @@ Example usage::
 
 from __future__ import annotations
 
+class WatchDogTimeout(Exception):
+    """Exception raised when the watchdog timer is set to
+    ``WatchDogMode.RAISE`` and expires.
+
+    Example::
+
+        import microcontroller
+        import watchdog
+        import time
+
+        wdt = microcontroller.watchdog
+        wdt.timeout = 5
+
+        while True:
+            wdt.mode = watchdog.WatchDogMode.RAISE
+            print("Starting loop -- should exit after five seconds")
+            try:
+                while True:
+                    time.sleep(10)  # Also works with pass
+            except watchdog.WatchDogTimeout as e:
+                print("Watchdog expired")
+            except Exception as e:
+                print("Other exception")
+
+        print("Exited loop")
+    """
+
 class WatchDogMode:
     """run state of the watchdog timer"""
 
@@ -27,6 +54,8 @@ class WatchDogMode:
         """Enum-like class to define the run mode of the watchdog timer."""
     RAISE: WatchDogMode
     """Raise an exception when the WatchDogTimer expires.
+
+    **Limitations:** ``RAISE`` mode is not supported on SAMD or RP2040.
 
     :type WatchDogMode:"""
 
@@ -57,7 +86,6 @@ class WatchDogTimer:
     timeout: float
     """The maximum number of seconds that can elapse between calls
     to feed()"""
-
     mode: WatchDogMode
     """The current operating mode of the WatchDogTimer `watchdog.WatchDogMode`.
 

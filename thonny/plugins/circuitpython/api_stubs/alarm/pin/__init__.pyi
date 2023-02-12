@@ -34,6 +34,5 @@ class PinAlarm:
         ...
     pin: microcontroller.Pin
     """The trigger pin."""
-
     value: bool
     """The value on which to trigger."""

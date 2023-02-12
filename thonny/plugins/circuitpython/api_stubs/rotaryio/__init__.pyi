@@ -4,6 +4,9 @@ The `rotaryio` module contains classes to read different rotation encoding schem
 `Wikipedia's Rotary Encoder page <https://en.wikipedia.org/wiki/Rotary_encoder>`_ for more
 background.
 
+For more information on working with rotary encoders using this library, see
+`this Learn Guide <https://learn.adafruit.com/rotary-encoder>`_.
+
 All classes change hardware state and should be deinitialized when they
 are no longer needed if the program continues after use. To do so, either
 call :py:meth:`!deinit` or use a context manager. See
@@ -55,7 +58,6 @@ class IncrementalEncoder:
     """The divisor of the quadrature signal.  Use 1 for encoders without
     detents, or encoders with 4 detents per cycle.  Use 2 for encoders with 2
     detents per cycle.  Use 4 for encoders with 1 detent per cycle."""
-
     position: int
     """The current position in terms of pulses. The number of pulses per rotation is defined by the
     specific hardware and by the divisor."""

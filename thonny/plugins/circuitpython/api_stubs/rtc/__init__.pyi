@@ -49,11 +49,13 @@ class RTC:
       current_time = r.datetime
       print(current_time)
       # struct_time(tm_year=2019, tm_month=5, ...)"""
-
     calibration: int
     """The RTC calibration value as an `int`.
 
     A positive value speeds up the clock and a negative value slows it down.
+
+    **Limitations:** Calibration not supported on SAMD, nRF, RP240, Spresense, and STM.
+
     Range and value is hardware specific, but one step is often approximately 1 ppm::
 
       import rtc

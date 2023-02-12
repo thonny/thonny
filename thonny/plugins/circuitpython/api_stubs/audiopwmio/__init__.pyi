@@ -105,7 +105,6 @@ class PWMAudioOut:
         ...
     playing: bool
     """True when an audio sample is being output even if `paused`. (read-only)"""
-
     def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...

@@ -154,6 +154,7 @@ class I2C:
         If ``in_start`` or ``in_end`` is provided, then the input buffer will be sliced
         as if ``in_buffer[in_start:in_end]`` were passed,
         The number of bytes read will be the length of ``out_buffer[in_start:in_end]``.
+
         :param int address: 7-bit device address
         :param ~circuitpython_typing.ReadableBuffer out_buffer: buffer containing the bytes to write
         :param ~circuitpython_typing.WriteableBuffer in_buffer: buffer to write into
@@ -232,9 +233,21 @@ class SPI:
     def unlock(self) -> None:
         """Releases the SPI lock."""
         ...
-    def write(self, buf: ReadableBuffer) -> None:
+    import sys
+    def write(
+        self, buf: ReadableBuffer, *, start: int = 0, end: int = sys.maxsize
+    ) -> None:
         """Write the data contained in ``buf``. Requires the SPI being locked.
-        If the buffer is empty, nothing happens."""
+        If the buffer is empty, nothing happens.
+
+        If ``start`` or ``end`` is provided, then the buffer will be sliced
+        as if ``buffer[start:end]`` were passed, but without copying the data.
+        The number of bytes written will be the length of ``buffer[start:end]``.
+
+        :param ReadableBuffer buffer: buffer containing the bytes to write
+        :param int start: beginning of buffer slice
+        :param int end: end of buffer slice; if not specified, use ``len(buffer)``
+        """
         ...
     import sys
     def readinto(

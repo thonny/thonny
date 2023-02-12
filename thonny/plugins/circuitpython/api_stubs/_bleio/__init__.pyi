@@ -84,15 +84,12 @@ class Adapter:
         ...
     enabled: bool
     """State of the BLE adapter."""
-
     address: Address
     """MAC address of the BLE adapter."""
-
     name: str
     """name of the BLE adapter used once connected.
     The name is "CIRCUITPY" + the last four hex digits of ``adapter.address``,
     to make it easy to distinguish multiple CircuitPython boards."""
-
     def start_advertising(
         self,
         data: ReadableBuffer,
@@ -161,15 +158,12 @@ class Adapter:
         ...
     advertising: bool
     """True when the adapter is currently advertising. (read-only)"""
-
     connected: bool
     """True when the adapter is connected to another device regardless of who initiated the
     connection. (read-only)"""
-
     connections: Tuple[Connection]
     """Tuple of active connections including those initiated through
     :py:meth:`_bleio.Adapter.connect`. (read-only)"""
-
     def connect(self, address: Address, *, timeout: float) -> Connection:
         """Attempts a connection to the device with the given address.
 
@@ -207,13 +201,11 @@ class Address:
       <Address c8:1d:f5:ed:a8:35>
       >>> _bleio.adapter.address.address_bytes
       b'5\\xa8\\xed\\xf5\\x1d\\xc8'"""
-
     type: int
     """The address type (read-only).
 
     One of the integer values: `PUBLIC`, `RANDOM_STATIC`, `RANDOM_PRIVATE_RESOLVABLE`,
     or `RANDOM_PRIVATE_NON_RESOLVABLE`."""
-
     def __eq__(self, other: object) -> bool:
         """Two Address objects are equal if their addresses and address types are equal."""
         ...
@@ -314,29 +306,24 @@ class Characteristic:
     """An int bitmask representing which properties are set, specified as bitwise or'ing of
     of these possible values.
     `BROADCAST`, `INDICATE`, `NOTIFY`, `READ`, `WRITE`, `WRITE_NO_RESPONSE`."""
-
     uuid: Optional[UUID]
     """The UUID of this characteristic. (read-only)
 
     Will be ``None`` if the 128-bit UUID for this characteristic is not known."""
-
     value: bytearray
     """The value of this characteristic."""
-
     max_length: int
     """The max length of this characteristic."""
-
     descriptors: Descriptor
     """A tuple of :py:class:`Descriptor` objects related to this characteristic. (read-only)"""
-
     service: Service
     """The Service this Characteristic is a part of."""
-
     def set_cccd(self, *, notify: bool = False, indicate: bool = False) -> None:
         """Set the remote characteristic's CCCD to enable or disable notification and indication.
 
         :param bool notify: True if Characteristic should receive notifications of remote writes
-        :param float indicate: True if Characteristic should receive indications of remote writes"""
+        :param float indicate: True if Characteristic should receive indications of remote writes
+        """
         ...
     BROADCAST: int
     """property: allowed in advertising packets"""
@@ -362,7 +349,6 @@ class CharacteristicBuffer:
     def __init__(
         self, characteristic: Characteristic, *, timeout: int = 1, buffer_size: int = 64
     ) -> None:
-
         """Monitor the given Characteristic. Each time a new value is written to the Characteristic
         add the newly-written bytes to a FIFO buffer.
 
@@ -396,7 +382,6 @@ class CharacteristicBuffer:
         ...
     in_waiting: int
     """The number of bytes in the input buffer, available to be read"""
-
     def reset_input_buffer(self) -> None:
         """Discard any unread characters in the input buffer."""
         ...
@@ -457,14 +442,13 @@ class Connection:
           service or characteristic to be discovered. Creating the UUID causes the UUID to be
           registered for use. (This restriction may be lifted in the future.)
 
-        :return: A tuple of `_bleio.Service` objects provided by the remote peripheral."""
+        :return: A tuple of `_bleio.Service` objects provided by the remote peripheral.
+        """
         ...
     connected: bool
     """True if connected to the remote peer."""
-
     paired: bool
     """True if paired to the remote peer."""
-
     connection_interval: float
     """Time between transmissions in milliseconds. Will be multiple of 1.25ms. Lower numbers
     increase speed and decrease latency but increase power consumption.
@@ -474,7 +458,6 @@ class Connection:
 
     Apple has additional guidelines that dictate should be a multiple of 15ms except if HID is
     available. When HID is available Apple devices may accept 11.25ms intervals."""
-
     max_packet_length: int
     """The maximum number of data bytes that can be sent in a single transmission,
     not including overhead bytes.
@@ -527,10 +510,8 @@ class Descriptor:
         ...
     uuid: UUID
     """The descriptor uuid. (read-only)"""
-
     characteristic: Characteristic
     """The Characteristic this Descriptor is a part of."""
-
     value: bytearray
     """The value of this descriptor."""
 
@@ -585,7 +566,6 @@ class PacketBuffer:
         ...
     incoming_packet_length: int
     """Maximum length in bytes of a packet we are reading."""
-
     outgoing_packet_length: int
     """Maximum length in bytes of a packet we are writing."""
 
@@ -600,22 +580,16 @@ class ScanEntry:
     def matches(self, prefixes: ScanEntry, *, match_all: bool = True) -> bool:
         """Returns True if the ScanEntry matches all prefixes when ``match_all`` is True. This is stricter
         than the scan filtering which accepts any advertisements that match any of the prefixes
-        where ``match_all`` is False.
-
-        ``all`` also works for ``match_all`` but will be removed in CircuitPython 8."""
+        where ``match_all`` is False."""
         ...
     address: Address
     """The address of the device (read-only), of type `_bleio.Address`."""
-
     advertisement_bytes: bytes
     """All the advertisement data present in the packet, returned as a ``bytes`` object. (read-only)"""
-
     rssi: int
     """The signal strength of the device at the time of the scan, in integer dBm. (read-only)"""
-
     connectable: bool
     """True if the device can be connected to. (read-only)"""
-
     scan_response: bool
     """True if the entry was a scan response. (read-only)"""
 
@@ -631,7 +605,8 @@ class ScanResults:
         ...
     def __next__(self) -> ScanEntry:
         """Returns the next `_bleio.ScanEntry`. Blocks if none have been received and scanning is still
-        active. Raises `StopIteration` if scanning is finished and no other results are available."""
+        active. Raises `StopIteration` if scanning is finished and no other results are available.
+        """
         ...
 
 class Service:
@@ -652,13 +627,10 @@ class Service:
     characteristics: Tuple[Characteristic, ...]
     """A tuple of :py:class:`Characteristic` designating the characteristics that are offered by
     this service. (read-only)"""
-
     remote: bool
     """True if this is a service provided by a remote device. (read-only)"""
-
     secondary: bool
     """True if this is a secondary service. (read-only)"""
-
     uuid: Optional[UUID]
     """The UUID of this service. (read-only)
 
@@ -685,19 +657,16 @@ class UUID:
     """The 16-bit part of the UUID. (read-only)
 
     :type: int"""
-
     uuid128: bytes
     """The 128-bit value of the UUID
     Raises AttributeError if this is a 16-bit UUID. (read-only)
 
     :type: bytes"""
-
     size: int
     """128 if this UUID represents a 128-bit vendor-specific UUID. 16 if this UUID represents a
     16-bit Bluetooth SIG assigned UUID. (read-only) 32-bit UUIDs are not currently supported.
 
     :type: int"""
-
     def pack_into(self, buffer: WriteableBuffer, offset: int = 0) -> None:
         """Packs the UUID into the given buffer at the given offset."""
         ...

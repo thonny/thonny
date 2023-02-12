@@ -69,13 +69,11 @@ class RGBMatrix:
     brightness: float
     """In the current implementation, 0.0 turns the display off entirely
     and any other value up to 1.0 turns the display on fully."""
-
     def refresh(self) -> None:
         """Transmits the color data in the buffer to the pixels so that
         they are shown."""
         ...
     width: int
     """The width of the display, in pixels"""
-
     height: int
     """The height of the display, in pixels"""
