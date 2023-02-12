@@ -23,7 +23,6 @@ logger = getLogger(__name__)
 
 
 class FindDialog(CommonDialog):
-
     last_searched_word = None
 
     def __init__(self, master):
@@ -212,7 +211,6 @@ class FindDialog(CommonDialog):
 
     # performs the replace operation - replaces the currently active found word with what is entered in the replace field
     def _perform_replace(self):
-
         # nothing is currently in found status
         if self.active_found_tag == None:
             return
@@ -251,7 +249,6 @@ class FindDialog(CommonDialog):
 
     # replaces all occurrences of the search string with the replace string
     def _perform_replace_all(self):
-
         tofind = self.find_entry.get()
         if len(tofind) == 0:
             self.infotext_label_var.set(tr("Enter string to be replaced."))

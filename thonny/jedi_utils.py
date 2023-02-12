@@ -177,7 +177,6 @@ def _export_completions(completions: List[jedi.api.classes.Completion]) -> List[
 def _filter_completions(
     completions: List[jedi.api.classes.Completion], sys_path: Optional[List[str]]
 ) -> List[jedi.api.classes.Completion]:
-
     if sys_path is None:
         return completions
 

@@ -512,7 +512,6 @@ def _is_python_name_char(c: str) -> bool:
 
 
 def load_plugin() -> None:
-
     completer = Completer()
 
     def can_complete():

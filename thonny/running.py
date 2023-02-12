@@ -322,7 +322,6 @@ class Runner:
         cmd_line: Union[str, List[str]],
         working_directory: Optional[str] = None,
     ) -> None:
-
         if working_directory and self._proxy.get_cwd() != working_directory:
             # create compound command
             # start with %cd
@@ -1339,7 +1338,6 @@ def _create_python_process(
     env=None,
     universal_newlines=True,
 ):
-
     cmd = [python_exe] + args
 
     if running_on_windows():

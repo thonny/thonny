@@ -24,7 +24,6 @@ class ShellMacroDialog(CommonDialog):
         self.main_command_text.focus_set()
 
     def _create_widgets(self):
-
         bg = "#ffff99"
         banner_frame = tk.Frame(self, background=bg)
         banner_frame.grid(row=0, column=0, sticky="nsew")

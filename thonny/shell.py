@@ -1181,7 +1181,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return get_runner() is not None
 
     def _extract_submittable_input(self, input_text, tail):
-
         if get_runner().is_waiting_toplevel_command():
             if input_text.endswith("\n"):
                 if input_text.strip().startswith("%") or input_text.strip().startswith("!"):
@@ -1503,7 +1502,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _show_user_exception(self, user_exception):
         for line, frame_id, *_ in user_exception["items"]:
-
             tags = ("io", "stderr")
             if frame_id is not None:
                 frame_tag = "frame_%d" % frame_id
@@ -1973,7 +1971,6 @@ class PlotterCanvas(tk.Canvas):
         return count
 
     def draw_segment(self, color, pos, nums):
-
         x = self.x_padding_left + pos * self.x_scale
 
         args = []

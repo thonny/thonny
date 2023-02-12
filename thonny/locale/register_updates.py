@@ -28,7 +28,6 @@ def register_locale(name: str) -> None:
         if entry.msgstr and (
             entry.msgid not in registered or registered[entry.msgid] != entry.msgstr
         ):
-
             msg = entry.msgstr.strip().replace("\n", " ")
             if not msg.endswith("."):
                 msg = msg + "."

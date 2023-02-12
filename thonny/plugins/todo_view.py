@@ -14,7 +14,6 @@ INFO_TEXT = "---"
 
 class TodoView(ui_utils.TreeFrame):
     def __init__(self, master):
-
         ui_utils.TreeFrame.__init__(
             self,
             master,
@@ -81,7 +80,6 @@ class TodoView(ui_utils.TreeFrame):
             self._update(event)
 
     def _update(self, event):
-
         if not self.winfo_ismapped():
             return
 

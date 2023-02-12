@@ -527,7 +527,6 @@ class Uf2FlashingDialog(WorkDialog):
             block_size = 8 * 1024
             with open(target_path, "wb") as fdst:
                 while True:
-
                     block = fsrc.read(block_size)
                     if not block:
                         break

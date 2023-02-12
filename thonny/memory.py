@@ -105,7 +105,6 @@ class VariablesFrame(MemoryFrame):
                 self.tree.set(node_id, "name", group_title)
 
             for name in sorted(variables.keys()):
-
                 if not name.startswith("__"):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)

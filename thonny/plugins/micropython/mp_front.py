@@ -35,7 +35,6 @@ class MicroPythonProxy(SubprocessProxy):
         return None
 
     def get_pip_target_dir(self) -> Optional[str]:
-
         lib_dirs = self.get_lib_dirs()
         if not lib_dirs:
             return None
@@ -570,7 +569,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return result
 
     def _get_webrepl_frame(self):
-
         if self._webrepl_frame is not None:
             return self._webrepl_frame
 

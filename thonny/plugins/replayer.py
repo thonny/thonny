@@ -285,7 +285,6 @@ class ReplayerEditorNotebook(ttk.Notebook):
         self._editors_by_text_widget_id = {}
 
     def clear(self):
-
         for child in self.winfo_children():
             child.destroy()
 

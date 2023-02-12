@@ -12,7 +12,6 @@ logger = getLogger(__name__)
 
 class RstText(TweakableText):
     def __init__(self, master=None, cnf={}, read_only=False, **kw):
-
         super().__init__(
             master=master,
             cnf=cnf,

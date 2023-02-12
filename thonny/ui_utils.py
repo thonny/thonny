@@ -1319,7 +1319,6 @@ class NoteBox(CommonDialog):
         self._current_chars += chars
 
     def place(self, target, focus=None):
-
         # Compute the area that will be described by this Note
         focus_x = target.winfo_rootx()
         focus_y = target.winfo_rooty()
@@ -1378,7 +1377,6 @@ class NoteBox(CommonDialog):
         self.deiconify()
 
     def show_note(self, *content_items: Union[str, List], target=None, focus=None) -> None:
-
         self.set_content(*content_items)
         self.place(target, focus)
 

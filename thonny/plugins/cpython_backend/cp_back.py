@@ -583,7 +583,6 @@ class MainCPythonBackend(MainBackend):
     def _perform_pip_operation_and_list(
         self, cmd_line: List[str]
     ) -> Tuple[int, Dict[str, DistInfo]]:
-
         extra_switches = ["--disable-pip-version-check"]
         proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
         if proxy:
@@ -634,7 +633,6 @@ class MainCPythonBackend(MainBackend):
         return get_single_dir_child_data(path, include_hidden)
 
     def _get_path_info(self, path: str) -> Optional[Dict]:
-
         try:
             if not os.path.exists(path):
                 return None

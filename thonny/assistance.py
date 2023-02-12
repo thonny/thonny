@@ -255,7 +255,6 @@ class AssistantView(tktextext.TextFrame):
         self.text.clear()
 
     def _start_program_analyses(self, main_file_path, main_file_source, imported_file_paths):
-
         for cls in _program_analyzer_classes:
             analyzer = cls(self._accept_warnings)
             if analyzer.is_enabled():
@@ -287,7 +286,6 @@ class AssistantView(tktextext.TextFrame):
             self._present_conclusion()
 
     def _present_conclusion(self):
-
         if not self.text.get("1.0", "end").strip():
             if self.main_file_path is not None and os.path.exists(self.main_file_path):
                 self._append_text("\n")
@@ -402,7 +400,6 @@ class AssistantView(tktextext.TextFrame):
         return format_file_url(atts["filename"], atts.get("lineno"), atts.get("col_offset"))
 
     def _ask_feedback(self, event=None):
-
         all_snapshots = self._snapshots_per_main_file[self._current_snapshot["main_file_path"]]
 
         # TODO: select only snapshots which are not sent yet
@@ -444,7 +441,6 @@ class Helper:
 
 class ErrorHelper(Helper):
     def __init__(self, error_info):
-
         # TODO: don't repeat all this for all error helpers
         self.error_info = error_info
 

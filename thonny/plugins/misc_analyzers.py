@@ -239,7 +239,6 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
         for item in os.listdir(main_file_dir):
             full_path = os.path.join(main_file_dir, item)
             if item.endswith(".py") and item[:-3] in library_modules:
-
                 if is_same_path(full_path, main_file_path):
                     prelude = "Your program file is named '%s'." % item
                     rename_hint = " (*File → Rename…* )"

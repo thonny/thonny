@@ -80,7 +80,6 @@ class PipDialog(CommonDialog, ABC):
         return tr("Uninstall")
 
     def _create_widgets(self, parent):
-
         header_frame = ttk.Frame(parent)
         header_frame.grid(
             row=1,
@@ -870,7 +869,6 @@ class PipDialog(CommonDialog, ABC):
     def _get_active_dist(self, name):
         normname = self._normalize_name(name)
         for key in self._active_distributions:
-
             if self._normalize_name(key) == normname:
                 return self._active_distributions[key]
 
@@ -1428,7 +1426,6 @@ def _start_fetching_search_results(query, completion_handler):
     url_future = _fetch_url_future(url)
 
     def poll_fetch_complete():
-
         if url_future.done():
             try:
                 _, bin_data = url_future.result()

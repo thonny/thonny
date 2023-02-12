@@ -1184,7 +1184,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _read_file_via_serial(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
     ) -> None:
-
         hex_mode = self._should_hexlify(source_path)
 
         self._execute_without_output(

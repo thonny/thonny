@@ -749,7 +749,6 @@ class EnhancedText(TweakableText):
             self.mark_set("insert", "@%d,%d" % (event.x, event.y))
 
     def _reload_theme_options(self, event=None):
-
         style = ttk.Style()
 
         states = []
@@ -1174,7 +1173,6 @@ class EnhancedTextFrame(TextFrame):
             self._reload_gutter_theme_options(event)
 
     def _reload_gutter_theme_options(self, event=None):
-
         style = ttk.Style()
         background = style.lookup("GUTTER", "background")
         if background:
