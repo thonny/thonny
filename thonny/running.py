@@ -96,6 +96,7 @@ _console_allocated = False
 
 class Runner:
     def __init__(self) -> None:
+        get_workbench().set_default("run.allow_running_unnamed_programs", True)
         get_workbench().set_default("run.auto_cd", True)
 
         self._init_commands()
@@ -410,7 +411,9 @@ class Runner:
             return
 
         UNTITLED = "<untitled>"
-        if editor.get_filename():
+        if editor.get_filename() or not get_workbench().get_option(
+            "run.allow_running_unnamed_programs"
+        ):
             filename = editor.save_file()
             if not filename:
                 # user has cancelled file saving

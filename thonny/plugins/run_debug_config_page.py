@@ -10,6 +10,13 @@ class RunDebugConfigurationPage(ConfigurationPage):
         super().__init__(master)
 
         self.add_checkbox(
+            "run.allow_running_unnamed_programs",
+            tr("Allow running unnamed programs"),
+            row=3,
+            columnspan=3,
+        )
+
+        self.add_checkbox(
             "run.auto_cd",
             tr("Change working directory to script directory on Run / Debug"),
             row=5,
