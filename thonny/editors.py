@@ -631,10 +631,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if sys.platform == "darwin":
             # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
             # widgets disappeared, at least on Aivar's machine.
-            child = self.get_current_child()
-            if child:
+            for child in self.get_all_editors():
                 assert isinstance(child, Editor)
                 child.get_code_view().grid_main_widgets()
+            self.update_idletasks()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
