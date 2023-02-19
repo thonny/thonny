@@ -62,7 +62,7 @@ class SerialConnection(MicroPythonConnection):
                     """\
                 Try adding yourself to the '{group}' group:
                 > sudo usermod -a -G {group} <username>
-                (NB! You may need to reboot your system after this!)""".format(
+                (NB! You probably have to logout/login or reboot your system after this!)""".format(
                         group=group
                     )
                 )
