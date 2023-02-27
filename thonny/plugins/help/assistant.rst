@@ -9,7 +9,7 @@ to explain it in simpler terms and offers some advice for finding and fixing the
 Sometimes your program may not work as you want even if you don't get any error messages. In this case
 sometimes it helps to investigate the code carefully in order to spot certain bad smells or
 peculiarities, which may lead to discovering the problem. There are two popular tools, which are used
-for such investigations: `Pylint <pylint.pycqa.or>`_ and `Mypy <http://mypy-lang.org/>`_.
+for such investigations: `Pylint <pylint.pycqa.org>`_ and `Mypy <http://mypy-lang.org/>`_.
 
 Mypy tries to detect certain contradictions in your code, for example when a function seems to
 expect an integer argument, but your code calls it with a string. Pylint is not as good with this

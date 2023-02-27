@@ -12,4 +12,4 @@ check it and run your Tkinter program, Thonny performs following magic tricks:
 * It remembers where you position your window. Next time it places the window at the same position.
 * It makes your window stay on top even if you click on Thonny window to start modifying the code. In fact, after your Tkinter window becomes visible, Thonny automatically focuses its own window so that you can continue editing the script without grabbing the mouse. When you're done, just press F5 again and old window gets replaced with the new one.
  
-*Staying on top currently does not work with turtle programs on macOS (https://github.com/thonny/thonny/issues/798)*
+Staying on top currently does not work with turtle programs on macOS (https://github.com/thonny/thonny/issues/798).
