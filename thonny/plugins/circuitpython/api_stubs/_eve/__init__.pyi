@@ -11,6 +11,8 @@ from typing import Tuple
 from circuitpython_typing import ReadableBuffer
 
 class _EVE:
+    def __init__(self) -> None:
+        """Create an _EVE object"""
     def register(self, o: object) -> None: ...
     def flush(self) -> None:
         """Send any queued drawing commands directly to the hardware.
@@ -28,14 +30,16 @@ class _EVE:
         :param int func: specifies the test function, one of ``NEVER``, ``LESS``, ``LEQUAL``, ``GREATER``, ``GEQUAL``, ``EQUAL``, ``NOTEQUAL``, or ``ALWAYS``. Range 0-7. The initial value is ALWAYS(7)
         :param int ref: specifies the reference value for the alpha test. Range 0-255. The initial value is 0
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Begin(self, prim: int) -> None:
         """Begin drawing a graphics primitive
 
         :param int prim: graphics primitive.
 
-        Valid primitives are ``BITMAPS``, ``POINTS``, ``LINES``, ``LINE_STRIP``, ``EDGE_STRIP_R``, ``EDGE_STRIP_L``, ``EDGE_STRIP_A``, ``EDGE_STRIP_B`` and ``RECTS``."""
+        Valid primitives are ``BITMAPS``, ``POINTS``, ``LINES``, ``LINE_STRIP``, ``EDGE_STRIP_R``, ``EDGE_STRIP_L``, ``EDGE_STRIP_A``, ``EDGE_STRIP_B`` and ``RECTS``.
+        """
         ...
     def BitmapExtFormat(self, format: int) -> None:
         """Set the bitmap format
@@ -47,7 +51,8 @@ class _EVE:
 
         :param int handle: bitmap handle. Range 0-31. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapLayoutH(self, linestride: int, height: int) -> None:
         """Set the source bitmap memory format and layout for the current handle. high bits for large bitmaps
@@ -82,7 +87,8 @@ class _EVE:
     def BitmapSource(self, addr: int) -> None:
         """Set the source address for bitmap graphics
 
-        :param int addr: Bitmap start address, pixel-aligned. May be in SRAM or flash. Range 0-16777215"""
+        :param int addr: Bitmap start address, pixel-aligned. May be in SRAM or flash. Range 0-16777215
+        """
         ...
     def BitmapSwizzle(self, r: int, g: int, b: int, a: int) -> None:
         """Set the source for the r,g,b and a channels of a bitmap
@@ -100,7 +106,8 @@ class _EVE:
 
         The initial value is **p** = 0, **v** = 256. This represents the value 1.0.
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapTransformB(self, p: int, v: int) -> None:
         """Set the :math:`b` component of the bitmap transform matrix
@@ -110,14 +117,16 @@ class _EVE:
 
         The initial value is **p** = 0, **v** = 0. This represents the value 0.0.
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapTransformC(self, v: int) -> None:
         """Set the :math:`c` component of the bitmap transform matrix
 
         :param int v: The :math:`c` component of the bitmap transform matrix, in signed 15.8 bit fixed-point form. Range 0-16777215. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapTransformD(self, p: int, v: int) -> None:
         """Set the :math:`d` component of the bitmap transform matrix
@@ -127,7 +136,8 @@ class _EVE:
 
         The initial value is **p** = 0, **v** = 0. This represents the value 0.0.
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapTransformE(self, p: int, v: int) -> None:
         """Set the :math:`e` component of the bitmap transform matrix
@@ -137,14 +147,16 @@ class _EVE:
 
         The initial value is **p** = 0, **v** = 256. This represents the value 1.0.
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BitmapTransformF(self, v: int) -> None:
         """Set the :math:`f` component of the bitmap transform matrix
 
         :param int v: The :math:`f` component of the bitmap transform matrix, in signed 15.8 bit fixed-point form. Range 0-16777215. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def BlendFunc(self, src: int, dst: int) -> None:
         """Set pixel arithmetic
@@ -152,7 +164,8 @@ class _EVE:
         :param int src: specifies how the source blending factor is computed.  One of ``ZERO``, ``ONE``, ``SRC_ALPHA``, ``DST_ALPHA``, ``ONE_MINUS_SRC_ALPHA`` or ``ONE_MINUS_DST_ALPHA``. Range 0-7. The initial value is SRC_ALPHA(2)
         :param int dst: specifies how the destination blending factor is computed, one of the same constants as **src**. Range 0-7. The initial value is ONE_MINUS_SRC_ALPHA(4)
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Call(self, dest: int) -> None:
         """Execute a sequence of commands at another location in the display list
@@ -164,14 +177,16 @@ class _EVE:
 
         :param int cell: bitmap cell number. Range 0-127. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ClearColorA(self, alpha: int) -> None:
         """Set clear value for the alpha channel
 
         :param int alpha: alpha value used when the color buffer is cleared. Range 0-255. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ClearColorRGB(self, red: int, green: int, blue: int) -> None:
         """Set clear values for red, green and blue channels
@@ -180,7 +195,8 @@ class _EVE:
         :param int green: green value used when the color buffer is cleared. Range 0-255. The initial value is 0
         :param int blue: blue value used when the color buffer is cleared. Range 0-255. The initial value is 0
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Clear(self, c: int, s: int, t: int) -> None:
         """Clear buffers to preset values
@@ -194,20 +210,23 @@ class _EVE:
 
         :param int s: value used when the stencil buffer is cleared. Range 0-255. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ClearTag(self, s: int) -> None:
         """Set clear value for the tag buffer
 
         :param int s: value used when the tag buffer is cleared. Range 0-255. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
     def ColorA(self, alpha: int) -> None:
         """Set the current color alpha
 
         :param int alpha: alpha for the current color. Range 0-255. The initial value is 255
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ColorMask(self, r: int, g: int, b: int, a: int) -> None:
         """Enable and disable writing of frame buffer color components
@@ -217,7 +236,8 @@ class _EVE:
         :param int b: allow updates to the frame buffer blue component. Range 0-1. The initial value is 1
         :param int a: allow updates to the frame buffer alpha component. Range 0-1. The initial value is 1
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ColorRGB(self, red: int, green: int, blue: int) -> None:
         """Set the drawing color
@@ -226,7 +246,8 @@ class _EVE:
         :param int green: green for the current color. Range 0-255. The initial value is 255
         :param int blue: blue for the current color. Range 0-255. The initial value is 255
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Display(self) -> None:
         """End the display list"""
@@ -234,7 +255,8 @@ class _EVE:
     def End(self) -> None:
         """End drawing a graphics primitive
 
-        :meth:`Vertex2ii` and :meth:`Vertex2f` calls are ignored until the next :meth:`Begin`."""
+        :meth:`Vertex2ii` and :meth:`Vertex2f` calls are ignored until the next :meth:`Begin`.
+        """
         ...
     def Jump(self, dest: int) -> None:
         """Execute commands at another location in the display list
@@ -254,7 +276,8 @@ class _EVE:
 
         :param int addr: Address in graphics SRAM, 2-byte aligned. Range 0-4194303. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def RestoreContext(self) -> None:
         """Restore the current graphics context from the context stack"""
@@ -271,7 +294,8 @@ class _EVE:
         :param int width: The width of the scissor clip rectangle, in pixels. Range 0-4095. The initial value is hsize
         :param int height: The height of the scissor clip rectangle, in pixels. Range 0-4095. The initial value is 2048
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def ScissorXY(self, x: int, y: int) -> None:
         """Set the top left corner of the scissor clip rectangle
@@ -279,7 +303,8 @@ class _EVE:
         :param int x: The :math:`x` coordinate of the scissor clip rectangle, in pixels. Range 0-2047. The initial value is 0
         :param int y: The :math:`y` coordinate of the scissor clip rectangle, in pixels. Range 0-2047. The initial value is 0
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def StencilFunc(self, func: int, ref: int, mask: int) -> None:
         """Set function and reference value for stencil testing
@@ -288,14 +313,16 @@ class _EVE:
         :param int ref: specifies the reference value for the stencil test. Range 0-255. The initial value is 0
         :param int mask: specifies a mask that is ANDed with the reference value and the stored stencil value. Range 0-255. The initial value is 255
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def StencilMask(self, mask: int) -> None:
         """Control the writing of individual bits in the stencil planes
 
         :param int mask: the mask used to enable writing stencil bits. Range 0-255. The initial value is 255
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def StencilOp(self, sfail: int, spass: int) -> None:
         """Set stencil test actions
@@ -303,21 +330,24 @@ class _EVE:
         :param int sfail: specifies the action to take when the stencil test fails, one of ``KEEP``, ``ZERO``, ``REPLACE``, ``INCR``, ``INCR_WRAP``, ``DECR``, ``DECR_WRAP``, and ``INVERT``. Range 0-7. The initial value is KEEP(1)
         :param int spass: specifies the action to take when the stencil test passes, one of the same constants as **sfail**. Range 0-7. The initial value is KEEP(1)
 
-        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        These values are part of the graphics context and are saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def TagMask(self, mask: int) -> None:
         """Control the writing of the tag buffer
 
         :param int mask: allow updates to the tag buffer. Range 0-1. The initial value is 1
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Tag(self, s: int) -> None:
         """Set the current tag value
 
         :param int s: tag value. Range 0-255. The initial value is 255
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def Vertex2ii(self, x: int, y: int, handle: int, cell: int) -> None:
         """:param int x: x-coordinate in pixels. Range 0-511
@@ -338,35 +368,40 @@ class _EVE:
 
         :param float width: line width in pixels. Range 0-511. The initial value is 1
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def PointSize(self, size: float) -> None:
         """Set the diameter of rasterized points
 
         :param float size: point diameter in pixels. Range 0-1023. The initial value is 1
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def VertexTranslateX(self, x: float) -> None:
         """Set the vertex transformation's x translation component
 
         :param float x: signed x-coordinate in pixels. Range ±4095. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def VertexTranslateY(self, y: float) -> None:
         """Set the vertex transformation's y translation component
 
         :param float y: signed y-coordinate in pixels. Range ±4095. The initial value is 0
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def VertexFormat(self, frac: int) -> None:
         """Set the precision of vertex2f coordinates
 
         :param int frac: Number of fractional bits in X,Y coordinates, 0-4. Range 0-7. The initial value is 4
 
-        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`."""
+        This value is part of the graphics context and is saved and restored by :meth:`SaveContext` and :meth:`RestoreContext`.
+        """
         ...
     def cmd0(self, n: int) -> None:
         """Append the command word n to the FIFO

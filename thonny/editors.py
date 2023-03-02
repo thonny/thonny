@@ -46,7 +46,6 @@ class EditorCodeViewText(CodeViewText):
     """Allows separate class binding for CodeViewTexts which are inside editors"""
 
     def __init__(self, master=None, cnf={}, **kw):
-
         super().__init__(
             master=master,
             cnf=cnf,
@@ -184,7 +183,6 @@ class Editor(ttk.Frame):
             self._last_known_mtime = os.path.getmtime(self._filename)
 
     def get_long_description(self):
-
         if self._filename is None:
             result = tr("<untitled>")
         else:
@@ -479,7 +477,6 @@ class Editor(ttk.Frame):
                 "matplotlib",
                 "numpy",
             ]:
-
                 # More proper name analysis will be performed by ProgramNamingAnalyzer
                 if not tk.messagebox.askyesno(
                     "Potential problem",
@@ -634,10 +631,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if sys.platform == "darwin":
             # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
             # widgets disappeared, at least on Aivar's machine.
-            child = self.get_current_child()
-            if child:
+            for child in self.get_all_editors():
                 assert isinstance(child, Editor)
                 child.get_code_view().grid_main_widgets()
+            self.update_idletasks()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -896,7 +893,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         return "break"
 
     def _close_files(self, except_index=None):
-
         for tab_index in reversed(range(len(self.winfo_children()))):
             if except_index is not None and tab_index == except_index:
                 continue

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import busio
-import microcontroller
+import digitalio
 
 class SPIDevice:
     """SPI Device Manager"""
@@ -9,14 +9,13 @@ class SPIDevice:
     def __init__(
         self,
         spi: busio.SPI,
-        chip_select: microcontroller.Pin,
+        chip_select: digitalio.DigitalInOut,
         *,
         baudrate: int = 100000,
         polarity: int = 0,
         phase: int = 0,
         extra_clocks: int = 0,
     ) -> None:
-
         """
         Represents a single SPI device and manages locking the bus and the device address.
 
@@ -44,7 +43,6 @@ class SPIDevice:
                 with device as spi:
                     spi.write(bytes_read)"""
     ...
-
     def __enter__(self) -> busio.SPI:
         """Starts a SPI transaction by configuring the SPI and asserting chip select."""
         ...

@@ -11,7 +11,7 @@ from update_variants_common import get_attr_value, save_variants
 
 base_url = "https://circuitpython.org/downloads"
 
-PREV_RELEVANT_VERSION = "6.3.0"
+PREV_RELEVANT_VERSION = "7.3.3"
 RELEVANT_FAMILIES = {"atmel-samd", "esp32s2", "esp32s3", "nrf52840", "raspberrypi"}
 
 DAPLINK_BOARDS = {"microbit_v2", "makerdiary_nrf52840_mdk"}

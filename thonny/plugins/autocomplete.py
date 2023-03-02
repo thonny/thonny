@@ -171,7 +171,10 @@ class CompletionsBox(EditorInfoBox):
         self._check_request_details()
 
     def _check_request_details(self) -> None:
-        assert self.winfo_ismapped()
+        if not self.winfo_ismapped():
+            # can happen, see https://github.com/thonny/thonny/issues/2162
+            return
+
         if (
             self._details_box
             and self._details_box.is_visible()
@@ -509,7 +512,6 @@ def _is_python_name_char(c: str) -> bool:
 
 
 def load_plugin() -> None:
-
     completer = Completer()
 
     def can_complete():

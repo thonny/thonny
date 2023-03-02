@@ -167,7 +167,6 @@ class ParenMatcher:
 
 class ShellParenMatcher(ParenMatcher):
     def _update_highlighting_for_active_range(self):
-
         # TODO: check that cursor is in this range
         index_parts = self.text.tag_prevrange("command", "end")
 

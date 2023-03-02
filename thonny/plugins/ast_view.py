@@ -79,7 +79,6 @@ class AstView(ui_utils.TreeFrame):
             return
 
         def _format(key, node, parent_id):
-
             if isinstance(node, ast.AST):
                 fields = list(ast.iter_fields(node))
 

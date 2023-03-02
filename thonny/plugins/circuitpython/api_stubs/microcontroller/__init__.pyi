@@ -1,7 +1,8 @@
 """Pin references and cpu functionality
 
-The `microcontroller` module defines the pins from the perspective of the
-microcontroller. See :py:mod:`board` for board-specific pin mappings."""
+The `microcontroller` module defines the pins and other bare-metal hardware
+from the perspective of the microcontroller. See :py:mod:`board` for
+board-specific pin mappings."""
 
 from __future__ import annotations
 
@@ -15,7 +16,6 @@ cpu: Processor
 """CPU information and control, such as ``cpu.temperature`` and ``cpu.frequency``
 (clock frequency).
 This object is an instance of `microcontroller.Processor`."""
-
 cpus: Processor
 """CPU information and control, such as ``cpus[0].temperature`` and ``cpus[1].frequency``
 (clock frequency) on chips with more than 1 cpu. The index selects which cpu.
@@ -59,7 +59,6 @@ nvm: Optional[ByteArray]
 This object is the sole instance of `nvm.ByteArray` when available or ``None`` otherwise.
 
 :type: nvm.ByteArray or None"""
-
 watchdog: Optional[WatchDogTimer]
 """Available watchdog timer.
 This object is the sole instance of `watchdog.WatchDogTimer` when available or ``None`` otherwise."""
@@ -71,6 +70,9 @@ class Pin:
         """Identifies an IO pin on the microcontroller. They are fixed by the
         hardware so they cannot be constructed on demand. Instead, use
         :mod:`board` or :mod:`microcontroller.pin` to reference the desired pin."""
+        ...
+    def __hash__(self) -> int:
+        """Returns a hash for the Pin."""
         ...
 
 class Processor:
@@ -95,19 +97,23 @@ class Processor:
         Use `microcontroller.cpu` to access the sole instance available."""
         ...
     frequency: int
-    """The CPU operating frequency in Hertz. (read-only)"""
+    """The CPU operating frequency in Hertz.
 
+    **Limitations:** Setting the ``frequency`` is possible only on some i.MX boards.
+    On most boards, ``frequency`` is read-only.
+    """
     reset_reason: microcontroller.ResetReason
     """The reason the microcontroller started up from reset state."""
-
     temperature: Optional[float]
     """The on-chip temperature, in Celsius, as a float. (read-only)
 
-    Is `None` if the temperature is not available."""
+    Is `None` if the temperature is not available.
 
+    **Limitations:** Not available on ESP32 or ESP32-S3. On small SAMD21 builds without external flash,
+    the reported temperature has reduced accuracy and precision, to save code space.
+    """
     uid: bytearray
     """The unique id (aka serial number) of the chip as a `bytearray`. (read-only)"""
-
     voltage: Optional[float]
     """The input voltage to the microcontroller, as a float. (read-only)
 

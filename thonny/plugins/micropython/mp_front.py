@@ -35,7 +35,6 @@ class MicroPythonProxy(SubprocessProxy):
         return None
 
     def get_pip_target_dir(self) -> Optional[str]:
-
         lib_dirs = self.get_lib_dirs()
         if not lib_dirs:
             return None
@@ -187,7 +186,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -569,7 +569,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return result
 
     def _get_webrepl_frame(self):
-
         if self._webrepl_frame is not None:
             return self._webrepl_frame
 
@@ -716,7 +715,8 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -860,7 +860,8 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -985,6 +986,10 @@ def list_serial_ports():
         return comports()
     finally:
         os.path.islink = old_islink
+
+
+def list_serial_port_infos():
+    return [f"{p.device} ({p.hwid})" for p in list_serial_ports()]
 
 
 def port_exists(device):

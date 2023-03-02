@@ -177,7 +177,6 @@ def _export_completions(completions: List[jedi.api.classes.Completion]) -> List[
 def _filter_completions(
     completions: List[jedi.api.classes.Completion], sys_path: Optional[List[str]]
 ) -> List[jedi.api.classes.Completion]:
-
     if sys_path is None:
         return completions
 
@@ -193,7 +192,9 @@ def _filter_completions(
 
 def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInfo:
     # In jedi before 0.16, the name attribute did not contain trailing '=' for argument completions,
-    # since 0.16 it does. Need to ensure similar result for all supported versions.
+    # since 0.16 it does.
+    # When older jedi versions were supported, I needed to ensure similar result for all supported
+    # versions.
 
     return CompletionInfo(
         name=completion.name and completion.name.strip("="),

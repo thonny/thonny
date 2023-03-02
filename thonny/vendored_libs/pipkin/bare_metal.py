@@ -389,7 +389,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
             data += self._connection.read(1, timeout=1, timeout_is_soft=True)
             data += self._connection.read_all()
             logger.error(
-                "Could not read command confirmation for script\n\n: %s\n\n" "Got: %r",
+                "Could not read command confirmation for script\n\n: %s\n\n" + "Got: %r",
                 script_bytes,
                 data,
             )

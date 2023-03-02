@@ -40,36 +40,30 @@ class AuthMode:
 class Monitor:
     """For monitoring WiFi packets."""
 
-def __init__(self, channel: Optional[int] = 1, queue: Optional[int] = 128) -> None:
-    """Initialize `wifi.Monitor` singleton.
+    def __init__(self, channel: Optional[int] = 1, queue: Optional[int] = 128) -> None:
+        """Initialize `wifi.Monitor` singleton.
 
-    :param int channel: The WiFi channel to scan.
-    :param int queue: The queue size for buffering the packet.
+        :param int channel: The WiFi channel to scan.
+        :param int queue: The queue size for buffering the packet.
 
-    """
-    ...
-
-channel: int
-"""The WiFi channel to scan."""
-
-queue: int
-"""The queue size for buffering the packet."""
-
-def deinit(self) -> None:
-    """De-initialize `wifi.Monitor` singleton."""
-    ...
-
-def lost(self) -> int:
-    """Returns the packet loss count. The counter resets after each poll."""
-    ...
-
-def queued(self) -> int:
-    """Returns the packet queued count."""
-    ...
-
-def packet(self) -> dict:
-    """Returns the monitor packet."""
-    ...
+        """
+        ...
+    channel: int
+    """The WiFi channel to scan."""
+    queue: int
+    """The queue size for buffering the packet."""
+    def deinit(self) -> None:
+        """De-initialize `wifi.Monitor` singleton."""
+        ...
+    def lost(self) -> int:
+        """Returns the packet loss count. The counter resets after each poll."""
+        ...
+    def queued(self) -> int:
+        """Returns the packet queued count."""
+        ...
+    def packet(self) -> dict:
+        """Returns the monitor packet."""
+        ...
 
 class Network:
     """A wifi network provided by a nearby access point."""
@@ -79,19 +73,14 @@ class Network:
         ...
     ssid: str
     """String id of the network"""
-
     bssid: bytes
     """BSSID of the network (usually the AP's MAC address)"""
-
     rssi: int
     """Signal strength of the network"""
-
     channel: int
     """Channel number the network is operating on"""
-
     country: str
     """String id of the country code"""
-
     authmode: str
     """String id of the authmode"""
 
@@ -126,23 +115,32 @@ class Radio:
     """``True`` when the wifi radio is enabled.
     If you set the value to ``False``, any open sockets will be closed.
     """
-
     hostname: Union[str | ReadableBuffer]
     """Hostname for wifi interface. When the hostname is altered after interface started/connected
        the changes would only be reflected once the interface restarts/reconnects."""
-
     mac_address: ReadableBuffer
     """MAC address for the station. When the address is altered after interface is connected
-       the changes would only be reflected once the interface reconnects."""
+       the changes would only be reflected once the interface reconnects.
 
+    **Limitations:** Not settable on RP2040 CYW43 boards, such as Pi Pico W.
+    """
+    tx_power: float
+    """Wifi transmission power, in dBm."""
     mac_address_ap: ReadableBuffer
     """MAC address for the AP. When the address is altered after interface is started
-       the changes would only be reflected once the interface restarts."""
+       the changes would only be reflected once the interface restarts.
 
+    **Limitations:** Not settable on RP2040 CYW43 boards, such as Pi Pico W.
+    """
     def start_scanning_networks(
         self, *, start_channel: int = 1, stop_channel: int = 11
     ) -> Iterable[Network]:
-        """Scans for available wifi networks over the given channel range. Make sure the channels are allowed in your country."""
+        """Scans for available wifi networks over the given channel range. Make sure the channels are allowed in your country.
+
+        .. note::
+
+            In the raspberrypi port (RP2040 CYW43), ``start_channel`` and ``stop_channel`` are ignored.
+        """
         ...
     def stop_scanning_networks(self) -> None:
         """Stop scanning for Wifi networks and free any resources used to do it."""
@@ -156,10 +154,10 @@ class Radio:
     def start_ap(
         self,
         ssid: Union[str | ReadableBuffer],
-        password: Union[str | ReadableBuffer] = "",
+        password: Union[str | ReadableBuffer] = b"",
         *,
-        channel: Optional[int] = 1,
-        authmode: Optional[AuthMode],
+        channel: int = 1,
+        authmode: Optional[AuthMode] = None,
         max_connections: Optional[int] = 4,
     ) -> None:
         """Starts an Access Point with the specified ssid and password.
@@ -167,10 +165,11 @@ class Radio:
         If ``channel`` is given, the access point will use that channel unless
         a station is already operating on a different channel.
 
-        If ``authmode`` is given, the access point will use that Authentication
-        mode. If a password is given, ``authmode`` must not be ``OPEN``.
-        If ``authmode`` isn't given, ``OPEN`` will be used when password isn't provided,
-        otherwise ``WPA_WPA2_PSK``.
+        If ``authmode`` is not None, the access point will use that Authentication
+        mode. If a non-empty password is given, ``authmode`` must not be ``OPEN``.
+        If ``authmode`` is not given or is None,
+        ``OPEN`` will be used when the password is the empty string,
+        otherwise ``authmode`` will be ``WPA_WPA2_PSK``.
 
         If ``max_connections`` is given, the access point will allow up to
         that number of stations to connect."""
@@ -181,10 +180,10 @@ class Radio:
     def connect(
         self,
         ssid: Union[str | ReadableBuffer],
-        password: Union[str | ReadableBuffer] = "",
+        password: Union[str | ReadableBuffer] = b"",
         *,
-        channel: Optional[int] = 0,
-        bssid: Optional[Union[str | ReadableBuffer]] = "",
+        channel: int = 0,
+        bssid: Optional[Union[str | ReadableBuffer]] = None,
         timeout: Optional[float] = None,
     ) -> None:
         """Connects to the given ssid and waits for an ip address. Reconnections are handled
@@ -193,37 +192,46 @@ class Radio:
         By default, this will scan all channels and connect to the access point (AP) with the
         given ``ssid`` and greatest signal strength (rssi).
 
-        If ``channel`` is given, the scan will begin with the given channel and connect to
+        If ``channel`` is non-zero, the scan will begin with the given channel and connect to
         the first AP with the given ``ssid``. This can speed up the connection time
         significantly because a full scan doesn't occur.
 
-        If ``bssid`` is given, the scan will start at the first channel or the one given and
+        If ``bssid`` is given and not None, the scan will start at the first channel or the one given and
         connect to the AP with the given ``bssid`` and ``ssid``."""
         ...
     ipv4_gateway: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the station gateway when connected to an access point. None otherwise."""
-
     ipv4_gateway_ap: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the access point gateway, when enabled. None otherwise."""
-
     ipv4_subnet: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the station subnet when connected to an access point. None otherwise."""
-
     ipv4_subnet_ap: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the access point subnet, when enabled. None otherwise."""
-
+    def set_ipv4_address(
+        self,
+        *,
+        ipv4: ipaddress.IPv4Address,
+        netmask: ipaddress.IPv4Address,
+        gateway: ipaddress.IPv4Address,
+        ipv4_dns: Optional[ipaddress.IPv4Address],
+    ) -> None:
+        """Sets the IP v4 address of the station. Must include the netmask and gateway. DNS address is optional.
+        Setting the address manually will stop the DHCP client."""
+        ...
     ipv4_address: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the station when connected to an access point. None otherwise."""
-
     ipv4_address_ap: Optional[ipaddress.IPv4Address]
     """IP v4 Address of the access point, when enabled. None otherwise."""
-
-    ipv4_dns: Optional[ipaddress.IPv4Address]
-    """IP v4 Address of the DNS server in use when connected to an access point. None otherwise."""
-
+    ipv4_dns: ipaddress.IPv4Address
+    """IP v4 Address of the DNS server to be used."""
     ap_info: Optional[Network]
     """Network object containing BSSID, SSID, authmode, channel, country and RSSI when connected to an access point. None otherwise."""
-
+    def start_dhcp(self) -> None:
+        """Starts the DHCP client."""
+        ...
+    def stop_dhcp(self) -> None:
+        """Stops the DHCP client. Needed to assign a static IP address."""
+        ...
     def ping(
         self, ip: ipaddress.IPv4Address, *, timeout: Optional[float] = 0.5
     ) -> Optional[float]:
@@ -243,5 +251,6 @@ class ScannedNetworks:
         ...
     def __next__(self) -> Network:
         """Returns the next `wifi.Network`.
-        Raises `StopIteration` if scanning is finished and no other results are available."""
+        Raises `StopIteration` if scanning is finished and no other results are available.
+        """
         ...

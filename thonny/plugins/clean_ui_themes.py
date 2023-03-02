@@ -19,7 +19,6 @@ def clean(
         int
     ] = None,  # NB! Should be 1 or 0, not True or False (Tk would convert False to "False")
 ) -> UiThemeSettings:
-
     # https://wiki.tcl.tk/37973 (Changing colors)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c

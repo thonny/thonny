@@ -584,7 +584,6 @@ class Workbench(tk.Tk):
         return server_socket, secret
 
     def _init_commands(self) -> None:
-
         self.add_command(
             "exit",
             "file",
@@ -643,7 +642,6 @@ class Workbench(tk.Tk):
         )
 
         if self.get_ui_mode() == "expert":
-
             self.add_command(
                 "toggle_maximize_view",
                 "view",
@@ -706,7 +704,6 @@ class Workbench(tk.Tk):
         print(get_runner()._postponed_commands)
 
     def _init_containers(self) -> None:
-
         margin = ems_to_pixels(0.6)
         # Main frame functions as
         # - a background behind padding of main_pw, without this OS X leaves white border
@@ -802,7 +799,6 @@ class Workbench(tk.Tk):
         webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine")
 
     def _init_backend_switcher(self):
-
         # Set up the menu
         self._backend_conf_variable = tk.StringVar(value="{}")
 
@@ -1405,7 +1401,6 @@ class Workbench(tk.Tk):
             return "Default Light"
 
     def uses_dark_ui_theme(self) -> bool:
-
         name = self._style.theme_use()
         while True:
             if "dark" in name.lower():
@@ -1643,7 +1638,6 @@ class Workbench(tk.Tk):
     def get_image(
         self, filename: str, tk_name: Optional[str] = None, disabled=False
     ) -> tk.PhotoImage:
-
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
 
@@ -1981,7 +1975,6 @@ class Workbench(tk.Tk):
         tester: Optional[Callable[[], bool]],
         toolbar_group: int,
     ) -> None:
-
         assert caption is not None and len(caption) > 0, (
             "Missing caption for '%s'. Toolbar commands must have caption." % command_label
         )
@@ -2100,7 +2093,6 @@ class Workbench(tk.Tk):
         self.geometry("{0}x{1}+{2}+{3}".format(new_width, geo[1], geo[2], geo[3]))
 
     def _change_font_size(self, delta: int) -> None:
-
         if delta != 0:
             editor_font_size = self.get_option("view.editor_font_size")
             editor_font_size += delta
@@ -2259,7 +2251,6 @@ class Workbench(tk.Tk):
                     menu.entryconfigure(i, state=tk.DISABLED)
 
     def _find_location_for_menu_item(self, menu_name: str, command_label: str) -> Union[str, int]:
-
         menu = self.get_menu(menu_name)
 
         if menu.index("end") == None:  # menu is empty

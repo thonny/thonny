@@ -25,7 +25,6 @@ def set_default_backend(matplotlib):
         # done or the user knows what (s)he's doing
         pass
     else:
-
         try:
             import tkinter  # @UnusedImport
 

@@ -31,7 +31,14 @@ Here is blinky::
       led.value = True
       time.sleep(0.1)
       led.value = False
-      time.sleep(0.1)"""
+      time.sleep(0.1)
+
+For the essentials of `digitalio`, see the `CircuitPython Essentials
+Learn guide <https://learn.adafruit.com/circuitpython-essentials/circuitpython-digital-in-out>`_
+
+For more information on using `digitalio`, see `this additional Learn guide
+<https://learn.adafruit.com/circuitpython-digital-inputs-and-outputs>`_
+"""
 
 from __future__ import annotations
 
@@ -110,16 +117,13 @@ class DigitalInOut:
     :py:meth:`switch_to_input` or :py:meth:`switch_to_output` method. If
     you want to set pull, value or drive mode prior to switching, then use
     those methods instead."""
-
     value: bool
     """The digital logic level of the pin."""
-
     drive_mode: DriveMode
     """The pin drive mode. One of:
 
     - `digitalio.DriveMode.PUSH_PULL`
     - `digitalio.DriveMode.OPEN_DRAIN`"""
-
     pull: Optional[Pull]
     """The pin pull direction. One of:
 

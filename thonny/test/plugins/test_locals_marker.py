@@ -15,7 +15,6 @@ def joo():
 
 
 def test_regular_closed():
-
     expected_local = {("5.4", "5.12"), ("6.10", "6.18"), ("6.21", "6.29")}
 
     text_widget = tkinter.Text()

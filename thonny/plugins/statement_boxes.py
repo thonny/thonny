@@ -13,7 +13,6 @@ from thonny.codeview import get_syntax_options_for_tag
 
 
 def create_bitmap_file(width, height, predicate, name):
-
     cache_dir = os.path.join(thonny.THONNY_USER_DIR, "image_cache")
     name = "%s_%d_%d.xbm" % (name, width, height)
     filename = os.path.join(cache_dir, name)
@@ -158,7 +157,6 @@ def add_tags(text):
         from parso.python import tree as python_tree
 
         if node.type == "simple_stmt" or isinstance(node, (python_tree.Flow, python_tree.Scope)):
-
             start_line, start_col = node.start_pos
             end_line, end_col = node.end_pos
 
@@ -180,7 +178,6 @@ def add_tags(text):
             # exceptions: several statements on the same line (semicoloned statements)
             # also unclosed parens in if-header
             for lineno in range(start_line, end_line if end_col == 0 else end_line + 1):
-
                 top = lineno == start_line and lineno > 1
                 bottom = False  # start_line == end_line-1
 

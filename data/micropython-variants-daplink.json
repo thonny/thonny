@@ -6,8 +6,8 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20221006-unstable-v1.19.1-528-gb8982ec5f",
-                "url": "https://micropython.org/resources/firmware/microbit-20221006-unstable-v1.19.1-528-gb8982ec5f.hex"
+                "version": "20230209-unstable-v1.19.1-859-g41ed01f13",
+                "url": "https://micropython.org/resources/firmware/microbit-20230209-unstable-v1.19.1-859-g41ed01f13.hex"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.19.1-\\d+-[a-z0-9]{10}"
@@ -20,8 +20,8 @@
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
             {
-                "version": "1.1.0",
-                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.0/micropython-microbit-v1.1.0.hex"
+                "version": "1.1.1",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.1/micropython-microbit-v1.1.1.hex"
             },
             {
                 "version": "1.0.1",
@@ -38,8 +38,8 @@
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
             {
-                "version": "2.1.0",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.0/micropython-microbit-v2.1.0.hex"
+                "version": "2.1.1",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.1/micropython-microbit-v2.1.1.hex"
             },
             {
                 "version": "2.0.0",

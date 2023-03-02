@@ -21,7 +21,11 @@ This example will initialize the the device, set
 :py:data:`~pwmio.PWMOut.duty_cycle`, and then sleep 0.1 seconds.
 CircuitPython will automatically turn off the PWM when it resets all
 hardware after program completion. Use ``deinit()`` or a ``with`` statement
-to do it yourself."""
+to do it yourself.
+
+For the essentials of `pwmio`, see the `CircuitPython Essentials
+Learn guide <https://learn.adafruit.com/circuitpython-essentials/circuitpython-pwm>`_.
+"""
 
 from __future__ import annotations
 
@@ -114,7 +118,6 @@ class PWMOut:
     representation for duty cycle might have less than 16 bits of resolution.
     Reading this property will return the value from the internal representation,
     so it may differ from the value set."""
-
     frequency: int
     """32 bit value that dictates the PWM frequency in Hertz (cycles per
     second). Only writeable when constructed with ``variable_frequency=True``.

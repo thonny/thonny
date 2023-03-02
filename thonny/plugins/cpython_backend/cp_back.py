@@ -256,8 +256,9 @@ class MainCPythonBackend(MainBackend):
 
         filename = cmd.args[0]
         if os.path.isfile(filename):
-            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
-            __main__.__dict__["__file__"] = filename
+            abs_filename = os.path.abspath(filename)
+            sys.path.insert(0, os.path.dirname(abs_filename))
+            __main__.__dict__["__file__"] = abs_filename
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
@@ -582,7 +583,6 @@ class MainCPythonBackend(MainBackend):
     def _perform_pip_operation_and_list(
         self, cmd_line: List[str]
     ) -> Tuple[int, Dict[str, DistInfo]]:
-
         extra_switches = ["--disable-pip-version-check"]
         proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
         if proxy:
@@ -633,7 +633,6 @@ class MainCPythonBackend(MainBackend):
         return get_single_dir_child_data(path, include_hidden)
 
     def _get_path_info(self, path: str) -> Optional[Dict]:
-
         try:
             if not os.path.exists(path):
                 return None
@@ -1033,6 +1032,8 @@ class FakeOutputStream(FakeStream):
                 self._processed_symbol_count += len(data)
         finally:
             self._backend._exit_io_function()
+
+        return len(data)
 
     def writelines(self, lines):
         try:

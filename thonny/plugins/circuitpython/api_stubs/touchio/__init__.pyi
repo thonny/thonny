@@ -8,7 +8,10 @@ are no longer needed if the program continues after use. To do so, either
 call :py:meth:`!deinit` or use a context manager. See
 :ref:`lifetime-and-contextmanagers` for more info.
 
-For example::
+For more information about working with the `touchio` module in CircuitPython,
+see `this Learn guide page <https://learn.adafruit.com/circuitpython-essentials/circuitpython-cap-touch>`_.
+
+Example::
 
   import touchio
   from board import *
@@ -57,10 +60,8 @@ class TouchIn:
     """Whether the touch pad is being touched or not. (read-only)
 
     True when `raw_value` > `threshold`."""
-
     raw_value: int
     """The raw touch measurement as an `int`. (read-only)"""
-
     threshold: Optional[int]
     """Minimum `raw_value` needed to detect a touch (and for `value` to be `True`).
 

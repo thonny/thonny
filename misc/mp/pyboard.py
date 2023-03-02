@@ -4,7 +4,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2019 Damien P. George
+# Copyright (c) 2014-2021 Damien P. George
 # Copyright (c) 2017 Paul Sokolovsky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -69,8 +69,11 @@ Or:
 
 import ast
 import os
+import struct
 import sys
 import time
+
+from collections import namedtuple
 
 try:
     stdout = sys.stdout.buffer
@@ -86,7 +89,15 @@ def stdout_write_bytes(b):
 
 
 class PyboardError(Exception):
-    pass
+    def convert(self, info):
+        if len(self.args) >= 3:
+            if b"OSError" in self.args[2] and b"ENOENT" in self.args[2]:
+                return OSError(errno.ENOENT, info)
+
+        return self
+
+
+listdir_result = namedtuple("dir_result", ["name", "st_mode", "st_ino", "st_size"])
 
 
 class TelnetToSerial:
@@ -212,9 +223,8 @@ class ProcessPtyToTerminal:
     this PTY."""
 
     def __init__(self, cmd):
-        import re
         import subprocess
-
+        import re
         import serial
 
         self.subp = subprocess.Popen(
@@ -253,8 +263,11 @@ class ProcessPtyToTerminal:
 
 
 class Pyboard:
-    def __init__(self, device, baudrate=115200, user="micro", password="python", wait=0):
-        self.use_raw_paste = False
+    def __init__(
+        self, device, baudrate=115200, user="micro", password="python", wait=0, exclusive=True
+    ):
+        self.in_raw_repl = False
+        self.use_raw_paste = True
         if device.startswith("exec:"):
             self.serial = ProcessToSerial(device[len("exec:") :])
         elif device.startswith("execpty:"):
@@ -265,10 +278,23 @@ class Pyboard:
         else:
             import serial
 
+            # Set options, and exclusive if pyserial supports it
+            serial_kwargs = {"baudrate": baudrate, "interCharTimeout": 1}
+            if serial.__version__ >= "3.3":
+                serial_kwargs["exclusive"] = exclusive
+
             delayed = False
             for attempt in range(wait + 1):
                 try:
-                    self.serial = serial.Serial(device, baudrate=baudrate, interCharTimeout=1)
+                    if os.name == "nt":
+                        # Windows does not set DTR or RTS by default
+                        self.serial = serial.Serial(**serial_kwargs)
+                        self.serial.dtr = True
+                        self.serial.rts = False
+                        self.serial.port = device
+                        self.serial.open()
+                    else:
+                        self.serial = serial.Serial(device, **serial_kwargs)
                     break
                 except (OSError, IOError):  # Py2 and Py3 have different errors
                     if wait == 0:
@@ -315,7 +341,7 @@ class Pyboard:
                 time.sleep(0.01)
         return data
 
-    def enter_raw_repl(self):
+    def enter_raw_repl(self, soft_reset=True):
         self.serial.write(b"\r\x03\x03")  # ctrl-C twice: interrupt any running program
 
         # flush input (without relying on serial.flushInput())
@@ -325,25 +351,33 @@ class Pyboard:
             n = self.serial.inWaiting()
 
         self.serial.write(b"\r\x01")  # ctrl-A: enter raw REPL
-        data = self.read_until(1, b"raw REPL; CTRL-B to exit\r\n>")
-        if not data.endswith(b"raw REPL; CTRL-B to exit\r\n>"):
-            print(data)
-            raise PyboardError("could not enter raw repl")
 
-        self.serial.write(b"\x04")  # ctrl-D: soft reset
-        data = self.read_until(1, b"soft reboot\r\n")
-        if not data.endswith(b"soft reboot\r\n"):
-            print(data)
-            raise PyboardError("could not enter raw repl")
-        # By splitting this into 2 reads, it allows boot.py to print stuff,
-        # which will show up after the soft reboot and before the raw REPL.
+        if soft_reset:
+            data = self.read_until(1, b"raw REPL; CTRL-B to exit\r\n>")
+            if not data.endswith(b"raw REPL; CTRL-B to exit\r\n>"):
+                print(data)
+                raise PyboardError("could not enter raw repl")
+
+            self.serial.write(b"\x04")  # ctrl-D: soft reset
+
+            # Waiting for "soft reboot" independently to "raw REPL" (done below)
+            # allows boot.py to print, which will show up after "soft reboot"
+            # and before "raw REPL".
+            data = self.read_until(1, b"soft reboot\r\n")
+            if not data.endswith(b"soft reboot\r\n"):
+                print(data)
+                raise PyboardError("could not enter raw repl")
+
         data = self.read_until(1, b"raw REPL; CTRL-B to exit\r\n")
         if not data.endswith(b"raw REPL; CTRL-B to exit\r\n"):
             print(data)
             raise PyboardError("could not enter raw repl")
 
+        self.in_raw_repl = True
+
     def exit_raw_repl(self):
         self.serial.write(b"\r\x02")  # ctrl-B: enter friendly REPL
+        self.in_raw_repl = False
 
     def follow(self, timeout, data_consumer=None):
         # wait for normal output
@@ -364,7 +398,7 @@ class Pyboard:
     def raw_paste_write(self, command_bytes):
         # Read initial header, with window size.
         data = self.serial.read(2)
-        window_size = data[0] | data[1] << 8
+        window_size = struct.unpack("<H", data)[0]
         window_remain = window_size
 
         # Write out the command_bytes data.
@@ -441,11 +475,17 @@ class Pyboard:
         self.exec_raw_no_follow(command)
         return self.follow(timeout, data_consumer)
 
-    def eval(self, expression):
-        ret = self.exec_("print({})".format(expression))
-        ret = ret.strip()
-        return ret
+    def eval(self, expression, parse=False):
+        if parse:
+            ret = self.exec_("print(repr({}))".format(expression))
+            ret = ret.strip()
+            return ast.literal_eval(ret.decode())
+        else:
+            ret = self.exec_("print({})".format(expression))
+            ret = ret.strip()
+            return ret
 
+    # In Python3, call as pyboard.exec(), see the setattr call below.
     def exec_(self, command, data_consumer=None):
         ret, ret_err = self.exec_raw(command, data_consumer=data_consumer)
         if ret_err:
@@ -461,6 +501,13 @@ class Pyboard:
         t = str(self.eval("pyb.RTC().datetime()"), encoding="utf8")[1:-1].split(", ")
         return int(t[4]) * 3600 + int(t[5]) * 60 + int(t[6])
 
+    def fs_exists(self, src):
+        try:
+            self.exec_("import uos\nuos.stat(%s)" % (("'%s'" % src) if src else ""))
+            return True
+        except PyboardError:
+            return False
+
     def fs_ls(self, src):
         cmd = (
             "import uos\nfor f in uos.ilistdir(%s):\n"
@@ -469,6 +516,34 @@ class Pyboard:
         )
         self.exec_(cmd, data_consumer=stdout_write_bytes)
 
+    def fs_listdir(self, src=""):
+        buf = bytearray()
+
+        def repr_consumer(b):
+            buf.extend(b.replace(b"\x04", b""))
+
+        cmd = "import uos\nfor f in uos.ilistdir(%s):\n" " print(repr(f), end=',')" % (
+            ("'%s'" % src) if src else ""
+        )
+        try:
+            buf.extend(b"[")
+            self.exec_(cmd, data_consumer=repr_consumer)
+            buf.extend(b"]")
+        except PyboardError as e:
+            raise e.convert(src)
+
+        return [
+            listdir_result(*f) if len(f) == 4 else listdir_result(*(f + (0,)))
+            for f in ast.literal_eval(buf.decode())
+        ]
+
+    def fs_stat(self, src):
+        try:
+            self.exec_("import uos")
+            return os.stat_result(self.eval("uos.stat(%s)" % (("'%s'" % src)), parse=True))
+        except PyboardError as e:
+            raise e.convert(src)
+
     def fs_cat(self, src, chunk_size=256):
         cmd = (
             "with open('%s') as f:\n while 1:\n"
@@ -476,7 +551,48 @@ class Pyboard:
         )
         self.exec_(cmd, data_consumer=stdout_write_bytes)
 
-    def fs_get(self, src, dest, chunk_size=256):
+    def fs_readfile(self, src, chunk_size=256):
+        buf = bytearray()
+
+        def repr_consumer(b):
+            buf.extend(b.replace(b"\x04", b""))
+
+        cmd = (
+            "with open('%s', 'rb') as f:\n while 1:\n"
+            "  b=f.read(%u)\n  if not b:break\n  print(b,end='')" % (src, chunk_size)
+        )
+        try:
+            self.exec_(cmd, data_consumer=repr_consumer)
+        except PyboardError as e:
+            raise e.convert(src)
+        return ast.literal_eval(buf.decode())
+
+    def fs_writefile(self, dest, data, chunk_size=256):
+        self.exec_("f=open('%s','wb')\nw=f.write" % dest)
+        while data:
+            chunk = data[:chunk_size]
+            self.exec_("w(" + repr(chunk) + ")")
+            data = data[len(chunk) :]
+        self.exec_("f.close()")
+
+    def fs_cp(self, src, dest, chunk_size=256, progress_callback=None):
+        if progress_callback:
+            src_size = self.fs_stat(src).st_size
+            written = 0
+        self.exec_("fr=open('%s','rb')\nr=fr.read\nfw=open('%s','wb')\nw=fw.write" % (src, dest))
+        while True:
+            data_len = int(self.exec_("d=r(%u)\nw(d)\nprint(len(d))" % chunk_size))
+            if not data_len:
+                break
+            if progress_callback:
+                written += data_len
+                progress_callback(written, src_size)
+        self.exec_("fr.close()\nfw.close()")
+
+    def fs_get(self, src, dest, chunk_size=256, progress_callback=None):
+        if progress_callback:
+            src_size = self.fs_stat(src).st_size
+            written = 0
         self.exec_("f=open('%s','rb')\nr=f.read" % src)
         with open(dest, "wb") as f:
             while True:
@@ -492,9 +608,15 @@ class Pyboard:
                 if not data:
                     break
                 f.write(data)
+                if progress_callback:
+                    written += len(data)
+                    progress_callback(written, src_size)
         self.exec_("f.close()")
 
-    def fs_put(self, src, dest, chunk_size=256):
+    def fs_put(self, src, dest, chunk_size=256, progress_callback=None):
+        if progress_callback:
+            src_size = os.path.getsize(src)
+            written = 0
         self.exec_("f=open('%s','wb')\nw=f.write" % dest)
         with open(src, "rb") as f:
             while True:
@@ -505,6 +627,9 @@ class Pyboard:
                     self.exec_("w(b" + repr(data) + ")")
                 else:
                     self.exec_("w(" + repr(data) + ")")
+                if progress_callback:
+                    written += len(data)
+                    progress_callback(written, src_size)
         self.exec_("f.close()")
 
     def fs_mkdir(self, dir):
@@ -515,6 +640,9 @@ class Pyboard:
 
     def fs_rm(self, src):
         self.exec_("import uos\nuos.remove('%s')" % src)
+
+    def fs_touch(self, src):
+        self.exec_("f=open('%s','a')\nf.close()" % src)
 
 
 # in Python2 exec is a keyword so one must use "exec_"
@@ -531,19 +659,19 @@ def execfile(filename, device="/dev/ttyACM0", baudrate=115200, user="micro", pas
     pyb.close()
 
 
-def filesystem_command(pyb, args):
+def filesystem_command(pyb, args, progress_callback=None, verbose=False):
     def fname_remote(src):
         if src.startswith(":"):
             src = src[1:]
         return src
 
     def fname_cp_dest(src, dest):
-        src = src.rsplit("/", 1)[-1]
+        _, src = os.path.split(src)
         if dest is None or dest == "":
             dest = src
         elif dest == ".":
-            dest = "./" + src
-        elif dest.endswith("/"):
+            dest = os.path.join(".", src)
+        elif dest.endswith(os.path.sep):
             dest += src
         return dest
 
@@ -553,34 +681,45 @@ def filesystem_command(pyb, args):
         if cmd == "cp":
             srcs = args[:-1]
             dest = args[-1]
-            if srcs[0].startswith("./") or dest.startswith(":"):
-                op = pyb.fs_put
-                fmt = "cp %s :%s"
-                dest = fname_remote(dest)
+            if dest.startswith(":"):
+                op_remote_src = pyb.fs_cp
+                op_local_src = pyb.fs_put
             else:
-                op = pyb.fs_get
-                fmt = "cp :%s %s"
+                op_remote_src = pyb.fs_get
+                op_local_src = lambda src, dest, **_: __import__("shutil").copy(src, dest)
             for src in srcs:
-                src = fname_remote(src)
-                dest2 = fname_cp_dest(src, dest)
-                print(fmt % (src, dest2))
-                op(src, dest2)
+                if verbose:
+                    print("cp %s %s" % (src, dest))
+                if src.startswith(":"):
+                    op = op_remote_src
+                else:
+                    op = op_local_src
+                src2 = fname_remote(src)
+                dest2 = fname_cp_dest(src2, fname_remote(dest))
+                op(src2, dest2, progress_callback=progress_callback)
         else:
-            op = {
-                "ls": pyb.fs_ls,
+            ops = {
                 "cat": pyb.fs_cat,
+                "ls": pyb.fs_ls,
                 "mkdir": pyb.fs_mkdir,
-                "rmdir": pyb.fs_rmdir,
                 "rm": pyb.fs_rm,
-            }[cmd]
+                "rmdir": pyb.fs_rmdir,
+                "touch": pyb.fs_touch,
+            }
+            if cmd not in ops:
+                raise PyboardError("'{}' is not a filesystem command".format(cmd))
             if cmd == "ls" and not args:
                 args = [""]
             for src in args:
                 src = fname_remote(src)
-                print("%s :%s" % (cmd, src))
-                op(src)
+                if verbose:
+                    print("%s :%s" % (cmd, src))
+                ops[cmd](src)
     except PyboardError as er:
-        print(str(er.args[2], "ascii"))
+        if len(er.args) > 1:
+            print(str(er.args[2], "ascii"))
+        else:
+            print(er)
         pyb.exit_raw_repl()
         pyb.close()
         sys.exit(1)
@@ -642,14 +781,39 @@ def main():
     )
     group = cmd_parser.add_mutually_exclusive_group()
     group.add_argument(
+        "--soft-reset",
+        default=True,
+        action="store_true",
+        help="Whether to perform a soft reset when connecting to the board [default]",
+    )
+    group.add_argument(
+        "--no-soft-reset",
+        action="store_false",
+        dest="soft_reset",
+    )
+    group = cmd_parser.add_mutually_exclusive_group()
+    group.add_argument(
         "--follow",
         action="store_true",
+        default=None,
         help="follow the output after running the scripts [default if no scripts given]",
     )
     group.add_argument(
         "--no-follow",
+        action="store_false",
+        dest="follow",
+    )
+    group = cmd_parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--exclusive",
         action="store_true",
-        help="Do not follow the output after running the scripts.",
+        default=True,
+        help="Open the serial device for exclusive access [default]",
+    )
+    group.add_argument(
+        "--no-exclusive",
+        action="store_false",
+        dest="exclusive",
     )
     cmd_parser.add_argument(
         "-f",
@@ -663,7 +827,9 @@ def main():
 
     # open the connection to the pyboard
     try:
-        pyb = Pyboard(args.device, args.baudrate, args.user, args.password, args.wait)
+        pyb = Pyboard(
+            args.device, args.baudrate, args.user, args.password, args.wait, args.exclusive
+        )
     except PyboardError as er:
         print(er)
         sys.exit(1)
@@ -673,7 +839,7 @@ def main():
         # we must enter raw-REPL mode to execute commands
         # this will do a soft-reset of the board
         try:
-            pyb.enter_raw_repl()
+            pyb.enter_raw_repl(args.soft_reset)
         except PyboardError as er:
             print(er)
             pyb.close()
@@ -681,13 +847,13 @@ def main():
 
         def execbuffer(buf):
             try:
-                if args.no_follow:
-                    pyb.exec_raw_no_follow(buf)
-                    ret_err = None
-                else:
+                if args.follow is None or args.follow:
                     ret, ret_err = pyb.exec_raw(
                         buf, timeout=None, data_consumer=stdout_write_bytes
                     )
+                else:
+                    pyb.exec_raw_no_follow(buf)
+                    ret_err = None
             except PyboardError as er:
                 print(er)
                 pyb.close()
@@ -702,7 +868,7 @@ def main():
 
         # do filesystem commands, if given
         if args.filesystem:
-            filesystem_command(pyb, args.files)
+            filesystem_command(pyb, args.files, verbose=True)
             del args.files[:]
 
         # run the command, if given

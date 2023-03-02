@@ -21,10 +21,8 @@ class IPv4Address:
         ...
     packed: bytes
     """The bytes that make up the address (read-only)."""
-
     version: int
     """4 for IPv4, 6 for IPv6"""
-
     def __eq__(self, other: object) -> bool:
         """Two Address objects are equal if their addresses and address types are equal."""
         ...

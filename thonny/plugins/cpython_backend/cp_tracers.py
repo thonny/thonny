@@ -390,7 +390,6 @@ class FastTracer(Tracer):
         return self._at_a_breakpoint(frame)
 
     def _get_breakpoints_in_code(self, f_code):
-
         bps_in_file = self._get_breakpoints_in_file(f_code.co_filename)
 
         code_id = id(f_code)
@@ -693,7 +692,6 @@ class NiceTracer(Tracer):
             and prev_state["fresh_exception_id"] == id(self._fresh_exception)
             and ("before" in event or "skipexport" in node.tags)
         ):
-
             exception_info = prev_state["exception_info"]
             # share the stack ...
             stack = prev_state["stack"]
@@ -850,7 +848,6 @@ class NiceTracer(Tracer):
                 or "and_arg" in original_node.tags
                 and not value
             ):
-
                 # there may be explicit exceptions
                 if (
                     "skip_after_statement_again" in original_node.parent_node.tags

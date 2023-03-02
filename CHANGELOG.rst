@@ -2,6 +2,30 @@
 Version history
 ===============
 
+4.0.2 (2023-01-14)
+==================
+* Fix Mypy logging error in the Assistant, #2491 by @kr-g and @solsword
+* Fix AttributeError on save, #2454
+* Add Thonny version as environment value for user programs, #2494 by @kr-g
+* Make `__file__` contain absolute path, #2497
+* Start SSH preparation command with space to avoid adding it to shell history, #2563 by @isaacl
+* Bump pipkin version to 1.0b8 and fix various bugs with MicroPython package installation, including not being able to update a package (#2555)
+* Restore Find/Replace dialog close button and non-dialog behavior, #2461, #2550
+* Make Find/Replace dialog non-modal again, #2550
+* Fix Find/Replace seeding, #2356, #2550
+* Restore focus after using file dialogs, #2501
+* Don't remove stacktrace links after closing the process, #2471
+* Never clear shell when Stop/Restart is used for stopping a process, #2456
+* Treat .toml, .gitignore and .env as text files
+* Fix expression box glitch (lower frame box remaining visible) when debugging on macOS
+* Ignore disk flushing errors in the end of UF2 installation
+* Make port finding in the end of UF2 installation process more robust
+* Don't enable variant and version selection in UF2 dialog before variants get downloaded
+* Add Vietnamese translation, by Bui Huy Quang
+* Update several translations
+* Fix the name for Slowenian, #2611
+* Update several deps in Thonny + Python bundles (asttokens, mypy, pylint, esptool, paramiko)
+
 4.0.1 (2022-09-11)
 ==================
 * Fix error when running script with closed Shell, #2412

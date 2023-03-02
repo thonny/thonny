@@ -148,7 +148,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             output.append(data)
 
         report_time("befini")
-        self._forward_output_until_active_prompt(collect_output, "stdout")
+        self._process_output_until_active_prompt(collect_output, "stdout")
         self._original_welcome_text = "".join(output).replace("\r\n", "\n")
         self._welcome_text = self._tweak_welcome_text(self._original_welcome_text)
         report_time("afini")
@@ -175,9 +175,9 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         self._connection.read_until(end_marker.encode("ascii"))
         self._write(EOT)
         self._connection.read_until(b"\n")
-        self._forward_output_until_active_prompt(output_consumer)
+        self._process_output_until_active_prompt(output_consumer)
 
-    def _forward_output_until_active_prompt(
+    def _process_output_until_active_prompt(
         self, output_consumer: Callable[[str, str], None], stream_name="stdout"
     ):
         INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
@@ -248,7 +248,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
 
         self._connection = self._create_connection(args)
         report_time("afconn")
-        self._forward_output_until_active_prompt(self._send_output, "stdout")
+        self._process_output_until_active_prompt(self._send_output, "stdout")
         report_time("afforv")
         self.send_message(
             BackendEvent(event_type="HideTrailingOutput", text=self._original_welcome_text)

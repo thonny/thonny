@@ -118,7 +118,6 @@ class CodeViewText(EnhancedTextWithLogging, SyntaxText):
     """Provides opportunities for monkey-patching by plugins"""
 
     def __init__(self, master=None, cnf={}, **kw):
-
         super().__init__(
             master=master,
             tag_current_line=get_workbench().get_option("view.highlight_current_line"),
@@ -233,7 +232,6 @@ class CodeView(tktextext.EnhancedTextFrame):
         return content.encode(self.detect_encoding(content.encode("ascii", errors="replace")))
 
     def set_content_as_bytes(self, data, keep_undo=False):
-
         encoding = self.detect_encoding(data)
         logger.debug("Detected encoding %s", encoding)
         while True:

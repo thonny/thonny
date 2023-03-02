@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Set
 from thonny import get_runner
 from thonny.languages import tr
 from thonny.misc_utils import get_win_volume_name, list_volumes
+from thonny.plugins.micropython.mp_front import list_serial_port_infos
 from thonny.ui_utils import AdvancedLabel, MappingCombobox, set_text_if_different
 from thonny.workdlg import WorkDialog
 
@@ -67,14 +68,18 @@ class Uf2FlashingDialog(WorkDialog):
 
         variant_label = ttk.Label(self.main_frame, text=f"{self.firmware_name} variant")
         variant_label.grid(row=5, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
-        self._variant_combo = MappingCombobox(self.main_frame, exportselection=False)
+        self._variant_combo = MappingCombobox(
+            self.main_frame, exportselection=False, state="disabled"
+        )
         self._variant_combo.grid(
             row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
 
         version_label = ttk.Label(self.main_frame, text="version")
         version_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
-        self._version_combo = MappingCombobox(self.main_frame, exportselection=False)
+        self._version_combo = MappingCombobox(
+            self.main_frame, exportselection=False, state="disabled"
+        )
         self._version_combo.grid(
             row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
@@ -100,6 +105,8 @@ class Uf2FlashingDialog(WorkDialog):
                 self._variant_combo.set_mapping({})
                 self._variant_combo.select_none()
             elif current_target != self._last_handled_target and self._downloaded_variants:
+                self._variant_combo.state(["!disabled", "readonly"])
+                self._version_combo.state(["!disabled", "readonly"])
                 self._present_variants_for_target(current_target)
                 self._last_handled_target = current_target
                 self._last_handled_variant = None
@@ -465,7 +472,8 @@ class Uf2FlashingDialog(WorkDialog):
         from thonny.plugins.micropython import list_serial_ports
 
         try:
-            ports_before = list_serial_ports()
+            ports_before = list_serial_port_infos()
+            logger.debug("Ports before: %s", ports_before)
             self._download_to_the_device(download_url, size, target_dir, target_filename)
             if self._state == "working":
                 self.perform_post_installation_steps(ports_before)
@@ -519,7 +527,6 @@ class Uf2FlashingDialog(WorkDialog):
             block_size = 8 * 1024
             with open(target_path, "wb") as fdst:
                 while True:
-
                     block = fsrc.read(block_size)
                     if not block:
                         break
@@ -528,9 +535,16 @@ class Uf2FlashingDialog(WorkDialog):
                         break
 
                     fdst.write(block)
-                    fdst.flush()
-                    os.fsync(fdst.fileno())
                     bytes_copied += len(block)
+                    fdst.flush()
+                    try:
+                        # May fail after last block
+                        os.fsync(fdst.fileno())
+                    except Exception:
+                        if bytes_copied == size:
+                            logger.warning("Could not fsync last block")
+                        else:
+                            logger.exception("Could not fsync")
                     percent_str = "%.0f%%" % (bytes_copied / size * 100)
                     self.set_action_text("Copying... " + percent_str)
                     self.report_progress(bytes_copied, size)
@@ -545,11 +559,11 @@ class Uf2FlashingDialog(WorkDialog):
         wait_time = 0
         step = 0.2
         while wait_time < 10:
-            new_ports = list_serial_ports()
+            new_ports = list_serial_port_infos()
             added_ports = set(new_ports) - set(old_ports)
             if added_ports:
                 for p in added_ports:
-                    self.append_text("Found %s at %s\n" % ("%04x:%04x" % (p.vid, p.pid), p.device))
+                    self.append_text("Found port %s\n" % p)
                     self.set_action_text("Found port")
                 return
             if self._state == "cancelling":
@@ -557,6 +571,7 @@ class Uf2FlashingDialog(WorkDialog):
             time.sleep(step)
             wait_time += step
         else:
+            logger.debug("Ports after: %s", list_serial_port_infos())
             self.set_action_text("Warning: Could not find port")
             self.append_text("Warning: Could not find port in %s seconds\n" % int(wait_time))
             # leave some time to see the warning

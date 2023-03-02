@@ -18,6 +18,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import DistInfo, InlineCommand, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
+from thonny.misc_utils import construct_cmd_line
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -79,7 +80,6 @@ class PipDialog(CommonDialog, ABC):
         return tr("Uninstall")
 
     def _create_widgets(self, parent):
-
         header_frame = ttk.Frame(parent)
         header_frame.grid(
             row=1,
@@ -869,7 +869,6 @@ class PipDialog(CommonDialog, ABC):
     def _get_active_dist(self, name):
         normname = self._normalize_name(name)
         for key in self._active_distributions:
-
             if self._normalize_name(key) == normname:
                 return self._active_distributions[key]
 
@@ -981,6 +980,7 @@ class BackendPipDialog(PipDialog):
             title=command,
             instructions=title,
             autostart=True,
+            output_prelude=f"{command} {construct_cmd_line(args)}\n",
         )
         ui_utils.show_dialog(dlg)
 
@@ -1426,7 +1426,6 @@ def _start_fetching_search_results(query, completion_handler):
     url_future = _fetch_url_future(url)
 
     def poll_fetch_complete():
-
         if url_future.done():
             try:
                 _, bin_data = url_future.result()

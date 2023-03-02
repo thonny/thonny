@@ -7,32 +7,31 @@ that provide a desired service."""
 
 from __future__ import annotations
 
-from typing import Tuple
+import ipaddress
+from typing import Optional, Tuple
 
 import wifi
 
 class RemoteService:
     """Encapsulates information about a remote service that was found during a search. This
-    object may only be created by a `mdns.Server`. It has no user-visible constructor."""
+    object may only be created by a `mdns.Server`. It has no user-visible constructor.
+    """
 
     def __init__(self) -> None:
         """Cannot be instantiated directly. Use `mdns.Server.find`."""
         ...
     hostname: str
     """The hostname of the device (read-only),."""
-
     instance_name: str
     """The human readable instance name for the service. (read-only)"""
-
     service_type: str
     """The service type string such as ``_http``. (read-only)"""
-
     protocol: str
     """The protocol string such as ``_tcp``. (read-only)"""
-
     port: int
     """Port number used for the service. (read-only)"""
-
+    ipv4_address: Optional[ipaddress.IPv4Address]
+    """IP v4 Address of the remote service. None if no A records are found."""
     def __del__(self) -> None:
         """Deletes the RemoteService object."""
         ...
@@ -54,10 +53,8 @@ class Server:
     """Hostname resolvable as ``<hostname>.local`` in addition to ``circuitpython.local``. Make
        sure this is unique across all devices on the network. It defaults to ``cpy-######``
        where ``######`` is the hex digits of the last three bytes of the mac address."""
-
     instance_name: str
     """Human readable name to describe the device."""
-
     def find(
         self, service_type: str, protocol: str, *, timeout: float = 1
     ) -> Tuple[RemoteService]:
@@ -72,6 +69,9 @@ class Server:
         ...
     def advertise_service(self, *, service_type: str, protocol: str, port: int) -> None:
         """Respond to queries for the given service with the given port.
+
+        ``service_type`` and ``protocol`` can only occur on one port. Any call after the first
+        will update the entry's port.
 
         :param str service_type: The service type such as "_http"
         :param str protocol: The service protocol such as "_tcp"

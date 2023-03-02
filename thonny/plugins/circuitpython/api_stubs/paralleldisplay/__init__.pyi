@@ -38,7 +38,8 @@ class ParallelBus:
         :param microcontroller.Pin write: Write pin
         :param microcontroller.Pin read: Read pin, optional
         :param microcontroller.Pin reset: Reset pin, optional
-        :param int frequency: The communication frequency in Hz for the display on the bus"""
+        :param int frequency: The communication frequency in Hz for the display on the bus
+        """
         ...
     def reset(self) -> None:
         """Performs a hardware reset via the reset pin. Raises an exception if called when no reset pin
@@ -46,5 +47,6 @@ class ParallelBus:
         ...
     def send(self, command: int, data: ReadableBuffer) -> None:
         """Sends the given command value followed by the full set of data. Display state, such as
-        vertical scroll, set via ``send`` may or may not be reset once the code is done."""
+        vertical scroll, set via ``send`` may or may not be reset once the code is done.
+        """
         ...

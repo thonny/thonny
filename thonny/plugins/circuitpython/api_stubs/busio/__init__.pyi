@@ -26,7 +26,19 @@ For example::
 This example will initialize the the device, run
 :py:meth:`~busio.I2C.scan` and then :py:meth:`~busio.I2C.deinit` the
 hardware. The last step is optional because CircuitPython automatically
-resets hardware after a program finishes."""
+resets hardware after a program finishes.
+
+Note that drivers will typically handle communication if provided the bus
+instance (such as ``busio.I2C(board.SCL, board.SDA)``), and that many of
+the methods listed here are lower level functionalities that are needed
+for working with custom drivers.
+
+Tutorial for I2C and SPI:
+https://learn.adafruit.com/circuitpython-basics-i2c-and-spi
+
+Tutorial for UART:
+https://learn.adafruit.com/circuitpython-essentials/circuitpython-uart-serial
+"""
 
 from __future__ import annotations
 
@@ -46,7 +58,6 @@ class I2C:
         frequency: int = 100000,
         timeout: int = 255,
     ) -> None:
-
         """I2C is a two-wire protocol for communicating between devices.  At the
         physical level it consists of 2 wires: SCL and SDA, the clock and data
         lines respectively.
@@ -161,6 +172,7 @@ class I2C:
         If ``in_start`` or ``in_end`` is provided, then the input buffer will be sliced
         as if ``in_buffer[in_start:in_end]`` were passed,
         The number of bytes read will be the length of ``out_buffer[in_start:in_end]``.
+
         :param int address: 7-bit device address
         :param ~circuitpython_typing.ReadableBuffer out_buffer: buffer containing the bytes to write
         :param ~circuitpython_typing.WriteableBuffer in_buffer: buffer to write into
@@ -190,7 +202,6 @@ class SPI:
         MISO: Optional[microcontroller.Pin] = None,
         half_duplex: bool = False,
     ) -> None:
-
         """Construct an SPI object on the given pins.
 
         .. note:: The SPI peripherals allocated in order of desirability, if possible,
@@ -211,7 +222,10 @@ class SPI:
         :param ~microcontroller.Pin clock: the pin to use for the clock.
         :param ~microcontroller.Pin MOSI: the Main Out Selected In pin.
         :param ~microcontroller.Pin MISO: the Main In Selected Out pin.
-        :param bool half_duplex: True when MOSI is used for bidirectional data. False when SPI is full-duplex or simplex."""
+        :param bool half_duplex: True when MOSI is used for bidirectional data. False when SPI is full-duplex or simplex.
+
+        **Limitations:** ``half_duplex`` is available only on STM; other chips do not have the hardware support.
+        """
         ...
     def deinit(self) -> None:
         """Turn off the SPI bus."""
@@ -297,7 +311,9 @@ class SPI:
 
         :param WriteableBuffer buffer: read bytes into this buffer
         :param int start: beginning of buffer slice
-        :param int end: end of buffer slice; if not specified, use ``len(buffer)``
+        :param int end: end of buffer slice; if not specified, it will be the equivalent value
+            of ``len(buffer)`` and for any value provided it will take the value of
+            ``min(end, len(buffer))``
         :param int write_value: value to write while reading
         """
         ...
@@ -371,7 +387,13 @@ class UART:
         :param int receiver_buffer_size: the character length of the read buffer (0 to disable). (When a character is 9 bits the buffer will be 2 * receiver_buffer_size bytes.)
 
         *New in CircuitPython 4.0:* ``timeout`` has incompatibly changed units from milliseconds to seconds.
-        The new upper limit on ``timeout`` is meant to catch mistaken use of milliseconds."""
+        The new upper limit on ``timeout`` is meant to catch mistaken use of milliseconds.
+
+        **Limitations:** RS485 is not supported on SAMD, nRF, Broadcom, Spresense, or STM.
+        On i.MX and Raspberry Pi RP2040 support is implemented in software:
+        The timing for the ``rs485_dir`` pin signal is done on a best-effort basis, and may not meet
+        RS485 specifications intermittently.
+        """
         ...
     def deinit(self) -> None:
         """Deinitialises the UART and releases any hardware resources for reuse."""
@@ -384,10 +406,14 @@ class UART:
         :ref:`lifetime-and-contextmanagers` for more info."""
         ...
     def read(self, nbytes: Optional[int] = None) -> Optional[bytes]:
-        """Read characters.  If ``nbytes`` is specified then read at most that many
+        """Read bytes.  If ``nbytes`` is specified then read at most that many
         bytes. Otherwise, read everything that arrives until the connection
         times out. Providing the number of bytes expected is highly recommended
-        because it will be faster.
+        because it will be faster. If no bytes are read, return ``None``.
+
+        .. note:: When no bytes are read due to a timeout, this function returns ``None``.
+          This matches the behavior of `io.RawIOBase.read` in Python 3, but
+          differs from pyserial which returns ``b''`` in that situation.
 
         :return: Data read
         :rtype: bytes or None"""
@@ -402,13 +428,14 @@ class UART:
         ...
     def readline(self) -> bytes:
         """Read a line, ending in a newline character, or
-           return None if a timeout occurs sooner, or
-           return everything readable if no newline is found and timeout=0
+        return ``None`` if a timeout occurs sooner, or
+        return everything readable if no newline is found and
+        ``timeout=0``
 
         :return: the line read
         :rtype: bytes or None"""
         ...
-    def write(self, buf: WriteableBuffer) -> Optional[int]:
+    def write(self, buf: ReadableBuffer) -> Optional[int]:
         """Write the buffer of bytes to the bus.
 
         *New in CircuitPython 4.0:* ``buf`` must be bytes, not a string.
@@ -418,13 +445,10 @@ class UART:
         ...
     baudrate: int
     """The current baudrate."""
-
     in_waiting: int
     """The number of bytes in the input buffer, available to be read"""
-
     timeout: float
     """The current timeout, in seconds (float)."""
-
     def reset_input_buffer(self) -> None:
         """Discard any unread characters in the input buffer."""
         ...

@@ -588,7 +588,6 @@ class UploadDownloadMixin(ABC):
         cmd,
         target_path_class,
     ) -> List[str]:
-
         total_cost = 0
         for item in items:
             if item["kind"] == "file":
@@ -821,7 +820,6 @@ class SshMixin(UploadDownloadMixin):
         pass
 
     def _get_sftp(self, fresh: bool):
-
         if fresh and self._sftp is not None:
             self._sftp.close()
             self._sftp = None
@@ -924,7 +922,6 @@ def ensure_posix_directory(
         return
 
     for step in list(reversed(list(map(str, pathlib.PurePosixPath(path).parents)))) + [path]:
-
         if step != "/":
             mode = stat_mode_fun(step)
             if mode is None:

@@ -55,6 +55,8 @@ def add_download_link_if_exists(links: List[Dict[str, str]], link: str, version:
     response = requests.head(link)
     if response.status_code == 200:
         links.append({"version": version, "url": link})
+    else:
+        print("Could not download", link, "for", version)
 
 
 def get_attr_value(attrs, name):

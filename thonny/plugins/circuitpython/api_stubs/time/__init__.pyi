@@ -1,8 +1,7 @@
 """time and timing related functions
 
-The `time` module is a strict subset of the CPython `cpython:time` module. So, code
-using `time` written in CircuitPython will work in CPython but not necessarily the other
-way around."""
+|see_cpython_module| :mod:`cpython:time`.
+"""
 
 from __future__ import annotations
 

@@ -70,11 +70,12 @@ class Serial:
         :rtype: bytes"""
         ...
     def readinto(self, buf: WriteableBuffer) -> int:
-        """Read bytes into the ``buf``.  If ``nbytes`` is specified then read at most
-        that many bytes, subject to `timeout`.  Otherwise, read at most ``len(buf)`` bytes.
+        """Read bytes into the ``buf``. Read at most ``len(buf)`` bytes. If `timeout`
+        is > 0 or ``None``, keep waiting until the timeout expires or ``len(buf)``
+        bytes are available.
 
         :return: number of bytes read and stored into ``buf``
-        :rtype: bytes"""
+        :rtype: int"""
         ...
     def readline(self, size: int = -1) -> Optional[bytes]:
         r"""Read a line ending in a newline character ("\\n"), including the newline.
@@ -113,13 +114,10 @@ class Serial:
       Most terminal programs and ``pyserial`` assert DTR when opening a serial connection.
       However, the C# ``SerialPort`` API does not. You must set ``SerialPort.DtrEnable``.
     """
-
     in_waiting: int
     """Returns the number of bytes waiting to be read on the USB serial input. (read-only)"""
-
     out_waiting: int
     """Returns the number of bytes waiting to be written on the USB serial output. (read-only)"""
-
     def reset_input_buffer(self) -> None:
         """Clears any unread bytes."""
         ...
@@ -129,7 +127,6 @@ class Serial:
     timeout: Optional[float]
     """The initial value of `timeout` is ``None``. If ``None``, wait indefinitely to satisfy
     the conditions of a read operation. If 0, do not wait. If > 0, wait only ``timeout`` seconds."""
-
     write_timeout: Optional[float]
     """The initial value of `write_timeout` is ``None``. If ``None``, wait indefinitely to finish
     writing all the bytes passed to ``write()``.If 0, do not wait.

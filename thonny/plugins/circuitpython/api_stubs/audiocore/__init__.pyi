@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import typing
-from typing import Optional
+from typing import Optional, Union
 
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
@@ -66,15 +66,16 @@ class WaveFile:
     be 8 bit unsigned or 16 bit signed. If a buffer is provided, it will be used instead of allocating
     an internal buffer, which can prevent memory fragmentation."""
 
-    def __init__(self, file: typing.BinaryIO, buffer: WriteableBuffer) -> None:
+    def __init__(
+        self, file: Union[str, typing.BinaryIO], buffer: WriteableBuffer
+    ) -> None:
         """Load a .wav file for playback with `audioio.AudioOut` or `audiobusio.I2SOut`.
 
-        :param typing.BinaryIO file: Already opened wave file
+        :param Union[str, typing.BinaryIO] file: The name of a wave file (preferred) or an already opened wave file
         :param ~circuitpython_typing.WriteableBuffer buffer: Optional pre-allocated buffer,
           that will be split in half and used for double-buffering of the data.
           The buffer must be 8 to 1024 bytes long.
           If not provided, two 256 byte buffers are initially allocated internally.
-
 
         Playing a wave file from flash::
 
@@ -87,15 +88,15 @@ class WaveFile:
           speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
           speaker_enable.switch_to_output(value=True)
 
-          data = open("cplay-5.1-16bit-16khz.wav", "rb")
-          wav = audiocore.WaveFile(data)
+          wav = audiocore.WaveFile("cplay-5.1-16bit-16khz.wav")
           a = audioio.AudioOut(board.A0)
 
           print("playing")
           a.play(wav)
           while a.playing:
             pass
-          print("stopped")"""
+          print("stopped")
+        """
         ...
     def deinit(self) -> None:
         """Deinitialises the WaveFile and releases all memory resources for reuse."""
@@ -111,9 +112,7 @@ class WaveFile:
     """32 bit value that dictates how quickly samples are loaded into the DAC
     in Hertz (cycles per second). When the sample is looped, this can change
     the pitch output without changing the underlying sample."""
-
     bits_per_sample: int
     """Bits per sample. (read only)"""
-
     channel_count: int
     """Number of audio channels. (read only)"""
