@@ -600,8 +600,6 @@ class BlackFormatContextHandler(ShellScriptContextHandler):
 
         backend_python = self.get_backend_python()
 
-        OUTNIL = "" if tk.TkVersion > 8.6 else "2>&0"
-
         # since there is no workspace folder in thonny
         # this might be confusing because the config is picked
         # pedening on the place of call (on an expanded folder or active folder)
@@ -610,7 +608,7 @@ class BlackFormatContextHandler(ShellScriptContextHandler):
         if os.path.exists(os.path.join(cur, "black.cfg")):
             CONFIG = "--config 'black.cfg'"
 
-        return " ".join([f"!{backend_python}", "-m", "black", CONFIG, *files, OUTNIL])
+        return " ".join([f"!{backend_python}", "-m", "black", CONFIG, *files])
 
     def add_first_menu_items(self):
         pass
