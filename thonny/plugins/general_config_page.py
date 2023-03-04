@@ -94,7 +94,9 @@ class GeneralConfigurationPage(ConfigurationPage):
             width=10,
         )
 
-        env_label = ttk.Label(self, text=tr("Environment variables (one KEY=VALUE per line)"))
+        env_label = ttk.Label(
+            self, text=tr("Environment variables (one KEY=VALUE per line). No restart required.")
+        )
         env_label.grid(row=90, column=0, sticky=tk.W, pady=(20, 0), columnspan=2)
         self.env_box = tktextext.TextFrame(
             self,

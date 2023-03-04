@@ -1399,6 +1399,12 @@ def get_environment_for_python_subprocess(target_executable) -> Dict[str, str]:
 
 def get_environment_with_overrides(overrides):
     env = os.environ.copy()
+    settings = get_workbench().get_option("general.environment")
+
+    for entry in settings:
+        key, val = entry.split("=", maxsplit=1)
+        env[key] = val
+
     for key in overrides:
         if overrides[key] is None and key in env:
             del env[key]
