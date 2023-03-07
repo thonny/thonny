@@ -722,7 +722,7 @@ msgstr "Déboguer le script courant (plus rapide)"
 
 #: thonny/plugins/debugger.py:1350
 msgid "Step over"
-msgstr "Nœud suivant"
+msgstr "Étape suivante"
 
 #: thonny/plugins/debugger.py:1352
 msgid "Over"
@@ -730,7 +730,7 @@ msgstr "Suivant"
 
 #: thonny/plugins/debugger.py:1363
 msgid "Step into"
-msgstr "Entrer dans le nœud"
+msgstr "Entrer dans l'étape en cours"
 
 #: thonny/plugins/debugger.py:1365
 msgid "Into"
@@ -738,7 +738,7 @@ msgstr "Entrer"
 
 #: thonny/plugins/debugger.py:1376
 msgid "Step out"
-msgstr "Sortir du nœud"
+msgstr "Sortir de l'étape en cours"
 
 #: thonny/plugins/debugger.py:1378
 msgid "Out"
@@ -746,7 +746,7 @@ msgstr "Sortir"
 
 #: thonny/plugins/debugger.py:1413
 msgid "Step back"
-msgstr "Nœud précédent"
+msgstr "Étape précédente"
 
 #: thonny/plugins/debugger.py:1415
 msgid "Back"
@@ -1941,4 +1941,3 @@ msgstr "information"
 #: thonny/running.py:339
 msgid "For debugging the program must be saved first."
 msgstr "Enregistrez le logiciel avant de le débouger."
-
