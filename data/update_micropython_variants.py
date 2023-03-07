@@ -15,7 +15,7 @@ UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
 
-PIMORONI_LATEST_STABLE_VERSION = "1.19.12"
+PIMORONI_LATEST_STABLE_VERSION = "1.19.15"
 PIMORONI_LATEST_UNSTABLE_VERSION = None
 PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
 
@@ -104,6 +104,21 @@ pimoroni_variants = [
         "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython\.uf2$",
     },
     {
+        "_id": "pimoroni-badger2040w",
+        "vendor": "Pimoroni",
+        "model": "Badger 2040 W",
+        "family": "rp2",
+        "_download_url_pattern": rf"/pimoroni-badger2040w-v({PIMORONI_LATEST_STABLE_VERSION})-micropython\.uf2$",
+    },
+    {
+        "_id": "pimoroni-badger2040w-with-examples",
+        "vendor": "Pimoroni",
+        "model": "Badger 2040 W",
+        "family": "rp2",
+        "title": "Badger 2040 W (with Pimoroni libraries and examples)",
+        "_download_url_pattern": rf"/pimoroni-badger2040w-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython-with-examples\.uf2$",
+    },
+    {
         "_id": "pimoroni-pico",
         "vendor": "Raspberry Pi",
         "model": "Pico",
@@ -128,25 +143,28 @@ pimoroni_variants = [
         "family": "rp2",
     },
     {
-        "_id": "pimoroni-picow_enviro",
-        "vendor": "Raspberry Pi",
-        "model": "Pico W",
+        "_id": "pimoroni-picow_cosmic_unicorn",
+        "vendor": "Pimoroni",
+        "model": "Cosmic Unicorn",
         "family": "rp2",
-        "title": "Pico W (with Enviro libs by Pimoroni)",
+    },
+    {
+        "_id": "pimoroni-picow_enviro",
+        "vendor": "Pimoroni",
+        "model": "Enviro",
+        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow_galactic_unicorn",
-        "vendor": "Raspberry Pi",
-        "model": "Pico W",
+        "vendor": "Pimoroni",
+        "model": "Galactic Unicorn",
         "family": "rp2",
-        "title": "Pico W (with Galactic Unicorn libs by Pimoroni)",
     },
     {
         "_id": "pimoroni-picow_inky_frame",
-        "vendor": "Raspberry Pi",
-        "model": "Pico W",
+        "vendor": "Pimoroni",
+        "model": "Inky Frame",
         "family": "rp2",
-        "title": "Pico W (with Inky Frame libs by Pimoroni)",
     },
     {
         "_id": "pimoroni-tiny2040",

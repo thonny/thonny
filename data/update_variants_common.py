@@ -48,6 +48,13 @@ def find_download_links(
         elif len(unstables) < max_unstable_count and re.search(unstable_pattern, link):
             unstables.append({"version": re.search(unstable_pattern, link).group(1), "url": link})
 
+    result = stables + unstables
+    for item in result:
+        url = item["url"]
+        response = requests.head(url)
+        if response.status_code not in [200, 302]:
+            raise RuntimeError(f"Got {response.status_code} when downloading {url}")
+
     return stables + unstables
 
 
