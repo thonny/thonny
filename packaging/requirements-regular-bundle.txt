@@ -5,7 +5,7 @@ docutils==0.19.*
 mypy==0.991.*
 asttokens==2.2.*
 Send2Trash==1.8.1b0
-esptool==4.4.*
+esptool==4.5.*
 bcrypt==3.2.* # has builds available for RPi (https://www.piwheels.org/project/bcrypt/). Should be good enough for paramiko
 cryptography==38.* # Good fit for macoOS, see also ~/thonny_alt_packages
 paramiko==2.12.*
