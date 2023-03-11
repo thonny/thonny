@@ -351,7 +351,7 @@ class Runner:
         self.execute_via_shell(cmd_line, working_directory)
 
     def execute_editor_content(self, command_name, args):
-        if command_name.lower() == "debug":
+        if command_name.lower() in ["debug", "fastdebug"]:
             messagebox.showinfo(
                 tr("Information"),
                 tr("For debugging the program must be saved first."),
