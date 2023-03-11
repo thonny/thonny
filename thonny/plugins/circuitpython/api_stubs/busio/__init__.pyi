@@ -360,9 +360,13 @@ class UART:
 
     def __init__(
         self,
-        tx: microcontroller.Pin,
-        rx: microcontroller.Pin,
+        tx: Optional[microcontroller.Pin] = None,
+        rx: Optional[microcontroller.Pin] = None,
         *,
+        rts: Optional[microcontroller.Pin] = None,
+        cts: Optional[microcontroller.Pin] = None,
+        rs485_dir: Optional[microcontroller.Pin] = None,
+        rs485_invert: bool = False,
         baudrate: int = 9600,
         bits: int = 8,
         parity: Optional[Parity] = None,
@@ -386,11 +390,13 @@ class UART:
         :param float timeout:  the timeout in seconds to wait for the first character and between subsequent characters when reading. Raises ``ValueError`` if timeout >100 seconds.
         :param int receiver_buffer_size: the character length of the read buffer (0 to disable). (When a character is 9 bits the buffer will be 2 * receiver_buffer_size bytes.)
 
+        ``tx`` and ``rx`` cannot both be ``None``.
+
         *New in CircuitPython 4.0:* ``timeout`` has incompatibly changed units from milliseconds to seconds.
         The new upper limit on ``timeout`` is meant to catch mistaken use of milliseconds.
 
         **Limitations:** RS485 is not supported on SAMD, nRF, Broadcom, Spresense, or STM.
-        On i.MX and Raspberry Pi RP2040 support is implemented in software:
+        On i.MX and Raspberry Pi RP2040, RS485 support is implemented in software:
         The timing for the ``rs485_dir`` pin signal is done on a best-effort basis, and may not meet
         RS485 specifications intermittently.
         """

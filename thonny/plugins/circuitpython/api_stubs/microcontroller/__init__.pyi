@@ -123,7 +123,7 @@ class ResetReason:
     """The reason the microntroller was last reset"""
 
     POWER_ON: object
-    """The microntroller was started from power off."""
+    """The microcontroller was started from power off."""
 
     BROWNOUT: object
     """The microntroller was reset due to too low a voltage."""

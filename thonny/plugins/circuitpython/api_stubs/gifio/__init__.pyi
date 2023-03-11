@@ -46,3 +46,66 @@ class GifWriter:
         :param delay: The frame delay in seconds.  The GIF format rounds this to the nearest 1/100 second, and the largest permitted value is 655 seconds.
         """
         ...
+
+class OnDiskGif:
+    """Loads one frame of a GIF into memory at a time.
+
+    .. code-block:: Python
+
+      import board
+      import gifio
+      import displayio
+      import time
+
+      display = board.DISPLAY
+      splash = displayio.Group()
+      display.root_group = splash
+
+      odg = gifio.OnDiskGif('/sample.gif')
+
+      start = time.monotonic()
+      odg.next_frame() # Load the first frame
+      end = time.monotonic()
+      overhead = end - start
+
+      face = displayio.TileGrid(
+          odg.bitmap,
+          pixel_shader=displayio.ColorConverter(
+              input_colorspace=displayio.Colorspace.RGB565_SWAPPED
+          ),
+      )
+      splash.append(face)
+      board.DISPLAY.refresh()
+
+      # Display repeatedly.
+      while True:
+          # Sleep for the frame delay specified by the GIF,
+          # minus the overhead measured to advance between frames.
+          time.sleep(max(0, next_delay - overhead))
+          next_delay = odg.next_frame()
+    """
+
+    def __init__(self, file: str) -> None:
+        """Create an `OnDiskGif` object with the given file.
+        The GIF frames are decoded into RGB565 big-endian format.
+        `displayio` expects little-endian, so the example above uses `Colorspace.RGB565_SWAPPED`.
+
+        :param file file: The name of the GIF file.
+        """
+        ...
+    width: int
+    """Width of the gif. (read only)"""
+    height: int
+    """Height of the gif. (read only)"""
+    bitmap: displayio.Bitmap
+    """The bitmap used to hold the current frame."""
+    def next_frame(self) -> float:
+        """Loads the next frame. Returns expected delay before the next frame in seconds."""
+    duration: float
+    """Returns the total duration of the GIF in seconds. (read only)"""
+    frame_count: int
+    """Returns the number of frames in the GIF. (read only)"""
+    min_delay: float
+    """The minimum delay found between frames. (read only)"""
+    max_delay: float
+    """The maximum delay found between frames. (read only)"""

@@ -171,7 +171,12 @@ class Runtime:
     on the USB serial input.  Allows for polling to see whether
     to call the built-in input() or wait. (read-only)"""
     run_reason: RunReason
-    """Why CircuitPython started running this particular time."""
+    """Why CircuitPython started running this particular time (read-only)."""
+    safe_mode_reason: SafeModeReason
+    """Why CircuitPython went into safe mode this particular time (read-only).
+
+    **Limitations**: Raises ``NotImplementedError`` on builds that do not implement ``safemode.py``.
+    """
     autoreload: bool
     """Whether CircuitPython may autoreload based on workflow writes to the filesystem."""
 
@@ -186,6 +191,67 @@ class Runtime:
     """Set brightness of status RGB LED from 0-255. This will take effect
     after the current code finishes and the status LED is used to show
     the finish state."""
+
+class SafeModeReason:
+    """The reason that CircuitPython went into safe mode.
+
+    **Limitations**: Class not available on builds that do not implement ``safemode.py``.
+    """
+
+    NONE: object
+    """CircuitPython is not in safe mode."""
+
+    BROWNOUT: object
+    """The microcontroller voltage dropped too low."""
+
+    FLASH_WRITE_FAIL: object
+    """Could not write to flash memory."""
+
+    GC_ALLOC_OUTSIDE_VM: object
+    """CircuitPython tried to allocate storage when its virtual machine was not running."""
+
+    HARD_FAULT: object
+    """The microcontroller detected a fault, such as an out-of-bounds memory write."""
+
+    INTERRUPT_ERROR: object
+    """Internal error related to interrupts."""
+
+    NLR_JUMP_FAIL: object
+    """An error occurred during exception handling, possibly due to memory corruption."""
+
+    NO_CIRCUITPY: object
+    """The CIRCUITPY drive was not available."""
+
+    NO_HEAP: object
+    """Heap storage was not present."""
+
+    PROGRAMMATIC: object
+    """The program entered safe mode using the `supervisor` module."""
+
+    SDK_FATAL_ERROR: object
+    """Third party firmware reported a fatal error."""
+
+    STACK_OVERFLOW: object
+    """The CircuitPython heap was corrupted because the stack was too small."""
+
+    USB_BOOT_DEVICE_NOT_INTERFACE_ZERO: object
+    """The USB HID boot device was not set up to be the first device, on interface #0."""
+
+    USB_TOO_MANY_ENDPOINTS: object
+    """USB devices need more endpoints than are available."""
+
+    USB_TOO_MANY_INTERFACE_NAMES: object
+    """USB devices specify too many interface names."""
+
+    USER: object
+    """The user pressed one or more buttons to enter safe mode.
+    This safe mode does **not** cause ``safemode.py`` to be run, since its purpose
+    is to prevent all user code from running.
+    This allows errors in ``safemode.py`` to be corrected easily.
+    """
+
+    SAFE_MODE_WATCHDOG: object
+    """An internal watchdog timer expired."""
 
 class StatusBar:
     """Current status of runtime objects.
