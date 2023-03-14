@@ -23,6 +23,16 @@ PIMORONI_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-p
 PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS = PIMORONI_LATEST_UNSTABLE_VERSION and f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_LATEST_UNSTABLE_VERSION}"
 PIMORONI_PREV_RELEVANT_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_PREV_RELEVANT_VERSION}"
 
+POLOLU_LATEST_STABLE_VERSION = "230303"
+POLOLU_LATEST_STABLE_VERSION_FULL = f"1.19.1-{POLOLU_LATEST_STABLE_VERSION}"
+POLOLU_LATEST_UNSTABLE_VERSION = None
+POLOLU_PREV_RELEVANT_VERSION = None
+
+POLOLU_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_LATEST_STABLE_VERSION}"
+POLOLU_LATEST_UNSTABLE_VERSION_ASSETS = POLOLU_LATEST_UNSTABLE_VERSION and f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_LATEST_UNSTABLE_VERSION}"
+POLOLU_PREV_RELEVANT_VERSION_ASSETS = POLOLU_PREV_RELEVANT_VERSION and f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_PREV_RELEVANT_VERSION}"
+
+
 
 class IndexParser(HTMLParser):
     def __init__(self, *, convert_charrefs=True):
@@ -87,6 +97,7 @@ for mcu in map(str.strip, mcu_list.split(",")):
         variant["downloads"]: List[Dict[str, str]]
         all_variants.append(variant)
 
+########################################################
 pimoroni_variants = [
     {
         "_id": "pimoroni-badger2040",
@@ -224,6 +235,59 @@ for variant in pimoroni_variants:
 print(f"Adding {len(pimoroni_variants)} Pimoroni variants")
 all_variants += pimoroni_variants
 
+########################################################
+pololu_variants = [
+    {
+        "_id": "pololu-3pi-2040-robot",
+        "vendor": "Pololu",
+        "model": "3pi+ 2040 Robot",
+        "family": "rp2",
+        "info_url": "https://www.pololu.com/product/5001",
+        "_download_url_pattern": rf"/{POLOLU_LATEST_STABLE_VERSION}/micropython-pololu-3pi-2040-robot-v({POLOLU_LATEST_STABLE_VERSION_FULL})\.uf2$",
+    },
+]
+
+for variant in pololu_variants:
+    stable_url_pattern = variant.get(
+        "_download_url_pattern"
+    )
+
+    old_url_pattern = POLOLU_PREV_RELEVANT_VERSION and stable_url_pattern.replace(
+        POLOLU_LATEST_STABLE_VERSION, POLOLU_PREV_RELEVANT_VERSION
+    )
+
+    variant["downloads"] = find_download_links(
+        POLOLU_LATEST_STABLE_VERSION_ASSETS,
+        stable_url_pattern,
+        1,
+        url_prefix="https://github.com",
+    )
+    if (POLOLU_LATEST_UNSTABLE_VERSION):
+        unstable_url_pattern = stable_url_pattern.replace(
+            POLOLU_LATEST_STABLE_VERSION, POLOLU_LATEST_UNSTABLE_VERSION
+        )
+        variant["downloads"] += find_download_links(
+            POLOLU_LATEST_UNSTABLE_VERSION_ASSETS,
+            unstable_url_pattern,
+            1,
+            url_prefix="https://github.com",
+        )
+    if POLOLU_PREV_RELEVANT_VERSION_ASSETS:
+        variant["downloads"] += find_download_links(
+            [
+                POLOLU_PREV_RELEVANT_VERSION_ASSETS,
+                "https://github.com/pololu/micropython-build/releases?page=2",
+            ],
+            old_url_pattern,
+            1,
+            url_prefix="https://github.com",
+        )
+
+
+print(f"Adding {len(pololu_variants)} Pimoroni variants")
+all_variants += pololu_variants
+
+#####################################################
 simplified_microbits = [
     {
         "vendor": "BBC",
