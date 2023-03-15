@@ -577,7 +577,7 @@
         "vendor": "Pololu",
         "model": "3pi+ 2040 Robot",
         "family": "rp2",
-        "info_url": "https://www.pololu.com/product/5001",
+        "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
             {
                 "version": "1.19.1-230303",

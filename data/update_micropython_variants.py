@@ -242,7 +242,7 @@ pololu_variants = [
         "vendor": "Pololu",
         "model": "3pi+ 2040 Robot",
         "family": "rp2",
-        "info_url": "https://www.pololu.com/product/5001",
+        "info_url": "https://github.com/pololu/micropython-build/releases/",
         "_download_url_pattern": rf"/{POLOLU_LATEST_STABLE_VERSION}/micropython-pololu-3pi-2040-robot-v({POLOLU_LATEST_STABLE_VERSION_FULL})\.uf2$",
     },
 ]
