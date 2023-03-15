@@ -97,10 +97,10 @@ def read_page(url) -> str:
     return _page_cache[url]
 
 
-def save_variants(variants: List, flasher: str, families: Set[str], file_path:str,
+def save_variants(variants: List, extensions: List[str], families: Set[str], file_path:str,
                   latest_prerelease_regex: Optional[str]=None):
     variants = list(
-        filter(lambda v: v["_flasher"] == flasher and v["family"] in families, variants)
+        filter(lambda v: v["family"] in families, variants)
     )
 
     for variant in variants:
@@ -127,8 +127,17 @@ def save_variants(variants: List, flasher: str, families: Set[str], file_path:st
     final_variants = []
     for variant in variants:
         variant = variant.copy()
-        if not variant["downloads"]:
-            print("No downloads:", variant)
+        relevant_downloads = []
+        for extension in extensions:
+            for download in variant["downloads"]:
+                if download["url"].endswith(extension):
+                    relevant_downloads.append(download)
+        if not relevant_downloads:
+            print(f"No downloads relevant for {extension}:", variant)
+            continue
+
+        variant["downloads"] = relevant_downloads
+
         for key in list(variant.keys()):
             if key.startswith("_"):
                 del variant[key]

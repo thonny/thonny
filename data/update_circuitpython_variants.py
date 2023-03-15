@@ -50,10 +50,8 @@ for i, variant in enumerate(all_variants):
 
     if variant["_id"] in DAPLINK_BOARDS:
         extension = r"(?:combined\.)?hex"
-        variant["_flasher"] = "daplink"
     else:
         extension = "uf2"
-        variant["_flasher"] = "uf2"
 
     variant["downloads"] = find_download_links(
         variant["info_url"],
@@ -98,15 +96,15 @@ for variant in cant_determine_samd:
 
 save_variants(
     all_variants,
-    "uf2",
+    ["uf2"],
     {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "circuitpython-variants-uf2.json",
 )
 
 save_variants(
     all_variants,
-    "daplink",
-    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    ["hex"],
+    {"nrf52"},
     "circuitpython-variants-daplink.json",
 )
 

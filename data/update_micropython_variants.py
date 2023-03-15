@@ -93,9 +93,35 @@ for mcu in map(str.strip, mcu_list.split(",")):
             "model": pvariant["board-product"],
             "family": board_family,
             "info_url": base_url + pvariant["id"],
+            "downloads": []
         }
         variant["downloads"]: List[Dict[str, str]]
         all_variants.append(variant)
+
+print("Adding micropython.org downloads")
+for i, variant in enumerate(all_variants):
+    print("Processing", i + 1, "of", len(all_variants), variant)
+    if "micro:bit" in variant["model"]:
+        extensions = ["hex"]
+    elif variant["family"] in {"esp32s2", "esp32s3"}:
+        extensions = ["uf2", "bin"]
+    elif "esp" in variant["family"]:
+        extensions = ["bin"]
+    else:
+        extensions = ["uf2"]
+
+    for extension in extensions:
+        variant["downloads"] += find_download_links(
+            variant["info_url"],
+            r"v(\d+(?:\.\d+)+)\." + extension,
+            1,
+            rf"({UNSTABLE_VERSION})\." + extension,
+            1,
+            url_prefix="https://micropython.org",
+            )
+
+        prev_major_url = f"https://micropython.org/resources/firmware/{variant['_id']}-{PREV_RELEVANT_VERSION_IN_URL}.{extension}"
+        add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
 ########################################################
 pimoroni_variants = [
@@ -331,32 +357,10 @@ all_variants += simplified_microbits
 
 print(f"Got {len(all_variants)} boards")
 
-print("Adding downloads")
-for i, variant in enumerate(all_variants):
-    print("Processing", i + 1, "of", len(all_variants), variant)
-    if "micro:bit" in variant["model"]:
-        extension = r"hex"
-        variant["_flasher"] = "daplink"
-    else:
-        extension = "uf2"
-        variant["_flasher"] = "uf2"
-
-    if not "downloads" in variant:
-        variant["downloads"] = find_download_links(
-            variant["info_url"],
-            r"v(\d+(?:\.\d+)+)\." + extension,
-            1,
-            rf"({UNSTABLE_VERSION})\." + extension,
-            1,
-            url_prefix="https://micropython.org",
-        )
-
-        prev_major_url = f"https://micropython.org/resources/firmware/{variant['_id']}-{PREV_RELEVANT_VERSION_IN_URL}.uf2"
-        add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
 save_variants(
     all_variants,
-    "uf2",
+    ["uf2"],
     {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "micropython-variants-uf2.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
@@ -365,8 +369,8 @@ save_variants(
 
 save_variants(
     all_variants,
-    "daplink",
-    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    ["hex"],
+    {"nrf51", "nrf52"},
     "micropython-variants-daplink.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
 )

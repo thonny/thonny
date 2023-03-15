@@ -302,34 +302,6 @@
         ]
     },
     {
-        "vendor": "Nordic Semiconductor",
-        "model": "pca10000",
-        "family": "nrf51",
-        "info_url": "https://micropython.org/download/pca10000",
-        "downloads": []
-    },
-    {
-        "vendor": "Nordic Semiconductor",
-        "model": "pca10001",
-        "family": "nrf51",
-        "info_url": "https://micropython.org/download/pca10001",
-        "downloads": []
-    },
-    {
-        "vendor": "Nordic Semiconductor",
-        "model": "pca10028",
-        "family": "nrf51",
-        "info_url": "https://micropython.org/download/pca10028",
-        "downloads": []
-    },
-    {
-        "vendor": "Nordic Semiconductor",
-        "model": "pca10031",
-        "family": "nrf51",
-        "info_url": "https://micropython.org/download/pca10031",
-        "downloads": []
-    },
-    {
         "vendor": "nullbits",
         "model": "Bit-C PRO",
         "family": "rp2",
@@ -876,13 +848,6 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20230313-unstable-v1.19.1-966-g05bb26010.uf2"
             }
         ]
-    },
-    {
-        "vendor": "Wireless-Tag",
-        "model": "wt51822_s4at",
-        "family": "nrf51",
-        "info_url": "https://micropython.org/download/wt51822_s4at",
-        "downloads": []
     },
     {
         "vendor": "Wiznet",
