@@ -208,17 +208,17 @@ class Editor(ttk.Frame):
                     return False
         except BinaryFileException:
             messagebox.showerror(
-                tr("Problem"),
-                tr("%s doesn't look like a text file") % (filename,),
-                master=self
+                tr("Problem"), tr("%s doesn't look like a text file") % (filename,), master=self
             )
             return False
         except SyntaxError as e:
             assert "encoding" in str(e).lower()
             messagebox.showerror(
                 tr("Problem loading file"),
-                tr("This file seems to have problems with encoding.\n\n"
-                   "Make sure it is in UTF-8 or contains proper encoding hint."),
+                tr(
+                    "This file seems to have problems with encoding.\n\n"
+                    "Make sure it is in UTF-8 or contains proper encoding hint."
+                ),
                 master=self,
             )
             return False
@@ -291,9 +291,11 @@ class Editor(ttk.Frame):
             if self.notebook.get_editor(save_filename) is not None:
                 messagebox.showerror(
                     tr("File is open"),
-                    tr("This file is already open in Thonny.\n\n"
-                       "If you want to save with this name,\n"
-                       "close the existing editor first!"),
+                    tr(
+                        "This file is already open in Thonny.\n\n"
+                        "If you want to save with this name,\n"
+                        "close the existing editor first!"
+                    ),
                     master=get_workbench(),
                 )
                 return None
@@ -344,7 +346,7 @@ class Editor(ttk.Frame):
             messagebox.showerror(
                 tr("Permission Error"),
                 tr("Looks like this file or folder is not writable."),
-                master=self
+                master=self,
             )
             return False
 
@@ -407,14 +409,12 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("RemoteFilesChanged")
             return True
         else:
-            messagebox.showerror(tr("Could not save"),
-                                 tr("Back-end is not ready"))
+            messagebox.showerror(tr("Could not save"), tr("Back-end is not ready"))
             return False
 
     def ask_new_path(self, node=None):
         if node is None:
-            node = choose_node_for_file_operations(self.winfo_toplevel(),
-                                                   tr("Where to save to?"))
+            node = choose_node_for_file_operations(self.winfo_toplevel(), tr("Where to save to?"))
         if not node:
             return None
 
@@ -486,9 +486,11 @@ class Editor(ttk.Frame):
                 # More proper name analysis will be performed by ProgramNamingAnalyzer
                 if not tk.messagebox.askyesno(
                     tr("Potential problem"),
-                    tr("If you name your script '%s', "
-                       "you won't be able to import the library module named '%s'")
-                        % (base, mod_name)
+                    tr(
+                        "If you name your script '%s', "
+                        "you won't be able to import the library module named '%s'"
+                    )
+                    % (base, mod_name)
                     + ".\n\n"
                     + tr("Do you still want to use this name for your script?"),
                     master=self,
