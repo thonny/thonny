@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from html.parser import HTMLParser
 from typing import Set, Dict, List, Union, Optional
@@ -34,7 +35,10 @@ def find_download_links(
 
     content = ""
     for url in page_urls:
-        content += read_page(url)
+        try:
+            content += read_page(url)
+        except Exception:
+            logging.exception("Could not read page %s", url)
 
     parser.feed(content)
 

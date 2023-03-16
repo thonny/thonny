@@ -68,7 +68,7 @@ class IndexParser(HTMLParser):
 all_variants = []
 
 # mcu_list = "RA4M1, RA4W1, RA6M1, RA6M2, RP2040, STM32H747, cc3200, esp32, esp32c3, esp32s2, esp32s3, esp8266, mimxrt, nRF52840, nrf51, nrf52, nrf91, rp2040, samd21, samd51, stm32, stm32f0, stm32f4, stm32f7, stm32g0, stm32g4, stm32h7, stm32l0, stm32l4, stm32wb, stm32wl"
-mcu_list = "RP2040, esp32s2, esp32s3, rp2040, samd21, samd51, nrf51"
+mcu_list = "RP2040, esp8266, esp32, esp32s2, esp32s3, esp32c3, rp2040, samd21, samd51, nrf51"
 
 for mcu in map(str.strip, mcu_list.split(",")):
     print("Fetching mcu", mcu, end="... ")
@@ -372,6 +372,14 @@ save_variants(
     ["hex"],
     {"nrf51", "nrf52"},
     "micropython-variants-daplink.json",
+    latest_prerelease_regex=UNSTABLE_VERSION,
+)
+
+save_variants(
+    all_variants,
+    ["bin"],
+    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c3"},
+    "micropython-variants-esptool.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
 )
 

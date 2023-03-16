@@ -1127,13 +1127,6 @@
     },
     {
         "vendor": "Adafruit",
-        "model": "pIRkey",
-        "family": "samd21",
-        "info_url": "https://circuitpython.org/board/pirkey_m0/",
-        "downloads": []
-    },
-    {
-        "vendor": "Adafruit",
         "model": "Proximity Trinkey - SAMD21",
         "family": "samd21",
         "info_url": "https://circuitpython.org/board/adafruit_proxlight_trinkey_m0/",
@@ -2368,13 +2361,6 @@
     },
     {
         "vendor": "Electronut Labs",
-        "model": "Blip",
-        "family": "nrf52",
-        "info_url": "https://circuitpython.org/board/electronut_labs_blip/",
-        "downloads": []
-    },
-    {
-        "vendor": "Electronut Labs",
         "model": "Papyr",
         "family": "nrf52",
         "info_url": "https://circuitpython.org/board/electronut_labs_papyr/",
@@ -2716,14 +2702,6 @@
                 "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-7.3.3.uf2"
             }
         ]
-    },
-    {
-        "vendor": "Espruino",
-        "model": "Espruino Bangle.js v2",
-        "family": "nrf52",
-        "info_url": "https://circuitpython.org/board/espruino_banglejs2/",
-        "downloads": [],
-        "title": "Bangle.js v2"
     },
     {
         "vendor": "Franzininho",
@@ -4691,13 +4669,6 @@
                 "url": "https://downloads.circuitpython.org/bin/shirtty/en_US/adafruit-circuitpython-shirtty-en_US-7.3.3.uf2"
             }
         ]
-    },
-    {
-        "vendor": "Scott Shawcroft",
-        "model": "Python powered GameBoy-compatible cartridge",
-        "family": "samd51",
-        "info_url": "https://circuitpython.org/board/gb_m4/",
-        "downloads": []
     },
     {
         "vendor": "Seeed Studio",
