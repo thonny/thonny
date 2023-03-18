@@ -1,40 +1,50 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import os
 from typing import Sequence
+
 from dbus_next.aio import MessageBus
 from dbus_next.constants import BusType
 from dbus_next.errors import DBusError
 
-UDISKS2_BUS_NAME = 'org.freedesktop.UDisks2'
-
-loop = asyncio.get_event_loop()
+UDISKS2_BUS_NAME = "org.freedesktop.UDisks2"
 
 
-# todo Add actual error-checking and log diagnostic information appropriately.
-async def list_volumes_udisks() -> Sequence[str]:
+def list_volumes_sync() -> Sequence[str]:
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(list_volumes())
+
+
+async def list_volumes() -> Sequence[str]:
     bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
 
-    # with open('introspection.xml', 'r') as f:
-    #     introspection = f.read()
+    introspection = None
+    with open(
+        os.path.join(os.path.dirname(__file__), "res", "org.freedesktop.UDisks2.xml"), "r"
+    ) as f:
+        introspection = f.read()
 
-    # todo Apparently, the introspections should be stored as strings instead of fetched dynamically as done here.
-    introspection = await bus.introspect(UDISKS2_BUS_NAME, '/org/freedesktop/UDisks2/Manager')
+    object_manager_introspection = None
+    with open(
+        os.path.join(os.path.dirname(__file__), "res", "org.freedesktop.DBus.ObjectManager.xml"),
+        "r",
+    ) as f:
+        object_manager_introspection = f.read()
 
-    proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME,
-                                        '/org/freedesktop/UDisks2/Manager',
-                                        introspection)
+    proxy_object = bus.get_proxy_object(
+        UDISKS2_BUS_NAME, "/org/freedesktop/UDisks2/Manager", introspection
+    )
 
-    interface = proxy_object.get_interface('org.freedesktop.UDisks2.Manager')
+    interface = proxy_object.get_interface("org.freedesktop.UDisks2.Manager")
 
     block_devices = await interface.call_get_block_devices({})
     print(f"Block devices: {block_devices}")
 
-    introspection = await bus.introspect(UDISKS2_BUS_NAME, '/org/freedesktop/UDisks2')
-    proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME,
-                                        '/org/freedesktop/UDisks2',
-                                        introspection)
-    interface = proxy_object.get_interface('org.freedesktop.DBus.ObjectManager')
+    proxy_object = bus.get_proxy_object(
+        UDISKS2_BUS_NAME, "/org/freedesktop/UDisks2", object_manager_introspection
+    )
+    interface = proxy_object.get_interface("org.freedesktop.DBus.ObjectManager")
     managed_objects = await interface.call_get_managed_objects()
     print(f"Managed objects: {managed_objects}")
 
@@ -46,70 +56,73 @@ async def list_volumes_udisks() -> Sequence[str]:
             drives.append(device)
     print(f"\nDrives: {drives}\n")
 
-    # Filter down to RP2040 USB drives only
-    rp2040_usb_drives = []
-    for drive in drives:
-        drive_introspection = await bus.introspect(UDISKS2_BUS_NAME, drive)
-        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME,
-                                            drive,
-                                            drive_introspection)
+    discovered_usb_drives = []
+    for a_drive in drives:
+        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, a_drive, introspection)
         interface = proxy_object.get_interface("org.freedesktop.UDisks2.Drive")
         connection_bus = await interface.get_connection_bus()
-        vendor = await interface.get_vendor()
-        model = await interface.get_model()
-        if connection_bus == "usb" and vendor == "RPI" and model == "RP2":
-            rp2040_usb_drives.append(drive)
-    print(f"\nRP2040 USB Drives: {rp2040_usb_drives}\n")
+        time_media_detected = await interface.get_time_media_detected()
+        if connection_bus == "usb":
+            discovered_usb_drives.append(
+                {
+                    "drive": a_drive,
+                    "time_media_detected": time_media_detected,
+                }
+            )
+    print(f"\nUSB Drives: {discovered_usb_drives}\n")
 
-    if len(rp2040_usb_drives) == 0:
-        print("No RP2040 USB drive found")
+    if len(discovered_usb_drives) == 0:
+        print("No USB drive found")
         return []
 
-    if len(rp2040_usb_drives) > 1:
-        print("Multiple RP2040 USB drives found")
-
-    # Find the block devices associated with the RP2040 USB drive
-    rp2040_block_devices = []
+    # Find the block devices associated with each USB drive
+    discovered_block_devices = []
     for block_device in block_devices:
-        block_device_introspection = await bus.introspect(UDISKS2_BUS_NAME, block_device)
-        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME,
-                                            block_device,
-                                            block_device_introspection)
+        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
         interface = proxy_object.get_interface("org.freedesktop.UDisks2.Block")
-        id_label = await interface.get_id_label()
-        drive = await interface.get_drive()
-        if id_label == "RPI-RP2" and drive in rp2040_usb_drives:
-            rp2040_block_devices.append(block_device)
-    print(f"\nRP2040 Block Devices: {rp2040_block_devices}\n")
+        id_usage = await interface.get_id_usage()
+        if id_usage != "filesystem":
+            continue
+        a_drive = await interface.get_drive()
+        for dictionary in discovered_usb_drives:
+            if dictionary["drive"] == a_drive:
+                discovered_block_devices.append(
+                    {
+                        "block_device": block_device,
+                        "time_media_detected": dictionary["time_media_detected"],
+                    }
+                )
+                break
+    print(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
 
-    if len(rp2040_block_devices) == 0:
-        print("No RP2040 block devices found")
+    if len(discovered_block_devices) == 0:
+        print("No block devices found")
         return []
 
-    # Assume that we only want the first RP2040 block device for now.
-    rp2040_block_device = rp2040_block_devices[0]
+    # In case there are multiple block devices detected, sort by time the device was detected.
+    # Most recently detected are placed first.
+    discovered_block_devices = sorted(
+        discovered_block_devices, key=lambda x: x.get("time_media_detected")
+    )
+    print(f"Sorted Block Devices: {discovered_block_devices}")
+    discovered_block_devices = [i["block_device"] for i in discovered_block_devices]
 
-    # Make sure that the RP2040 filesystem is mounted and get the mount point.
-    block_device_introspection = await bus.introspect(UDISKS2_BUS_NAME, rp2040_block_device)
-    proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME,
-                                        rp2040_block_device,
-                                        block_device_introspection)
-    interface = proxy_object.get_interface("org.freedesktop.UDisks2.Filesystem")
+    discovered_mount_points = []
+    for block_device in discovered_block_devices:
+        # Make sure that the filesystem is mounted and get the mount point.
+        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
+        interface = proxy_object.get_interface("org.freedesktop.UDisks2.Filesystem")
 
-    mount_point = None
-    try:
-        mount_point = await interface.call_mount({})
-    except DBusError as error:
-        if "is already mounted" not in error.text:
-            raise
-        mount_points = await interface.get_mount_points()
-        print(f"\nRP2040 Filesystem Mount Points: {mount_points}\n")
-        # todo Double check that I don't need to account for endianess or other encoding formats here.
-        mount_point = mount_points[0].decode("utf-8")
-    print(f"\nRP2040 Filesystem Mount Point: {mount_point}\n")
+        mount_point = None
+        try:
+            mount_point = await interface.call_mount({})
+        except DBusError as error:
+            if "is already mounted" not in error.text:
+                raise
+            mount_points = await interface.get_mount_points()
+            # todo Double check that I don't need to account for endianess or other encoding formats here.
+            mount_point = mount_points[0].decode("utf-8")
+        discovered_mount_points.append(mount_point.rstrip("\x00"))
+    print(f"\nFilesystem Mount Points: {discovered_mount_points}\n")
 
-    await loop.create_future()
-    return mount_point
-
-
-loop.run_until_complete(list_volumes_udisks())
+    return discovered_mount_points

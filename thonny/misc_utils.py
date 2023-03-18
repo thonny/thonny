@@ -96,6 +96,12 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
         finally:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
     else:
+        if sys.platform == "linux":
+            import udisks
+
+            mount_points = udisks.list_volumes_sync()
+            if len(mount_points) > 0:
+                return mount_points
         # 'posix' means we're on Linux or OSX (Mac).
         # Call the unix "mount" command to list the mounted volumes.
         mount_output = subprocess.check_output("mount").splitlines()
