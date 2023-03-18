@@ -75,7 +75,7 @@ async def list_volumes() -> Sequence[str]:
     logger.debug(f"\nUSB Drives: {discovered_usb_drives}\n")
 
     if len(discovered_usb_drives) == 0:
-        logger.error("No USB drive found")
+        logger.debug("No USB drive found")
         return []
 
     # Find the block devices associated with each USB drive
@@ -99,7 +99,7 @@ async def list_volumes() -> Sequence[str]:
     logger.debug(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
 
     if len(discovered_block_devices) == 0:
-        logger.error("No block devices found")
+        logger.debug("No block devices found")
         return []
 
     # In case there are multiple block devices detected, sort by time the device was detected.
