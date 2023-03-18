@@ -97,9 +97,9 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
     else:
         if sys.platform == "linux":
-            import udisks
+            from thonny.udisks import list_volumes_sync
 
-            mount_points = udisks.list_volumes_sync()
+            mount_points = list_volumes_sync()
             if len(mount_points) > 0:
                 return mount_points
         # 'posix' means we're on Linux or OSX (Mac).
