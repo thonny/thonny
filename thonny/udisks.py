@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+from logging import getLogger
 import os
 from typing import Sequence
 
 from dbus_next.aio import MessageBus
 from dbus_next.constants import BusType
 from dbus_next.errors import DBusError
+
+logger = getLogger(__name__)
 
 UDISKS2_BUS_NAME = "org.freedesktop.UDisks2"
 
@@ -39,14 +42,14 @@ async def list_volumes() -> Sequence[str]:
     interface = proxy_object.get_interface("org.freedesktop.UDisks2.Manager")
 
     block_devices = await interface.call_get_block_devices({})
-    print(f"Block devices: {block_devices}")
+    logger.debug(f"Block devices: {block_devices}")
 
     proxy_object = bus.get_proxy_object(
         UDISKS2_BUS_NAME, "/org/freedesktop/UDisks2", object_manager_introspection
     )
     interface = proxy_object.get_interface("org.freedesktop.DBus.ObjectManager")
     managed_objects = await interface.call_get_managed_objects()
-    print(f"Managed objects: {managed_objects}")
+    logger.debug(f"Managed objects: {managed_objects}")
 
     # Find all drives
     drives = []
@@ -54,7 +57,7 @@ async def list_volumes() -> Sequence[str]:
         type = next(iter(values))
         if type == "org.freedesktop.UDisks2.Drive":
             drives.append(device)
-    print(f"\nDrives: {drives}\n")
+    logger.debug(f"\nDrives: {drives}\n")
 
     discovered_usb_drives = []
     for a_drive in drives:
@@ -69,10 +72,10 @@ async def list_volumes() -> Sequence[str]:
                     "time_media_detected": time_media_detected,
                 }
             )
-    print(f"\nUSB Drives: {discovered_usb_drives}\n")
+    logger.debug(f"\nUSB Drives: {discovered_usb_drives}\n")
 
     if len(discovered_usb_drives) == 0:
-        print("No USB drive found")
+        logger.error("No USB drive found")
         return []
 
     # Find the block devices associated with each USB drive
@@ -93,10 +96,10 @@ async def list_volumes() -> Sequence[str]:
                     }
                 )
                 break
-    print(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
+    logger.debug(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
 
     if len(discovered_block_devices) == 0:
-        print("No block devices found")
+        logger.error("No block devices found")
         return []
 
     # In case there are multiple block devices detected, sort by time the device was detected.
@@ -104,7 +107,6 @@ async def list_volumes() -> Sequence[str]:
     discovered_block_devices = sorted(
         discovered_block_devices, key=lambda x: x.get("time_media_detected")
     )
-    print(f"Sorted Block Devices: {discovered_block_devices}")
     discovered_block_devices = [i["block_device"] for i in discovered_block_devices]
 
     discovered_mount_points = []
@@ -123,6 +125,6 @@ async def list_volumes() -> Sequence[str]:
             # todo Double check that I don't need to account for endianess or other encoding formats here.
             mount_point = mount_points[0].decode("utf-8")
         discovered_mount_points.append(mount_point.rstrip("\x00"))
-    print(f"\nFilesystem Mount Points: {discovered_mount_points}\n")
+    logger.debug(f"\nFilesystem Mount Points: {discovered_mount_points}\n")
 
     return discovered_mount_points
