@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from logging import getLogger
 import os
+from logging import getLogger
 from typing import Sequence
 
 from dbus_next.aio import MessageBus
