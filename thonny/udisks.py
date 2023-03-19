@@ -24,13 +24,13 @@ async def list_volumes() -> Sequence[str]:
 
     introspection = None
     with open(
-        os.path.join(os.path.dirname(__file__), "res", "org.freedesktop.UDisks2.xml"), "r"
+        os.path.join(os.path.dirname(__file__), "dbus", "org.freedesktop.UDisks2.xml"), "r"
     ) as f:
         introspection = f.read()
 
     object_manager_introspection = None
     with open(
-        os.path.join(os.path.dirname(__file__), "res", "org.freedesktop.DBus.ObjectManager.xml"),
+        os.path.join(os.path.dirname(__file__), "dbus", "org.freedesktop.DBus.ObjectManager.xml"),
         "r",
     ) as f:
         object_manager_introspection = f.read()
