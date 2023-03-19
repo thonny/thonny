@@ -5,7 +5,11 @@ from logging import getLogger
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from thonny.misc_utils import get_win_volume_name, list_volumes
-from thonny.plugins.micropython.base_flashing_dialog import BaseFlashingDialog, TargetInfo
+from thonny.plugins.micropython.base_flashing_dialog import (
+    BaseFlashingDialog,
+    TargetInfo,
+    family_code_to_name,
+)
 from thonny.plugins.micropython.mp_front import list_serial_port_infos
 
 logger = getLogger(__name__)
@@ -17,6 +21,10 @@ class Uf2FlashingDialog(BaseFlashingDialog):
 
     def get_variants_url(self) -> str:
         return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-uf2.json"
+
+    def get_families_mapping(self) -> Dict[str, str]:
+        codes = ["rp2", "samd21", "samd51", "esp32s2", "esp32s3", "nrf51", "nrf52"]
+        return {family_code_to_name(code): code for code in codes}
 
     def find_targets(self) -> Dict[str, TargetInfo]:
         paths = [
@@ -43,9 +51,15 @@ class Uf2FlashingDialog(BaseFlashingDialog):
                 # too general to be called model
                 return "RP2", "family"
             else:
-                return target.model, "model"
+                text = target.model
+                if target.family:
+                    text += f"   ({family_code_to_name(target.family)})"
+                return text, "model"
         elif target.board_id:
-            return target.board_id, "board id"
+            text = target.board_id
+            if target.family:
+                text += f"   ({family_code_to_name(target.family)})"
+            return text, "board id"
         elif target.family:
             return target.family, "family"
         else:

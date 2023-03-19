@@ -2,7 +2,7 @@ import os.path
 import sys
 import time
 from time import sleep
-from typing import Optional
+from typing import Dict, Optional
 
 from thonny import ui_utils
 from thonny.languages import tr
@@ -81,6 +81,12 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
 
     def get_variants_url(self) -> str:
         return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-daplink.json"
+
+    def get_families_mapping(self) -> Dict[str, str]:
+        return {
+            "nRF51": "nrf51",
+            "nRF52": "nrf52",
+        }
 
     def get_instructions(self) -> Optional[str]:
         return (

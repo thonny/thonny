@@ -19,6 +19,19 @@ logger = getLogger(__name__)
 
 FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
+FAMILY_CODES_TO_NAMES = {
+    "rp2": "RP2",
+    "samd21": "SAMD21",
+    "samd51": "SAMD51",
+    "esp8266": "ESP8266",
+    "esp32": "ESP32",
+    "esp32s2": "ESP32-S2",
+    "esp32s3": "ESP32-S3",
+    "esp32c3": "ESP32-C3",
+    "nrf51": "nRF51",
+    "nrf52": "nRF52",
+}
+
 
 @dataclass()
 class TargetInfo:
@@ -34,6 +47,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._downloaded_variants: List[Dict[str, Any]] = []
 
         self._last_handled_target = None
+        self._last_handled_family_target = None
         self._last_handled_variant = None
         self.firmware_name = firmware_name
 
@@ -69,60 +83,93 @@ class BaseFlashingDialog(WorkDialog, ABC):
             row=2, column=2, sticky="w", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
-        variant_label = ttk.Label(self.main_frame, text=f"{self.firmware_name} variant")
-        variant_label.grid(row=5, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
+        family_label = ttk.Label(self.main_frame, text=f"{self.firmware_name} family")
+        family_label.grid(row=5, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
+        self._family_combo = MappingCombobox(
+            self.main_frame,
+            exportselection=False,
+            state="enabled",
+            mapping=self.get_families_mapping(),
+        )
+        self._family_combo.grid(
+            row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
+        )
+
+        variant_label = ttk.Label(self.main_frame, text=f"variant")
+        variant_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_combo = MappingCombobox(
             self.main_frame, exportselection=False, state="disabled"
         )
         self._variant_combo.grid(
-            row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
+            row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
         version_label = ttk.Label(self.main_frame, text="version")
-        version_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
+        version_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._version_combo = MappingCombobox(
             self.main_frame, exportselection=False, state="disabled"
         )
         self._version_combo.grid(
-            row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+            row=7, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
         variant_info_label = ttk.Label(self.main_frame, text="info")
-        variant_info_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
+        variant_info_label.grid(row=8, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_info_content_label = AdvancedLabel(self.main_frame)
         self._variant_info_content_label.grid(
-            row=7, column=2, sticky="w", padx=(ipadx, epadx), pady=(ipady, 0)
+            row=8, column=2, sticky="w", padx=(ipadx, epadx), pady=(ipady, 0)
         )
 
         self.main_frame.columnconfigure(2, weight=1)
 
+    @abstractmethod
+    def get_families_mapping(self) -> Dict[str, str]:
+        ...
+
     def update_ui(self):
+        if self._downloaded_variants:
+            self._variant_combo.state(["!disabled", "readonly"])
+            self._version_combo.state(["!disabled", "readonly"])
+
         if self._state == "idle":
             targets = self.find_targets()
             if targets != self._target_combo.mapping:
                 self.show_new_targets(targets)
                 self._last_handled_target = None
+                self._last_handled_family_target = None
 
             current_target = self._target_combo.get_selected_value()
-            if not current_target:
-                self._variant_combo.set_mapping({})
-                self._variant_combo.select_none()
-            elif current_target != self._last_handled_target and self._downloaded_variants:
-                self._variant_combo.state(["!disabled", "readonly"])
-                self._version_combo.state(["!disabled", "readonly"])
-                self._present_variants_for_target(current_target)
+            if current_target != self._last_handled_target:
+                if current_target.family:
+                    self._family_combo.select_value(current_target.family)
+                self._update_target_info()
                 self._last_handled_target = current_target
+                self._last_handled_family_target = None
+
+            current_family = self._family_combo.get_selected_value()
+            if self._last_handled_family_target != (current_family, current_target):
+                self._variant_combo.select_none()
+                self._version_combo.select_none()
                 self._last_handled_variant = None
-            self._update_target_info()
+
+                if current_family and current_target and self._downloaded_variants:
+                    self._present_variants_for_family_and_target(current_family, current_target)
+                else:
+                    self._variant_combo.set_mapping({})
+                    self._variant_combo.select_none()
+
+                if self._downloaded_variants:
+                    self._last_handled_family_target = (current_family, current_target)
 
             current_variant = self._variant_combo.get_selected_value()
-            if not current_variant:
-                self._version_combo.select_none()
-                self._version_combo.set_mapping({})
-            elif current_variant != self._last_handled_variant:
-                self._present_versions_for_variant(current_variant)
+            if current_variant != self._last_handled_variant:
+                if not current_variant:
+                    self._version_combo.select_none()
+                    self._version_combo.set_mapping({})
+                else:
+                    self._present_versions_for_variant(current_variant)
+                self._update_variant_info()
                 self._last_handled_variant = current_variant
-            self._update_variant_info()
 
         super().update_ui()
 
@@ -174,21 +221,17 @@ class BaseFlashingDialog(WorkDialog, ABC):
         set_text_if_different(self._variant_info_content_label, text)
         self._variant_info_content_label.set_url(url)
 
-    def _present_variants_for_target(self, target: TargetInfo) -> None:
+    def _present_variants_for_family_and_target(self, family: str, target: TargetInfo) -> None:
         assert self._downloaded_variants
+        assert target
 
         whole_mapping = {self._create_variant_description(v): v for v in self._downloaded_variants}
 
-        if target.family is not None:
-            filtered_mapping = {
-                item[0]: item[1]
-                for item in whole_mapping.items()
-                if item[1]["family"].startswith(target.family)
-            }
-            if not filtered_mapping:
-                filtered_mapping = whole_mapping
-        else:
-            filtered_mapping = whole_mapping
+        filtered_mapping = {
+            item[0]: item[1]
+            for item in whole_mapping.items()
+            if item[1]["family"].startswith(family)
+        }
 
         prev_variant = self._variant_combo.get_selected_value()
 
@@ -457,3 +500,7 @@ def find_uf2_property(lines: List[str], prop_name: str) -> Optional[str]:
             return line[len(marker) :]
 
     return None
+
+
+def family_code_to_name(code: str) -> str:
+    return FAMILY_CODES_TO_NAMES.get(code, code)
