@@ -12,7 +12,11 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
-from thonny.plugins.micropython.uf2dialog import TargetInfo, Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import (
+    TargetInfo,
+    Uf2FlashingDialog,
+    create_volume_description,
+)
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -118,7 +122,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                     if board_id in models:
                         model, family = models[board_id]
                         return TargetInfo(
-                            title=self.describe_target_path(path),
+                            title=create_volume_description(path),
                             path=path,
                             family=family,
                             model=model,
@@ -132,7 +136,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                     board_id = "9900"
                     model, family = models[board_id]
                     return TargetInfo(
-                        title=self.describe_target_path(path),
+                        title=create_volume_description(path),
                         path=path,
                         family=family,
                         model=model,
