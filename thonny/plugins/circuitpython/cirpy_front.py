@@ -1,7 +1,11 @@
 import sys
 from logging import getLogger
+from typing import List
 
+from thonny import ui_utils
 from thonny.languages import tr
+from thonny.plugins.microbit import MicrobitFlashingDialog
+from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
@@ -88,11 +92,17 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
     def _get_intro_url(self):
         return "https://learn.adafruit.com/welcome-to-circuitpython/installing-circuitpython"
 
-    def _has_flashing_dialog(self):
-        return True
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return ["UF2", "esptool", "BBC micro:bit"]
 
-    def _open_flashing_dialog(self):
-        show_uf2_installer(self, firmware_name="CircuitPython")
+    def _open_flashing_dialog(self, kind: str) -> None:
+        if kind == "UF2":
+            show_uf2_installer(self, firmware_name="CircuitPython")
+        elif kind == "esptool":
+            try_launch_esptool_dialog(self.winfo_toplevel(), "CircuitPython")
+        elif kind == "BBC micro:bit":
+            dlg = MicrobitFlashingDialog(self, "CircuitPython")
+            ui_utils.show_dialog(dlg)
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "CircuitPython"

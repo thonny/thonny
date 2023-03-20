@@ -14,7 +14,6 @@ from thonny.plugins.micropython.mp_front import (
     SshMicroPythonProxy,
     add_micropython_backend,
     list_serial_ports,
-    list_serial_ports_with_descriptions,
 )
 
 

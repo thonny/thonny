@@ -2,7 +2,7 @@ import os.path
 import sys
 import time
 from time import sleep
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from thonny import ui_utils
 from thonny.languages import tr
@@ -65,10 +65,11 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
             + ")"
         )
 
-    def _has_flashing_dialog(self):
-        return True
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return [""]
 
-    def _open_flashing_dialog(self):
+    def _open_flashing_dialog(self, kind: str) -> None:
+        assert kind == ""
         dlg = MicrobitFlashingDialog(self, "MicroPython")
         ui_utils.show_dialog(dlg)
 
@@ -133,6 +134,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                             family=family,
                             model=model,
                             board_id=board_id,
+                            port=None,
                         )
 
             # With older bootloaders, the file may be different
@@ -147,13 +149,14 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                         family=family,
                         model=model,
                         board_id=board_id,
+                        port=None,
                     )
 
         # probably not micro:bit
         return None
 
     def get_title(self):
-        return f"Install {self.firmware_name} for BBC micro:bit"
+        return f"Install or update {self.firmware_name} for BBC micro:bit"
 
     def perform_post_installation_steps(self, ports_before):
         # can't check the ports as in the superclass, because the port is always there

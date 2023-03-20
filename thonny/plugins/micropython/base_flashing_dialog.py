@@ -36,10 +36,11 @@ FAMILY_CODES_TO_NAMES = {
 @dataclass()
 class TargetInfo:
     title: str
-    path: str
+    path: Optional[str]
     family: Optional[str]
     model: Optional[str]
     board_id: Optional[str]
+    port: Optional[Any]
 
 
 class BaseFlashingDialog(WorkDialog, ABC):
@@ -372,9 +373,6 @@ class BaseFlashingDialog(WorkDialog, ABC):
     def get_ok_text(self):
         return tr("Install")
 
-    def _on_variant_select(self, *args):
-        pass
-
     def is_ready_for_work(self):
         return self._target_combo.get_selected_value() and self._version_combo.get_selected_value()
 
@@ -392,24 +390,28 @@ class BaseFlashingDialog(WorkDialog, ABC):
         if isinstance(proxy, BareMetalMicroPythonProxy):
             proxy.disconnect()
 
+        work_options = self.prepare_work_get_options()
         threading.Thread(
             target=self._perform_work_and_update_status,
-            args=[
-                variant_info,
-                download_info,
-                target_info,
-            ],
+            args=[variant_info, download_info, target_info, work_options],
             daemon=True,
         ).start()
         return True
 
+    def prepare_work_get_options(self) -> Dict[str, Any]:
+        return {}
+
     def _perform_work_and_update_status(
-        self, variant_info: Dict[str, Any], download_info: Dict[str, str], target_info: TargetInfo
+        self,
+        variant_info: Dict[str, Any],
+        download_info: Dict[str, str],
+        target_info: TargetInfo,
+        work_options: Dict[str, Any],
     ) -> None:
         try:
             temp_file = self._download_to_temp(download_info)
 
-            self.upload_to_device(temp_file, variant_info, download_info, target_info)
+            self.upload_to_device(temp_file, variant_info, download_info, target_info, work_options)
         except Exception as e:
             self.append_text("\n" + "".join(traceback.format_exc()))
             self.set_action_text("Error...")
@@ -417,8 +419,8 @@ class BaseFlashingDialog(WorkDialog, ABC):
             return
 
         if self._state == "working":
-            self.append_text("\nDone!\n")
-            self.set_action_text("Done!")
+            # self.append_text("\nDone!\n")
+            # self.set_action_text("Done!")
             self.report_done(True)
         else:
             assert self._state == "cancelling"
@@ -489,6 +491,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         variant_info: Dict[str, Any],
         download_info: Dict[str, str],
         target_info: TargetInfo,
+        work_options: Dict[str, Any],
     ) -> None:
         ...
 

@@ -113,6 +113,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
             family=family,
             model=model,
             board_id=board_id,
+            port=None,
         )
 
     def get_info_file_name(self):
@@ -132,11 +133,8 @@ class Uf2FlashingDialog(BaseFlashingDialog):
             "5. Close the dialog and start programming!"
         )
 
-    def _on_variant_select(self, *args):
-        pass
-
     def get_title(self):
-        return f"Install {self.firmware_name}"
+        return f"Install or update {self.firmware_name} (UF2)"
 
     def upload_to_device(
         self,
@@ -144,6 +142,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         variant_info: Dict[str, Any],
         download_info: Dict[str, str],
         target_info: TargetInfo,
+        work_options: Dict[str, Any],
     ) -> None:
         """Running in a bg thread"""
         size = os.path.getsize(source_path)

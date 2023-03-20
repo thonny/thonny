@@ -517,30 +517,37 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.rowconfigure(100, weight=1)
         last_row.columnconfigure(1, weight=1)
 
-        advanced_link = ui_utils.create_action_label(
-            last_row, tr("Advanced options"), lambda event: self._show_advanced_options()
-        )
-        # advanced_link.grid(row=0, column=1, sticky="e")
+        kinds = self.get_flashing_dialog_kinds()
+        for i, kind in enumerate(kinds):
 
-        if self._has_flashing_dialog():
+            def _click_flashing_link(event, kind=kind):
+                self._handle_python_installer_link(kind=kind)
+
+            if i == 0:
+                link_text = self._get_flasher_link_title()
+            else:
+                link_text = ""
+
+            if kind != "":
+                if link_text:
+                    link_text += " "
+                link_text += f"({kind})"
+
             python_link = ui_utils.create_action_label(
                 last_row,
-                self._get_flasher_link_title(),
-                self._on_click_python_installer_link,
+                link_text,
+                _click_flashing_link,
             )
-            python_link.grid(row=1, column=1, sticky="e")
+            python_link.grid(row=i, column=1, sticky="e")
 
         self._on_change_port()
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "MicroPython"
 
-    def _on_click_python_installer_link(self, event=None):
-        self._open_flashing_dialog()
+    def _handle_python_installer_link(self, kind: str):
+        self._open_flashing_dialog(kind)
         self._has_opened_python_flasher = True
-
-    def _show_advanced_options(self):
-        pass
 
     def _get_intro_text(self):
         result = (
@@ -649,10 +656,10 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def _get_intro_url(self) -> Optional[str]:
         return None
 
-    def _has_flashing_dialog(self):
-        return False
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return []
 
-    def _open_flashing_dialog(self):
+    def _open_flashing_dialog(self, kind: str) -> None:
         raise NotImplementedError()
 
     @property
@@ -998,28 +1005,6 @@ def port_exists(device):
             return True
 
     return False
-
-
-def list_serial_ports_with_descriptions():
-    def port_order(p):
-        name = p.device
-        if name is None:
-            return ""
-        elif name.startswith("COM") and len(name) == 4:
-            # Make one-digit COM ports go before COM10
-            return name.replace("COM", "COM0")
-        else:
-            return name
-
-    sorted_ports = sorted(list_serial_ports(), key=port_order)
-
-    return [
-        (
-            p.description if p.device in p.description else p.description + " (" + p.device + ")",
-            p.device,
-        )
-        for p in sorted_ports
-    ]
 
 
 def get_uart_adapter_vids_pids():
