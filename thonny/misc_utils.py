@@ -95,8 +95,23 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
             return volumes
         finally:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
+    if sys.platform == "linux":
+        from dbus_next.errors import DBusError
+
+        from thonny.udisks import list_volumes_sync
+
+        mount_points = []
+        try:
+            mount_points = list_volumes_sync()
+        except DBusError as error:
+            # Fallback to using the 'mount' command on Linux if the Udisks D-Bus service is unavailable.
+            if "org.freedesktop.DBus.Error.ServiceUnknown" not in error.text:
+                raise
+            mount_output = subprocess.check_output("mount").splitlines()
+            mount_points = [x.split()[2].decode("utf-8") for x in mount_output]
+        return mount_points
     else:
-        # 'posix' means we're on Linux or OSX (Mac).
+        # 'posix' means we're on *BSD or OSX (Mac).
         # Call the unix "mount" command to list the mounted volumes.
         mount_output = subprocess.check_output("mount").splitlines()
         return [x.split()[2].decode("utf-8") for x in mount_output]
