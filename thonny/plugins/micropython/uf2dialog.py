@@ -201,7 +201,6 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         return True
 
     def _wait_for_new_ports(self, old_ports):
-
         self.append_text("\nWaiting for the port...\n")
         self.set_action_text("Waiting for the port...")
 
