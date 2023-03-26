@@ -235,9 +235,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._variant_info_content_label.set_url(url)
 
     def on_change_family(self, family: Optional[str]) -> None:
+        self._variant_combo.select_none()
+        
         if not family or not self._downloaded_variants:
             self._variant_combo.set_mapping({})
-            self._variant_combo.select_none()
             return
 
         whole_mapping = {self._create_variant_description(v): v for v in self._downloaded_variants}
