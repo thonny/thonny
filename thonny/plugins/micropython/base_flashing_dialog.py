@@ -271,12 +271,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
         assert self._downloaded_variants
         assert target
 
-        matches = list(
-            filter(
-                lambda v: self._variant_can_be_recommended_for_target(v, target),
-                self._variant_combo.mapping.values(),
-            )
-        )
+        matches = []
+        for v in self._variant_combo.mapping.values():
+            if v and v not in matches and self._variant_can_be_recommended_for_target(v, target):
+                matches.append(v)
 
         if len(matches) == 1:
             self._variant_combo.select_value(matches[0])
@@ -442,7 +440,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
             )
         except Exception as e:
             if isinstance(e, UserError):
-                self.append_text("\n", str(e))
+                self.append_text("\n" + str(e))
             else:
                 self.append_text("\n" + "".join(traceback.format_exc()))
             self.set_action_text("Error...")

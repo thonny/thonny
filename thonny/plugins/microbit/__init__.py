@@ -91,14 +91,14 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            f"This dialog allows you to install or update {self.firmware_name} on your micro:bit.\n"
             "\n"
             "1. Plug in your micro:bit.\n"
             "2. Wait until device information appears.\n"
             "3. Click 'Install' and wait for some seconds until done.\n"
             "4. Close the dialog and start programming!\n"
             "\n"
-            "NB! Installing MicroPython will erase all files you may have on your\n"
+            f"NB! Installing {self.firmware_name} will erase all files you may have on your\n"
             "device. Make sure you have important files backed up!"
         )
 
