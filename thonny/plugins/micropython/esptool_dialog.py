@@ -10,6 +10,7 @@ from tkinter import messagebox, ttk
 from typing import Any, Dict, Optional, Tuple
 
 from thonny import get_runner, get_workbench, ui_utils
+from thonny.common import normpath_with_actual_case
 from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import BareMetalMicroPythonProxy, list_serial_ports
 from thonny.plugins.micropython.base_flashing_dialog import (
@@ -349,6 +350,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
         )
         if not path:
             return
+
+        if running_on_windows():
+            path = normpath_with_actual_case(path)
 
         family = self._infer_firmware_family(path)
         if not family:

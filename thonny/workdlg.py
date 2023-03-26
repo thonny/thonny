@@ -109,7 +109,7 @@ class WorkDialog(CommonDialog):
             text="☰",
             command=self.post_action_menu,
             # style="Toolbutton"
-            width=2,
+            width=3,
         )
         if self.has_action_menu():
             self._menu_button.grid(column=3, row=1, pady=padding, padx=(0, intpad))
