@@ -21,6 +21,7 @@ from thonny.ui_utils import (
     ems_to_pixels,
     get_hyperlink_cursor,
     lookup_style_option,
+    open_with_default_app,
     scrollbar_style,
     show_dialog,
 )
@@ -1572,15 +1573,6 @@ def get_local_files_root_text():
         _LOCAL_FILES_ROOT_TEXT = tr("This computer")
 
     return _LOCAL_FILES_ROOT_TEXT
-
-
-def open_with_default_app(path):
-    if running_on_windows():
-        os.startfile(path)
-    elif running_on_mac_os():
-        subprocess.run(["open", path])
-    else:
-        subprocess.run(["xdg-open", path])
 
 
 def get_file_handler_conf_key(extension):

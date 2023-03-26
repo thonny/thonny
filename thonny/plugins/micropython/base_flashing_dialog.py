@@ -1,7 +1,9 @@
 import os.path
 import re
+import shutil
 import tempfile
 import threading
+import time
 import traceback
 import urllib.request
 from abc import ABC, abstractmethod
@@ -11,6 +13,7 @@ from tkinter import ttk
 from typing import Any, Dict, List, Optional, Tuple
 
 from thonny import get_runner
+from thonny.common import UserError
 from thonny.languages import tr
 from thonny.ui_utils import AdvancedLabel, MappingCombobox, set_text_if_different
 from thonny.workdlg import WorkDialog
@@ -48,6 +51,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._downloaded_variants: List[Dict[str, Any]] = []
 
         self._last_handled_target = None
+        self._last_handled_family = None
         self._last_handled_family_target = None
         self._last_handled_variant = None
         self.firmware_name = firmware_name
@@ -76,6 +80,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._target_combo.grid(
             row=1, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
+        self._target_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
         self._target_info_label = ttk.Label(self.main_frame, text="model")
         self._target_info_label.grid(row=2, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
@@ -95,6 +100,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._family_combo.grid(
             row=5, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
+        self._family_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
         variant_label = ttk.Label(self.main_frame, text=f"variant")
         variant_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
@@ -104,6 +110,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._variant_combo.grid(
             row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
+        self._variant_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
         version_label = ttk.Label(self.main_frame, text="version")
         version_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
@@ -113,6 +120,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._version_combo.grid(
             row=7, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
         )
+        self._version_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
         variant_info_label = ttk.Label(self.main_frame, text="info")
         variant_info_label.grid(row=8, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
@@ -128,7 +136,14 @@ class BaseFlashingDialog(WorkDialog, ABC):
         ...
 
     def update_ui(self):
-        if self._downloaded_variants:
+        for widget in self.main_frame.winfo_children():
+            if isinstance(widget, (ttk.Combobox, ttk.Checkbutton)):
+                if self._state == "working":
+                    widget.state(["disabled", "readonly"])
+                else:
+                    widget.state(["!disabled", "readonly"])
+
+        if self._downloaded_variants and self._state != "working":
             self._variant_combo.state(["!disabled", "readonly"])
             self._version_combo.state(["!disabled", "readonly"])
 
@@ -148,18 +163,15 @@ class BaseFlashingDialog(WorkDialog, ABC):
                 self._last_handled_family_target = None
 
             current_family = self._family_combo.get_selected_value()
-            if self._last_handled_family_target != (current_family, current_target):
-                self._variant_combo.select_none()
-                self._version_combo.select_none()
-                self._last_handled_variant = None
-
-                if current_family and current_target and self._downloaded_variants:
-                    self._present_variants_for_family_and_target(current_family, current_target)
-                else:
-                    self._variant_combo.set_mapping({})
-                    self._variant_combo.select_none()
-
+            if self._last_handled_family != current_family:
+                self.on_change_family(current_family)
                 if self._downloaded_variants:
+                    # not handled yet if still downloading
+                    self._last_handled_family = current_family
+
+            if self._last_handled_family_target != (current_family, current_target):
+                if current_family and current_target and self._downloaded_variants:
+                    self._try_preselect_a_variant(current_target)
                     self._last_handled_family_target = (current_family, current_target)
 
             current_variant = self._variant_combo.get_selected_value()
@@ -222,19 +234,17 @@ class BaseFlashingDialog(WorkDialog, ABC):
         set_text_if_different(self._variant_info_content_label, text)
         self._variant_info_content_label.set_url(url)
 
-    def _present_variants_for_family_and_target(self, family: str, target: TargetInfo) -> None:
-        assert self._downloaded_variants
-        assert target
+    def on_change_family(self, family: Optional[str]) -> None:
+        if not family or not self._downloaded_variants:
+            self._variant_combo.set_mapping({})
+            self._variant_combo.select_none()
+            return
 
         whole_mapping = {self._create_variant_description(v): v for v in self._downloaded_variants}
 
         filtered_mapping = {
-            item[0]: item[1]
-            for item in whole_mapping.items()
-            if item[1]["family"].startswith(family)
+            item[0]: item[1] for item in whole_mapping.items() if item[1]["family"] == family
         }
-
-        prev_variant = self._variant_combo.get_selected_value()
 
         populars = {
             key: variant
@@ -256,17 +266,20 @@ class BaseFlashingDialog(WorkDialog, ABC):
             enhanced_mapping = filtered_mapping
 
         self._variant_combo.set_mapping(enhanced_mapping)
+
+    def _try_preselect_a_variant(self, target: TargetInfo) -> None:
+        assert self._downloaded_variants
+        assert target
+
         matches = list(
             filter(
                 lambda v: self._variant_can_be_recommended_for_target(v, target),
-                filtered_mapping.values(),
+                self._variant_combo.mapping.values(),
             )
         )
 
         if len(matches) == 1:
             self._variant_combo.select_value(matches[0])
-        elif prev_variant and prev_variant in filtered_mapping.values():
-            self._variant_combo.select_value(prev_variant)
 
     def _present_versions_for_variant(self, variant: Dict[str, Any]) -> None:
         versions_mapping = {d["version"]: d for d in variant["downloads"]}
@@ -277,7 +290,12 @@ class BaseFlashingDialog(WorkDialog, ABC):
             self._version_combo.select_none()
 
     def _create_variant_description(self, variant: Dict[str, Any]) -> str:
-        return variant["vendor"] + " • " + variant.get("title", variant["model"])
+        result = variant.get("vendor", "")
+        if result:
+            result += " • "
+
+        result += variant.get("title", variant["model"])
+        return result
 
     @abstractmethod
     def _variant_can_be_recommended_for_target(self, variant: Dict[str, Any], target: TargetInfo):
@@ -311,7 +329,12 @@ class BaseFlashingDialog(WorkDialog, ABC):
             self.grid_progress_widgets()
             return
 
-        self._downloaded_variants = variants
+        if self._downloaded_variants:
+            # it looks like the user already got ahead of us by browsing a local file
+            logger.warning("Ignoring downloaded variants as variants already present")
+            return
+        else:
+            self._downloaded_variants = variants
 
     def _tweak_variants(self, variants):
         """
@@ -381,9 +404,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
         variant_info: Dict[str, Any] = self._variant_combo.get_selected_value()
         download_info: Dict[str, Any] = self._version_combo.get_selected_value()
-        assert download_info
         target_info: TargetInfo = self._target_combo.get_selected_value()
-        assert target_info
 
         self.report_progress(0, 100)
         proxy = get_runner().get_backend_proxy()
@@ -391,6 +412,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
             proxy.disconnect()
 
         work_options = self.prepare_work_get_options()
+        self.clear_log()
         threading.Thread(
             target=self._perform_work_and_update_status,
             args=[variant_info, download_info, target_info, work_options],
@@ -408,27 +430,36 @@ class BaseFlashingDialog(WorkDialog, ABC):
         target_info: TargetInfo,
         work_options: Dict[str, Any],
     ) -> None:
+        temp_file = None
         try:
-            temp_file = self._download_to_temp(download_info)
+            if download_info:
+                temp_file = self._download_to_temp(download_info)
+            else:
+                temp_file = None
 
-            self.upload_to_device(temp_file, variant_info, download_info, target_info, work_options)
+            core_result = self.perform_core_operation(
+                temp_file, variant_info, download_info, target_info, work_options
+            )
         except Exception as e:
-            self.append_text("\n" + "".join(traceback.format_exc()))
+            if isinstance(e, UserError):
+                self.append_text("\n", str(e))
+            else:
+                self.append_text("\n" + "".join(traceback.format_exc()))
             self.set_action_text("Error...")
             self.report_done(False)
             return
+        finally:
+            if temp_file:
+                os.remove(temp_file)
 
-        if self._state == "working":
-            # self.append_text("\nDone!\n")
-            # self.set_action_text("Done!")
-            self.report_done(True)
+        if core_result:
+            self.set_action_text("Done!")
         else:
-            assert self._state == "cancelling"
-            self.append_text("\nCancelled\n")
-            self.set_action_text("Cancelled")
-            self.report_done(False)
+            self.set_action_text("Error...")
 
-    def _download_to_temp(self, download_info: Dict[str, str]) -> str:
+        self.report_done(core_result)
+
+    def _download_to_temp(self, download_info: Dict[str, str]) -> Optional[str]:
         """Running in a bg thread"""
         from urllib.request import urlopen
 
@@ -438,6 +469,13 @@ class BaseFlashingDialog(WorkDialog, ABC):
         size = download_info.get("size", None)
 
         target_path = os.path.join(target_dir, target_filename)
+
+        url_protocol = download_url.split(":")[0].lower()
+        if url_protocol not in ["http", "https"]:
+            logger.debug("Copying local file %r", download_url)
+            shutil.copyfile(download_url, target_path)
+            return target_path
+
         logger.debug("Downloading from %s", download_url)
 
         self.set_action_text("Starting...")
@@ -470,7 +508,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
                         break
 
                     if self._state == "cancelling":
-                        break
+                        raise UserError("Cancelled download per user request")
 
                     fdst.write(block)
                     bytes_copied += len(block)
@@ -485,15 +523,19 @@ class BaseFlashingDialog(WorkDialog, ABC):
         return target_path
 
     @abstractmethod
-    def upload_to_device(
+    def perform_core_operation(
         self,
-        source_path: str,
-        variant_info: Dict[str, Any],
-        download_info: Dict[str, str],
-        target_info: TargetInfo,
+        source_path: Optional[str],
+        variant_info: Optional[Dict[str, Any]],
+        download_info: Optional[Dict[str, str]],
+        target_info: Optional[TargetInfo],
         work_options: Dict[str, Any],
-    ) -> None:
+    ) -> bool:
         ...
+
+    def register_settings_changed(self, event=None):
+        if self._state == "done":
+            self.allow_new_work()
 
 
 def find_uf2_property(lines: List[str], prop_name: str) -> Optional[str]:

@@ -1,3 +1,4 @@
+import io
 import os.path
 import signal
 import subprocess
@@ -8,7 +9,7 @@ from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Any, Dict, Optional, Tuple
 
-from thonny import get_runner, ui_utils
+from thonny import get_runner, get_workbench, ui_utils
 from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import BareMetalMicroPythonProxy, list_serial_ports
 from thonny.plugins.micropython.base_flashing_dialog import (
@@ -17,15 +18,24 @@ from thonny.plugins.micropython.base_flashing_dialog import (
     family_code_to_name,
 )
 from thonny.running import get_front_interpreter_for_subprocess
+from thonny.ui_utils import EnhancedBooleanVar, MappingCombobox
 
 logger = getLogger(__name__)
+
+LOCAL_VARIANT_TITLE = "<local file>"
 
 
 class ESPFlashingDialog(BaseFlashingDialog):
     def __init__(self, master, firmware_name: str, esptool_command):
         self._esptool_command = esptool_command
+        self._advanced_widgets = []
+        self._work_mode = None
+        self._proc = None
 
         super().__init__(master, firmware_name)
+
+        if not get_workbench().get_option("esptool.show_advanced_options"):
+            self._hide_advanced_options()
 
     def get_title(self):
         return f"Install {self.firmware_name} (esptool)"
@@ -34,17 +44,115 @@ class ESPFlashingDialog(BaseFlashingDialog):
         return "Target port"
 
     def get_families_mapping(self) -> Dict[str, str]:
-        codes = ["esp8266", "esp32", "esp32s2", "esp32s3", "esp32c3"]
+        codes = ["esp32", "esp32s2", "esp32s3", "esp32c3"]
+        if self.firmware_name == "MicroPython":
+            codes.insert(0, "esp8266")
+
         return {family_code_to_name(code): code for code in codes}
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows installing or updating firmware on ESP devices using the most common settings.\n"
-            + "If you need to set other options, then please use 'esptool' on the command line.\n\n"
-            + "Note that there are many variants of MicroPython for ESP devices. If the firmware provided\n"
-            + "at micropython.org/download doesn't work for your device, then there may exist better\n"
-            + "alternatives -- look around in your device's documentation or at MicroPython forum."
+            "Click the ☰ button to see all features and options. If you're stuck then check the variant's\n"
+            f"'info' page for details or ask in {self.firmware_name} forum.\n\n"
+            "NB! Some boards need to be put into a special mode before they can be managed here\n"
+            "(e.g. by holding the BOOT button while plugging in). Some require hard reset after installing."
         )
+
+    def populate_main_frame(self):
+        super().populate_main_frame()
+        self._target_info_label.grid_forget()
+        self._target_info_content_label.grid_forget()
+
+        epadx = self.get_large_padding()
+        ipadx = self.get_small_padding()
+        epady = epadx
+        ipady = ipadx
+
+        self._erase_variable = EnhancedBooleanVar(
+            value=True, modification_listener=self.register_settings_changed
+        )
+        self._erase_checkbutton = ttk.Checkbutton(
+            self.main_frame,
+            text="Erase flash before installing",
+            variable=self._erase_variable,
+        )
+        self._erase_checkbutton.grid(row=3, column=2, sticky="w", padx=(ipadx, 0), pady=(ipady, 0))
+
+        x0_target_description = (
+            "for CircuitPython and some variants of MicroPython"
+            if self.firmware_name == "CircuitPython"
+            else "for MicroPython on ESP8266 and ESP32-C3"
+        )
+        x1000_target_description = "for MicroPython on ESP32, ESP32-S2 and ESP32-S3"
+        address_mapping = {
+            f"0x0 ({x0_target_description})": "0x0",
+            f"0x1000 ({x1000_target_description})": "0x1000",
+        }
+        address_label = ttk.Label(self.main_frame, text=f"Target address")
+        address_label.grid(row=9, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
+        self._address_combo = MappingCombobox(
+            self.main_frame, exportselection=False, mapping=address_mapping
+        )
+        self._address_combo.grid(
+            row=9, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
+        )
+        self._address_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
+
+        self._advanced_widgets += [address_label, self._address_combo]
+
+        speed_mapping = {
+            "460800 (supported by some boards)": "460800",
+            "230400 (supported by many boards)": "230400",
+            "115200 (default)": "115200",
+            "38400 (a fallback to try if installation fails at higher speeds)": "38400",
+            "9600 (the last resort for ruling out installation speed problems)": "9600",
+        }
+        speed_label = ttk.Label(self.main_frame, text=f"Install speed")
+        speed_label.grid(row=10, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
+        self._speed_combo = MappingCombobox(
+            self.main_frame, exportselection=False, mapping=speed_mapping
+        )
+        self._speed_combo.grid(
+            row=10, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+        )
+        self._speed_combo.select_value("115200")
+        self._advanced_widgets += [speed_label, self._speed_combo]
+        self._speed_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
+
+        flash_mode_mapping = {
+            f"keep (reads the setting from the selected {self.firmware_name} image)": "keep",
+            "dio (next to try if 'keep' doesn't give working result)": "dio",
+            "qio (another alternative to try if 'keep' fails)": "qio",
+            "dout (a less common option)": "dout",
+            "qout (a less common option)": "qout",
+        }
+        flash_mode_label = ttk.Label(self.main_frame, text=f"Flash mode")
+        flash_mode_label.grid(row=11, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
+        self._flash_mode_combo = MappingCombobox(
+            self.main_frame, exportselection=False, mapping=flash_mode_mapping
+        )
+        self._flash_mode_combo.grid(
+            row=11, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+        )
+        self._flash_mode_combo.select_value("keep")
+        self._advanced_widgets += [flash_mode_label, self._flash_mode_combo]
+        self._flash_mode_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
+
+        self._no_stub_variable = EnhancedBooleanVar(
+            value=False, modification_listener=self.register_settings_changed
+        )
+        self._no_stub_checkbutton = ttk.Checkbutton(
+            self.main_frame,
+            text="Disable stub loader (--no-stub, some boards require this)",
+            variable=self._no_stub_variable,
+        )
+        self._no_stub_checkbutton.grid(
+            row=14, column=2, sticky="w", padx=(ipadx, 0), pady=(ipady, 0)
+        )
+        self._advanced_widgets += [self._no_stub_checkbutton]
+
+    def get_initial_log_line_count(self):
+        return 10
 
     def find_targets(self) -> Dict[str, TargetInfo]:
         def port_order(p):
@@ -72,6 +180,11 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         return result
 
+    def on_change_family(self, family: Optional[str]) -> None:
+        super().on_change_family(family)
+        if family:
+            self._address_combo.select_value(self._compute_start_address(family))
+
     def compute_target_info_text_and_label(self, target: TargetInfo) -> Tuple[str, str]:
         return target.path, "info"
 
@@ -94,60 +207,111 @@ class ESPFlashingDialog(BaseFlashingDialog):
         if port_was_used_in_thonny:
             proxy.disconnect()
 
+        if self._work_mode in ["device_info", "image_info"]:
+            self.show_log_frame()
+
         return {
+            "erase_flash": self._erase_variable.get(),
             "family": self._family_combo.get_selected_value(),
-            "flash_mode": "keep",  # TODO:
-            "erase_flash": True,  # TODO: self._erase_variable.get(),
+            "address": self._address_combo.get_selected_value(),
+            "speed": self._speed_combo.get_selected_value(),
+            "flash_mode": self._flash_mode_combo.get_selected_value(),
+            "no_stub": self._no_stub_variable.get(),
             "port_was_used_in_thonny": port_was_used_in_thonny,
         }
 
-    def upload_to_device(
+    def _download_to_temp(self, download_info: Dict[str, str]) -> Optional[str]:
+        if self._work_mode == "device_info":
+            return None
+        else:
+            return super()._download_to_temp(download_info)
+
+    def allow_single_success(self) -> bool:
+        return self._work_mode == "install"
+
+    def perform_core_operation(
         self,
         source_path: str,
         variant_info: Dict[str, Any],
         download_info: Dict[str, str],
         target_info: TargetInfo,
         work_options: Dict[str, Any],
-    ) -> None:
+    ) -> bool:
         """Running in a bg thread"""
-        assert target_info.port
 
-        if work_options["port_was_used_in_thonny"]:
+        self.report_progress(None, None)
+
+        if self._work_mode == "install":
+            assert source_path
+            assert target_info
+
+            command = self._esptool_command + [
+                "--port",
+                target_info.port.device,
+                "--chip",
+                work_options["family"],
+                "--baud",
+                work_options["speed"],
+            ]
+            if work_options["no_stub"]:
+                command.append("--no-stub")
+
+            command += [
+                "write_flash",
+                "--flash_mode",
+                work_options["flash_mode"],
+                "--flash_size",  # default changed in esptool 3.0
+                "keep",
+            ]
+
+            if work_options["erase_flash"]:
+                command.append("--erase-all")
+
+            command += [
+                work_options["address"],
+                source_path,
+            ]
+
+            progress_text = "Installing"
+
+        elif self._work_mode == "device_info":
+            assert target_info
+            command = self._esptool_command + [
+                "--port",
+                target_info.port.device,
+            ]
+            if work_options["no_stub"]:
+                command.append("--no-stub")
+            command.append("flash_id")
+
+            progress_text = "Querying device info"
+
+        elif self._work_mode == "image_info":
+            assert source_path
+            command = self._esptool_command + ["image_info", "--version", "2", source_path]
+            progress_text = "Reading image info"
+
+        else:
+            raise RuntimeError(f"Unknown work mode {self._work_mode!r}")
+
+        if (
+            self._work_mode in ["install", "device_info"]
+            and work_options["port_was_used_in_thonny"]
+        ):
+            self.append_text("Disconnecting from REPL...")
+            self.set_action_text("Disconnecting from REPL...")
             time.sleep(1.5)
 
-        erase_command = self._esptool_command + [
-            # "--no-stub",
-            "--chip",
-            work_options["family"],
-            "--port",
-            target_info.port.device,
-            "erase_flash",
-        ]
+            if not self._check_connection(target_info.port.device):
+                self.set_action_text("Problem")
+                self.append_text("Could not connect to port\n")
+                self.report_done(False)
+                return False
 
-        write_command = self._esptool_command + [
-            "--port",
-            target_info.port.device,
-            "--chip",
-            work_options["family"],
-            "write_flash",
-            "--flash_mode",
-            work_options["flash_mode"],
-            "--flash_size",  # default changed in esptool 3.0
-            "detect",
-            self._compute_start_address(work_options["family"]),
-            source_path,
-        ]
-
-        if not self._check_connection(target_info.port.device):
-            self.set_action_text("Problem")
-            self.append_text("Could not connect to port\n")
-            self.report_done(False)
-            return
-
-        if work_options["erase_flash"]:
-            self.set_action_text("Erasing flash")
-            self.append_text(subprocess.list2cmdline(erase_command) + "\n")
-            self._proc = self._create_subprocess(erase_command)
+        self.set_action_text(progress_text)
+        self.append_text(subprocess.list2cmdline(command) + "\n")
+        self._proc = self._create_subprocess(command)
+        try:
             while True:
                 line = self._proc.stdout.readline()
                 if not line:
@@ -155,31 +319,17 @@ class ESPFlashingDialog(BaseFlashingDialog):
                 self.append_text(line)
                 self.set_action_text_smart(line)
             returncode = self._proc.wait()
-            if returncode:
-                self.set_action_text("Error")
-                self.append_text("\nErase command returned with error code %s" % returncode)
-                self.report_done(False)
-                return
-            else:
-                self.append_text("Erasing done\n------------------------------------\n\n")
+        finally:
+            self._proc = None
 
-        self.set_action_text("Writing firmware")
-        self.append_text(subprocess.list2cmdline(write_command) + "\n")
-        self._proc = self._create_subprocess(write_command)
-        while True:
-            line = self._proc.stdout.readline()
-            if not line:
-                break
-            self.append_text(line)
-            self.set_action_text_smart(line)
-        returncode = self._proc.wait()
         if returncode:
             self.set_action_text("Error")
-            self.append_text("\nWrite command returned with error code %s" % returncode)
+            self.append_text("\nCommand returned with error code %s" % returncode)
         else:
             self.set_action_text("Done!")
             self.append_text("Done!")
-        self.report_done(returncode == 0)
+
+        return returncode == 0
 
     def _compute_start_address(self, family: str) -> str:
         if self.firmware_name == "MicroPython" and family in ["esp32", "esp32-s2", "esp32-s3"]:
@@ -187,78 +337,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         else:
             return "0x0"
 
-    def _old_populate_main_frame(self):
-        epadx = self.get_large_padding()
-        ipadx = self.get_small_padding()
-        epady = epadx
-        ipady = ipadx
-
-        # Port
-        port_label = ttk.Label(self.main_frame, text="Port")
-        port_label.grid(row=1, column=1, sticky="w", padx=(epadx, 0), pady=(epady, 0))
-
-        self._port_desc_variable = tk.StringVar(value="")
-        self._port_combo = ttk.Combobox(
-            self.main_frame, exportselection=False, textvariable=self._port_desc_variable, values=[]
-        )
-        self._port_combo.state(["!disabled", "readonly"])
-        self._port_combo.grid(row=1, column=2, sticky="nsew", padx=ipadx, pady=(epady, 0))
-
-        port_reload_button = ttk.Button(self.main_frame, text="Reload", command=self._reload_ports)
-        port_reload_button.grid(row=1, column=3, sticky="ew", padx=(0, epadx), pady=(epady, 0))
-
-        # Firmware
-        firmware_label = ttk.Label(self.main_frame, text="Firmware")
-        firmware_label.grid(row=2, column=1, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
-
-        self._firmware_entry = ttk.Entry(self.main_frame, width=50)
-        self._firmware_entry.grid(row=2, column=2, sticky="nsew", padx=ipadx, pady=(ipady, 0))
-
-        browse_button = ttk.Button(self.main_frame, text="Browse...", command=self._browse)
-        browse_button.grid(row=2, column=3, sticky="we", padx=(0, epadx), pady=(ipady, 0))
-
-        self.main_frame.columnconfigure(2, weight=1)
-
-        # FLASH_MODE
-        self._flashmode = tk.StringVar(None, "keep")
-        flashmode_group = ttk.Labelframe(self.main_frame, text="Flash mode")
-        flashmode_group.grid(
-            row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady * 2, 0)
-        )
-
-        self._flashmode_keep_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="From image file (keep)", variable=self._flashmode, value="keep"
-        )
-        self._flashmode_keep_radiobutton.grid(row=0, column=0, sticky="w")
-
-        # self._flashmode_variable.value=False
-        self._flashmode_qio_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Quad I/O (qio)", variable=self._flashmode, value="qio"
-        )
-        self._flashmode_qio_radiobutton.grid(row=0, column=1, sticky="w")
-
-        self._flashmode_dio_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Dual I/O (dio)", variable=self._flashmode, value="dio"
-        )
-        self._flashmode_dio_radiobutton.grid(row=1, column=0, sticky="w")
-
-        self._flashmode_dout_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Dual Output (dout)", variable=self._flashmode, value="dout"
-        )
-        self._flashmode_dout_radiobutton.grid(row=1, column=1, sticky="w")
-
-        # Erase
-        self._erase_variable = tk.BooleanVar(value=True)
-        self._erase_checkbutton = ttk.Checkbutton(
-            self.main_frame, text="Erase flash before installing", variable=self._erase_variable
-        )
-        self._erase_checkbutton.grid(
-            row=6, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady, epady)
-        )
-
-        self._reload_ports()
-
-    def _old_browse(self):
+    def _browse_image(self):
         initialdir = os.path.normpath(os.path.expanduser("~/Downloads"))
         if not os.path.isdir(initialdir):
             initialdir = None
@@ -268,9 +347,71 @@ class ESPFlashingDialog(BaseFlashingDialog):
             parent=self.winfo_toplevel(),
             initialdir=initialdir,
         )
-        if path:
-            self._firmware_entry.delete(0, "end")
-            self._firmware_entry.insert(0, path)
+        if not path:
+            return
+
+        family = self._infer_firmware_family(path)
+        if not family:
+            messagebox.showerror("Error", "Could not determine image type", parent=self)
+            return
+
+        if family not in self.get_families_mapping().values():
+            messagebox.showerror("Error", f"Unkown image type '{family!r}'", parent=self)
+            return
+
+        if not self._downloaded_variants:
+            self._downloaded_variants = []
+
+        for variant in self._downloaded_variants:
+            if variant.get("title", "") == LOCAL_VARIANT_TITLE and variant["family"] == family:
+                break
+        else:
+            variant = {
+                "title": LOCAL_VARIANT_TITLE,
+                "model": "unknown",
+                "family": family,
+                "info_url": os.path.dirname(path),
+                "downloads": [],
+            }
+            self._downloaded_variants.insert(0, variant)
+
+        for download in variant["downloads"]:
+            if download["url"] == path:
+                break
+        else:
+            download = {"version": os.path.basename(path), "url": path}
+            variant["downloads"].insert(0, download)
+
+        self._family_combo.select_value(family)
+        self.on_change_family(family)
+        self._variant_combo.select_value(variant)
+        self._present_versions_for_variant(variant)
+        self._update_variant_info()
+        self._version_combo.select_value(download)
+
+        # avoid automatic updates
+        self._last_handled_family = family
+        self._last_handled_family_target = (family, self._target_combo.get_selected_value())
+        self._last_handled_variant = variant
+
+    def _infer_firmware_family(self, path: str) -> Optional[str]:
+        from contextlib import redirect_stdout
+
+        import esptool
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            esptool.main(["image_info", "--version", "2", path])
+        out = f.getvalue()
+
+        for line in out.splitlines():
+            if line.startswith("Detected image type:"):
+                family = line.split()[-1].lower().replace("-", "").replace("'", "").replace('"', "")
+                logger.info("Detected family %r", family)
+                return family
+
+        logger.warning("Could not detect image family. image_info output:\n%s", out)
+        return None
 
     def _check_connection(self, port):
         # wait a bit in case existing connection was just closed
@@ -288,100 +429,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
             messagebox.showerror("Can't connect", str(e), master=self)
             return False
 
-    def _old_start_work(self):
-        port = self._ports_by_desc[self._port_desc_variable.get()]
-        if not self._port_desc_variable.get():
-            messagebox.showerror("Select port", "Please select port", parent=self)
-            return False
-
-        firmware_path = self._firmware_entry.get()
-        if not os.path.exists(firmware_path):
-            messagebox.showerror(
-                "Bad firmware path", "Can't find firmware, please check path", master=self
-            )
-            return False
-
-        flash_mode = self._flashmode.get()
-        erase_flash = self._erase_variable.get()
-
-        proxy = get_runner().get_backend_proxy()
-        port_was_used_in_thonny = (
-            isinstance(proxy, BareMetalMicroPythonProxy) and proxy._port == port
-        )
-        if port_was_used_in_thonny:
-            proxy.disconnect()
-
-        commands = []
-        threading.Thread(
-            target=self.work_in_thread,
-            daemon=True,
-            args=[port, firmware_path, flash_mode, erase_flash, port_was_used_in_thonny],
-        ).start()
-
-    def work_in_thread(self, port, firmware_path, flash_mode, erase_flash, port_was_used_in_thonny):
-        if port_was_used_in_thonny:
-            time.sleep(1.5)
-
-        erase_command = self._esptool_command + [
-            "--port",
-            port,
-            "erase_flash",
-        ]
-
-        write_command = self._esptool_command + [
-            "--port",
-            port,
-            "write_flash",
-            "--flash_mode",
-            flash_mode,
-            "--flash_size",  # default changed in esptool 3.0
-            "detect",
-            self._start_address,
-            firmware_path,
-        ]
-
-        if not self._check_connection(port):
-            self.set_action_text("Problem")
-            self.append_text("Could not connect to port\n")
-            self.report_done(False)
-            return
-
-        if erase_flash:
-            self.set_action_text("Erasing flash")
-            self.append_text(subprocess.list2cmdline(erase_command) + "\n")
-            self._proc = self._create_subprocess(erase_command)
-            while True:
-                line = self._proc.stdout.readline()
-                if not line:
-                    break
-                self.append_text(line)
-                self.set_action_text_smart(line)
-            returncode = self._proc.wait()
-            if returncode:
-                self.set_action_text("Error")
-                self.append_text("\nErase command returned with error code %s" % returncode)
-                self.report_done(False)
-                return
-            else:
-                self.append_text("Erasing done\n------------------------------------\n\n")
-
-        self.set_action_text("Writing firmware")
-        self.append_text(subprocess.list2cmdline(write_command) + "\n")
-        self._proc = self._create_subprocess(write_command)
-        while True:
-            line = self._proc.stdout.readline()
-            if not line:
-                break
-            self.append_text(line)
-            self.set_action_text_smart(line)
-        returncode = self._proc.wait()
-        if returncode:
-            self.set_action_text("Error")
-            self.append_text("\nWrite command returned with error code %s" % returncode)
-        else:
-            self.set_action_text("Done!")
-            self.append_text("Done!")
-        self.report_done(returncode == 0)
+    def on_click_ok_button(self):
+        self._work_mode = "install"
+        super().on_click_ok_button()
 
     def _create_subprocess(self, cmd) -> subprocess.Popen:
         return subprocess.Popen(
@@ -390,6 +440,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
     def cancel_work(self):
         super().cancel_work()
+        if not self._proc:
+            return
+
         # try gently first
         try:
             try:
@@ -406,6 +459,65 @@ class ESPFlashingDialog(BaseFlashingDialog):
         except OSError as e:
             messagebox.showerror("Error", "Could not kill subprocess: " + str(e), master=self)
             logger.error("Could not kill subprocess", exc_info=e)
+
+    def has_action_menu(self) -> bool:
+        return True
+
+    def populate_action_menu(self, action_menu: tk.Menu) -> None:
+        action_menu.add_command(
+            label="Select local MicroPython image ...", command=self._browse_image
+        )
+        action_menu.add_separator()
+
+        action_menu.add_command(
+            label="Query device info",
+            command=self._query_device_info,
+            state="normal" if self._can_query_device_info() else "disabled",
+        )
+        action_menu.add_command(
+            label="Show image info",
+            command=self._show_image_info,
+            state="normal" if self._can_query_image_info() else "disabled",
+        )
+
+        action_menu.add_separator()
+        if self._advanced_widgets[0].winfo_ismapped():
+            action_menu.add_command(
+                label="Hide install options",
+                command=self._hide_advanced_options,
+            )
+        else:
+            action_menu.add_command(
+                label="Show install options",
+                command=self._show_advanced_options,
+            )
+
+    def _query_device_info(self) -> None:
+        self._work_mode = "device_info"
+        self.start_work_and_update_ui()
+
+    def _show_image_info(self) -> None:
+        self._work_mode = "image_info"
+        self.start_work_and_update_ui()
+
+    def _can_query_device_info(self) -> bool:
+        return self._state == "idle" and self._target_combo.get_selected_value() is not None
+
+    def _can_query_image_info(self) -> bool:
+        return self._state == "idle" and self._version_combo.get_selected_value() is not None
+
+    def _hide_advanced_options(self) -> None:
+        for widget in self._advanced_widgets:
+            widget.grid_remove()
+
+        get_workbench().set_option("esptool.show_advanced_options", False)
+
+    def _show_advanced_options(self) -> None:
+        for widget in self._advanced_widgets:
+            if not widget.winfo_ismapped():
+                widget.grid()
+
+        get_workbench().set_option("esptool.show_advanced_options", True)
 
 
 def try_launch_esptool_dialog(master, firmware_name: str):
