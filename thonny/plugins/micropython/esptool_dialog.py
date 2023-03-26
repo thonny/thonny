@@ -356,8 +356,17 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         family = self._infer_firmware_family(path)
         if not family:
-            messagebox.showerror("Error", "Could not determine image type", parent=self)
-            return
+            famkey = ui_utils.ask_one_from_choices(
+                self,
+                title="Problem",
+                question="Could not determine image type.\nPlease select the correct family manually!",
+                choices=self.get_families_mapping().keys(),
+            )
+
+            if not famkey:
+                return
+
+            family = self.get_families_mapping()[famkey]
 
         if family not in self.get_families_mapping().values():
             messagebox.showerror("Error", f"Unkown image type '{family!r}'", parent=self)
@@ -405,7 +414,12 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         f = io.StringIO()
         with redirect_stdout(f):
-            esptool.main(["image_info", "--version", "2", path])
+            try:
+                esptool.main(["image_info", "--version", "2", path])
+            except Exception:
+                logger.exception("Could not infer image family")
+                return None
+
         out = f.getvalue()
 
         for line in out.splitlines():
