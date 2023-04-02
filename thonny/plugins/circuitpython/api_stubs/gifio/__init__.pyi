@@ -50,6 +50,8 @@ class GifWriter:
 class OnDiskGif:
     """Loads one frame of a GIF into memory at a time.
 
+    The code can be used in cooperation with displayio but this mode is relatively slow:
+
     .. code-block:: Python
 
       import board
@@ -64,7 +66,7 @@ class OnDiskGif:
       odg = gifio.OnDiskGif('/sample.gif')
 
       start = time.monotonic()
-      odg.next_frame() # Load the first frame
+      next_delay = odg.next_frame() # Load the first frame
       end = time.monotonic()
       overhead = end - start
 
@@ -83,6 +85,39 @@ class OnDiskGif:
           # minus the overhead measured to advance between frames.
           time.sleep(max(0, next_delay - overhead))
           next_delay = odg.next_frame()
+
+    The displayio Group and TileGrid layers can be bypassed and the image can
+    be directly blitted to the full screen. This can give a speed-up of ~4x to
+    ~6x depending on the GIF and display. This requires an LCD that uses
+    standard codes to set the update area, and which accepts RGB565_SWAPPED
+    pixel data directly:
+
+    .. code-block:: Python
+
+      # Initial set-up the same as above
+
+      # Take over display to drive directly
+      display.auto_refresh = False
+      display_bus = display.bus
+
+      # Display repeatedly & directly.
+      while True:
+          # Sleep for the frame delay specified by the GIF,
+          # minus the overhead measured to advance between frames.
+          time.sleep(max(0, next_delay - overhead))
+          next_delay = odg.next_frame()
+
+          display_bus.send(42, struct.pack(">hh", 0, odg.bitmap.width - 1))
+          display_bus.send(43, struct.pack(">hh", 0, odg.bitmap.height - 1))
+          display_bus.send(44, odg.bitmap)
+
+      # The following optional code will free the OnDiskGif and allocated resources
+      # after use. This may be required before loading a new GIF in situations
+      # where RAM is limited and the first GIF took most of the RAM.
+      odg.deinit()
+      odg = None
+      gc.collect()
+
     """
 
     def __init__(self, file: str) -> None:
@@ -92,6 +127,13 @@ class OnDiskGif:
 
         :param file file: The name of the GIF file.
         """
+        ...
+    def __enter__(self) -> OnDiskGif:
+        """No-op used by Context Managers."""
+        ...
+    def __exit__(self) -> None:
+        """Automatically deinitializes the GIF when exiting a context. See
+        :ref:`lifetime-and-contextmanagers` for more info."""
         ...
     width: int
     """Width of the gif. (read only)"""
@@ -109,3 +151,7 @@ class OnDiskGif:
     """The minimum delay found between frames. (read only)"""
     max_delay: float
     """The maximum delay found between frames. (read only)"""
+
+    def deinit(self) -> None:
+        """Release resources allocated by OnDiskGif."""
+        ...

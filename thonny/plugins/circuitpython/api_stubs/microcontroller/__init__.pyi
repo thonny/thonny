@@ -120,31 +120,31 @@ class Processor:
     Is `None` if the voltage is not available."""
 
 class ResetReason:
-    """The reason the microntroller was last reset"""
+    """The reason the microcontroller was last reset"""
 
     POWER_ON: object
     """The microcontroller was started from power off."""
 
     BROWNOUT: object
-    """The microntroller was reset due to too low a voltage."""
+    """The microcontroller was reset due to too low a voltage."""
 
     SOFTWARE: object
-    """The microntroller was reset from software."""
+    """The microcontroller was reset from software."""
 
     DEEP_SLEEP_ALARM: object
-    """The microntroller was reset for deep sleep and restarted by an alarm."""
+    """The microcontroller was reset for deep sleep and restarted by an alarm."""
 
     RESET_PIN: object
-    """The microntroller was reset by a signal on its reset pin. The pin might be connected to a reset button."""
+    """The microcontroller was reset by a signal on its reset pin. The pin might be connected to a reset button."""
 
     WATCHDOG: object
     """The microcontroller was reset by its watchdog timer."""
 
     UNKNOWN: object
-    """The microntroller restarted for an unknown reason."""
+    """The microcontroller restarted for an unknown reason."""
 
     RESCUE_DEBUG: object
-    """The microntroller was reset by the rescue debug port."""
+    """The microcontroller was reset by the rescue debug port."""
 
 class RunMode:
     """run state of the microcontroller"""

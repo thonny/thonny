@@ -9,7 +9,7 @@ from circuitpython_typing import ReadableBuffer
 
 class ParallelBus:
     """Manage updating a display over 8-bit parallel bus in the background while Python code runs. This
-    protocol may be refered to as 8080-I Series Parallel Interface in datasheets. It doesn't handle
+    protocol may be referred to as 8080-I Series Parallel Interface in datasheets. It doesn't handle
     display initialization."""
 
     def __init__(

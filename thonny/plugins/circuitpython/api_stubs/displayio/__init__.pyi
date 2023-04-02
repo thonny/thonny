@@ -21,7 +21,7 @@ import vectorio
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
 def release_displays() -> None:
-    """Releases any actively used displays so their busses and pins can be used again. This will also
+    """Releases any actively used displays so their buses and pins can be used again. This will also
     release the builtin display on boards that have one. You will need to reinitialize it yourself
     afterwards. This may take seconds to complete if an active EPaperDisplay is refreshing.
 
@@ -139,6 +139,9 @@ class Bitmap:
         display will not be properly updated unless the bitmap is
         notified of the "dirty rectangle" that encloses all modified
         pixels."""
+        ...
+    def deinit(self) -> None:
+        """Release resources allocated by Bitmap."""
         ...
 
 class ColorConverter:
