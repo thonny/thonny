@@ -132,8 +132,6 @@ class MicroPythonBackend(MainBackend, ABC):
         self._builtin_modules = []
         self._number_of_interrupts_sent = 0
 
-        self._builtins_info = self._fetch_builtins_info()
-
         MainBackend.__init__(self)
         try:
             report_time("before prepare")
@@ -394,15 +392,6 @@ class MicroPythonBackend(MainBackend, ABC):
             return []
         else:
             return self._evaluate("__thonny_helper.sys.path")
-
-    def _fetch_builtins_info(self):
-        for stubs_dir in self._get_sys_path_for_analysis():
-            for name in ["builtins.py", "builtins.pyi"]:
-                path = os.path.join(stubs_dir, name)
-                if os.path.exists(path):
-                    return parse_api_information(path)
-
-        return {}
 
     def _fetch_epoch_year(self):
         if self._using_microbit_micropython():
@@ -756,17 +745,18 @@ class MicroPythonBackend(MainBackend, ABC):
 
             # at the moment I'm assuming source is the code before cursor, not whole input
             lines = source.split("\n")
-            completions = jedi_utils.get_script_completions(
+            jedi_completions = jedi_utils.get_script_completions(
                 source,
                 len(lines),
                 len(lines[-1]),
                 "<shell>",
                 sys_path=self._get_sys_path_for_analysis(),
             )
-            for comp in completions:
-                logger.info("type: %r, name: %r", comp.type, comp.name)
             response["completions"] += [
-                comp for comp in completions if comp.type in ["module", "keyword"]
+                comp
+                for comp in jedi_completions
+                if (comp.type in ["module", "keyword"] or comp.module_name == "builtins")
+                and self._should_present_completion(comp)
             ]
         except Exception as e:
             logger.exception("Problem with jedi shell autocomplete")
@@ -782,6 +772,7 @@ class MicroPythonBackend(MainBackend, ABC):
             prefix_length=len(prefix),
             signatures=None,  # must be queried separately
             docstring=None,  # must be queried separately
+            module_path=None,
         )
 
     def _find_basic_object_info(self, object_id, context_id):
@@ -1093,28 +1084,28 @@ class MicroPythonBackend(MainBackend, ABC):
         assert not cmd.path.startswith("//")
         self._mkdir(cmd.path)
 
-    def _filter_completions(self, completions):
-        # filter out completions not applicable to MicroPython
-        result = []
-        for completion in completions:
-            if completion.name.startswith("__"):
-                continue
+    def _should_present_completion(self, completion: CompletionInfo) -> bool:
+        if completion.name.startswith("__"):
+            return False
 
-            if completion.parent() and completion.full_name:
-                parent_name = completion.parent().name
-                name = completion.name
-                root = completion.full_name.split(".")[0]
+        if completion.module_path is None and completion.type == "module":
+            # That's how jedi 0.18 (and maybe later) lists CPython stdlib modules
+            return False
 
-                # jedi proposes names from CPython builtins
-                if root in self._builtins_info and name not in self._builtins_info[root]:
-                    continue
+        if completion.module_name == "builtins":
+            # Jedi's builtins.pyi is pretty good
+            return True
 
-                if parent_name == "builtins" and name not in self._builtins_info:
-                    continue
+        if completion.module_path:
+            # if it's in our stubs folder, then it's good
+            for path in self._get_sys_path_for_analysis():
+                if os.path.normcase(completion.module_path).startswith(os.path.normcase(path)):
+                    return True
 
-            result.append({"name": completion.name})
+            # somewhere else, not good
+            return False
 
-        return result
+        return True
 
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
         return [os.path.join(os.path.dirname(__file__), "base_api_stubs")]
@@ -1414,34 +1405,6 @@ class ManagementError(ProtocolError):
         self.script = script
         self.out = out
         self.err = err
-
-
-def parse_api_information(file_path):
-    import tokenize
-
-    with tokenize.open(file_path) as fp:
-        source = fp.read()
-
-    tree = ast.parse(source)
-
-    defs = {}
-
-    # TODO: read also docstrings ?
-
-    for toplevel_item in tree.body:
-        if isinstance(toplevel_item, ast.ClassDef):
-            class_name = toplevel_item.name
-            member_names = []
-            for item in toplevel_item.body:
-                if isinstance(item, ast.FunctionDef):
-                    member_names.append(item.name)
-                elif isinstance(item, ast.Assign):
-                    # TODO: check Python 3.4
-                    "TODO: item.targets[0].id"
-
-            defs[class_name] = member_names
-
-    return defs
 
 
 def unix_dirname_basename(path):

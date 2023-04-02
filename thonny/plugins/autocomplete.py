@@ -381,7 +381,7 @@ class Completer:
 
         # Don't autocomplete in remote shells
         proxy = get_runner().get_backend_proxy()
-        if isinstance(event.widget, ShellText) and not proxy or not proxy.has_local_interpreter():
+        if isinstance(event.widget, ShellText) and (not proxy or not proxy.has_local_interpreter()):
             return False
 
         # Don't autocomplete inside comments

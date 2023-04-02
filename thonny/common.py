@@ -442,6 +442,8 @@ class CompletionInfo:
     prefix_length: int  # the number of chars to be deleted before inserting name
     signatures: Optional[List[SignatureInfo]]
     docstring: Optional[str]
+    module_name: Optional[str]
+    module_path: Optional[str]
 
 
 @dataclass

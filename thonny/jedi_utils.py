@@ -72,6 +72,8 @@ def get_completion_details(full_name: str) -> Optional[CompletionInfo]:
                     prefix_length=completion.get_completion_prefix_length(),
                     signatures=signatures,
                     docstring=completion.docstring(raw=raw_docstring),
+                    module_name=completion.module_name,
+                    module_path=completion.module_path and str(completion.module_path),
                 )
     except Exception:
         logger.exception("Jedi error")
@@ -195,6 +197,7 @@ def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInf
     # since 0.16 it does.
     # When older jedi versions were supported, I needed to ensure similar result for all supported
     # versions.
+    # Also, for MicroPython there are some completions which are not created by jedi.
 
     return CompletionInfo(
         name=completion.name and completion.name.strip("="),
@@ -204,6 +207,8 @@ def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInf
         prefix_length=completion.get_completion_prefix_length(),
         signatures=None,  # must be queried separately
         docstring=None,  # must be queried separately
+        module_name=completion.module_name,
+        module_path=completion.module_path and str(completion.module_path),
     )
 
 
