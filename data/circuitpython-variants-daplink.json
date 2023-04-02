@@ -6,12 +6,12 @@
         "info_url": "https://circuitpython.org/board/microbit_v2/",
         "downloads": [
             {
-                "version": "8.0.4",
-                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-8.0.4.combined.hex"
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-8.0.5.combined.hex"
             },
             {
-                "version": "8.1.0-beta.0",
-                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-8.1.0-beta.0.combined.hex"
+                "version": "8.1.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/microbit_v2/en_US/adafruit-circuitpython-microbit_v2-en_US-8.1.0-beta.1.combined.hex"
             },
             {
                 "version": "7.3.3",
@@ -26,12 +26,12 @@
         "info_url": "https://circuitpython.org/board/makerdiary_nrf52840_mdk/",
         "downloads": [
             {
-                "version": "8.0.4",
-                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-8.0.4.hex"
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-8.0.5.hex"
             },
             {
-                "version": "8.1.0-beta.0",
-                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-8.1.0-beta.0.hex"
+                "version": "8.1.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/makerdiary_nrf52840_mdk/en_US/adafruit-circuitpython-makerdiary_nrf52840_mdk-en_US-8.1.0-beta.1.hex"
             },
             {
                 "version": "7.3.3",
