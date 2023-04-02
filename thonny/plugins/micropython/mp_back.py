@@ -59,6 +59,7 @@ from thonny.common import (
     OBJECT_LINK_START,
     BackendEvent,
     CommandToBackend,
+    CompletionInfo,
     DistInfo,
     EOFCommand,
     ImmediateCommand,
@@ -718,6 +719,70 @@ class MicroPythonBackend(MainBackend, ABC):
         )
 
         return {"id": cmd.object_id, "info": info}
+
+    def _cmd_shell_autocomplete(self, cmd):
+        source = cmd.source
+        response = dict(source=cmd.source, row=cmd.row, column=cmd.column, completions=[])
+
+        # First the dynamic completions
+        match = re.search(
+            r"(\w+\.)*(\w+)?$", source
+        )  # https://github.com/takluyver/ubit_kernel/blob/master/ubit_kernel/kernel.py
+        if match:
+            prefix = match.group()
+            if "." in prefix:
+                obj, prefix = prefix.rsplit(".", 1)
+                names = self._evaluate(
+                    "__thonny_helper.builtins.dir({obj}) if '{obj}' in __thonny_helper.builtins.locals() or '{obj}' in __thonny_helper.builtins.globals() else []".format(
+                        obj=obj
+                    )
+                )
+            else:
+                names = self._evaluate("__thonny_helper.builtins.dir()")
+        else:
+            names = []
+            prefix = ""
+
+        # prevent TypeError (iterating over None)
+        names = names if names else []
+
+        for name in names:
+            if name.startswith(prefix) and not name.startswith("__"):
+                response["completions"].append(self._create_shell_completion(name, prefix))
+
+        # add keywords, import modules etc. from jedi
+        try:
+            from thonny import jedi_utils
+
+            # at the moment I'm assuming source is the code before cursor, not whole input
+            lines = source.split("\n")
+            completions = jedi_utils.get_script_completions(
+                source,
+                len(lines),
+                len(lines[-1]),
+                "<shell>",
+                sys_path=self._get_sys_path_for_analysis(),
+            )
+            for comp in completions:
+                logger.info("type: %r, name: %r", comp.type, comp.name)
+            response["completions"] += [
+                comp for comp in completions if comp.type in ["module", "keyword"]
+            ]
+        except Exception as e:
+            logger.exception("Problem with jedi shell autocomplete")
+
+        return response
+
+    def _create_shell_completion(self, name: str, prefix: str) -> CompletionInfo:
+        return CompletionInfo(
+            name=name,
+            name_with_symbols=name,
+            full_name=name,
+            type="name",
+            prefix_length=len(prefix),
+            signatures=None,  # must be queried separately
+            docstring=None,  # must be queried separately
+        )
 
     def _find_basic_object_info(self, object_id, context_id):
         """If object is found then returns basic info and leaves object reference
