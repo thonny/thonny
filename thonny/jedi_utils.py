@@ -1,13 +1,20 @@
 """
 Utils to handle different jedi versions
 """
+import os.path
 from logging import getLogger
 from typing import Dict, List, Optional
 
 import jedi.api.classes
 from jedi.api.classes import BaseSignature, ParamName
 
-from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
+from thonny.common import (
+    CompletionInfo,
+    NameReference,
+    SignatureInfo,
+    SignatureParameter,
+    is_local_path,
+)
 
 logger = getLogger(__name__)
 
@@ -150,10 +157,17 @@ def get_references(
 
 
 def _create_script(source: str, filename: str, sys_path: List[str]) -> jedi.api.Script:
-    if sys_path:
-        project = jedi.Project(path=sys_path[0], sys_path=sys_path, smart_sys_path=False)
+    # Beside local scripts, this is also used for MicroPython remote scripts and also in MP shell
+    if filename and is_local_path(filename) or filename is None:
+        # local and unnamed files
+        project_path = os.getcwd()
+        smart_sys_path = True
     else:
-        project = None
+        # remote files and shell
+        project_path = None
+        smart_sys_path = False
+
+    project = jedi.Project(path=project_path, sys_path=sys_path, smart_sys_path=smart_sys_path)
 
     return jedi.Script(
         code=source,
@@ -165,10 +179,8 @@ def _create_script(source: str, filename: str, sys_path: List[str]) -> jedi.api.
 def _create_interpreter(
     source: str, namespaces: List[Dict], sys_path: Optional[List[str]]
 ) -> jedi.api.Interpreter:
-    if sys_path:
-        project = jedi.Project(path=sys_path[0], sys_path=sys_path, smart_sys_path=False)
-    else:
-        project = None
+    # not using this method for remote MicroPython, therefore it's OK to use cwd as project path
+    project = jedi.Project(path=os.getcwd(), sys_path=sys_path)
     return jedi.Interpreter(source, namespaces, project=project)
 
 
@@ -198,6 +210,14 @@ def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInf
     # When older jedi versions were supported, I needed to ensure similar result for all supported
     # versions.
     # Also, for MicroPython there are some completions which are not created by jedi.
+
+    logger.info(
+        "COMPL type: %r, name: %r, path %r, mod_name: %r",
+        completion.type,
+        completion.name,
+        completion.module_path,
+        completion.module_name,
+    )
 
     return CompletionInfo(
         name=completion.name and completion.name.strip("="),

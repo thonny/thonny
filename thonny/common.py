@@ -18,6 +18,7 @@ REPL_PSEUDO_FILENAME = "<stdin>"
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
+REMOTE_PATH_MARKER = " :: "
 
 IGNORED_FILES_AND_DIRS = [
     "System Volume Information",
@@ -797,3 +798,11 @@ def is_private_python(executable):
     result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
     logger.debug("is_private_python(%r) == %r", executable, result)
     return result
+
+
+def is_remote_path(s: str) -> bool:
+    return REMOTE_PATH_MARKER in s
+
+
+def is_local_path(s: str) -> bool:
+    return not is_remote_path(s) and not s.startswith("<")

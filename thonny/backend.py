@@ -16,9 +16,9 @@ from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tupl
 
 import thonny
 from thonny import report_time
-from thonny.common import BackendEvent  # TODO: try to get rid of this
-from thonny.common import (
+from thonny.common import (  # TODO: try to get rid of this
     IGNORED_FILES_AND_DIRS,
+    BackendEvent,
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,
@@ -29,6 +29,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    is_local_path,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
@@ -353,13 +354,22 @@ class MainBackend(BaseBackend, ABC):
         try:
             from thonny import jedi_utils
 
+            sys_path = self._get_sys_path_for_analysis()
+
+            # add current dir for local files
+            """
+            if cmd.filename and is_local_path(cmd.filename):
+                sys_path.insert(0, os.getcwd())
+                logger.debug("editor autocomplete with %r", sys_path)
+            """
+
             with warnings.catch_warnings():
                 completions = jedi_utils.get_script_completions(
                     cmd.source,
                     cmd.row,
                     cmd.column,
                     cmd.filename,
-                    sys_path=self._get_sys_path_for_analysis(),
+                    sys_path=sys_path,
                 )
         except ImportError:
             completions = []

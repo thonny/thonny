@@ -344,6 +344,8 @@ class MicroPythonBackend(MainBackend, ABC):
 
         if "local_cwd" in cmd:
             self._local_cwd = cmd["local_cwd"]
+            if os.path.isdir(self._local_cwd):
+                os.chdir(self._local_cwd)
 
         super()._handle_normal_command(cmd)
 
@@ -773,6 +775,7 @@ class MicroPythonBackend(MainBackend, ABC):
             signatures=None,  # must be queried separately
             docstring=None,  # must be queried separately
             module_path=None,
+            module_name=None,
         )
 
     def _find_basic_object_info(self, object_id, context_id):

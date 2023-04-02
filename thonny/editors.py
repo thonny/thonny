@@ -14,9 +14,12 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
 from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
+    REMOTE_PATH_MARKER,
     InlineCommand,
     TextRange,
     ToplevelResponse,
+    is_local_path,
+    is_remote_path,
     is_same_path,
     normpath_with_actual_case,
     universal_dirname,
@@ -35,7 +38,6 @@ from thonny.ui_utils import (
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]
 
-REMOTE_PATH_MARKER = " :: "
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
 PYTHONLIKE_EXTENSIONS = set()
 
@@ -1214,14 +1216,6 @@ def get_saved_current_script_filename(force=True):
         filename = editor.save_file()
 
     return filename
-
-
-def is_remote_path(s):
-    return REMOTE_PATH_MARKER in s
-
-
-def is_local_path(s):
-    return not is_remote_path(s)
 
 
 def get_target_dirname_from_editor_filename(s):
