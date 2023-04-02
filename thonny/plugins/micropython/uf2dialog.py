@@ -24,7 +24,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-uf2.json"
 
     def get_families_mapping(self) -> Dict[str, str]:
-        codes = ["rp2", "samd21", "samd51", "esp32s2", "esp32s3", "nrf51", "nrf52"]
+        codes = ["rp2", "samd21", "samd51", "esp32s2", "esp32s3", "nrf52"]
         return {family_code_to_name(code): code for code in codes}
 
     def find_targets(self) -> Dict[str, TargetInfo]:

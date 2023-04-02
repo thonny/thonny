@@ -138,14 +138,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
     def update_ui(self):
         for widget in self.main_frame.winfo_children():
             if isinstance(widget, (ttk.Combobox, ttk.Checkbutton)):
-                if self._state == "working":
+                if self._state == "working" or not self._downloaded_variants:
                     widget.state(["disabled", "readonly"])
                 else:
                     widget.state(["!disabled", "readonly"])
-
-        if self._downloaded_variants and self._state != "working":
-            self._variant_combo.state(["!disabled", "readonly"])
-            self._version_combo.state(["!disabled", "readonly"])
 
         if self._state == "idle":
             targets = self.find_targets()
@@ -164,6 +160,9 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
             current_family = self._family_combo.get_selected_value()
             if self._last_handled_family != current_family:
+                logger.debug(
+                    "Changing family from %r to %r", self._last_handled_family, current_family
+                )
                 self.on_change_family(current_family)
                 if self._downloaded_variants:
                     # not handled yet if still downloading
@@ -181,8 +180,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
                     self._version_combo.set_mapping({})
                 else:
                     self._present_versions_for_variant(current_variant)
-                self._update_variant_info()
                 self._last_handled_variant = current_variant
+
+            # always updating the multipurpose label
+            self._update_variant_info()
 
         super().update_ui()
 
@@ -236,7 +237,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
     def on_change_family(self, family: Optional[str]) -> None:
         self._variant_combo.select_none()
-        
+
         if not family or not self._downloaded_variants:
             self._variant_combo.set_mapping({})
             return
@@ -333,6 +334,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
             logger.warning("Ignoring downloaded variants as variants already present")
             return
         else:
+            logger.debug("Assigning self._downloaded_variants")
             self._downloaded_variants = variants
 
     def _tweak_variants(self, variants):
