@@ -288,6 +288,7 @@
         "vendor": "LILYGO",
         "model": "LILYGO TTGO LoRa32",
         "family": "esp32",
+        "title": "TTGO LoRa32",
         "info_url": "https://micropython.org/download/LILYGO_TTGO_LORA32",
         "downloads": [
             {
@@ -298,13 +299,13 @@
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20230405-unstable-v1.19.1-1008-gc046b23ea.bin"
             }
-        ],
-        "title": "TTGO LoRa32"
+        ]
     },
     {
         "vendor": "M5 Stack",
         "model": "M5 Stack Atom",
         "family": "esp32",
+        "title": "Atom",
         "info_url": "https://micropython.org/download/M5STACK_ATOM",
         "downloads": [
             {
@@ -319,21 +320,20 @@
                 "version": "1.18",
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20220117-v1.18.bin"
             }
-        ],
-        "title": "Atom"
+        ]
     },
     {
         "vendor": "OLIMEX",
         "model": "Olimex ESP32 POE",
         "family": "esp32",
+        "title": "ESP32 POE",
         "info_url": "https://micropython.org/download/OLIMEX_ESP32_POE",
         "downloads": [
             {
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20230405-unstable-v1.19.1-1008-gc046b23ea.bin"
             }
-        ],
-        "title": "ESP32 POE"
+        ]
     },
     {
         "vendor": "Silicognition LLC",

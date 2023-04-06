@@ -148,6 +148,7 @@
         "vendor": "Arduino",
         "model": "Arduino Nano RP2040 Connect",
         "family": "rp2",
+        "title": "Nano RP2040 Connect",
         "info_url": "https://micropython.org/download/ARDUINO_NANO_RP2040_CONNECT",
         "downloads": [
             {
@@ -162,8 +163,7 @@
                 "version": "1.18",
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20220117-v1.18.uf2"
             }
-        ],
-        "title": "Nano RP2040 Connect"
+        ]
     },
     {
         "vendor": "Espressif",
@@ -317,16 +317,12 @@
         "vendor": "Pimoroni",
         "model": "Badger 2040",
         "family": "rp2",
-        "title": "Badger 2040 (with Pimoroni libraries and BadgerOS)",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "title": "Badger 2040 (with Pimoroni libraries and Badger OS)",
+        "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-badger2040-v1.19.16-micropython.uf2"
-            },
-            {
-                "version": "1.18.7",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.18.7/pimoroni-badger2040-v1.18.7-micropython.uf2"
+                "version": "0.0.2",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.2/pimoroni-badger2040-v0.0.2-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -335,11 +331,11 @@
         "model": "Badger 2040",
         "family": "rp2",
         "title": "Badger 2040 (with Pimoroni libraries)",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-badger2040-v1.19.16-micropython-without-badger-os.uf2"
+                "version": "0.0.2",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.2/pimoroni-badger2040-v0.0.2-micropython.uf2"
             }
         ]
     },
@@ -347,12 +343,12 @@
         "vendor": "Pimoroni",
         "model": "Badger 2040 W",
         "family": "rp2",
-        "title": "Badger 2040 W (with Pimoroni libraries and examples)",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "title": "Badger 2040 W (with Pimoroni libraries and Badger OS)",
+        "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-badger2040w-v1.19.16-micropython-with-examples.uf2"
+                "version": "0.0.2",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.2/pimoroni-badger2040w-v0.0.2-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -361,11 +357,11 @@
         "model": "Badger 2040 W",
         "family": "rp2",
         "title": "Badger 2040 W (with Pimoroni libraries)",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-badger2040w-v1.19.16-micropython.uf2"
+                "version": "0.0.2",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.2/pimoroni-badger2040w-v0.0.2-micropython.uf2"
             }
         ]
     },
@@ -377,8 +373,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picow_cosmic_unicorn-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picow_cosmic_unicorn-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -390,8 +386,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picow_enviro-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picow_enviro-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -403,8 +399,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picow_galactic_unicorn-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picow_galactic_unicorn-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -416,8 +412,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picow_inky_frame-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picow_inky_frame-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -429,8 +425,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picolipo_16mb-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picolipo_16mb-v1.19.18-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -466,8 +462,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picolipo_4mb-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picolipo_4mb-v1.19.18-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -503,8 +499,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-tiny2040-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-tiny2040-v1.19.18-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -540,8 +536,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-tufty2040-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-tufty2040-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -552,7 +548,11 @@
         "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
             {
-                "version": "1.19.1-230303",
+                "version": "230405",
+                "url": "https://github.com/pololu/micropython-build/releases/download/230405/micropython-pololu-3pi-2040-robot-v1.19.1-230405.uf2"
+            },
+            {
+                "version": "230303",
                 "url": "https://github.com/pololu/micropython-build/releases/download/230303/micropython-pololu-3pi-2040-robot-v1.19.1-230303.uf2"
             }
         ]
@@ -561,6 +561,7 @@
         "vendor": "Raspberry Pi",
         "model": "Pico",
         "family": "rp2",
+        "title": "Pico / Pico H",
         "info_url": "https://micropython.org/download/rp2-pico",
         "downloads": [
             {
@@ -576,8 +577,7 @@
                 "url": "https://micropython.org/resources/firmware/rp2-pico-20220117-v1.18.uf2"
             }
         ],
-        "popular": true,
-        "title": "Pico / Pico H"
+        "popular": true
     },
     {
         "vendor": "Raspberry Pi",
@@ -587,8 +587,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-pico-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-pico-v1.19.18-micropython.uf2"
             },
             {
                 "version": "1.18.7",
@@ -600,6 +600,7 @@
         "vendor": "Raspberry Pi",
         "model": "Pico W",
         "family": "rp2",
+        "title": "Pico W / Pico WH",
         "info_url": "https://micropython.org/download/rp2-pico-w",
         "downloads": [
             {
@@ -607,8 +608,7 @@
                 "url": "https://micropython.org/resources/firmware/rp2-pico-w-20230405-unstable-v1.19.1-1008-gc046b23ea.uf2"
             }
         ],
-        "popular": true,
-        "title": "Pico W / Pico WH"
+        "popular": true
     },
     {
         "vendor": "Raspberry Pi",
@@ -618,8 +618,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.19.16",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.16/pimoroni-picow-v1.19.16-micropython.uf2"
+                "version": "1.19.18",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.19.18/pimoroni-picow-v1.19.18-micropython.uf2"
             }
         ]
     },
@@ -679,14 +679,14 @@
         "vendor": "Sparkfun",
         "model": "Sparkfun SAMD51 Thing Plus",
         "family": "samd51",
+        "title": "SAMD51 Thing Plus",
         "info_url": "https://micropython.org/download/SPARKFUN_SAMD51_THING_PLUS",
         "downloads": [
             {
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20230405-unstable-v1.19.1-1008-gc046b23ea.uf2"
             }
-        ],
-        "title": "SAMD51 Thing Plus"
+        ]
     },
     {
         "vendor": "Sparkfun",
@@ -808,14 +808,14 @@
         "vendor": "WeAct",
         "model": "WeAct Studio RP2040",
         "family": "rp2",
+        "title": "Studio RP2040",
         "info_url": "https://micropython.org/download/WEACTSTUDIO",
         "downloads": [
             {
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20230405-unstable-v1.19.1-1008-gc046b23ea.uf2"
             }
-        ],
-        "title": "Studio RP2040"
+        ]
     },
     {
         "vendor": "Wemos",
@@ -853,6 +853,7 @@
         "vendor": "Wiznet",
         "model": "Wiznet W5100S-EVB-Pico",
         "family": "rp2",
+        "title": "W5100S-EVB-Pico",
         "info_url": "https://micropython.org/download/W5100S_EVB_PICO",
         "downloads": [
             {
@@ -863,20 +864,19 @@
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20230405-unstable-v1.19.1-1008-gc046b23ea.uf2"
             }
-        ],
-        "title": "W5100S-EVB-Pico"
+        ]
     },
     {
         "vendor": "Wiznet",
         "model": "Wiznet W5500-EVB-Pico",
         "family": "rp2",
+        "title": "W5500-EVB-Pico",
         "info_url": "https://micropython.org/download/W5500_EVB_PICO",
         "downloads": [
             {
                 "version": "20230405-unstable-v1.19.1-1008-gc046b23ea",
                 "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20230405-unstable-v1.19.1-1008-gc046b23ea.uf2"
             }
-        ],
-        "title": "W5500-EVB-Pico"
+        ]
     }
 ]

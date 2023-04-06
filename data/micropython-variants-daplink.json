@@ -33,8 +33,8 @@
     {
         "vendor": "BBC",
         "model": "micro:bit v2",
-        "title": "micro:bit v2 (original simplified API)",
         "family": "nrf52",
+        "title": "micro:bit v2 (original simplified API)",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
             {
