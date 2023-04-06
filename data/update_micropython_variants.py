@@ -1,6 +1,7 @@
 from html.parser import HTMLParser
 from typing import Dict, List
 
+from data.update_variants_common import add_defaults_and_downloads_to_variants
 from update_variants_common import (
     get_attr_value,
     save_variants,
@@ -14,24 +15,6 @@ base_url = "https://micropython.org/download/"
 UNSTABLE_VERSION = r"\d{8}-unstable-v1.19.1-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.18"
 PREV_RELEVANT_VERSION_IN_URL = "20220117-v1.18"
-
-PIMORONI_LATEST_STABLE_VERSION = "1.19.16"
-PIMORONI_LATEST_UNSTABLE_VERSION = None
-PIMORONI_PREV_RELEVANT_VERSION = "1.18.7"
-
-PIMORONI_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_LATEST_STABLE_VERSION}"
-PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS = PIMORONI_LATEST_UNSTABLE_VERSION and f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_LATEST_UNSTABLE_VERSION}"
-PIMORONI_PREV_RELEVANT_VERSION_ASSETS = f"https://github.com/pimoroni/pimoroni-pico/releases/expanded_assets/v{PIMORONI_PREV_RELEVANT_VERSION}"
-
-POLOLU_LATEST_STABLE_VERSION = "230303"
-POLOLU_LATEST_STABLE_VERSION_FULL = f"1.19.1-{POLOLU_LATEST_STABLE_VERSION}"
-POLOLU_LATEST_UNSTABLE_VERSION = None
-POLOLU_PREV_RELEVANT_VERSION = None
-
-POLOLU_LATEST_STABLE_VERSION_ASSETS = f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_LATEST_STABLE_VERSION}"
-POLOLU_LATEST_UNSTABLE_VERSION_ASSETS = POLOLU_LATEST_UNSTABLE_VERSION and f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_LATEST_UNSTABLE_VERSION}"
-POLOLU_PREV_RELEVANT_VERSION_ASSETS = POLOLU_PREV_RELEVANT_VERSION and f"https://github.com/pololu/micropython-build/releases/expanded_assets/{POLOLU_PREV_RELEVANT_VERSION}"
-
 
 
 class IndexParser(HTMLParser):
@@ -93,7 +76,7 @@ for mcu in map(str.strip, mcu_list.split(",")):
             "model": pvariant["board-product"],
             "family": board_family,
             "info_url": base_url + pvariant["id"],
-            "downloads": []
+            "downloads": [],
         }
         variant["downloads"]: List[Dict[str, str]]
         all_variants.append(variant)
@@ -118,199 +101,141 @@ for i, variant in enumerate(all_variants):
             rf"({UNSTABLE_VERSION})\." + extension,
             1,
             url_prefix="https://micropython.org",
-            )
+        )
 
         prev_major_url = f"https://micropython.org/resources/firmware/{variant['_id']}-{PREV_RELEVANT_VERSION_IN_URL}.{extension}"
         add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
 ########################################################
-pimoroni_variants = [
+badger_variants = [
     {
         "_id": "pimoroni-badger2040",
-        "vendor": "Pimoroni",
         "model": "Badger 2040",
-        "family": "rp2",
-        "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})-micropython-without-badger-os\.uf2$",
     },
     {
         "_id": "pimoroni-badger2040-with-badger-os",
-        "vendor": "Pimoroni",
         "model": "Badger 2040",
-        "family": "rp2",
-        "title": "Badger 2040 (with Pimoroni libraries and BadgerOS)",
-        "_download_url_pattern": rf"/pimoroni-badger2040-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython\.uf2$",
+        "title": "Badger 2040 (with Pimoroni libraries and Badger OS)",
+        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/pimoroni-badger2040-v{version}-micropython-with-badger-os.uf2",
     },
     {
         "_id": "pimoroni-badger2040w",
-        "vendor": "Pimoroni",
         "model": "Badger 2040 W",
-        "family": "rp2",
-        "_download_url_pattern": rf"/pimoroni-badger2040w-v({PIMORONI_LATEST_STABLE_VERSION})-micropython\.uf2$",
     },
     {
         "_id": "pimoroni-badger2040w-with-examples",
-        "vendor": "Pimoroni",
         "model": "Badger 2040 W",
-        "family": "rp2",
-        "title": "Badger 2040 W (with Pimoroni libraries and examples)",
-        "_download_url_pattern": rf"/pimoroni-badger2040w-v({PIMORONI_LATEST_STABLE_VERSION})\-micropython-with-examples\.uf2$",
+        "title": "Badger 2040 W (with Pimoroni libraries and Badger OS)",
+        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/pimoroni-badger2040w-v{version}-micropython-with-badger-os.uf2",
     },
+]
+
+print(f"Updating {len(badger_variants)} Badger variants")
+
+add_defaults_and_downloads_to_variants(
+    {
+        "vendor": "Pimoroni",
+        "family": "rp2",
+        "info_url": "https://github.com/pimoroni/badger2040/releases",
+        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/{id}-v{version}-micropython.uf2",
+    },
+    ["0.0.2"],
+    badger_variants,
+)
+
+for variant in badger_variants:
+    if "title" not in variant:
+        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
+
+
+all_variants += badger_variants
+
+########################################################
+pimoroni_variants = [
     {
         "_id": "pimoroni-pico",
         "vendor": "Raspberry Pi",
         "model": "Pico",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picolipo_16mb",
-        "vendor": "Pimoroni",
         "model": "Pimoroni Pico LiPo (16MB)",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picolipo_4mb",
-        "vendor": "Pimoroni",
         "model": "Pimoroni Pico LiPo (4MB)",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow",
         "vendor": "Raspberry Pi",
         "model": "Pico W",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow_cosmic_unicorn",
-        "vendor": "Pimoroni",
         "model": "Cosmic Unicorn",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow_enviro",
-        "vendor": "Pimoroni",
         "model": "Enviro",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow_galactic_unicorn",
-        "vendor": "Pimoroni",
         "model": "Galactic Unicorn",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-picow_inky_frame",
-        "vendor": "Pimoroni",
         "model": "Inky Frame",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-tiny2040",
-        "vendor": "Pimoroni",
         "model": "Tiny 2040",
-        "family": "rp2",
     },
     {
         "_id": "pimoroni-tufty2040",
-        "vendor": "Pimoroni",
         "model": "Tufty 2040",
-        "family": "rp2",
     },
 ]
+
+print(f"Updating {len(pimoroni_variants)} Pimoroni variants")
+
+add_defaults_and_downloads_to_variants(
+    {
+        "vendor": "Pimoroni",
+        "family": "rp2",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-micropython.uf2",
+    },
+    ["1.19.18", "1.18.7"],
+    pimoroni_variants,
+)
 
 for variant in pimoroni_variants:
     if "title" not in variant:
         variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
 
-    stable_url_pattern = variant.get(
-        "_download_url_pattern",
-        rf"/{variant['_id']}-v?({PIMORONI_LATEST_STABLE_VERSION})-micropython.uf2$",
-    )
 
-    old_url_pattern = stable_url_pattern.replace(
-        PIMORONI_LATEST_STABLE_VERSION, PIMORONI_PREV_RELEVANT_VERSION
-    )
-
-    variant["info_url"] = "https://github.com/pimoroni/pimoroni-pico/releases"
-    variant["downloads"] = find_download_links(
-        PIMORONI_LATEST_STABLE_VERSION_ASSETS,
-        stable_url_pattern,
-        1,
-        url_prefix="https://github.com",
-    )
-    if (PIMORONI_LATEST_UNSTABLE_VERSION):
-        unstable_url_pattern = stable_url_pattern.replace(
-            PIMORONI_LATEST_STABLE_VERSION, PIMORONI_LATEST_UNSTABLE_VERSION
-        )
-        variant["downloads"] += find_download_links(
-            PIMORONI_LATEST_UNSTABLE_VERSION_ASSETS,
-            unstable_url_pattern,
-            1,
-            url_prefix="https://github.com",
-        )
-    variant["downloads"] += find_download_links(
-        [
-            PIMORONI_PREV_RELEVANT_VERSION_ASSETS,
-            "https://github.com/pimoroni/pimoroni-pico/releases?page=2",
-        ],
-        old_url_pattern,
-        1,
-        url_prefix="https://github.com",
-    )
-
-
-print(f"Adding {len(pimoroni_variants)} Pimoroni variants")
 all_variants += pimoroni_variants
 
 ########################################################
 pololu_variants = [
     {
         "_id": "pololu-3pi-2040-robot",
-        "vendor": "Pololu",
         "model": "3pi+ 2040 Robot",
-        "family": "rp2",
-        "info_url": "https://github.com/pololu/micropython-build/releases/",
-        "_download_url_pattern": rf"/{POLOLU_LATEST_STABLE_VERSION}/micropython-pololu-3pi-2040-robot-v({POLOLU_LATEST_STABLE_VERSION_FULL})\.uf2$",
     },
 ]
 
-for variant in pololu_variants:
-    stable_url_pattern = variant.get(
-        "_download_url_pattern"
-    )
+print(f"Updating {len(pololu_variants)} Pololu variants")
+add_defaults_and_downloads_to_variants(
+    {
+        "vendor": "Pololu",
+        "family": "rp2",
+        "info_url": "https://github.com/pololu/micropython-build/releases/",
+        "_download_url_pattern": "https://github.com/pololu/micropython-build/releases/download/{version}/micropython-{id}-v1.19.1-{version}.uf2",
+    },
+    ["230405", "230303"],
+    pololu_variants,
+)
 
-    old_url_pattern = POLOLU_PREV_RELEVANT_VERSION and stable_url_pattern.replace(
-        POLOLU_LATEST_STABLE_VERSION, POLOLU_PREV_RELEVANT_VERSION
-    )
-
-    variant["downloads"] = find_download_links(
-        POLOLU_LATEST_STABLE_VERSION_ASSETS,
-        stable_url_pattern,
-        1,
-        url_prefix="https://github.com",
-    )
-    if (POLOLU_LATEST_UNSTABLE_VERSION):
-        unstable_url_pattern = stable_url_pattern.replace(
-            POLOLU_LATEST_STABLE_VERSION, POLOLU_LATEST_UNSTABLE_VERSION
-        )
-        variant["downloads"] += find_download_links(
-            POLOLU_LATEST_UNSTABLE_VERSION_ASSETS,
-            unstable_url_pattern,
-            1,
-            url_prefix="https://github.com",
-        )
-    if POLOLU_PREV_RELEVANT_VERSION_ASSETS:
-        variant["downloads"] += find_download_links(
-            [
-                POLOLU_PREV_RELEVANT_VERSION_ASSETS,
-                "https://github.com/pololu/micropython-build/releases?page=2",
-            ],
-            old_url_pattern,
-            1,
-            url_prefix="https://github.com",
-        )
-
-
-print(f"Adding {len(pololu_variants)} Pimoroni variants")
 all_variants += pololu_variants
 
 #####################################################

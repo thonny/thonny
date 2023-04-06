@@ -1,12 +1,15 @@
+import copy
 import json
 import logging
 import re
 from html.parser import HTMLParser
-from typing import Set, Dict, List, Union, Optional
+from typing import Set, Dict, List, Union, Optional, Any
 
 import requests
 
 FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+
+VARIANT_KEY_ORDER = ["vendor", "model", "family", "title", "info_url", "downloads", "popular"]
 
 
 def re_escape_model_name(name: str) -> str:
@@ -64,10 +67,10 @@ def find_download_links(
 
 def add_download_link_if_exists(links: List[Dict[str, str]], link: str, version: str) -> None:
     response = requests.head(link)
-    if response.status_code == 200:
+    if response.status_code in [200, 302]:
         links.append({"version": version, "url": link})
     else:
-        print("Could not download", link, "for", version)
+        print(f"Could not download {link}, status: {response.status_code}")
 
 
 def get_attr_value(attrs, name):
@@ -101,13 +104,37 @@ def read_page(url) -> str:
     return _page_cache[url]
 
 
-def save_variants(variants: List, extensions: List[str], families: Set[str], file_path:str,
-                  latest_prerelease_regex: Optional[str]=None):
-    variants = list(
-        filter(lambda v: v["family"] in families, variants)
-    )
+def add_defaults_and_downloads_to_variants(
+    defaults: Dict[str, str],
+    versions: List[str],
+    variants: List[Dict[str, Any]],
+) -> None:
+    for i, variant in enumerate(variants):
+        print("Updating variant", i + 1, "of", len(variants))
+        for key in defaults:
+            variant.setdefault(key, defaults[key])
 
-    for variant in variants:
+        if "downloads" not in variant:
+            variant["downloads"] = []
+
+        for version in versions:
+            download_url = variant["_download_url_pattern"].format(
+                id=variant["_id"], version=version
+            )
+
+            add_download_link_if_exists(variant["downloads"], download_url, version)
+
+
+def save_variants(
+    all_variants: List,
+    extensions: List[str],
+    families: Set[str],
+    file_path: str,
+    latest_prerelease_regex: Optional[str] = None,
+):
+    relevant_variants = list(filter(lambda v: v["family"] in families, all_variants))
+    processed_variants = []
+    for variant in relevant_variants:
         title = variant.get("title", variant["model"])
         if (title.lower() + " ").startswith(variant["vendor"].lower()):
             variant["title"] = title[len(variant["vendor"]) :].strip()
@@ -122,14 +149,21 @@ def save_variants(variants: List, extensions: List[str], families: Set[str], fil
             elif variant["model"] == "Pico W":
                 variant["title"] = title.replace("Pico W", "Pico W / Pico WH")
 
-    variants = sorted(
-        variants,
+        variant_with_ordered_keys = {}
+        for key in VARIANT_KEY_ORDER:
+            if key in variant:
+                variant_with_ordered_keys[key] = variant[key]
+
+        processed_variants.append(variant_with_ordered_keys)
+
+    processed_variants = sorted(
+        processed_variants,
         key=lambda b: (b["vendor"].upper(), b.get("title", b["model"]).upper()),
     )
 
     # get rid of temporary/private attributes
     final_variants = []
-    for variant in variants:
+    for variant in processed_variants:
         variant = variant.copy()
         relevant_downloads = []
         for extension in extensions:
@@ -148,7 +182,7 @@ def save_variants(variants: List, extensions: List[str], families: Set[str], fil
 
         final_variants.append(variant)
 
-    if latest_prerelease_regex:
+    if latest_prerelease_regex and final_variants:
         # This attribute signifies Thonny should look up the version of the latest unstable
         # from the info page of this variant and use it all variants up to the next variant
         # which has this attribute set.
