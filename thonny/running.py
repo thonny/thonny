@@ -74,6 +74,8 @@ from thonny.misc_utils import (
 from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
+PROCESS_ACK = "OK"
+
 logger = getLogger(__name__)
 
 WINDOWS_EXE = "python.exe"
@@ -1058,17 +1060,30 @@ class SubprocessProxy(BackendProxy, ABC):
             encoding="utf-8",
         )
 
-        self._send_initial_input()
+        # read success acknowledgement
+        ack = self._proc.stdout.readline()
 
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
+        # only attempt initial input if process started nicely,
+        # otherwise can't read the error from stderr
+        if ack.strip() == PROCESS_ACK:
+            self._send_initial_input()
+        else:
+            get_shell().print_error(
+                f"INTERNAL ERROR, got {ack!r} instead of {PROCESS_ACK!r}\n---\n"
+            )
+
     def _send_initial_input(self) -> None:
+        # Used for sending data sending for startup, which can't be send by other means
+        # (e.g. don't want the password to end up in logs)
+
         pass
 
     def _get_launch_cwd(self):
-        return self.get_cwd() if self.uses_local_filesystem() else None
+        return get_workbench().get_local_cwd()
 
     def _get_launcher_with_args(self):
         raise NotImplementedError()

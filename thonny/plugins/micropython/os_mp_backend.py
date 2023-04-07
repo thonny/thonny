@@ -26,6 +26,7 @@ from thonny.plugins.micropython.mp_back import (
     ends_overlap,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
+from thonny.running import PROCESS_ACK
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
@@ -383,6 +384,7 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
 
     import ast
 

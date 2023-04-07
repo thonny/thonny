@@ -23,6 +23,7 @@ from thonny.common import (
     MessageFromBackend,
     serialize_message,
 )
+from thonny.running import PROCESS_ACK
 
 logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
@@ -194,6 +195,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
 
 if __name__ == "__main__":
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
     args = ast.literal_eval(sys.argv[1])
     backend = SshCPythonBackend(**args)
     backend.mainloop()

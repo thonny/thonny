@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import thonny
 from thonny.plugins.micropython.os_mp_backend import SshUnixMicroPythonBackend
+from thonny.running import PROCESS_ACK
 
 logger = getLogger("thonny.plugins.ev3.ev3_back")
 
@@ -19,6 +20,7 @@ class EV3MicroPythonBackend(SshUnixMicroPythonBackend):
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
 
     import ast
 
