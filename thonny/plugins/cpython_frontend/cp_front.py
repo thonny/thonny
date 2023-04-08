@@ -350,7 +350,7 @@ def _get_interpreters():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
-        for minor in [7, 8, 9, 10, 11]:
+        for minor in [8, 9, 10, 11, 12]:
             for dir_ in [
                 "C:\\Python3%d" % minor,
                 "C:\\Python3%d-32" % minor,
@@ -471,9 +471,6 @@ def _get_interpreters_from_windows_registry():
     result = set()
     for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
         for version in [
-            "3.6",
-            "3.6-32",
-            "3.6-64",
             "3.8",
             "3.8-32",
             "3.8-64",

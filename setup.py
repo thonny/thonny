@@ -12,8 +12,8 @@ def recursive_files(directory):
                 paths.append(os.path.join('..', path, filename))
     return paths
 
-if sys.version_info < (3, 6):
-    raise RuntimeError("Thonny requires Python 3.6 or later")
+if sys.version_info < (3, 8):
+    raise RuntimeError("Thonny requires Python 3.8 or later")
 
 setupdir = os.path.dirname(__file__)
 
@@ -55,6 +55,8 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Education",
         "Topic :: Software Development",
         "Topic :: Software Development :: Debuggers",
