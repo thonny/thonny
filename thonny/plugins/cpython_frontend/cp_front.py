@@ -215,6 +215,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
             textvariable=self._configuration_variable,
             values=_get_interpreters(),
         )
+        self._entry.state(["!disabled", "readonly"])
 
         self._entry.grid(row=1, column=1, sticky=tk.NSEW)
 
@@ -360,8 +361,8 @@ def _get_interpreters():
                 "C:\\Program Files (x86)\\Python 3.%d" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
-                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d" % minor),
-                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d-32" % minor),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d" % minor),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d-32" % minor),
             ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
