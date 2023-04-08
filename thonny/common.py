@@ -724,13 +724,11 @@ def universal_relpath(path: str, context: str) -> str:
         return os.path.relpath(path, context)
 
 
-def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None):
-    result = ".".join(map(str, sys.version_info[:3]))
-    if sys.version_info[3] != "final":
-        result += "-" + sys.version_info[3]
+def get_python_version_string():
+    result = sys.version.split()[0]
 
-    if maxsize is not None:
-        result += " (" + ("64" if sys.maxsize > 2**32 else "32") + " bit)"
+    if sys.maxsize <= 2**32:
+        result += ", 32-bit"
 
     return result
 
