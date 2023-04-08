@@ -35,6 +35,7 @@ from thonny import (
     report_time,
 )
 from thonny.common import (
+    PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
     DebuggerCommand,
@@ -53,7 +54,7 @@ from thonny.common import (
     read_one_incoming_message_str,
     serialize_message,
     universal_relpath,
-    update_system_path, PROCESS_ACK,
+    update_system_path,
 )
 from thonny.editors import (
     extract_target_path,
@@ -73,7 +74,6 @@ from thonny.misc_utils import (
 )
 from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
-
 
 logger = getLogger(__name__)
 
@@ -1031,6 +1031,7 @@ class SubprocessProxy(BackendProxy, ABC):
         cmd_line = (
             [
                 self._mgmt_executable,
+                "-I",  # Isolated mode
                 "-u",  # unbuffered IO
                 "-B",  # don't write pyo/pyc files
                 # (to avoid problems when using different Python versions without write permissions)

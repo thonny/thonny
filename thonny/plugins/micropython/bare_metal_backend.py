@@ -8,10 +8,16 @@ from logging import getLogger
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, List, Optional, Union
 
+# make sure thonny folder is in sys.path (relevant in dev)
+thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+if thonny_container not in sys.path:
+    sys.path.insert(0, thonny_container)
+
 import thonny
 from thonny import report_time
 from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
+    PROCESS_ACK,
     BackendEvent,
     EOFCommand,
     OscEvent,
@@ -44,7 +50,6 @@ from thonny.plugins.micropython.mp_common import (
     RAW_SUBMIT_MODE,
 )
 from thonny.plugins.micropython.webrepl_connection import WebReplConnection
-from thonny.common import PROCESS_ACK
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"

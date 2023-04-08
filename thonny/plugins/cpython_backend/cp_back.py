@@ -115,7 +115,8 @@ class MainCPythonBackend(MainBackend):
         # ... and replace current-dir path item
         # start in shell mode (may be later switched to script mode)
         # required in shell mode and also required to overwrite thonny location dir
-        sys.path[0] = ""
+        assert "" not in sys.path  # for avoiding
+        sys.path.insert(0, "")
         sys.argv[:] = [""]  # empty "script name"
 
         if os.name == "nt":

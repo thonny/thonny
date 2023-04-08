@@ -10,10 +10,15 @@ from abc import ABC
 from logging import getLogger
 from typing import Callable, Optional, Union
 
+# make sure thonny folder is in sys.path (relevant in dev)
+thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+if thonny_container not in sys.path:
+    sys.path.insert(0, thonny_container)
+
 import thonny
 from thonny import report_time
 from thonny.backend import SshMixin
-from thonny.common import BackendEvent, serialize_message
+from thonny.common import PROCESS_ACK, BackendEvent, serialize_message
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
@@ -26,7 +31,6 @@ from thonny.plugins.micropython.mp_back import (
     ends_overlap,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
-from thonny.common import PROCESS_ACK
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")

@@ -7,6 +7,12 @@ import threading
 from logging import getLogger
 from threading import Thread
 
+# make sure thonny folder is in sys.path (relevant in dev)
+thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+if thonny_container not in sys.path:
+    sys.path.insert(0, thonny_container)
+
+
 import thonny
 from thonny.backend import (
     BaseBackend,
@@ -16,6 +22,7 @@ from thonny.backend import (
     interrupt_local_process,
 )
 from thonny.common import (
+    PROCESS_ACK,
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,
@@ -23,7 +30,6 @@ from thonny.common import (
     MessageFromBackend,
     serialize_message,
 )
-from thonny.common import PROCESS_ACK
 
 logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
@@ -130,9 +136,11 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
 
+        cp_launcher_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher"
+        )
         args = [
-            self._target_interpreter,
-            "-m",
+            cp_launcher_file,
             "thonny.plugins.cpython_backend.cp_launcher",
             self._cwd,
         ]

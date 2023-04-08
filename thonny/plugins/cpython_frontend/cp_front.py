@@ -3,12 +3,13 @@ import subprocess
 import sys
 import textwrap
 import tkinter as tk
+import traceback
 from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Any, Dict
 
 import thonny
-from thonny import get_runner, get_workbench, running, ui_utils
+from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -34,7 +35,10 @@ class LocalCPythonProxy(SubprocessProxy):
         executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)
-        self._send_msg(ToplevelCommand("get_environment_info"))
+        try:
+            self._send_msg(ToplevelCommand("get_environment_info"))
+        except Exception:
+            get_shell().report_exception()
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
@@ -44,7 +48,10 @@ class LocalCPythonProxy(SubprocessProxy):
         return os.path.dirname(os.path.dirname(thonny.__file__))
 
     def _get_launcher_with_args(self):
-        return ["-m", "thonny.plugins.cpython_backend.cp_launcher", self.get_cwd()]
+        launcher_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
+        )
+        return [launcher_file, self.get_cwd()]
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)
@@ -77,8 +84,10 @@ class LocalCPythonProxy(SubprocessProxy):
 
         if msg["gui_is_active"] and self._gui_update_loop_id is None:
             # Start updating
+            logger.info("Starting GUI update loop")
             self._loop_gui_update(True)
         elif not msg["gui_is_active"] and self._gui_update_loop_id is not None:
+            logger.info("Cancelling GUI update loop")
             self._cancel_gui_update_loop()
 
     def _loop_gui_update(self, force=False):
