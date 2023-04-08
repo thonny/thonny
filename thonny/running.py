@@ -94,6 +94,40 @@ io_animation_required = False
 
 _console_allocated = False
 
+BASE_MODULES = [
+    "_abc",
+    "_codecs",
+    "_collections_abc",
+    "_distutils_hack",
+    "_frozen_importlib",
+    "_frozen_importlib_external",
+    "_imp",
+    "_io",
+    "_signal",
+    "_sitebuiltins",
+    "_stat",
+    "_thread",
+    "_warnings",
+    "_weakref",
+    "_winapi",
+    "abc",
+    "builtins",
+    "codecs",
+    "encodings",
+    "genericpath",
+    "io",
+    "marshal",
+    "nt",
+    "ntpath",
+    "os",
+    "site",
+    "stat",
+    "sys",
+    "time",
+    "winreg",
+    "zipimport",
+]
+
 
 class Runner:
     def __init__(self) -> None:
@@ -1023,15 +1057,10 @@ class SubprocessProxy(BackendProxy, ABC):
                 f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
             )
             return
-            # raise UserError(
-            #    "Interpreter (%s) not found. Please recheck corresponding option!"
-            #    % self._mgmt_executable
-            # )
 
         cmd_line = (
             [
                 self._mgmt_executable,
-                "-I",  # Isolated mode
                 "-u",  # unbuffered IO
                 "-B",  # don't write pyo/pyc files
                 # (to avoid problems when using different Python versions without write permissions)
@@ -1039,6 +1068,9 @@ class SubprocessProxy(BackendProxy, ABC):
             + self._get_launcher_with_args()
             + extra_args
         )
+
+        if self.can_be_isolated():
+            cmd_line.insert(1, "-I")
 
         creationflags = 0
         if running_on_windows():
@@ -1258,6 +1290,10 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def get_exe_dirs(self):
         return self._exe_dirs
+
+    def can_be_isolated(self) -> bool:
+        """Says whether the backend may be launched with -I switch"""
+        return True
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
