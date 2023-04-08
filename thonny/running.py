@@ -53,7 +53,7 @@ from thonny.common import (
     read_one_incoming_message_str,
     serialize_message,
     universal_relpath,
-    update_system_path,
+    update_system_path, PROCESS_ACK,
 )
 from thonny.editors import (
     extract_target_path,
@@ -74,7 +74,6 @@ from thonny.misc_utils import (
 from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
 
-PROCESS_ACK = "OK"
 
 logger = getLogger(__name__)
 

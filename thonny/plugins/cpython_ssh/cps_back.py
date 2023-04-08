@@ -23,7 +23,7 @@ from thonny.common import (
     MessageFromBackend,
     serialize_message,
 )
-from thonny.running import PROCESS_ACK
+from thonny.common import PROCESS_ACK
 
 logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 

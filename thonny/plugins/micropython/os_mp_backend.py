@@ -26,7 +26,7 @@ from thonny.plugins.micropython.mp_back import (
     ends_overlap,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
-from thonny.running import PROCESS_ACK
+from thonny.common import PROCESS_ACK
 
 # Can't use __name__, because it will be "__main__"
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")

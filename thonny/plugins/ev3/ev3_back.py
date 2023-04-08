@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import thonny
 from thonny.plugins.micropython.os_mp_backend import SshUnixMicroPythonBackend
-from thonny.running import PROCESS_ACK
+from thonny.common import PROCESS_ACK
 
 logger = getLogger("thonny.plugins.ev3.ev3_back")
 

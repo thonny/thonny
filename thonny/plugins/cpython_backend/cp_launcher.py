@@ -9,7 +9,6 @@ is far from clean.
 I could also do python -c "from backend import MainCPythonBackend: MainCPythonBackend().mainloop()",
 but looks like this gives relative __file__-s on imported modules.)
 """
-from thonny.running import PROCESS_ACK
 
 # NB! This module can be also imported (when querying its path for uploading)
 if __name__ == "__main__":
@@ -37,6 +36,7 @@ if __name__ == "__main__":
 
     report_time("Before importing MainCPythonBackend")
     from thonny.plugins.cpython_backend.cp_back import MainCPythonBackend
+    from thonny.common import PROCESS_ACK
 
     thonny.prepare_thonny_user_dir()
     thonny.configure_backend_logging()

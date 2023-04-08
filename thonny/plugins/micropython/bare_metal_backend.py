@@ -44,7 +44,7 @@ from thonny.plugins.micropython.mp_common import (
     RAW_SUBMIT_MODE,
 )
 from thonny.plugins.micropython.webrepl_connection import WebReplConnection
-from thonny.running import PROCESS_ACK
+from thonny.common import PROCESS_ACK
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
