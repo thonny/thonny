@@ -402,13 +402,14 @@ def _get_interpreters():
                 "python3.9",
                 "python3.10",
                 "python3.11",
+                "python3.12",
             ]:
                 path = os.path.join(dir_, name)
                 if os.path.exists(path):
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.8", "3.9", "3.10", "3.11"]:
+        for version in ["3.8", "3.9", "3.10", "3.11", "3.12"]:
             dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
             path = os.path.join(dir_, "python3")
 
@@ -417,7 +418,7 @@ def _get_interpreters():
 
     from shutil import which
 
-    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11"]:
+    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11", "python3.12"]:
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)
