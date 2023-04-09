@@ -44,14 +44,20 @@ class LocalCPythonProxy(SubprocessProxy):
         return get_workbench().get_local_cwd()
 
     def _get_launch_cwd(self):
-        # launch in the directory containing thonny package, so that other interpreters can import it as well
-        return os.path.dirname(os.path.dirname(thonny.__file__))
+        # use a directory which doesn't contain misleading modules
+        empty_dir = os.path.join(thonny.THONNY_USER_DIR, "leave_this_empty")
+        os.makedirs(empty_dir, exist_ok=True)
+        return empty_dir
 
     def _get_launcher_with_args(self):
         launcher_file = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
         )
         return [launcher_file, self.get_cwd()]
+
+    def can_be_isolated(self) -> bool:
+        # Can't run in isolated mode as it would hide user site-packages
+        return False
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)

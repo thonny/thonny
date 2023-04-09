@@ -103,7 +103,7 @@ class MainCPythonBackend(MainBackend):
         execute_with_frontend_sys_path(self._load_plugins)
         report_time("After loading plugins")
 
-        # preceding code was run in the directory containing thonny module, now switch to provided
+        # preceding code was run in an empty directory, now switch to provided
         try:
             os.chdir(os.path.expanduser(target_cwd))
         except OSError:
