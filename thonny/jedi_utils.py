@@ -211,14 +211,6 @@ def _export_completion(completion: jedi.api.classes.Completion) -> CompletionInf
     # versions.
     # Also, for MicroPython there are some completions which are not created by jedi.
 
-    logger.info(
-        "COMPL type: %r, name: %r, path %r, mod_name: %r",
-        completion.type,
-        completion.name,
-        completion.module_path,
-        completion.module_name,
-    )
-
     return CompletionInfo(
         name=completion.name and completion.name.strip("="),
         name_with_symbols=_get_completion_name_with_symbols(completion),
