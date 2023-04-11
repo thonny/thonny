@@ -18,6 +18,7 @@ import thonny
 from thonny import report_time
 from thonny.common import (  # TODO: try to get rid of this
     IGNORED_FILES_AND_DIRS,
+    PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
     EOFCommand,
@@ -808,6 +809,9 @@ class SshMixin(UploadDownloadMixin):
 
         # stderr gets directed to stdout because of pty
         pid = stdout.readline().strip()
+        ack = stdout.readline().strip()
+        if ack != PROCESS_ACK:
+            raise RuntimeError(f"Got {ack!r} instead of expected {PROCESS_ACK!r}")
         channel = stdout.channel
 
         return RemoteProcess(self._client, channel, stdin, stdout, pid)

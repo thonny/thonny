@@ -137,12 +137,13 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         self._main_backend_is_fresh = True
 
         cp_launcher_file = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher"
+            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
         )
         args = [
+            self._target_interpreter,
             cp_launcher_file,
-            "thonny.plugins.cpython_backend.cp_launcher",
             self._cwd,
+            repr(self._main_backend_options),
         ]
         logger.info("Starting remote process: %r", args)
         return self._create_remote_process(
