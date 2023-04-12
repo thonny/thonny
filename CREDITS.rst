@@ -103,6 +103,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * jharris1993
 * Juan Falgueras
+* Juhan Oskar Hennoste (@FeldrinH)
 * Jonathan Campbell
 * Jordan Williams
 * jose1711
