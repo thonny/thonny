@@ -2,7 +2,7 @@
 import ast
 import builtins
 import functools
-import importlib
+import importlib.util
 import inspect
 import io
 import os.path
@@ -61,7 +61,7 @@ _backend = None
 
 
 class MainCPythonBackend(MainBackend):
-    def __init__(self, target_cwd):
+    def __init__(self, target_cwd, options):
         report_time("Before MainBackend")
         MainBackend.__init__(self)
         report_time("After MainBackend")
@@ -70,7 +70,9 @@ class MainCPythonBackend(MainBackend):
         _backend = self
 
         self._ini = None
+        self._options = options
         self._object_info_tweakers = []
+        self._warned_shadow_casters = set()
         self._import_handlers = {}
         self._input_queue = queue.Queue()
         self._source_preprocessors = []
@@ -102,7 +104,8 @@ class MainCPythonBackend(MainBackend):
         report_time("Before loading plugins")
         execute_with_frontend_sys_path(self._load_plugins)
         report_time("After loading plugins")
-        # sys.addaudithook(self.audit_hook)
+        if self._options.get("run.warn_module_shadowing", False):
+            sys.addaudithook(self.import_audit_hook)
 
         # preceding code was run in an empty directory, now switch to provided
         try:
@@ -119,6 +122,7 @@ class MainCPythonBackend(MainBackend):
         assert "" not in sys.path  # for avoiding
         sys.path.insert(0, "")
         sys.argv[:] = [""]  # empty "script name"
+        self._check_warn_avoided_sys_path_conflicts()
 
         if os.name == "nt":
             self._install_signal_handler()
@@ -163,44 +167,72 @@ class MainCPythonBackend(MainBackend):
     def get_main_module(self):
         return __main__
 
-    def audit_hook(self, event: str, args):
+    def import_audit_hook(self, event: str, args):
         if event == "import":
             logger.debug("detected Import event with args %r", args)
-            for i, arg in enumerate(args):
-                logger.debug("arg %r: %r", i, arg)
-            self.check_warn_bad_import(args[0].split(".")[0])
+            module_name = args[0]
+            self._check_warn_sys_path_conflict(module_name.split(".")[0])
 
-    def check_warn_bad_import(self, root_module_name: str):
+    def _check_warn_avoided_sys_path_conflicts(self):
+        if self._options.get("run.warn_module_shadowing", False):
+            return
+
+        for name in sys.modules.keys():
+            if name != "__main__":
+                self._check_warn_sys_path_conflict(name.split(".")[0])
+
+    def _check_warn_sys_path_conflict(self, root_module_name: str):
         user_dir = sys.path[0]
         if user_dir == "":
             user_dir = os.getcwd()
 
-        # TODO: check that user dir is not actually a library or site dir
+        # rough test to see if it's worth invoking the finder
+        for ext in ["", ".py", ".pyw"]:
+            pot_path = os.path.join(user_dir, root_module_name + ext)
+            if os.path.exists(pot_path):
+                logger.debug("Found import candidate: %r", pot_path)
+                break
+        else:
+            return
 
-        conflicting_base = os.path.join(user_dir, root_module_name)
-        conflicting_files = [conflicting_base + "." + ext for ext in ["py", "pyw"]]
+        # It looks like a module is about to be imported from the script dir or current dir.
+        # Is it shadowing a library module?
 
-        should_rename = False
-        if os.path.isdir(conflicting_base):
-            self._send_output(
-                f"WARNING: Directory '{os.path.basename(conflicting_base)}' shadows a library module.\n",
-                "stderr",
-            )
-            should_rename = True
+        current_spec = importlib.util.find_spec(root_module_name)
 
-        for file in conflicting_files:
-            if os.path.isfile(file):
-                self._send_output(
-                    f"WARNING: File '{os.path.basename(file)}' shadows a library module.\n",
-                    "stderr",
-                )
-                should_rename = True
+        first_entry = sys.path[0]
+        del sys.path[0]
+        try:
+            shadowed_spec = importlib.util.find_spec(root_module_name)
+        finally:
+            sys.path.insert(0, first_entry)
 
-        if should_rename:
-            self._send_output(
-                "This is likely to cause problems\n",
-                "stderr",
-            )
+        if shadowed_spec is None:
+            logger.debug("No shadowed spec")
+            return
+
+        if shadowed_spec.origin == current_spec.origin:
+            logger.debug("Equal current and shadowed spec")
+            return
+
+        logger.debug("%r shadows %r", current_spec.origin, shadowed_spec.origin)
+
+        if current_spec.origin in self._warned_shadow_casters:
+            return
+
+        if root_module_name in sys.modules:
+            # i.e. the method is called for post-import warning
+            verb = "can shadow"
+        else:
+            verb = "is shadowing"
+
+        self._send_output(
+            # using backticks, because Shell would present file path in quotes as frame link
+            f"WARNING: Your `{current_spec.origin}` {verb} the library module '{root_module_name}'. Consider renaming or moving it!\n",
+            "stderr",
+        )
+
+        self._warned_shadow_casters.add(current_spec.origin)
 
     def _read_incoming_msg_line(self) -> str:
         return self._original_stdin.readline()
@@ -300,6 +332,8 @@ class MainCPythonBackend(MainBackend):
             abs_filename = os.path.abspath(filename)
             sys.path.insert(0, os.path.dirname(abs_filename))
             __main__.__dict__["__file__"] = abs_filename
+
+        self._check_warn_avoided_sys_path_conflicts()
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)

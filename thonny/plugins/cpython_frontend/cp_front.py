@@ -53,7 +53,17 @@ class LocalCPythonProxy(SubprocessProxy):
         launcher_file = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
         )
-        return [launcher_file, self.get_cwd()]
+        return [
+            launcher_file,
+            self.get_cwd(),
+            repr(
+                {
+                    "run.warn_module_shadowing": get_workbench().get_option(
+                        "run.warn_module_shadowing"
+                    )
+                }
+            ),
+        ]
 
     def can_be_isolated(self) -> bool:
         # Can't run in isolated mode as it would hide user site-packages

@@ -40,6 +40,11 @@ class SshCPythonProxy(SubprocessProxy):
                     "user": self._user,
                     "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),
+                    "main_backend_options": {
+                        "run.warn_module_shadowing": get_workbench().get_option(
+                            "run.warn_module_shadowing"
+                        )
+                    },
                 }
             ),
         ]

@@ -21,6 +21,12 @@ class RunDebugConfigurationPage(ConfigurationPage):
             tr("Change working directory to script directory on Run / Debug"),
             row=5,
             columnspan=3,
+        )
+        self.add_checkbox(
+            "run.warn_module_shadowing",
+            tr("Warn if a user module shadows a library module"),
+            row=6,
+            columnspan=3,
             pady=(0, 20),
         )
 

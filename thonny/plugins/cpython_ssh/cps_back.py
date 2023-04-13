@@ -6,6 +6,7 @@ import sys
 import threading
 from logging import getLogger
 from threading import Thread
+from typing import Any, Dict
 
 # make sure thonny folder is in sys.path (relevant in dev)
 thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -35,8 +36,9 @@ logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
-    def __init__(self, host, user, interpreter, cwd):
+    def __init__(self, host, user, interpreter, cwd, main_backend_options: Dict[str, Any]):
         logger.info("Starting mediator for %s @ %s", user, host)
+        self._main_backend_options = main_backend_options
         password = sys.stdin.readline().strip("\r\n")
         SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()

@@ -9,9 +9,11 @@ is far from clean.
 I could also do python -c "from backend import MainCPythonBackend: MainCPythonBackend().mainloop()",
 but looks like this gives relative __file__-s on imported modules.)
 """
+import ast
 
 # NB! This module can be also imported (when querying its path for uploading)
 if __name__ == "__main__":
+    import ast
     import os.path
     import sys
 
@@ -48,5 +50,6 @@ if __name__ == "__main__":
     print(PROCESS_ACK)
 
     target_cwd = sys.argv[1]
+    options = ast.literal_eval(sys.argv[2])
     report_time("Before constructing backend")
-    MainCPythonBackend(target_cwd).mainloop()
+    MainCPythonBackend(target_cwd, options).mainloop()
