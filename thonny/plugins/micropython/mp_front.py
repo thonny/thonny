@@ -356,13 +356,13 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             return f"{cls.backend_description}  •  {url}"
         else:
             try:
-                pi = get_port_info(port)
+                p = get_port_info(port)
             except Exception:
-                pi = None
+                p = None
                 logger.exception("Could not get port info for %r", port)
 
-            if pi:
-                return f"{cls.backend_description}  • {pi.description} @ {port}"
+            if p:
+                return f"{cls.backend_description}  •  {get_serial_port_label(p)}"
             else:
                 return f"{cls.backend_description}  •  {port}"
 
@@ -454,12 +454,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
-        self._ports_by_desc = {
-            p.description
-            if p.device in p.description
-            else p.description + " @ " + p.device: p.device
-            for p in list_serial_ports()
-        }
+        self._ports_by_desc = {get_serial_port_label(p) for p in list_serial_ports()}
         self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
@@ -977,6 +972,20 @@ class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
 
 _PORTS_CACHE = []
 _PORTS_CACHE_TIME = 0
+
+
+def get_serial_port_label(p) -> str:
+    # On Windows, port is given also in description
+    desc = p.description.replace(f" ({p.device})", "")
+
+    if desc == "USB Serial Device":
+        # Try finding something less generic
+        if p.product:
+            desc = p.product
+        elif p.interface:
+            desc = p.interface
+
+    return f"{desc} @ {p.device}"
 
 
 def list_serial_ports(max_cache_age: float = 0.5):

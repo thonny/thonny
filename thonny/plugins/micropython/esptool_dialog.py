@@ -18,6 +18,7 @@ from thonny.plugins.micropython.base_flashing_dialog import (
     TargetInfo,
     family_code_to_name,
 )
+from thonny.plugins.micropython.mp_front import get_serial_port_label
 from thonny.running import get_front_interpreter_for_subprocess
 from thonny.ui_utils import EnhancedBooleanVar, MappingCombobox
 
@@ -170,11 +171,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         result = {}
         for p in sorted_ports:
-            desc = (
-                p.description
-                if p.device in p.description
-                else p.description + " (" + p.device + ")"
-            )
+            desc = get_serial_port_label(p)
             result[desc] = TargetInfo(
                 title=desc, path=None, board_id=None, family=None, model=None, port=p
             )
