@@ -38,6 +38,10 @@ class ESP32Proxy(ESPProxy):
     def get_known_usb_vids_pids(cls):
         return get_uart_adapter_vids_pids()
 
+    @classmethod
+    def _is_potential_port(cls, p):
+        return super()._is_potential_port(p) or "m5stack" in p.description.lower()
+
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):
     def _open_flashing_dialog(self, kind: str) -> None:
