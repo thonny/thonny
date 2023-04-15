@@ -272,4 +272,4 @@ def create_volume_description(path: str) -> str:
 
 
 def list_serial_ports_with_hw_info():
-    return [f"{p.device} ({p.hwid})" for p in list_serial_ports()]
+    return [f"{p.device} ({p.hwid})" for p in list_serial_ports(max_cache_age=0)]

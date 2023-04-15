@@ -355,7 +355,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
         else:
-            return f"{cls.backend_description}  •  {port}"
+            try:
+                pi = get_port_info(port)
+            except Exception:
+                pi = None
+                logger.exception("Could not get port info for %r", port)
+
+            if pi:
+                return f"{cls.backend_description}  • {pi.description} @ {port}"
+            else:
+                return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
@@ -448,7 +457,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._ports_by_desc = {
             p.description
             if p.device in p.description
-            else p.description + " (" + p.device + ")": p.device
+            else p.description + " @ " + p.device: p.device
             for p in list_serial_ports()
         }
         self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
@@ -966,7 +975,23 @@ class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
     pass
 
 
-def list_serial_ports():
+_PORTS_CACHE = []
+_PORTS_CACHE_TIME = 0
+
+
+def list_serial_ports(max_cache_age: float = 0.5):
+    global _PORTS_CACHE, _PORTS_CACHE_TIME
+
+    cur_time = time.time()
+    if cur_time - _PORTS_CACHE_TIME > max_cache_age:
+        _PORTS_CACHE = _list_serial_ports_uncached()
+        _PORTS_CACHE_TIME = cur_time
+
+    return _PORTS_CACHE
+
+
+def _list_serial_ports_uncached():
+    logger.info("Listing serial ports")
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
