@@ -40,7 +40,10 @@ class ESP32Proxy(ESPProxy):
 
     @classmethod
     def _is_potential_port(cls, p):
-        return super()._is_potential_port(p) or "m5stack" in p.description.lower()
+        lower_desc = p.description.lower()
+        return (
+            super()._is_potential_port(p) or "m5stack" in lower_desc or "esp32" in lower_desc
+        ) and "circuitpython" not in lower_desc
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):
