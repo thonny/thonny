@@ -11,7 +11,7 @@ from thonny.plugins.micropython.base_flashing_dialog import (
     TargetInfo,
     family_code_to_name,
 )
-from thonny.plugins.micropython.mp_front import list_serial_port_infos
+from thonny.plugins.micropython.mp_front import list_serial_ports
 
 logger = getLogger(__name__)
 
@@ -159,7 +159,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         self.set_action_text("Starting...")
         self.append_text("Copying to %s\n" % target_path)
 
-        ports_before = list_serial_port_infos()
+        ports_before = list_serial_ports_with_hw_info()
         logger.debug("Ports before: %s", ports_before)
 
         with open(source_path, "rb") as fsrc:
@@ -207,7 +207,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         wait_time = 0
         step = 0.2
         while wait_time < 10:
-            new_ports = list_serial_port_infos()
+            new_ports = list_serial_ports_with_hw_info()
             added_ports = set(new_ports) - set(old_ports)
             if added_ports:
                 for p in added_ports:
@@ -219,7 +219,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
             time.sleep(step)
             wait_time += step
         else:
-            logger.debug("Ports after: %s", list_serial_port_infos())
+            logger.debug("Ports after: %s", list_serial_ports_with_hw_info())
             self.set_action_text("Warning: Could not find port")
             self.append_text("Warning: Could not find port in %s seconds\n" % int(wait_time))
             # leave some time to see the warning
@@ -269,3 +269,7 @@ def create_volume_description(path: str) -> str:
             return path
     else:
         return path
+
+
+def list_serial_ports_with_hw_info():
+    return [f"{p.device} ({p.hwid})" for p in list_serial_ports()]

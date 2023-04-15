@@ -995,10 +995,6 @@ def list_serial_ports():
         os.path.islink = old_islink
 
 
-def list_serial_port_infos():
-    return [f"{p.device} ({p.hwid})" for p in list_serial_ports()]
-
-
 def port_exists(device):
     for port in list_serial_ports():
         if port.device == device:
