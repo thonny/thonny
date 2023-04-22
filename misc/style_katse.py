@@ -17,4 +17,7 @@ nb.add(tk.Frame(nb, background="pink"), text="fr")
 
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
+
+print("MAP", style.map("TNotebook.Tab"))
+print("CONF", style.configure("TNotebook.Tab"))
 root.mainloop()
