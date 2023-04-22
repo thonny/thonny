@@ -582,7 +582,6 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         {
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
-            "Tab": {"map": {"foreground": [("selected", "white")]}},
             "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
             "Active.ViewTab.TLabel": {
                 "configure": {
