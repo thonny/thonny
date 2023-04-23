@@ -2,6 +2,49 @@
 Version history
 ===============
 
+4.1.0b1 (2023-04-23)
+====================
+
+New
+---
+* Enhance esptool GUI (propose known MicroPython and CircuitPython downloads; allow setting baud rate and start address; allow querying device info), #2707, #1600, #2536, #1171, #2657
+* Ensure Thonny's backends don't get confused by other installations, #2616
+* Detect and warn if user module is shadowing a library module, #384
+* Make serial port description in interpreter selection menu more descriptive
+* Added pt_BR translation for all help pages, #2673, by @mgmalheiros
+* Add Pololu MicroPython downloads to UF2 flasher
+* Use UDisks to find mounted filesystems on Linux, #2683 by jwillikers
+
+Dependency changes
+------------------
+* Upgrade bundled Python from 3.10.9 to 3.10.11
+* Upgrade bundled Tk from 8.6.12 to 8.6.13
+* Upgrade bundled Pylint from 2.15 to 2.17
+* Upgrade bundled MyPy from 0.991 to 1.2
+
+Fixes
+-----
+* Fix a potential autocompletion error, #2162
+* Experiment with better MicroPython raw paste fallback, #2624
+* Fix sys.sdtout.write return value, #2629
+* Remove unnecessary shebangs, #2645
+* Add option for saving unnamed editors before Run/Debug, #2619
+* Fix blank editors in macOS, again, #2425
+* Fix todo view, #2681, by @kr-g
+* Minor corrections for English help pages, #2674, by @mgmalheiros
+* Upgrade bundled esptool from 4.4 to 4.5
+* Allow Linux installer to use existing Python 3.11 and 3.12, #2676
+* Require saving before using fast debugger, #2699, by @michaellass
+* Add missing translation sites in editors.py, #2705 by @nicolasdespres
+* Restore MicroPython completions in the shell, #2467, #2419
+* Don't use deprecated FLASK_ENV environment variable.
+* Add better shortcut for increasing font size in macOS, #2725
+* Avoid falling back to Python menu in simple mode on macOS, #2729
+* Various improvements to "Kind of Aqua" UI theme, #2760
+* Fix double paste with Command-V when CapsLock on, #2753
+* Fix Cut with Command-X when CapsLock on, #2753
+
+
 4.0.2 (2023-01-14)
 ==================
 * Fix Mypy logging error in the Assistant, #2491 by @kr-g and @solsword
