@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=8.6.12
+VERSION=8.6.13
 
 # COMPILE TCL/TK ####################################################
 wget https://downloads.sourceforge.net/project/tcl/Tcl/${VERSION}/tcl${VERSION}-src.tar.gz
