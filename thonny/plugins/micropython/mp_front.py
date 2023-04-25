@@ -454,7 +454,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
-        self._ports_by_desc = {get_serial_port_label(p) for p in list_serial_ports()}
+        self._ports_by_desc = {get_serial_port_label(p): p.device for p in list_serial_ports()}
         self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
