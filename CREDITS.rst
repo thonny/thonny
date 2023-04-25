@@ -118,6 +118,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Marian-Silviu Iuga
 * Marie Roald
 * Marko Ristin
+* Martin Rommel
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
