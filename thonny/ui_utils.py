@@ -836,6 +836,7 @@ def sequence_to_accelerator(sequence):
         .replace("minus", "-")
         .replace("Plus", "+")
         .replace("plus", "+")
+        .replace("space", "Space")
     )
 
     return accelerator
