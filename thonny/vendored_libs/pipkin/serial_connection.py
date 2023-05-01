@@ -18,7 +18,6 @@ logger = getLogger(__name__)
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate=115200, dtr=None, rts=None, skip_reader=False):
-
         import serial
         from serial.serialutil import SerialException
 
@@ -159,7 +158,6 @@ class DifficultSerialConnection(SerialConnection):
     """For hardening the communication protocol"""
 
     def _make_output_available(self, data, block=True):
-
         # output prompts in parts
         if FIRST_RAW_PROMPT in data or NORMAL_PROMPT in data:
             if FIRST_RAW_PROMPT in data:
