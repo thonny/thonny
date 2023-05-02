@@ -33,6 +33,15 @@ class TweakableText(tk.Text):
         self._original_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
         self._original_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
 
+        # Reference: https://wiki.tcl-lang.org/page/Modern+Bindings+for+the+Text+Widget
+        try:
+            # Make sure modernText loaded properly
+            self.tk.exprlong("$::modernText::mouseSelectIgnoresKbd")
+            # Switch to the modernText bindings
+            self.bindtags([str(self), "modernText", ".", "all"])
+        except tk.TclError as x:
+            logger.error(f"Tcl error from modernText: {x}")
+
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
         setattr(self, operation, function)
