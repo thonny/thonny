@@ -484,8 +484,10 @@ class ClosableNotebook(ttk.Notebook):
         if running_on_mac_os():
             self.bind("<ButtonPress-2>", self._right_btn_press, True)
             self.bind("<Control-Button-1>", self._right_btn_press, True)
+            self.bind("<ButtonPress-3>", self._middle_btn_press, True)
         else:
             self.bind("<ButtonPress-3>", self._right_btn_press, True)
+            self.bind("<ButtonPress-2>", self._middle_btn_press, True)
 
         # self._check_update_style()
 
@@ -533,6 +535,14 @@ class ClosableNotebook(ttk.Notebook):
             self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
         except Exception:
             logger.exception("Opening tab menu")
+
+    def _middle_btn_press(self, event):
+        try:
+            index = self.index("@%d,%d" % (event.x, event.y))
+            self.close_tab(index)
+
+        except Exception:
+            logger.exception("Middle click on tab")
 
     def _close_tab_from_menu(self):
         self.close_tab(self._popup_index)
