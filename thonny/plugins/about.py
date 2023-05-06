@@ -45,6 +45,10 @@ class AboutDialog(CommonDialogEx):
 
             if "32" not in system_desc and "64" not in system_desc:
                 system_desc += self.get_os_word_size_suffix()
+        elif sys.platform == "darwin":
+            mac_ver = platform.mac_ver()[0]
+            mac_arch = platform.mac_ver()[2]
+            system_desc = f"macOS {mac_ver} ({mac_arch})"
         else:
             release = platform.release()
             if sys.platform == "win32":
