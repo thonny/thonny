@@ -7,7 +7,7 @@ scipy==1.9.*
 matplotlib==3.5.*
 pgzero==1.2.*
 pygame==2.1.*
-flask==2.2.*
+flask==2.3.*
 pytest==7.1.*
 colorama==0.4.*
 birdseye==0.9.*
