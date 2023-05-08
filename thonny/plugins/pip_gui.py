@@ -644,11 +644,29 @@ class PipDialog(CommonDialog, ABC):
         self.title_label.grid()
         self.title_label["text"] = tr("Search results")
         self.info_text.direct_insert("1.0", tr("Searching") + " ...")
-        _start_fetching_search_results(query, self._show_search_results)
         if discard_selection:
             self._select_list_item(0)
 
-    def _show_search_results(self, query, results: Union[List[Dict], str]) -> None:
+        from concurrent.futures.thread import ThreadPoolExecutor
+
+        executor = ThreadPoolExecutor(max_workers=1)
+        results_future = executor.submit(self._fetch_search_results, query)
+
+        def poll_fetch_complete():
+            if results_future.done():
+                try:
+                    results = results_future.result()
+                except OSError as e:
+                    self._show_search_results(query, str(e))
+                else:
+                    self._show_search_results(query, results)
+
+            else:
+                get_workbench().after(200, poll_fetch_complete)
+
+        poll_fetch_complete()
+
+    def _show_search_results(self, query, results: Union[Dict[str, List[Dict]], str]) -> None:
         self._set_state("idle")
         self._clear_info_text()
 
@@ -665,18 +683,22 @@ class PipDialog(CommonDialog, ABC):
         else:
             results = self._tweak_search_results(results, query)
 
-        for item in results:
-            # self._append_info_text("•")
-            tags = ("url",)
-            if item["name"].lower() == query.lower():
-                tags = tags + ("bold",)
+        for source, source_results in results.items():
+            if len(results) > 1:
+                self._append_info_text(source + "\n", tags=("caption",))
 
-            self._append_info_text(item["name"], tags)
-            self._append_info_text("\n")
-            self.info_text.direct_insert(
-                "end", item.get("description", "<No description>").strip() + "\n"
-            )
-            self._append_info_text("\n")
+            for item in source_results:
+                # self._append_info_text("•")
+                tags = ("url",)
+                if item["name"].lower() == query.lower():
+                    tags = tags + ("bold",)
+
+                self._append_info_text(item["name"], tags)
+                self._append_info_text("\n")
+                self.info_text.direct_insert(
+                    "end", item.get("description", "<No description>").strip() + "\n"
+                )
+                self._append_info_text("\n")
 
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
@@ -908,6 +930,21 @@ class PipDialog(CommonDialog, ABC):
 
     def _tweak_search_results(self, results, query):
         return results
+
+    def _fetch_search_results(self, query: str) -> Dict[str, List[Dict[str, str]]]:
+        """Will be executed in background thread"""
+        return {"PyPI": self._perform_pypi_search(query)}
+
+    def _perform_pypi_search(self, query: str) -> List[Dict[str, str]]:
+        import urllib.parse
+        from urllib.request import urlopen
+
+        url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
+
+        with urlopen(url, timeout=10) as fp:
+            data = fp.read()
+
+        return _extract_pypi_search_results(data.decode("utf-8"))
 
 
 class BackendPipDialog(PipDialog):
@@ -1418,28 +1455,7 @@ def _start_fetching_package_info(name, url: str, fallback_url: str, completion_h
     poll_fetch_complete()
 
 
-def _start_fetching_search_results(query, completion_handler):
-    import urllib.parse
-
-    url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
-
-    url_future = _fetch_url_future(url)
-
-    def poll_fetch_complete():
-        if url_future.done():
-            try:
-                _, bin_data = url_future.result()
-                raw_data = bin_data.decode("UTF-8")
-                completion_handler(query, _extract_search_results(raw_data))
-            except Exception as e:
-                completion_handler(query, str(e))
-        else:
-            get_workbench().after(200, poll_fetch_complete)
-
-    poll_fetch_complete()
-
-
-def _extract_search_results(html_data: str) -> List:
+def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
     from html.parser import HTMLParser
 
     def get_class(attrs):
