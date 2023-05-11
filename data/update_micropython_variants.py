@@ -230,9 +230,9 @@ add_defaults_and_downloads_to_variants(
         "vendor": "Pololu",
         "family": "rp2",
         "info_url": "https://github.com/pololu/micropython-build/releases/",
-        "_download_url_pattern": "https://github.com/pololu/micropython-build/releases/download/{version}/micropython-{id}-v1.19.1-{version}.uf2",
+        "_download_url_pattern": "https://github.com/pololu/micropython-build/releases/download/{version}/micropython-{id}-v1.20.0-{version}.uf2",
     },
-    ["230405", "230303"],
+    ["230510"],
     pololu_variants,
 )
 
