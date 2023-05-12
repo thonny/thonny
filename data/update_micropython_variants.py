@@ -205,7 +205,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
-    ["1.20.1", "1.19.18"],
+    ["1.20.2", "1.19.18"],
     pimoroni_variants,
 )
 
