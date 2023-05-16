@@ -2098,8 +2098,6 @@ class _ZenityDialogProvider:
     def asksaveasfilename(cls, **options):
         args = cls._convert_common_options("Save as", **options)
         args.append("--save")
-        if options.get("confirmoverwrite", True):
-            args.append("--confirm-overwrite")
 
         filename = cls._call(args)
         if not filename:
@@ -2124,7 +2122,6 @@ class _ZenityDialogProvider:
         parent = options.get("parent", options.get("master", None))
         if parent is not None:
             args.append("--modal")
-            args.append("--attach=%s" % hex(parent.winfo_id()))
 
         for desc, pattern in options.get("filetypes", ()):
             # zenity requires star before extension
@@ -2143,7 +2140,7 @@ class _ZenityDialogProvider:
 
     @classmethod
     def _call(cls, args):
-        args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
+        args = ["zenity"] + args
         result = subprocess.run(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
         )
