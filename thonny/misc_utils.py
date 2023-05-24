@@ -50,7 +50,7 @@ def running_on_rpi() -> bool:
         # not great heuristics, I know
         machine_lower.startswith("arm")
         or machine_lower.startswith("aarch64")
-        or os.environ.get("DESKTOP_SESSION") == "LXDE-pi"
+        or "LXDE-pi" in os.environ.get("DESKTOP_SESSION", "")
     )
 
 
