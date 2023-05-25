@@ -18,7 +18,7 @@ import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import DistInfo, InlineCommand, normpath_with_actual_case, path_startswith
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line
+from thonny.misc_utils import construct_cmd_line, levenshtein_distance
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -459,19 +459,27 @@ class PipDialog(CommonDialog, ABC):
     ) -> Optional[str]:
         return None
 
+    def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
+        import json
+        from urllib.request import urlopen
+
+        """Running in a background thread"""
+        # Fetch info from PyPI
+        if version_str is None:
+            url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
+        else:
+            url = "https://pypi.org/pypi/{}/{}/json".format(
+                urllib.parse.quote(name), urllib.parse.quote(version_str)
+            )
+
+        logger.info("Downloading package info from %s", url)
+        with urlopen(url) as fp:
+            return json.load(fp)
+
     def _start_show_package_info(self, name):
         self.current_package_data = None
         # Fetch info from PyPI
         self._set_state("fetching")
-        # Following fetches info about latest version.
-        # This is OK even when we're looking an installed older version
-        # because new version may have more relevant and complete info.
-        _start_fetching_package_info(
-            name,
-            url=self._get_package_metadata_url(name, None),
-            fallback_url=self._get_package_metadata_fallback_url(name, None),
-            completion_handler=self._show_package_info,
-        )
 
         self._clear_info_text()
         self.title_label["text"] = ""
@@ -509,6 +517,33 @@ class PipDialog(CommonDialog, ABC):
                 # new package
                 self.install_button["text"] = self.get_install_button_text()
                 self.uninstall_button.grid_remove()
+
+        # start download and polling
+        from concurrent.futures.thread import ThreadPoolExecutor
+
+        executor = ThreadPoolExecutor(max_workers=1)
+        download_future = executor.submit(self._download_package_info, name, None)
+
+        def poll_fetch_complete():
+            if download_future.done():
+                try:
+                    data = download_future.result()
+                    if "info" in data and "name" not in data["info"]:
+                        # this is the case of micropython.org/pi
+                        data["info"]["name"] = name
+                    self._show_package_info(name, data)
+                except urllib.error.HTTPError as e:
+                    self._show_package_info(
+                        name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
+                    )
+                except Exception as e:
+                    self._show_package_info(
+                        name, {"info": {"name": name}, "error": str(e), "releases": {}}, e
+                    )
+            else:
+                get_workbench().after(200, poll_fetch_complete)
+
+        poll_fetch_complete()
 
     def _append_location_to_info_path(self, path):
         self.info_text.direct_insert("end", path)
@@ -550,17 +585,19 @@ class PipDialog(CommonDialog, ABC):
             return
 
         info = data["info"]
-        # NB! Json from micropython.org/pi doesn't have all the same fields as PyPI!
+        # NB! Json from micropython.org index doesn't have all the same fields as PyPI!
         self.title_label["text"] = info["name"]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att(tr("Latest stable version"), latest_stable_version)
         else:
-            write_att(tr("Latest version"), data["info"]["version"])
+            write_att(tr("Latest version"), info["version"])
         if "summary" in info:
             write_att(tr("Summary"), info["summary"])
         if "author" in info:
             write_att(tr("Author"), info["author"])
+        if "license" in info:
+            write_att(tr("License"), info["license"])
         if "home_page" in info:
             write_att(tr("Homepage"), info["home_page"], "url")
         if info.get("bugtrack_url", None):
@@ -680,8 +717,6 @@ class PipDialog(CommonDialog, ABC):
             self._append_info_text("Try opening the package directly:\n")
             self._append_info_text(query, ("url",))
             return
-        else:
-            results = self._tweak_search_results(results, query)
 
         for source, source_results in results.items():
             if len(results) > 1:
@@ -694,9 +729,11 @@ class PipDialog(CommonDialog, ABC):
                     tags = tags + ("bold",)
 
                 self._append_info_text(item["name"], tags)
+                if item.get("source"):
+                    self._append_info_text(" @ " + item["source"])
                 self._append_info_text("\n")
                 self.info_text.direct_insert(
-                    "end", item.get("description", "<No description>").strip() + "\n"
+                    "end", (item.get("description") or "<No description>").strip() + "\n"
                 )
                 self._append_info_text("\n")
 
@@ -928,23 +965,31 @@ class PipDialog(CommonDialog, ABC):
     def _is_read_only(self):
         raise NotImplementedError()
 
-    def _tweak_search_results(self, results, query):
-        return results
-
     def _fetch_search_results(self, query: str) -> Dict[str, List[Dict[str, str]]]:
         """Will be executed in background thread"""
-        return {"PyPI": self._perform_pypi_search(query)}
+        return {"*": self._perform_pypi_search(query)}
 
-    def _perform_pypi_search(self, query: str) -> List[Dict[str, str]]:
+    def _perform_pypi_search(
+        self, query: str, source: Optional[str] = None
+    ) -> List[Dict[str, str]]:
         import urllib.parse
         from urllib.request import urlopen
 
-        url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
+        logger.info("Performing PyPI search for %r", query)
 
+        url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
         with urlopen(url, timeout=10) as fp:
             data = fp.read()
 
-        return _extract_pypi_search_results(data.decode("utf-8"))
+        results = _extract_pypi_search_results(data.decode("utf-8"))
+
+        for result in results:
+            if source:
+                result["source"] = source
+            result["distance"] = levenshtein_distance(query, result["name"])
+
+        logger.info("Got %r matches")
+        return results
 
 
 class BackendPipDialog(PipDialog):
