@@ -115,6 +115,7 @@ class Workbench(tk.Tk):
     """
 
     def __init__(self) -> None:
+        logger.info("Starting Workbench")
         thonny._workbench = self
         self.ready = False
         self._closing = False
@@ -163,9 +164,12 @@ class Workbench(tk.Tk):
         )
 
         assistance.init()
+        logger.info("Creating runner")
         self._runner = Runner()
         self._init_hooks()  # Plugins may register hooks, so initialized them before to load plugins.
+        logger.info("Start loading plugins")
         self._load_plugins()
+        logger.info("Done loading plugins")
 
         self._editor_notebook = None  # type: Optional[EditorNotebook]
         self._init_fonts()
@@ -191,6 +195,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
         self._editor_notebook.focus_set()
+        logger.info("Opening views")
         self._try_action(self._open_views)
 
         self.bind_class("EditorCodeViewText", "<<CursorMove>>", self.update_title, True)
@@ -399,6 +404,7 @@ class Workbench(tk.Tk):
                 logger.debug("Skipping plug-in %s", module_name)
             else:
                 try:
+                    logger.debug("Importing %r", module_name)
                     m = importlib.import_module(module_name)
                     if hasattr(m, load_function_name):
                         modules.append(m)
@@ -409,6 +415,7 @@ class Workbench(tk.Tk):
             return getattr(m, "load_order_key", m.__name__)
 
         for m in sorted(modules, key=module_sort_key):
+            logger.debug("Loading %r", m.__file__)
             getattr(m, load_function_name)()
 
     def _init_fonts(self) -> None:
