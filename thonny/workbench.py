@@ -37,6 +37,7 @@ from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
+    get_menu_char,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
@@ -816,8 +817,7 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button.
-        # Using ≡ ("Identical to"), because ☰ ("Trigram for heaven") looks too heavy in Windows
-        self._backend_button = ttk.Button(self._statusbar, text="≡", style="Toolbutton")
+        self._backend_button = ttk.Button(self._statusbar, text=get_menu_char(), style="Toolbutton")
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -913,7 +913,7 @@ class Workbench(tk.Tk):
             value = "n/a"
 
         self._backend_conf_variable.set(value=value)
-        self._backend_button.configure(text=desc + " ⚙️")
+        self._backend_button.configure(text=desc + " " + get_menu_char())
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()

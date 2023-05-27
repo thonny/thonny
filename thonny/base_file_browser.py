@@ -12,7 +12,7 @@ from typing import Optional
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
+from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
     ask_one_from_choices,
@@ -173,7 +173,10 @@ class BaseFileBrowser(ttk.Frame):
 
         # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
         self.menu_button = ttk.Button(
-            header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton", command=self.post_button_menu
+            header_frame,
+            text=f" {get_menu_char()} ",
+            style="ViewToolbar.Toolbutton",
+            command=self.post_button_menu,
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)

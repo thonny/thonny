@@ -11,7 +11,7 @@ from typing import Optional
 
 from thonny import tktextext
 from thonny.languages import tr
-from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows
 from thonny.ui_utils import (
     CommonDialog,
     create_action_label,
@@ -106,7 +106,7 @@ class WorkDialog(CommonDialog):
 
         self._menu_button = ttk.Button(
             self.action_frame,
-            text="☰",
+            text=get_menu_char(),
             command=self.post_action_menu,
             # style="Toolbutton"
             width=3,

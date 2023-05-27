@@ -540,3 +540,10 @@ def show_command_not_available_in_flatpak_message():
         tr("This command is not available if Thonny is run via Flatpak"),
         parent=get_workbench(),
     )
+
+
+def get_menu_char():
+    if running_on_windows():
+        return "≡"  # Identical to
+    else:
+        return "☰"  # Trigram for heaven, too heavy on Windows

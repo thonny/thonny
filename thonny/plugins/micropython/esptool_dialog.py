@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import normpath_with_actual_case
-from thonny.misc_utils import running_on_windows
+from thonny.misc_utils import get_menu_char, running_on_windows
 from thonny.plugins.micropython import BareMetalMicroPythonProxy, list_serial_ports
 from thonny.plugins.micropython.base_flashing_dialog import (
     BaseFlashingDialog,
@@ -54,7 +54,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            "Click the ☰ button to see all features and options. If you're stuck then check the variant's\n"
+            f"Click the {get_menu_char()} button to see all features and options. If you're stuck then check the variant's\n"
             f"'info' page for details or ask in {self.firmware_name} forum.\n\n"
             "NB! Some boards need to be put into a special mode before they can be managed here\n"
             "(e.g. by holding the BOOT button while plugging in). Some require hard reset after installing."
