@@ -46,6 +46,10 @@ class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):
         assert kind == ""
         show_uf2_installer(self, firmware_name="MicroPython")
 
+    @property
+    def allow_webrepl(self):
+        return True
+
 
 def load_plugin():
     add_micropython_backend(

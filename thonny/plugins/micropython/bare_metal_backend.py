@@ -132,7 +132,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._last_inferred_fs_mount: Optional[str] = None
 
         self._submit_mode = args.get("submit_mode", None)
-        if self._submit_mode is None:
+        if self._submit_mode is None or self._connected_over_webrepl():
             self._submit_mode = self._infer_submit_mode()
 
         self._write_block_size = args.get("write_block_size", None)
