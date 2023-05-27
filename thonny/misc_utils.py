@@ -8,11 +8,14 @@ import subprocess
 import sys
 import threading
 import time
+from logging import getLogger
 from typing import Optional, Sequence, Tuple
 
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
 PUBLIC_KEY_WITH_PASS_METHOD = "public-key (with passphrase)"
+
+logger = getLogger(__name__)
 
 
 def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
@@ -96,25 +99,30 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
         finally:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
     if sys.platform == "linux":
-        from dbus_next.errors import DBusError
+        try:
+            from dbus_next.errors import DBusError
+        except ImportError:
+            logger.info("Could not import dbus_next, falling back to mount command")
+            return list_volumes_with_mount_command()
 
         from thonny.udisks import list_volumes_sync
 
-        mount_points = []
         try:
-            mount_points = list_volumes_sync()
+            return list_volumes_sync()
         except DBusError as error:
-            # Fallback to using the 'mount' command on Linux if the Udisks D-Bus service is unavailable.
             if "org.freedesktop.DBus.Error.ServiceUnknown" not in error.text:
                 raise
-            mount_output = subprocess.check_output("mount").splitlines()
-            mount_points = [x.split()[2].decode("utf-8") for x in mount_output]
-        return mount_points
+            # Fallback to using the 'mount' command on Linux if the Udisks D-Bus service is unavailable.
+            return list_volumes_with_mount_command()
     else:
         # 'posix' means we're on *BSD or OSX (Mac).
         # Call the unix "mount" command to list the mounted volumes.
-        mount_output = subprocess.check_output("mount").splitlines()
-        return [x.split()[2].decode("utf-8") for x in mount_output]
+        return list_volumes_with_mount_command()
+
+
+def list_volumes_with_mount_command() -> Sequence[str]:
+    mount_output = subprocess.check_output("mount").splitlines()
+    return [x.split()[2].decode("utf-8") for x in mount_output]
 
 
 def get_win_volume_name(path: str) -> str:
