@@ -9,6 +9,7 @@ from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
     BareMetalMicroPythonProxy,
+    get_uart_adapter_vids_pids,
 )
 from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
@@ -79,6 +80,10 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
     def _is_potential_port(cls, p):
         # micro:bit's v2's CircuitPython does not have CircuitPython's port attributes
         if (p.vid, p.pid) == (0x0D28, 0x0204):
+            return True
+
+        # ESP-32 and ESP32-C3 can have CP but don't expose this information
+        if (p.vid, p.pid) in get_uart_adapter_vids_pids():
             return True
 
         if "adafruit_board_toolkit" in sys.modules or sys.platform == "linux":
