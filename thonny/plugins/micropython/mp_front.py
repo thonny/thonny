@@ -640,6 +640,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             port_name = self.get_selected_port_name()
             get_workbench().set_option(self.backend_name + ".port", port_name)
             if self.webrepl_selected():
+                if not self._webrepl_url_var.get().lower().startswith("ws://"):
+                    messagebox.showerror(
+                        "Bad URL", "WebREPL URL should start with ws://", parent=self
+                    )
+                    return False
+
                 get_workbench().set_option(
                     self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
                 )
