@@ -36,7 +36,8 @@ class ESP8266Proxy(ESPProxy):
 class ESP32Proxy(ESPProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
-        return get_uart_adapter_vids_pids()
+        # See https://github.com/espressif/usb-pids for 0x303A
+        return get_uart_adapter_vids_pids() | {(0x303A, None)}
 
     @classmethod
     def _is_potential_port(cls, p):
