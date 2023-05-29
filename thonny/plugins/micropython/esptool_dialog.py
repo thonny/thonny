@@ -83,9 +83,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
         x0_target_description = (
             "for CircuitPython and some variants of MicroPython"
             if self.firmware_name == "CircuitPython"
-            else "for MicroPython on ESP8266 and ESP32-C3"
+            else "for MicroPython on ESP8266, ESP32-S3 and ESP32-C3"
         )
-        x1000_target_description = "for MicroPython on ESP32, ESP32-S2 and ESP32-S3"
+        x1000_target_description = "for MicroPython on ESP32 and ESP32-S2"
         address_mapping = {
             f"0x0 ({x0_target_description})": "0x0",
             f"0x1000 ({x1000_target_description})": "0x1000",
@@ -330,7 +330,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         return returncode == 0
 
     def _compute_start_address(self, family: str) -> str:
-        if self.firmware_name == "MicroPython" and family in ["esp32", "esp32-s2", "esp32-s3"]:
+        if self.firmware_name == "MicroPython" and family in ["esp32", "esp32-s2"]:
             return "0x1000"
         else:
             return "0x0"
