@@ -57,7 +57,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
             f"Click the {get_menu_char()} button to see all features and options. If you're stuck then check the variant's\n"
             f"'info' page for details or ask in {self.firmware_name} forum.\n\n"
             "NB! Some boards need to be put into a special mode before they can be managed here\n"
-            "(e.g. by holding the BOOT button while plugging in). Some require hard reset after installing."
+            "(e.g. by holding the BOOT button while plugging in). Some require hard reset after installing.\n\n"
+            f"You may need to tweak the install options ({get_menu_char()}) if the selected {self.firmware_name} variant doesn't match\n"
+            f"your device precisely. For example, you may need to set flash-mode to 'dio' or flash-size to 'detect'."
         )
 
     def populate_main_frame(self):
@@ -140,6 +142,33 @@ class ESPFlashingDialog(BaseFlashingDialog):
         self._advanced_widgets += [flash_mode_label, self._flash_mode_combo]
         self._flash_mode_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
+        flash_size_mapping = {
+            f"keep (reads the setting from the selected {self.firmware_name} image)": "keep",
+            "detect (uses detection based on flash ID)": "detect",
+            "256KB": "256KB",
+            "512KB": "512KB",
+            "1MB": "1MB",
+            "2MB": "2MB",
+            "4MB": "4MB",
+            "8MB": "8MB",
+            "16MB": "16MB",
+            "32MB": "32MB",
+            "64MB": "64MB",
+            "2MB-c1": "2MB-c1",
+            "4MB-c1": "4MB-c1",
+        }
+        flash_size_label = ttk.Label(self.main_frame, text=f"Flash size")
+        flash_size_label.grid(row=12, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
+        self._flash_size_combo = MappingCombobox(
+            self.main_frame, exportselection=False, mapping=flash_size_mapping
+        )
+        self._flash_size_combo.grid(
+            row=12, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
+        )
+        self._flash_size_combo.select_value("keep")
+        self._advanced_widgets += [flash_size_label, self._flash_size_combo]
+        self._flash_size_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
+
         self._no_stub_variable = EnhancedBooleanVar(
             value=False, modification_listener=self.register_settings_changed
         )
@@ -214,6 +243,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
             "address": self._address_combo.get_selected_value(),
             "speed": self._speed_combo.get_selected_value(),
             "flash_mode": self._flash_mode_combo.get_selected_value(),
+            "flash_size": self._flash_size_combo.get_selected_value(),
             "no_stub": self._no_stub_variable.get(),
             "port_was_used_in_thonny": port_was_used_in_thonny,
         }
@@ -258,8 +288,8 @@ class ESPFlashingDialog(BaseFlashingDialog):
                 "write_flash",
                 "--flash_mode",
                 work_options["flash_mode"],
-                "--flash_size",  # default changed in esptool 3.0
-                "keep",
+                "--flash_size",
+                work_options["flash_size"],
             ]
 
             if work_options["erase_flash"]:
