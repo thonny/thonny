@@ -1035,7 +1035,13 @@ def _list_serial_ports_uncached():
         else:
             from serial.tools.list_ports import comports
 
-        return comports()
+        irrelevant = ["/dev/cu.Bluetooth-Incoming-Port", "/dev/cu.iPhone-WirelessiAP"]
+        result = []
+        for p in comports():
+            if p.device not in irrelevant:
+                result.append(p)
+
+        return result
     finally:
         os.path.islink = old_islink
 
