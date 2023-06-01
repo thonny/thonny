@@ -5,7 +5,7 @@ from tkinter import ttk
 from thonny import is_portable, languages, ui_utils
 
 STD_MODE_TEXT = "Standard"
-RPI_MODE_TEXT = "Raspberry Pi"
+RPI_MODE_TEXT = "Raspberry Pi (simple)"
 
 
 class FirstRunWindow(tk.Tk):
