@@ -24,6 +24,7 @@ Version history
 * Rename "Raspberry Pi" initial settings to "Raspberry Pi (simple)"
 * Update several translations
 * Add en_GB translation
+* Attempt to overcome "window was deleted before its visibility changed" error
 
 
 4.1.0b1 (2023-04-23)

@@ -2225,7 +2225,13 @@ def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     _place_window(dlg, master, width=width, height=height)
 
     dlg.lift()
-    dlg.wait_visibility()
+    try:
+        dlg.wait_visibility()
+    except tk.TclError as e:
+        if "was deleted before its visibility changed" in str(e):
+            return
+        else:
+            raise
 
     if modal:
         try:
