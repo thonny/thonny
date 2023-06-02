@@ -5,7 +5,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 BASE_LANGUAGE_CODE = "en_US"
-BASE_LANGUAGE_NAME = "English (US)"
+BASE_LANGUAGE_NAME = "English (US) [default]"
 
 # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
