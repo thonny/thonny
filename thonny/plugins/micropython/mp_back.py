@@ -170,6 +170,8 @@ class MicroPythonBackend(MainBackend, ABC):
         logger.debug("Helper code:\n%s", script)
         self._check_perform_just_in_case_gc()
         self._execute_without_output(script)
+
+        # See https://github.com/thonny/thonny/issues/1877
         # self._execute_without_output(
         #     dedent(
         #         """
@@ -179,6 +181,7 @@ class MicroPythonBackend(MainBackend, ABC):
         #     """
         #     ).strip()
         # )
+        
         report_time("prepared helpers")
 
         self._update_cwd()
