@@ -110,6 +110,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jordan Williams
 * jose1711
 * José Carlos García
+* Karolina Surma (@befeleme)
 * Kaspar Papli
 * Kauri Raba
 * kr-g
