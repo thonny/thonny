@@ -2,6 +2,28 @@
 Version history
 ===============
 
+4.1.0 (2023-06-02)
+==================
+* Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
+* Fix code completion shortcut displayed in macOS menu
+* Close tab on middle click (#2767) by @mrexodia
+* Make package manager support new micropython-lib index (#2777)
+* Report macOS version instead of Darwin version in the About box
+* Implement more flexible Raspberry Pi detection
+* Enable thonny to open and save files with zenity 3.91+ (#2786) by @befeleme
+* Make dbus_next dependency optional (#2771)
+* Recognize ESP32 as possible CircuitPython device
+* Add menu indicator for back-end switcher
+* Allow WebREPL for RP2040 backend (experimental)
+* Use correct MicroPython start address (0x0 instead of 0x1000) when flashing ESP32-S3
+* Recognize ESP32 devices by VID 0x303A
+* Don't show irrelevant ports in port selector (e.g. /dev/cu.Bluetooth-Incoming-Port)
+* Allow setting --flash-size in ESP flasher, #2801
+* Rename "Raspberry Pi" initial settings to "Raspberry Pi (simple)"
+* Update several translations
+* Add en_GB translation
+
+
 4.1.0b1 (2023-04-23)
 ====================
 
