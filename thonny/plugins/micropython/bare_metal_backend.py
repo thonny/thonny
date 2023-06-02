@@ -275,12 +275,25 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             interrupt_times = None
             advice_delay = 2.0
 
-        self._process_output_until_active_prompt(
-            self._send_output,
-            interrupt_times=interrupt_times,
-            poke_after=poke_after,
-            advice_delay=advice_delay,
-        )
+        while True:
+            self._process_output_until_active_prompt(
+                self._send_output,
+                interrupt_times=interrupt_times,
+                poke_after=poke_after,
+                advice_delay=advice_delay,
+            )
+            # It's worth being more paranoid with first prompt. Let's see if we can get welcome text
+            self._welcome_text = self._fetch_welcome_text()
+            if self._welcome_text is None:
+                logger.warning(
+                    "Could not get welcome text on first try. Continuing waiting for active prompt"
+                )
+                # Assuming a program is running and user will interrupt if needed. I.e. no need to poke anymore
+                poke_after = None
+            else:
+                break
+
+        report_time("got welcome")
 
         if clean:
             self._clear_repl()
@@ -292,9 +305,31 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return RAW_PASTE_SUBMIT_MODE
 
-    def _fetch_welcome_text(self) -> str:
+    def _fetch_welcome_text(self) -> Optional[str]:
         self._write(NORMAL_MODE_CMD)
-        out, err = self._capture_output_until_active_prompt()
+        result = self._connection.soft_read_until(NORMAL_PROMPT, timeout=0.5)
+        if not result.endswith(NORMAL_PROMPT):
+            # Something's fishy... maybe we were not in active prompt.
+            # This can happen with WebREPL, which outputs a gratuitous >>> upon connection when program is running,
+            # See https://github.com/thonny/thonny/issues/2104
+            self._connection.unread(result)
+            return None
+
+        self._last_prompt = NORMAL_PROMPT
+        result: bytes = result[: -len(NORMAL_PROMPT)]
+
+        # are there extra preceding prompts?
+        while True:
+            for prompt in [FIRST_RAW_PROMPT, RAW_PROMPT, NORMAL_PROMPT]:
+                pos = result.find(prompt)
+                if pos >= 0:
+                    split = pos + len(prompt)
+                    self._send_output(result[:split].decode("utf-8"), "stdout")
+                    result = result[split:]
+            else:
+                break
+
+        out = result.decode("utf-8")
         welcome_text = out.strip("\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace("\r\n", "\n")

@@ -138,9 +138,6 @@ class MicroPythonBackend(MainBackend, ABC):
             self._process_until_initial_prompt(
                 interrupt=args.get("interrupt_on_connect", False) or clean, clean=clean
             )
-            if self._welcome_text is None:
-                self._welcome_text = self._fetch_welcome_text()
-                report_time("got welcome")
 
             # Get rid of the welcome text which was printed while searching for prompt
             self.send_message(
@@ -382,9 +379,6 @@ class MicroPythonBackend(MainBackend, ABC):
             return None
 
         return "pycom" in self._welcome_text.lower()
-
-    def _fetch_welcome_text(self) -> str:
-        raise NotImplementedError()
 
     def _fetch_builtin_modules(self):
         raise NotImplementedError()
