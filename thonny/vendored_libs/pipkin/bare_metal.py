@@ -247,7 +247,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
-                __pipkin_helper.os.stat({path!r})
+                __pipkin_helper.os.stat({path!r}) and None
             except __pipkin_helper.builtins.OSError:
                 pass
             else:
@@ -274,7 +274,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
-                __pipkin_helper.os.stat({path!r})
+                __pipkin_helper.os.stat({path!r}) and None
             except __pipkin_helper.builtins.OSError:
                 __pipkin_helper.os.mkdir({path!r})
         """

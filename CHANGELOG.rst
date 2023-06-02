@@ -25,6 +25,7 @@ Version history
 * Update several translations
 * Add en_GB translation
 * Attempt to overcome "window was deleted before its visibility changed" error
+* Fix pipkin directory creation in paste mode (e.g. package installation via WebREPL)
 
 
 4.1.0b1 (2023-04-23)
