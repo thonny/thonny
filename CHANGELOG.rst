@@ -5,6 +5,7 @@ Version history
 4.1.0 (2023-06-02)
 ==================
 * Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
+* Fix remote Python 3 (SSH) connection error (regression introduced in 4.1.0b1)
 * Fix code completion shortcut displayed in macOS menu
 * Add command "Show esptool version" for ESP flasher
 * Don't disconnect for ESP flasher commands which don't touch the device

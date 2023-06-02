@@ -138,8 +138,10 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
 
-        cp_launcher_file = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
+        cp_launcher_file = (
+            self._get_remote_program_directory()
+            + "/"
+            + "thonny/plugins/cpython_backend/cp_launcher.py"
         )
         args = [
             self._target_interpreter,
