@@ -181,7 +181,7 @@ class MicroPythonBackend(MainBackend, ABC):
         #     """
         #     ).strip()
         # )
-        
+
         report_time("prepared helpers")
 
         self._update_cwd()
