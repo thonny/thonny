@@ -103,7 +103,10 @@ class PipDialog(CommonDialog, ABC):
         self.search_box.bind("<B1-Motion>", lambda _: self.search_box.focus_set())
 
         self.search_button = ttk.Button(
-            header_frame, text=self.get_search_button_text(), command=self._on_search, width=25
+            header_frame,
+            text=self.get_search_button_text(),
+            command=self._on_search,
+            width=len(self.get_search_button_text()) + 2,
         )
         self.search_button.grid(row=1, column=1, sticky="nse", padx=(self.get_small_padding(), 0))
 
