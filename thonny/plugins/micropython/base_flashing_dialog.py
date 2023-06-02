@@ -408,9 +408,6 @@ class BaseFlashingDialog(WorkDialog, ABC):
         target_info: TargetInfo = self._target_combo.get_selected_value()
 
         self.report_progress(0, 100)
-        proxy = get_runner().get_backend_proxy()
-        if isinstance(proxy, BareMetalMicroPythonProxy):
-            proxy.disconnect()
 
         work_options = self.prepare_work_get_options()
         self.clear_log()

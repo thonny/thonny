@@ -225,13 +225,17 @@ class ESPFlashingDialog(BaseFlashingDialog):
     def get_action_text_max_length(self):
         return 35
 
+    def _work_needs_disconnect(self):
+        return self._work_mode not in ["image_info", "esptool_version"]
+
     def prepare_work_get_options(self) -> Dict[str, Any]:
         target = self._target_combo.get_selected_value()
         proxy = get_runner().get_backend_proxy()
         port_was_used_in_thonny = (
             isinstance(proxy, BareMetalMicroPythonProxy) and proxy._port == target.port.device
         )
-        if port_was_used_in_thonny:
+        if port_was_used_in_thonny and self._work_needs_disconnect():
+            logger.info("Disconnecting")
             proxy.disconnect()
 
         if self._work_mode in ["device_info", "image_info", "esptool_version"]:
@@ -329,10 +333,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         else:
             raise RuntimeError(f"Unknown work mode {self._work_mode!r}")
 
-        if (
-            self._work_mode in ["install", "device_info"]
-            and work_options["port_was_used_in_thonny"]
-        ):
+        if self._work_needs_disconnect() and work_options["port_was_used_in_thonny"]:
             self.append_text("Disconnecting from REPL...")
             self.set_action_text("Disconnecting from REPL...")
             time.sleep(1.5)
