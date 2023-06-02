@@ -47,7 +47,8 @@ class MicroPythonConnection:
                 self._read_buffer.extend(self._read_queue.get(True, timer.time_left))
             except queue.Empty:
                 if timeout_is_soft:
-                    return b""
+                    # logger.debug("Could not read %r bytes", size)
+                    break
                 else:
                     logger.error(
                         "Could not read expected %s bytes in %s seconds. Bytes read: %r",
@@ -58,7 +59,11 @@ class MicroPythonConnection:
                     raise ReadingTimeoutError(read_bytes=self._read_buffer)
 
         try:
+            # fetching everything so that I can log remaining more easily
+            self._fetch_to_buffer()
             data = self._read_buffer[:size]
+            if data:
+                logger.debug("Returning %r, leaving %r", data, self._read_buffer[size:])
             return data
         finally:
             del self._read_buffer[:size]
@@ -103,7 +108,10 @@ class MicroPythonConnection:
             assert timeout_is_soft
             size = len(self._read_buffer)
 
+        self._fetch_to_buffer()
         data = self._read_buffer[:size]
+        if data:
+            logger.debug("Returning %r, leaving %r", data, self._read_buffer[size:])
         del self._read_buffer[:size]
         return data
 
@@ -118,6 +126,8 @@ class MicroPythonConnection:
             self.check_for_error()
 
         try:
+            if self._read_buffer:
+                logger.debug("Returing all of %r", self._read_buffer)
             return self._read_buffer
         finally:
             self._read_buffer = bytearray()
@@ -143,11 +153,15 @@ class MicroPythonConnection:
         elif isinstance(data, bytes):
             data = bytearray(data)
 
+        logger.debug("Unreading %r to %r", data, self._read_buffer)
         self._read_buffer = data + self._read_buffer
 
     def write(self, data: bytes) -> int:
         """Writing"""
         raise NotImplementedError()
+
+    def _log_write(self, data, num_written: int) -> None:
+        logger.debug("wrote %d %r", num_written, data)
 
     def _log_data(self, data: bytes) -> None:
         print(
@@ -163,6 +177,7 @@ class MicroPythonConnection:
     def _make_output_available(self, data: bytes, block: bool = True) -> None:
         # self._log_data(data)
         if data:
+            logger.debug("Received %r", data)
             self._read_queue.put(data, block=block)
             self.num_bytes_received += len(data)
 

@@ -35,6 +35,7 @@ class SubprocessConnection(MicroPythonConnection):
             data = data.decode(self.encoding)
         self._proc.write(data)
         self._proc.flush()
+        self._log_write(data, len(data))
         return len(data)
 
     def _listen_output(self):

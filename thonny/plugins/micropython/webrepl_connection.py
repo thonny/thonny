@@ -126,7 +126,9 @@ class WebReplConnection(MicroPythonConnection):
 
     def write(self, data: bytes) -> int:
         self._write_queue.put_nowait(data)
-        return self._write_responses.get()
+        result = self._write_responses.get()
+        self._log_write(data, result)
+        return result
 
     async def _async_close(self):
         await self._ws.close()

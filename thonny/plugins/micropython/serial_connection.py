@@ -87,6 +87,7 @@ class SerialConnection(MicroPythonConnection):
     def write(self, data: bytes) -> int:
         size = self._serial.write(data)
         # print(data.decode(), end="")
+        self._log_write(data, size)
         assert size == len(data)
         return len(data)
 
@@ -127,6 +128,7 @@ class SerialConnection(MicroPythonConnection):
                     else:
                         to_be_published = data[: e.start]
                         data = data[e.start :]
+                        logger.debug("Holding back incomplete Unicode %r", data)
 
                 if to_be_published:
                     self._make_output_available(to_be_published)

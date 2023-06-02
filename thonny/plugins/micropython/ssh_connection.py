@@ -30,6 +30,7 @@ class SshProcessConnection(MicroPythonConnection):
             data = data.encode(self.encoding)
         self._stdin.write(data)
         self._stdin.flush()
+        self._log_write(data, len(data))
         return len(data)
 
     def _listen_output(self):
