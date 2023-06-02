@@ -196,7 +196,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
             else:
                 return name
 
-        sorted_ports = sorted(list_serial_ports(max_cache_age=0), key=port_order)
+        sorted_ports = sorted(list_serial_ports(max_cache_age=0, skip_logging=True), key=port_order)
 
         result = {}
         for p in sorted_ports:

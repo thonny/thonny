@@ -999,19 +999,20 @@ def get_serial_port_label(p) -> str:
     return f"{desc} @ {p.device}"
 
 
-def list_serial_ports(max_cache_age: float = 0.5):
+def list_serial_ports(max_cache_age: float = 0.5, skip_logging: bool = False):
     global _PORTS_CACHE, _PORTS_CACHE_TIME
 
     cur_time = time.time()
     if cur_time - _PORTS_CACHE_TIME > max_cache_age:
-        _PORTS_CACHE = _list_serial_ports_uncached()
+        _PORTS_CACHE = _list_serial_ports_uncached(skip_logging=skip_logging)
         _PORTS_CACHE_TIME = cur_time
 
     return _PORTS_CACHE
 
 
-def _list_serial_ports_uncached():
-    logger.info("Listing serial ports")
+def _list_serial_ports_uncached(skip_logging: bool = False):
+    if not skip_logging:
+        logger.info("Listing serial ports")
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
