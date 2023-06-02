@@ -6,6 +6,7 @@ Version history
 ==================
 * Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
 * Fix code completion shortcut displayed in macOS menu
+* Add command "Show esptool version" for ESP flasher
 * Close tab on middle click (#2767) by @mrexodia
 * Make package manager support new micropython-lib index (#2777)
 * Report macOS version instead of Darwin version in the About box

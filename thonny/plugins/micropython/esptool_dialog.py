@@ -234,7 +234,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         if port_was_used_in_thonny:
             proxy.disconnect()
 
-        if self._work_mode in ["device_info", "image_info"]:
+        if self._work_mode in ["device_info", "image_info", "esptool_version"]:
             self.show_log_frame()
 
         return {
@@ -313,6 +313,13 @@ class ESPFlashingDialog(BaseFlashingDialog):
             command.append("flash_id")
 
             progress_text = "Querying device info"
+
+        elif self._work_mode == "esptool_version":
+            command = self._esptool_command + [
+                "version",
+            ]
+
+            progress_text = "Querying esptool version"
 
         elif self._work_mode == "image_info":
             assert source_path
@@ -524,6 +531,11 @@ class ESPFlashingDialog(BaseFlashingDialog):
             command=self._show_image_info,
             state="normal" if self._can_query_image_info() else "disabled",
         )
+        action_menu.add_command(
+            label="Show esptool version",
+            command=self._show_esptool_version,
+            state="normal" if self._can_show_esptool_version() else "disabled",
+        )
 
         action_menu.add_separator()
         if self._advanced_widgets[0].winfo_ismapped():
@@ -545,11 +557,18 @@ class ESPFlashingDialog(BaseFlashingDialog):
         self._work_mode = "image_info"
         self.start_work_and_update_ui()
 
+    def _show_esptool_version(self) -> None:
+        self._work_mode = "esptool_version"
+        self.start_work_and_update_ui()
+
     def _can_query_device_info(self) -> bool:
         return self._state == "idle" and self._target_combo.get_selected_value() is not None
 
     def _can_query_image_info(self) -> bool:
         return self._state == "idle" and self._version_combo.get_selected_value() is not None
+
+    def _can_show_esptool_version(self) -> bool:
+        return self._state == "idle"
 
     def _hide_advanced_options(self) -> None:
         for widget in self._advanced_widgets:
