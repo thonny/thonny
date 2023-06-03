@@ -913,7 +913,7 @@ class Workbench(tk.Tk):
             value = "n/a"
 
         self._backend_conf_variable.set(value=value)
-        self._backend_button.configure(text=desc + " " + get_menu_char())
+        self._backend_button.configure(text=desc + "  " + get_menu_char())
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
