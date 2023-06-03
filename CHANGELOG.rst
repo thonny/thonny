@@ -2,7 +2,7 @@
 Version history
 ===============
 
-4.1.0 (2023-06-02)
+4.1.0 (2023-06-03)
 ==================
 * Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
 * Fix remote Python 3 (SSH) connection error (regression introduced in 4.1.0b1)
@@ -27,6 +27,7 @@ Version history
 * Add en_GB translation
 * Attempt to overcome "window was deleted before its visibility changed" error
 * Fix pipkin directory creation in paste mode (e.g. package installation via WebREPL)
+* Upgrade bundled websockets, paramiko, docutils, mypy, Send2Trash, esptool to latest versions
 
 
 4.1.0b1 (2023-04-23)
