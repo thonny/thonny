@@ -254,19 +254,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return set()
 
     @classmethod
-    def get_uart_adapter_vids_pids(cls):
-        return {
-            (0x1A86, 0x7523),  # HL-340
-            (0x10C4, 0xEA60),  # CP210x"),
-            (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
-            (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
-            (0x0403, 0x6011),  # FT4232
-            (0x0403, 0x6014),  # FT232H
-            (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
-            (0x0403, 0x601C),  # FT4222H
-        }
-
-    @classmethod
     def should_consider_unknown_devices(cls):
         return True
 
