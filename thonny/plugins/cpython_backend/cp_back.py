@@ -174,7 +174,7 @@ class MainCPythonBackend(MainBackend):
             self._check_warn_sys_path_conflict(module_name.split(".")[0])
 
     def _check_warn_avoided_sys_path_conflicts(self):
-        if self._options.get("run.warn_module_shadowing", False):
+        if not self._options.get("run.warn_module_shadowing", False):
             return
 
         for name in sys.modules.keys():
@@ -195,15 +195,15 @@ class MainCPythonBackend(MainBackend):
         else:
             return
 
-        # It looks like a module is about to be imported from the script dir or current dir.
+        # It looks like a module is importable from the script dir or current dir.
         # Is it shadowing a library module?
 
-        current_spec = importlib.util.find_spec(root_module_name)
+        current_spec = self._find_spec_ignore_loaded(root_module_name)
 
         first_entry = sys.path[0]
         del sys.path[0]
         try:
-            shadowed_spec = importlib.util.find_spec(root_module_name)
+            shadowed_spec = self._find_spec_ignore_loaded(root_module_name)
         finally:
             sys.path.insert(0, first_entry)
 
@@ -227,12 +227,25 @@ class MainCPythonBackend(MainBackend):
             verb = "is shadowing"
 
         self._send_output(
-            # using backticks, because Shell would present file path in quotes as frame link
-            f"WARNING: Your `{current_spec.origin}` {verb} the library module '{root_module_name}'. Consider renaming or moving it!\n",
+            # NB! Using backticks, because Shell would present file path in quotes as frame link
+            f"WARNING: Your `{current_spec.origin}` {verb} the library module '{root_module_name}'. Consider renaming or moving it!\n\n",
             "stderr",
         )
 
         self._warned_shadow_casters.add(current_spec.origin)
+
+    def _find_spec_ignore_loaded(self, module_name):
+        if module_name not in sys.modules:
+            return importlib.util.find_spec(module_name)
+
+        old_modules = sys.modules
+        try:
+            modules_copy = old_modules.copy()
+            del modules_copy[module_name]
+            sys.modules = modules_copy
+            return importlib.util.find_spec(module_name)
+        finally:
+            sys.modules = old_modules
 
     def _read_incoming_msg_line(self) -> str:
         return self._original_stdin.readline()
