@@ -2,6 +2,16 @@
 Version history
 ===============
 
+4.1.1 (2023-06-11)
+==================
+* Fix warning for the cases where Thonny avoids user module shadowing a library module (#384)
+* Fix installing from local file in ESP flashing dialog (#2811)
+* Use a tilde to separate pre-release versions in the AppData (#2807), by @jwillikers
+* Use bigger initial width in simple mode
+* Big progress with Italian translation, by mapi68, Ribezzz and sailslack
+* Updated Chinese (TW) and English (UK) translations
+
+
 4.1.0 (2023-06-03)
 ==================
 * Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
