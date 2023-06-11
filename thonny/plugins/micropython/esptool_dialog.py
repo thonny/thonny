@@ -77,7 +77,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         )
         self._erase_checkbutton = ttk.Checkbutton(
             self.main_frame,
-            text="Erase flash before installing",
+            text="Erase all flash before installing (not just the write areas)",
             variable=self._erase_variable,
         )
         self._erase_checkbutton.grid(row=3, column=2, sticky="w", padx=(ipadx, 0), pady=(ipady, 0))
