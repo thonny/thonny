@@ -39,8 +39,8 @@ do
 	$PYTHON_CURRENT/bin/python3.10  -s -m pip install --no-binary mypy --no-binary lxml -r $req_file
 done
 $PYTHON_CURRENT/bin/python3.10 -s -m pip install --no-cache-dir certifi
-#$PYTHON_CURRENT/bin/python3.10 -s -m pip install --pre --no-cache-dir "thonny==${VERSION}"
-$PYTHON_CURRENT/bin/python3.10 -s -m pip install ../setuptools/thonny-4.1.0b1.dev0-py3-none-any.whl
+$PYTHON_CURRENT/bin/python3.10 -s -m pip install --pre --no-cache-dir "thonny==${VERSION}"
+#$PYTHON_CURRENT/bin/python3.10 -s -m pip install ../setuptools/thonny-4.1.0b1.dev0-py3-none-any.whl
 
 rm $PYTHON_CURRENT/bin/thonny # because Thonny is not supposed to run from there
 
