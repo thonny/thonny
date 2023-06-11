@@ -461,14 +461,19 @@ class BaseFlashingDialog(WorkDialog, ABC):
         """Running in a bg thread"""
         from urllib.request import urlopen
 
-        target_dir = tempfile.mkdtemp()
-        target_filename = download_info.get("filename", download_info["url"].split("/")[-1])
         download_url = download_info["url"]
+        url_protocol = download_url.split(":")[0].lower()
         size = download_info.get("size", None)
 
+        target_dir = tempfile.mkdtemp()
+        if url_protocol in ["http", "https"]:
+            inferred_filename = download_url.split("/")[-1]
+        else:
+            assert os.path.isfile(download_url)
+            inferred_filename = os.path.basename(download_url)
+        target_filename = download_info.get("filename", inferred_filename)
         target_path = os.path.join(target_dir, target_filename)
 
-        url_protocol = download_url.split(":")[0].lower()
         if url_protocol not in ["http", "https"]:
             logger.debug("Copying local file %r", download_url)
             shutil.copyfile(download_url, target_path)
