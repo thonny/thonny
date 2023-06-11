@@ -302,7 +302,7 @@ class Workbench(tk.Tk):
         self.set_default("layout.top", 50)
         self.set_default("layout.left", 150)
         if self.in_simple_mode():
-            self.set_default("layout.width", 1050)
+            self.set_default("layout.width", 1130)
             self.set_default("layout.height", 700)
         else:
             self.set_default("layout.width", 800)
