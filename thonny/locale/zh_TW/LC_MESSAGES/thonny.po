@@ -457,7 +457,7 @@ msgstr "錯誤"
 
 #: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
 msgid "You need to select a file!"
-msgstr "你必須選取一個檔案!"
+msgstr "你必須選取一個檔案！"
 
 #: thonny/base_file_browser.py:1427
 msgid "Overwrite?"
@@ -465,7 +465,7 @@ msgstr "覆寫?"
 
 #: thonny/base_file_browser.py:1427
 msgid "Do you want to overwrite '%s' ?"
-msgstr "你想要覆寫 '%s' 嗎?"
+msgstr "你想要覆蓋 '%s' 嗎？"
 
 #: thonny/editors.py:658 thonny/editors.py:660
 msgid "New"
@@ -683,7 +683,7 @@ msgid "Configuration has been updated. Restart Thonny to start working in regula
 "(See 'Tools → Options → General' if you change your mind later.)"
 msgstr "設置已更新. 請重新啟動 Thonny 進入一般模式\n"
 "\n"
-"(如果你之後要變更，請到 工具 -> 選項 -> 一般 中設定)"
+"(如果你之後要變更，請到『工具/選項/一般』中設定)"
 
 #: thonny/plugins/ast_view.py:211
 msgid "Program tree"
@@ -1072,7 +1072,7 @@ msgstr "blah, blah"
 
 #: thonny/plugins/theme_and_font_config_page.py:183
 msgid "NB! Some style elements change only after restarting Thonny!"
-msgstr "注意!有些樣式項目在重新啟動Thonny後才會套用"
+msgstr "注意!有些樣式項目在重新啟動 Thonny後才會套用"
 
 #: thonny/plugins/theme_and_font_config_page.py:222
 msgid "Enter an integer"
@@ -1153,7 +1153,8 @@ msgstr "從本地檔案安裝"
 #: thonny/plugins/pip_gui.py:1200
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
-msgstr "這是為了要管理"
+msgstr "這是管理 Thonny 本身的外掛以及相依模組的交談窗。\n"
+"如果是要安裝程式所需的套件, 請改用『工具/管理套件...』功能表指令"
 
 #: thonny/plugins/circuitpython/__init__.py:10
 msgid "CircuitPython (generic)"
@@ -1884,83 +1885,87 @@ msgstr "程式必須先存檔才能除錯。"
 
 #: thonny/editors.py:213
 msgid "%s doesn't look like a text file"
-msgstr ""
+msgstr "%s 似乎不是文字檔"
 
 #: thonny/editors.py:219
 msgid "Problem loading file"
-msgstr ""
+msgstr "載入檔案遇到問題"
 
 #: thonny/editors.py:220
 msgid "This file seems to have problems with encoding.\n"
 "\n"
 "Make sure it is in UTF-8 or contains proper encoding hint."
-msgstr ""
+msgstr "此檔案編碼有問題。\n"
+"\n"
+"請確認使用 UTF-8 編碼或是加入正確的編碼指示。"
 
 #: thonny/editors.py:295
 msgid "File is open"
-msgstr ""
+msgstr "檔案已經開啟"
 
 #: thonny/editors.py:296
 msgid "This file is already open in Thonny.\n"
 "\n"
 "If you want to save with this name,\n"
 "close the existing editor first!"
-msgstr ""
+msgstr "此檔案已經在 Thonny 中開啟。\n"
+"\n"
+"如果要以此名稱存檔, 請先關閉編輯中的同名檔案！"
 
 #: thonny/editors.py:349
 msgid "Permission Error"
-msgstr ""
+msgstr "權限錯誤"
 
 #: thonny/editors.py:350
 msgid "Looks like this file or folder is not writable."
-msgstr ""
+msgstr "無法寫入此檔案或資料夾。"
 
 #: thonny/editors.py:414
 msgid "Back-end is not ready"
-msgstr ""
+msgstr "後端尚未就緒"
 
 #: thonny/editors.py:419
 msgid "Where to save to?"
-msgstr ""
+msgstr "存檔位置？"
 
 #: thonny/editors.py:490
 msgid "Potential problem"
-msgstr ""
+msgstr "潛在問題"
 
 #: thonny/editors.py:491
 msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
-msgstr ""
+msgstr "如果將腳本存成 '%s', 就無法匯入名稱為 '%s' 的程式庫模組"
 
 #: thonny/editors.py:497
 msgid "Do you still want to use this name for your script?"
-msgstr ""
+msgstr "仍然要為腳本使用此檔名？"
 
 #: thonny/editors.py:1053
 msgid "Got permission error when trying to load\n"
 "%s"
-msgstr ""
+msgstr "儲存 %s 時發生權限錯誤"
 
 #: thonny/editors.py:1055
 msgid "Try opening it with File => Open."
-msgstr ""
+msgstr "請試看看用『檔案/開啟』來開檔。"
 
 #: thonny/editors.py:1057
 msgid "Permission error"
-msgstr ""
+msgstr "權限錯誤"
 
 #: thonny/plugins/run_debug_config_page.py:14
 msgid "Allow running unnamed programs"
-msgstr ""
+msgstr "允許執行尚未命名的程式"
 
 #: thonny/plugins/pip_gui.py:600
 msgid "License"
-msgstr ""
+msgstr "授權"
 
 #: thonny/plugins/run_debug_config_page.py:27
 msgid "Warn if a user module shadows a library module"
-msgstr ""
+msgstr "在使用者自己的模組會遮蓋掉程式庫模組時發出警告"
 
 #: thonny/plugins/micropython/pip_gui.py:65
 msgid "Search micropython-lib and PyPI"
-msgstr ""
+msgstr "搜尋 micropython-lib 與 PyPI"
 
