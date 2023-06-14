@@ -17,7 +17,6 @@ class WebReplConnection(MicroPythonConnection):
     """
 
     def __init__(self, url, password, num_bytes_received=0):
-
         self.num_bytes_received = num_bytes_received
         super().__init__()
 
@@ -31,12 +30,12 @@ class WebReplConnection(MicroPythonConnection):
             sys.exit(-1)
         self._url = url
         self._password = password
-        self._write_responses = Queue()
+        self._write_responses: Queue = Queue()
 
         # Some tricks are needed to use async library in a sync program.
         # Using thread-safe queues to communicate with async world in another thread
-        self._write_queue = Queue()
-        self._connection_result = Queue()
+        self._write_queue: Queue = Queue()
+        self._connection_result: Queue = Queue()
         self._ws_thread = threading.Thread(target=self._wrap_ws_main, daemon=True)
         self._ws_thread.start()
 

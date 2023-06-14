@@ -3,12 +3,13 @@ import subprocess
 import sys
 import textwrap
 import tkinter as tk
+import traceback
 from logging import getLogger
 from tkinter import messagebox, ttk
 from typing import Any, Dict
 
 import thonny
-from thonny import get_runner, get_workbench, running, ui_utils
+from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -34,17 +35,39 @@ class LocalCPythonProxy(SubprocessProxy):
         executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
         super().__init__(clean, executable)
-        self._send_msg(ToplevelCommand("get_environment_info"))
+        try:
+            self._send_msg(ToplevelCommand("get_environment_info"))
+        except Exception:
+            get_shell().report_exception()
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
 
     def _get_launch_cwd(self):
-        # launch in the directory containing thonny package, so that other interpreters can import it as well
-        return os.path.dirname(os.path.dirname(thonny.__file__))
+        # use a directory which doesn't contain misleading modules
+        empty_dir = os.path.join(thonny.THONNY_USER_DIR, "leave_this_empty")
+        os.makedirs(empty_dir, exist_ok=True)
+        return empty_dir
 
     def _get_launcher_with_args(self):
-        return ["-m", "thonny.plugins.cpython_backend.cp_launcher", self.get_cwd()]
+        launcher_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "cpython_backend", "cp_launcher.py"
+        )
+        return [
+            launcher_file,
+            self.get_cwd(),
+            repr(
+                {
+                    "run.warn_module_shadowing": get_workbench().get_option(
+                        "run.warn_module_shadowing"
+                    )
+                }
+            ),
+        ]
+
+    def can_be_isolated(self) -> bool:
+        # Can't run in isolated mode as it would hide user site-packages
+        return False
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)
@@ -77,8 +100,10 @@ class LocalCPythonProxy(SubprocessProxy):
 
         if msg["gui_is_active"] and self._gui_update_loop_id is None:
             # Start updating
+            logger.info("Starting GUI update loop")
             self._loop_gui_update(True)
         elif not msg["gui_is_active"] and self._gui_update_loop_id is not None:
+            logger.info("Cancelling GUI update loop")
             self._cancel_gui_update_loop()
 
     def _loop_gui_update(self, force=False):
@@ -215,6 +240,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
             textvariable=self._configuration_variable,
             values=_get_interpreters(),
         )
+        self._entry.state(["!disabled", "readonly"])
 
         self._entry.grid(row=1, column=1, sticky=tk.NSEW)
 
@@ -350,7 +376,7 @@ def _get_interpreters():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
-        for minor in [7, 8, 9, 10, 11]:
+        for minor in [8, 9, 10, 11, 12]:
             for dir_ in [
                 "C:\\Python3%d" % minor,
                 "C:\\Python3%d-32" % minor,
@@ -360,8 +386,8 @@ def _get_interpreters():
                 "C:\\Program Files (x86)\\Python 3.%d" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
                 "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
-                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d" % minor),
-                os.path.expanduser("~\\AppData\Local\Programs\Python\Python3%d-32" % minor),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d" % minor),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d-32" % minor),
             ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
@@ -402,13 +428,14 @@ def _get_interpreters():
                 "python3.9",
                 "python3.10",
                 "python3.11",
+                "python3.12",
             ]:
                 path = os.path.join(dir_, name)
                 if os.path.exists(path):
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.8", "3.9", "3.10", "3.11"]:
+        for version in ["3.8", "3.9", "3.10", "3.11", "3.12"]:
             dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
             path = os.path.join(dir_, "python3")
 
@@ -417,7 +444,7 @@ def _get_interpreters():
 
     from shutil import which
 
-    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11"]:
+    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11", "python3.12"]:
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)
@@ -470,9 +497,6 @@ def _get_interpreters_from_windows_registry():
     result = set()
     for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
         for version in [
-            "3.6",
-            "3.6-32",
-            "3.6-64",
             "3.8",
             "3.8-32",
             "3.8-64",

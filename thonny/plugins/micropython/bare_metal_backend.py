@@ -8,10 +8,16 @@ from logging import getLogger
 from textwrap import dedent, indent
 from typing import BinaryIO, Callable, List, Optional, Union
 
+# make sure thonny folder is in sys.path (relevant in dev)
+thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+if thonny_container not in sys.path:
+    sys.path.insert(0, thonny_container)
+
 import thonny
 from thonny import report_time
 from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
+    PROCESS_ACK,
     BackendEvent,
     EOFCommand,
     OscEvent,
@@ -126,7 +132,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._last_inferred_fs_mount: Optional[str] = None
 
         self._submit_mode = args.get("submit_mode", None)
-        if self._submit_mode is None:
+        if self._submit_mode is None or self._connected_over_webrepl():
             self._submit_mode = self._infer_submit_mode()
 
         self._write_block_size = args.get("write_block_size", None)
@@ -1716,6 +1722,7 @@ class RawPasteNotSupportedError(RuntimeError):
 
 def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonBackend]) -> None:
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
 
     import ast
 

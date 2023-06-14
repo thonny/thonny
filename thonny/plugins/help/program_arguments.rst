@@ -19,7 +19,6 @@ When you run your program like this, you can access the arguments from ``sys.arg
 Fixing the command line arguments
 ---------------------------------
 If you need to use same set of arguments several times, it may become tedious to construct
-the ``%Run`` by hand. In this case check **Program arguments** in the **View menu**. This 
+the ``%Run`` by hand. In this case check **Program arguments** in the **View** menu. This
 opens a small entry box next to the toolbar buttons. From now on, everything you type in this
 box gets appended to ``%Run <script name>`` each time you press F5.
- 	

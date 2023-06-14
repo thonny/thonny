@@ -1,6 +1,6 @@
 """Support for edge counting
 
-The `countio` module contains logic to read and count edge transistions
+The `countio` module contains logic to read and count edge transitions
 
 For more information on the applications of counting edges, see
 `this Learn Guide on sequential circuits

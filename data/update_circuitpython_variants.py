@@ -11,8 +11,16 @@ from update_variants_common import get_attr_value, save_variants
 
 base_url = "https://circuitpython.org/downloads"
 
-PREV_RELEVANT_VERSION = "7.3.3"
-RELEVANT_FAMILIES = {"atmel-samd", "esp32s2", "esp32s3", "nrf52840", "raspberrypi"}
+PREV_RELEVANT_VERSION = "8.0.5"
+RELEVANT_FAMILIES = {
+    "atmel-samd",
+    "esp32",
+    "esp32s2",
+    "esp32s3",
+    "esp32c3",
+    "nrf52840",
+    "raspberrypi",
+}
 
 DAPLINK_BOARDS = {"microbit_v2", "makerdiary_nrf52840_mdk"}
 
@@ -49,22 +57,24 @@ for i, variant in enumerate(all_variants):
     print("Processing", i + 1, "of", len(all_variants), variant)
 
     if variant["_id"] in DAPLINK_BOARDS:
-        extension = r"(?:combined\.)?hex"
-        variant["_flasher"] = "daplink"
+        extensions = ["hex", "combined.hex"]
+    elif "esp" in variant["family"]:
+        extensions = ["uf2", "bin"]
     else:
-        extension = "uf2"
-        variant["_flasher"] = "uf2"
+        extensions = ["uf2"]
 
-    variant["downloads"] = find_download_links(
-        variant["info_url"],
-        r"/adafruit-circuitpython.+en_US-(\d+\.\d+\.\d+)\." + extension,
-        1,
-        r"/adafruit-circuitpython.+en_US-(\d+\.\d+\.\d+-(?:alpha|beta|rc)\.\d+)\." + extension,
-        1,
-    )
+    variant["downloads"] = []
+    for extension in extensions:
+        variant["downloads"] += find_download_links(
+            variant["info_url"],
+            r"/adafruit-circuitpython.+en_US-(\d+\.\d+\.\d+)\." + extension,
+            1,
+            r"/adafruit-circuitpython.+en_US-(\d+\.\d+\.\d+-(?:alpha|beta|rc)\.\d+)\." + extension,
+            1,
+        )
 
-    prev_major_url = f"https://downloads.circuitpython.org/bin/{variant['_id']}/en_US/adafruit-circuitpython-{variant['_id']}-en_US-{PREV_RELEVANT_VERSION}.uf2"
-    add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
+        prev_major_url = f"https://downloads.circuitpython.org/bin/{variant['_id']}/en_US/adafruit-circuitpython-{variant['_id']}-en_US-{PREV_RELEVANT_VERSION}.{extension}"
+        add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
     if variant["family"] == "raspberrypi":
         variant["family"] = "rp2"
@@ -98,16 +108,23 @@ for variant in cant_determine_samd:
 
 save_variants(
     all_variants,
-    "uf2",
+    ["uf2"],
     {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
     "circuitpython-variants-uf2.json",
 )
 
 save_variants(
     all_variants,
-    "daplink",
-    {"rp2", "samd21", "samd51", "nrf51", "nrf52", "esp32s2", "esp32s3"},
+    ["hex"],
+    {"nrf52"},
     "circuitpython-variants-daplink.json",
+)
+
+save_variants(
+    all_variants,
+    ["bin"],
+    {"esp32", "esp32s2", "esp32s3", "esp32c3"},
+    "circuitpython-variants-esptool.json",
 )
 
 print("Done")

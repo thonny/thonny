@@ -379,6 +379,11 @@ class Completer:
         if not get_workbench().get_option("edit.automatic_completions"):
             return False
 
+        # Don't autocomplete in remote shells
+        proxy = get_runner().get_backend_proxy()
+        if isinstance(event.widget, ShellText) and (not proxy or not proxy.has_local_interpreter()):
+            return False
+
         # Don't autocomplete inside comments
         line_prefix = event.widget.get("insert linestart", "insert")
         if "#" in line_prefix:

@@ -12,8 +12,8 @@ Debugging
 ---------
 If you want to step through your Flask program, set a breakpoint inside some function and invoke 
 the debugger (both nicer and faster work, but faster is ... faster). Reload your page and start 
-stepping inside the function. You may want to turn off "Frames in separate windows" (Tools => Options
-=> Run & Debug) for more comfortable operation. 
+stepping inside the function. You may want to turn off "Frames in separate windows" in *Tools → Options
+→ Run & Debug* for more comfortable operation.
 
 Details
 -------

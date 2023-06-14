@@ -96,7 +96,6 @@ class BareMetalAdapter(BaseAdapter, ABC):
         write_block_size: Optional[int] = None,
         write_block_delay: Optional[float] = None,
     ) -> Tuple[str, int, float]:
-
         if submit_mode is None:
             submit_mode = RAW_PASTE_SUBMIT_MODE
 
@@ -194,7 +193,6 @@ class BareMetalAdapter(BaseAdapter, ABC):
         return None
 
     def read_file(self, path: str) -> bytes:
-
         hex_mode = self._should_hexlify(path)
 
         open_script = f"__pipkin_fp = __pipkin_helper.builtins.open({path!r}, 'rb')"
@@ -249,7 +247,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
-                __pipkin_helper.os.stat({path!r})
+                __pipkin_helper.os.stat({path!r}) and None
             except __pipkin_helper.builtins.OSError:
                 pass
             else:
@@ -276,7 +274,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
             dedent(
                 f"""
             try:
-                __pipkin_helper.os.stat({path!r})
+                __pipkin_helper.os.stat({path!r}) and None
             except __pipkin_helper.builtins.OSError:
                 __pipkin_helper.os.mkdir({path!r})
         """
@@ -498,7 +496,7 @@ class BareMetalAdapter(BaseAdapter, ABC):
         self._write(NORMAL_MODE_CMD)
         self._log_output_until_active_prompt()
         assert self._last_prompt == NORMAL_PROMPT, (
-            "Could not get normal prompt, got %s" % self._last_prompt
+            "Could not get normal prompt, got %r" % self._last_prompt
         )
 
     def _log_output_until_active_prompt(self, timeout: float = WAIT_OR_CRASH_TIMEOUT) -> None:
@@ -523,7 +521,6 @@ class BareMetalAdapter(BaseAdapter, ABC):
         output_consumer: OutputConsumer,
         timeout: float,
     ):
-
         PROMPT_MARKERS = [NORMAL_PROMPT, EOT + RAW_PROMPT, FIRST_RAW_PROMPT]
         PROMPT_MARKERS_RE = re.compile(
             b"|".join(

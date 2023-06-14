@@ -4,7 +4,7 @@ from tkinter.font import nametofont
 
 root = tk.Tk()
 style = ttk.Style()
-print(style.layout("TFrame"))
+#print(style.layout("TFrame"))
 style.layout("TFrame", [])
 style.configure("TFrame", background="pink")
 
@@ -17,4 +17,10 @@ nb.add(tk.Frame(nb, background="pink"), text="fr")
 
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
+
+#key = "TNotebook.Tab"
+key = "Toolbutton"
+print("MAP", style.map(key))
+print("CONF", style.configure(key))
+print("LAYOUT", style.layout(key))
 root.mainloop()

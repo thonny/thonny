@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import List
 
 from thonny.plugins.micropython import add_micropython_backend
 from thonny.plugins.micropython.mp_common import RAW_PASTE_SUBMIT_MODE
@@ -38,11 +39,16 @@ class RP2040BackendProxy(BareMetalMicroPythonProxy):
 
 
 class RP2040BackendConfigPage(BareMetalMicroPythonConfigPage):
-    def _has_flashing_dialog(self):
-        return True
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return [""]
 
-    def _open_flashing_dialog(self):
+    def _open_flashing_dialog(self, kind: str) -> None:
+        assert kind == ""
         show_uf2_installer(self, firmware_name="MicroPython")
+
+    @property
+    def allow_webrepl(self):
+        return True
 
 
 def load_plugin():

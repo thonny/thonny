@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from typing import AnyStr, Iterator, Optional, Tuple, Union
 
+from circuitpython_typing import BlockDevice
+
 def mount(filesystem: VfsFat, mount_path: str, *, readonly: bool = False) -> None:
     """Mounts the given filesystem object at the given path.
 
@@ -94,7 +96,7 @@ def enable_usb_drive() -> None:
     ...
 
 class VfsFat:
-    def __init__(self, block_device: str) -> None:
+    def __init__(self, block_device: BlockDevice) -> None:
         """Create a new VfsFat filesystem around the given block device.
 
         :param block_device: Block device the the filesystem lives on"""
@@ -108,8 +110,15 @@ class VfsFat:
     This property cannot be changed, use `storage.remount` instead."""
     ...
 
-    def mkfs(self) -> None:
-        """Format the block device, deleting any data that may have been there"""
+    @staticmethod
+    def mkfs(block_device: BlockDevice) -> None:
+        """Format the block device, deleting any data that may have been there.
+
+        **Limitations**: On SAMD21 builds, `mkfs()` will raise ``OSError(22)`` when
+        attempting to format filesystems larger than 4GB. The extra code to format larger
+        filesystems will not fit on these builds. You can still access
+        larger filesystems, but you will need to format the filesystem on another device.
+        """
         ...
     def open(self, path: str, mode: str) -> None:
         """Like builtin ``open()``"""

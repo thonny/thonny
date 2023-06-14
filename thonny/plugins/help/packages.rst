@@ -10,10 +10,10 @@ With pip on command line
 ------------------------
 #. From "Tools" menu select "Open system shell...". You should get a new terminal window stating the correct name of *pip* command (usually ``pip`` or ``pip3``). In the following I've assumed the command name is ``pip``.
 #. Enter ``pip install <package name>`` (eg. ``pip install pygame``) and press ENTER. You should see *pip* downloading and installing the package and printing a success message.
-#. Close the terminal (optional)
-#. Return to Thonny
-#. Reset interpreter by selecting "Stop/Reset" from "Run menu" (this is required only first time you do pip install)
-#. Start using the package
+#. Close the terminal (optional).
+#. Return to Thonny.
+#. Reset interpreter by selecting "Stop/Restart backend" from "Run" menu (this is required only first time you do pip install).
+#. Start using the package.
 
 .. NOTE::
    The "Open system shell..." menu is not available when running from the Flatpak on Linux.
@@ -45,7 +45,7 @@ Install it and find out where it puts Python executable (*pythonw.exe* in Window
 *python3* or *python* in Linux and Mac).
 
 In Thonny open "Tools" menu and select "Options...". In the options dialog open "Interpreter" 
-tab, click "Select executable" and show the location of Anaconda's Python executable.
+tab and show the location of Anaconda's Python executable.
 
 After you have done this, next time you run your program, it will be run through Anaconda's 
 Python and all the libraries installed there are available.

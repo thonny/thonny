@@ -18,6 +18,8 @@ REPL_PSEUDO_FILENAME = "<stdin>"
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
+REMOTE_PATH_MARKER = " :: "
+PROCESS_ACK = "OK"
 
 IGNORED_FILES_AND_DIRS = [
     "System Volume Information",
@@ -442,6 +444,8 @@ class CompletionInfo:
     prefix_length: int  # the number of chars to be deleted before inserting name
     signatures: Optional[List[SignatureInfo]]
     docstring: Optional[str]
+    module_name: Optional[str]
+    module_path: Optional[str]
 
 
 @dataclass
@@ -721,13 +725,11 @@ def universal_relpath(path: str, context: str) -> str:
         return os.path.relpath(path, context)
 
 
-def get_python_version_string(version_info: Optional[Tuple] = None, maxsize=None):
-    result = ".".join(map(str, sys.version_info[:3]))
-    if sys.version_info[3] != "final":
-        result += "-" + sys.version_info[3]
+def get_python_version_string():
+    result = sys.version.split()[0]
 
-    if maxsize is not None:
-        result += " (" + ("64" if sys.maxsize > 2**32 else "32") + " bit)"
+    if sys.maxsize <= 2**32:
+        result += ", 32-bit"
 
     return result
 
@@ -795,3 +797,11 @@ def is_private_python(executable):
     result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
     logger.debug("is_private_python(%r) == %r", executable, result)
     return result
+
+
+def is_remote_path(s: str) -> bool:
+    return REMOTE_PATH_MARKER in s
+
+
+def is_local_path(s: str) -> bool:
+    return not is_remote_path(s) and not s.startswith("<")

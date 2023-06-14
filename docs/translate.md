@@ -65,3 +65,8 @@ Original text for help pages comes from .rst files in `thonny/plugins/help`. Tra
 
 Note that you don't have to translate all pages at once. If a page is requested and corresponding file is missing from the translation directory, the page is displayed in English.
 
+### Include translations
+
+1. Download po-files
+2. Review and register updates with `thonny/locale/register_updates.py`
+3. Compile to mo-files with `pybabel compile -d thonny/locale/ -D thonny`

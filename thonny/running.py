@@ -35,6 +35,7 @@ from thonny import (
     report_time,
 )
 from thonny.common import (
+    PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
     DebuggerCommand,
@@ -93,11 +94,46 @@ io_animation_required = False
 
 _console_allocated = False
 
+BASE_MODULES = [
+    "_abc",
+    "_codecs",
+    "_collections_abc",
+    "_distutils_hack",
+    "_frozen_importlib",
+    "_frozen_importlib_external",
+    "_imp",
+    "_io",
+    "_signal",
+    "_sitebuiltins",
+    "_stat",
+    "_thread",
+    "_warnings",
+    "_weakref",
+    "_winapi",
+    "abc",
+    "builtins",
+    "codecs",
+    "encodings",
+    "genericpath",
+    "io",
+    "marshal",
+    "nt",
+    "ntpath",
+    "os",
+    "site",
+    "stat",
+    "sys",
+    "time",
+    "winreg",
+    "zipimport",
+]
+
 
 class Runner:
     def __init__(self) -> None:
         get_workbench().set_default("run.allow_running_unnamed_programs", True)
         get_workbench().set_default("run.auto_cd", True)
+        get_workbench().set_default("run.warn_module_shadowing", True)
 
         self._init_commands()
         self._state = "starting"
@@ -351,7 +387,7 @@ class Runner:
         self.execute_via_shell(cmd_line, working_directory)
 
     def execute_editor_content(self, command_name, args):
-        if command_name.lower() == "debug":
+        if command_name.lower() in ["debug", "fastdebug"]:
             messagebox.showinfo(
                 tr("Information"),
                 tr("For debugging the program must be saved first."),
@@ -1022,10 +1058,6 @@ class SubprocessProxy(BackendProxy, ABC):
                 f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
             )
             return
-            # raise UserError(
-            #    "Interpreter (%s) not found. Please recheck corresponding option!"
-            #    % self._mgmt_executable
-            # )
 
         cmd_line = (
             [
@@ -1037,6 +1069,9 @@ class SubprocessProxy(BackendProxy, ABC):
             + self._get_launcher_with_args()
             + extra_args
         )
+
+        if self.can_be_isolated():
+            cmd_line.insert(1, "-I")
 
         creationflags = 0
         if running_on_windows():
@@ -1058,17 +1093,30 @@ class SubprocessProxy(BackendProxy, ABC):
             encoding="utf-8",
         )
 
-        self._send_initial_input()
+        # read success acknowledgement
+        ack = self._proc.stdout.readline()
 
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
+        # only attempt initial input if process started nicely,
+        # otherwise can't read the error from stderr
+        if ack.strip() == PROCESS_ACK:
+            self._send_initial_input()
+        else:
+            get_shell().print_error(
+                f"INTERNAL ERROR, got {ack!r} instead of {PROCESS_ACK!r}\n---\n"
+            )
+
     def _send_initial_input(self) -> None:
+        # Used for sending data sending for startup, which can't be send by other means
+        # (e.g. don't want the password to end up in logs)
+
         pass
 
     def _get_launch_cwd(self):
-        return self.get_cwd() if self.uses_local_filesystem() else None
+        return get_workbench().get_local_cwd()
 
     def _get_launcher_with_args(self):
         raise NotImplementedError()
@@ -1243,6 +1291,10 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def get_exe_dirs(self):
         return self._exe_dirs
+
+    def can_be_isolated(self) -> bool:
+        """Says whether the backend may be launched with -I switch"""
+        return True
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:

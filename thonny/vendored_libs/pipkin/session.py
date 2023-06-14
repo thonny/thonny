@@ -213,7 +213,6 @@ class Session:
         excludes: Optional[List[str]] = None,
         **_,
     ):
-
         args = ["list"]
 
         if outdated:
@@ -264,7 +263,6 @@ class Session:
         excludes: Optional[List[str]] = None,
         **_,
     ):
-
         args = ["freeze"]
 
         args += self._format_exclusion_args(excludes)
@@ -571,7 +569,7 @@ def patch_context_function(fun):
         context = fun()
         patch_context(context)
         return context
-
+    
     return patched_context_function
 
 pip._vendor.packaging.markers.default_environment = \
@@ -698,7 +696,6 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
         no_index: bool,
         find_links: Optional[str],
     ):
-
         if no_index:
             assert find_links
             self._invoke_pip(pip_args + ["--no-index", "--find-links", find_links])
@@ -722,10 +719,10 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
             pip_cmd += ["--no-color"]
 
         pip_cmd += [
-                       "--disable-pip-version-check",
-                       "--trusted-host",
-                       "127.0.0.1",
-                   ] + args
+            "--disable-pip-version-check",
+            "--trusted-host",
+            "127.0.0.1",
+        ] + args
         logger.debug("Calling pip: %s", " ".join(shlex.quote(arg) for arg in pip_cmd))
 
         env = {key: os.environ[key] for key in os.environ if not key.startswith("PIP_")}

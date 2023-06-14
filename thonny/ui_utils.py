@@ -484,8 +484,10 @@ class ClosableNotebook(ttk.Notebook):
         if running_on_mac_os():
             self.bind("<ButtonPress-2>", self._right_btn_press, True)
             self.bind("<Control-Button-1>", self._right_btn_press, True)
+            self.bind("<ButtonPress-3>", self._middle_btn_press, True)
         else:
             self.bind("<ButtonPress-3>", self._right_btn_press, True)
+            self.bind("<ButtonPress-2>", self._middle_btn_press, True)
 
         # self._check_update_style()
 
@@ -533,6 +535,14 @@ class ClosableNotebook(ttk.Notebook):
             self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
         except Exception:
             logger.exception("Opening tab menu")
+
+    def _middle_btn_press(self, event):
+        try:
+            index = self.index("@%d,%d" % (event.x, event.y))
+            self.close_tab(index)
+
+        except Exception:
+            logger.exception("Middle click on tab")
 
     def _close_tab_from_menu(self):
         self.close_tab(self._popup_index)
@@ -836,6 +846,7 @@ def sequence_to_accelerator(sequence):
         .replace("minus", "-")
         .replace("Plus", "+")
         .replace("plus", "+")
+        .replace("space", "Space")
     )
 
     return accelerator
@@ -2087,8 +2098,6 @@ class _ZenityDialogProvider:
     def asksaveasfilename(cls, **options):
         args = cls._convert_common_options("Save as", **options)
         args.append("--save")
-        if options.get("confirmoverwrite", True):
-            args.append("--confirm-overwrite")
 
         filename = cls._call(args)
         if not filename:
@@ -2113,7 +2122,6 @@ class _ZenityDialogProvider:
         parent = options.get("parent", options.get("master", None))
         if parent is not None:
             args.append("--modal")
-            args.append("--attach=%s" % hex(parent.winfo_id()))
 
         for desc, pattern in options.get("filetypes", ()):
             # zenity requires star before extension
@@ -2132,7 +2140,7 @@ class _ZenityDialogProvider:
 
     @classmethod
     def _call(cls, args):
-        args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
+        args = ["zenity"] + args
         result = subprocess.run(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
         )
@@ -2217,7 +2225,13 @@ def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     _place_window(dlg, master, width=width, height=height)
 
     dlg.lift()
-    dlg.wait_visibility()
+    try:
+        dlg.wait_visibility()
+    except tk.TclError as e:
+        if "was deleted before its visibility changed" in str(e):
+            return
+        else:
+            raise
 
     if modal:
         try:
@@ -2533,9 +2547,21 @@ class AdvancedLabel(ttk.Label):
 
     def _on_click(self, *event):
         if self._url:
-            import webbrowser
+            if os.path.isdir(self._url):
+                open_with_default_app(self._url)
+            else:
+                import webbrowser
 
-            webbrowser.open(self._url)
+                webbrowser.open(self._url)
+
+
+def open_with_default_app(path):
+    if running_on_windows():
+        os.startfile(path)
+    elif running_on_mac_os():
+        subprocess.run(["open", path])
+    else:
+        subprocess.run(["xdg-open", path])
 
 
 if __name__ == "__main__":

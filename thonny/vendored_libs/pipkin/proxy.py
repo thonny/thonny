@@ -24,27 +24,39 @@ SOFTWARE.
 import copy
 import email.parser
 import errno
+import hashlib
 import io
 import json
 import logging
 import os.path
 import shlex
+import socket
 import subprocess
 import sys
 import tarfile
 import tempfile
+import textwrap
 import threading
+import zipfile
+from abc import ABC, abstractmethod
 from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import BaseServer
 from textwrap import dedent
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
-from pipkin.util import normalize_dist_name, parse_dist_file_name
+from pkg_resources import safe_name, safe_version
 
-MP_ORG_INDEX = "https://micropython.org/pi"
+from pipkin.util import (
+    create_dist_info_version_name,
+    custom_normalize_dist_name,
+    parse_dist_file_name,
+)
+
+MP_ORG_INDEX_V1 = "https://micropython.org/pi"
+MP_ORG_INDEX_V2 = "https://micropython.org/pi/v2"
 PYPI_SIMPLE_INDEX = "https://pypi.org/simple"
 SERVER_ENCODING = "utf-8"
 
@@ -97,185 +109,61 @@ class SimpleUrlsParser(HTMLParser):
         pass
 
 
-class BaseIndexDownloader:
+class BaseIndexDownloader(ABC):
     def __init__(self, index_url: str):
         self._index_url = index_url.rstrip("/")
-        self._file_urls_cache: Dict[str, Dict[str, str]] = {}
 
-    def get_file_urls(self, dist_name: str) -> Dict[str, str]:
-        if dist_name not in self._file_urls_cache:
-            self._file_urls_cache[dist_name] = self._download_file_urls(dist_name)
+    @abstractmethod
+    def get_dist_file_names(self, dist_name: str) -> Optional[List[str]]:
+        raise NotImplementedError()
 
-        return self._file_urls_cache[dist_name]
-
-    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+    @abstractmethod
+    def get_file_content(self, dist_name: str, file_name: str) -> bytes:
         raise NotImplementedError()
 
 
-class SimpleIndexDownloader(BaseIndexDownloader):
-    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
-        url = f"{self._index_url}/{dist_name}"
-        logger.info("Downloading file urls from simple index %s", url)
+class RegularIndexDownloader(BaseIndexDownloader, ABC):
+    def __init__(self, index_url: str):
+        super().__init__(index_url)
+        self._dist_urls_cache: Dict[str, Dict[str, str]] = {}
 
-        try:
-            with urlopen(url) as fp:
-                parser = SimpleUrlsParser()
-                parser.feed(fp.read().decode("utf-8"))
-                return parser.file_urls
-        except HTTPError as e:
-            if e.code == 404:
-                return None
-            else:
-                raise e
-
-
-class JsonIndexDownloader(BaseIndexDownloader):
-    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
-        metadata_url = f"{self._index_url}/{dist_name}/json"
-        logger.info("Downloading file urls from json index at %s", metadata_url)
-
-        result = {}
-        try:
-            with urlopen(metadata_url) as fp:
-                data = json.load(fp)
-                releases = data["releases"]
-                for ver in releases:
-                    for file in releases[ver]:
-                        file_url = file["url"]
-                        if "filename" in file:
-                            file_name = file["filename"]
-                        else:
-                            # micropython.org/pi doesn't have it
-                            file_name = file_url.split("/")[-1]
-                            # may be missing micropython prefix
-                            if not file_name.startswith(dist_name):
-                                # Let's hope version part doesn't contain dashes
-                                _, suffix = file_name.split("-")
-                                file_name = dist_name + "-" + suffix
-                        result[file_name] = file_url
-        except HTTPError as e:
-            if e.code == 404:
-                return None
-            else:
-                raise e
-        return result
-
-
-class MpOrgIndexDownloader(JsonIndexDownloader):
-    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
-        if not normalize_dist_name(dist_name).startswith("micropython_"):
+    def get_dist_file_names(self, dist_name: str) -> Optional[List[str]]:
+        urls = self._get_dist_urls(dist_name)
+        if urls is None:
             return None
+        return list(urls.keys())
 
-        return super()._download_file_urls(dist_name)
-
-
-class PipkinProxy(HTTPServer):
-    def __init__(
-        self, no_mp_org: bool, index_url: Optional[str], extra_index_urls: List[str], port: int
-    ):
-        self._downloaders: List[BaseIndexDownloader] = []
-        self._downloaders_by_dist_name: Dict[str, Optional[BaseIndexDownloader]] = {}
-        if not no_mp_org:
-            self._downloaders.append(MpOrgIndexDownloader(MP_ORG_INDEX))
-        self._downloaders.append(SimpleIndexDownloader(index_url or PYPI_SIMPLE_INDEX))
-        for url in extra_index_urls:
-            self._downloaders.append(SimpleIndexDownloader(url))
-        super().__init__(("127.0.0.1", port), PipkinProxyHandler)
-
-    def get_downloader_for_dist(self, dist_name: str) -> Optional[BaseIndexDownloader]:
-        if dist_name not in self._downloaders_by_dist_name:
-            for downloader in self._downloaders:
-                file_urls = downloader.get_file_urls(dist_name)
-                if file_urls is not None:
-                    self._downloaders_by_dist_name[dist_name] = downloader
-                    break
-            else:
-                self._downloaders_by_dist_name[dist_name] = None
-
-        return self._downloaders_by_dist_name[dist_name]
-
-    def get_index_url(self) -> str:
-        return f"http://127.0.0.1:{self.server_port}"
-
-
-class PipkinProxyHandler(BaseHTTPRequestHandler):
-    def __init__(self, request: bytes, client_address: Tuple[str, int], server: BaseServer):
-        logger.debug("Creating new handler")
-        assert isinstance(server, PipkinProxy)
-        self.proxy: PipkinProxy = server
-        super().__init__(request, client_address, server)
-
-    def do_GET(self) -> None:
-        path = self.path.strip("/")
-        logger.debug("do_GET for %s", path)
-        if "/" in path:
-            assert path.count("/") == 1
-            self._serve_file(*path.split("/"))
-        else:
-            self._serve_distribution_page(path)
-
-    def _serve_distribution_page(self, dist_name: str) -> None:
-        logger.debug("Serving index page for %s", dist_name)
-        downloader = self.proxy.get_downloader_for_dist(dist_name)
-        if downloader is None:
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        # TODO: check https://discuss.python.org/t/community-testing-of-packaging-tools-against-non-warehouse-indexes/13442
-
-        file_urls = downloader.get_file_urls(dist_name)
-        # logger.debug("File urls: %r", file_urls)
-        self.send_response(200)
-        self.send_header("Content-type", f"text/html; charset={SERVER_ENCODING}")
-        self.send_header("Cache-Control", "max-age=600, public")
-        self.end_headers()
-        self.wfile.write("<!DOCTYPE html><html><body>\n".encode(SERVER_ENCODING))
-        for file_name in file_urls:
-            self.wfile.write(
-                f"<a href='/{dist_name}/{file_name}/'>{file_name}</a>\n".encode(SERVER_ENCODING)
-            )
-        self.wfile.write("</body></html>".encode(SERVER_ENCODING))
-
-    def _serve_file(self, dist_name: str, file_name: str):
-        logger.debug("Serving %s for %s", file_name, dist_name)
-
+    def get_file_content(self, dist_name: str, file_name: str) -> bytes:
         if self._should_return_dummy(dist_name):
-            tweaked_bytes = create_dummy_dist(dist_name, file_name)
+            return create_dummy_dist(dist_name, file_name)
         else:
             original_bytes = self._download_file(dist_name, file_name)
-            tweaked_bytes = self._tweak_file(dist_name, file_name, original_bytes)
+            return self._tweak_file(dist_name, file_name, original_bytes)
 
-        self.send_response(200)
-        self.send_header("Content-Type", "application/octet-stream")
-        self.send_header("Cache-Control", "max-age=365000000, immutable, public")
-        self.end_headers()
+    def _get_dist_urls(self, dist_name: str) -> Optional[Dict[str, str]]:
+        """
+        Returns file names and url-s for constructing the dist index page.
+        """
+        if dist_name not in self._dist_urls_cache:
+            self._dist_urls_cache[dist_name] = self._download_file_urls(dist_name)
 
-        block_size = 4096
-        for start_index in range(0, len(tweaked_bytes), block_size):
-            block = tweaked_bytes[start_index : start_index + block_size]
-            self.wfile.write(block)
+        return self._dist_urls_cache[dist_name]
+
+    @abstractmethod
+    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+        raise NotImplementedError()
 
     def _download_file(self, dist_name: str, file_name: str) -> bytes:
-        downloader = self.proxy.get_downloader_for_dist(dist_name)
-        assert downloader is not None
-
-        urls = downloader.get_file_urls(dist_name)
+        urls = self._get_dist_urls(dist_name)
         assert urls
 
         assert file_name in urls
         url = urls[file_name]
+
         logger.debug("Downloading file from %s", url)
         with urlopen(url) as result:
             logger.debug("Headers: %r", result.headers.items())
             return result.read()
-
-    def _should_return_dummy(self, dist_name: str) -> bool:
-        return normalize_dist_name(
-            dist_name
-        ) in NORMALIZED_IRRELEVANT_PACKAGE_NAMES or normalize_dist_name(dist_name).startswith(
-            "adafruit_blinka_"
-        )
 
     def _tweak_file(self, dist_name: str, file_name: str, original_bytes: bytes) -> bytes:
         if not file_name.lower().endswith(".tar.gz"):
@@ -311,7 +199,9 @@ class PipkinProxyHandler(BaseHTTPRequestHandler):
                 assert info.isdir()
                 wrapper_dir, rel_name = info.name, ""
 
-            assert normalize_dist_name(wrapper_dir).startswith(normalize_dist_name(dist_name))
+            assert custom_normalize_dist_name(wrapper_dir).startswith(
+                custom_normalize_dist_name(dist_name)
+            )
 
             rel_name = rel_name.strip("/")
             rel_segments = rel_name.split("/")
@@ -395,6 +285,15 @@ tag_date = 0
         info.size = len(content)
         tar.addfile(info, stream)
 
+    def _should_return_dummy(self, dist_name: str) -> bool:
+        return custom_normalize_dist_name(
+            dist_name
+        ) in NORMALIZED_IRRELEVANT_PACKAGE_NAMES or custom_normalize_dist_name(
+            dist_name
+        ).startswith(
+            "adafruit_blinka_"
+        )
+
     def _parse_metadata(self, metadata_bytes) -> Dict[str, str]:
         metadata = email.parser.Parser().parsestr(metadata_bytes.decode("utf-8"))
         return {
@@ -418,7 +317,6 @@ tag_date = 0
         packages: List[str],
         requirements: List[str],
     ) -> str:
-
         src = dedent(
             """
             from setuptools import setup
@@ -454,15 +352,304 @@ tag_date = 0
         return src
 
 
+class SimpleIndexDownloader(RegularIndexDownloader):
+    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+        url = f"{self._index_url}/{dist_name}"
+        logger.info("Downloading file urls from simple index %s", url)
+
+        try:
+            with urlopen(url) as fp:
+                parser = SimpleUrlsParser()
+                parser.feed(fp.read().decode("utf-8"))
+                return parser.file_urls
+        except HTTPError as e:
+            if e.code == 404:
+                return None
+            else:
+                raise e
+
+
+class JsonIndexDownloader(RegularIndexDownloader):
+    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+        metadata_url = f"{self._index_url}/{dist_name}/json"
+        logger.info("Downloading file urls from json index at %s", metadata_url)
+
+        result = {}
+        try:
+            with urlopen(metadata_url) as fp:
+                data = json.load(fp)
+                releases = data["releases"]
+                for ver in releases:
+                    for file in releases[ver]:
+                        file_url = file["url"]
+                        if "filename" in file:
+                            file_name = file["filename"]
+                        else:
+                            # micropython.org/pi doesn't have it
+                            file_name = file_url.split("/")[-1]
+                            # may be missing micropython prefix
+                            if not file_name.startswith(dist_name):
+                                # Let's hope version part doesn't contain dashes
+                                _, suffix = file_name.split("-")
+                                file_name = dist_name + "-" + suffix
+                        result[file_name] = file_url
+        except HTTPError as e:
+            if e.code == 404:
+                return None
+            else:
+                raise e
+        return result
+
+
+class MpOrgV1IndexDownloader(JsonIndexDownloader):
+    def _download_file_urls(self, dist_name) -> Optional[Dict[str, str]]:
+        if not custom_normalize_dist_name(dist_name).startswith("micropython_"):
+            return None
+
+        return super()._download_file_urls(dist_name)
+
+
+class MpOrgV2IndexDownloader(BaseIndexDownloader):
+    def __init__(self, index_url):
+        self._packages = None
+        super().__init__(index_url)
+
+    def get_dist_file_names(self, dist_name: str) -> Optional[List[str]]:
+        # there is no per-package, all-versions metadata resource. Need to use the global index
+        meta = self._get_dist_metadata(dist_name)
+        if meta is None:
+            return None
+
+        # Collect relationship between version and constructed file names so that I won't need to parse file name later.
+        meta["original_versions_per_file_name"] = {}
+
+        result = []
+        for version in meta["versions"]["py"]:
+            file_name = create_dist_info_version_name(dist_name, version) + "-py3-none-any.whl"
+            meta["original_versions_per_file_name"][file_name] = version
+            result.append(file_name)
+
+        return result
+
+    def get_file_content(self, dist_name: str, file_name: str) -> bytes:
+        dist_meta = self._get_dist_metadata(dist_name)
+        original_name = dist_meta["name"]
+
+        original_versions = dist_meta.get("original_versions_per_file_name", None)
+        assert isinstance(original_versions, dict)
+        original_version = original_versions.get(file_name, None)
+        assert isinstance(original_version, str)
+
+        version_meta_url = f"{self._index_url}/package/py/{original_name}/{original_version}.json"
+        with urlopen(version_meta_url) as fp:
+            version_meta = json.load(fp)
+
+        return self._construct_wheel_content(dist_meta, version_meta)
+
+    def _construct_wheel_content(
+        self, dist_meta: Dict[str, Any], version_meta: Dict[str, Any]
+    ) -> bytes:
+        urls_per_wheel_path = {}
+
+        for wheel_path, short_hash in version_meta.get("hashes", []):
+            urls_per_wheel_path[
+                wheel_path
+            ] = f"{self._index_url}/file/{short_hash[:2]}/{short_hash}"
+
+        for wheel_path, url in version_meta.get("urls", []):
+            urls_per_wheel_path[wheel_path] = url
+
+        bytes_per_wheel_path = {}
+        for wheel_path, url in urls_per_wheel_path.items():
+            with urlopen(url) as fp:
+                bytes_per_wheel_path[wheel_path] = fp.read()
+
+        # construct metadata files
+        meta_dir_prefix = create_dist_info_version_name(dist_meta["name"], version_meta["version"])
+        meta_dir = f"{meta_dir_prefix}.dist-info"
+        summary = dist_meta.get("description", "").replace("\r\n", "\n").replace("\n", " ")
+
+        metadata = textwrap.dedent(
+            f"""
+            Metadata-Version: 2.1
+            Name: {safe_name(dist_meta["name"])}
+            Version: {safe_version(version_meta["version"])}
+            Summary: {summary}
+            Author: {dist_meta.get("author", "")}
+            License: {dist_meta.get("license", "")}
+            """
+        ).lstrip()
+
+        for dep_name, dep_version in version_meta.get("deps", []):
+            metadata += f"Requires-Dist: {dep_name}"
+            if dep_version and dep_version != "latest":
+                metadata += " ("
+                if dep_version[0] not in "<>=":
+                    metadata += "=="
+                metadata += dep_version
+                metadata += ")"
+            metadata += "\n"
+
+        bytes_per_wheel_path[f"{meta_dir}/METADATA"] = metadata.encode("utf-8")
+
+        bytes_per_wheel_path[f"{meta_dir}/WHEEL"] = (
+            textwrap.dedent(
+                """
+            Wheel-Version: 1.0
+            Generator: bdist_wheel (0.37.1)
+            Root-Is-Purelib: true
+            Tag: py3-none-any
+            """
+            )
+            .lstrip()
+            .encode("utf-8")
+        )
+
+        record_lines = []
+        for wheel_path, content in bytes_per_wheel_path.items():
+            digest = hashlib.sha256(content).hexdigest()
+            record_lines.append(f"{wheel_path},sha256={digest},{len(content)}")
+        record_lines.append(f"{meta_dir}/RECORD,,")
+
+        bytes_per_wheel_path[f"{meta_dir}/RECORD"] = ("\n".join(record_lines) + "\n").encode(
+            "utf-8"
+        )
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(
+            zip_buffer, mode="a", compression=zipfile.ZIP_DEFLATED, allowZip64=False
+        ) as fp:
+            for wheel_path, content in bytes_per_wheel_path.items():
+                fp.writestr(wheel_path, content)
+
+        with open(os.path.expanduser("~/out.whl"), "wb") as fp:
+            fp.write(zip_buffer.getvalue())
+        return zip_buffer.getvalue()
+
+    def _get_dist_metadata(self, dist_name: str) -> Optional[Dict[Any, Any]]:
+        if self._packages is None:
+            with urlopen(MP_ORG_INDEX_V2 + "/index.json") as fp:
+                self._packages = json.load(fp)["packages"]
+
+        for package in self._packages:
+            if custom_normalize_dist_name(package["name"]) == custom_normalize_dist_name(dist_name):
+                return package
+
+        return None
+
+
+class PipkinProxy(HTTPServer):
+    def __init__(
+        self, no_mp_org: bool, index_url: Optional[str], extra_index_urls: List[str], port: int
+    ):
+        self._downloaders: List[BaseIndexDownloader] = []
+        self._downloaders_by_dist_name: Dict[str, Optional[BaseIndexDownloader]] = {}
+        if not no_mp_org:
+            # V1 first, because it only considers packages with "micropython-"-prefix
+            self._downloaders.append(MpOrgV1IndexDownloader(MP_ORG_INDEX_V1))
+            self._downloaders.append(MpOrgV2IndexDownloader(MP_ORG_INDEX_V2))
+        self._downloaders.append(SimpleIndexDownloader(index_url or PYPI_SIMPLE_INDEX))
+        for url in extra_index_urls:
+            self._downloaders.append(SimpleIndexDownloader(url))
+        super().__init__(("127.0.0.1", port), PipkinProxyHandler)
+
+    def get_downloader_for_dist(self, dist_name: str) -> Optional[BaseIndexDownloader]:
+        if dist_name not in self._downloaders_by_dist_name:
+            for downloader in self._downloaders:
+                logger.debug("Checking if %s has %r", downloader, dist_name)
+                file_names = downloader.get_dist_file_names(dist_name)
+                if file_names is not None:
+                    logger.debug("Got %r file names", len(file_names))
+                    self._downloaders_by_dist_name[dist_name] = downloader
+                    break
+                else:
+                    logger.debug("Got None. Trying next downloader")
+            else:
+                self._downloaders_by_dist_name[dist_name] = None
+
+        return self._downloaders_by_dist_name[dist_name]
+
+    def get_index_url(self) -> str:
+        return f"http://127.0.0.1:{self.server_port}"
+
+
+class PipkinProxyHandler(BaseHTTPRequestHandler):
+    def __init__(
+        self,
+        request: Union[socket.socket, Tuple[bytes, socket.socket]],
+        client_address: Tuple[str, int],
+        server: BaseServer,
+    ):
+        logger.debug("Creating new handler")
+        assert isinstance(server, PipkinProxy)
+        self.proxy: PipkinProxy = server
+        super().__init__(request, client_address, server)
+
+    def do_GET(self) -> None:
+        path = self.path.strip("/")
+        logger.debug("do_GET for %s", path)
+        if "/" in path:
+            assert path.count("/") == 1
+            self._serve_file(*path.split("/"))
+        else:
+            self._serve_distribution_page(path)
+
+    def _serve_distribution_page(self, dist_name: str) -> None:
+        logger.debug("Serving index page for %s", dist_name)
+        downloader = self.proxy.get_downloader_for_dist(dist_name)
+        if downloader is None:
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        # TODO: check https://discuss.python.org/t/community-testing-of-packaging-tools-against-non-warehouse-indexes/13442
+
+        file_names = downloader.get_dist_file_names(dist_name)
+        # logger.debug("File urls: %r", file_names)
+        self.send_response(200)
+        self.send_header("Content-type", f"text/html; charset={SERVER_ENCODING}")
+        self.send_header("Cache-Control", "max-age=600, public")
+        self.end_headers()
+        self.wfile.write("<!DOCTYPE html><html><body>\n".encode(SERVER_ENCODING))
+        for file_name in file_names:
+            self.wfile.write(
+                f"<a href='/{dist_name}/{file_name}/'>{file_name}</a>\n".encode(SERVER_ENCODING)
+            )
+        self.wfile.write("</body></html>".encode(SERVER_ENCODING))
+
+    def _serve_file(self, dist_name: str, file_name: str):
+        logger.debug("Serving %s for %s", file_name, dist_name)
+
+        downloader = self.proxy.get_downloader_for_dist(dist_name)
+        assert downloader is not None
+        file_content = downloader.get_file_content(dist_name, file_name)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/octet-stream")
+        self.send_header("Cache-Control", "max-age=365000000, immutable, public")
+        self.end_headers()
+
+        block_size = 4096
+        for start_index in range(0, len(file_content), block_size):
+            block = file_content[start_index : start_index + block_size]
+            self.wfile.write(block)
+
+
 def start_proxy(
     no_mp_org: bool,
     index_url: Optional[str],
     extra_index_urls: List[str],
 ) -> PipkinProxy:
+    port = PREFERRED_PORT
+    if no_mp_org:
+        # Use different port for different set of source indexes, otherwise
+        # pip may use wrong cached wheel.
+        port += 7
     try:
-        proxy = PipkinProxy(no_mp_org, index_url, extra_index_urls, PREFERRED_PORT)
+        proxy = PipkinProxy(no_mp_org, index_url, extra_index_urls, port)
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
+            logger.warning("Port %s was in use. Letting OS choose.", port)
             proxy = PipkinProxy(no_mp_org, index_url, extra_index_urls, 0)
         else:
             raise e
@@ -476,7 +663,7 @@ def start_proxy(
 def create_dummy_dist(dist_name: str, file_name: str) -> bytes:
     logger.info("Creating dummy content for %s", file_name)
     parsed_dist_name, version, suffix = parse_dist_file_name(file_name)
-    assert normalize_dist_name(dist_name) == normalize_dist_name(parsed_dist_name)
+    assert custom_normalize_dist_name(dist_name) == custom_normalize_dist_name(parsed_dist_name)
 
     with tempfile.TemporaryDirectory(prefix="pipkin-proxy") as tmp:
         setup_py_path = os.path.join(tmp, "setup.py")

@@ -42,6 +42,7 @@ Libraries, resources and tools
 * websockets (https://pypi.org/project/websockets) is optionally used for communicating with MicroPython devices over WebREPL.
 * Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overridden by Tango icons (http://tango.freedesktop.org/)
 * POEditor (https://poeditor.com/) is used for managing translations of UI strings.
+* https://github.com/hlovatt/PyBoardTypeshed
 
 Source contributors, sponsors, advisors, translators and frequent bug-reporters
 -------------------------------------------------------------------------------
@@ -68,6 +69,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * badukaire
 * Bui Huy Quang
 * borpol
+* CADTEC GmbH (cadtec.ch)
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
@@ -79,6 +81,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Dominic Twyman
 * Dominik George
 * Donald Butt
+* Duncan Ogilvie (@mrexodia)
 * Eliot Blennerhassett
 * Emanuel Angelo
 * Fabianus.c
@@ -102,10 +105,12 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * jharris1993
 * Juan Falgueras
+* Juhan Oskar Hennoste (@FeldrinH)
 * Jonathan Campbell
 * Jordan Williams
 * jose1711
 * José Carlos García
+* Karolina Surma (@befeleme)
 * Kaspar Papli
 * Kauri Raba
 * kr-g
@@ -116,6 +121,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Marian-Silviu Iuga
 * Marie Roald
 * Marko Ristin
+* Martin Rommel
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm

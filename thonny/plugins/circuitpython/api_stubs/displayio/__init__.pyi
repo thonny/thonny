@@ -14,13 +14,14 @@ import typing
 from typing import Optional, Tuple, Union
 
 import busio
+import circuitpython_typing
 import microcontroller
 import paralleldisplay
 import vectorio
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
 def release_displays() -> None:
-    """Releases any actively used displays so their busses and pins can be used again. This will also
+    """Releases any actively used displays so their buses and pins can be used again. This will also
     release the builtin display on boards that have one. You will need to reinitialize it yourself
     afterwards. This may take seconds to complete if an active EPaperDisplay is refreshing.
 
@@ -138,6 +139,9 @@ class Bitmap:
         display will not be properly updated unless the bitmap is
         notified of the "dirty rectangle" that encloses all modified
         pixels."""
+        ...
+    def deinit(self) -> None:
+        """Release resources allocated by Bitmap."""
         ...
 
 class ColorConverter:
@@ -267,10 +271,16 @@ class Display:
         """
         ...
     def show(self, group: Group) -> None:
-        """Switches to displaying the given group of layers. When group is None, the default
+        """
+        .. note:: `show()` is deprecated and will be removed in CircuitPython 9.0.0.
+          Use ``.root_group = group`` instead.
+
+        Switches to displaying the given group of layers. When group is None, the default
         CircuitPython terminal will be shown.
 
-        :param Group group: The group to show."""
+        :param Group group: The group to show.
+
+        """
         ...
     def refresh(
         self,
@@ -311,7 +321,9 @@ class Display:
     bus: _DisplayBus
     """The bus being used by the display"""
     root_group: Group
-    """The root group on the display."""
+    """The root group on the display.
+    If the root group is set to ``None``, the default CircuitPython terminal will be shown.
+    """
     def fill_row(self, y: int, buffer: WriteableBuffer) -> WriteableBuffer:
         """Extract the pixels from a single row
 
@@ -352,14 +364,16 @@ class EPaperDisplay:
         write_color_ram_command: Optional[int] = None,
         color_bits_inverted: bool = False,
         highlight_color: int = 0x000000,
-        refresh_display_command: int,
+        refresh_display_command: Union[int, circuitpython_typing.ReadableBuffer],
         refresh_time: float = 40,
         busy_pin: Optional[microcontroller.Pin] = None,
         busy_state: bool = True,
         seconds_per_frame: float = 180,
         always_toggle_chip_select: bool = False,
         grayscale: bool = False,
+        advanced_color_epaper: bool = False,
         two_byte_sequence_length: bool = False,
+        start_up_time: float = 0,
     ) -> None:
         """Create a EPaperDisplay object on the given display bus (`displayio.FourWire` or `paralleldisplay.ParallelBus`).
 
@@ -373,8 +387,8 @@ class EPaperDisplay:
 
         :param display_bus: The bus that the display is connected to
         :type _DisplayBus: displayio.FourWire or paralleldisplay.ParallelBus
-        :param ~circuitpython_typing.ReadableBuffer start_sequence: Byte-packed initialization sequence.
-        :param ~circuitpython_typing.ReadableBuffer stop_sequence: Byte-packed initialization sequence.
+        :param ~circuitpython_typing.ReadableBuffer start_sequence: Byte-packed command sequence.
+        :param ~circuitpython_typing.ReadableBuffer stop_sequence: Byte-packed command sequence.
         :param int width: Width in pixels
         :param int height: Height in pixels
         :param int ram_width: RAM width in pixels
@@ -391,18 +405,24 @@ class EPaperDisplay:
         :param int write_color_ram_command: Command used to write pixels values into the update region
         :param bool color_bits_inverted: True if 0 bits are used to show the color. Otherwise, 1 means to show color.
         :param int highlight_color: RGB888 of source color to highlight with third ePaper color.
-        :param int refresh_display_command: Command used to start a display refresh
+        :param int refresh_display_command: Command used to start a display refresh. Single int or byte-packed command sequence
         :param float refresh_time: Time it takes to refresh the display before the stop_sequence should be sent. Ignored when busy_pin is provided.
         :param microcontroller.Pin busy_pin: Pin used to signify the display is busy
         :param bool busy_state: State of the busy pin when the display is busy
         :param float seconds_per_frame: Minimum number of seconds between screen refreshes
         :param bool always_toggle_chip_select: When True, chip select is toggled every byte
         :param bool grayscale: When true, the color ram is the low bit of 2-bit grayscale
+        :param bool advanced_color_epaper: When true, the display is a 7-color advanced color epaper (ACeP)
         :param bool two_byte_sequence_length: When true, use two bytes to define sequence length
+        :param float start_up_time: Time to wait after reset before sending commands
         """
         ...
     def show(self, group: Group) -> None:
-        """Switches to displaying the given group of layers. When group is None, the default
+        """
+        .. note:: `show()` is deprecated and will be removed in CircuitPython 9.0.0.
+          Use ``.root_group = group`` instead.
+
+        Switches to displaying the given group of layers. When group is None, the default
         CircuitPython terminal will be shown.
 
         :param Group group: The group to show."""
@@ -431,7 +451,9 @@ class EPaperDisplay:
     """The bus being used by the display"""
 
     root_group: Group
-    """The root group on the epaper display."""
+    """The root group on the epaper display.
+    If the root group is set to ``None``, the default CircuitPython terminal will be shown.
+    """
 
 class FourWire:
     """Manage updating a display over SPI four wire protocol in the background while Python code runs.
@@ -668,11 +690,16 @@ class Palette:
     """Map a pixel palette_index to a full color. Colors are transformed to the display's format internally to
     save memory."""
 
-    def __init__(self, color_count: int) -> None:
+    def __init__(self, color_count: int, *, dither: bool = False) -> None:
         """Create a Palette object to store a set number of colors.
 
-        :param int color_count: The number of colors in the Palette"""
+        :param int color_count: The number of colors in the Palette
+        :param bool dither: When true, dither the RGB color before converting to the display's color space
+        """
         ...
+    dither: bool
+    """When `True` the Palette dithers the output color by adding random
+    noise when truncating to display bitdepth"""
     def __bool__(self) -> bool: ...
     def __len__(self) -> int:
         """Returns the number of colors in a Palette"""

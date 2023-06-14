@@ -29,7 +29,7 @@ def set_power_management(value: int) -> None:
     The low 4 bits, ``m``, are the power management mode:
      * 0: disabled
      * 1: aggressive power saving which reduces wifi throughput
-     * 2: Power saving with high througput
+     * 2: Power saving with high throughput
 
     The next 8 bits, ``r``, specify "the maximum time to wait before going back to sleep" for power management mode 2. The units of ``r`` are 10ms.
 

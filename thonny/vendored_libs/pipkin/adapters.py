@@ -460,7 +460,7 @@ class DirAdapter(LocalMirrorAdapter):
 
     def fetch_sys_implementation(self) -> Tuple[str, str, int]:
         # TODO:
-        return ("micropython", "1.18", 0)
+        return ("micropython", "1.20", 0)
 
     def get_default_target(self) -> str:
         return "/"

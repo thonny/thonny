@@ -2,7 +2,7 @@ import os.path
 import sys
 import time
 from time import sleep
-from typing import Optional
+from typing import Dict, List, Optional
 
 from thonny import ui_utils
 from thonny.languages import tr
@@ -12,7 +12,11 @@ from thonny.plugins.micropython import (
     add_micropython_backend,
 )
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
-from thonny.plugins.micropython.uf2dialog import TargetInfo, Uf2FlashingDialog
+from thonny.plugins.micropython.uf2dialog import (
+    TargetInfo,
+    Uf2FlashingDialog,
+    create_volume_description,
+)
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -61,10 +65,11 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
             + ")"
         )
 
-    def _has_flashing_dialog(self):
-        return True
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return [""]
 
-    def _open_flashing_dialog(self):
+    def _open_flashing_dialog(self, kind: str) -> None:
+        assert kind == ""
         dlg = MicrobitFlashingDialog(self, "MicroPython")
         ui_utils.show_dialog(dlg)
 
@@ -78,16 +83,22 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
     def get_variants_url(self) -> str:
         return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-daplink.json"
 
+    def get_families_mapping(self) -> Dict[str, str]:
+        return {
+            "nRF51": "nrf51",
+            "nRF52": "nrf52",
+        }
+
     def get_instructions(self) -> Optional[str]:
         return (
-            "This dialog allows you to install or update MicroPython on your micro:bit.\n"
+            f"This dialog allows you to install or update {self.firmware_name} on your micro:bit.\n"
             "\n"
             "1. Plug in your micro:bit.\n"
             "2. Wait until device information appears.\n"
             "3. Click 'Install' and wait for some seconds until done.\n"
             "4. Close the dialog and start programming!\n"
             "\n"
-            "NB! Installing MicroPython will erase all files you may have on your\n"
+            f"NB! Installing {self.firmware_name} will erase all files you may have on your\n"
             "device. Make sure you have important files backed up!"
         )
 
@@ -118,11 +129,12 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                     if board_id in models:
                         model, family = models[board_id]
                         return TargetInfo(
-                            title=self.describe_target_path(path),
+                            title=create_volume_description(path),
                             path=path,
                             family=family,
                             model=model,
                             board_id=board_id,
+                            port=None,
                         )
 
             # With older bootloaders, the file may be different
@@ -132,18 +144,19 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
                     board_id = "9900"
                     model, family = models[board_id]
                     return TargetInfo(
-                        title=self.describe_target_path(path),
+                        title=create_volume_description(path),
                         path=path,
                         family=family,
                         model=model,
                         board_id=board_id,
+                        port=None,
                     )
 
         # probably not micro:bit
         return None
 
     def get_title(self):
-        return f"Install {self.firmware_name} for BBC micro:bit"
+        return f"Install or update {self.firmware_name} for BBC micro:bit"
 
     def perform_post_installation_steps(self, ports_before):
         # can't check the ports as in the superclass, because the port is always there

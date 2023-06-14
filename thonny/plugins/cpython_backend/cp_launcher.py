@@ -9,11 +9,18 @@ is far from clean.
 I could also do python -c "from backend import MainCPythonBackend: MainCPythonBackend().mainloop()",
 but looks like this gives relative __file__-s on imported modules.)
 """
+import ast
 
 # NB! This module can be also imported (when querying its path for uploading)
 if __name__ == "__main__":
-    import os
+    import ast
+    import os.path
     import sys
+
+    # make sure thonny folder is in sys.path (relevant in dev)
+    thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    if thonny_container not in sys.path:
+        sys.path.insert(0, thonny_container)
 
     if sys.platform == "darwin":
         try:
@@ -35,11 +42,14 @@ if __name__ == "__main__":
     from thonny import report_time
 
     report_time("Before importing MainCPythonBackend")
+    from thonny.common import PROCESS_ACK
     from thonny.plugins.cpython_backend.cp_back import MainCPythonBackend
 
     thonny.prepare_thonny_user_dir()
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
 
     target_cwd = sys.argv[1]
+    options = ast.literal_eval(sys.argv[2])
     report_time("Before constructing backend")
-    MainCPythonBackend(target_cwd).mainloop()
+    MainCPythonBackend(target_cwd, options).mainloop()

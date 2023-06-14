@@ -1,16 +1,17 @@
 jedi==0.18.*
 pyserial==3.5
-pylint==2.15.*
-docutils==0.19.*
-mypy==0.991.*
+pylint==2.17.*
+docutils==0.20.*
+mypy==1.3.*
 asttokens==2.2.*
-Send2Trash==1.8.1b0
-esptool==4.4.*
+Send2Trash==1.8.*
+esptool==4.6.*
 bcrypt==3.2.* # has builds available for RPi (https://www.piwheels.org/project/bcrypt/). Should be good enough for paramiko
 cryptography==38.* # Good fit for macoOS, see also ~/thonny_alt_packages
-paramiko==2.12.*
-websockets==10.*
+paramiko==3.2.*
+websockets==11.0.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
 adafruit_board_toolkit==1.1.*; sys_platform == "win32" or sys_platform == "darwin"
+dbus-next==0.2.*; sys_platform == "linux"
 
 

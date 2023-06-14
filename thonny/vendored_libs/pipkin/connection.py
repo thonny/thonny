@@ -20,7 +20,7 @@ class MicroPythonConnection:
 
     def __init__(self):
         self.encoding = "utf-8"
-        self._read_queue = Queue()  # populated by reader thread
+        self._read_queue: Queue = Queue()  # populated by reader thread
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
         self.startup_time = time.time()
