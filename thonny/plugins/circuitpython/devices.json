@@ -501,5 +501,16 @@
         "USB_PID": "0x8072",
         "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/clue_nrf52840_express/{lang}/adafruit-circuitpython-clue_nrf52840_express-{lang}-{release}.uf2",
         "CP_URL": "https://circuitpython.org/board/clue_nrf52840_express/"
+    },
+        "ESP32-S2-FeatherRevTFT-revB": {
+        "VENDOR_NAME": "Adafruit Industries",
+        "PRODUCT_NAME": "ESP32-S2 Reverse TFT Feather",
+        "VOLUME_LABEL": "FTHRS2BOOT",
+        "INDEX_URL": "http://adafru.it/5345",
+        "BOARD_ID": "ESP32-S2-FeatherRevTFT-revB",
+        "USB_VID": "0x239A",
+        "USB_PID": "0x80EE",
+        "FIRMWARE_DOWNLOAD": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/{lang}/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-{lang}-{release}.uf2",
+        "CP_URL": "https://circuitpython.org/board/adafruit_feather_esp32s2_reverse_tft/"
     }
 }
