@@ -32,7 +32,6 @@ class BackendDetailsConfigPage(ConfigurationPage):
         width=None,
         **kwargs,
     ):
-
         if isinstance(pady, int):
             pady = (pady, pady)
 
@@ -129,7 +128,6 @@ class BackendConfigurationPage(ConfigurationPage):
         page = self._get_conf_page(backend_desc)
 
         if page != self._current_page:
-
             if self._current_page is not None:
                 self._current_page.grid_forget()
 

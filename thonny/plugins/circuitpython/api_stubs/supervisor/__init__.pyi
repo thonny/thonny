@@ -8,28 +8,15 @@ runtime: Runtime
 """Runtime information, such as ``runtime.serial_connected``
 (USB serial connection status).
 This object is the sole instance of `supervisor.Runtime`."""
-
-def enable_autoreload() -> None:
-    """Enable autoreload based on USB file write activity."""
-    ...
-
-def disable_autoreload() -> None:
-    """Disable autoreload based on USB file write activity until
-    `enable_autoreload` is called."""
-    ...
-
-def set_rgb_status_brightness(brightness: int) -> None:
-    """Set brightness of status RGB LED from 0-255. This will take effect
-    after the current code finishes and the status LED is used to show
-    the finish state."""
-    ...
+status_bar: StatusBar
+"""The status bar, shown on an attached display, and also sent to
+an attached terminal via OSC escape codes over the REPL serial connection.
+The status bar reports the current IP or BLE connection, what file is running,
+the last exception name and location, and firmware version information.
+This object is the sole instance of `supervisor.StatusBar`."""
 
 def reload() -> None:
     """Reload the main Python code and run it (equivalent to hitting Ctrl-D at the REPL)."""
-    ...
-
-def set_next_stack_limit(size: int) -> None:
-    """Set the size of the stack for the next vm run. If its too large, the default will be used."""
     ...
 
 def set_next_code_file(
@@ -100,7 +87,7 @@ def ticks_ms() -> int:
 
         def ticks_add(ticks, delta):
             "Add a delta to a base number of ticks, performing wraparound at 2**29ms."
-            return (a + b) % _TICKS_PERIOD
+            return (ticks + delta) % _TICKS_PERIOD
 
         def ticks_diff(ticks1, ticks2):
             "Compute the signed difference between two ticks values, assuming that they are within 2**28 ticks"
@@ -125,13 +112,25 @@ def get_previous_traceback() -> Optional[str]:
     Only code (main or boot) runs are considered, not REPL runs."""
     ...
 
-def disable_ble_workflow() -> None:
-    """Disable ble workflow until a reset. This prevents BLE advertising outside of the VM and
-    the services used for it."""
-    ...
-
 def reset_terminal(x_pixels: int, y_pixels: int) -> None:
     """Reset the CircuitPython serial terminal with new dimensions."""
+    ...
+
+def set_usb_identification(
+    manufacturer: Optional[str] = None,
+    product: Optional[str] = None,
+    vid: int = -1,
+    pid: int = -1,
+) -> None:
+    """Override identification constants in the USB Device Descriptor.
+
+    If passed, `manufacturer` and `product` must be ASCII strings (or buffers) of at most 126
+    characters. Any omitted arguments will be left at their default values.
+
+    This method must be called in boot.py to have any effect.
+
+    Not available on boards without native USB support.
+    """
     ...
 
 class RunReason:
@@ -165,14 +164,118 @@ class Runtime:
         ...
     usb_connected: bool
     """Returns the USB enumeration status (read-only)."""
-
     serial_connected: bool
     """Returns the USB serial communication status (read-only)."""
-
     serial_bytes_available: int
     """Returns the whether any bytes are available to read
     on the USB serial input.  Allows for polling to see whether
     to call the built-in input() or wait. (read-only)"""
-
     run_reason: RunReason
-    """Returns why CircuitPython started running this particular time."""
+    """Why CircuitPython started running this particular time (read-only)."""
+    safe_mode_reason: SafeModeReason
+    """Why CircuitPython went into safe mode this particular time (read-only).
+
+    **Limitations**: Raises ``NotImplementedError`` on builds that do not implement ``safemode.py``.
+    """
+    autoreload: bool
+    """Whether CircuitPython may autoreload based on workflow writes to the filesystem."""
+
+    ble_workflow: bool
+    """Enable/Disable ble workflow until a reset. This prevents BLE advertising outside of the VM and
+    the services used for it."""
+
+    next_stack_limit: int
+    """The size of the stack for the next vm run. If its too large, the default will be used."""
+
+    rgb_status_brightness: int
+    """Set brightness of status RGB LED from 0-255. This will take effect
+    after the current code finishes and the status LED is used to show
+    the finish state."""
+
+class SafeModeReason:
+    """The reason that CircuitPython went into safe mode.
+
+    **Limitations**: Class not available on builds that do not implement ``safemode.py``.
+    """
+
+    NONE: object
+    """CircuitPython is not in safe mode."""
+
+    BROWNOUT: object
+    """The microcontroller voltage dropped too low."""
+
+    FLASH_WRITE_FAIL: object
+    """Could not write to flash memory."""
+
+    GC_ALLOC_OUTSIDE_VM: object
+    """CircuitPython tried to allocate storage when its virtual machine was not running."""
+
+    HARD_FAULT: object
+    """The microcontroller detected a fault, such as an out-of-bounds memory write."""
+
+    INTERRUPT_ERROR: object
+    """Internal error related to interrupts."""
+
+    NLR_JUMP_FAIL: object
+    """An error occurred during exception handling, possibly due to memory corruption."""
+
+    NO_CIRCUITPY: object
+    """The CIRCUITPY drive was not available."""
+
+    NO_HEAP: object
+    """Heap storage was not present."""
+
+    PROGRAMMATIC: object
+    """The program entered safe mode using the `supervisor` module."""
+
+    SDK_FATAL_ERROR: object
+    """Third party firmware reported a fatal error."""
+
+    STACK_OVERFLOW: object
+    """The CircuitPython heap was corrupted because the stack was too small."""
+
+    USB_BOOT_DEVICE_NOT_INTERFACE_ZERO: object
+    """The USB HID boot device was not set up to be the first device, on interface #0."""
+
+    USB_TOO_MANY_ENDPOINTS: object
+    """USB devices need more endpoints than are available."""
+
+    USB_TOO_MANY_INTERFACE_NAMES: object
+    """USB devices specify too many interface names."""
+
+    USER: object
+    """The user pressed one or more buttons to enter safe mode.
+    This safe mode does **not** cause ``safemode.py`` to be run, since its purpose
+    is to prevent all user code from running.
+    This allows errors in ``safemode.py`` to be corrected easily.
+    """
+
+    SAFE_MODE_WATCHDOG: object
+    """An internal watchdog timer expired."""
+
+class StatusBar:
+    """Current status of runtime objects.
+
+    Usage::
+
+       import supervisor
+
+       supervisor.status_bar.console = False
+    """
+
+    def __init__(self) -> None:
+        """You cannot create an instance of `supervisor.StatusBar`.
+        Use `supervisor.status_bar` to access the sole instance available."""
+        ...
+    console: bool
+    """Whether status bar information is sent over the console (REPL) serial connection,
+    using OSC terminal escape codes that change the terminal's title. Default is ``True``.
+    If set to ``False``, status bar will be cleared and then disabled.
+    May be set in ``boot.py`` or later. Persists across soft restarts.
+    """
+    display: bool
+    """Whether status bar information is displayed on the top line of the display.
+    Default is ``True``. If set to ``False``, status bar will be cleared and then disabled.
+    May be set in ``boot.py`` or later.  Persists across soft restarts.
+    Not available if `terminalio` is not available.
+    """

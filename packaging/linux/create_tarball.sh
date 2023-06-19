@@ -145,7 +145,8 @@ DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
 cp downinstall_template.sh $DOWNINSTALL_TARGET
 sed -i "s/_VERSION_/${VERSION}/g" $DOWNINSTALL_TARGET
 sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
-sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-regular-bundle.txt)/g" $DOWNINSTALL_TARGET
+#sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-regular-bundle.txt)/g" $DOWNINSTALL_TARGET
+./insert_deps.py ../requirements-regular-bundle.txt $DOWNINSTALL_TARGET
 
 # xxl
 #XXL_DOWNINSTALL_FILENAME=thonny-xxl-$VERSION.bash

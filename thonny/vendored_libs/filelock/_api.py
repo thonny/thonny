@@ -44,9 +44,9 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
         Create a new lock object.
 
         :param lock_file: path to the file
-        :param timeout: default timeout when acquiring the lock. It will be used as fallback value in the acquire
-        method, if no timeout value (``None``) is given. If you want to disable the timeout, set it to a negative value.
-         A timeout of 0 means, that there is exactly one attempt to acquire the file lock.
+        :param timeout: default timeout when acquiring the lock, in seconds. It will be used as fallback value in
+        the acquire method, if no timeout value (``None``) is given. If you want to disable the timeout, set it
+        to a negative value. A timeout of 0 means, that there is exactly one attempt to acquire the file lock.
         """
         # The path to the lock file.
         self._lock_file: str = os.fspath(lock_file)
@@ -56,7 +56,7 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
         self._lock_file_fd: int | None = None
 
         # The default timeout value.
-        self.timeout: float = timeout
+        self._timeout: float = timeout
 
         # We use this lock primarily for the lock counter.
         self._thread_lock: Lock = Lock()
@@ -73,7 +73,7 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
     @property
     def timeout(self) -> float:
         """
-        :return: the default timeout value
+        :return: the default timeout value, in seconds
 
         .. versionadded:: 2.0.0
         """
@@ -84,7 +84,7 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
         """
         Change the default timeout value.
 
-        :param value: the new value
+        :param value: the new value, in seconds
         """
         self._timeout = float(value)
 
@@ -116,6 +116,7 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
         poll_interval: float = 0.05,
         *,
         poll_intervall: float | None = None,
+        blocking: bool = True,
     ) -> AcquireReturnProxy:
         """
         Try to acquire the file lock.
@@ -124,6 +125,8 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
          if ``timeout < 0``, there is no timeout and this method will block until the lock could be acquired
         :param poll_interval: interval of trying to acquire the lock file
         :param poll_intervall: deprecated, kept for backwards compatibility, use ``poll_interval`` instead
+        :param blocking: defaults to True. If False, function will return immediately if it cannot obtain a lock on the
+         first attempt. Otherwise this method will block until the timeout expires or the lock is acquired.
         :raises Timeout: if fails to acquire lock within the timeout period
         :return: a context object that will unlock the file when the context is exited
 
@@ -172,6 +175,9 @@ class BaseFileLock(ABC, contextlib.ContextDecorator):
                 if self.is_locked:
                     _LOGGER.debug("Lock %s acquired on %s", lock_id, lock_filename)
                     break
+                elif blocking is False:
+                    _LOGGER.debug("Failed to immediately acquire lock %s on %s", lock_id, lock_filename)
+                    raise Timeout(self._lock_file)
                 elif 0 <= timeout < time.monotonic() - start_time:
                     _LOGGER.debug("Timeout on acquiring lock %s on %s", lock_id, lock_filename)
                     raise Timeout(self._lock_file)

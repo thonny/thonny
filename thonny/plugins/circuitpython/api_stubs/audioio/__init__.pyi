@@ -7,6 +7,10 @@ are no longer needed if the program continues after use. To do so, either
 call :py:meth:`!deinit` or use a context manager. See
 :ref:`lifetime-and-contextmanagers` for more info.
 
+For more information on working with this module, refer to the
+`CircuitPython Essentials Learn Guide
+<https://learn.adafruit.com/circuitpython-essentials/circuitpython-audio-out>`_.
+
 Since CircuitPython 5, `RawSample` and `WaveFile` are moved
 to :mod:`audiocore`, and `Mixer` is moved to :mod:`audiomixer`.
 
@@ -107,7 +111,6 @@ class AudioOut:
         ...
     playing: bool
     """True when an audio sample is being output even if `paused`. (read-only)"""
-
     def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...

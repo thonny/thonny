@@ -268,7 +268,6 @@ def update_fonts():
 
 
 def load_plugin():
-
     # set custom images
     if get_workbench().get_ui_mode() == "simple" and get_workbench().winfo_screenwidth() >= 1280:
         images = {

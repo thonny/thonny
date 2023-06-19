@@ -100,7 +100,6 @@ class I2SOut:
         ...
     playing: bool
     """True when the audio sample is being output. (read-only)"""
-
     def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...
@@ -139,9 +138,13 @@ class PDMIn:
         :param int oversample: Number of single bit samples to decimate into a final sample. Must be divisible by 8
         :param float startup_delay: seconds to wait after starting microphone clock
          to allow microphone to turn on. Most require only 0.01s; some require 0.1s. Longer is safer.
-         Must be in range 0.0-1.0 seconds."""
+         Must be in range 0.0-1.0 seconds.
 
-        """Record 8-bit unsigned samples to buffer::
+        **Limitations:** On SAMD and RP2040, supports only 8 or 16 bit mono input, with 64x oversampling.
+        On nRF52840, supports only 16 bit mono input at 16 kHz; oversampling is fixed at 64x. Not provided
+        on nRF52833 for space reasons. Not available on Espressif.
+
+        For example, to record 8-bit unsigned samples to a buffer::
 
           import audiobusio
           import board
@@ -151,20 +154,17 @@ class PDMIn:
           with audiobusio.PDMIn(board.MICROPHONE_CLOCK, board.MICROPHONE_DATA, sample_rate=16000) as mic:
               mic.record(b, len(b))
 
-        Record 16-bit unsigned samples to buffer::
+        To record 16-bit unsigned samples to a buffer::
 
           import audiobusio
           import board
 
-          # Prep a buffer to record into. The array interface doesn't allow for
-          # constructing with a set size so we append to it until we have the size
-          # we want.
-          b = array.array("H")
-          for i in range(200):
-              b.append(0)
+          # Prep a buffer to record into.
+          b = array.array("H", [0] * 200)
           with audiobusio.PDMIn(board.MICROPHONE_CLOCK, board.MICROPHONE_DATA, sample_rate=16000, bit_depth=16) as mic:
-              mic.record(b, len(b))"""
-        ...
+              mic.record(b, len(b))
+        """
+    ...
     def deinit(self) -> None:
         """Deinitialises the PDMIn and releases any hardware resources for reuse."""
         ...

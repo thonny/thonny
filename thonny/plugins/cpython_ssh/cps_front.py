@@ -1,3 +1,4 @@
+import os.path
 import shutil
 from tkinter import messagebox
 from typing import Any, Dict, Optional
@@ -30,15 +31,20 @@ class SshCPythonProxy(SubprocessProxy):
         return True
 
     def _get_launcher_with_args(self):
+        launcher_file = os.path.join(os.path.dirname(__file__), "cps_back.py")
         return [
-            "-m",
-            "thonny.plugins.cpython_ssh.cps_back",
+            launcher_file,
             repr(
                 {
                     "host": self._host,
                     "user": self._user,
                     "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),
+                    "main_backend_options": {
+                        "run.warn_module_shadowing": get_workbench().get_option(
+                            "run.warn_module_shadowing"
+                        )
+                    },
                 }
             ),
         ]

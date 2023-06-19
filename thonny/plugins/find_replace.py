@@ -6,6 +6,7 @@ from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.languages import tr
+from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import CommonDialog, select_sequence, show_dialog
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -22,14 +23,13 @@ logger = getLogger(__name__)
 
 
 class FindDialog(CommonDialog):
-
     last_searched_word = None
 
     def __init__(self, master):
         padx = 15
         pady = 15
 
-        super().__init__(master, takefocus=1, background="pink")
+        super().__init__(master, skip_tk_dialog_attributes=running_on_mac_os(), takefocus=1)
         main_frame = ttk.Frame(self)
         main_frame.grid(row=1, column=1, sticky="nsew")
         self.columnconfigure(1, weight=1)
@@ -67,20 +67,23 @@ class FindDialog(CommonDialog):
         self.find_label.grid(column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0))
 
         # Find text field
-        initial_text = ""
+        seed_text = ""
         try:
             widget = get_workbench().focus_get()
             if isinstance(widget, tk.Text):
+                # NB! selection_get may give selection from another app,
+                # that's why I'm checkin that Text has sel tags
                 selected_lines = widget.selection_get().splitlines()
-                if selected_lines:
-                    initial_text = selected_lines[0]
+                if selected_lines and len(widget.tag_ranges("sel")) > 0:
+                    seed_text = selected_lines[0]
+                    logger.debug("Got seed text %r from widget %s", seed_text, widget)
         except Exception:
-            logger.exception("Could not get initial text")
+            logger.exception("Could not get seed text")
 
-        self.find_entry_var = tk.StringVar(value=initial_text)
+        self.find_entry_var = tk.StringVar(value=seed_text)
         self.find_entry = ttk.Entry(main_frame, textvariable=self.find_entry_var)
         self.find_entry.grid(column=1, row=0, columnspan=2, padx=(0, 10), pady=(pady, 0))
-        if FindDialog.last_searched_word is not None:
+        if not seed_text and FindDialog.last_searched_word is not None:
             self.find_entry.insert(0, FindDialog.last_searched_word)
 
         # Replace text label
@@ -177,6 +180,10 @@ class FindDialog(CommonDialog):
         self.find_entry.focus_set()
         self.find_entry.selection_range(0, tk.END)
 
+    def _raise_tags(self):
+        self.codeview.text.tag_raise("found")
+        self.codeview.text.tag_raise("current_found")
+
     # callback for text modifications on the find entry object, used to dynamically enable and disable buttons
     def _update_button_statuses(self, *args):
         find_text = self.find_entry_var.get()
@@ -204,7 +211,6 @@ class FindDialog(CommonDialog):
 
     # performs the replace operation - replaces the currently active found word with what is entered in the replace field
     def _perform_replace(self):
-
         # nothing is currently in found status
         if self.active_found_tag == None:
             return
@@ -243,7 +249,6 @@ class FindDialog(CommonDialog):
 
     # replaces all occurrences of the search string with the replace string
     def _perform_replace_all(self):
-
         tofind = self.find_entry.get()
         if len(tofind) == 0:
             self.infotext_label_var.set(tr("Enter string to be replaced."))
@@ -304,6 +309,7 @@ class FindDialog(CommonDialog):
                 self.codeview.text.tag_add(
                     "found", self.active_found_tag[0], self.active_found_tag[1]
                 )
+                self._raise_tags()
 
         else:  # start a new search, start from the current insert line position
             if self.active_found_tag is not None:
@@ -347,6 +353,7 @@ class FindDialog(CommonDialog):
         self.codeview.text.tag_add(
             "current_found", wordstart, wordend
         )  # tags the found word as active
+        self._raise_tags()
         self.active_found_tag = (wordstart, wordend)
         self.replace_and_find_button.config(state="normal")
         self.replace_button.config(state="normal")
@@ -404,19 +411,20 @@ class FindDialog(CommonDialog):
             endpos = self.codeview.text.index("%s+%dc" % (currentpos, len(tofind)))
             self.passive_found_tags.add((currentpos, endpos))
             self.codeview.text.tag_add("found", currentpos, endpos)
+            self._raise_tags()
 
             currentpos = self.codeview.text.index("%s+1c" % currentpos)
 
 
 def load_plugin() -> None:
-    def cmd_open_find_dialog():
+    def cmd_open_find_dialog(event=None):
         if _active_find_dialog is not None:
             _active_find_dialog.focus_set()
         else:
             editor = get_workbench().get_editor_notebook().get_current_editor()
             if editor:
                 dlg = FindDialog(editor._code_view)
-                show_dialog(dlg)
+                show_dialog(dlg, modal=False)
 
     def find_f3(event):
         if _active_find_dialog is None:
@@ -432,5 +440,7 @@ def load_plugin() -> None:
         default_sequence=select_sequence("<Control-f>", "<Command-f>"),
         extra_sequences=["<Control-Greek_phi>"],
     )
+
+    get_workbench().bind("<<CtrlFInText>>", cmd_open_find_dialog, True)
 
     get_workbench().bind("<F3>", find_f3, True)

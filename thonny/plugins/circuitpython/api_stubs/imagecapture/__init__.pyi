@@ -1,4 +1,10 @@
-"""Support for "Parallel capture" interfaces"""
+"""Support for "Parallel capture" interfaces
+
+.. seealso::
+
+    Espressif microcontrollers use the `espcamera` module together.
+
+"""
 
 from __future__ import annotations
 
@@ -19,6 +25,8 @@ class ParallelImageCapture:
         href: Optional[microcontroller.Pin],
     ) -> None:
         """Create a parallel image capture object
+
+        This object is usually used with a camera-specific wrapper library such as `adafruit_ov5640 <https://circuitpython.readthedocs.io/projects/ov5640/en/latest/>`_.
 
         :param List[microcontroller.Pin] data_pins: The data pins.
         :param microcontroller.Pin clock: The pixel clock input.

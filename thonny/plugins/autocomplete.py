@@ -171,7 +171,10 @@ class CompletionsBox(EditorInfoBox):
         self._check_request_details()
 
     def _check_request_details(self) -> None:
-        assert self.winfo_ismapped()
+        if not self.winfo_ismapped():
+            # can happen, see https://github.com/thonny/thonny/issues/2162
+            return
+
         if (
             self._details_box
             and self._details_box.is_visible()
@@ -371,6 +374,24 @@ class Completer:
         else:
             get_workbench().bell()
 
+    def _should_open_box_automatically(self, event):
+        assert isinstance(event.widget, tk.Text)
+        if not get_workbench().get_option("edit.automatic_completions"):
+            return False
+
+        # Don't autocomplete in remote shells
+        proxy = get_runner().get_backend_proxy()
+        if isinstance(event.widget, ShellText) and (not proxy or not proxy.has_local_interpreter()):
+            return False
+
+        # Don't autocomplete inside comments
+        line_prefix = event.widget.get("insert linestart", "insert")
+        if "#" in line_prefix:
+            # not very precise (eg. when inside a string), but good enough
+            return False
+
+        return True
+
     def _box_is_visible(self):
         if not self._completions_box:
             return False
@@ -403,10 +424,7 @@ class Completer:
         if widget.is_read_only():
             return
 
-        if (
-            not get_workbench().get_option("edit.automatic_completions")
-            and not self._box_is_visible()
-        ):
+        if not self._box_is_visible() and not self._should_open_box_automatically(event):
             return
 
         if event.keysym == "Escape":
@@ -499,7 +517,6 @@ def _is_python_name_char(c: str) -> bool:
 
 
 def load_plugin() -> None:
-
     completer = Completer()
 
     def can_complete():

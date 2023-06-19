@@ -1,0 +1,2364 @@
+[
+    {
+        "vendor": "01space",
+        "model": "ESP32-C3-0.42LCD",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/01space_lcd042_esp32c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/01space_lcd042_esp32c3/en_US/adafruit-circuitpython-01space_lcd042_esp32c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/01space_lcd042_esp32c3/en_US/adafruit-circuitpython-01space_lcd042_esp32c3-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit ESP32-S2 Camera",
+        "family": "esp32s2",
+        "title": "ESP32-S2 Camera",
+        "info_url": "https://circuitpython.org/board/adafruit_esp32s2_camera/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s2_camera/en_US/adafruit-circuitpython-adafruit_esp32s2_camera-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "ESP32-S2 Reverse TFT Feather",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_reverse_tft/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "ESP32-S3 Reverse TFT Feather",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_reverse_tft/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit Feather ESP32 V2",
+        "family": "esp32",
+        "title": "Feather ESP32 V2",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32_v2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S2 with BME280 Sensor",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_bme280/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S2 with TFT",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_tft/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S3 4MB Flash 2MB PSRAM",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_4mbflash_2mbpsram/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S3 No PSRAM",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_nopsram/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Feather ESP32-S3 TFT PSRAM",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_tft/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit Feather HUZZAH32",
+        "family": "esp32",
+        "title": "Feather HUZZAH32",
+        "info_url": "https://circuitpython.org/board/adafruit_feather_huzzah32/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "FunHouse - WiFi Home Automation Development Board",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_funhouse/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit HUZZAH32 Breakout",
+        "family": "esp32",
+        "title": "HUZZAH32 Breakout",
+        "info_url": "https://circuitpython.org/board/adafruit_huzzah32_breakout/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_huzzah32_breakout/en_US/adafruit-circuitpython-adafruit_huzzah32_breakout-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_huzzah32_breakout/en_US/adafruit-circuitpython-adafruit_huzzah32_breakout-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "MagTag - 2.9",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_magtag_2.9_grayscale/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Metro ESP32-S2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/adafruit_metro_esp32s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32 Pico",
+        "family": "esp32",
+        "title": "QT Py ESP32 Pico",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32_pico/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32-C3",
+        "family": "esp32c3",
+        "title": "QT Py ESP32-C3",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32-S2 (including uFL version)",
+        "family": "esp32s2",
+        "title": "QT Py ESP32-S2 (including uFL version)",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Adafruit",
+        "model": "Adafruit QT Py ESP32-S3 No PSRAM",
+        "family": "esp32s3",
+        "title": "QT Py ESP32-S3 No PSRAM",
+        "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s3_nopsram/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Ai-Thinker",
+        "model": "ESP-C3-32S",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/ai_thinker_esp32-c3s/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Ai-Thinker",
+        "model": "ESP-C3-32S (2M)",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/ai_thinker_esp32-c3s-2m/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Ai-Thinker",
+        "model": "NodeMCU ESP-12K",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/ai_thinker_esp_12k_nodemcu/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "ATMegaZero",
+        "model": "ATMegaZero ESP32-S2",
+        "family": "esp32s2",
+        "title": "ESP32-S2",
+        "info_url": "https://circuitpython.org/board/atmegazero_esp32s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Banana Pi",
+        "model": "BPI-Bit-S2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/bpi_bit_s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Banana Pi",
+        "model": "BPI-Leaf-S3",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/bpi_leaf_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Banana Pi",
+        "model": "BPI-PicoW-S3",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/bpi_picow_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "BrainBoardz Inc.",
+        "model": "BrainBoardz Neuron",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/brainboardz_neuron/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "CRCibernetica",
+        "model": "CRCibernetica IdeaBoard",
+        "family": "esp32",
+        "title": "IdeaBoard",
+        "info_url": "https://circuitpython.org/board/crcibernetica-ideaboard/",
+        "downloads": [
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/crcibernetica-ideaboard/en_US/adafruit-circuitpython-crcibernetica-ideaboard-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "CrumpSpace",
+        "model": "CrumpSpace CrumpS2",
+        "family": "esp32s2",
+        "title": "CrumpS2",
+        "info_url": "https://circuitpython.org/board/crumpspace_crumps2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Cytron Technologies",
+        "model": "Maker Feather AIoT S3",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/cytron_maker_feather_aiot_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Czech maker & Make More",
+        "model": "Maker badge",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/maker_badge/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "DFRobot",
+        "model": "DFRobot Beetle ESP32-C3",
+        "family": "esp32c3",
+        "title": "Beetle ESP32-C3",
+        "info_url": "https://circuitpython.org/board/beetle-esp32-c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "DOIT",
+        "model": "DOIT ESP32 Development Board",
+        "family": "esp32",
+        "title": "ESP32 Development Board",
+        "info_url": "https://circuitpython.org/board/doit_esp32_devkit_v1/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Electronic Cats",
+        "model": "Bast Wifi",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/electroniccats_bastwifi/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP-EYE",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/espressif_esp32_eye/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-C3-DevKitM-1-N4",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32c3_devkitm_1_n4/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-LyraT",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/espressif_esp32_lyrat/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_lyrat/en_US/adafruit-circuitpython-espressif_esp32_lyrat-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_lyrat/en_US/adafruit-circuitpython-espressif_esp32_lyrat-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2 Human Machine Interface Dev Kit",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_hmi_devkit_1/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2 Kaluga Dev Kit (v1.2) featuring WROVER",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_kaluga_1/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2 Kaluga Dev Kit (v1.3) featuring WROVER",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_kaluga_1.3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2-DevKitC-1-N4",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n4/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2-DevKitC-1-N4R2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n4r2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S2-DevKitC-1-N8R2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n8r2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3 Box",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_box/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3 Box Lite",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_box_lite/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-DevKitC-1-N32R8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n32r8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-DevKitC-1-N8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-DevKitC-1-N8R2",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-DevKitC-1-N8R8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-DevKitM-1-N8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitm_1_n8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-EYE",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_eye/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-S3-USB-OTG-N8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/espressif_esp32s3_usb_otg_n8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "Saola 1 w/WROOM",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_saola_1_wroom/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "Saola 1 w/WROVER",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/espressif_saola_1_wrover/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Franzininho",
+        "model": "Franzininho WiFi Wroom",
+        "family": "esp32s2",
+        "title": "WiFi Wroom",
+        "info_url": "https://circuitpython.org/board/franzininho_wifi_wroom/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Franzininho",
+        "model": "Franzininho WiFi Wrover",
+        "family": "esp32s2",
+        "title": "WiFi Wrover",
+        "info_url": "https://circuitpython.org/board/franzininho_wifi_wrover/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Gravitech",
+        "model": "Cucumber M",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/gravitech_cucumber_m/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Gravitech",
+        "model": "Cucumber MS",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/gravitech_cucumber_ms/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Gravitech",
+        "model": "Cucumber R",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/gravitech_cucumber_r/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Gravitech",
+        "model": "Cucumber RS",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/gravitech_cucumber_rs/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Hangzhou LeBan",
+        "model": "HiiBot IoTs2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/hiibot_iots2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "HardKernel",
+        "model": "Odroid Go",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/hardkernel_odroid_go/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "T-Embed",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/lilygo_tembed_esp32s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tembed_esp32s3/en_US/adafruit-circuitpython-lilygo_tembed_esp32s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tembed_esp32s3/en_US/adafruit-circuitpython-lilygo_tembed_esp32s3-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "T-Watch 2020 V3",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/lilygo_twatch_2020_v3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_twatch_2020_v3/en_US/adafruit-circuitpython-lilygo_twatch_2020_v3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_twatch_2020_v3/en_US/adafruit-circuitpython-lilygo_twatch_2020_v3-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T-01C3 ESP32-C3",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_t-01c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T-Display ESP32 16M",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_tdisplay_esp32_16m/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_16m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_16m-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_16m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_16m-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T-OI Plus",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_t-oi-plus/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T8 ESP32-S2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T8 ESP32-S2 ST7789",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_s2_st7789/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LILYGO",
+        "model": "TTGO T8 ESP32-S2-WROOM",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_esp32_s2_wroom/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN C3 Mini",
+        "family": "esp32c3",
+        "title": "C3 Mini",
+        "info_url": "https://circuitpython.org/board/lolin_c3_mini/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN C3 Pico",
+        "family": "esp32c3",
+        "title": "C3 Pico",
+        "info_url": "https://circuitpython.org/board/lolin_c3_pico/",
+        "downloads": [
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_pico/en_US/adafruit-circuitpython-lolin_c3_pico-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN S2 Mini",
+        "family": "esp32s2",
+        "title": "S2 Mini",
+        "info_url": "https://circuitpython.org/board/lolin_s2_mini/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN S2 Pico",
+        "family": "esp32s2",
+        "title": "S2 Pico",
+        "info_url": "https://circuitpython.org/board/lolin_s2_pico/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN S3",
+        "family": "esp32s3",
+        "title": "S3",
+        "info_url": "https://circuitpython.org/board/lolin_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "LOLIN",
+        "model": "LOLIN S3 MINI",
+        "family": "esp32s3",
+        "title": "S3 MINI",
+        "info_url": "https://circuitpython.org/board/lolin_s3_mini/",
+        "downloads": [
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3_mini/en_US/adafruit-circuitpython-lolin_s3_mini-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Luatos",
+        "model": "Luatos Core ESP32C3",
+        "family": "esp32c3",
+        "title": "Core ESP32C3",
+        "info_url": "https://circuitpython.org/board/luatos_core_esp32c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "ATOM Echo Smart Speaker",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_atom_echo/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "ATOM Lite ESP32 IoT",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_atom_lite/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "ATOM Matrix ESP32",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_atom_matrix/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "AtomS3 Lite ESP32S3 Dev Kit",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/m5stack_atoms3_lite/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3_lite/en_US/adafruit-circuitpython-m5stack_atoms3_lite-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3_lite/en_US/adafruit-circuitpython-m5stack_atoms3_lite-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "AtomU ESP32",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_atom_u/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "Core2 ESP32 IoT",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_core2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core2/en_US/adafruit-circuitpython-m5stack_core2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core2/en_US/adafruit-circuitpython-m5stack_core2-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "ESP32 Basic Core IoT",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_core_basic/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "M5Stack FIRE IoT",
+        "family": "esp32",
+        "title": "FIRE IoT",
+        "info_url": "https://circuitpython.org/board/m5stack_core_fire/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "M5Stamp C3",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/m5stack_stamp_c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "M5StickC ESP32-PICO Mini IoT",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/m5stack_stick_c/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "M5Stack Timer Camera X",
+        "family": "esp32",
+        "title": "Timer Camera X",
+        "info_url": "https://circuitpython.org/board/m5stack_timer_camera_x/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_timer_camera_x/en_US/adafruit-circuitpython-m5stack_timer_camera_x-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_timer_camera_x/en_US/adafruit-circuitpython-m5stack_timer_camera_x-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "MicroDev",
+        "model": "MicroDev microC3",
+        "family": "esp32c3",
+        "title": "microC3",
+        "info_url": "https://circuitpython.org/board/microdev_micro_c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "MicroDev",
+        "model": "MicroDev microS2",
+        "family": "esp32s2",
+        "title": "microS2",
+        "info_url": "https://circuitpython.org/board/microdev_micro_s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Mixly",
+        "model": "MixGo CE Serial",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/mixgo_ce_serial/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Mixly",
+        "model": "MixGo CE UDisk",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/mixgo_ce_udisk/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Morpheans",
+        "model": "MorphESP 240",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/morpheans_morphesp-240/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Muselab",
+        "model": "NanoESP32 S2 w/WROOM",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/muselab_nanoesp32_s2_wroom/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Muselab",
+        "model": "NanoESP32 S2 w/WROVER",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/muselab_nanoesp32_s2_wrover/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Oak Development Technologies",
+        "model": "PixelWing ESP32-S2 RGB Matrix",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/odt_pixelwing_esp32_s2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Seeed Studio",
+        "model": "Seeed Studio XIAO ESP32C3",
+        "family": "esp32c3",
+        "title": "XIAO ESP32C3",
+        "info_url": "https://circuitpython.org/board/seeed_xiao_esp32c3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Smart Bee Designs",
+        "model": "Bee Motion S3",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/smartbeedesigns_bee_motion_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Smart Bee Designs",
+        "model": "Bee S3",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/smartbeedesigns_bee_s3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Targett",
+        "model": "Targett ESP32-S2 Module Clip (WROOM)",
+        "family": "esp32s2",
+        "title": "ESP32-S2 Module Clip (WROOM)",
+        "info_url": "https://circuitpython.org/board/targett_module_clip_wroom/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Targett",
+        "model": "Targett ESP32-S2 Module Clip (WROVER)",
+        "family": "esp32s2",
+        "title": "ESP32-S2 Module Clip (WROVER)",
+        "info_url": "https://circuitpython.org/board/targett_module_clip_wrover/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Kart",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/deneyap_kart/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart/en_US/adafruit-circuitpython-deneyap_kart-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart/en_US/adafruit-circuitpython-deneyap_kart-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Kart 1A",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/deneyap_kart_1a/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a/en_US/adafruit-circuitpython-deneyap_kart_1a-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a/en_US/adafruit-circuitpython-deneyap_kart_1a-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Kart 1A v2",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/deneyap_kart_1a_v2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a_v2/en_US/adafruit-circuitpython-deneyap_kart_1a_v2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a_v2/en_US/adafruit-circuitpython-deneyap_kart_1a_v2-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Kart G",
+        "family": "esp32c3",
+        "info_url": "https://circuitpython.org/board/deneyap_kart_g/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_g/en_US/adafruit-circuitpython-deneyap_kart_g-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_g/en_US/adafruit-circuitpython-deneyap_kart_g-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Mini",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/deneyap_mini/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini/en_US/adafruit-circuitpython-deneyap_mini-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini/en_US/adafruit-circuitpython-deneyap_mini-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Turkish Technology Team Foundation",
+        "model": "Deneyap Mini v2",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/deneyap_mini_v2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini_v2/en_US/adafruit-circuitpython-deneyap_mini_v2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini_v2/en_US/adafruit-circuitpython-deneyap_mini_v2-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker FeatherS2",
+        "family": "esp32s2",
+        "title": "FeatherS2",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker FeatherS2 Neo",
+        "family": "esp32s2",
+        "title": "FeatherS2 Neo",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2_neo/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker FeatherS2 Prerelease",
+        "family": "esp32s2",
+        "title": "FeatherS2 Prerelease",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2_prerelease/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker FeatherS3",
+        "family": "esp32s3",
+        "title": "FeatherS3",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker ProS3",
+        "family": "esp32s3",
+        "title": "ProS3",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_pros3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker TinyPICO",
+        "family": "esp32",
+        "title": "TinyPICO",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_tinypico/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker TinyPICO NANO",
+        "family": "esp32",
+        "title": "TinyPICO NANO",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_tinypico_nano/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker TinyS2",
+        "family": "esp32s2",
+        "title": "TinyS2",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_tinys2/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "Unexpected Maker TinyS3",
+        "family": "esp32s3",
+        "title": "TinyS3",
+        "info_url": "https://circuitpython.org/board/unexpectedmaker_tinys3/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "VCC-GND Studio",
+        "model": "YD-ESP32-S3 N16R8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/yd_esp32_s3_n16r8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n16r8/en_US/adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n16r8/en_US/adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "VCC-GND Studio",
+        "model": "YD-ESP32-S3 N8R8",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/yd_esp32_s3_n8r8/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n8r8/en_US/adafruit-circuitpython-yd_esp32_s3_n8r8-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n8r8/en_US/adafruit-circuitpython-yd_esp32_s3_n8r8-en_US-8.2.0-beta.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Waveshare",
+        "model": "ESP32-S2-Pico",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/waveshare_esp32s2_pico/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-8.0.5.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Waveshare",
+        "model": "ESP32-S2-Pico with LCD",
+        "family": "esp32s2",
+        "info_url": "https://circuitpython.org/board/waveshare_esp32_s2_pico_lcd/",
+        "downloads": [
+            {
+                "version": "8.1.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-8.1.0.bin"
+            },
+            {
+                "version": "8.2.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-8.2.0-beta.1.bin"
+            },
+            {
+                "version": "8.0.5",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-8.0.5.bin"
+            }
+        ]
+    }
+]

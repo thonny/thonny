@@ -46,7 +46,7 @@ def is_private_exe(p):
 
 
 def list_commands(prefix, highlighted_reals, highlighted_dirs):
-    for suffix in ["", "3", "3.8", "3.9", "3.10", "3.11"]:
+    for suffix in ["", "3", "3.8", "3.9", "3.10", "3.11", "3.12"]:
         cmd = prefix + suffix
         import shutil
 

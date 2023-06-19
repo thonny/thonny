@@ -1,5 +1,7 @@
 """
 The `ssl` module provides SSL contexts to wrap sockets in.
+
+|see_cpython_module| :mod:`cpython:ssl`.
 """
 
 from __future__ import annotations
@@ -19,6 +21,14 @@ class SSLContext:
     This is useful to provide SSL certificates to specific connections
     rather than all of them."""
 
+    def load_cert_chain(self, certfile: str, keyfile: str) -> None:
+        """Load a private key and the corresponding certificate.
+
+        The certfile string must be the path to a single file in PEM format
+        containing the certificate as well as any number of CA certificates
+        needed to establish the certificate's authenticity.  The keyfile string
+        must point to a file containing the private key.
+        """
     def load_verify_locations(self, cadata: Optional[str] = None) -> None:
         """Load a set of certification authority (CA) certificates used to validate
         other peers' certificates."""
@@ -26,7 +36,6 @@ class SSLContext:
         """Load a set of default certification authority (CA) certificates."""
     check_hostname: bool
     """Whether to match the peer certificate's hostname."""
-
     def wrap_socket(
         self,
         sock: socketpool.Socket,
@@ -44,6 +53,9 @@ class SSLSocket:
     Provides a subset of CPython's `ssl.SSLSocket` API. It only implements the versions of
     recv that do not allocate bytes objects."""
 
+    def __hash__(self) -> int:
+        """Returns a hash for the Socket."""
+        ...
     def __enter__(self) -> SSLSocket:
         """No-op used by Context Managers."""
         ...
@@ -94,13 +106,11 @@ class SSLSocket:
     def settimeout(self, value: int) -> None:
         """Set the timeout value for this socket.
 
-        :param ~int value: timeout in seconds.  0 means non-blocking.  None means block indefinitely."""
+        :param ~int value: timeout in seconds.  0 means non-blocking.  None means block indefinitely.
+        """
         ...
     def setblocking(self, flag: bool) -> Optional[int]:
         """Set the blocking behaviour of this socket.
 
         :param ~bool flag: False means non-blocking, True means block indefinitely."""
-        ...
-    def __hash__(self) -> int:
-        """Returns a hash for the Socket."""
         ...

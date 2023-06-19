@@ -21,7 +21,14 @@ For example::
 This example will initialize the the device, read
 :py:data:`~analogio.AnalogIn.value` and then
 :py:meth:`~analogio.AnalogIn.deinit` the hardware. The last step is optional
-because CircuitPython will do it automatically after the program finishes."""
+because CircuitPython will do it automatically after the program finishes.
+
+For the essentials of `analogio`, see the `CircuitPython Essentials
+Learn guide <https://learn.adafruit.com/circuitpython-essentials/circuitpython-analog-in>`_
+
+For more information on using `analogio`, see `this additional Learn guide
+<https://learn.adafruit.com/circuitpython-basics-analog-inputs-and-outputs>`_
+"""
 
 from __future__ import annotations
 
@@ -59,14 +66,16 @@ class AnalogIn:
 
     Even if the underlying analog to digital converter (ADC) is lower
     resolution, the value is 16-bit."""
-
     reference_voltage: float
     """The maximum voltage measurable (also known as the reference voltage) as a
-    `float` in Volts.  Note the ADC value may not scale to the actual voltage linearly
+    ``float`` in Volts.  Note the ADC value may not scale to the actual voltage linearly
     at ends of the analog range."""
 
 class AnalogOut:
     """Output analog values (a specific voltage).
+
+    **Limitations:** Not available on nRF, RP2040, Spresense, as there is no on-chip DAC.
+    On Espressif, available only on ESP32 and ESP32-S2; other chips do not have a DAC.
 
     Example usage::
 
@@ -79,7 +88,9 @@ class AnalogOut:
     def __init__(self, pin: microcontroller.Pin) -> None:
         """Use the AnalogOut on the given pin.
 
-        :param ~microcontroller.Pin pin: the pin to output to"""
+        :param ~microcontroller.Pin pin: the pin to output to
+
+        """
         ...
     def deinit(self) -> None:
         """Turn off the AnalogOut and release the pin for other use."""

@@ -13,7 +13,6 @@ from thonny.ui_utils import create_string_var, scrollbar_style
 
 class ThemeAndFontConfigurationPage(ConfigurationPage):
     def __init__(self, master):
-
         ConfigurationPage.__init__(self, master)
 
         self._init_themes()

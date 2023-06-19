@@ -12,7 +12,7 @@ from typing import Optional
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
+from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
     ask_one_from_choices,
@@ -21,6 +21,7 @@ from thonny.ui_utils import (
     ems_to_pixels,
     get_hyperlink_cursor,
     lookup_style_option,
+    open_with_default_app,
     scrollbar_style,
     show_dialog,
 )
@@ -172,7 +173,10 @@ class BaseFileBrowser(ttk.Frame):
 
         # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
         self.menu_button = ttk.Button(
-            header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton", command=self.post_button_menu
+            header_frame,
+            text=f" {get_menu_char()} ",
+            style="ViewToolbar.Toolbutton",
+            command=self.post_button_menu,
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
@@ -183,6 +187,9 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.direct_delete("1.0", "end")
         self.tree.set_children("")
         self.current_focus = None
+
+    def path_exists(self, path: str) -> Optional[bool]:
+        return None
 
     def request_focus_into(self, path):
         return self.focus_into(path)
@@ -808,14 +815,16 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.join(parent_path, name)
 
-        if name in self._cached_child_data[parent_path]:
-            # TODO: ignore case in windows
+        if self.path_exists(path):
             messagebox.showerror("Error", "The file '" + path + "' already exists", master=self)
             return self.create_new_file()
         else:
-            self.open_file(path)
+            self.create_new_file_editor(path)
 
         return path
+
+    def create_new_file_editor(self, path):
+        raise NotImplementedError()
 
     def delete(self):
         selection = self.get_selection_info(True)
@@ -1037,6 +1046,12 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().unbind("WindowFocusIn", self.on_window_focus_in)
         get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
 
+    def path_exists(self, path: str) -> Optional[bool]:
+        return os.path.exists(path)
+
+    def create_new_file_editor(self, path):
+        get_workbench().get_editor_notebook().open_new_file(path)
+
     def request_dirs_child_data(self, node_id, paths):
         self.cache_dirs_child_data(get_dirs_children_info(paths, show_hidden_files()))
         self.render_children_from_cache(node_id)
@@ -1152,6 +1167,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             return runner.get_node_label()
 
         return "Back-end"
+
+    def create_new_file_editor(self, path):
+        get_workbench().get_editor_notebook().open_new_file(path, remote=True)
 
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
@@ -1558,15 +1576,6 @@ def get_local_files_root_text():
         _LOCAL_FILES_ROOT_TEXT = tr("This computer")
 
     return _LOCAL_FILES_ROOT_TEXT
-
-
-def open_with_default_app(path):
-    if running_on_windows():
-        os.startfile(path)
-    elif running_on_mac_os():
-        subprocess.run(["open", path])
-    else:
-        subprocess.run(["xdg-open", path])
 
 
 def get_file_handler_conf_key(extension):

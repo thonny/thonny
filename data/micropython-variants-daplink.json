@@ -6,10 +6,15 @@
         "info_url": "https://micropython.org/download/microbit",
         "downloads": [
             {
-                "version": "20220812-unstable-v1.19.1-278-gcf90e2433",
-                "url": "https://micropython.org/resources/firmware/microbit-20220812-unstable-v1.19.1-278-gcf90e2433.hex"
+                "version": "1.20.0",
+                "url": "https://micropython.org/resources/firmware/microbit-20230426-v1.20.0.hex"
+            },
+            {
+                "version": "20230511-unstable-v1.20.0-68-g3229791b6",
+                "url": "https://micropython.org/resources/firmware/microbit-20230511-unstable-v1.20.0-68-g3229791b6.hex"
             }
-        ]
+        ],
+        "latest_prerelease_regex": "\\d{8}-unstable-v1.20.0-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "BBC",
@@ -18,6 +23,10 @@
         "title": "micro:bit v1 (original simplified API)",
         "info_url": "https://github.com/bbcmicrobit/micropython/releases/",
         "downloads": [
+            {
+                "version": "1.1.1",
+                "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.1.1/micropython-microbit-v1.1.1.hex"
+            },
             {
                 "version": "1.0.1",
                 "url": "https://github.com/bbcmicrobit/micropython/releases/download/v1.0.1/microbit-micropython-v1.0.1.hex"
@@ -28,10 +37,14 @@
     {
         "vendor": "BBC",
         "model": "micro:bit v2",
-        "title": "micro:bit v2 (original simplified API)",
         "family": "nrf52",
+        "title": "micro:bit v2 (original simplified API)",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
+            {
+                "version": "2.1.1",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.1/micropython-microbit-v2.1.1.hex"
+            },
             {
                 "version": "2.0.0",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.0.0/micropython-microbit-v2.0.0.hex"

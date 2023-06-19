@@ -21,4 +21,4 @@ for decorating your functions. Thonny executes Birdseye such that it records inf
 functions.
 
 The local server uses port 7777 by default. If this is used by another application, then configure
-another port (Tools → Options → Debugger) and restart Thonny.
+another port in *Tools → Options → Run & Debug* and restart Thonny.

@@ -5,7 +5,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 BASE_LANGUAGE_CODE = "en_US"
-BASE_LANGUAGE_NAME = "English"
+BASE_LANGUAGE_NAME = "English (US) [default]"
 
 # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
@@ -13,6 +13,7 @@ LANGUAGES_DICT = {
     "cs_CZ": "Čeština [BETA]",
     "de_DE": "Deutsch",
     "et_EE": "Eesti",
+    "en_GB": "English (UK)",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español",
     "fr_FR": "Français",
@@ -27,11 +28,12 @@ LANGUAGES_DICT = {
     "pt_BR": "Português (BR)",
     "ro_RO": "Român",
     "ru_RU": "Русский",
-    "sl_SI": "Slovène",
+    "sl_SI": "Slovenščina",
     "sk_SK": "Slovenčina [BETA]",
     "fi_FI": "Suomi [BETA]",
     "sv_SE": "Svenska [BETA]",
     "sq_AL": "Shqip [ALPHA]",
+    "vi_VN": "Tiếng Việt",
     "tr_TR": "Türkçe [BETA]",
     "uk_UA": "Українська",
     "zh_TW": "繁體中文-TW",

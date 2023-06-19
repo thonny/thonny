@@ -21,7 +21,8 @@ def interp(
     :param left: Value to return for ``x < xp[0]``, default is ``fp[0]``.
     :param right: Value to return for ``x > xp[-1]``, default is ``fp[-1]``.
 
-    Returns the one-dimensional piecewise linear interpolant to a function with given discrete data points (xp, fp), evaluated at x."""
+    Returns the one-dimensional piecewise linear interpolant to a function with given discrete data points (xp, fp), evaluated at x.
+    """
     ...
 
 def trapz(
@@ -54,7 +55,8 @@ def arange(
     .. param: dtype
       Type of values in the array
 
-    Return a new 1-D array with elements ranging from ``start`` to ``stop``, with step size ``step``."""
+    Return a new 1-D array with elements ranging from ``start`` to ``stop``, with step size ``step``.
+    """
     ...
 
 def concatenate(
@@ -88,14 +90,16 @@ def empty(
     .. param: dtype
        Type of values in the array
 
-    Return a new array of the given shape with all elements set to 0. An alias for numpy.zeros."""
+    Return a new array of the given shape with all elements set to 0. An alias for numpy.zeros.
+    """
     ...
 
 def eye(
     size: int, *, M: Optional[int] = None, k: int = 0, dtype: _DType = ulab.numpy.float
 ) -> ulab.numpy.ndarray:
     """Return a new square array of size, with the diagonal elements set to 1
-    and the other elements set to 0. If k is given, the diagonal is shifted by the specified amount."""
+    and the other elements set to 0. If k is given, the diagonal is shifted by the specified amount.
+    """
     ...
 
 def full(
@@ -140,7 +144,8 @@ def linspace(
      .. param bool: retstep,
       If True, return (`samples`, `step`), where `step` is the spacing between samples.
 
-    Return a new 1-D array with ``num`` elements ranging from ``start`` to ``stop`` linearly."""
+    Return a new 1-D array with ``num`` elements ranging from ``start`` to ``stop`` linearly.
+    """
     ...
 
 def logspace(
@@ -336,7 +341,8 @@ def dot(
     :param ~ulab.numpy.ndarray m1: a matrix, or a vector
     :param ~ulab.numpy.ndarray m2: a matrix, or a vector
 
-    Computes the product of two matrices, or two vectors. In the letter case, the inner product is returned."""
+    Computes the product of two matrices, or two vectors. In the letter case, the inner product is returned.
+    """
     ...
 
 """Element-by-element functions
@@ -470,5 +476,6 @@ def vectorize(
     :param otypes: List of array types that may be returned by the function.  None is interpreted to mean the return value is float.
 
     Wrap a Python function ``f`` so that it can be applied to arrays.
-    The callable must return only values of the types specified by ``otypes``, or the result is undefined."""
+    The callable must return only values of the types specified by ``otypes``, or the result is undefined.
+    """
     ...

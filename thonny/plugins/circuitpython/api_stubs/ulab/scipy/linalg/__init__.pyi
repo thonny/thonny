@@ -27,5 +27,6 @@ def cho_solve(L: ulab.numpy.ndarray, b: ulab.numpy.ndarray) -> ulab.numpy.ndarra
     :return: solution to the system A x = b. Shape of return matches b
     :raises TypeError: if L and b are not of type ndarray and are not dense
 
-    Solve the linear equations A x = b, given the Cholesky factorization of A as input"""
+    Solve the linear equations A x = b, given the Cholesky factorization of A as input
+    """
     ...

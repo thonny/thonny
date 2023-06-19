@@ -33,7 +33,7 @@ If you want to reach a specific part of the code, then you can speed up the
 process by placing your cursor on that line and selecting *Run → Run to cursor*. 
 This makes Thonny automatically step until this line. You can take the command from there.
 
-If you have editor line numbers enabled (Tools → Options → Editor), then you can 
+If you have editor line numbers enabled in *Tools → Options → Editor*, then you can 
 also use **breakpoints**. When you click next to a statement in the editor left margin, a dot
 appears. When you now start the debugger, it doesn't stop before first statement but runs to the 
 statement marked with the dot a.k.a breakpoint. You can place as many breakpoints to your programs as 
@@ -55,10 +55,10 @@ Different styles for showing the call stack
 -------------------------------------------
 By default Thonny uses stacked windows for presenting the call stack. This gives good intuition about 
 the concept, but it may become cumbersome to use. Therefore, since version 3.0 one can choose between 
-two different styles for presenting call stack. In “Tools → Options → Debugger” you can switch to more 
+two different styles for presenting call stack. In *Tools → Options → Run & Debug* you can switch to more 
 traditional style with a separate view for presenting and switching call frames. Note that both 
 styles can be used with both debugging modes.
 
 Birdseye
 --------
-Command *Debug current script (Birdseye)* is explained at a `separate page <birdseye.rst>`_
+Command *Debug current script (Birdseye)* is explained at a `separate page <birdseye.rst>`_.

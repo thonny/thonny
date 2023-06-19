@@ -44,6 +44,41 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="4.1.1" date="2023-06-11">
+      <description>
+        <p>
+          Bug-fix release.
+        </p>
+      </description>
+    </release>
+    <release version="4.1.0" date="2023-06-03">
+      <description>
+        <p>
+          Feature and bug-fix release.
+        </p>
+      </description>
+    </release>
+    <release version="4.1.0~b1" date="2023-04-23">
+      <description>
+        <p>
+          Feature pre-release.
+        </p>
+      </description>
+    </release>
+    <release version="4.0.1" date="2022-09-11">
+      <description>
+        <p>
+          Bug-fix release.
+        </p>
+      </description>
+    </release>
+    <release version="4.0.0" date="2022-08-22">
+      <description>
+        <p>
+          Feature release.
+        </p>
+      </description>
+    </release>
     <release version="3.3.14" date="2021-08-01">
       <description>
         <p>

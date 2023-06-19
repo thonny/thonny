@@ -28,7 +28,6 @@ class OccurrencesHighlighter:
         if self.text.tag_prevrange("open_string", index) or self.text.tag_prevrange(
             "open_string3", index
         ):
-
             return set()
 
         source = self.text.get("1.0", "end")

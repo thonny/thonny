@@ -21,6 +21,7 @@ Several companies and organizations have provided us with free hardware for test
 * M5Stack (https://m5stack.com/)
 * Micro:bit educational foundation (https://microbit.org/)
 * Calliope (https://calliope.cc/en)
+* @bwshockley (https://minifigboards.com/)
 
 Python
 ------
@@ -41,6 +42,7 @@ Libraries, resources and tools
 * websockets (https://pypi.org/project/websockets) is optionally used for communicating with MicroPython devices over WebREPL.
 * Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overridden by Tango icons (http://tango.freedesktop.org/)
 * POEditor (https://poeditor.com/) is used for managing translations of UI strings.
+* https://github.com/hlovatt/PyBoardTypeshed
 
 Source contributors, sponsors, advisors, translators and frequent bug-reporters
 -------------------------------------------------------------------------------
@@ -54,8 +56,10 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Algent Albrahimi
 * Anatoly Techtonik
 * Anders Pamdal
+* Andrea Ferrari
 * Andrew Scheller
 * André Roberge
+* Andy Piper
 * Ankith
 * Antonio Carlos
 * atesin
@@ -63,7 +67,9 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Austin Bart
 * Avag. sayan
 * badukaire
+* Bui Huy Quang
 * borpol
+* CADTEC GmbH (cadtec.ch)
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
@@ -75,6 +81,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Dominic Twyman
 * Dominik George
 * Donald Butt
+* Duncan Ogilvie (@mrexodia)
 * Eliot Blennerhassett
 * Emanuel Angelo
 * Fabianus.c
@@ -90,6 +97,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Hyungseok Choi
 * IhorNehrutsa
 * Ingo Blechschmidt
+* Isaac Levy (@isaacl)
 * Ivanhercaz
 * Ivan.schamann
 * Илья Кругликов
@@ -97,10 +105,12 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * jharris1993
 * Juan Falgueras
+* Juhan Oskar Hennoste (@FeldrinH)
 * Jonathan Campbell
 * Jordan Williams
 * jose1711
 * José Carlos García
+* Karolina Surma (@befeleme)
 * Kaspar Papli
 * Kauri Raba
 * kr-g
@@ -108,14 +118,17 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
+* Marian-Silviu Iuga
 * Marie Roald
 * Marko Ristin
+* Martin Rommel
 * Matt Iversen
 * Miro Hrončok
 * NathanBnm
 * Nicolas Despres
 * Pavel Minaev
 * Peter Marshall
+* Peter Mawhorter (@solsword)
 * Petr. moses
 * Phil Duby
 * phr0gger
@@ -127,18 +140,21 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Sam Warmuth
 * Sami Almuhammady
 * sailslack
+* Scott Blackledge
 * segalion
 * Simon Gijsen
 * Simon Long
 * sourceperl
 * speedy-10
 * Stefan Rothe
+* Stewart Russell (@scruss)
 * Suk-Hyung Hwang
 * Sven Duzont
 * Syed Nasim
 * Taavi Ilp
 * tabreturn
 * TANAKA Masayuki
+* Thomas Helmuth
 * TooLazy0x00
 * Toomas Mölder
 * Tristan Bunn

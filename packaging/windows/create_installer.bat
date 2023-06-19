@@ -18,8 +18,8 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -s -m pip install --no-warn-script-location --no-cache-dir --no-binary mypy -r ..\requirements-regular-bundle.txt
 
 @echo ............... INSTALLING THONNY ...................................
-@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
-%BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b4.dev1-py3-none-any.whl
+%BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
+@rem %BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b4.dev1-py3-none-any.whl
 
 @echo ............... CLEANING PYTHON ............................
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
@@ -84,17 +84,17 @@ cd %BUILDDIR%
 del portable_thonny.ini
 cd ..
 
-@rem @echo ............... XXL ..........................
-@rem %BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
-@rem 
-@rem del /S "%BUILDDIR%\*.pyc">NUL
-@rem 
-@rem @rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
-@rem del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
-@rem del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
-@rem 
-@rem 
-@rem "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
+@echo ............... XXL ..........................
+%BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
 
-@rem rmdir %BUILDDIR% /S /Q
+del /S "%BUILDDIR%\*.pyc">NUL
+
+@rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
+del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
+del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
+
+
+"C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
+
+rmdir %BUILDDIR% /S /Q
 pause

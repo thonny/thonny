@@ -30,7 +30,8 @@ class FramebufferDisplay:
 
         :param ~circuitpython_typing.FrameBuffer framebuffer: The framebuffer that the display is connected to
         :param bool auto_refresh: Automatically refresh the screen
-        :param int rotation: The rotation of the display in degrees clockwise. Must be in 90 degree increments (0, 90, 180, 270)"""
+        :param int rotation: The rotation of the display in degrees clockwise. Must be in 90 degree increments (0, 90, 180, 270)
+        """
         ...
     def show(self, group: displayio.Group) -> None:
         """Switches to displaying the given group of layers. When group is None, the default
@@ -53,37 +54,27 @@ class FramebufferDisplay:
         without calls to this.)
 
         :param int target_frames_per_second: How many times a second `refresh` should be called and the screen updated.
-        :param int minimum_frames_per_second: The minimum number of times the screen should be updated per second."""
+        :param int minimum_frames_per_second: The minimum number of times the screen should be updated per second.
+        """
         ...
     auto_refresh: bool
     """True when the display is refreshed automatically."""
-
     brightness: float
-    """The brightness of the display as a float. 0.0 is off and 1.0 is full brightness. When
-    `auto_brightness` is True, the value of `brightness` will change automatically.
-    If `brightness` is set, `auto_brightness` will be disabled and will be set to False."""
-
-    auto_brightness: bool
-    """True when the display brightness is adjusted automatically, based on an ambient
-    light sensor or other method. Note that some displays may have this set to True by default,
-    but not actually implement automatic brightness adjustment. `auto_brightness` is set to False
-    if `brightness` is set manually."""
-
+    """The brightness of the display as a float. 0.0 is off and 1.0 is full brightness."""
     width: int
     """Gets the width of the framebuffer"""
-
     height: int
     """Gets the height of the framebuffer"""
-
     rotation: int
     """The rotation of the display as an int in degrees."""
-
     framebuffer: circuitpython_typing.FrameBuffer
     """The framebuffer being used by the display"""
-
     def fill_row(self, y: int, buffer: WriteableBuffer) -> WriteableBuffer:
         """Extract the pixels from a single row
 
         :param int y: The top edge of the area
-        :param ~circuitpython_typing.WriteableBuffer buffer: The buffer in which to place the pixel data"""
+        :param ~circuitpython_typing.WriteableBuffer buffer: The buffer in which to place the pixel data
+        """
         ...
+    root_group: displayio.Group
+    """The root group on the display."""

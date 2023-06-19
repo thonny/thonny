@@ -6,6 +6,7 @@ This is a subset of the PyUSB core module.
 from __future__ import annotations
 
 import array
+from typing import Optional
 
 from circuitpython_typing import ReadableBuffer
 
@@ -19,7 +20,12 @@ class USBTimeoutError(USBError):
 
     ...
 
-def find(find_all=False, *, idVendor=None, idProduct=None):
+def find(
+    find_all: bool = False,
+    *,
+    idVendor: Optional[int] = None,
+    idProduct: Optional[int] = None,
+) -> Device:
     """Find the first device that matches the given requirements or, if
     find_all is True, return a generator of all matching devices.
 
@@ -34,20 +40,17 @@ class Device:
         ...
     idVendor: int
     """The USB vendor ID of the device"""
-
     idProduct: int
     """The USB product ID of the device"""
-
     serial_number: str
     """The USB device's serial number string."""
-
     product: str
     """The USB device's product string."""
-
     manufacturer: str
     """The USB device's manufacturer string."""
-
-    def write(self, endpoint: int, data: ReadableBuffer, timeout=None) -> int:
+    def write(
+        self, endpoint: int, data: ReadableBuffer, timeout: Optional[int] = None
+    ) -> int:
         """Write data to a specific endpoint on the device.
 
         :param int endpoint: the bEndpointAddress you want to communicate with.
@@ -56,7 +59,9 @@ class Device:
         :returns: the number of bytes written
         """
         ...
-    def read(self, endpoint: int, size_or_buffer: array.array, timeout=None) -> int:
+    def read(
+        self, endpoint: int, size_or_buffer: array.array, timeout: Optional[int] = None
+    ) -> int:
         """Read data from the endpoint.
 
         :param int endpoint: the bEndpointAddress you want to communicate with.
@@ -67,12 +72,12 @@ class Device:
         ...
     def ctrl_transfer(
         self,
-        bmRequestType,
-        bRequest,
-        wValue=0,
-        wIndex=0,
-        data_or_wLength: array.array = None,
-        timeout=None,
+        bmRequestType: int,
+        bRequest: int,
+        wValue: int = 0,
+        wIndex: int = 0,
+        data_or_wLength: Optional[array.array] = None,
+        timeout: Optional[int] = None,
     ) -> int:
         """Do a control transfer on the endpoint 0. The parameters bmRequestType,
         bRequest, wValue and wIndex are the same of the USB Standard Control
@@ -99,7 +104,7 @@ class Device:
         :param int interface: the device interface number to check
         """
         ...
-    def detach_kernel_driver(self, interface: int):
+    def detach_kernel_driver(self, interface: int) -> None:
         """Stop CircuitPython from using the interface. If successful, you
         will then be able to perform I/O. CircuitPython will automatically
         re-start using the interface on reload.
@@ -107,7 +112,7 @@ class Device:
         :param int interface: the device interface number to stop CircuitPython on
         """
         ...
-    def attach_kernel_driver(self, interface: int):
+    def attach_kernel_driver(self, interface: int) -> None:
         """Allow CircuitPython to use the interface if it wants to.
 
         :param int interface: the device interface number to allow CircuitPython to use

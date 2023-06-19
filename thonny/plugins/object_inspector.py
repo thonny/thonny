@@ -327,7 +327,6 @@ class FileHandleInspector(TextFrame, ContentInspector):
         return "file_content" in object_info or "file_error" in object_info
 
     def set_object_info(self, object_info):
-
         if "file_content" not in object_info:
             logger.exception("File error: " + object_info["file_error"])
             return

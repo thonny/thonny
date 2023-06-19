@@ -277,6 +277,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def is_active_browser(self):
         return True
 
+    def supports_new_file(self):
+        return True
+
     def on_toplevel_response(self, msg):
         if not self.winfo_ismapped():
             return
@@ -543,7 +546,7 @@ def format_items(items):
         return items[0]
     msg = "• " + "\n• ".join(items[:max_count])
     if len(items) > max_count:
-        msg += "\n ... %d more ..."
+        msg += "\n ... %d more ..." % (len(items) - max_count)
 
     return msg
 
@@ -605,7 +608,21 @@ def load_plugin() -> None:
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 
-    for ext in [".py", ".pyw", ".pyi", ".txt", ".log", ".json", ".yml", ".yaml", ".md", ".rst"]:
+    for ext in [
+        ".py",
+        ".pyw",
+        ".pyi",
+        ".txt",
+        ".log",
+        ".json",
+        ".yml",
+        ".yaml",
+        ".md",
+        ".rst",
+        ".toml",
+        ".gitignore",
+        ".env",
+    ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
 

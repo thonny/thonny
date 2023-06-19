@@ -27,7 +27,7 @@ else
   echo "Thonny only provides pre-built bundles for x86_64 (not $ARCHITECTURE)."
   TARGET=~/apps/thonny
   PYVER="$(python3 -V 2>&1)"
-  GOODVER="Python 3\.(8|9|10)\.*"
+  GOODVER="Python 3\.(8|9|10|11|12)\.*"
   if [[ "$PYVER" =~ $GOODVER ]]; then
     PYLOC="$(which python3 2>&1)"
     echo "I could install Thonny into a venv under your existing $PYVER ($PYLOC)."
@@ -98,6 +98,12 @@ else
     echo "[Desktop Action Edit]" >> $LAUNCHER
     echo "Exec=$TARGET/bin/thonny %F" >> $LAUNCHER
     echo "Name=Edit with Thonny" >> $LAUNCHER
+
+    UNINSTALLER="${TARGET}/bin/uninstall"
+    echo "Creating the uninstaller ($UNINSTALLER)"
+    echo "#!/usr/bin/env bash" > $UNINSTALLER
+    echo "rm -rf $TARGET"
+    echo "rm $LAUNCHER"
   else
     echo "Can't offer alternatives as your system doesn't seem to have suitable Python interpreter."
     exit 1

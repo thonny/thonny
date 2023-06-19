@@ -2,7 +2,7 @@
 import ast
 import builtins
 import functools
-import importlib
+import importlib.util
 import inspect
 import io
 import os.path
@@ -40,7 +40,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    UserSystemExit,
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
@@ -62,7 +61,7 @@ _backend = None
 
 
 class MainCPythonBackend(MainBackend):
-    def __init__(self, target_cwd):
+    def __init__(self, target_cwd, options):
         report_time("Before MainBackend")
         MainBackend.__init__(self)
         report_time("After MainBackend")
@@ -71,7 +70,9 @@ class MainCPythonBackend(MainBackend):
         _backend = self
 
         self._ini = None
+        self._options = options
         self._object_info_tweakers = []
+        self._warned_shadow_casters = set()
         self._import_handlers = {}
         self._input_queue = queue.Queue()
         self._source_preprocessors = []
@@ -79,7 +80,7 @@ class MainCPythonBackend(MainBackend):
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {}  # WeakValueDictionary would be better, but can't store reference to None
         self._source_info_by_frame = {}
-        site.sethelper()  # otherwise help function is not available
+        self._init_help()
         self._install_fake_streams()
         self._install_repl_helper()
         self._current_executor = None
@@ -103,8 +104,10 @@ class MainCPythonBackend(MainBackend):
         report_time("Before loading plugins")
         execute_with_frontend_sys_path(self._load_plugins)
         report_time("After loading plugins")
+        if self._options.get("run.warn_module_shadowing", False):
+            sys.addaudithook(self.import_audit_hook)
 
-        # preceding code was run in the directory containing thonny module, now switch to provided
+        # preceding code was run in an empty directory, now switch to provided
         try:
             os.chdir(os.path.expanduser(target_cwd))
         except OSError:
@@ -116,8 +119,10 @@ class MainCPythonBackend(MainBackend):
         # ... and replace current-dir path item
         # start in shell mode (may be later switched to script mode)
         # required in shell mode and also required to overwrite thonny location dir
-        sys.path[0] = ""
+        assert "" not in sys.path  # for avoiding
+        sys.path.insert(0, "")
         sys.argv[:] = [""]  # empty "script name"
+        self._check_warn_avoided_sys_path_conflicts()
 
         if os.name == "nt":
             self._install_signal_handler()
@@ -161,6 +166,86 @@ class MainCPythonBackend(MainBackend):
 
     def get_main_module(self):
         return __main__
+
+    def import_audit_hook(self, event: str, args):
+        if event == "import":
+            logger.debug("detected Import event with args %r", args)
+            module_name = args[0]
+            self._check_warn_sys_path_conflict(module_name.split(".")[0])
+
+    def _check_warn_avoided_sys_path_conflicts(self):
+        if not self._options.get("run.warn_module_shadowing", False):
+            return
+
+        for name in sys.modules.keys():
+            if name != "__main__":
+                self._check_warn_sys_path_conflict(name.split(".")[0])
+
+    def _check_warn_sys_path_conflict(self, root_module_name: str):
+        user_dir = sys.path[0]
+        if user_dir == "":
+            user_dir = os.getcwd()
+
+        # rough test to see if it's worth invoking the finder
+        for ext in ["", ".py", ".pyw"]:
+            pot_path = os.path.join(user_dir, root_module_name + ext)
+            if os.path.exists(pot_path):
+                logger.debug("Found import candidate: %r", pot_path)
+                break
+        else:
+            return
+
+        # It looks like a module is importable from the script dir or current dir.
+        # Is it shadowing a library module?
+
+        current_spec = self._find_spec_ignore_loaded(root_module_name)
+
+        first_entry = sys.path[0]
+        del sys.path[0]
+        try:
+            shadowed_spec = self._find_spec_ignore_loaded(root_module_name)
+        finally:
+            sys.path.insert(0, first_entry)
+
+        if shadowed_spec is None:
+            logger.debug("No shadowed spec")
+            return
+
+        if shadowed_spec.origin == current_spec.origin:
+            logger.debug("Equal current and shadowed spec")
+            return
+
+        logger.debug("%r shadows %r", current_spec.origin, shadowed_spec.origin)
+
+        if current_spec.origin in self._warned_shadow_casters:
+            return
+
+        if root_module_name in sys.modules:
+            # i.e. the method is called for post-import warning
+            verb = "can shadow"
+        else:
+            verb = "is shadowing"
+
+        self._send_output(
+            # NB! Using backticks, because Shell would present file path in quotes as frame link
+            f"WARNING: Your `{current_spec.origin}` {verb} the library module '{root_module_name}'. Consider renaming or moving it!\n\n",
+            "stderr",
+        )
+
+        self._warned_shadow_casters.add(current_spec.origin)
+
+    def _find_spec_ignore_loaded(self, module_name):
+        if module_name not in sys.modules:
+            return importlib.util.find_spec(module_name)
+
+        old_modules = sys.modules
+        try:
+            modules_copy = old_modules.copy()
+            del modules_copy[module_name]
+            sys.modules = modules_copy
+            return importlib.util.find_spec(module_name)
+        finally:
+            sys.modules = old_modules
 
     def _read_incoming_msg_line(self) -> str:
         return self._original_stdin.readline()
@@ -257,8 +342,11 @@ class MainCPythonBackend(MainBackend):
 
         filename = cmd.args[0]
         if os.path.isfile(filename):
-            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
-            __main__.__dict__["__file__"] = filename
+            abs_filename = os.path.abspath(filename)
+            sys.path.insert(0, os.path.dirname(abs_filename))
+            __main__.__dict__["__file__"] = abs_filename
+
+        self._check_warn_avoided_sys_path_conflicts()
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
@@ -583,7 +671,6 @@ class MainCPythonBackend(MainBackend):
     def _perform_pip_operation_and_list(
         self, cmd_line: List[str]
     ) -> Tuple[int, Dict[str, DistInfo]]:
-
         extra_switches = ["--disable-pip-version-check"]
         proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
         if proxy:
@@ -634,7 +721,6 @@ class MainCPythonBackend(MainBackend):
         return get_single_dir_child_data(path, include_hidden)
 
     def _get_path_info(self, path: str) -> Optional[Dict]:
-
         try:
             if not os.path.exists(path):
                 return None
@@ -771,9 +857,6 @@ class MainCPythonBackend(MainBackend):
                 source, filename, execution_mode, ast_postprocessors
             )
         except SystemExit as e:
-            # TODO: hack
-            # let frontend know the exit was caused by the user code
-            self.send_message(UserSystemExit(e.code))
             sys.exit(e.code)
         finally:
             self._current_executor = None
@@ -792,6 +875,12 @@ class MainCPythonBackend(MainBackend):
                 builtins._ = obj
 
         setattr(builtins, _REPL_HELPER_NAME, _handle_repl_value)
+
+    def _init_help(self):
+        import pydoc
+
+        pydoc.pager = pydoc.plainpager
+        site.sethelper()  # otherwise help function is not available
 
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
@@ -943,7 +1032,7 @@ class MainCPythonBackend(MainBackend):
         if result is not None:
             return result, "stack"
 
-        if getattr(sys, "last_traceback"):
+        if getattr(sys, "last_traceback", None):
             result = lookup_from_tb(getattr(sys, "last_traceback"))
             if result:
                 return result, "last_traceback"
@@ -1031,6 +1120,8 @@ class FakeOutputStream(FakeStream):
                 self._processed_symbol_count += len(data)
         finally:
             self._backend._exit_io_function()
+
+        return len(data)
 
     def writelines(self, lines):
         try:

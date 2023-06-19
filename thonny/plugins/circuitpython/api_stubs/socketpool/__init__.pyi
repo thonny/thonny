@@ -1,6 +1,9 @@
 """
 The `socketpool` module provides sockets through a pool. The pools themselves
 act like CPython's `socket` module.
+
+For more information about the `socket` module, see the CPython documentation:
+https://docs.python.org/3/library/socket.html
 """
 
 from __future__ import annotations
@@ -8,6 +11,7 @@ from __future__ import annotations
 from typing import Optional, Tuple
 
 import socketpool
+import wifi
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
 class Socket:
@@ -17,6 +21,9 @@ class Socket:
     Provides a subset of CPython's `socket.socket` API. It only implements the versions of
     recv that do not allocate bytes objects."""
 
+    def __hash__(self) -> int:
+        """Returns a hash for the Socket."""
+        ...
     def __enter__(self) -> Socket:
         """No-op used by Context Managers."""
         ...
@@ -43,7 +50,7 @@ class Socket:
     def listen(self, backlog: int) -> None:
         """Set socket to listen for incoming connections
 
-        :param ~int backlog: length of backlog queue for waiting connetions"""
+        :param ~int backlog: length of backlog queue for waiting connections"""
         ...
     def recvfrom_into(self, buffer: WriteableBuffer) -> Tuple[int, Tuple[str, int]]:
         """Reads some bytes from a remote address.
@@ -73,6 +80,16 @@ class Socket:
 
         :param ~bytes bytes: some bytes to send"""
         ...
+    def sendall(self, bytes: ReadableBuffer) -> None:
+        """Send some bytes to the connected remote address.
+        Suits sockets of type SOCK_STREAM
+
+        This calls send() repeatedly until all the data is sent or an error
+        occurs. If an error occurs, it's impossible to tell how much data
+        has been sent.
+
+        :param ~bytes bytes: some bytes to send"""
+        ...
     def sendto(self, bytes: ReadableBuffer, address: Tuple[str, int]) -> int:
         """Send some bytes to a specific address.
         Suits sockets of type SOCK_DGRAM
@@ -85,13 +102,14 @@ class Socket:
 
         :param ~bool flag: False means non-blocking, True means block indefinitely."""
         ...
+    def setsockopt(self, level: int, optname: int, value: int) -> None:
+        """Sets socket options"""
+        ...
     def settimeout(self, value: int) -> None:
         """Set the timeout value for this socket.
 
-        :param ~int value: timeout in seconds.  0 means non-blocking.  None means block indefinitely."""
-        ...
-    def __hash__(self) -> int:
-        """Returns a hash for the Socket."""
+        :param ~int value: timeout in seconds.  0 means non-blocking.  None means block indefinitely.
+        """
         ...
 
 class SocketPool:
@@ -99,14 +117,32 @@ class SocketPool:
     SocketPool can be created for each radio.
 
     SocketPool should be used in place of CPython's socket which provides
-    a pool of sockets provided by the underlying OS."""
+    a pool of sockets provided by the underlying OS.
+    """
+
+    def __init__(self, radio: wifi.Radio) -> None:
+        """Create a new SocketPool object for the provided radio
+
+        :param wifi.Radio radio: The (connected) network hardware to associate
+            with this SocketPool; currently, this will always be the object
+            returned by :py:attr:`wifi.radio`
+        """
+        ...
+
+    class gaierror(OSError):
+        """Errors raised by getaddrinfo"""
 
     AF_INET: int
     AF_INET6: int
+
     SOCK_STREAM: int
     SOCK_DGRAM: int
     SOCK_RAW: int
+    EAI_NONAME: int
 
+    TCP_NODELAY: int
+
+    IPPROTO_TCP: int
     def socket(
         self, family: int = AF_INET, type: int = SOCK_STREAM
     ) -> socketpool.Socket:

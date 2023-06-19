@@ -65,10 +65,8 @@ class Mixer:
         ...
     playing: bool
     """True when any voice is being output. (read-only)"""
-
     sample_rate: int
     """32 bit value that dictates how quickly samples are played in Hertz (cycles per second)."""
-
     voice: Tuple[MixerVoice, ...]
     """A tuple of the mixer's `audiomixer.MixerVoice` object(s).
 
@@ -110,13 +108,13 @@ class MixerVoice:
 
         Sample must be an `audiocore.WaveFile`, `audiocore.RawSample`, `audiomixer.Mixer` or `audiomp3.MP3Decoder`.
 
-        The sample must match the `audiomixer.Mixer`'s encoding settings given in the constructor."""
+        The sample must match the `audiomixer.Mixer`'s encoding settings given in the constructor.
+        """
         ...
     def stop(self) -> None:
         """Stops playback of the sample on this voice."""
         ...
     level: float
     """The volume level of a voice, as a floating point number between 0 and 1."""
-
     playing: bool
     """True when this voice is being output. (read-only)"""

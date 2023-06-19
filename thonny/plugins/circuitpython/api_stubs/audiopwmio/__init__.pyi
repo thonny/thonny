@@ -37,6 +37,10 @@ class PWMAudioOut:
         :param int quiescent_value: The output value when no signal is present. Samples should start
             and end with this value to prevent audible popping.
 
+        **Limitations:** On mimxrt10xx, low sample rates may have an audible
+        "carrier" frequency. The manufacturer datasheet states that the "MQS" peripheral
+        is intended for 44 kHz or 48kHz input signals.
+
         Simple 8ksps 440 Hz sin wave::
 
           import audiocore
@@ -105,7 +109,6 @@ class PWMAudioOut:
         ...
     playing: bool
     """True when an audio sample is being output even if `paused`. (read-only)"""
-
     def pause(self) -> None:
         """Stops playback temporarily while remembering the position. Use `resume` to resume playback."""
         ...

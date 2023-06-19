@@ -4,6 +4,9 @@ The `keypad` module provides native support to scan sets of keys or buttons,
 connected independently to individual pins,
 connected to a shift register,
 or connected in a row-and-column matrix.
+
+For more information about working with the `keypad` module in CircuitPython,
+see `this Learn guide <https://learn.adafruit.com/key-pad-matrix-scanning-in-circuitpython>`_.
 """
 
 from __future__ import annotations
@@ -20,27 +23,23 @@ class Event:
     ) -> None:
         """Create a key transition event, which reports a key-pressed or key-released transition.
 
-        :param int key_number: the key number
+        :param int key_number: The key number.
         :param bool pressed: ``True`` if the key was pressed; ``False`` if it was released.
         :param int timestamp: The time in milliseconds that the keypress occurred in the `supervisor.ticks_ms` time system.  If specified as None, the current value of `supervisor.ticks_ms` is used.
         """
         ...
     key_number: int
     """The key number."""
-
     pressed: bool
     """``True`` if the event represents a key down (pressed) transition.
     The opposite of `released`.
     """
-
     released: bool
     """``True`` if the event represents a key up (released) transition.
     The opposite of `pressed`.
     """
-
     timestamp: int
-    """The timestamp"""
-
+    """The timestamp."""
     def __eq__(self, other: object) -> bool:
         """Two `Event` objects are equal if their `key_number`
         and `pressed`/`released` values are equal.
@@ -50,7 +49,8 @@ class Event:
     def __hash__(self) -> int:
         """Returns a hash for the `Event`, so it can be used in dictionaries, etc..
 
-        Note that as events with different timestamps compare equal, they also hash to the same value."""
+        Note that as events with different timestamps compare equal, they also hash to the same value.
+        """
         ...
 
 class EventQueue:
@@ -69,7 +69,7 @@ class EventQueue:
         If a new event arrives when the queue is full, the event is discarded, and
         `overflowed` is set to ``True``.
 
-        :return: the next queued key transition `Event`
+        :return: The next queued key transition `Event`.
         :rtype: Optional[Event]
         """
         ...
@@ -126,7 +126,7 @@ class KeyMatrix:
         An `EventQueue` is created when this object is created and is available in the `events` attribute.
 
         :param Sequence[microcontroller.Pin] row_pins: The pins attached to the rows.
-        :param Sequence[microcontroller.Pin] column_pins: The pins attached to the colums.
+        :param Sequence[microcontroller.Pin] column_pins: The pins attached to the columns.
         :param bool columns_to_anodes: Default ``True``.
           If the matrix uses diodes, the diode anodes are typically connected to the column pins,
           and the cathodes should be connected to the row pins. If your diodes are reversed,
@@ -158,8 +158,7 @@ class KeyMatrix:
     key_count: int
     """The number of keys that are being scanned. (read-only)
     """
-
-    def key_number_to_row_column(self, row: int, column: int) -> Tuple[int]:
+    def key_number_to_row_column(self, key_number: int) -> Tuple[int]:
         """Return the row and column for the given key number.
         The row is ``key_number // len(column_pins)``.
         The column is ``key_number % len(column_pins)``.
@@ -233,7 +232,6 @@ class Keys:
     key_count: int
     """The number of keys that are being scanned. (read-only)
     """
-
     events: EventQueue
     """The `EventQueue` associated with this `Keys` object. (read-only)
     """
@@ -303,7 +301,6 @@ class ShiftRegisterKeys:
     key_count: int
     """The number of keys that are being scanned. (read-only)
     """
-
     events: EventQueue
     """The `EventQueue` associated with this `Keys` object. (read-only)
     """

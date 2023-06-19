@@ -28,6 +28,9 @@ to enable the transceiver.
 Other implementations of the CAN device may exist (for instance, attached
 via an SPI bus).  If so their constructor arguments may differ, but
 otherwise we encourage implementors to follow the API that the core uses.
+
+For more information on working with this module, refer to
+`this Learn Guide on using it <https://learn.adafruit.com/using-canio-circuitpython>`_.
 """
 
 from __future__ import annotations
@@ -88,16 +91,12 @@ class CAN:
         ...
     auto_restart: bool
     """If True, will restart communications after entering bus-off state"""
-
     baudrate: int
     """The baud rate (read-only)"""
-
     transmit_error_count: int
     """The number of transmit errors (read-only).  Increased for a detected transmission error, decreased for successful transmission.  Limited to the range from 0 to 255 inclusive.  Also called TEC."""
-
     receive_error_count: int
     """The number of receive errors (read-only).  Increased for a detected reception error, decreased for successful reception.  Limited to the range from 0 to 255 inclusive.  Also called REC."""
-
     state: BusState
     """The current state of the bus. (read-only)"""
     def restart(self) -> None:
@@ -140,7 +139,6 @@ class CAN:
     loopback: bool
     """True if the device was created in loopback mode, False
     otherwise (read-only)"""
-
     def send(self, message: Union[RemoteTransmissionRequest, Message]) -> None:
         """Send a message on the bus with the given data and id.
         If the message could not be sent due to a full fifo or a bus error condition, RuntimeError is raised.
@@ -149,7 +147,6 @@ class CAN:
     silent: bool
     """True if the device was created in silent mode, False
     otherwise (read-only)"""
-
     def deinit(self) -> None:
         """Deinitialize this object, freeing its hardware resources"""
         ...
@@ -231,10 +228,8 @@ class Match:
         only standard ids are matched."""
     id: int
     """The id to match"""
-
     mask: int
     """The optional mask of ids to match"""
-
     extended: bool
     """True to match extended ids, False to match standard ides"""
 
@@ -251,10 +246,8 @@ class Message:
         ...
     id: int
     """The numeric ID of the message"""
-
     data: bytes
     """The content of the message"""
-
     extended: bool
     """True if the message's id is an extended id"""
 
@@ -271,9 +264,7 @@ class RemoteTransmissionRequest:
         ...
     id: int
     """The numeric ID of the message"""
-
     extended: bool
     """True if the message's id is an extended id"""
-
     length: int
     """The length of the requested message."""

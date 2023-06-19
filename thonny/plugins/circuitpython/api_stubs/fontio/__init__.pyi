@@ -1,4 +1,12 @@
-"""Core font related data structures"""
+"""Core font related data structures
+
+.. note:: This module is intended only for low-level usage.  For working with
+    fonts in CircuitPython see the `adafruit_bitmap_font library
+    <https://github.com/adafruit/Adafruit_CircuitPython_Bitmap_Font>`_.
+    For information on creating custom fonts for use in CircuitPython, see
+    `this Learn guide <https://learn.adafruit.com/custom-fonts-for-pyportal-circuitpython-display>`_
+
+"""
 
 from __future__ import annotations
 
@@ -35,7 +43,6 @@ class BuiltinFont:
     """Bitmap containing all font glyphs starting with ASCII and followed by unicode. Use
     `get_glyph` in most cases. This is useful for use with `displayio.TileGrid` and
     `terminalio.Terminal`."""
-
     def get_bounding_box(self) -> Tuple[int, int]:
         """Returns the maximum bounds of all glyphs in the font in a tuple of two values: width, height."""
         ...
