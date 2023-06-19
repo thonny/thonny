@@ -90,11 +90,9 @@ class PulseIn:
     maxlen: int
     """The maximum length of the PulseIn. When len() is equal to maxlen,
     it is unclear which pulses are active and which are idle."""
-
     paused: bool
     """True when pulse capture is paused as a result of :py:func:`pause` or an error during capture
     such as a signal that is too fast."""
-
     def __bool__(self) -> bool: ...
     def __len__(self) -> int:
         """Returns the number of pulse durations currently stored.
@@ -130,9 +128,6 @@ class PulseOut:
         :param ~microcontroller.Pin pin: Signal output pin
         :param int frequency: Carrier signal frequency in Hertz
         :param int duty_cycle: 16-bit duty cycle of carrier frequency (0 - 65536)
-
-        For backwards compatibility, ``pin`` may be a PWMOut object used as the carrier. This
-        compatibility will be removed in CircuitPython 8.0.0.
 
         Send a short series of pulses::
 

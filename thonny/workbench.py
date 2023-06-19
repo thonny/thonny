@@ -37,6 +37,7 @@ from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     copy_to_clipboard,
+    get_menu_char,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
@@ -115,6 +116,7 @@ class Workbench(tk.Tk):
     """
 
     def __init__(self) -> None:
+        logger.info("Starting Workbench")
         thonny._workbench = self
         self.ready = False
         self._closing = False
@@ -163,9 +165,12 @@ class Workbench(tk.Tk):
         )
 
         assistance.init()
+        logger.info("Creating runner")
         self._runner = Runner()
         self._init_hooks()  # Plugins may register hooks, so initialized them before to load plugins.
+        logger.info("Start loading plugins")
         self._load_plugins()
+        logger.info("Done loading plugins")
 
         self._editor_notebook = None  # type: Optional[EditorNotebook]
         self._init_fonts()
@@ -191,6 +196,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
         self._editor_notebook.focus_set()
+        logger.info("Opening views")
         self._try_action(self._open_views)
 
         self.bind_class("EditorCodeViewText", "<<CursorMove>>", self.update_title, True)
@@ -296,7 +302,7 @@ class Workbench(tk.Tk):
         self.set_default("layout.top", 50)
         self.set_default("layout.left", 150)
         if self.in_simple_mode():
-            self.set_default("layout.width", 1050)
+            self.set_default("layout.width", 1130)
             self.set_default("layout.height", 700)
         else:
             self.set_default("layout.width", 800)
@@ -358,7 +364,7 @@ class Workbench(tk.Tk):
             if "custom" in opts:
                 del opts["custom"]
             self._menubar = tk.Menu(self, **opts)
-            if self.get_ui_mode() != "simple":
+            if self.get_ui_mode() != "simple" or running_on_mac_os():
                 self["menu"] = self._menubar
         self._menus = {}  # type: Dict[str, tk.Menu]
         self._menu_item_specs = (
@@ -399,6 +405,7 @@ class Workbench(tk.Tk):
                 logger.debug("Skipping plug-in %s", module_name)
             else:
                 try:
+                    logger.debug("Importing %r", module_name)
                     m = importlib.import_module(module_name)
                     if hasattr(m, load_function_name):
                         modules.append(m)
@@ -409,6 +416,7 @@ class Workbench(tk.Tk):
             return getattr(m, "load_order_key", m.__name__)
 
         for m in sorted(modules, key=module_sort_key):
+            logger.debug("Loading %r", m.__file__)
             getattr(m, load_function_name)()
 
     def _init_fonts(self) -> None:
@@ -584,7 +592,6 @@ class Workbench(tk.Tk):
         return server_socket, secret
 
     def _init_commands(self) -> None:
-
         self.add_command(
             "exit",
             "file",
@@ -607,7 +614,7 @@ class Workbench(tk.Tk):
             "view",
             tr("Increase font size"),
             lambda: self._change_font_size(1),
-            default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
+            default_sequence=select_sequence("<Control-plus>", "<Command-plus>"),
             extra_sequences=["<Control-KP_Add>"],
             group=60,
         )
@@ -643,7 +650,6 @@ class Workbench(tk.Tk):
         )
 
         if self.get_ui_mode() == "expert":
-
             self.add_command(
                 "toggle_maximize_view",
                 "view",
@@ -706,7 +712,6 @@ class Workbench(tk.Tk):
         print(get_runner()._postponed_commands)
 
     def _init_containers(self) -> None:
-
         margin = ems_to_pixels(0.6)
         # Main frame functions as
         # - a background behind padding of main_pw, without this OS X leaves white border
@@ -802,7 +807,6 @@ class Workbench(tk.Tk):
         webbrowser.open("https://github.com/thonny/thonny/wiki/Support-Ukraine")
 
     def _init_backend_switcher(self):
-
         # Set up the menu
         self._backend_conf_variable = tk.StringVar(value="{}")
 
@@ -813,8 +817,7 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button.
-        # Using ≡ ("Identical to"), because ☰ ("Trigram for heaven") looks too heavy in Windows
-        self._backend_button = ttk.Button(self._statusbar, text="≡", style="Toolbutton")
+        self._backend_button = ttk.Button(self._statusbar, text=get_menu_char(), style="Toolbutton")
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -910,7 +913,7 @@ class Workbench(tk.Tk):
             value = "n/a"
 
         self._backend_conf_variable.set(value=value)
-        self._backend_button.configure(text=desc)
+        self._backend_button.configure(text=desc + "  " + get_menu_char())
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
@@ -1405,7 +1408,6 @@ class Workbench(tk.Tk):
             return "Default Light"
 
     def uses_dark_ui_theme(self) -> bool:
-
         name = self._style.theme_use()
         while True:
             if "dark" in name.lower():
@@ -1643,7 +1645,6 @@ class Workbench(tk.Tk):
     def get_image(
         self, filename: str, tk_name: Optional[str] = None, disabled=False
     ) -> tk.PhotoImage:
-
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
 
@@ -1981,7 +1982,6 @@ class Workbench(tk.Tk):
         tester: Optional[Callable[[], bool]],
         toolbar_group: int,
     ) -> None:
-
         assert caption is not None and len(caption) > 0, (
             "Missing caption for '%s'. Toolbar commands must have caption." % command_label
         )
@@ -2100,7 +2100,6 @@ class Workbench(tk.Tk):
         self.geometry("{0}x{1}+{2}+{3}".format(new_width, geo[1], geo[2], geo[3]))
 
     def _change_font_size(self, delta: int) -> None:
-
         if delta != 0:
             editor_font_size = self.get_option("view.editor_font_size")
             editor_font_size += delta
@@ -2259,7 +2258,6 @@ class Workbench(tk.Tk):
                     menu.entryconfigure(i, state=tk.DISABLED)
 
     def _find_location_for_menu_item(self, menu_name: str, command_label: str) -> Union[str, int]:
-
         menu = self.get_menu(menu_name)
 
         if menu.index("end") == None:  # menu is empty

@@ -33,7 +33,7 @@ logger = getLogger(__name__)
 
 
 class CommonDialog(tk.Toplevel):
-    def __init__(self, master=None, **kw):
+    def __init__(self, master=None, skip_tk_dialog_attributes=False, **kw):
         assert master
         super().__init__(master=master, class_="Thonny", **kw)
         self.withdraw()  # remain invisible until size calculations are done
@@ -41,11 +41,14 @@ class CommonDialog(tk.Toplevel):
         # TODO: Is it still required ?
         # self.bind("<FocusIn>", self._unlock_on_focus_in, True)
 
-        # https://bugs.python.org/issue43655
-        if self._windowingsystem == "aqua":
-            self.tk.call("::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", "")
-        elif self._windowingsystem == "x11":
-            self.wm_attributes("-type", "dialog")
+        if not skip_tk_dialog_attributes:
+            # https://bugs.python.org/issue43655
+            if self._windowingsystem == "aqua":
+                self.tk.call(
+                    "::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", ""
+                )
+            elif self._windowingsystem == "x11":
+                self.wm_attributes("-type", "dialog")
 
         self.parent = master
 
@@ -481,8 +484,10 @@ class ClosableNotebook(ttk.Notebook):
         if running_on_mac_os():
             self.bind("<ButtonPress-2>", self._right_btn_press, True)
             self.bind("<Control-Button-1>", self._right_btn_press, True)
+            self.bind("<ButtonPress-3>", self._middle_btn_press, True)
         else:
             self.bind("<ButtonPress-3>", self._right_btn_press, True)
+            self.bind("<ButtonPress-2>", self._middle_btn_press, True)
 
         # self._check_update_style()
 
@@ -530,6 +535,14 @@ class ClosableNotebook(ttk.Notebook):
             self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
         except Exception:
             logger.exception("Opening tab menu")
+
+    def _middle_btn_press(self, event):
+        try:
+            index = self.index("@%d,%d" % (event.x, event.y))
+            self.close_tab(index)
+
+        except Exception:
+            logger.exception("Middle click on tab")
 
     def _close_tab_from_menu(self):
         self.close_tab(self._popup_index)
@@ -833,6 +846,7 @@ def sequence_to_accelerator(sequence):
         .replace("minus", "-")
         .replace("Plus", "+")
         .replace("plus", "+")
+        .replace("space", "Space")
     )
 
     return accelerator
@@ -1316,7 +1330,6 @@ class NoteBox(CommonDialog):
         self._current_chars += chars
 
     def place(self, target, focus=None):
-
         # Compute the area that will be described by this Note
         focus_x = target.winfo_rootx()
         focus_y = target.winfo_rooty()
@@ -1375,7 +1388,6 @@ class NoteBox(CommonDialog):
         self.deiconify()
 
     def show_note(self, *content_items: Union[str, List], target=None, focus=None) -> None:
-
         self.set_content(*content_items)
         self.place(target, focus)
 
@@ -1976,28 +1988,60 @@ def _get_dialog_provider():
     return filedialog
 
 
+def try_restore_focus_after_file_dialog(dialog_parent):
+    if dialog_parent is None:
+        return
+
+    logger.info("Restoring focus to %s", dialog_parent)
+    old_focused_widget = dialog_parent.winfo_toplevel().focus_get()
+
+    dialog_parent.winfo_toplevel().lift()
+    dialog_parent.winfo_toplevel().focus_force()
+    dialog_parent.winfo_toplevel().grab_set()
+    if running_on_mac_os():
+        dialog_parent.winfo_toplevel().grab_release()
+
+    if old_focused_widget is not None:
+        try:
+            old_focused_widget.focus_force()
+        except TclError:
+            logger.warning("Could not restore focus to %r", old_focused_widget)
+
+
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().asksaveasfilename(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().asksaveasfilename(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askopenfilename(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askopenfilename(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askopenfilenames(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askopenfilenames(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
-    _check_dialog_parent(options)
-    return _get_dialog_provider().askdirectory(**options)
+    parent = _check_dialog_parent(options)
+    try:
+        return _get_dialog_provider().askdirectory(**options)
+    finally:
+        try_restore_focus_after_file_dialog(parent)
 
 
 def _check_dialog_parent(options):
@@ -2030,6 +2074,8 @@ def _check_dialog_parent(options):
         del options["master"]
         del options["parent"]
 
+    return parent
+
 
 class _ZenityDialogProvider:
     # https://www.writebash.com/bash-gui/zenity-create-file-selection-dialog-224.html
@@ -2052,8 +2098,6 @@ class _ZenityDialogProvider:
     def asksaveasfilename(cls, **options):
         args = cls._convert_common_options("Save as", **options)
         args.append("--save")
-        if options.get("confirmoverwrite", True):
-            args.append("--confirm-overwrite")
 
         filename = cls._call(args)
         if not filename:
@@ -2078,7 +2122,6 @@ class _ZenityDialogProvider:
         parent = options.get("parent", options.get("master", None))
         if parent is not None:
             args.append("--modal")
-            args.append("--attach=%s" % hex(parent.winfo_id()))
 
         for desc, pattern in options.get("filetypes", ()):
             # zenity requires star before extension
@@ -2097,7 +2140,7 @@ class _ZenityDialogProvider:
 
     @classmethod
     def _call(cls, args):
-        args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
+        args = ["zenity"] + args
         result = subprocess.run(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
         )
@@ -2159,7 +2202,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, width=None, height=None):
+def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     if getattr(dlg, "closed", False):
         return
 
@@ -2182,12 +2225,19 @@ def show_dialog(dlg, master=None, width=None, height=None):
     _place_window(dlg, master, width=width, height=height)
 
     dlg.lift()
-    dlg.wait_visibility()
-
     try:
-        dlg.grab_set()
-    except TclError as e:
-        logger.warning("Can't grab: %s", e)
+        dlg.wait_visibility()
+    except tk.TclError as e:
+        if "was deleted before its visibility changed" in str(e):
+            return
+        else:
+            raise
+
+    if modal:
+        try:
+            dlg.grab_set()
+        except TclError as e:
+            logger.warning("Can't grab: %s", e)
 
     dlg.update_idletasks()
     dlg.focus_set()
@@ -2451,7 +2501,10 @@ class MappingCombobox(ttk.Combobox):
         self.mapping_desc_variable = tk.StringVar(value="")
         self.configure(textvariable=self.mapping_desc_variable)
 
-        self.state(["!disabled", "readonly"])
+        if kw.get("state", None) == "disabled":
+            self.state(["readonly"])
+        else:
+            self.state(["!disabled", "readonly"])
 
     def set_mapping(self, mapping: Dict[str, Any]):
         self.mapping = mapping
@@ -2494,9 +2547,21 @@ class AdvancedLabel(ttk.Label):
 
     def _on_click(self, *event):
         if self._url:
-            import webbrowser
+            if os.path.isdir(self._url):
+                open_with_default_app(self._url)
+            else:
+                import webbrowser
 
-            webbrowser.open(self._url)
+                webbrowser.open(self._url)
+
+
+def open_with_default_app(path):
+    if running_on_windows():
+        os.startfile(path)
+    elif running_on_mac_os():
+        subprocess.run(["open", path])
+    else:
+        subprocess.run(["xdg-open", path])
 
 
 if __name__ == "__main__":

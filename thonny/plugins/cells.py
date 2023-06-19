@@ -86,7 +86,6 @@ def _patch_perform_return():
         if len(ranges) == 2 and (
             ui_utils.shift_is_pressed(event) or ui_utils.control_is_pressed(event)
         ):
-
             if run_enabled():
                 code = text.get(ranges[0], ranges[1]).strip()
                 _submit_code(code)

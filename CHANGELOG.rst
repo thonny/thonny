@@ -2,6 +2,111 @@
 Version history
 ===============
 
+4.1.1 (2023-06-11)
+==================
+* Fix warning for the cases where Thonny avoids user module shadowing a library module (#384)
+* Fix installing from local file in ESP flashing dialog (#2811)
+* Use a tilde to separate pre-release versions in the AppData (#2807), by @jwillikers
+* Use bigger initial width in simple mode
+* Big progress with Italian translation, by mapi68, Ribezzz and sailslack
+* Updated Chinese (TW) and English (UK) translations
+
+
+4.1.0 (2023-06-03)
+==================
+* Fix MicroPython config page regression introduced in 4.1.0b1 (#2724, #2763)
+* Fix remote Python 3 (SSH) connection error (regression introduced in 4.1.0b1)
+* Fix code completion shortcut displayed in macOS menu
+* Add command "Show esptool version" for ESP flasher
+* Don't disconnect for ESP flasher commands which don't touch the device
+* Close tab on middle click (#2767) by @mrexodia
+* Make package manager support new micropython-lib index (#2777)
+* Report macOS version instead of Darwin version in the About box
+* Implement more flexible Raspberry Pi detection
+* Enable thonny to open and save files with zenity 3.91+ (#2786) by @befeleme
+* Make dbus_next dependency optional (#2771)
+* Recognize ESP32 as possible CircuitPython device
+* Add menu indicator for back-end switcher
+* Allow WebREPL for RP2040 backend (experimental)
+* Use correct MicroPython start address (0x0 instead of 0x1000) when flashing ESP32-S3
+* Recognize ESP32 devices by VID 0x303A
+* Don't show irrelevant ports in port selector (e.g. /dev/cu.Bluetooth-Incoming-Port)
+* Allow setting --flash-size in ESP flasher, #2801
+* Rename "Raspberry Pi" initial settings to "Raspberry Pi (simple)"
+* Update several translations
+* Add en_GB translation
+* Attempt to overcome "window was deleted before its visibility changed" error
+* Fix pipkin directory creation in paste mode (e.g. package installation via WebREPL)
+* Upgrade bundled websockets, paramiko, docutils, mypy, Send2Trash, esptool to latest versions
+
+
+4.1.0b1 (2023-04-23)
+====================
+
+New
+---
+* Enhance esptool GUI (propose known MicroPython and CircuitPython downloads; allow setting baud rate and start address; allow querying device info), #2707, #1600, #2536, #1171, #2657
+* Ensure Thonny's backends don't get confused by other installations, #2616
+* Detect and warn if user module is shadowing a library module, #384
+* Make serial port description in interpreter selection menu more descriptive
+* Added pt_BR translation for all help pages, #2673, by @mgmalheiros
+* Add Pololu MicroPython downloads to UF2 flasher
+* Use UDisks to find mounted filesystems on Linux, #2683 by jwillikers
+
+Dependency changes
+------------------
+* Upgrade bundled Python from 3.10.9 to 3.10.11
+* Upgrade bundled Tk from 8.6.12 to 8.6.13
+* Upgrade bundled Pylint from 2.15 to 2.17
+* Upgrade bundled MyPy from 0.991 to 1.2
+
+Fixes
+-----
+* Fix a potential autocompletion error, #2162
+* Experiment with better MicroPython raw paste fallback, #2624
+* Fix sys.sdtout.write return value, #2629
+* Remove unnecessary shebangs, #2645
+* Add option for saving unnamed editors before Run/Debug, #2619
+* Fix blank editors in macOS, again, #2425
+* Fix todo view, #2681, by @kr-g
+* Minor corrections for English help pages, #2674, by @mgmalheiros
+* Upgrade bundled esptool from 4.4 to 4.5
+* Allow Linux installer to use existing Python 3.11 and 3.12, #2676
+* Require saving before using fast debugger, #2699, by @michaellass
+* Add missing translation sites in editors.py, #2705 by @nicolasdespres
+* Restore MicroPython completions in the shell, #2467, #2419
+* Don't use deprecated FLASK_ENV environment variable.
+* Add better shortcut for increasing font size in macOS, #2725
+* Avoid falling back to Python menu in simple mode on macOS, #2729
+* Various improvements to "Kind of Aqua" UI theme, #2760
+* Fix double paste with Command-V when CapsLock on, #2753
+* Fix Cut with Command-X when CapsLock on, #2753
+
+
+4.0.2 (2023-01-14)
+==================
+* Fix Mypy logging error in the Assistant, #2491 by @kr-g and @solsword
+* Fix AttributeError on save, #2454
+* Add Thonny version as environment value for user programs, #2494 by @kr-g
+* Make `__file__` contain absolute path, #2497
+* Start SSH preparation command with space to avoid adding it to shell history, #2563 by @isaacl
+* Bump pipkin version to 1.0b8 and fix various bugs with MicroPython package installation, including not being able to update a package (#2555)
+* Restore Find/Replace dialog close button and non-dialog behavior, #2461, #2550
+* Make Find/Replace dialog non-modal again, #2550
+* Fix Find/Replace seeding, #2356, #2550
+* Restore focus after using file dialogs, #2501
+* Don't remove stacktrace links after closing the process, #2471
+* Never clear shell when Stop/Restart is used for stopping a process, #2456
+* Treat .toml, .gitignore and .env as text files
+* Fix expression box glitch (lower frame box remaining visible) when debugging on macOS
+* Ignore disk flushing errors in the end of UF2 installation
+* Make port finding in the end of UF2 installation process more robust
+* Don't enable variant and version selection in UF2 dialog before variants get downloaded
+* Add Vietnamese translation, by Bui Huy Quang
+* Update several translations
+* Fix the name for Slowenian, #2611
+* Update several deps in Thonny + Python bundles (asttokens, mypy, pylint, esptool, paramiko)
+
 4.0.1 (2022-09-11)
 ==================
 * Fix error when running script with closed Shell, #2412

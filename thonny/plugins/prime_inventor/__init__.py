@@ -33,9 +33,6 @@ class PrimeInventorMicroPythonProxy(BareMetalMicroPythonProxy):
 
 
 class PrimeInventorMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
-    def _has_flashing_dialog(self):
-        return False
-
     def _get_intro_text(self):
         return "Instructions:"
 

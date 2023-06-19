@@ -15,7 +15,19 @@ boards.)
   pin = digitalio.DigitalInOut(board.NEOPIXEL)
   pin.direction = digitalio.Direction.OUTPUT
   pixel_off = bytearray([0, 0, 0])
-  neopixel_write.neopixel_write(pin, pixel_off)"""
+  neopixel_write.neopixel_write(pin, pixel_off)
+
+.. note::
+
+    This module is typically not used by user level code.
+
+    For more information on actually using NeoPixels, refer to the `CircuitPython
+    Essentials Learn guide <https://learn.adafruit.com/circuitpython-essentials/circuitpython-neopixel>`_
+
+    For a much more thorough guide about using NeoPixels, refer to the `Adafruit NeoPixel Überguide
+    <https://learn.adafruit.com/adafruit-neopixel-uberguide>`_.
+
+"""
 
 from __future__ import annotations
 
@@ -26,5 +38,6 @@ def neopixel_write(digitalinout: digitalio.DigitalInOut, buf: ReadableBuffer) ->
     """Write buf out on the given DigitalInOut.
 
     :param ~digitalio.DigitalInOut digitalinout: the DigitalInOut to output with
-    :param ~circuitpython_typing.ReadableBuffer buf: The bytes to clock out. No assumption is made about color order"""
+    :param ~circuitpython_typing.ReadableBuffer buf: The bytes to clock out. No assumption is made about color order
+    """
     ...

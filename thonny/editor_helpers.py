@@ -279,7 +279,6 @@ class DocuBoxBase(EditorInfoBox):
             self._append_chars(sig.return_type, ["annotation"])
 
     def render_parameter(self, param: SignatureParameter, active: bool) -> None:
-
         if active:
             base_tags = ["active"]
         else:

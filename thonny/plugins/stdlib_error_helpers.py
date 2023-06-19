@@ -104,7 +104,6 @@ class SyntaxErrorHelper(ErrorHelper):
                     ]
                     and self.tokens[i].string != ":"
                 ):
-
                     old_i = i
                     if self.tokens[i].string in "([{":
                         i = self._skip_braced_part(i)
@@ -163,7 +162,6 @@ class SyntaxErrorHelper(ErrorHelper):
         level = 1
         token_index += 1
         while token_index < len(self.tokens):
-
             if self.tokens[token_index].string in ["(", "[", "{"]:
                 level += 1
             elif self.tokens[token_index].string in [")", "]", "}"]:
@@ -271,7 +269,6 @@ class NameErrorHelper(ErrorHelper):
         )
 
     def _sug_bad_spelling(self):
-
         # Yes, it would be more proper to consult builtins from the backend,
         # but it's easier this way...
         all_names = {name for name in dir(builtins) if not name.startswith("_")}
@@ -496,7 +493,6 @@ class AttributeErrorHelper(ErrorHelper):
         ]
 
     def _sug_wrong_attribute_instead_of_len(self):
-
         if self.type_name == "str":
             goal = "length"
         elif self.type_name == "bytes":

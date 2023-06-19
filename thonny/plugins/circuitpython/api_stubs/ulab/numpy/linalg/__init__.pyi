@@ -45,7 +45,8 @@ def norm(x: ulab.numpy.ndarray) -> float:
     """
     :param ~ulab.numpy.ndarray x: a vector or a matrix
 
-    Computes the 2-norm of a vector or a matrix, i.e., ``sqrt(sum(x*x))``, however, without the RAM overhead."""
+    Computes the 2-norm of a vector or a matrix, i.e., ``sqrt(sum(x*x))``, however, without the RAM overhead.
+    """
     ...
 
 def qr(m: ulab.numpy.ndarray) -> Tuple[ulab.numpy.ndarray, ulab.numpy.ndarray]:

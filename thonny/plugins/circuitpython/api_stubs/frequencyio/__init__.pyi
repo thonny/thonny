@@ -89,7 +89,6 @@ class FrequencyIn:
 
     .. note:: When setting a new ``capture_period``, all previous capture information is
               cleared with a call to ``clear()``."""
-
     def __get__(self, index: int) -> int:
         """Returns the value of the last frequency captured."""
         ...

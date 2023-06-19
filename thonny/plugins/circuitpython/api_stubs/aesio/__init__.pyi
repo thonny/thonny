@@ -1,7 +1,11 @@
 """AES encryption routines
 
 The `AES` module contains classes used to implement encryption
-and decryption. It aims to be low overhead in terms of memory."""
+and decryption. It aims to be low overhead in terms of memory.
+
+For more information on AES, refer to `the Wikipedia entry
+<https://en.wikipedia.org/wiki/Advanced_Encryption_Standard>`_.
+"""
 
 from __future__ import annotations
 
@@ -20,7 +24,7 @@ class AES:
         self,
         key: ReadableBuffer,
         mode: int = 0,
-        iv: Optional[ReadableBuffer] = None,
+        IV: Optional[ReadableBuffer] = None,
         segment_size: int = 8,
     ) -> None:
         """Create a new AES state with the given key.
@@ -28,7 +32,7 @@ class AES:
         :param ~circuitpython_typing.ReadableBuffer key: A 16-, 24-, or 32-byte key
         :param int mode: AES mode to use.  One of: `MODE_ECB`, `MODE_CBC`, or
                          `MODE_CTR`
-        :param ~circuitpython_typing.ReadableBuffer iv: Initialization vector to use for CBC or CTR mode
+        :param ~circuitpython_typing.ReadableBuffer IV: Initialization vector to use for CBC or CTR mode
 
         Additional arguments are supported for legacy reasons.
 
@@ -43,6 +47,17 @@ class AES:
           cipher = aesio.AES(key, aesio.MODE_ECB)
           cipher.encrypt_into(inp, outp)
           hexlify(outp)"""
+        ...
+    def rekey(
+        self,
+        key: ReadableBuffer,
+        IV: Optional[ReadableBuffer] = None,
+    ) -> None:
+        """Update the AES state with the given key.
+
+        :param ~circuitpython_typing.ReadableBuffer key: A 16-, 24-, or 32-byte key
+        :param ~circuitpython_typing.ReadableBuffer IV: Initialization vector to use
+                                                        for CBC or CTR mode"""
         ...
     def encrypt_into(self, src: ReadableBuffer, dest: WriteableBuffer) -> None:
         """Encrypt the buffer from ``src`` into ``dest``.

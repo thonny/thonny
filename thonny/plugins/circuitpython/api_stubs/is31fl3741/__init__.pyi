@@ -48,14 +48,12 @@ class IS31FL3741_FrameBuffer:
     brightness: float
     """In the current implementation, 0.0 turns the display off entirely
     and any other value up to 1.0 turns the display on fully."""
-
     def refresh(self) -> None:
         """Transmits the color data in the buffer to the pixels so that
         they are shown."""
         ...
     width: int
     """The width of the display, in pixels"""
-
     height: int
     """The height of the display, in pixels"""
 
@@ -105,5 +103,6 @@ def write(mapping: Tuple[int, ...], buf: ReadableBuffer) -> None:
     """Write buf out on the I2C bus to the IS31FL3741.
 
     :param ~Tuple[int, ...] mapping: map the pixels in the buffer to the order addressed by the driver chip
-    :param ~_typing.ReadableBuffer buf: The bytes to clock out. No assumption is made about color order"""
+    :param ~_typing.ReadableBuffer buf: The bytes to clock out. No assumption is made about color order
+    """
     ...

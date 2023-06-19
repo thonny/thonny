@@ -1,4 +1,10 @@
-"""Collection of bitmap manipulation tools"""
+"""Collection of bitmap manipulation tools
+
+.. note:: If you're looking for information about displaying bitmaps on
+    screens in CircuitPython, see `this Learn guide
+    <https://learn.adafruit.com/circuitpython-display-support-using-displayio>`_
+    for information about using the :py:mod:`displayio` module.
+"""
 
 from __future__ import annotations
 
@@ -30,23 +36,29 @@ def rotozoom(
     :param bitmap dest_bitmap: Destination bitmap that will be copied into
     :param bitmap source_bitmap: Source bitmap that contains the graphical region to be copied
     :param int ox: Horizontal pixel location in destination bitmap where source bitmap
-           point (px,py) is placed
+           point (px,py) is placed. Defaults to None which causes it to use the horizontal
+           midway point of the destination bitmap.
     :param int oy: Vertical pixel location in destination bitmap where source bitmap
-           point (px,py) is placed
+           point (px,py) is placed. Defaults to None which causes it to use the vertical
+           midway point of the destination bitmap.
     :param Tuple[int,int] dest_clip0: First corner of rectangular destination clipping
            region that constrains region of writing into destination bitmap
     :param Tuple[int,int] dest_clip1: Second corner of rectangular destination clipping
            region that constrains region of writing into destination bitmap
     :param int px: Horizontal pixel location in source bitmap that is placed into the
-           destination bitmap at (ox,oy)
+           destination bitmap at (ox,oy). Defaults to None which causes it to use the
+           horizontal midway point in the source bitmap.
     :param int py: Vertical pixel location in source bitmap that is placed into the
-           destination bitmap at (ox,oy)
+           destination bitmap at (ox,oy). Defaults to None which causes it to use the
+           vertical midway point in the source bitmap.
     :param Tuple[int,int] source_clip0: First corner of rectangular source clipping
            region that constrains region of reading from the source bitmap
     :param Tuple[int,int] source_clip1: Second corner of rectangular source clipping
            region that constrains region of reading from the source bitmap
-    :param float angle: Angle of rotation, in radians (positive is clockwise direction)
-    :param float scale: Scaling factor
+    :param float angle: Angle of rotation, in radians (positive is clockwise direction).
+           Defaults to None which gets treated as 0.0 radians or no rotation.
+    :param float scale: Scaling factor. Defaults to None which gets treated as 1.0 or same
+           as original source size.
     :param int skip_index: Bitmap palette index in the source that will not be copied,
            set to None to copy all pixels"""
     ...
@@ -57,7 +69,7 @@ def alphablend(
     source_bitmap_2: displayio.Bitmap,
     colorspace: displayio.Colorspace,
     factor1: float = 0.5,
-    factor2: float = None,
+    factor2: Optional[float] = None,
 ) -> None:
     """Alpha blend the two source bitmaps into the destination.
 
@@ -123,6 +135,56 @@ def draw_line(
            line in the destination bitmap"""
     ...
 
+def draw_polygon(
+    dest_bitmap: displayio.Bitmap,
+    xs: ReadableBuffer,
+    ys: ReadableBuffer,
+    value: int,
+    close: Optional[bool] = True,
+) -> None:
+    """Draw a polygon connecting points on provided bitmap with provided value
+
+    :param bitmap dest_bitmap: Destination bitmap that will be written into
+    :param ReadableBuffer xs: x-pixel position of the polygon's vertices
+    :param ReadableBuffer ys: y-pixel position of the polygon's vertices
+    :param int value: Bitmap palette index that will be written into the
+           line in the destination bitmap
+    :param bool close: (Optional) Whether to connect first and last point. (True)
+
+    .. code-block:: Python
+
+       import board
+       import displayio
+       import bitmaptools
+
+       display = board.DISPLAY
+       main_group = displayio.Group()
+       display.root_group = main_group
+
+       palette = displayio.Palette(3)
+       palette[0] = 0xffffff
+       palette[1] = 0x0000ff
+       palette[2] = 0xff0000
+
+       bmp = displayio.Bitmap(128,128, 3)
+       bmp.fill(0)
+
+       xs = bytes([4, 101, 101, 19])
+       ys = bytes([4, 19,  121, 101])
+       bitmaptools.draw_polygon(bmp, xs, ys, 1)
+
+       xs = bytes([14, 60, 110])
+       ys = bytes([14, 24,  90])
+       bitmaptools.draw_polygon(bmp, xs, ys, 2)
+
+       tilegrid = displayio.TileGrid(bitmap=bmp, pixel_shader=palette)
+       main_group.append(tilegrid)
+
+       while True:
+           pass
+    """
+    ...
+
 def arrayblit(
     bitmap: displayio.Bitmap,
     data: ReadableBuffer,
@@ -135,7 +197,7 @@ def arrayblit(
     """Inserts pixels from ``data`` into the rectangle of width×height pixels with the upper left corner at ``(x,y)``
 
     The values from ``data`` are taken modulo the number of color values
-    avalable in the destination bitmap.
+    available in the destination bitmap.
 
     If x1 or y1 are not specified, they are taken as 0.  If x2 or y2
     are not specified, or are given as -1, they are taken as the width
@@ -182,14 +244,14 @@ def readinto(
     :param typing.BinaryIO file: A file opened in binary mode
     :param int bits_per_pixel: Number of bits per pixel.  Values 1, 2, 4, 8, 16, 24, and 32 are supported;
     :param int element_size: Number of bytes per element.  Values of 1, 2, and 4 are supported, except that 24 ``bits_per_pixel`` requires 1 byte per element.
-    :param bool reverse_pixels_in_element: If set, the first pixel in a word is taken from the Most Signficant Bits; otherwise, it is taken from the Least Significant Bits.
+    :param bool reverse_pixels_in_element: If set, the first pixel in a word is taken from the Most Significant Bits; otherwise, it is taken from the Least Significant Bits.
     :param bool swap_bytes_in_element: If the ``element_size`` is not 1, then reverse the byte order of each element read.
     :param bool reverse_rows: Reverse the direction of the row loading (required for some bitmap images).
     """
     ...
 
 class DitherAlgorithm:
-    """Identifies the algorith for dither to use"""
+    """Identifies the algorithm for dither to use"""
 
     Atkinson: "DitherAlgorithm"
     """The classic Atkinson dither, often associated with the Hypercard esthetic"""

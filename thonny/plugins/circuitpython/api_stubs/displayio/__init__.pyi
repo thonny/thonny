@@ -1,7 +1,12 @@
 """Native helpers for driving displays
 
 The `displayio` module contains classes to manage display output
-including synchronizing with refresh rates and partial updating."""
+including synchronizing with refresh rates and partial updating.
+
+For more a more thorough explanation and guide for using `displayio`, please
+refer to `this Learn guide
+<https://learn.adafruit.com/circuitpython-display-support-using-displayio>`_.
+"""
 
 from __future__ import annotations
 
@@ -9,13 +14,14 @@ import typing
 from typing import Optional, Tuple, Union
 
 import busio
+import circuitpython_typing
 import microcontroller
 import paralleldisplay
 import vectorio
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
 def release_displays() -> None:
-    """Releases any actively used displays so their busses and pins can be used again. This will also
+    """Releases any actively used displays so their buses and pins can be used again. This will also
     release the builtin display on boards that have one. You will need to reinitialize it yourself
     afterwards. This may take seconds to complete if an active EPaperDisplay is refreshing.
 
@@ -67,10 +73,8 @@ class Bitmap:
         ...
     width: int
     """Width of the bitmap. (read only)"""
-
     height: int
     """Height of the bitmap. (read only)"""
-
     def __getitem__(self, index: Union[Tuple[int, int], int]) -> int:
         """Returns the value at the given index. The index can either be an x,y tuple or an int equal
         to ``y * width + x``.
@@ -136,6 +140,9 @@ class Bitmap:
         notified of the "dirty rectangle" that encloses all modified
         pixels."""
         ...
+    def deinit(self) -> None:
+        """Release resources allocated by Bitmap."""
+        ...
 
 class ColorConverter:
     """Converts one color format to another."""
@@ -154,7 +161,6 @@ class ColorConverter:
     dither: bool
     """When `True` the ColorConverter dithers the output by adding random noise when
     truncating to display bitdepth"""
-
     def make_transparent(self, color: int) -> None:
         """Set the transparent color or index for the ColorConverter. This will
         raise an Exception if there is already a selected transparent index.
@@ -199,7 +205,6 @@ class Display:
         backlight_pin: Optional[microcontroller.Pin] = None,
         brightness_command: Optional[int] = None,
         brightness: float = 1.0,
-        auto_brightness: bool = False,
         single_byte_bounds: bool = False,
         data_as_commands: bool = False,
         auto_refresh: bool = True,
@@ -254,8 +259,7 @@ class Display:
         :param int write_ram_command: Command used to write pixels values into the update region. Ignored if data_as_commands is set.
         :param microcontroller.Pin backlight_pin: Pin connected to the display's backlight
         :param int brightness_command: Command to set display brightness. Usually available in OLED controllers.
-        :param float brightness: Initial display brightness. This value is ignored if auto_brightness is True.
-        :param bool auto_brightness: If True, brightness is controlled via an ambient light sensor or other mechanism.
+        :param float brightness: Initial display brightness.
         :param bool single_byte_bounds: Display column and row commands use single bytes
         :param bool data_as_commands: Treat all init and boundary data as SPI commands. Certain displays require this.
         :param bool auto_refresh: Automatically refresh the screen
@@ -263,13 +267,20 @@ class Display:
         :param bool backlight_on_high: If True, pulling the backlight pin high turns the backlight on.
         :param bool SH1107_addressing: Special quirk for SH1107, use upper/lower column set and page set
         :param int set_vertical_scroll: This parameter is accepted but ignored for backwards compatibility. It will be removed in a future release.
+        :param int backlight_pwm_frequency: The frequency to use to drive the PWM for backlight brightness control. Default is 50000.
         """
         ...
     def show(self, group: Group) -> None:
-        """Switches to displaying the given group of layers. When group is None, the default
+        """
+        .. note:: `show()` is deprecated and will be removed in CircuitPython 9.0.0.
+          Use ``.root_group = group`` instead.
+
+        Switches to displaying the given group of layers. When group is None, the default
         CircuitPython terminal will be shown.
 
-        :param Group group: The group to show."""
+        :param Group group: The group to show.
+
+        """
         ...
     def refresh(
         self,
@@ -294,42 +305,31 @@ class Display:
 
         :param Optional[int] target_frames_per_second: The target frame rate that :py:func:`refresh` should try to
             achieve. Set to `None` for immediate refresh.
-        :param int minimum_frames_per_second: The minimum number of times the screen should be updated per second."""
+        :param int minimum_frames_per_second: The minimum number of times the screen should be updated per second.
+        """
         ...
     auto_refresh: bool
     """True when the display is refreshed automatically."""
-
     brightness: float
-    """The brightness of the display as a float. 0.0 is off and 1.0 is full brightness. When
-    `auto_brightness` is True, the value of `brightness` will change automatically.
-    If `brightness` is set, `auto_brightness` will be disabled and will be set to False."""
-
-    auto_brightness: bool
-    """True when the display brightness is adjusted automatically, based on an ambient
-    light sensor or other method. Note that some displays may have this set to True by default,
-    but not actually implement automatic brightness adjustment. `auto_brightness` is set to False
-    if `brightness` is set manually."""
-
+    """The brightness of the display as a float. 0.0 is off and 1.0 is full brightness."""
     width: int
     """Gets the width of the board"""
-
     height: int
     """Gets the height of the board"""
-
     rotation: int
     """The rotation of the display as an int in degrees."""
-
     bus: _DisplayBus
     """The bus being used by the display"""
-
     root_group: Group
-    """The root group on the display."""
-
+    """The root group on the display.
+    If the root group is set to ``None``, the default CircuitPython terminal will be shown.
+    """
     def fill_row(self, y: int, buffer: WriteableBuffer) -> WriteableBuffer:
         """Extract the pixels from a single row
 
         :param int y: The top edge of the area
-        :param ~circuitpython_typing.WriteableBuffer buffer: The buffer in which to place the pixel data"""
+        :param ~circuitpython_typing.WriteableBuffer buffer: The buffer in which to place the pixel data
+        """
         ...
 
 class EPaperDisplay:
@@ -364,14 +364,16 @@ class EPaperDisplay:
         write_color_ram_command: Optional[int] = None,
         color_bits_inverted: bool = False,
         highlight_color: int = 0x000000,
-        refresh_display_command: int,
+        refresh_display_command: Union[int, circuitpython_typing.ReadableBuffer],
         refresh_time: float = 40,
         busy_pin: Optional[microcontroller.Pin] = None,
         busy_state: bool = True,
         seconds_per_frame: float = 180,
         always_toggle_chip_select: bool = False,
         grayscale: bool = False,
+        advanced_color_epaper: bool = False,
         two_byte_sequence_length: bool = False,
+        start_up_time: float = 0,
     ) -> None:
         """Create a EPaperDisplay object on the given display bus (`displayio.FourWire` or `paralleldisplay.ParallelBus`).
 
@@ -385,8 +387,8 @@ class EPaperDisplay:
 
         :param display_bus: The bus that the display is connected to
         :type _DisplayBus: displayio.FourWire or paralleldisplay.ParallelBus
-        :param ~circuitpython_typing.ReadableBuffer start_sequence: Byte-packed initialization sequence.
-        :param ~circuitpython_typing.ReadableBuffer stop_sequence: Byte-packed initialization sequence.
+        :param ~circuitpython_typing.ReadableBuffer start_sequence: Byte-packed command sequence.
+        :param ~circuitpython_typing.ReadableBuffer stop_sequence: Byte-packed command sequence.
         :param int width: Width in pixels
         :param int height: Height in pixels
         :param int ram_width: RAM width in pixels
@@ -403,17 +405,24 @@ class EPaperDisplay:
         :param int write_color_ram_command: Command used to write pixels values into the update region
         :param bool color_bits_inverted: True if 0 bits are used to show the color. Otherwise, 1 means to show color.
         :param int highlight_color: RGB888 of source color to highlight with third ePaper color.
-        :param int refresh_display_command: Command used to start a display refresh
+        :param int refresh_display_command: Command used to start a display refresh. Single int or byte-packed command sequence
         :param float refresh_time: Time it takes to refresh the display before the stop_sequence should be sent. Ignored when busy_pin is provided.
         :param microcontroller.Pin busy_pin: Pin used to signify the display is busy
         :param bool busy_state: State of the busy pin when the display is busy
         :param float seconds_per_frame: Minimum number of seconds between screen refreshes
         :param bool always_toggle_chip_select: When True, chip select is toggled every byte
         :param bool grayscale: When true, the color ram is the low bit of 2-bit grayscale
-        :param bool two_byte_sequence_length: When true, use two bytes to define sequence length"""
+        :param bool advanced_color_epaper: When true, the display is a 7-color advanced color epaper (ACeP)
+        :param bool two_byte_sequence_length: When true, use two bytes to define sequence length
+        :param float start_up_time: Time to wait after reset before sending commands
+        """
         ...
     def show(self, group: Group) -> None:
-        """Switches to displaying the given group of layers. When group is None, the default
+        """
+        .. note:: `show()` is deprecated and will be removed in CircuitPython 9.0.0.
+          Use ``.root_group = group`` instead.
+
+        Switches to displaying the given group of layers. When group is None, the default
         CircuitPython terminal will be shown.
 
         :param Group group: The group to show."""
@@ -429,22 +438,22 @@ class EPaperDisplay:
         ...
     time_to_refresh: float
     """Time, in fractional seconds, until the ePaper display can be refreshed."""
-
     busy: bool
     """True when the display is refreshing. This uses the ``busy_pin`` when available or the
        ``refresh_time`` otherwise."""
-
     width: int
     """Gets the width of the display in pixels"""
-
     height: int
     """Gets the height of the display in pixels"""
-
     rotation: int
     """The rotation of the display as an int in degrees."""
-
     bus: _DisplayBus
     """The bus being used by the display"""
+
+    root_group: Group
+    """The root group on the epaper display.
+    If the root group is set to ``None``, the default CircuitPython terminal will be shown.
+    """
 
 class FourWire:
     """Manage updating a display over SPI four wire protocol in the background while Python code runs.
@@ -490,7 +499,8 @@ class FourWire:
         self, command: int, data: ReadableBuffer, *, toggle_every_byte: bool = False
     ) -> None:
         """Sends the given command value followed by the full set of data. Display state, such as
-        vertical scroll, set via ``send`` may or may not be reset once the code is done."""
+        vertical scroll, set via ``send`` may or may not be reset once the code is done.
+        """
         ...
 
 class Group:
@@ -507,17 +517,13 @@ class Group:
     hidden: bool
     """True when the Group and all of it's layers are not visible. When False, the Group's layers
     are visible if they haven't been hidden."""
-
     scale: int
     """Scales each pixel within the Group in both directions. For example, when scale=2 each pixel
     will be represented by 2x2 pixels."""
-
     x: int
     """X position of the Group in the parent."""
-
     y: int
     """Y position of the Group in the parent."""
-
     def append(
         self,
         layer: Union[
@@ -613,7 +619,8 @@ class I2CDisplay:
 
         :param busio.I2C i2c_bus: The I2C bus that make up the clock and data lines
         :param int device_address: The I2C address of the device
-        :param microcontroller.Pin reset: Reset pin. When None only software reset can be used"""
+        :param microcontroller.Pin reset: Reset pin. When None only software reset can be used
+        """
         ...
     def reset(self) -> None:
         """Performs a hardware reset via the reset pin. Raises an exception if called when no reset pin
@@ -621,7 +628,8 @@ class I2CDisplay:
         ...
     def send(self, command: int, data: ReadableBuffer) -> None:
         """Sends the given command value followed by the full set of data. Display state, such as
-        vertical scroll, set via ``send`` may or may not be reset once the code is done."""
+        vertical scroll, set via ``send`` may or may not be reset once the code is done.
+        """
         ...
 
 class OnDiskBitmap:
@@ -639,7 +647,6 @@ class OnDiskBitmap:
       import time
       import pulseio
 
-      board.DISPLAY.auto_brightness = False
       board.DISPLAY.brightness = 0
       splash = displayio.Group()
       board.DISPLAY.show(splash)
@@ -672,10 +679,8 @@ class OnDiskBitmap:
         ...
     width: int
     """Width of the bitmap. (read only)"""
-
     height: int
     """Height of the bitmap. (read only)"""
-
     pixel_shader: Union[ColorConverter, Palette]
     """The image's pixel_shader.  The type depends on the underlying
     bitmap's structure.  The pixel shader can be modified (e.g., to set the
@@ -685,11 +690,16 @@ class Palette:
     """Map a pixel palette_index to a full color. Colors are transformed to the display's format internally to
     save memory."""
 
-    def __init__(self, color_count: int) -> None:
+    def __init__(self, color_count: int, *, dither: bool = False) -> None:
         """Create a Palette object to store a set number of colors.
 
-        :param int color_count: The number of colors in the Palette"""
+        :param int color_count: The number of colors in the Palette
+        :param bool dither: When true, dither the RGB color before converting to the display's color space
+        """
         ...
+    dither: bool
+    """When `True` the Palette dithers the output color by adding random
+    noise when truncating to display bitdepth"""
     def __bool__(self) -> bool: ...
     def __len__(self) -> int:
         """Returns the number of colors in a Palette"""
@@ -763,6 +773,8 @@ class TileGrid:
         convert the value and its location to a display native pixel color. This may be a simple color
         palette lookup, a gradient, a pattern or a color transformer.
 
+        To save RAM usage, tile values are only allowed in the range from 0 to 255 inclusive (single byte values).
+
         tile_width and tile_height match the height of the bitmap by default.
 
         :param Bitmap,OnDiskBitmap,Shape bitmap: The bitmap storing one or more tiles.
@@ -776,38 +788,32 @@ class TileGrid:
         :param int y: Initial y position of the top edge within the parent."""
     hidden: bool
     """True when the TileGrid is hidden. This may be False even when a part of a hidden Group."""
-
     x: int
     """X position of the left edge in the parent."""
-
     y: int
     """Y position of the top edge in the parent."""
-
     width: int
     """Width of the tilegrid in tiles."""
-
     height: int
     """Height of the tilegrid in tiles."""
-
     tile_width: int
     """Width of a single tile in pixels."""
-
     tile_height: int
     """Height of a single tile in pixels."""
-
     flip_x: bool
     """If true, the left edge rendered will be the right edge of the right-most tile."""
-
     flip_y: bool
     """If true, the top edge rendered will be the bottom edge of the bottom-most tile."""
-
     transpose_xy: bool
     """If true, the TileGrid's axis will be swapped. When combined with mirroring, any 90 degree
     rotation can be achieved along with the corresponding mirrored version."""
-
+    def contains(self, touch_tuple: tuple) -> bool:
+        """Returns True if the first two values in ``touch_tuple`` represent an x,y coordinate
+        inside the tilegrid rectangle bounds."""
     pixel_shader: Union[ColorConverter, Palette]
     """The pixel shader of the tilegrid."""
-
+    bitmap: Union[Bitmap, OnDiskBitmap, Shape]
+    """The bitmap of the tilegrid."""
     def __getitem__(self, index: Union[Tuple[int, int], int]) -> int:
         """Returns the tile index at the given index. The index can either be an x,y tuple or an int equal
         to ``y * width + x``.

@@ -14,9 +14,9 @@ to close some parentheses.
 
 Magic commands
 --------------
-If you select "Run => Run current script" or press F5, then you'll see how Thonny inserts a command
+If you select *Run →  Run current script* or press F5, then you'll see how Thonny inserts a command
 starting with ``%Run`` into Shell. Commands starting with ``%`` are called *magic commands* (just 
-like in `IPython <https://ipython.org/>`_ and they perform certain actions, which can't be
+like in `IPython <https://ipython.org/>`_) and they perform certain actions, which can't be
 (easily) expressed as Python commands. Thonny's magic commands usually have
 corresponding menu commands so you don't need write them by hand.
 
@@ -33,7 +33,7 @@ before that and so on. Use Down-key to move in the opposite direction in history
 
 Colored output
 --------------
-If you have your Shell in Terminal emulation mode (see Tools => Options => Shell), then you can
+If you have your Shell in Terminal emulation mode (see *Tools → Options → Shell*), then you can
 use `ANSI codes <https://en.wikipedia.org/wiki/ANSI_escape_code>`_ to produce colored output. 
 
 Try the following example:

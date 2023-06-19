@@ -16,9 +16,10 @@ from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tupl
 
 import thonny
 from thonny import report_time
-from thonny.common import BackendEvent  # TODO: try to get rid of this
-from thonny.common import (
+from thonny.common import (  # TODO: try to get rid of this
     IGNORED_FILES_AND_DIRS,
+    PROCESS_ACK,
+    BackendEvent,
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,
@@ -29,6 +30,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    is_local_path,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
@@ -353,13 +355,22 @@ class MainBackend(BaseBackend, ABC):
         try:
             from thonny import jedi_utils
 
+            sys_path = self._get_sys_path_for_analysis()
+
+            # add current dir for local files
+            """
+            if cmd.filename and is_local_path(cmd.filename):
+                sys_path.insert(0, os.getcwd())
+                logger.debug("editor autocomplete with %r", sys_path)
+            """
+
             with warnings.catch_warnings():
                 completions = jedi_utils.get_script_completions(
                     cmd.source,
                     cmd.row,
                     cmd.column,
                     cmd.filename,
-                    sys_path=self._get_sys_path_for_analysis(),
+                    sys_path=sys_path,
                 )
         except ImportError:
             completions = []
@@ -588,7 +599,6 @@ class UploadDownloadMixin(ABC):
         cmd,
         target_path_class,
     ) -> List[str]:
-
         total_cost = 0
         for item in items:
             if item["kind"] == "file":
@@ -799,6 +809,9 @@ class SshMixin(UploadDownloadMixin):
 
         # stderr gets directed to stdout because of pty
         pid = stdout.readline().strip()
+        ack = stdout.readline().strip()
+        if ack != PROCESS_ACK:
+            raise RuntimeError(f"Got {ack!r} instead of expected {PROCESS_ACK!r}")
         channel = stdout.channel
 
         return RemoteProcess(self._client, channel, stdin, stdout, pid)
@@ -821,7 +834,6 @@ class SshMixin(UploadDownloadMixin):
         pass
 
     def _get_sftp(self, fresh: bool):
-
         if fresh and self._sftp is not None:
             self._sftp.close()
             self._sftp = None
@@ -924,7 +936,6 @@ def ensure_posix_directory(
         return
 
     for step in list(reversed(list(map(str, pathlib.PurePosixPath(path).parents)))) + [path]:
-
         if step != "/":
             mode = stat_mode_fun(step)
             if mode is None:

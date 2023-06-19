@@ -25,8 +25,17 @@ from tkinter import messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
 
 import thonny
-from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, report_time
+from thonny import (
+    THONNY_USER_DIR,
+    common,
+    get_runner,
+    get_shell,
+    get_version,
+    get_workbench,
+    report_time,
+)
 from thonny.common import (
+    PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
     DebuggerCommand,
@@ -85,10 +94,46 @@ io_animation_required = False
 
 _console_allocated = False
 
+BASE_MODULES = [
+    "_abc",
+    "_codecs",
+    "_collections_abc",
+    "_distutils_hack",
+    "_frozen_importlib",
+    "_frozen_importlib_external",
+    "_imp",
+    "_io",
+    "_signal",
+    "_sitebuiltins",
+    "_stat",
+    "_thread",
+    "_warnings",
+    "_weakref",
+    "_winapi",
+    "abc",
+    "builtins",
+    "codecs",
+    "encodings",
+    "genericpath",
+    "io",
+    "marshal",
+    "nt",
+    "ntpath",
+    "os",
+    "site",
+    "stat",
+    "sys",
+    "time",
+    "winreg",
+    "zipimport",
+]
+
 
 class Runner:
     def __init__(self) -> None:
+        get_workbench().set_default("run.allow_running_unnamed_programs", True)
         get_workbench().set_default("run.auto_cd", True)
+        get_workbench().set_default("run.warn_module_shadowing", True)
 
         self._init_commands()
         self._state = "starting"
@@ -309,15 +354,12 @@ class Runner:
         assert self.is_running()
         self._proxy.send_program_input(data)
 
-    def execute_script(
+    def execute_via_shell(
         self,
-        script_path: str,
-        args: List[str],
+        cmd_line: Union[str, List[str]],
         working_directory: Optional[str] = None,
-        command_name: str = "Run",
     ) -> None:
-
-        if self._proxy.get_cwd() != working_directory:
+        if working_directory and self._proxy.get_cwd() != working_directory:
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cd_command(working_directory) + "\n"
@@ -325,15 +367,27 @@ class Runner:
             # create simple command
             cd_cmd_line = ""
 
-        rel_filename = universal_relpath(script_path, working_directory)
-        cmd_parts = ["%" + command_name, rel_filename] + args
-        exe_cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN]) + "\n"
+        if not isinstance(cmd_line, str):
+            cmd_line = construct_cmd_line(cmd_line)
 
         # submit to shell (shell will execute it)
-        get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
+        get_shell().submit_magic_command(cd_cmd_line + cmd_line)
+
+    def execute_script(
+        self,
+        script_path: str,
+        args: List[str],
+        working_directory: Optional[str],
+        command_name: str = "Run",
+    ) -> None:
+        rel_filename = universal_relpath(script_path, working_directory)
+        cmd_parts = ["%" + command_name, rel_filename] + args
+        cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN])
+
+        self.execute_via_shell(cmd_line, working_directory)
 
     def execute_editor_content(self, command_name, args):
-        if command_name.lower() == "debug":
+        if command_name.lower() in ["debug", "fastdebug"]:
             messagebox.showinfo(
                 tr("Information"),
                 tr("For debugging the program must be saved first."),
@@ -393,7 +447,9 @@ class Runner:
             return
 
         UNTITLED = "<untitled>"
-        if editor.get_filename():
+        if editor.get_filename() or not get_workbench().get_option(
+            "run.allow_running_unnamed_programs"
+        ):
             filename = editor.save_file()
             if not filename:
                 # user has cancelled file saving
@@ -510,6 +566,8 @@ class Runner:
                     return None
             elif isinstance(widget, (tk.Listbox, ttk.Entry, tk.Entry, tk.Spinbox)):
                 try:
+                    # NB! On Linux, selection_get() gives X selection
+                    # i.e. it may be from another application when Thonny has nothing selected
                     selection = widget.selection_get()
                     if isinstance(selection, str) and len(selection) > 0:
                         # Assuming user meant to copy, not interrupt
@@ -652,7 +710,7 @@ class Runner:
 
     def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
-
+        was_running = self.is_running()
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
@@ -668,7 +726,7 @@ class Runner:
         self._poll_backend_messages()
 
         if not first:
-            get_shell().restart(automatic=automatic)
+            get_shell().restart(automatic=automatic, was_running=was_running)
             get_shell().update_idletasks()
 
         get_workbench().event_generate("BackendRestart", full=True)
@@ -983,6 +1041,7 @@ class SubprocessProxy(BackendProxy, ABC):
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
 
         env["THONNY_LANGUAGE"] = get_workbench().get_option("general.language")
+        env["THONNY_VERSION"] = get_version()
 
         if thonny.in_debug_mode():
             env["THONNY_DEBUG"] = "1"
@@ -999,10 +1058,6 @@ class SubprocessProxy(BackendProxy, ABC):
                 f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
             )
             return
-            # raise UserError(
-            #    "Interpreter (%s) not found. Please recheck corresponding option!"
-            #    % self._mgmt_executable
-            # )
 
         cmd_line = (
             [
@@ -1014,6 +1069,9 @@ class SubprocessProxy(BackendProxy, ABC):
             + self._get_launcher_with_args()
             + extra_args
         )
+
+        if self.can_be_isolated():
+            cmd_line.insert(1, "-I")
 
         creationflags = 0
         if running_on_windows():
@@ -1035,17 +1093,30 @@ class SubprocessProxy(BackendProxy, ABC):
             encoding="utf-8",
         )
 
-        self._send_initial_input()
+        # read success acknowledgement
+        ack = self._proc.stdout.readline()
 
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
+        # only attempt initial input if process started nicely,
+        # otherwise can't read the error from stderr
+        if ack.strip() == PROCESS_ACK:
+            self._send_initial_input()
+        else:
+            get_shell().print_error(
+                f"INTERNAL ERROR, got {ack!r} instead of {PROCESS_ACK!r}\n---\n"
+            )
+
     def _send_initial_input(self) -> None:
+        # Used for sending data sending for startup, which can't be send by other means
+        # (e.g. don't want the password to end up in logs)
+
         pass
 
     def _get_launch_cwd(self):
-        return self.get_cwd() if self.uses_local_filesystem() else None
+        return get_workbench().get_local_cwd()
 
     def _get_launcher_with_args(self):
         raise NotImplementedError()
@@ -1221,6 +1292,10 @@ class SubprocessProxy(BackendProxy, ABC):
     def get_exe_dirs(self):
         return self._exe_dirs
 
+    def can_be_isolated(self) -> bool:
+        """Says whether the backend may be launched with -I switch"""
+        return True
+
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
             if self.is_terminated():
@@ -1318,7 +1393,6 @@ def _create_python_process(
     env=None,
     universal_newlines=True,
 ):
-
     cmd = [python_exe] + args
 
     if running_on_windows():
@@ -1489,6 +1563,8 @@ class InlineCommandDialog(WorkDialog):
         self.response = None
         self._title = title
         self._instructions = instructions
+        if "id" not in cmd:
+            cmd["id"] = generate_command_id()
         self._cmd = cmd
         self.returncode = None
 

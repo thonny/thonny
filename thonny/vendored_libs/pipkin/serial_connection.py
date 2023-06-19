@@ -18,7 +18,6 @@ logger = getLogger(__name__)
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate=115200, dtr=None, rts=None, skip_reader=False):
-
         import serial
         from serial.serialutil import SerialException
 
@@ -33,6 +32,7 @@ class SerialConnection(MicroPythonConnection):
             # but in some cases it messes up communication.
             # At the same time, in some cases it is required
             # https://github.com/thonny/thonny/issues/1462
+            # See also https://github.com/micropython/micropython/pull/10347
             if dtr is not None:
                 logger.debug("Setting DTR to %s", dtr)
                 self._serial.dtr = dtr
@@ -158,7 +158,6 @@ class DifficultSerialConnection(SerialConnection):
     """For hardening the communication protocol"""
 
     def _make_output_available(self, data, block=True):
-
         # output prompts in parts
         if FIRST_RAW_PROMPT in data or NORMAL_PROMPT in data:
             if FIRST_RAW_PROMPT in data:

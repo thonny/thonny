@@ -381,7 +381,7 @@ def vista() -> BasicUiThemeSettings:
 
 
 def aqua() -> BasicUiThemeSettings:
-    # https://github.com/tcltk/tk/blob/master/library/ttk/aquaTheme.tcl
+    # https://github.com/tcltk/tk/blob/main/library/ttk/aquaTheme.tcl
     return {
         ".": {
             "configure": {
@@ -410,7 +410,27 @@ def aqua() -> BasicUiThemeSettings:
             },
         },
         "TButton": {"configure": {"anchor": "center", "width": "6"}},
-        "Toolbutton": {"configure": {"padding": 4}},
+        # "Toolbutton": {"configure": {"padding": 0}},
+        "Toolbutton": {
+            "configure": {"anchor": "center", "padding": scale(2), "relief": "flat"},
+            "map": {
+                "relief": [
+                    ("disabled", "flat"),
+                    ("selected", "sunken"),
+                    ("pressed", "sunken"),
+                    ("active", "raised"),
+                ],
+                "background": [("disabled", "gray"), ("pressed", "gray"), ("active", "gray")],
+                "lightcolor": [("pressed", "red")],
+                "darkcolor": [("pressed", "red")],
+            },
+            "layout": [
+                (
+                    "Toolbutton.padding",
+                    {"sticky": "nswe", "children": [("Toolbutton.label", {"sticky": "nswe"})]},
+                )
+            ],
+        },
         "TNotebook": {
             "configure": {"tabmargins": [10, 0], "tabposition": "n", "padding": [18, 8, 18, 17]}
         },
@@ -575,15 +595,18 @@ def enhanced_clam() -> CompoundUiThemeSettings:
 
 def enhanced_aqua() -> CompoundUiThemeSettings:
     return [
-        _treeview_settings(),
         _menubutton_settings(),
         # _paned_window_settings(),
         _menu_settings(),
         {
+            "ViewToolbar.TFrame": {
+                "configure": {"background": "systemWindowBackgroundColor1"}
+            },  # TODO:
+            "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor1"}},
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
-            "Tab": {"map": {"foreground": [("selected", "white")]}},
             "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
+            "Tab": {"map": {"foreground": [("selected", "systemSelectedTabTextColor")]}},
             "Active.ViewTab.TLabel": {
                 "configure": {
                     # "font" : "BoldTkDefaultFont",

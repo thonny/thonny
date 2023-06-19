@@ -146,29 +146,25 @@ class Device:
     CONSUMER_CONTROL: Device
     """Consumer Control device supporting sent values from 1-652, with no rollover.
     Uses Report ID 3 for its IN report."""
-
-    def send_report(self, buf: ReadableBuffer, report_id: Optional[int] = None) -> None:
+    def send_report(
+        self, report: ReadableBuffer, report_id: Optional[int] = None
+    ) -> None:
         """Send an HID report. If the device descriptor specifies zero or one report id's,
         you can supply `None` (the default) as the value of ``report_id``.
         Otherwise you must specify which report id to use when sending the report.
         """
         ...
-    def get_last_received_report(self, report_id: Optional[int] = None) -> bytes:
+    def get_last_received_report(
+        self, report_id: Optional[int] = None
+    ) -> Optional[bytes]:
         """Get the last received HID OUT or feature report for the given report ID.
         The report ID may be omitted if there is no report ID, or only one report ID.
-        Return `None` if nothing received.
+        Return `None` if nothing received. After returning a report, subsequent calls
+        will return `None` until next report is received.
         """
         ...
-    last_received_report: bytes
-    """The HID OUT report as a `bytes` (read-only). `None` if nothing received.
-    Same as `get_last_received_report()` with no argument.
-
-    Deprecated: will be removed in CircutPython 8.0.0. Use `get_last_received_report()` instead.
-    """
-
     usage_page: int
     """The device usage page identifier, which designates a category of device. (read-only)"""
-
     usage: int
     """The device usage identifier, which designates a specific kind of device. (read-only)
 

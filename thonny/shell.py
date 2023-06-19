@@ -259,8 +259,8 @@ class ShellView(tk.PanedWindow):
 
         self.text.submit_command(cmd_line, ("magic",))
 
-    def restart(self, automatic: bool = False):
-        self.text.restart(automatic)
+    def restart(self, automatic: bool = False, was_running: bool = False):
+        self.text.restart(automatic, was_running)
 
     def clear_shell(self):
         self.text._clear_shell()
@@ -937,10 +937,14 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
-    def restart(self, automatic: bool = False):
+    def restart(self, automatic: bool = False, was_running: bool = False):
         logger.info("BaseShellText.restart(%r)", automatic)
         self.set_read_only(False)
-        if get_workbench().get_option("shell.clear_for_new_process") and not automatic:
+        if (
+            get_workbench().get_option("shell.clear_for_new_process")
+            and not automatic
+            and not was_running
+        ):
             self._clear_content("end")
         else:
             if (
@@ -1177,7 +1181,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return get_runner() is not None
 
     def _extract_submittable_input(self, input_text, tail):
-
         if get_runner().is_waiting_toplevel_command():
             if input_text.endswith("\n"):
                 if input_text.strip().startswith("%") or input_text.strip().startswith("!"):
@@ -1499,7 +1502,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _show_user_exception(self, user_exception):
         for line, frame_id, *_ in user_exception["items"]:
-
             tags = ("io", "stderr")
             if frame_id is not None:
                 frame_tag = "frame_%d" % frame_id
@@ -1575,7 +1577,6 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 break
 
         self.tag_remove("value", "1.0", end_index)
-        self.tag_remove("stacktrace_hyperlink", "1.0", end_index)
 
         while len(self.active_extra_tags) > 0:
             self.tag_remove(self.active_extra_tags.pop(), "1.0", "end")
@@ -1970,7 +1971,6 @@ class PlotterCanvas(tk.Canvas):
         return count
 
     def draw_segment(self, color, pos, nums):
-
         x = self.x_padding_left + pos * self.x_scale
 
         args = []

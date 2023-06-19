@@ -35,7 +35,6 @@ class MicroPythonProxy(SubprocessProxy):
         return None
 
     def get_pip_target_dir(self) -> Optional[str]:
-
         lib_dirs = self.get_lib_dirs()
         if not lib_dirs:
             return None
@@ -187,7 +186,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -252,19 +252,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         in the switcher.
         """
         return set()
-
-    @classmethod
-    def get_uart_adapter_vids_pids(cls):
-        return {
-            (0x1A86, 0x7523),  # HL-340
-            (0x10C4, 0xEA60),  # CP210x"),
-            (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
-            (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)
-            (0x0403, 0x6011),  # FT4232
-            (0x0403, 0x6014),  # FT232H
-            (0x0403, 0x6015),  # FT X-Series (Sparkfun ESP32)
-            (0x0403, 0x601C),  # FT4222H
-        }
 
     @classmethod
     def should_consider_unknown_devices(cls):
@@ -355,7 +342,16 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
         else:
-            return f"{cls.backend_description}  •  {port}"
+            try:
+                p = get_port_info(port)
+            except Exception:
+                p = None
+                logger.exception("Could not get port info for %r", port)
+
+            if p:
+                return f"{cls.backend_description}  •  {get_serial_port_label(p)}"
+            else:
+                return f"{cls.backend_description}  •  {port}"
 
     @classmethod
     def get_switcher_entries(cls):
@@ -445,12 +441,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
-        self._ports_by_desc = {
-            p.description
-            if p.device in p.description
-            else p.description + " (" + p.device + ")": p.device
-            for p in list_serial_ports()
-        }
+        self._ports_by_desc = {get_serial_port_label(p): p.device for p in list_serial_ports()}
         self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
@@ -517,30 +508,37 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.rowconfigure(100, weight=1)
         last_row.columnconfigure(1, weight=1)
 
-        advanced_link = ui_utils.create_action_label(
-            last_row, tr("Advanced options"), lambda event: self._show_advanced_options()
-        )
-        # advanced_link.grid(row=0, column=1, sticky="e")
+        kinds = self.get_flashing_dialog_kinds()
+        for i, kind in enumerate(kinds):
 
-        if self._has_flashing_dialog():
+            def _click_flashing_link(event, kind=kind):
+                self._handle_python_installer_link(kind=kind)
+
+            if i == 0:
+                link_text = self._get_flasher_link_title()
+            else:
+                link_text = ""
+
+            if kind != "":
+                if link_text:
+                    link_text += " "
+                link_text += f"({kind})"
+
             python_link = ui_utils.create_action_label(
                 last_row,
-                self._get_flasher_link_title(),
-                self._on_click_python_installer_link,
+                link_text,
+                _click_flashing_link,
             )
-            python_link.grid(row=1, column=1, sticky="e")
+            python_link.grid(row=i, column=1, sticky="e")
 
         self._on_change_port()
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "MicroPython"
 
-    def _on_click_python_installer_link(self, event=None):
-        self._open_flashing_dialog()
+    def _handle_python_installer_link(self, kind: str):
+        self._open_flashing_dialog(kind)
         self._has_opened_python_flasher = True
-
-    def _show_advanced_options(self):
-        pass
 
     def _get_intro_text(self):
         result = (
@@ -569,7 +567,6 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         return result
 
     def _get_webrepl_frame(self):
-
         if self._webrepl_frame is not None:
             return self._webrepl_frame
 
@@ -630,6 +627,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             port_name = self.get_selected_port_name()
             get_workbench().set_option(self.backend_name + ".port", port_name)
             if self.webrepl_selected():
+                if not self._webrepl_url_var.get().lower().startswith("ws://"):
+                    messagebox.showerror(
+                        "Bad URL", "WebREPL URL should start with ws://", parent=self
+                    )
+                    return False
+
                 get_workbench().set_option(
                     self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
                 )
@@ -650,10 +653,10 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def _get_intro_url(self) -> Optional[str]:
         return None
 
-    def _has_flashing_dialog(self):
-        return False
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return []
 
-    def _open_flashing_dialog(self):
+    def _open_flashing_dialog(self, kind: str) -> None:
         raise NotImplementedError()
 
     @property
@@ -716,7 +719,8 @@ class LocalMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -860,7 +864,8 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):
-            get_shell().restart()  # Runner doesn't notice restart
+            # Runner doesn't notice restart
+            get_shell().restart(was_running=get_runner().is_running())
 
         return super().send_command(cmd)
 
@@ -958,7 +963,43 @@ class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
     pass
 
 
-def list_serial_ports():
+_PORTS_CACHE = []
+_PORTS_CACHE_TIME = 0
+
+
+def get_serial_port_label(p) -> str:
+    # On Windows, port is given also in description
+    if p.product:
+        desc = p.product
+    elif p.interface:
+        desc = p.interface
+    else:
+        desc = p.description.replace(f" ({p.device})", "")
+
+    if desc == "USB Serial Device":
+        # Try finding something less generic
+        if p.product:
+            desc = p.product
+        elif p.interface:
+            desc = p.interface
+
+    return f"{desc} @ {p.device}"
+
+
+def list_serial_ports(max_cache_age: float = 0.5, skip_logging: bool = False):
+    global _PORTS_CACHE, _PORTS_CACHE_TIME
+
+    cur_time = time.time()
+    if cur_time - _PORTS_CACHE_TIME > max_cache_age:
+        _PORTS_CACHE = _list_serial_ports_uncached(skip_logging=skip_logging)
+        _PORTS_CACHE_TIME = cur_time
+
+    return _PORTS_CACHE
+
+
+def _list_serial_ports_uncached(skip_logging: bool = False):
+    if not skip_logging:
+        logger.info("Listing serial ports")
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
@@ -982,7 +1023,13 @@ def list_serial_ports():
         else:
             from serial.tools.list_ports import comports
 
-        return comports()
+        irrelevant = ["/dev/cu.Bluetooth-Incoming-Port", "/dev/cu.iPhone-WirelessiAP"]
+        result = []
+        for p in comports():
+            if p.device not in irrelevant:
+                result.append(p)
+
+        return result
     finally:
         os.path.islink = old_islink
 
@@ -995,37 +1042,16 @@ def port_exists(device):
     return False
 
 
-def list_serial_ports_with_descriptions():
-    def port_order(p):
-        name = p.device
-        if name is None:
-            return ""
-        elif name.startswith("COM") and len(name) == 4:
-            # Make one-digit COM ports go before COM10
-            return name.replace("COM", "COM0")
-        else:
-            return name
-
-    sorted_ports = sorted(list_serial_ports(), key=port_order)
-
-    return [
-        (
-            p.description if p.device in p.description else p.description + " (" + p.device + ")",
-            p.device,
-        )
-        for p in sorted_ports
-    ]
-
-
 def get_uart_adapter_vids_pids():
     # https://github.com/per1234/zzInoVIDPID
     # https://github.com/per1234/zzInoVIDPID/blob/master/zzInoVIDPID/boards.txt
     # http://esp32.net/usb-uart/
     # https://www.usb.org/developers
+    # https://github.com/espressif/usb-pids
     return {
         (0x1A86, 0x7523),  # CH340 (HL-340?)
         (0x1A86, 0x5523),  # CH341
-        (0x1A86, 0x55D4),  # CH9102F, seen at Adafruit Feather ESP32 V2
+        (0x1A86, 0x55D4),  # CH9102F, seen at Adafruit Feather ESP32 V2, M5 stamp C3
         (0x10C4, 0xEA60),  # CP210x,
         (0x0403, 0x6001),  # FT232/FT245 (XinaBox CW01, CW02)
         (0x0403, 0x6010),  # FT2232C/D/L/HL/Q (ESP-WROVER-KIT)

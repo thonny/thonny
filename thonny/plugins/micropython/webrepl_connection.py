@@ -17,7 +17,6 @@ class WebReplConnection(MicroPythonConnection):
     """
 
     def __init__(self, url, password, num_bytes_received=0):
-
         self.num_bytes_received = num_bytes_received
         super().__init__()
 

@@ -86,7 +86,6 @@ class AllocationSize:
         ...
     bytes_per_block: int
     """Number of bytes per block"""
-
     def __len__(self) -> int:
         """Returns the number of allocation buckets.
 

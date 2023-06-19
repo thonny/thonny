@@ -1,9 +1,17 @@
-"""Hardware interface to RP2 series' programmable IO (PIO) peripheral."""
+"""Hardware interface to RP2 series' programmable IO (PIO) peripheral.
+
+.. note:: This module is intended to be used with the `adafruit_pioasm library
+    <https://github.com/adafruit/Adafruit_CircuitPython_PIOASM>`_.  For an
+    introduction and guide to working with PIO in CircuitPython, see `this
+    Learn guide <https://learn.adafruit.com/intro-to-rp2040-pio-with-circuitpython>`_.
+
+"""
 
 from __future__ import annotations
 
 from typing import List, Optional
 
+import digitalio
 import microcontroller
 from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
@@ -48,6 +56,8 @@ class StateMachine:
         initial_sideset_pin_state: int = 0,
         initial_sideset_pin_direction: int = 0x1F,
         sideset_enable: bool = False,
+        jmp_pin: Optional[microcontroller.Pin] = None,
+        jmp_pin_pull: Optional[digitalio.Pull] = None,
         exclusive_pin_use: bool = True,
         auto_pull: bool = False,
         pull_threshold: int = 32,
@@ -57,12 +67,13 @@ class StateMachine:
         push_threshold: int = 32,
         in_shift_right: bool = True,
         user_interruptible: bool = True,
+        wrap_target: int = 0,
+        wrap: int = -1,
     ) -> None:
-
         """Construct a StateMachine object on the given pins with the given program.
 
         :param ReadableBuffer program: the program to run with the state machine
-        :param int frequency: the target clock frequency of the state machine. Actual may be less.
+        :param int frequency: the target clock frequency of the state machine. Actual may be less. Use 0 for system clock speed.
         :param ReadableBuffer init: a program to run once at start up. This is run after program
              is started so instructions may be intermingled
         :param ~microcontroller.Pin first_out_pin: the first pin to use with the OUT instruction
@@ -83,6 +94,7 @@ class StateMachine:
         :param int initial_sideset_pin_direction: the initial output direction for sideset pins starting at first_sideset_pin
         :param bool sideset_enable: True when the top sideset bit is to enable. This should be used with the ".side_set # opt" directive
         :param ~microcontroller.Pin jmp_pin: the pin which determines the branch taken by JMP PIN instructions
+        :param ~digitalio.Pull jmp_pin_pull: The pull value for the jmp pin, default is no pull.
         :param bool exclusive_pin_use: When True, do not share any pins with other state machines. Pins are never shared with other peripherals
         :param bool auto_pull: When True, automatically load data from the tx FIFO into the
             output shift register (OSR) when an OUT instruction shifts more than pull_threshold bits
@@ -106,6 +118,10 @@ class StateMachine:
             that causes an infinite loop, you will be able to interrupt the loop.
             However, if you are writing to a device that can get into a bad state if a read or write
             is interrupted, you may want to set this to False after your program has been vetted.
+        :param int wrap_target: The target instruction number of automatic wrap. Defaults to the first instruction of the program.
+        :param int wrap: The instruction after which to wrap to the ``wrap``
+            instruction. As a special case, -1 (the default) indicates the
+            last instruction of the program.
         """
         ...
     def deinit(self) -> None:
@@ -133,7 +149,12 @@ class StateMachine:
         """Stops the state machine clock. Use `restart` to enable it."""
         ...
     def write(
-        self, buffer: ReadableBuffer, *, start: int = 0, end: Optional[int] = None
+        self,
+        buffer: ReadableBuffer,
+        *,
+        start: int = 0,
+        end: Optional[int] = None,
+        swap: bool = False,
     ) -> None:
         """Write the data contained in ``buffer`` to the state machine. If the buffer is empty, nothing happens.
 
@@ -146,10 +167,69 @@ class StateMachine:
 
         :param ~circuitpython_typing.ReadableBuffer buffer: Write out the data in this buffer
         :param int start: Start of the slice of ``buffer`` to write out: ``buffer[start:end]``
-        :param int end: End of the slice; this index is not included. Defaults to ``len(buffer)``"""
+        :param int end: End of the slice; this index is not included. Defaults to ``len(buffer)``
+        :param bool swap: For 2- and 4-byte elements, swap (reverse) the byte order"""
         ...
+    def background_write(
+        self,
+        once: Optional[ReadableBuffer] = None,
+        *,
+        loop: Optional[ReadableBuffer] = None,
+        swap: bool = False,
+    ) -> None:
+        """Write data to the TX fifo in the background, with optional looping.
+
+        First, if any previous ``once`` or ``loop`` buffer has not been started, this function blocks until they have been started.
+        This means that any ``once`` or ``loop`` buffer will be written at least once.
+        Then the ``once`` and/or ``loop`` buffers are queued. and the function returns.
+        The ``once`` buffer (if specified) will be written just once.
+        Finally, the ``loop`` buffer (if specified) will continue being looped indefinitely.
+
+        Writes to the FIFO will match the input buffer's element size. For example, bytearray elements
+        will perform 8 bit writes to the PIO FIFO. The RP2040's memory bus will duplicate the value into
+        the other byte positions. So, pulling more data in the PIO assembly will read the duplicated values.
+
+        To perform 16 or 32 bits writes into the FIFO use an `array.array` with a type code of the desired
+        size, or use `memoryview.cast` to change the interpretation of an
+        existing buffer.  To send just part of a larger buffer, slice a `memoryview`
+        of it.
+
+        If a buffer is modified while it is being written out, the updated
+        values will be used. However, because of interactions between CPU
+        writes, DMA and the PIO FIFO are complex, it is difficult to predict
+        the result of modifying multiple values. Instead, alternate between
+        a pair of buffers.
+
+        Having both a ``once`` and a ``loop`` parameter is to support a special case in PWM generation
+        where a change in duty cycle requires a special transitional buffer to be used exactly once. Most
+        use cases will probably only use one of ``once`` or ``loop``.
+
+        Having neither ``once`` nor ``loop`` terminates an existing
+        background looping write after exactly a whole loop. This is in contrast to
+        `stop_background_write`, which interrupts an ongoing DMA operation.
+
+        :param ~Optional[circuitpython_typing.ReadableBuffer] once: Data to be written once
+        :param ~Optional[circuitpython_typing.ReadableBuffer] loop: Data to be written repeatedly
+        :param bool swap: For 2- and 4-byte elements, swap (reverse) the byte order
+        """
+        ...
+    def stop_background_write(self) -> None:
+        """Immediately stop a background write, if one is in progress.  Any
+        DMA in progress is halted, but items already in the TX FIFO are not
+        affected."""
+    writing: bool
+    """Returns True if a background write is in progress"""
+    pending: int
+    """Returns the number of pending buffers for background writing.
+
+    If the number is 0, then a `StateMachine.background_write` call will not block."""
     def readinto(
-        self, buffer: WriteableBuffer, *, start: int = 0, end: Optional[int] = None
+        self,
+        buffer: WriteableBuffer,
+        *,
+        start: int = 0,
+        end: Optional[int] = None,
+        swap: bool = False,
     ) -> None:
         """Read into ``buffer``. If the number of bytes to read is 0, nothing happens. The buffer
         includes any data added to the fifo even if it was added before this was called.
@@ -164,7 +244,8 @@ class StateMachine:
 
         :param ~circuitpython_typing.WriteableBuffer buffer: Read data into this buffer
         :param int start: Start of the slice of ``buffer`` to read into: ``buffer[start:end]``
-        :param int end: End of the slice; this index is not included. Defaults to ``len(buffer)``"""
+        :param int end: End of the slice; this index is not included. Defaults to ``len(buffer)``
+        :param bool swap: For 2- and 4-byte elements, swap (reverse) the byte order"""
         ...
     def write_readinto(
         self,
@@ -192,18 +273,25 @@ class StateMachine:
         :param int out_start: Start of the slice of buffer_out to write out: ``buffer_out[out_start:out_end]``
         :param int out_end: End of the slice; this index is not included. Defaults to ``len(buffer_out)``
         :param int in_start: Start of the slice of ``buffer_in`` to read into: ``buffer_in[in_start:in_end]``
-        :param int in_end: End of the slice; this index is not included. Defaults to ``len(buffer_in)``"""
+        :param int in_end: End of the slice; this index is not included. Defaults to ``len(buffer_in)``
+        :param bool swap_out: For 2- and 4-byte elements, swap (reverse) the byte order for the buffer being transmitted (written)
+        :param bool swap_in: For 2- and 4-rx elements, swap (reverse) the byte order for the buffer being received (read)
+        """
         ...
     def clear_rxfifo(self) -> None:
         """Clears any unread bytes in the rxfifo."""
         ...
+    def clear_txstall(self) -> None:
+        """Clears the txstall flag."""
+        ...
     frequency: int
     """The actual state machine frequency. This may not match the frequency requested
     due to internal limitations."""
-
+    txstall: bool
+    """True when the state machine has stalled due to a full TX FIFO since the last
+       `clear_txstall` call."""
     rxstall: bool
     """True when the state machine has stalled due to a full RX FIFO since the last
        `clear_rxfifo` call."""
-
     in_waiting: int
     """The number of words available to readinto"""

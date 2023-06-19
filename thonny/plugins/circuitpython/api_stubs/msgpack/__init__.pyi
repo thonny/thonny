@@ -6,6 +6,9 @@ module msgpack-python.
 
 Not implemented: 64-bit int, uint, float.
 
+For more information about working with msgpack,
+see `the CPython Library Documentation <https://msgpack-python.readthedocs.io/en/latest/?badge=latest>`_.
+
 Example 1::
 
    import msgpack
@@ -96,7 +99,6 @@ class ExtType:
     code: int
     """The type code, in range 0~127."""
     ...
-
     data: bytes
     """Data."""
     ...

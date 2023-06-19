@@ -14,9 +14,12 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
 from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
+    REMOTE_PATH_MARKER,
     InlineCommand,
     TextRange,
     ToplevelResponse,
+    is_local_path,
+    is_remote_path,
     is_same_path,
     normpath_with_actual_case,
     universal_dirname,
@@ -35,7 +38,6 @@ from thonny.ui_utils import (
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]
 
-REMOTE_PATH_MARKER = " :: "
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
 PYTHONLIKE_EXTENSIONS = set()
 
@@ -46,7 +48,6 @@ class EditorCodeViewText(CodeViewText):
     """Allows separate class binding for CodeViewTexts which are inside editors"""
 
     def __init__(self, master=None, cnf={}, **kw):
-
         super().__init__(
             master=master,
             cnf=cnf,
@@ -184,7 +185,6 @@ class Editor(ttk.Frame):
             self._last_known_mtime = os.path.getmtime(self._filename)
 
     def get_long_description(self):
-
         if self._filename is None:
             result = tr("<untitled>")
         else:
@@ -210,15 +210,17 @@ class Editor(ttk.Frame):
                     return False
         except BinaryFileException:
             messagebox.showerror(
-                "Problem", "%s doesn't look like a text file" % filename, master=self
+                tr("Problem"), tr("%s doesn't look like a text file") % (filename,), master=self
             )
             return False
         except SyntaxError as e:
             assert "encoding" in str(e).lower()
             messagebox.showerror(
-                "Problem loading file",
-                "This file seems to have problems with encoding.\n\n"
-                + "Make sure it is in UTF-8 or contains proper encoding hint.",
+                tr("Problem loading file"),
+                tr(
+                    "This file seems to have problems with encoding.\n\n"
+                    "Make sure it is in UTF-8 or contains proper encoding hint."
+                ),
                 master=self,
             )
             return False
@@ -290,10 +292,12 @@ class Editor(ttk.Frame):
 
             if self.notebook.get_editor(save_filename) is not None:
                 messagebox.showerror(
-                    "File is open",
-                    "This file is already open in Thonny.\n\n"
-                    "If you want to save with this name,\n"
-                    "close the existing editor first!",
+                    tr("File is open"),
+                    tr(
+                        "This file is already open in Thonny.\n\n"
+                        "If you want to save with this name,\n"
+                        "close the existing editor first!"
+                    ),
                     master=get_workbench(),
                 )
                 return None
@@ -342,7 +346,9 @@ class Editor(ttk.Frame):
             )
         except PermissionError:
             messagebox.showerror(
-                "Permission Error", "Looks like this file or folder is not writable.", master=self
+                tr("Permission Error"),
+                tr("Looks like this file or folder is not writable."),
+                master=self,
             )
             return False
 
@@ -405,12 +411,12 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("RemoteFilesChanged")
             return True
         else:
-            messagebox.showerror(tr("Could not save"), "Back-end is not ready")
+            messagebox.showerror(tr("Could not save"), tr("Back-end is not ready"))
             return False
 
     def ask_new_path(self, node=None):
         if node is None:
-            node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
+            node = choose_node_for_file_operations(self.winfo_toplevel(), tr("Where to save to?"))
         if not node:
             return None
 
@@ -479,14 +485,16 @@ class Editor(ttk.Frame):
                 "matplotlib",
                 "numpy",
             ]:
-
                 # More proper name analysis will be performed by ProgramNamingAnalyzer
                 if not tk.messagebox.askyesno(
-                    "Potential problem",
-                    "If you name your script '%s', " % base
-                    + "you won't be able to import the library module named '%s'" % mod_name
+                    tr("Potential problem"),
+                    tr(
+                        "If you name your script '%s', "
+                        "you won't be able to import the library module named '%s'"
+                    )
+                    % (base, mod_name)
                     + ".\n\n"
-                    + "Do you still want to use this name for your script?",
+                    + tr("Do you still want to use this name for your script?"),
                     master=self,
                 ):
                     return self.ask_new_local_path()
@@ -634,10 +642,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if sys.platform == "darwin":
             # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
             # widgets disappeared, at least on Aivar's machine.
-            child = self.get_current_child()
-            if child:
+            for child in self.get_all_editors():
                 assert isinstance(child, Editor)
                 child.get_code_view().grid_main_widgets()
+            self.update_idletasks()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -896,7 +904,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         return "break"
 
     def _close_files(self, except_index=None):
-
         for tab_index in reversed(range(len(self.winfo_children()))):
             if except_index is not None and tab_index == except_index:
                 continue
@@ -1043,11 +1050,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             editor = self.get_editor(filename, True)
         except PermissionError:
             logger.exception("Loading " + filename)
-            msg = "Got permission error when trying to load\n" + filename
+            msg = tr("Got permission error when trying to load\n%s") % (filename,)
             if running_on_mac_os() and propose_dialog:
-                msg += "\n\nTry opening it with File => Open."
+                msg += "\n\n" + tr("Try opening it with File => Open.")
 
-            messagebox.showerror("Permission error", msg, master=self)
+            messagebox.showerror(tr("Permission error"), msg, master=self)
             return None
 
         if editor is None:
@@ -1209,14 +1216,6 @@ def get_saved_current_script_filename(force=True):
         filename = editor.save_file()
 
     return filename
-
-
-def is_remote_path(s):
-    return REMOTE_PATH_MARKER in s
-
-
-def is_local_path(s):
-    return not is_remote_path(s)
 
 
 def get_target_dirname_from_editor_filename(s):

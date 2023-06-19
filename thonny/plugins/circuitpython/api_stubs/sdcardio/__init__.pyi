@@ -58,7 +58,6 @@ class SDCard:
 
         :return: None"""
     def readblocks(self, start_block: int, buf: WriteableBuffer) -> None:
-
         """Read one or more blocks from the card
 
         :param int start_block: The block to start reading from
@@ -71,7 +70,6 @@ class SDCard:
         :return: None"""
         ...
     def writeblocks(self, start_block: int, buf: ReadableBuffer) -> None:
-
         """Write one or more blocks to the card
 
         :param int start_block: The block to start writing from

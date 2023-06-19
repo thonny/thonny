@@ -41,16 +41,12 @@ class GNSS:
         ...
     latitude: float
     """Latitude of current position in degrees (float)."""
-
     longitude: float
     """Longitude of current position in degrees (float)."""
-
     altitude: float
     """Altitude of current position in meters (float)."""
-
     timestamp: time.struct_time
     """Time when the position data was updated."""
-
     fix: PositionFix
     """Fix mode."""
 

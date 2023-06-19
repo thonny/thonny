@@ -171,7 +171,10 @@ class CompletionsBox(EditorInfoBox):
         self._check_request_details()
 
     def _check_request_details(self) -> None:
-        assert self.winfo_ismapped()
+        if not self.winfo_ismapped():
+            # can happen, see https://github.com/thonny/thonny/issues/2162
+            return
+
         if (
             self._details_box
             and self._details_box.is_visible()
@@ -376,6 +379,11 @@ class Completer:
         if not get_workbench().get_option("edit.automatic_completions"):
             return False
 
+        # Don't autocomplete in remote shells
+        proxy = get_runner().get_backend_proxy()
+        if isinstance(event.widget, ShellText) and (not proxy or not proxy.has_local_interpreter()):
+            return False
+
         # Don't autocomplete inside comments
         line_prefix = event.widget.get("insert linestart", "insert")
         if "#" in line_prefix:
@@ -509,7 +517,6 @@ def _is_python_name_char(c: str) -> bool:
 
 
 def load_plugin() -> None:
-
     completer = Completer()
 
     def can_complete():

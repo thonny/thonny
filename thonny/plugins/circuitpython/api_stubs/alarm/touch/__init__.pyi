@@ -12,6 +12,8 @@ class TouchAlarm:
 
         :param microcontroller.Pin pin: The pin to monitor. On some ports, the choice of pin
           may be limited due to hardware restrictions, particularly for deep-sleep alarms.
+
+        **Limitations:** Not available on SAMD, nRF, or RP2040.
         """
         ...
     pin: microcontroller.Pin

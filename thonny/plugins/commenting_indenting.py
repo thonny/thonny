@@ -136,7 +136,6 @@ def _cmd_replace_tabs():
 
 
 def load_plugin() -> None:
-
     get_workbench().add_command(
         "indent",
         "edit",

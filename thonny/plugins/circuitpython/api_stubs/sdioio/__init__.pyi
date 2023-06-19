@@ -63,7 +63,6 @@ class SDCard:
 
         :return: The number of 512-byte blocks, as a number"""
     def readblocks(self, start_block: int, buf: WriteableBuffer) -> None:
-
         """Read one or more blocks from the card
 
         :param int start_block: The block to start reading from
@@ -71,22 +70,17 @@ class SDCard:
 
         :return: None"""
     def writeblocks(self, start_block: int, buf: ReadableBuffer) -> None:
-
         """Write one or more blocks to the card
 
         :param int start_block: The block to start writing from
         :param ~circuitpython_typing.ReadableBuffer buf: The buffer to read from.  Length must be multiple of 512.
 
         :return: None"""
-    @property
-    def frequency(self) -> int:
-        """The actual SDIO bus frequency. This may not match the frequency
-        requested due to internal limitations."""
-        ...
-    @property
-    def width(self) -> int:
-        """The actual SDIO bus width, in bits"""
-        ...
+    frequency: int
+    """The actual SDIO bus frequency. This may not match the frequency
+    requested due to internal limitations."""
+    width: int
+    """The actual SDIO bus width, in bits"""
     def deinit(self) -> None:
         """Disable permanently.
 

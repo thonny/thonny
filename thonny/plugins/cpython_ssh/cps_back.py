@@ -6,6 +6,13 @@ import sys
 import threading
 from logging import getLogger
 from threading import Thread
+from typing import Any, Dict
+
+# make sure thonny folder is in sys.path (relevant in dev)
+thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+if thonny_container not in sys.path:
+    sys.path.insert(0, thonny_container)
+
 
 import thonny
 from thonny.backend import (
@@ -16,6 +23,7 @@ from thonny.backend import (
     interrupt_local_process,
 )
 from thonny.common import (
+    PROCESS_ACK,
     CommandToBackend,
     EOFCommand,
     ImmediateCommand,
@@ -28,8 +36,9 @@ logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
-    def __init__(self, host, user, interpreter, cwd):
+    def __init__(self, host, user, interpreter, cwd, main_backend_options: Dict[str, Any]):
         logger.info("Starting mediator for %s @ %s", user, host)
+        self._main_backend_options = main_backend_options
         password = sys.stdin.readline().strip("\r\n")
         SshMixin.__init__(self, host, user, password, interpreter, cwd)
         self._upload_main_backend()
@@ -129,11 +138,16 @@ class SshCPythonBackend(BaseBackend, SshMixin):
         env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
         self._main_backend_is_fresh = True
 
+        cp_launcher_file = (
+            self._get_remote_program_directory()
+            + "/"
+            + "thonny/plugins/cpython_backend/cp_launcher.py"
+        )
         args = [
             self._target_interpreter,
-            "-m",
-            "thonny.plugins.cpython_backend.cp_launcher",
+            cp_launcher_file,
             self._cwd,
+            repr(self._main_backend_options),
         ]
         logger.info("Starting remote process: %r", args)
         return self._create_remote_process(
@@ -194,6 +208,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
 
 if __name__ == "__main__":
     thonny.configure_backend_logging()
+    print(PROCESS_ACK)
     args = ast.literal_eval(sys.argv[1])
     backend = SshCPythonBackend(**args)
     backend.mainloop()

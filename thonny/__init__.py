@@ -143,11 +143,18 @@ def is_portable():
         return abs_location.startswith("/media/") or abs_location.startswith("/mnt/")
 
 
+_THONNY_VERSION = None
+
+
 def get_version():
+    global _THONNY_VERSION
+    if _THONNY_VERSION:
+        return _THONNY_VERSION
     try:
         package_dir = os.path.dirname(sys.modules["thonny"].__file__)
         with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
-            return fp.read().strip()
+            _THONNY_VERSION = fp.read().strip()
+            return _THONNY_VERSION
     except Exception:
         return "0.0.0"
 
@@ -414,7 +421,7 @@ def _get_orig_argv() -> Optional[List[str]]:
 
 def _configure_logging(log_file, console_level=None):
     logFormatter = logging.Formatter(
-        "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
+        "%(asctime)s.%(msecs)03d [%(threadName)s] %(levelname)-7s %(name)s: %(message)s", "%H:%M:%S"
     )
 
     file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")

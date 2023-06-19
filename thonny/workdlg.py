@@ -11,8 +11,14 @@ from typing import Optional
 
 from thonny import tktextext
 from thonny.languages import tr
-from thonny.misc_utils import running_on_windows
-from thonny.ui_utils import CommonDialog, create_action_label, ems_to_pixels, set_text_if_different
+from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows
+from thonny.ui_utils import (
+    CommonDialog,
+    create_action_label,
+    ems_to_pixels,
+    get_style_configuration,
+    set_text_if_different,
+)
 
 logger = getLogger(__name__)
 
@@ -98,10 +104,26 @@ class WorkDialog(CommonDialog):
             row=1, column=2, sticky="we", pady=padding, padx=(0, intpad)
         )
 
+        self._menu_button = ttk.Button(
+            self.action_frame,
+            text=get_menu_char(),
+            command=self.post_action_menu,
+            # style="Toolbutton"
+            width=3,
+        )
+        if self.has_action_menu():
+            self._menu_button.grid(column=3, row=1, pady=padding, padx=(0, intpad))
+
+        if running_on_mac_os():
+            menu_conf = {}
+        else:
+            menu_conf = get_style_configuration("Menu")
+        self._action_menu = tk.Menu(self, tearoff=False, **menu_conf)
+
         self._ok_button = ttk.Button(
             self.action_frame,
             text=self.get_ok_text(),
-            command=self.start_work_and_update_ui,
+            command=self.on_click_ok_button,
             state="disabled",
             default="active",
         )
@@ -117,8 +139,27 @@ class WorkDialog(CommonDialog):
 
         self.action_frame.columnconfigure(2, weight=1)
 
+    def on_click_ok_button(self):
+        self.start_work_and_update_ui()
+
+    def has_action_menu(self) -> bool:
+        return False
+
+    def populate_action_menu(self, action_menu: tk.Menu) -> None:
+        pass
+
+    def post_action_menu(self) -> None:
+        self._action_menu.delete(0, "end")
+        post_x = self._menu_button.winfo_rootx()
+        post_y = self._menu_button.winfo_rooty() + self._menu_button.winfo_height()
+        self.populate_action_menu(self._action_menu)
+        self._action_menu.tk_popup(post_x, post_y)
+
     def get_action_text_max_length(self):
         return 35
+
+    def get_initial_log_line_count(self):
+        return 5
 
     def init_log_frame(self):
         self.log_frame = ttk.Frame(self)
@@ -132,7 +173,7 @@ class WorkDialog(CommonDialog):
             horizontal_scrollbar=False,
             wrap="word",
             borderwidth=1,
-            height=5,
+            height=self.get_initial_log_line_count(),
             width=20,
             font=font,
             read_only=True,
@@ -194,13 +235,22 @@ class WorkDialog(CommonDialog):
 
     def toggle_log_frame(self, event=None):
         if self.log_frame.winfo_ismapped():
-            self.log_frame.grid_forget()
-            self.rowconfigure(2, weight=1)
-            self.rowconfigure(4, weight=0)
+            self.hide_log_frame()
         else:
-            self.log_frame.grid(row=4, column=0, sticky="nsew")
-            self.rowconfigure(2, weight=0)
-            self.rowconfigure(4, weight=1)
+            self.show_log_frame()
+
+    def show_log_frame(self):
+        self.log_frame.grid(row=4, column=0, sticky="nsew")
+        self.rowconfigure(2, weight=0)
+        self.rowconfigure(4, weight=1)
+
+    def hide_log_frame(self):
+        self.log_frame.grid_forget()
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(4, weight=0)
+
+    def clear_log(self) -> None:
+        self.log_text.text.direct_delete("1.0", "end")
 
     def get_ok_text(self):
         return tr("OK")
@@ -256,7 +306,7 @@ class WorkDialog(CommonDialog):
         self._work_events_queue.put(("replace", (text, stream_name)))
         setattr(self, stream_name, getattr(self, stream_name) + text)
 
-    def report_progress(self, value: float, maximum: float) -> None:
+    def report_progress(self, value: Optional[float], maximum: Optional[float]) -> None:
         """Updates progress bar. May be called from another thread."""
         self._work_events_queue.put(("progress", (value, maximum)))
 
@@ -300,26 +350,20 @@ class WorkDialog(CommonDialog):
         elif type == "done":
             self.on_done(args[0])
 
+    def allow_single_success(self) -> bool:
+        return True
+
     def on_done(self, success):
         """NB! Don't call from non-ui thread!"""
         self.success = success
-        if self.success:
-            self._state = "done"
-            self._cancel_button.focus_set()
-            self._cancel_button["default"] = "active"
-            self._ok_button["default"] = "normal"
-        elif self._autostart:
-            # Can't try again if failed with autostart
+        if self.success and self.allow_single_success() or self._autostart:
             self._state = "done"
             self._cancel_button.focus_set()
             self._cancel_button["default"] = "active"
             self._ok_button["default"] = "normal"
         else:
-            # allows trying again when failed
-            self._state = "idle"
-            self._ok_button.focus_set()
-            self._ok_button["default"] = "active"
-            self._cancel_button["default"] = "normal"
+            # allows trying again when failed or wasn't final action
+            self.allow_new_work()
 
         self._progress_bar.stop()
         # need to put to determinate mode, otherwise it looks half done
@@ -327,8 +371,14 @@ class WorkDialog(CommonDialog):
         if self.success and self._autostart and not self.log_frame.winfo_ismapped():
             self.close()
 
-        if not self.success and not self.log_frame.winfo_ismapped():
-            self.toggle_log_frame()
+        if not self.success:
+            self.show_log_frame()
+
+    def allow_new_work(self):
+        self._state = "idle"
+        self._ok_button.focus_set()
+        self._ok_button["default"] = "active"
+        self._cancel_button["default"] = "normal"
 
 
 class SubprocessDialog(WorkDialog):

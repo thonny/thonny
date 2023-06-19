@@ -14,7 +14,6 @@ from thonny.plugins.micropython.mp_front import (
     SshMicroPythonProxy,
     add_micropython_backend,
     list_serial_ports,
-    list_serial_ports_with_descriptions,
 )
 
 
@@ -56,3 +55,5 @@ def load_plugin():
     get_workbench().set_default("SshMicroPython.user", "")
     get_workbench().set_default("SshMicroPython.auth_method", "password")
     get_workbench().set_default("SshMicroPython.make_uploaded_shebang_scripts_executable", True)
+
+    get_workbench().set_default("esptool.show_advanced_options", False)

@@ -43,11 +43,6 @@ def augment_source(source, cmd):
             + """
 
 if "{app_name}" in globals():
-    import os as __temp_os__
-    if "FLASK_ENV" not in __temp_os__.environ:
-        __temp_os__.environ["FLASK_ENV"] = "development"
-    del __temp_os__
-    
     # Conservative options for minimum technical risks.
     # Users who need more control should call run explicitly.
     print(" # Running the app with options chosen by Thonny. See Help for details.")
