@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 
 root = tk.Tk()
@@ -221,7 +222,12 @@ systemWindowBackgroundColor7
 
 """
 
-colors = [color for color in maccolors.splitlines() if color]
+if os.name == "nt":
+    source = wincolors
+else:
+    source = maccolors
+
+colors = [color for color in source.splitlines() if color]
 columns = 3
 
 for i, color in enumerate(colors):
