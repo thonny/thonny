@@ -24,6 +24,7 @@ from thonny.common import (
     normpath_with_actual_case,
     universal_dirname,
 )
+from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
@@ -597,13 +598,13 @@ class Editor(ttk.Frame):
         return path
 
 
-class EditorNotebook(ui_utils.ClosableNotebook):
+class EditorNotebook(CustomNotebook):
     """
     Manages opened files / modules
     """
 
     def __init__(self, master):
-        super().__init__(master, padding=0)
+        super().__init__(master)
 
         get_workbench().set_default("file.reopen_all_files", False)
         get_workbench().set_default("file.open_files", [])
@@ -642,9 +643,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if sys.platform == "darwin":
             # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
             # widgets disappeared, at least on Aivar's machine.
-            for child in self.get_all_editors():
-                assert isinstance(child, Editor)
-                child.get_code_view().grid_main_widgets()
+            # for child in self.get_all_editors():
+            #    assert isinstance(child, Editor)
+            #    child.get_code_view().grid_main_widgets()
             self.update_idletasks()
 
     def _init_commands(self):

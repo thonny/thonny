@@ -18,6 +18,7 @@ from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
+from thonny.custom_notebook import CustomNotebook
 from thonny.languages import get_button_padding, tr
 from thonny.misc_utils import (
     running_on_linux,
@@ -80,6 +81,7 @@ class CommonDialog(tk.Toplevel):
                 ttk.Treeview,
                 tk.Text,
                 ttk.Notebook,
+                CustomNotebook,
                 ttk.Button,
                 tk.Listbox,
             ),
@@ -671,7 +673,7 @@ class ClosableNotebook(ttk.Notebook):
         super().insert(pos, child, **kw)
 
 
-class AutomaticNotebook(ClosableNotebook):
+class AutomaticNotebook(CustomNotebook):
     """
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
@@ -679,10 +681,10 @@ class AutomaticNotebook(ClosableNotebook):
 
     def __init__(self, master, position_key, preferred_size_in_pw=None):
         if get_workbench().in_simple_mode():
-            style = "TNotebook"
+            closable = False
         else:
-            style = "ButtonNotebook.TNotebook"
-        super().__init__(master, style=style, padding=0)
+            closable = True
+        super().__init__(master, closable=closable)
         self.position_key = position_key
 
         # should be in the end, so that it can be detected when
@@ -695,7 +697,7 @@ class AutomaticNotebook(ClosableNotebook):
 
     def insert(self, pos, child, **kw):
         if pos == "auto":
-            for sibling in map(self.nametowidget, self.tabs()):
+            for sibling in [page.content for page in self.pages]:
                 if (
                     not hasattr(sibling, "position_key")
                     or sibling.position_key == None
