@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os.path
+import sys
 import tkinter as tk
 from tkinter import ttk
 from typing import List, Literal, Optional, Union
@@ -8,7 +9,16 @@ from typing import List, Literal, Optional, Union
 from thonny import get_workbench
 from thonny.ui_utils import ems_to_pixels
 
-border_color = "systemWindowBackgroundColor7"
+if sys.platform == "win32":
+    border_color = "system3dLight"
+    frame_background = "systemButtonFace"
+    activeTabBackground = "systemWindow"
+    active_indicator_color = "systemHighlight"
+elif sys.platform == "darwin":
+    activeTabBackground = "systemTextBackgroundColor"
+    frame_background = "systemWindowBackgroundColor"
+    border_color = "systemWindowBackgroundColor7"
+    active_indicator_color = "systemLinkColor"
 
 
 class CustomNotebook(tk.Frame):
@@ -21,7 +31,7 @@ class CustomNotebook(tk.Frame):
         self.tab_row = tk.Frame(self, background=border_color)
         self.tab_row.grid(row=0, column=0, sticky="new")
 
-        self.filler = tk.Frame(self.tab_row, background="systemWindowBackgroundColor")
+        self.filler = tk.Frame(self.tab_row, background=frame_background)
         self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
         self.tab_row.columnconfigure(999, weight=1)
 
@@ -122,17 +132,17 @@ class CustomNotebookTab(tk.Frame):
 
     def update_state(self, active: bool) -> None:
         if active:
-            main_background = "systemTextBackgroundColor"
+            main_background = activeTabBackground
             # indicator_background = "systemTextBackgroundColor"
             # indicator_height = 1
 
             # indicator_background = border_color
             # indicator_height = 1
 
-            indicator_background = "systemLinkColor"
+            indicator_background = active_indicator_color
             indicator_height = ems_to_pixels(0.2)
         else:
-            main_background = "systemWindowBackgroundColor"
+            main_background = frame_background
             indicator_background = border_color
             indicator_height = 1
 
@@ -169,28 +179,35 @@ class TextFrame(tk.Frame):
         self.scrollbar = ttk.Scrollbar(self, orient="vertical")
         self.scrollbar.grid(row=0, column=1, sticky="nsew")
 
-        isdark = int(root.eval(f"tk::unsupported::MacWindowStyle isdark {root}"))
-        # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
-        # Best dynamic alternative is probably systemTextBackgroundColor
-        if isdark:
-            stripe_color = "#2d2e31"
-            print("Dark")
-        else:
-            stripe_color = "#fafafa"
-        stripe = tk.Frame(self, width=1, background=stripe_color)
-        stripe.grid(row=0, column=1, sticky="nse")
-        stripe.tkraise()
+        if sys.platform == "darwin":
+            isdark = int(root.eval(f"tk::unsupported::MacWindowStyle isdark {root}"))
+            # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
+            # Best dynamic alternative is probably systemTextBackgroundColor
+            if isdark:
+                stripe_color = "#2d2e31"
+                print("Dark")
+            else:
+                stripe_color = "#fafafa"
+            stripe = tk.Frame(self, width=1, background=stripe_color)
+            stripe.grid(row=0, column=1, sticky="nse")
+            stripe.tkraise()
 
         self.scrollbar["command"] = self.text.yview
         self.text["yscrollcommand"] = self.scrollbar.set
 
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        import ctypes
+
+        PROCESS_SYSTEM_DPI_AWARE = 1
+        ctypes.OleDLL("shcore").SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE)
+
     root = tk.Tk()
     root.geometry("800x600")
 
     style = ttk.Style()
-    style.theme_use("aqua")
+    # style.theme_use("aqua")
 
     nb = CustomNotebook(root)
 
