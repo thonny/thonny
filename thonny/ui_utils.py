@@ -33,6 +33,58 @@ PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 logger = getLogger(__name__)
 
 
+class AquaToolbutton(tk.Label):
+    def __init__(self, master, command: Callable, image=None, state="normal", **kw):
+        if isinstance(image, (list, tuple)):
+            self.normal_image = image[0]
+            self.disabled_image = image[-1]
+        else:
+            self.normal_image = image
+            self.disabled_image = image
+
+        self.state = state
+
+        if state == "disabled":
+            self.current_image = self.disabled_image
+        else:
+            self.current_image = self.normal_image
+
+        super().__init__(master, image=self.current_image, **kw)
+        self.command = command
+        self.bind("<1>", self.on_click, True)
+        self.bind("<Enter>", self.on_enter, True)
+        self.bind("<Leave>", self.on_leave, True)
+
+    def on_click(self, event):
+        if self.state == "normal":
+            self.command()
+
+    def on_enter(self, event):
+        self.configure(relief="raised")
+
+    def on_leave(self, event):
+        self.configure(relief="flat")
+
+    def configure(self, cnf={}, state=None, command=None, **kw):
+        if command:
+            self.command = command
+
+        if "state" in cnf and not state:
+            state = cnf.get("state")
+        elif not state:
+            state = "normal"
+
+        self.state = state
+        if self.state == "disabled":
+            self.current_image = self.disabled_image
+        else:
+            self.current_image = self.normal_image
+
+        # Frame should be always state=normal as it won't display the image if "disabled"
+        # at least on mac with Tk 8.6.13
+        super().configure(cnf, image=self.current_image, state="normal", **kw)
+
+
 class CommonDialog(tk.Toplevel):
     def __init__(self, master=None, skip_tk_dialog_attributes=False, **kw):
         assert master
@@ -2555,6 +2607,41 @@ class AdvancedLabel(ttk.Label):
                 import webbrowser
 
                 webbrowser.open(self._url)
+
+
+def create_toolbutton(
+    master,
+    command=None,
+    text=None,
+    image=None,
+    compound=None,
+    state="normal",
+    pad=None,
+    width=None,
+) -> tk.Widget:
+    if "aqua" in get_workbench()._current_theme_name.lower():
+        return AquaToolbutton(
+            master,
+            command=command,
+            text=text,
+            image=image,
+            compound=compound,
+            state=state,
+            pad=pad,
+            width=width,
+        )
+    else:
+        return ttk.Button(
+            master,
+            style="Toolbutton",
+            command=command,
+            text=text,
+            image=image,
+            compound=compound,
+            state=state,
+            pad=pad,
+            width=width,
+        )
 
 
 def open_with_default_app(path):

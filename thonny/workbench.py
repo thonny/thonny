@@ -50,6 +50,7 @@ from thonny.ui_utils import (
     AutomaticPanedWindow,
     caps_lock_is_on,
     create_action_label,
+    create_toolbutton,
     create_tooltip,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -1645,6 +1646,11 @@ class Workbench(tk.Tk):
     def get_image(
         self, filename: str, tk_name: Optional[str] = None, disabled=False
     ) -> tk.PhotoImage:
+        if tk_name is None:
+            tk_name = filename.replace(".", "_").replace("\\", "_").replace("/", "_")
+            if disabled:
+                tk_name += "_disabled"
+
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
 
@@ -2012,10 +2018,9 @@ class Workbench(tk.Tk):
         else:
             image_spec = image
 
-        button = ttk.Button(
+        button = create_toolbutton(
             group_frame,
             image=image_spec,
-            style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
             compound="top" if self.in_simple_mode() else None,
