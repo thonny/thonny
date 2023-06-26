@@ -641,11 +641,7 @@ class EditorNotebook(CustomNotebook):
 
     def on_tab_changed(self, *args):
         if sys.platform == "darwin":
-            # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
-            # widgets disappeared, at least on Aivar's machine.
-            # for child in self.get_all_editors():
-            #    assert isinstance(child, Editor)
-            #    child.get_code_view().grid_main_widgets()
+            # Required to avoid incorrect sizing of parent panes in macOS
             self.update_idletasks()
 
     def _init_commands(self):

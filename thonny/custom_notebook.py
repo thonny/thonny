@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-import os.path
 import sys
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
-from typing import List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 from thonny.languages import tr
-from thonny.misc_utils import running_on_mac_os
 
 logger = getLogger(__name__)
 
+# """
 if sys.platform == "win32":
     border_color = "system3dLight"
     frame_background = "systemButtonFace"
@@ -22,10 +21,12 @@ elif sys.platform == "darwin":
     frame_background = "systemWindowBackgroundColor"
     border_color = "systemWindowBackgroundColor7"
     active_indicator_color = "systemLinkColor"
+# """
 
 
 class CustomNotebook(tk.Frame):
     def __init__(self, master: Union[tk.Widget, tk.Toplevel, tk.Tk], closable: bool = True):
+        base_style_conf = _get_style_configuration(".")
         super().__init__(master, background=border_color)
         self.closable = closable
         self.rowconfigure(1, weight=1)
@@ -35,7 +36,7 @@ class CustomNotebook(tk.Frame):
         self.tab_row = tk.Frame(self, background=border_color)
         self.tab_row.grid(row=0, column=0, sticky="new")
 
-        self.filler = tk.Frame(self.tab_row, background=frame_background)
+        self.filler = tk.Frame(self.tab_row, background=base_style_conf["background"])
         self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
         self.tab_row.columnconfigure(999, weight=1)
 
@@ -51,7 +52,7 @@ class CustomNotebook(tk.Frame):
         if pos == "end":
             self.pages.append(page)
         else:
-            self.pages.insert(pos, page)
+            self.pages.insert(self.index(pos), page)
 
         self._rearrange_tabs()
         self.select_tab(page.tab)
@@ -79,7 +80,9 @@ class CustomNotebook(tk.Frame):
 
         new_page.content.grid_propagate(False)
         new_page.content.grid(row=1, column=0, sticky="nsew", padx=(1, 1), pady=(0, 1))
-        new_page.content.tkraise()
+        if self.current_page:
+            self.current_page.content.grid_remove()
+            # new_page.content.tkraise(self.current_page.content)
 
         new_page.tab.update_state(True)
         if self.current_page:
@@ -95,6 +98,9 @@ class CustomNotebook(tk.Frame):
                 return
 
         raise ValueError(f"Unknown tab {tab}")
+
+    def select_page(self, page: CustomNotebookPage) -> None:
+        self.select_by_index(self.pages.index(page))
 
     def index(self, tab_id: Optional[str, tk.Widget]) -> int:
         if tab_id == "end":
@@ -123,18 +129,22 @@ class CustomNotebook(tk.Frame):
         else:
             raise ValueError(f"Can't find {child}")
 
-        self.pages[i].content.grid_forget()
+        if len(self.pages) > i + 1:
+            self.select_page(self.pages[i + 1])  # prefer right neighbor
+        elif i > 0:
+            self.select_page(self.pages[i - 1])  # left neighbor
+
+        child = self.pages[i].content
+        child.grid_forget()
         self.pages[i].tab.grid_forget()
+
         del self.pages[i]
-
-        if len(self.pages) == 0:
-            self.current_page = None
-        elif len(self.pages) > i:
-            self.current_page = self.pages[i]  # right neighbor of the deleted page
-        else:
-            self.current_page = self.pages[-1]  # last remaining page
-
         self._rearrange_tabs()
+
+        if hasattr(child, "close"):
+            child.close()
+        else:
+            child.destroy()
 
     def get_child_by_index(self, index: int) -> tk.Widget:
         return self.pages[index].content
@@ -171,9 +181,6 @@ class CustomNotebookTab(tk.Frame):
     active_close_image = None
 
     def __init__(self, notebook: CustomNotebook, title: str, closable: bool):
-        from thonny import get_workbench
-        from thonny.ui_utils import ems_to_pixels, get_style_configuration
-
         super().__init__(notebook.tab_row, borderwidth=0)
         self.notebook = notebook
         self.title = title
@@ -183,24 +190,24 @@ class CustomNotebookTab(tk.Frame):
         self.label.grid(
             row=0,
             column=0,
-            padx=(ems_to_pixels(0.3), ems_to_pixels(0.1)),
+            padx=(_ems_to_pixels(0.3), _ems_to_pixels(0.1)),
             sticky="nsw",
-            pady=(0, ems_to_pixels(0.1)),
+            pady=(0, _ems_to_pixels(0.1)),
         )
         self.bind("<1>", self.on_click, True)
         self.label.bind("<1>", self.on_click, True)
 
         if closable:
             if not CustomNotebookTab.close_image:
-                CustomNotebookTab.close_image = get_workbench().get_image("tab-close")
-                CustomNotebookTab.active_close_image = get_workbench().get_image("tab-close-active")
+                CustomNotebookTab.close_image = _get_image("tab-close")
+                CustomNotebookTab.active_close_image = _get_image("tab-close-active")
             self.button = tk.Label(self, image=CustomNotebookTab.close_image)
-            self.button.grid(row=0, column=1, padx=(0, ems_to_pixels(0.1)))
+            self.button.grid(row=0, column=1, padx=(0, _ems_to_pixels(0.1)))
             self.button.bind("<1>", self.on_button_click, True)
             self.button.bind("<Enter>", self.on_button_enter, True)
             self.button.bind("<Leave>", self.on_button_leave, True)
 
-            if running_on_mac_os():
+            if sys.platform == "darwin":
                 self.label.bind("<ButtonPress-2>", self._right_btn_press, True)
                 self.label.bind("<Control-Button-1>", self._right_btn_press, True)
                 self.label.bind("<ButtonPress-3>", self._middle_btn_press, True)
@@ -214,7 +221,9 @@ class CustomNotebookTab(tk.Frame):
         self.indicator = tk.Frame(self, height=1, background=border_color)
         self.indicator.grid(row=1, column=0, columnspan=2, sticky="sew")
 
-        self.menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
+        self.menu = tk.Menu(
+            self.winfo_toplevel(), tearoff=False, **_get_style_configuration("Menu")
+        )
         self.menu.add_command(label=tr("Close"), command=self._close_tab)
         self.menu.add_command(label=tr("Close others"), command=self._close_other_tabs)
         self.menu.add_command(label=tr("Close all"), command=self._close_all_tabs)
@@ -250,8 +259,6 @@ class CustomNotebookTab(tk.Frame):
         self.button.configure(image=CustomNotebookTab.close_image)
 
     def update_state(self, active: bool) -> None:
-        from thonny.ui_utils import ems_to_pixels
-
         if active:
             main_background = activeTabBackground
             # indicator_background = "systemTextBackgroundColor"
@@ -261,7 +268,7 @@ class CustomNotebookTab(tk.Frame):
             # indicator_height = 1
 
             indicator_background = active_indicator_color
-            indicator_height = ems_to_pixels(0.2)
+            indicator_height = _ems_to_pixels(0.2)
         else:
             main_background = frame_background
             indicator_background = border_color
@@ -280,6 +287,24 @@ class CustomNotebookPage:
         self.content = content
 
 
+def _get_image(name: str) -> tk.PhotoImage:
+    from thonny import get_workbench
+
+    return get_workbench().get_image(name)
+
+
+def _ems_to_pixels(x: float) -> int:
+    from thonny.ui_utils import ems_to_pixels
+
+    return ems_to_pixels(x)
+
+
+def _get_style_configuration(name: str) -> Dict:
+    from thonny.ui_utils import get_style_configuration
+
+    return get_style_configuration(name)
+
+
 class TextFrame(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -293,6 +318,7 @@ class TextFrame(tk.Frame):
         self.scrollbar.grid(row=0, column=1, sticky="nsew")
 
         if sys.platform == "darwin":
+            root = self.winfo_toplevel()
             isdark = int(root.eval(f"tk::unsupported::MacWindowStyle isdark {root}"))
             # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
             # Best dynamic alternative is probably systemTextBackgroundColor
@@ -309,6 +335,7 @@ class TextFrame(tk.Frame):
         self.text["yscrollcommand"] = self.scrollbar.set
 
 
+"""
 if __name__ == "__main__":
     if sys.platform == "win32":
         import ctypes
@@ -334,3 +361,4 @@ if __name__ == "__main__":
     root.columnconfigure(0, weight=1)
 
     root.mainloop()
+"""
