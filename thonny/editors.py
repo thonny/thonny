@@ -640,9 +640,8 @@ class EditorNotebook(CustomNotebook):
         self.bind("<<NotebookTabChanged>>", self.on_tab_changed, True)
 
     def on_tab_changed(self, *args):
-        if sys.platform == "darwin":
-            # Required to avoid incorrect sizing of parent panes in macOS
-            self.update_idletasks()
+        # Required to avoid incorrect sizing of parent panes
+        self.update_idletasks()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
