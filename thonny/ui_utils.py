@@ -33,8 +33,18 @@ PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 logger = getLogger(__name__)
 
 
-class AquaToolbutton(tk.Label):
-    def __init__(self, master, command: Callable, image=None, state="normal", **kw):
+class CustomToolbutton(tk.Frame):
+    def __init__(
+        self,
+        master,
+        command: Callable,
+        image=None,
+        state="normal",
+        text=None,
+        compound=None,
+        width=None,
+        pad=None,
+    ):
         if isinstance(image, (list, tuple)):
             self.normal_image = image[0]
             self.disabled_image = image[-1]
@@ -43,15 +53,42 @@ class AquaToolbutton(tk.Label):
             self.disabled_image = image
 
         self.state = state
+        style_conf = get_style_configuration("CustomToolbutton")
+        self.normal_background = style_conf["background"]
+        self.hover_background = style_conf["activebackground"]
 
         if state == "disabled":
             self.current_image = self.disabled_image
         else:
             self.current_image = self.normal_image
 
-        super().__init__(master, image=self.current_image, **kw)
+        super().__init__(master, background=self.normal_background)
+        self.label = tk.Label(
+            self,
+            image=self.current_image,
+            text=text,
+            compound=compound,
+            width=None if width is None else ems_to_pixels(width - 1),
+            background=self.normal_background,
+        )
+
+        # TODO: introduce padx and pady arguments
+        if isinstance(pad, int):
+            padx = pad
+            pady = pad
+        elif isinstance(pad, (tuple, list)):
+            assert len(pad) == 2
+            # TODO: how to use it?
+            padx = pad
+            pady = 0
+        else:
+            padx = None
+            pady = None
+
+        self.label.grid(row=0, column=0, padx=padx, pady=pady, sticky="nsew")
         self.command = command
         self.bind("<1>", self.on_click, True)
+        self.label.bind("<1>", self.on_click, True)
         self.bind("<Enter>", self.on_enter, True)
         self.bind("<Leave>", self.on_leave, True)
 
@@ -60,12 +97,15 @@ class AquaToolbutton(tk.Label):
             self.command()
 
     def on_enter(self, event):
-        self.configure(relief="raised")
+        if self.state == "normal":
+            super().configure(background=self.hover_background)
+            self.label.configure(background=self.hover_background)
 
     def on_leave(self, event):
-        self.configure(relief="flat")
+        super().configure(background=self.normal_background)
+        self.label.configure(background=self.normal_background)
 
-    def configure(self, cnf={}, state=None, command=None, **kw):
+    def configure(self, cnf={}, state=None, image=None, command=None, **kw):
         if command:
             self.command = command
 
@@ -75,14 +115,16 @@ class AquaToolbutton(tk.Label):
             state = "normal"
 
         self.state = state
-        if self.state == "disabled":
+        if image:
+            self.current_image = image
+        elif self.state == "disabled":
             self.current_image = self.disabled_image
         else:
             self.current_image = self.normal_image
 
-        # Frame should be always state=normal as it won't display the image if "disabled"
+        # tkinter.Frame should be always state=normal as it won't display the image if "disabled"
         # at least on mac with Tk 8.6.13
-        super().configure(cnf, image=self.current_image, state="normal", **kw)
+        self.label.configure(cnf, image=self.current_image, state="normal", **kw)
 
 
 class CommonDialog(tk.Toplevel):
@@ -1234,9 +1276,12 @@ class ToolTip:
         self.text = text
         if self.tipwindow or not self.text:
             return
+
+        # x = self.widget.winfo_pointerx() + ems_to_pixels(0)
+        # y = self.widget.winfo_pointery() + ems_to_pixels(0.8)
         x, y, _, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 27
-        y = y + cy + self.widget.winfo_rooty() + self.widget.winfo_height() + 2
+        x = x + self.widget.winfo_rootx()
+        y = y + self.widget.winfo_rooty() + self.widget.winfo_height() + ems_to_pixels(0.2)
         self.tipwindow = tw = tk.Toplevel(self.widget)
         if running_on_mac_os():
             try:
@@ -1289,8 +1334,8 @@ def create_tooltip(widget, text, **kw):
     def leave(event):
         toolTip.hidetip()
 
-    widget.bind("<Enter>", enter)
-    widget.bind("<Leave>", leave)
+    widget.bind("<Enter>", enter, True)
+    widget.bind("<Leave>", leave, True)
 
 
 class NoteBox(CommonDialog):
@@ -2619,16 +2664,16 @@ def create_toolbutton(
     pad=None,
     width=None,
 ) -> tk.Widget:
-    if "aqua" in get_workbench()._current_theme_name.lower():
-        return AquaToolbutton(
+    if True:
+        return CustomToolbutton(
             master,
             command=command,
             text=text,
             image=image,
             compound=compound,
             state=state,
-            pad=pad,
             width=width,
+            pad=pad,
         )
     else:
         return ttk.Button(

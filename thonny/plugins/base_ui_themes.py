@@ -213,6 +213,7 @@ def clam() -> BasicUiThemeSettings:
                 "darkcolor": [("pressed", darker)],
             },
         },
+        "CustomToolbutton": {"configure": {"background": frame, "activebackground": darker}},
         "TCheckbutton": {
             "configure": {
                 "indicatorbackground": "#ffffff",
@@ -615,6 +616,12 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 }
             },
             "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
+            "CustomToolbutton": {
+                "configure": {
+                    "background": "systemWindowBackgroundColor",
+                    "activebackground": "systemWindowBackgroundColor5",
+                }
+            },
         },
     ]
 

@@ -2024,12 +2024,12 @@ class Workbench(tk.Tk):
             state=tk.NORMAL,
             text=caption,
             compound="top" if self.in_simple_mode() else None,
-            pad=(10, 0) if self.in_simple_mode() else None,
+            pad=ems_to_pixels(0.5) if self.in_simple_mode() else ems_to_pixels(0.25),
             width=button_width,
         )
 
         def toolbar_handler(*args):
-            handler(*args)
+            handler()
             self._update_toolbar()
             if self.focus_get() == button:
                 # previously selected widget would be better candidate, but this is
