@@ -332,7 +332,7 @@ def load_plugin() -> None:
             high_foreground="#eeeeee",
             low_foreground="#666666",
         ),
-        dark_images,
+        images=dark_images,
     )
 
     dark_tip_background = ("#b8c28d",)
@@ -350,7 +350,7 @@ def load_plugin() -> None:
             high_foreground="#eeeeee",
             low_foreground="#5a725b",
         ),
-        dark_images,
+        images=dark_images,
     )
 
     get_workbench().add_ui_theme(
@@ -366,7 +366,7 @@ def load_plugin() -> None:
             high_foreground="#eeeeee",
             low_foreground="#5a5c72",
         ),
-        dark_images,
+        images=dark_images,
     )
 
     get_workbench().add_ui_theme(

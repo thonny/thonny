@@ -56,6 +56,7 @@ from thonny.ui_utils import (
     get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
+    os_is_in_dark_mode,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
@@ -918,9 +919,16 @@ class Workbench(tk.Tk):
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
-        self._ui_themes = (
-            {}
-        )  # type: Dict[str, Tuple[Optional[str], FlexibleUiThemeSettings, Dict[str, str]]] # value is (parent, settings, images)
+        # value is (parent, settings, overrides, images)
+        self._ui_themes: Dict[
+            str,
+            Tuple[
+                Optional[str],
+                FlexibleUiThemeSettings,
+                Optional[FlexibleUiThemeSettings],
+                Dict[str, str],
+            ],
+        ] = {}
         self._syntax_themes = (
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
@@ -1242,12 +1250,13 @@ class Workbench(tk.Tk):
         name: str,
         parent: Union[str, None],
         settings: FlexibleUiThemeSettings,
+        dark_mode_overrides: Optional[FlexibleUiThemeSettings] = None,
         images: Dict[str, str] = {},
     ) -> None:
         if name in self._ui_themes:
             warn(tr("Overwriting theme '%s'") % name)
 
-        self._ui_themes[name] = (parent, settings, images)
+        self._ui_themes[name] = (parent, settings, dark_mode_overrides, images)
 
     def add_syntax_theme(
         self, name: str, parent: Optional[str], settings: FlexibleSyntaxThemeSettings
@@ -1288,8 +1297,10 @@ class Workbench(tk.Tk):
         total_images = {}  # type: Dict[str, str]
         temp_name = name
         while True:
-            parent, settings, images = self._ui_themes[temp_name]
+            parent, settings, overrides, images = self._ui_themes[temp_name]
             total_settings.insert(0, settings)
+            if overrides and os_is_in_dark_mode():
+                total_settings.append(overrides)
             for img_name in images:
                 total_images.setdefault(img_name, images[img_name])
 
@@ -1414,7 +1425,7 @@ class Workbench(tk.Tk):
             if "dark" in name.lower():
                 return True
             try:
-                name, _, _ = self._ui_themes[name]
+                name, _, _, _ = self._ui_themes[name]
             except KeyError:
                 return False
 

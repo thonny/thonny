@@ -329,5 +329,7 @@ def load_plugin():
     for image in images:
         theme_image_map[image] = os.path.join(res_dir, images[image])
 
-    get_workbench().add_ui_theme("Raspberry Pi", "Enhanced Clam", pix, theme_image_map)
-    get_workbench().add_ui_theme("Raspberry Pi Dark", "Clean Dark", pix_dark, theme_image_map)
+    get_workbench().add_ui_theme("Raspberry Pi", "Enhanced Clam", pix, images=theme_image_map)
+    get_workbench().add_ui_theme(
+        "Raspberry Pi Dark", "Clean Dark", pix_dark, images=theme_image_map
+    )

@@ -709,6 +709,14 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
     ]
 
 
+def enhanced_aqua_dark_overrides():
+    return [
+        {
+            "Url.TLabel": {"configure": {"foreground": "#6699FF"}},
+        }
+    ]
+
+
 def load_plugin() -> None:
     from tkinter import ttk
 
@@ -730,11 +738,13 @@ def load_plugin() -> None:
         "Enhanced Clam",
         "clam",
         enhanced_clam,
-        {"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
+        images={"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
     )
 
     if "vista" in original_themes:
         get_workbench().add_ui_theme("Windows", "vista", windows)
 
     if "aqua" in original_themes:
-        get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
+        get_workbench().add_ui_theme(
+            "Kind of Aqua", "aqua", enhanced_aqua, enhanced_aqua_dark_overrides
+        )
