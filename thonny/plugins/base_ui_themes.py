@@ -565,6 +565,7 @@ def windows() -> CompoundUiThemeSettings:
             },
             "ViewToolbar.TFrame": {"configure": {"background": "SystemWindow"}},
             "ViewToolbar.Toolbutton": {"configure": {"background": "SystemWindow"}},
+            "ViewToolbar.CustomToolbutton": {"configure": {"background": "SystemWindow"}},
             "ViewTab.TLabel": {
                 "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
             },
@@ -585,7 +586,7 @@ def windows() -> CompoundUiThemeSettings:
             "CustomToolbutton": {
                 "configure": {
                     "background": "systemButtonFace",
-                    "activebackground": "systemScrollbar",
+                    "activebackground": "#dadada",
                 }
             },
             "CustomNotebook": {

@@ -38,6 +38,7 @@ class CustomToolbutton(tk.Frame):
         self,
         master,
         command: Callable = None,
+        style: Optional[str] = None,
         image=None,
         state="normal",
         text=None,
@@ -53,7 +54,10 @@ class CustomToolbutton(tk.Frame):
             self.disabled_image = image
 
         self.state = state
+        self.style = style
         style_conf = get_style_configuration("CustomToolbutton")
+        if self.style:
+            style_conf |= get_style_configuration(self.style)
         self.normal_background = style_conf["background"]
         self.hover_background = style_conf["activebackground"]
 
@@ -88,7 +92,7 @@ class CustomToolbutton(tk.Frame):
         if text and not image:
             # text only button content needs adjustment
             pady = pady or 0
-            pady = (pady, pady + ems_to_pixels(0.3))
+            pady = (pady, pady + ems_to_pixels(0.23))
 
         self.label.grid(row=0, column=0, padx=padx, pady=pady, sticky="nsew")
         self.command = command
