@@ -37,6 +37,10 @@ class ConfigurationDialog(CommonDialog):
             padx=self.get_medium_padding(),
             pady=(self.get_medium_padding(), 0),
         )
+        self._notebook.enable_traversal()
+        if get_workbench().is_using_aqua_based_theme():
+            # otherwise the new page content won't load immediately
+            self._notebook.bind("<<NotebookTabChanged>>", lambda e: self.update_idletasks(), True)
 
         self._ok_button = ttk.Button(main_frame, text=tr("OK"), command=self._ok, default="active")
         self._cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)

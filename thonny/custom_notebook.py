@@ -10,33 +10,21 @@ from thonny.languages import tr
 
 logger = getLogger(__name__)
 
-# """
-if sys.platform == "win32":
-    border_color = "system3dLight"
-    frame_background = "systemButtonFace"
-    activeTabBackground = "systemWindow"
-    active_indicator_color = "systemHighlight"
-elif sys.platform == "darwin":
-    activeTabBackground = "systemTextBackgroundColor"
-    frame_background = "systemWindowBackgroundColor"
-    border_color = "systemWindowBackgroundColor7"
-    active_indicator_color = "systemLinkColor"
-# """
-
 
 class CustomNotebook(tk.Frame):
     def __init__(self, master: Union[tk.Widget, tk.Toplevel, tk.Tk], closable: bool = True):
-        base_style_conf = _get_style_configuration(".")
-        super().__init__(master, background=border_color)
+        self.base_style_conf = _get_style_configuration(".")
+        self.style_conf = _get_style_configuration("CustomNotebook")
+        super().__init__(master, background=self.style_conf["bordercolor"])
         self.closable = closable
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
-        # Can't use ttk.Frame, because can't change it's color in aqua
-        self.tab_row = tk.Frame(self, background=border_color)
+        # Can't use ttk.Frame, because can't change its color in aqua
+        self.tab_row = tk.Frame(self, background=self.style_conf["bordercolor"])
         self.tab_row.grid(row=0, column=0, sticky="new")
 
-        self.filler = tk.Frame(self.tab_row, background=base_style_conf["background"])
+        self.filler = tk.Frame(self.tab_row, background=self.base_style_conf["background"])
         self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
         self.tab_row.columnconfigure(999, weight=1)
 
@@ -129,10 +117,12 @@ class CustomNotebook(tk.Frame):
         else:
             raise ValueError(f"Can't find {child}")
 
-        if len(self.pages) > i + 1:
-            self.select_page(self.pages[i + 1])  # prefer right neighbor
-        elif i > 0:
-            self.select_page(self.pages[i - 1])  # left neighbor
+        if page == self.current_page:
+            # Choose new active page
+            if len(self.pages) > i + 1:
+                self.select_page(self.pages[i + 1])  # prefer right neighbor
+            elif i > 0:
+                self.select_page(self.pages[i - 1])  # left neighbor
 
         child = self.pages[i].content
         child.grid_forget()
@@ -160,13 +150,20 @@ class CustomNotebook(tk.Frame):
         else:
             super().focus_set()
 
-    def close_tab(self, tab: CustomNotebookTab) -> None:
+    def get_page_by_tab(self, tab: CustomNotebookTab) -> CustomNotebookPage:
         for page in self.pages:
             if page.tab == tab:
-                self.forget(page.content)
-                return
+                return page
+
+        raise ValueError(f"Could not find tab {tab}")
+
+    def close_tab(self, index_or_tab: Union[int, CustomNotebookTab]) -> None:
+        if isinstance(index_or_tab, int):
+            page = self.pages[index_or_tab]
         else:
-            raise ValueError(f"Can't find {tab}")
+            page = self.get_page_by_tab(index_or_tab)
+
+        self.forget(page.content)
 
     def close_tabs(self, except_tab: Optional[CustomNotebookTab] = None):
         for page in reversed(self.pages):
@@ -182,11 +179,16 @@ class CustomNotebookTab(tk.Frame):
 
     def __init__(self, notebook: CustomNotebook, title: str, closable: bool):
         super().__init__(notebook.tab_row, borderwidth=0)
+
+        self.base_style = _get_style_configuration(".")
+        self.tab_style = _get_style_configuration("CustomNotebook.Tab")
+        self.notebook_style_conf = _get_style_configuration("CustomNotebook")
+
         self.notebook = notebook
         self.title = title
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.label = tk.Label(self, text=title)
+        self.label = tk.Label(self, text=title, foreground=self.base_style["foreground"])
         self.label.grid(
             row=0,
             column=0,
@@ -218,7 +220,9 @@ class CustomNotebookTab(tk.Frame):
         else:
             self.button = None
 
-        self.indicator = tk.Frame(self, height=1, background=border_color)
+        self.indicator = tk.Frame(
+            self, height=1, background=self.notebook_style_conf["bordercolor"]
+        )
         self.indicator.grid(row=1, column=0, columnspan=2, sticky="sew")
 
         self.menu = tk.Menu(
@@ -260,18 +264,18 @@ class CustomNotebookTab(tk.Frame):
 
     def update_state(self, active: bool) -> None:
         if active:
-            main_background = activeTabBackground
+            main_background = self.tab_style["activebackground"]
             # indicator_background = "systemTextBackgroundColor"
             # indicator_height = 1
 
             # indicator_background = border_color
             # indicator_height = 1
 
-            indicator_background = active_indicator_color
+            indicator_background = self.tab_style["indicatorbackground"]
             indicator_height = _ems_to_pixels(0.2)
         else:
-            main_background = frame_background
-            indicator_background = border_color
+            main_background = self.tab_style["background"]
+            indicator_background = self.notebook_style_conf["bordercolor"]
             indicator_height = 1
 
         self.configure(background=main_background)

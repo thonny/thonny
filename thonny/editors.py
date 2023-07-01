@@ -6,7 +6,7 @@ import tkinter as tk
 import traceback
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Optional
+from typing import Optional, Union
 
 from _tkinter import TclError
 
@@ -24,7 +24,7 @@ from thonny.common import (
     normpath_with_actual_case,
     universal_dirname,
 )
-from thonny.custom_notebook import CustomNotebook
+from thonny.custom_notebook import CustomNotebook, CustomNotebookTab
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
@@ -912,11 +912,14 @@ class EditorNotebook(CustomNotebook):
     def _cmd_close_file(self):
         self.close_tab(self.index(self.select()))
 
-    def close_tab(self, index):
-        editor = self.get_child_by_index(index)
+    def close_tab(self, index_or_tab: Union[int, CustomNotebookTab]):
+        if isinstance(index_or_tab, int):
+            page = self.pages[index_or_tab]
+        else:
+            page = self.get_page_by_tab(index_or_tab)
 
-        if editor:
-            self.close_editor(editor)
+        assert isinstance(page.content, Editor)
+        self.close_editor(page.content)
 
     def close_editor(self, editor, force=False):
         if not force and not self.check_allow_closing(editor):

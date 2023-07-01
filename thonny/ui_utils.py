@@ -564,7 +564,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
 
     def _update_appearance(self, event=None):
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", ems_to_pixels(0.6)))
-        self.configure(background=lookup_style_option("TPanedWindow", "background"))
+        self.configure(background=lookup_style_option(".", "background"))
 
 
 class ClosableNotebook(ttk.Notebook):
@@ -855,6 +855,12 @@ class TreeFrame(ttk.Frame):
             self.vert_scrollbar.grid(
                 row=0, column=1, sticky=tk.NSEW, rowspan=2 if show_statusbar else 1
             )
+            scrollbar_stripe = check_create_aqua_scrollbar_stripe(self)
+            if scrollbar_stripe is not None:
+                scrollbar_stripe.grid(
+                    row=0, column=1, sticky="nse", rowspan=2 if show_statusbar else 1
+                )
+                scrollbar_stripe.tkraise()
 
         self.tree = ttk.Treeview(
             self,
@@ -865,6 +871,10 @@ class TreeFrame(ttk.Frame):
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
+        header_stripe = check_create_aqua_header_stripe(self)
+        if header_stripe is not None:
+            header_stripe.grid(row=0, column=0, sticky="new")
+            header_stripe.tkraise()
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -2687,6 +2697,45 @@ def create_toolbutton(
             pad=pad,
             width=width,
         )
+
+
+def os_is_in_dark_mode() -> Optional[bool]:
+    if running_on_mac_os():
+        try:
+            return bool(
+                int(
+                    tk._default_root.eval(
+                        f"tk::unsupported::MacWindowStyle isdark {tk._default_root}"
+                    )
+                )
+            )
+        except Exception:
+            logger.exception("Could not query for dark mode")
+            return None
+
+    return None
+
+
+def check_create_aqua_scrollbar_stripe(master) -> Optional[tk.Frame]:
+    if get_workbench().is_using_aqua_based_theme():
+        # Want to cover a gray stripe on the right edge of the scrollbar.
+        # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
+        # Best dynamic alternative is probably systemTextBackgroundColor
+        if os_is_in_dark_mode():
+            stripe_color = "#2d2e31"
+        else:
+            stripe_color = "#fafafa"
+        return tk.Frame(master, width=1, background=stripe_color)
+    else:
+        return None
+
+
+def check_create_aqua_header_stripe(master) -> Optional[tk.Frame]:
+    if get_workbench().is_using_aqua_based_theme():
+        # Want to cover a gray 2px stripe on the top edge of the Treeview header.
+        return tk.Frame(master, height=2, background="systemWindowBackgroundColor")
+    else:
+        return None
 
 
 def open_with_default_app(path):

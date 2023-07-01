@@ -2604,6 +2604,9 @@ class Workbench(tk.Tk):
     def iter_load_hooks(self):
         return iter(self._load_hooks)
 
+    def is_using_aqua_based_theme(self) -> bool:
+        return "aqua" in self._current_theme_name.lower()
+
 
 class WorkbenchEvent(Record):
     def __init__(self, sequence: str, **kwargs) -> None:

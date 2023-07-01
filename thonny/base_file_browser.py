@@ -17,6 +17,7 @@ from thonny.ui_utils import (
     CommonDialog,
     ask_one_from_choices,
     ask_string,
+    check_create_aqua_scrollbar_stripe,
     create_string_var,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -47,6 +48,10 @@ class BaseFileBrowser(ttk.Frame):
             self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
         )
         self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
+        stripe = check_create_aqua_scrollbar_stripe(self)
+        if stripe is not None:
+            stripe.grid(row=0, column=1, sticky="nse", rowspan=3)
+            stripe.tkraise()
 
         tktextext.fixwordbreaks(tk._default_root)
         self.building_breadcrumbs = False
