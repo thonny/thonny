@@ -272,7 +272,7 @@ class CustomNotebookTab(tk.Frame):
             # indicator_height = 1
 
             indicator_background = self.tab_style["indicatorbackground"]
-            indicator_height = _ems_to_pixels(0.2)
+            indicator_height = self.tab_style.get("indicatorheight", _ems_to_pixels(0.2))
         else:
             main_background = self.tab_style["background"]
             indicator_background = self.notebook_style_conf["bordercolor"]

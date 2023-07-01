@@ -584,20 +584,22 @@ def windows() -> CompoundUiThemeSettings:
             "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
             "CustomToolbutton": {
                 "configure": {
-                    "background": "systemWindowBackgroundColor",
-                    "activebackground": "systemWindowBackgroundColor5",
+                    "background": "systemButtonFace",
+                    "activebackground": "systemScrollbar",
                 }
             },
             "CustomNotebook": {
                 "configure": {
-                    "bordercolor": "systemWindowBackgroundColor7",
+                    "bordercolor": "system3dLight",
                 }
             },
             "CustomNotebook.Tab": {
                 "configure": {
                     "background": "systemButtonFace",
                     "activebackground": "systemWindow",
-                    "indicatorbackground": "systemHighlight",
+                    #                    "indicatorbackground": "systemHighlight",
+                    "indicatorbackground": "system3dLight",
+                    "indicatorheight": 1,
                 }
             },
         },
