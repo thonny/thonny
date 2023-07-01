@@ -37,7 +37,7 @@ class CustomToolbutton(tk.Frame):
     def __init__(
         self,
         master,
-        command: Callable,
+        command: Callable = None,
         image=None,
         state="normal",
         text=None,
@@ -85,12 +85,23 @@ class CustomToolbutton(tk.Frame):
             padx = None
             pady = None
 
+        if text and not image:
+            # text only button content needs adjustment
+            pady = pady or 0
+            pady = (pady, pady + ems_to_pixels(0.3))
+
         self.label.grid(row=0, column=0, padx=padx, pady=pady, sticky="nsew")
         self.command = command
         self.bind("<1>", self.on_click, True)
         self.label.bind("<1>", self.on_click, True)
         self.bind("<Enter>", self.on_enter, True)
         self.bind("<Leave>", self.on_leave, True)
+
+    def cget(self, key: str) -> Any:
+        if key in ["text", "image"]:
+            return self.label.cget(key)
+        else:
+            return super().cget(key)
 
     def on_click(self, event):
         if self.state == "normal":
@@ -2662,41 +2673,6 @@ class AdvancedLabel(ttk.Label):
                 import webbrowser
 
                 webbrowser.open(self._url)
-
-
-def create_toolbutton(
-    master,
-    command=None,
-    text=None,
-    image=None,
-    compound=None,
-    state="normal",
-    pad=None,
-    width=None,
-) -> tk.Widget:
-    if True:
-        return CustomToolbutton(
-            master,
-            command=command,
-            text=text,
-            image=image,
-            compound=compound,
-            state=state,
-            width=width,
-            pad=pad,
-        )
-    else:
-        return ttk.Button(
-            master,
-            style="Toolbutton",
-            command=command,
-            text=text,
-            image=image,
-            compound=compound,
-            state=state,
-            pad=pad,
-            width=width,
-        )
 
 
 def os_is_in_dark_mode() -> Optional[bool]:

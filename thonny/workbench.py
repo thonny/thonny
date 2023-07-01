@@ -48,9 +48,9 @@ from thonny.shell import ShellView
 from thonny.ui_utils import (
     AutomaticNotebook,
     AutomaticPanedWindow,
+    CustomToolbutton,
     caps_lock_is_on,
     create_action_label,
-    create_toolbutton,
     create_tooltip,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -819,7 +819,7 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button.
-        self._backend_button = ttk.Button(self._statusbar, text=get_menu_char(), style="Toolbutton")
+        self._backend_button = CustomToolbutton(self._statusbar, text=get_menu_char())
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -2029,7 +2029,7 @@ class Workbench(tk.Tk):
         else:
             image_spec = image
 
-        button = create_toolbutton(
+        button = CustomToolbutton(
             group_frame,
             image=image_spec,
             state=tk.NORMAL,

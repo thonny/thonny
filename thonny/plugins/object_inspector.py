@@ -11,7 +11,7 @@ from thonny.languages import tr
 from thonny.memory import MemoryFrame
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import ems_to_pixels
+from thonny.ui_utils import CustomToolbutton, ems_to_pixels
 
 logger = logging.getLogger(__name__)
 
@@ -93,12 +93,12 @@ class ObjectInspector(ttk.Frame):
         create_tab(6, tr("Attributes"), self.attributes_page)
 
         def create_navigation_link(col, image_filename, action, tooltip, padx=0):
-            button = ttk.Button(
+            button = CustomToolbutton(
                 toolbar,
                 # command=handler,
                 image=get_workbench().get_image(image_filename),
-                style="ViewToolbar.Toolbutton",  # TODO: does this cause problems in some Macs?
                 state=tk.NORMAL,
+                pad=ems_to_pixels(0.2),
             )
             ui_utils.create_tooltip(button, tooltip)
 

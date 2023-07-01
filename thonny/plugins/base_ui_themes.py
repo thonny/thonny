@@ -671,8 +671,9 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         # _paned_window_settings(),
         _menu_settings(),
         {
+            "Url.TLabel": {"configure": {"foreground": "#003399"}},
             "ViewToolbar.TFrame": {
-                "configure": {"background": "systemWindowBackgroundColor1"}
+                "configure": {"background": "systemWindowBackgroundColor"}
             },  # TODO:
             "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor1"}},
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
@@ -690,12 +691,12 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             "CustomToolbutton": {
                 "configure": {
                     "background": "systemWindowBackgroundColor",
-                    "activebackground": "systemWindowBackgroundColor5",
+                    "activebackground": "systemWindowBackgroundColor3",
                 }
             },
             "CustomNotebook": {
                 "configure": {
-                    "bordercolor": "systemWindowBackgroundColor7",
+                    "bordercolor": "systemWindowBackgroundColor5",
                 }
             },
             "CustomNotebook.Tab": {
