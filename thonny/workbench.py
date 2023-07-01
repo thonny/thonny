@@ -50,6 +50,7 @@ from thonny.ui_utils import (
     AutomaticPanedWindow,
     caps_lock_is_on,
     create_action_label,
+    create_toolbutton,
     create_tooltip,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -1645,6 +1646,11 @@ class Workbench(tk.Tk):
     def get_image(
         self, filename: str, tk_name: Optional[str] = None, disabled=False
     ) -> tk.PhotoImage:
+        if tk_name is None:
+            tk_name = filename.replace(".", "_").replace("\\", "_").replace("/", "_")
+            if disabled:
+                tk_name += "_disabled"
+
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
 
@@ -2012,19 +2018,18 @@ class Workbench(tk.Tk):
         else:
             image_spec = image
 
-        button = ttk.Button(
+        button = create_toolbutton(
             group_frame,
             image=image_spec,
-            style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
             compound="top" if self.in_simple_mode() else None,
-            pad=(10, 0) if self.in_simple_mode() else None,
+            pad=ems_to_pixels(0.5) if self.in_simple_mode() else ems_to_pixels(0.25),
             width=button_width,
         )
 
         def toolbar_handler(*args):
-            handler(*args)
+            handler()
             self._update_toolbar()
             if self.focus_get() == button:
                 # previously selected widget would be better candidate, but this is
@@ -2598,6 +2603,9 @@ class Workbench(tk.Tk):
 
     def iter_load_hooks(self):
         return iter(self._load_hooks)
+
+    def is_using_aqua_based_theme(self) -> bool:
+        return "aqua" in self._current_theme_name.lower()
 
 
 class WorkbenchEvent(Record):

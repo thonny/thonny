@@ -825,8 +825,12 @@ class TextFrame(ttk.Frame):
             )
             self._vbar["command"] = self._vertical_scroll
             self.text["yscrollcommand"] = self._vertical_scrollbar_update
+            from thonny.ui_utils import check_create_aqua_scrollbar_stripe
+
+            self._vbar_stripe = check_create_aqua_scrollbar_stripe(self)
         else:
             self._vbar = None
+            self._vbar_stripe = None
 
         if horizontal_scrollbar:
             self._hbar = horizontal_scrollbar_class(
@@ -853,6 +857,9 @@ class TextFrame(ttk.Frame):
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         if self._vbar:
             self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+            if self._vbar_stripe:
+                self._vbar_stripe.grid(row=0, column=2, sticky="nse")
+                self._vbar_stripe.tkraise()
         if self._hbar:
             self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=3)
 
