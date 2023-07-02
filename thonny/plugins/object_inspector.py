@@ -95,7 +95,7 @@ class ObjectInspector(ttk.Frame):
         def create_navigation_link(col, image_filename, action, tooltip, padx=0):
             button = CustomToolbutton(
                 toolbar,
-                # command=handler,
+                command=action,
                 style="ViewToolbar.CustomToolbutton",
                 image=get_workbench().get_image(image_filename),
                 state=tk.NORMAL,
@@ -104,7 +104,6 @@ class ObjectInspector(ttk.Frame):
             ui_utils.create_tooltip(button, tooltip)
 
             button.grid(row=0, column=col, sticky=tk.NE, padx=padx, pady=4)
-            button.bind("<Button-1>", action)
             return button
 
         def configure(event):
@@ -155,14 +154,14 @@ class ObjectInspector(ttk.Frame):
     def _create_attributes_page(self):
         self.attributes_page = AttributesFrame(self)
 
-    def navigate_back(self, event):
+    def navigate_back(self):
         if len(self.back_links) == 0:
             return
 
         self.forward_links.append(self.object_id)
         self._show_object_by_id(self.back_links.pop(), True)
 
-    def navigate_forward(self, event):
+    def navigate_forward(self):
         if len(self.forward_links) == 0:
             return
 
