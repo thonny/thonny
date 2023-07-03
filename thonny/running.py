@@ -712,6 +712,7 @@ class Runner:
         """Recreate (or replace) backend proxy / backend process."""
         was_running = self.is_running()
         self.destroy_backend()
+        self._last_accepted_backend_command = None
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError(
