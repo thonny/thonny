@@ -1290,11 +1290,12 @@ class ToolTip:
     """Taken from http://www.voidspace.org.uk/python/weblog/arch_d7_2006_07_01.shtml"""
 
     def __init__(self, widget, options):
-        self.widget = widget
+        self.widget: tk.Widget = widget
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
         self.options = options
+        self.focus_out_bind_ref = None
 
     def showtip(self, text):
         "Display text in tooltip window"
@@ -1330,15 +1331,17 @@ class ToolTip:
 
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
-        # get_workbench().bind("WindowFocusOut", self.hidetip, True)
+        self.focus_out_bind_ref = self.widget.winfo_toplevel().bind(
+            "<FocusOut>", self.hidetip, True
+        )
 
     def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
+        if self.tipwindow:
+            self.widget.unbind("<FocusOut>", self.focus_out_bind_ref)
         if tw:
             tw.destroy()
-
-        # get_workbench().unbind("WindowFocusOut", self.hidetip)
 
 
 def create_tooltip(widget, text, **kw):
