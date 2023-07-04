@@ -48,6 +48,7 @@ from thonny.shell import ShellView
 from thonny.ui_utils import (
     AutomaticNotebook,
     AutomaticPanedWindow,
+    CustomToolbutton,
     caps_lock_is_on,
     create_action_label,
     create_tooltip,
@@ -55,6 +56,7 @@ from thonny.ui_utils import (
     get_hyperlink_cursor,
     get_style_configuration,
     lookup_style_option,
+    os_is_in_dark_mode,
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
@@ -817,7 +819,7 @@ class Workbench(tk.Tk):
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
         # Set up the button.
-        self._backend_button = ttk.Button(self._statusbar, text=get_menu_char(), style="Toolbutton")
+        self._backend_button = CustomToolbutton(self._statusbar, text=get_menu_char())
 
         self._backend_button.grid(row=1, column=3, sticky="nes")
         self._backend_button.configure(command=self._post_backend_menu)
@@ -917,9 +919,16 @@ class Workbench(tk.Tk):
 
     def _init_theming(self) -> None:
         self._style = ttk.Style()
-        self._ui_themes = (
-            {}
-        )  # type: Dict[str, Tuple[Optional[str], FlexibleUiThemeSettings, Dict[str, str]]] # value is (parent, settings, images)
+        # value is (parent, settings, overrides, images)
+        self._ui_themes: Dict[
+            str,
+            Tuple[
+                Optional[str],
+                FlexibleUiThemeSettings,
+                Optional[FlexibleUiThemeSettings],
+                Dict[str, str],
+            ],
+        ] = {}
         self._syntax_themes = (
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
@@ -1241,12 +1250,13 @@ class Workbench(tk.Tk):
         name: str,
         parent: Union[str, None],
         settings: FlexibleUiThemeSettings,
+        dark_mode_overrides: Optional[FlexibleUiThemeSettings] = None,
         images: Dict[str, str] = {},
     ) -> None:
         if name in self._ui_themes:
             warn(tr("Overwriting theme '%s'") % name)
 
-        self._ui_themes[name] = (parent, settings, images)
+        self._ui_themes[name] = (parent, settings, dark_mode_overrides, images)
 
     def add_syntax_theme(
         self, name: str, parent: Optional[str], settings: FlexibleSyntaxThemeSettings
@@ -1287,8 +1297,10 @@ class Workbench(tk.Tk):
         total_images = {}  # type: Dict[str, str]
         temp_name = name
         while True:
-            parent, settings, images = self._ui_themes[temp_name]
+            parent, settings, overrides, images = self._ui_themes[temp_name]
             total_settings.insert(0, settings)
+            if overrides and os_is_in_dark_mode():
+                total_settings.append(overrides)
             for img_name in images:
                 total_images.setdefault(img_name, images[img_name])
 
@@ -1413,7 +1425,7 @@ class Workbench(tk.Tk):
             if "dark" in name.lower():
                 return True
             try:
-                name, _, _ = self._ui_themes[name]
+                name, _, _, _ = self._ui_themes[name]
             except KeyError:
                 return False
 
@@ -1645,6 +1657,11 @@ class Workbench(tk.Tk):
     def get_image(
         self, filename: str, tk_name: Optional[str] = None, disabled=False
     ) -> tk.PhotoImage:
+        if tk_name is None:
+            tk_name = filename.replace(".", "_").replace("\\", "_").replace("/", "_")
+            if disabled:
+                tk_name += "_disabled"
+
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
 
@@ -2012,19 +2029,18 @@ class Workbench(tk.Tk):
         else:
             image_spec = image
 
-        button = ttk.Button(
+        button = CustomToolbutton(
             group_frame,
             image=image_spec,
-            style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
             compound="top" if self.in_simple_mode() else None,
-            pad=(10, 0) if self.in_simple_mode() else None,
+            pad=ems_to_pixels(0.5) if self.in_simple_mode() else ems_to_pixels(0.25),
             width=button_width,
         )
 
         def toolbar_handler(*args):
-            handler(*args)
+            handler()
             self._update_toolbar()
             if self.focus_get() == button:
                 # previously selected widget would be better candidate, but this is
@@ -2598,6 +2614,9 @@ class Workbench(tk.Tk):
 
     def iter_load_hooks(self):
         return iter(self._load_hooks)
+
+    def is_using_aqua_based_theme(self) -> bool:
+        return "aqua" in self._current_theme_name.lower()
 
 
 class WorkbenchEvent(Record):

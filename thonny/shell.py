@@ -21,6 +21,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
 )
+from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
@@ -159,7 +160,7 @@ class ShellView(tk.PanedWindow):
             return
 
         container = cast(ttk.Frame, getattr(self, "home_widget"))
-        notebook = cast(ttk.Notebook, container.master)
+        notebook = cast(CustomNotebook, container.master)
 
         # Should update tab text only if the tab is present
         for tab in notebook.winfo_children():

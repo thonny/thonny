@@ -6,7 +6,7 @@ import tkinter as tk
 import traceback
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Optional
+from typing import Optional, Union
 
 from _tkinter import TclError
 
@@ -24,6 +24,7 @@ from thonny.common import (
     normpath_with_actual_case,
     universal_dirname,
 )
+from thonny.custom_notebook import CustomNotebook, CustomNotebookTab
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
@@ -597,13 +598,13 @@ class Editor(ttk.Frame):
         return path
 
 
-class EditorNotebook(ui_utils.ClosableNotebook):
+class EditorNotebook(CustomNotebook):
     """
     Manages opened files / modules
     """
 
     def __init__(self, master):
-        super().__init__(master, padding=0)
+        super().__init__(master)
 
         get_workbench().set_default("file.reopen_all_files", False)
         get_workbench().set_default("file.open_files", [])
@@ -639,13 +640,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.bind("<<NotebookTabChanged>>", self.on_tab_changed, True)
 
     def on_tab_changed(self, *args):
-        if sys.platform == "darwin":
-            # Since Tk 8.6.11, after closing an editor, the previous editor re-appeared with
-            # widgets disappeared, at least on Aivar's machine.
-            for child in self.get_all_editors():
-                assert isinstance(child, Editor)
-                child.get_code_view().grid_main_widgets()
-            self.update_idletasks()
+        # Required to avoid incorrect sizing of parent panes
+        self.update_idletasks()
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -916,11 +912,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_close_file(self):
         self.close_tab(self.index(self.select()))
 
-    def close_tab(self, index):
-        editor = self.get_child_by_index(index)
+    def close_tab(self, index_or_tab: Union[int, CustomNotebookTab]):
+        if isinstance(index_or_tab, int):
+            page = self.pages[index_or_tab]
+        else:
+            page = self.get_page_by_tab(index_or_tab)
 
-        if editor:
-            self.close_editor(editor)
+        assert isinstance(page.content, Editor)
+        self.close_editor(page.content)
 
     def close_editor(self, editor, force=False):
         if not force and not self.check_allow_closing(editor):
