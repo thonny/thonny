@@ -565,6 +565,7 @@ def windows() -> CompoundUiThemeSettings:
             },
             "ViewToolbar.TFrame": {"configure": {"background": "SystemWindow"}},
             "ViewToolbar.Toolbutton": {"configure": {"background": "SystemWindow"}},
+            "ViewToolbar.CustomToolbutton": {"configure": {"background": "SystemWindow"}},
             "ViewTab.TLabel": {
                 "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
             },
@@ -585,7 +586,7 @@ def windows() -> CompoundUiThemeSettings:
             "CustomToolbutton": {
                 "configure": {
                     "background": "systemButtonFace",
-                    "activebackground": "systemScrollbar",
+                    "activebackground": "#dadada",
                 }
             },
             "CustomNotebook": {
@@ -671,8 +672,9 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         # _paned_window_settings(),
         _menu_settings(),
         {
+            "Url.TLabel": {"configure": {"foreground": "#003399"}},
             "ViewToolbar.TFrame": {
-                "configure": {"background": "systemWindowBackgroundColor1"}
+                "configure": {"background": "systemWindowBackgroundColor"}
             },  # TODO:
             "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor1"}},
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
@@ -690,12 +692,12 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             "CustomToolbutton": {
                 "configure": {
                     "background": "systemWindowBackgroundColor",
-                    "activebackground": "systemWindowBackgroundColor5",
+                    "activebackground": "systemWindowBackgroundColor3",
                 }
             },
             "CustomNotebook": {
                 "configure": {
-                    "bordercolor": "systemWindowBackgroundColor7",
+                    "bordercolor": "systemWindowBackgroundColor5",
                 }
             },
             "CustomNotebook.Tab": {
@@ -706,6 +708,14 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 }
             },
         },
+    ]
+
+
+def enhanced_aqua_dark_overrides():
+    return [
+        {
+            "Url.TLabel": {"configure": {"foreground": "#6699FF"}},
+        }
     ]
 
 
@@ -730,11 +740,13 @@ def load_plugin() -> None:
         "Enhanced Clam",
         "clam",
         enhanced_clam,
-        {"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
+        images={"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
     )
 
     if "vista" in original_themes:
         get_workbench().add_ui_theme("Windows", "vista", windows)
 
     if "aqua" in original_themes:
-        get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
+        get_workbench().add_ui_theme(
+            "Kind of Aqua", "aqua", enhanced_aqua, enhanced_aqua_dark_overrides
+        )

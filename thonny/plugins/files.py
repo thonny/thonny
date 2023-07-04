@@ -341,8 +341,11 @@ class FileBrowserContextHandler(object):
 
 class VirtualEnvContextHandler(FileBrowserContextHandler):
     def _get_venv_path(self):
-        CFGFILE = "pyvenv.cfg"
         path = self.get_selected_path()
+        if not path:
+            return None
+
+        CFGFILE = "pyvenv.cfg"
         fnam = self.get_selected_name()
         try:
             if os.path.exists(path):
@@ -353,8 +356,11 @@ class VirtualEnvContextHandler(FileBrowserContextHandler):
                 else:
                     if fnam == CFGFILE:
                         return os.path.dirname(path)
-        except Exception as ex:
-            logger.error("_get_venv_path", ex)
+        except Exception:
+            import traceback
+
+            traceback.print_stack()
+            logger.exception("_get_venv_path")
 
     def check_for_venv(self):
         return self._get_venv_path() is not None
