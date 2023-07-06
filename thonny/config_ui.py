@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
@@ -38,7 +39,7 @@ class ConfigurationDialog(CommonDialog):
             pady=(self.get_medium_padding(), 0),
         )
         self._notebook.enable_traversal()
-        if get_workbench().is_using_aqua_based_theme():
+        if sys.platform == "darwin":
             # otherwise the new page content won't load immediately
             self._notebook.bind("<<NotebookTabChanged>>", lambda e: self.update_idletasks(), True)
 
