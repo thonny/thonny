@@ -22,7 +22,7 @@ termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
 f.close()
 """
 
-s = Serial(baudrate=115200, exclusive=False)
+s = Serial(baudrate=115200, exclusive=True)
 s.port = port
 s.dtr = True
 s.rts = True
