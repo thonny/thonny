@@ -33,6 +33,9 @@ class SerialConnection(MicroPythonConnection):
             # but in some cases it messes up communication.
             # At the same time, in some cases it is required
             # https://github.com/thonny/thonny/issues/1462
+            # More information:
+            #   https://github.com/npat-efault/picocom/blob/master/lowerrts.md
+            #   https://github.com/micropython/micropython/pull/11076
             if dtr is not None:
                 logger.debug("Setting DTR to %s", dtr)
                 self._serial.dtr = dtr
