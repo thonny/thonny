@@ -688,12 +688,7 @@ class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
 
 class LocalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
-        exe = get_workbench().get_option("LocalMicroPython.executable")
-        if os.path.isabs(exe):
-            self._target_executable = exe
-        else:
-            self._target_executable = shutil.which(exe)
-
+        self._target_executable = get_workbench().get_option("LocalMicroPython.executable")
         super().__init__(clean)
 
     def get_target_executable(self) -> Optional[str]:
