@@ -3,6 +3,7 @@ import threading
 from logging import DEBUG, getLogger
 from queue import Queue
 
+from ...common import execute_with_frontend_sys_path
 from .connection import MicroPythonConnection
 
 logger = getLogger(__name__)
@@ -20,14 +21,7 @@ class WebReplConnection(MicroPythonConnection):
         self.num_bytes_received = num_bytes_received
         super().__init__()
 
-        try:
-            import websockets  # @UnusedImport
-        except:
-            print(
-                "Can't import `websockets`. You can install it via 'Tools => Manage plug-ins'.",
-                file=sys.stderr,
-            )
-            sys.exit(1)
+        execute_with_frontend_sys_path(self._try_load_websockets)
         self._url = url
         self._password = password
         self._write_responses = Queue()
@@ -43,6 +37,17 @@ class WebReplConnection(MicroPythonConnection):
         res = self._connection_result.get()
         if res != "OK":
             raise res
+
+    def _try_load_websockets(self):
+        try:
+            import websockets
+        except ImportError:
+            logger.error("Could not import websockets")
+            print(
+                "Can't import `websockets`. You can install it via 'Tools => Manage plug-ins'.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     def _wrap_ws_main(self):
         import asyncio
