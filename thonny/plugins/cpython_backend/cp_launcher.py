@@ -17,10 +17,14 @@ if __name__ == "__main__":
     import os.path
     import sys
 
-    # make sure thonny folder is in sys.path (relevant in dev)
+    # make sure thonny folder is in sys.path during startup
     thonny_container = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     if thonny_container not in sys.path:
+        # We're running with non-thonny interpreter or env
         sys.path.insert(0, thonny_container)
+        using_temp_augmented_sys_path = True
+    else:
+        using_temp_augmented_sys_path = False
 
     if sys.platform == "darwin":
         try:
@@ -49,7 +53,17 @@ if __name__ == "__main__":
     thonny.configure_backend_logging()
     print(PROCESS_ACK)
 
+    if using_temp_augmented_sys_path:
+        # Don't make thonny container available for user programs.
+        # NB! Need to do it before constructing the backend as it would clean the main scope and the flag would be gone.
+        from logging import getLogger
+
+        assert sys.path[0] == thonny_container
+        getLogger(__name__).info("Removing temporary %r from sys.path", thonny_container)
+        del sys.path[0]
+
     target_cwd = sys.argv[1]
     options = ast.literal_eval(sys.argv[2])
     report_time("Before constructing backend")
+    # Don't introduce new variables after constructing the backend, as it cleaned the main scope
     MainCPythonBackend(target_cwd, options).mainloop()
