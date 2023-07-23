@@ -139,7 +139,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
-    ["0.0.2"],
+    ["0.0.3", "0.0.2"],
     badger_variants,
 )
 
