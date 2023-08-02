@@ -18,6 +18,7 @@ from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
+from thonny.custom_notebook import CustomNotebook
 from thonny.languages import get_button_padding, tr
 from thonny.misc_utils import (
     running_on_linux,
@@ -30,6 +31,115 @@ from thonny.tktextext import TweakableText
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 
 logger = getLogger(__name__)
+
+
+class CustomToolbutton(tk.Frame):
+    def __init__(
+        self,
+        master,
+        command: Callable = None,
+        style: Optional[str] = None,
+        image=None,
+        state="normal",
+        text=None,
+        compound=None,
+        width=None,
+        pad=None,
+    ):
+        if isinstance(image, (list, tuple)):
+            self.normal_image = image[0]
+            self.disabled_image = image[-1]
+        else:
+            self.normal_image = image
+            self.disabled_image = image
+
+        self.state = state
+        self.style = style
+        style_conf = get_style_configuration("CustomToolbutton")
+        if self.style:
+            style_conf |= get_style_configuration(self.style)
+        self.normal_background = style_conf["background"]
+        self.hover_background = style_conf["activebackground"]
+
+        if state == "disabled":
+            self.current_image = self.disabled_image
+        else:
+            self.current_image = self.normal_image
+
+        super().__init__(master, background=self.normal_background)
+        self.label = tk.Label(
+            self,
+            image=self.current_image,
+            text=text,
+            compound=compound,
+            width=None if width is None else ems_to_pixels(width - 1),
+            background=self.normal_background,
+        )
+
+        # TODO: introduce padx and pady arguments
+        if isinstance(pad, int):
+            padx = pad
+            pady = pad
+        elif isinstance(pad, (tuple, list)):
+            assert len(pad) == 2
+            # TODO: how to use it?
+            padx = pad
+            pady = 0
+        else:
+            padx = None
+            pady = None
+
+        if text and not image:
+            # text only button content needs adjustment
+            pady = pady or 0
+            pady = (pady, pady + ems_to_pixels(0.23))
+
+        self.label.grid(row=0, column=0, padx=padx, pady=pady, sticky="nsew")
+        self.command = command
+        self.bind("<1>", self.on_click, True)
+        self.label.bind("<1>", self.on_click, True)
+        self.bind("<Enter>", self.on_enter, True)
+        self.bind("<Leave>", self.on_leave, True)
+
+    def cget(self, key: str) -> Any:
+        if key in ["text", "image"]:
+            return self.label.cget(key)
+        else:
+            return super().cget(key)
+
+    def on_click(self, event):
+        if self.state == "normal":
+            self.command()
+
+    def on_enter(self, event):
+        if self.state == "normal":
+            super().configure(background=self.hover_background)
+            self.label.configure(background=self.hover_background)
+
+    def on_leave(self, event):
+        super().configure(background=self.normal_background)
+        self.label.configure(background=self.normal_background)
+
+    def configure(self, cnf={}, state=None, image=None, command=None, **kw):
+        if command:
+            self.command = command
+
+        if "state" in cnf and not state:
+            state = cnf.get("state")
+        elif not state:
+            state = "normal"
+
+        self.state = state
+        if image:
+            self.current_image = image
+        elif self.state == "disabled":
+            self.current_image = self.disabled_image
+        else:
+            self.current_image = self.normal_image
+
+        # tkinter.Frame should be always state=normal as it won't display the image if "disabled"
+        # at least on mac with Tk 8.6.13
+        self.label.configure(cnf, image=self.current_image, state="normal", **kw)
 
 
 class CommonDialog(tk.Toplevel):
@@ -80,6 +190,7 @@ class CommonDialog(tk.Toplevel):
                 ttk.Treeview,
                 tk.Text,
                 ttk.Notebook,
+                CustomNotebook,
                 ttk.Button,
                 tk.Listbox,
             ),
@@ -468,7 +579,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
 
     def _update_appearance(self, event=None):
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", ems_to_pixels(0.6)))
-        self.configure(background=lookup_style_option("TPanedWindow", "background"))
+        self.configure(background=lookup_style_option(".", "background"))
 
 
 class ClosableNotebook(ttk.Notebook):
@@ -671,7 +782,7 @@ class ClosableNotebook(ttk.Notebook):
         super().insert(pos, child, **kw)
 
 
-class AutomaticNotebook(ClosableNotebook):
+class AutomaticNotebook(CustomNotebook):
     """
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
@@ -679,10 +790,10 @@ class AutomaticNotebook(ClosableNotebook):
 
     def __init__(self, master, position_key, preferred_size_in_pw=None):
         if get_workbench().in_simple_mode():
-            style = "TNotebook"
+            closable = False
         else:
-            style = "ButtonNotebook.TNotebook"
-        super().__init__(master, style=style, padding=0)
+            closable = True
+        super().__init__(master, closable=closable)
         self.position_key = position_key
 
         # should be in the end, so that it can be detected when
@@ -695,7 +806,7 @@ class AutomaticNotebook(ClosableNotebook):
 
     def insert(self, pos, child, **kw):
         if pos == "auto":
-            for sibling in map(self.nametowidget, self.tabs()):
+            for sibling in [page.content for page in self.pages]:
                 if (
                     not hasattr(sibling, "position_key")
                     or sibling.position_key == None
@@ -759,6 +870,12 @@ class TreeFrame(ttk.Frame):
             self.vert_scrollbar.grid(
                 row=0, column=1, sticky=tk.NSEW, rowspan=2 if show_statusbar else 1
             )
+            scrollbar_stripe = check_create_aqua_scrollbar_stripe(self)
+            if scrollbar_stripe is not None:
+                scrollbar_stripe.grid(
+                    row=0, column=1, sticky="nse", rowspan=2 if show_statusbar else 1
+                )
+                scrollbar_stripe.tkraise()
 
         self.tree = ttk.Treeview(
             self,
@@ -769,6 +886,10 @@ class TreeFrame(ttk.Frame):
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
+        header_stripe = check_create_aqua_header_stripe(self)
+        if header_stripe is not None:
+            header_stripe.grid(row=0, column=0, sticky="new")
+            header_stripe.tkraise()
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -1169,20 +1290,24 @@ class ToolTip:
     """Taken from http://www.voidspace.org.uk/python/weblog/arch_d7_2006_07_01.shtml"""
 
     def __init__(self, widget, options):
-        self.widget = widget
+        self.widget: tk.Widget = widget
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
         self.options = options
+        self.focus_out_bind_ref = None
 
     def showtip(self, text):
         "Display text in tooltip window"
         self.text = text
         if self.tipwindow or not self.text:
             return
+
+        # x = self.widget.winfo_pointerx() + ems_to_pixels(0)
+        # y = self.widget.winfo_pointery() + ems_to_pixels(0.8)
         x, y, _, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 27
-        y = y + cy + self.widget.winfo_rooty() + self.widget.winfo_height() + 2
+        x = x + self.widget.winfo_rootx()
+        y = y + self.widget.winfo_rooty() + self.widget.winfo_height() + ems_to_pixels(0.2)
         self.tipwindow = tw = tk.Toplevel(self.widget)
         if running_on_mac_os():
             try:
@@ -1206,15 +1331,17 @@ class ToolTip:
 
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
-        # get_workbench().bind("WindowFocusOut", self.hidetip, True)
+        self.focus_out_bind_ref = self.widget.winfo_toplevel().bind(
+            "<FocusOut>", self.hidetip, True
+        )
 
     def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
+        if self.tipwindow:
+            self.widget.unbind("<FocusOut>", self.focus_out_bind_ref)
         if tw:
             tw.destroy()
-
-        # get_workbench().unbind("WindowFocusOut", self.hidetip)
 
 
 def create_tooltip(widget, text, **kw):
@@ -1235,8 +1362,8 @@ def create_tooltip(widget, text, **kw):
     def leave(event):
         toolTip.hidetip()
 
-    widget.bind("<Enter>", enter)
-    widget.bind("<Leave>", leave)
+    widget.bind("<Enter>", enter, True)
+    widget.bind("<Leave>", leave, True)
 
 
 class NoteBox(CommonDialog):
@@ -2553,6 +2680,45 @@ class AdvancedLabel(ttk.Label):
                 import webbrowser
 
                 webbrowser.open(self._url)
+
+
+def os_is_in_dark_mode() -> Optional[bool]:
+    if running_on_mac_os():
+        try:
+            return bool(
+                int(
+                    tk._default_root.eval(
+                        f"tk::unsupported::MacWindowStyle isdark {tk._default_root}"
+                    )
+                )
+            )
+        except Exception:
+            logger.exception("Could not query for dark mode")
+            return None
+
+    return None
+
+
+def check_create_aqua_scrollbar_stripe(master) -> Optional[tk.Frame]:
+    if get_workbench().is_using_aqua_based_theme():
+        # Want to cover a gray stripe on the right edge of the scrollbar.
+        # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
+        # Best dynamic alternative is probably systemTextBackgroundColor
+        if os_is_in_dark_mode():
+            stripe_color = "#2d2e31"
+        else:
+            stripe_color = "#fafafa"
+        return tk.Frame(master, width=1, background=stripe_color)
+    else:
+        return None
+
+
+def check_create_aqua_header_stripe(master) -> Optional[tk.Frame]:
+    if get_workbench().is_using_aqua_based_theme():
+        # Want to cover a gray 2px stripe on the top edge of the Treeview header.
+        return tk.Frame(master, height=2, background="systemWindowBackgroundColor")
+    else:
+        return None
 
 
 def open_with_default_app(path):

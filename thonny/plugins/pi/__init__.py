@@ -18,6 +18,7 @@ def pix():
     MAIN_BACKGROUND = "#ededed"
     detail_bg = "#d0d0d0"
     detail_bg2 = "#cfcdc8"
+    border = "#9d9a92"
     res_dir = os.path.join(os.path.dirname(__file__), "res")
     scrollbar_button_settings = {}
     for direction, element_name in [
@@ -183,6 +184,21 @@ def pix():
         },
         "Tip.TLabel": {"configure": {"background": detail_bg2, "foreground": "black"}},
         "Tip.TFrame": {"configure": {"background": detail_bg2}},
+        "CustomToolbutton": {
+            "configure": {"background": MAIN_BACKGROUND, "activebackground": detail_bg}
+        },
+        "CustomNotebook": {
+            "configure": {
+                "bordercolor": border,
+            }
+        },
+        "CustomNotebook.Tab": {
+            "configure": {
+                "background": detail_bg,
+                "activebackground": MAIN_BACKGROUND,
+                "indicatorbackground": MAIN_BACKGROUND,
+            }
+        },
         "OPTIONS": {"configure": {"icons_in_menus": False, "shortcuts_in_tooltips": False}},
     }
 
@@ -313,5 +329,7 @@ def load_plugin():
     for image in images:
         theme_image_map[image] = os.path.join(res_dir, images[image])
 
-    get_workbench().add_ui_theme("Raspberry Pi", "Enhanced Clam", pix, theme_image_map)
-    get_workbench().add_ui_theme("Raspberry Pi Dark", "Clean Dark", pix_dark, theme_image_map)
+    get_workbench().add_ui_theme("Raspberry Pi", "Enhanced Clam", pix, images=theme_image_map)
+    get_workbench().add_ui_theme(
+        "Raspberry Pi Dark", "Clean Dark", pix_dark, images=theme_image_map
+    )

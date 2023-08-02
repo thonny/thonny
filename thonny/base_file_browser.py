@@ -15,8 +15,10 @@ from thonny.languages import tr
 from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
+    CustomToolbutton,
     ask_one_from_choices,
     ask_string,
+    check_create_aqua_scrollbar_stripe,
     create_string_var,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -47,6 +49,10 @@ class BaseFileBrowser(ttk.Frame):
             self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
         )
         self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
+        stripe = check_create_aqua_scrollbar_stripe(self)
+        if stripe is not None:
+            stripe.grid(row=0, column=1, sticky="nse", rowspan=3)
+            stripe.tkraise()
 
         tktextext.fixwordbreaks(tk._default_root)
         self.building_breadcrumbs = False
@@ -128,9 +134,8 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.grid(row=0, column=0, sticky="nsew")
         self.path_bar.set_read_only(True)
         self.path_bar.bind("<Configure>", self.resize_path_bar, True)
-        self.path_bar.tag_configure(
-            "dir", foreground=lookup_style_option("Url.TLabel", "foreground")
-        )
+        link_foreground = lookup_style_option("Url.TLabel", "foreground")
+        self.path_bar.tag_configure("dir", foreground=link_foreground)
         self.path_bar.tag_configure("underline", underline=True)
 
         def get_dir_range(event):
@@ -172,10 +177,10 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.tag_bind("dir", "<Motion>", dir_tag_motion)
 
         # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
-        self.menu_button = ttk.Button(
+        self.menu_button = CustomToolbutton(
             header_frame,
+            style="ViewToolbar.CustomToolbutton",
             text=f" {get_menu_char()} ",
-            style="ViewToolbar.Toolbutton",
             command=self.post_button_menu,
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
