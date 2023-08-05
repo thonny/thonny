@@ -942,7 +942,9 @@ def _get_imported_user_files(main_file, source=None):
 
     imported_files = set()
 
-    for file in {name + ext for ext in [".py", ".pyw"] for name in module_names}:
+    for file in {
+        name + ext for ext in [".py", ".pyw"] for name in module_names if name is not None
+    }:
         possible_path = os.path.join(main_dir, file)
         if os.path.exists(possible_path):
             imported_files.add(possible_path)
