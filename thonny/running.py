@@ -450,10 +450,15 @@ class Runner:
         if editor.get_filename() or not get_workbench().get_option(
             "run.allow_running_unnamed_programs"
         ):
-            filename = editor.save_file()
-            if not filename:
-                # user has cancelled file saving
-                return
+            if editor.get_filename() and not editor.is_modified():
+                # Don't attempt to save as the file may be read-only
+                logger.debug("Not saving read only file %s", editor.get_filename())
+                filename = editor.get_filename()
+            else:
+                filename = editor.save_file()
+                if not filename:
+                    # user has cancelled file saving
+                    return
         else:
             filename = UNTITLED
 
