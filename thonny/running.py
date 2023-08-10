@@ -1077,7 +1077,7 @@ class SubprocessProxy(BackendProxy, ABC):
         )
 
         if self.can_be_isolated():
-            cmd_line.insert(1, "-I")
+            cmd_line.insert(1, "-s")
 
         creationflags = 0
         if running_on_windows():
