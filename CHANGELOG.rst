@@ -2,6 +2,15 @@
 Version history
 ===============
 
+4.1.2 (2023-08-??)
+==================
+* Avoid repetitive attempts to restart backend after connection gets lost during a Run (#2836)
+* Automatically hide tooltips if window loses focus, #2607
+* Import optional deps with augmented sys.path, fixes problems with importing plug-ins (#2816)
+* Don't leak main site-packages to virtual environment's sys.path, #2867
+* Fix Assistant error with relative imports, #2873
+* Don't attempt to save unchanged editor at run, #2804
+
 4.1.1 (2023-06-11)
 ==================
 * Fix warning for the cases where Thonny avoids user module shadowing a library module (#384)
