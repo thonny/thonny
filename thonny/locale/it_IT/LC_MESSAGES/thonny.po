@@ -84,10 +84,11 @@ msgid "This program comes with\n"
 "redistribute it under certain conditions, see\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
-msgstr "Il programma viene fornito\n"
-"SENZA ALCUNA GARANZIA!\n"
-"È un software gratuito e sei il benvenuto\n"
-"per ridistribuirlo a determinate condizioni, vedi https://opensource.org/licenses/MIT\n"
+msgstr "Questo programma viene fornito\n"
+"ASSOLUTAMENTE SENZA GARANZIA!\n"
+"È un software gratuito e sei il benvenuto a ridistribuirlo \n"
+"a determinate condizioni, vedi \n"
+"https://opensource.org/licenses/MIT \n"
 "per i dettagli"
 
 #: thonny/plugins/about.py:142
@@ -511,7 +512,7 @@ msgstr "Salva una copia..."
 
 #: thonny/config_ui.py:18
 msgid "Thonny options"
-msgstr "Ozioni di Thonny"
+msgstr "Opzioni di Thonny"
 
 #: thonny/running.py:160
 msgid "Run current script"
@@ -587,8 +588,7 @@ msgstr "Mostra il plotter"
 #: thonny/shell.py:1660
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
-msgstr "Per raggioni di efficenza, la shell non mostra le righe molto lunghe\n"
-"completamente (vedi Strumenti => Opzioni => Shell).\n"
+msgstr "Per ragioni di efficienza, la shell evita di mostrare per intero righe molto lunghe (vedi Strumenti => Opzioni => Shell).\n"
 "Qui puoi interagire con il frammento di testo originale."
 
 #: thonny/shell.py:1671
@@ -693,10 +693,9 @@ msgstr "Modalitá regolare"
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
-msgstr "La configurazione è stata aggiornata. Riavvia Thonny per\n"
-"lavorare in modalità normale.\n"
+msgstr "La configurazione è stata aggiornata. Riavvia Thonny per iniziare a lavorare in modalità normale.\n"
 "\n"
-"(Vedi 'Strumenti → Opzioni → Generale' se ci ripensi.)"
+"(Vedi Strumenti → Opzioni → Generale se poi cambi idea.)"
 
 #: thonny/plugins/ast_view.py:211
 msgid "Program tree"
@@ -891,8 +890,9 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr "Sembra che stai installando un pacchetto relativo a Thonny.\n"
-"Se invece desideri installare un plugin di Thonny, allora dovresti scegliere 'Strumenti → Gestisci i plugin...'\n"
+msgstr "Sembra che tu stia installando un pacchetto relativo a Thonny. \n"
+"Se intendevi installare un plugin Thonny, allora dovresti scegliere\n"
+"invece 'Strumenti → Gestisci plugin...'\n"
 "\n"
 "Sei sicuro di voler installare %s per il back-end?"
 
@@ -946,7 +946,7 @@ msgstr "Errore:"
 
 #: thonny/plugins/pip_gui.py:1601
 msgid "Manage packages..."
-msgstr "Gestisci i pacchetti:"
+msgstr "Gestisci pacchetti..."
 
 #: thonny/plugins/pip_gui.py:1607
 msgid "Manage plug-ins..."
@@ -1100,7 +1100,7 @@ msgstr "Apri la cartella di programma di Thonny..."
 
 #: thonny/plugins/thonny_folders.py:24
 msgid "Open Thonny data folder..."
-msgstr "Apri la cartella dei dati di Thonny"
+msgstr "Apri la cartella dei dati di Thonny..."
 
 #: thonny/plugins/help/__init__.py:70
 msgid "Home"
@@ -1116,12 +1116,11 @@ msgstr "Dispositivo CircuitPython"
 
 #: thonny/plugins/micropython/mp_front.py:307
 msgid "MicroPython device"
-msgstr "Dispositivo MicroPython "
+msgstr "Dispositivo MicroPython"
 
 #: thonny/plugins/micropython/mp_front.py:558
 msgid "Connect your device to the computer and select corresponding port below"
-msgstr "Collega il dispositivo al computer e seleziona la porta corrispondente\n"
-"quì sotto"
+msgstr "Collega il dispositivo al computer e seleziona la porta corrispondente qui sotto"
 
 #: thonny/plugins/micropython/mp_front.py:561
 msgid "look for your device name, \"USB Serial\" or \"UART\""
@@ -1417,7 +1416,8 @@ msgstr "Eseguibile Python"
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
-msgstr "NB! Il pulsante di selezione dei file potrebbe non funzionare correttamente quando si selezionano gli eseguibili da un ambiente virtuale.\n"
+msgstr "NB! Il pulsante di selezione dei file potrebbe non funzionare correttamente \n"
+"quando si selezionano gli eseguibili da un ambiente virtuale.\n"
 "In questo caso scegli invece lo script 'activate' dell'interprete (o inserisci il percorso direttamente al box)!"
 
 #: thonny/plugins/cpython_ssh/__init__.py:17
@@ -1641,7 +1641,7 @@ msgstr "File Python"
 
 #: thonny/editors.py:123 thonny/editors.py:189
 msgid "<untitled>"
-msgstr "<senza titolo>"
+msgstr "<untitled>"
 
 #: thonny/editors.py:150
 msgid "File is gone"
@@ -1795,7 +1795,7 @@ msgstr "Se il file deve essere aperto in un'app esterna, scaricalo in una direct
 
 #: thonny/editors.py:151
 msgid "Looks like '%s' was deleted or moved."
-msgstr "Sembra che '%s' sia stato eliminato o spostato"
+msgstr "Sembra che '%s' sia stato eliminato o spostato."
 
 #: thonny/editors.py:170
 msgid "Looks like '%s' was modified outside of the editor."
@@ -1882,7 +1882,7 @@ msgstr "Python 3 Locale"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:266
 msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
-msgstr "Puoi anche attivare un ambiente virtuale usando il menu contestuale del file explorer: clicca con il tasto destro sulla cartella o sul file 'pyvenv.cfg' che si trova all'interno."
+msgstr "È possibile attivare un ambiente virtuale esistente anche tramite il menu di scelta rapida con il tasto destro del mouse durante la navigazione dei file, quando si seleziona una cartella dell'ambiente virtuale, o il file 'pyveng.cfg' all'interno."
 
 #: thonny/plugins/ev3/__init__.py:72
 msgid "Preparations (skip the VS Code part)"

@@ -10,6 +10,7 @@ Version history
 * Don't leak main site-packages to virtual environment's sys.path, #2867
 * Fix Assistant error with relative imports, #2873
 * Don't attempt to save unchanged editor at run, #2804
+* Update Persian, Italian, Japanese, Brazilian Portuguese and Chinese translations (see POEditor for contributions)
 
 4.1.1 (2023-06-11)
 ==================
