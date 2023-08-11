@@ -1042,6 +1042,8 @@ class SubprocessProxy(BackendProxy, ABC):
         # see https://github.com/thonny/thonny/issues/808
         env["PYTHONUNBUFFERED"] = "1"
 
+        env["PYTHONSAFEPATH"] = "1"
+
         # Let back-end know about plug-ins
         env["THONNY_USER_DIR"] = THONNY_USER_DIR
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
@@ -1299,7 +1301,7 @@ class SubprocessProxy(BackendProxy, ABC):
         return self._exe_dirs
 
     def can_be_isolated(self) -> bool:
-        """Says whether the backend may be launched with -I switch"""
+        """Says whether the backend may be launched with -s switch"""
         return True
 
     def fetch_next_message(self):
