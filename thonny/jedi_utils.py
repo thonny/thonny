@@ -296,4 +296,3 @@ def _get_completion_name_with_symbols(
         return completion.name + " "
 
     return completion.name_with_symbols
-

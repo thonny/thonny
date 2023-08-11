@@ -6,6 +6,7 @@ import pyperclip
 
 locale_dir = os.path.dirname(__file__)
 
+
 def register_locale(name: str) -> None:
     print(f"Processing {name}")
     po_path = os.path.join(locale_dir, name, "LC_MESSAGES", "thonny.po")
