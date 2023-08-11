@@ -1441,7 +1441,7 @@ msgstr "nenhum diretório lib absoluto em sys.path"
 
 #: thonny/plugins/pip_gui.py:71
 msgid "Search on PyPI"
-msgstr "Pesquisar no PyPI"
+msgstr "Pesquisar em PyPI"
 
 #: thonny/base_file_browser.py:693
 msgid "Open in Thonny's text editor"
@@ -1976,13 +1976,13 @@ msgstr "Permitir executar programas sem nome"
 
 #: thonny/plugins/pip_gui.py:600
 msgid "License"
-msgstr ""
+msgstr "Licença"
 
 #: thonny/plugins/run_debug_config_page.py:27
 msgid "Warn if a user module shadows a library module"
-msgstr ""
+msgstr "Avisar se um módulo do usuário oculta um módulo da biblioteca"
 
 #: thonny/plugins/micropython/pip_gui.py:65
 msgid "Search micropython-lib and PyPI"
-msgstr ""
+msgstr "Pesquisar em micropython-lib e PyPI"
 

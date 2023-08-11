@@ -50,5 +50,6 @@ def register_locale(name: str) -> None:
 
 
 for name in os.listdir(locale_dir):
-    if os.path.isdir(name):
+    path = os.path.join(locale_dir, name)
+    if os.path.isdir(path):
         register_locale(name)

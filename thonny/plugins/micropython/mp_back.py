@@ -717,6 +717,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_shell_autocomplete(self, cmd):
         source = cmd.source
         response = dict(source=cmd.source, row=cmd.row, column=cmd.column, completions=[])
+        completions_by_name = {}
 
         # First the dynamic completions
         match = re.search(
@@ -742,9 +743,9 @@ class MicroPythonBackend(MainBackend, ABC):
 
         for name in names:
             if name.startswith(prefix) and not name.startswith("__"):
-                response["completions"].append(self._create_shell_completion(name, prefix))
+                completions_by_name[name] = self._create_shell_completion(name, prefix)
 
-        # add keywords, import modules etc. from jedi
+        # add keywords, import modules etc. from jedi (possibly overriding dynamic names)
         try:
             from thonny import jedi_utils
 
@@ -757,15 +758,16 @@ class MicroPythonBackend(MainBackend, ABC):
                 "<shell>",
                 sys_path=self._get_sys_path_for_analysis(),
             )
-            response["completions"] += [
-                comp
-                for comp in jedi_completions
-                if (comp.type in ["module", "keyword"] or comp.module_name == "builtins")
-                and self._should_present_completion(comp)
-            ]
+            for comp in jedi_completions:
+                if (
+                    comp.type in ["module", "keyword"] or comp.module_name == "builtins"
+                ) and self._should_present_static_completion(comp):
+                    completions_by_name[comp.name] = comp
+
         except Exception as e:
             logger.exception("Problem with jedi shell autocomplete")
 
+        response["completions"] = list(completions_by_name.values())
         return response
 
     def _create_shell_completion(self, name: str, prefix: str) -> CompletionInfo:
@@ -1090,7 +1092,7 @@ class MicroPythonBackend(MainBackend, ABC):
         assert not cmd.path.startswith("//")
         self._mkdir(cmd.path)
 
-    def _should_present_completion(self, completion: CompletionInfo) -> bool:
+    def _should_present_static_completion(self, completion: CompletionInfo) -> bool:
         if completion.name.startswith("__"):
             return False
 

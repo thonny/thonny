@@ -24,7 +24,6 @@ _last_jedi_completions: Optional[List[jedi.api.classes.Completion]] = None
 def get_script_completions(
     source: str, row: int, column: int, filename: str, sys_path=None
 ) -> List[CompletionInfo]:
-    _check_patch_jedi_typesheds(sys_path)
     global _last_jedi_completions
     try:
         script = _create_script(source, filename, sys_path)
@@ -41,7 +40,6 @@ def get_script_completions(
 def get_interpreter_completions(
     source: str, namespaces: List[Dict], sys_path=None
 ) -> List[CompletionInfo]:
-    _check_patch_jedi_typesheds(sys_path)
     global _last_jedi_completions
     try:
         interpreter = _create_interpreter(source, namespaces, sys_path)
@@ -91,8 +89,6 @@ def get_completion_details(full_name: str) -> Optional[CompletionInfo]:
 def get_script_signatures(
     source: str, row: int, column: int, filename: str, sys_path=None
 ) -> List[SignatureInfo]:
-    _check_patch_jedi_typesheds(sys_path)
-
     try:
         script = _create_script(source, filename, sys_path)
         sigs = script.get_signatures(line=row, column=column)
@@ -105,8 +101,6 @@ def get_script_signatures(
 def get_interpreter_signatures(
     source: str, namespaces: List[Dict], sys_path=None
 ) -> List[SignatureInfo]:
-    _check_patch_jedi_typesheds(sys_path)
-
     try:
         # assuming cursor is at the end of the source
         interpreter = _create_interpreter(source, namespaces, sys_path)
@@ -121,8 +115,6 @@ def get_interpreter_signatures(
 def get_definitions(
     source: str, row: int, column: int, filename: str, sys_path: List[str] = None
 ) -> List[NameReference]:
-    _check_patch_jedi_typesheds(sys_path)
-
     try:
         script = _create_script(source, filename, sys_path)
         defs = script.goto(line=row, column=column, follow_imports=True)
@@ -141,8 +133,6 @@ def get_references(
     scope: str,
     sys_path: Optional[List[str]] = None,
 ) -> List[NameReference]:
-    _check_patch_jedi_typesheds(sys_path)
-
     try:
         script = _create_script(source + ")", filename, sys_path)
         references = script.get_references(row, column, include_builtins=False, scope=scope)
@@ -306,16 +296,3 @@ def _get_completion_name_with_symbols(
         return completion.name + " "
 
     return completion.name_with_symbols
-
-
-def _check_patch_jedi_typesheds(sys_path: Optional[List[str]]) -> None:
-    if sys_path is None:
-        return
-    from jedi.inference.gradual import typeshed
-
-    def _patched_get_typeshed_directories(version_info):
-        for path in sys_path:
-            if "api_stubs" in path:
-                yield typeshed.PathInfo(path, False)
-
-    typeshed._get_typeshed_directories = _patched_get_typeshed_directories
