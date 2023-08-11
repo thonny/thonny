@@ -73,6 +73,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
+* @chechigp
 * codemee
 * Collision Detection
 * cspaier
