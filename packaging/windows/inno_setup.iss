@@ -22,7 +22,11 @@ AppUpdatesURL=https://thonny.org
 ; Actual privileges depend on how user started the installer
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline dialog
-MinVersion=6.0
+
+; Compatibility
+MinVersion=10.0 
+ArchitecturesAllowed=x64 arm64 ia64
+ArchitecturesInstallIn64BitMode=x64 arm64 ia64
 
 ; Will show important info on welcome page
 DisableWelcomePage=no
