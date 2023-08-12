@@ -5,6 +5,7 @@
 ;#define SourceFolder "C:\workspaces\python_stuff\thonny\packaging\windows\dummy"
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
+#define SupportedArchitectures "x64 arm64 ia64"
 
 
 [Setup]
@@ -25,8 +26,8 @@ PrivilegesRequiredOverridesAllowed=commandline dialog
 
 ; Compatibility
 MinVersion=10.0 
-ArchitecturesAllowed=x64 arm64 ia64
-ArchitecturesInstallIn64BitMode=x64 arm64 ia64
+ArchitecturesAllowed={#SupportedArchitectures}
+ArchitecturesInstallIn64BitMode={#SupportedArchitectures}
 
 ; Will show important info on welcome page
 DisableWelcomePage=no
