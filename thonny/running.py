@@ -1282,9 +1282,7 @@ class SubprocessProxy(BackendProxy, ABC):
     def get_site_packages(self):
         # NB! site.sitepackages may not be present in virtualenv
         for d in self._sys_path:
-            if ("site-packages" in d or "dist-packages" in d) and path_startswith(
-                d, self._sys_prefix
-            ):
+            if d.endswith("site-packages") and path_startswith(d, self._sys_prefix):
                 return d
 
         return None
