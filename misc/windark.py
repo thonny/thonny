@@ -23,4 +23,15 @@ if result != 0:
                                                ctypes.sizeof(ctypes.c_int(value)))
     print("got", result)
 
+
+menu = tk.Menu(root)
+root.config(menu=menu)
+
+file_menu = tk.Menu(menu)
+menu.add_cascade(label="File", menu=file_menu)
+
+edit_menu = tk.Menu(menu)
+menu.add_cascade(label="Edit", menu=edit_menu)
+
+
 root.mainloop()
