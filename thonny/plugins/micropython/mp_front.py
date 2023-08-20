@@ -189,6 +189,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             # Runner doesn't notice restart
             get_shell().restart(was_running=get_runner().is_running())
 
+        if cmd.name.lower() == "run":
+            cmd.populate_argv = get_workbench().get_option(self.backend_name + ".populate_argv")
+
         return super().send_command(cmd)
 
     def _prepare_clean_launch(self):
@@ -501,6 +504,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             self.backend_name + ".restart_interpreter_before_run",
             row=13,
             description=tr("Restart interpreter before running a script"),
+        )
+
+        self.add_checkbox(
+            self.backend_name + ".populate_argv",
+            row=14,
+            description=tr("Populate sys.argv on run"),
         )
 
         last_row = ttk.Frame(self)
@@ -1092,6 +1101,7 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".rts", rts)
         get_workbench().set_default(name + ".interrupt_on_connect", True)
         get_workbench().set_default(name + ".restart_interpreter_before_run", True)
+        get_workbench().set_default(name + ".populate_argv", False)
 
         if sync_time is None:
             sync_time = True
