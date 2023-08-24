@@ -125,6 +125,8 @@ class Workbench(tk.Tk):
         self._destroyed = False
         self._lost_focus = False
         self._is_portable = is_portable()
+        self._event_queue = queue.Queue()  # Can be appended to by threads
+        self._event_polling_id = None
         self.initializing = True
 
         self._init_configuration()
@@ -229,9 +231,9 @@ class Workbench(tk.Tk):
         """
 
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
-        self.after_idle(self.advertise_ready)
+        self.after_idle(self.finalize_startup)
 
-    def advertise_ready(self):
+    def finalize_startup(self):
         self.ready = True
         self.event_generate("WorkbenchReady")
         self._editor_notebook.update_appearance()
@@ -243,6 +245,18 @@ class Workbench(tk.Tk):
                 "Using default settings",
                 master=self,
             )
+        self.poll_events()
+
+    def poll_events(self) -> None:
+        if self._event_queue is None or self._closing:
+            self._event_polling_id = None
+            return
+
+        while not self._event_queue.empty():
+            sequence, event = self._event_queue.get()
+            self.event_generate(sequence, event)
+
+        self._event_polling_id = self.after(20, self.poll_events)
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
@@ -1782,6 +1796,12 @@ class Workbench(tk.Tk):
 
         return True
 
+    def queue_event(self, sequence: str, event: Optional[Record] = None) -> None:
+        """
+        Asynchronous variant of event_generate. Safe to use from a background thread.
+        """
+        self._event_queue.put((sequence, event))
+
     def event_generate(self, sequence: str, event: Optional[Record] = None, **kwargs) -> None:
         """Uses custom event handling when sequence doesn't start with <.
         In this case arbitrary attributes can be added to the event.
@@ -2377,6 +2397,10 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
+            if self._event_polling_id is not None:
+                self.after_cancel(self._event_polling_id)
+                self._event_polling_id = None
+
             if self._is_server() and os.path.exists(thonny.get_ipc_file_path()):
                 os.remove(thonny.get_ipc_file_path())
 
