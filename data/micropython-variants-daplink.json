@@ -3,15 +3,15 @@
         "vendor": "BBC",
         "model": "micro:bit v1",
         "family": "nrf51",
-        "info_url": "https://micropython.org/download/microbit",
+        "info_url": "https://micropython.org/download/MICROBIT",
         "downloads": [
             {
                 "version": "1.20.0",
-                "url": "https://micropython.org/resources/firmware/microbit-20230426-v1.20.0.hex"
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20230426-v1.20.0.hex"
             },
             {
-                "version": "20230727-unstable-v1.20.0-327-gd14ddcbdb",
-                "url": "https://micropython.org/resources/firmware/microbit-20230727-unstable-v1.20.0-327-gd14ddcbdb.hex"
+                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20230823-unstable-v1.20.0-394-g326dfd2a8.hex"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.20.0-\\d+-[a-z0-9]{10}"
