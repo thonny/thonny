@@ -565,11 +565,13 @@ class Editor(ttk.Frame):
     def update_title(self):
         try:
             self.master.update_editor_title(self)
-        except Exception as e:
-            logger.exception("Could not update editor title", exc_info=e)
+        except Exception:
+            logger.exception("Could not update editor title")
 
     def _on_text_change(self, event):
-        self.update_title()
+        # may not be added to the Notebook yet
+        if self.notebook.has_content(self):
+            self.update_title()
 
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)

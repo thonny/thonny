@@ -144,6 +144,13 @@ class CustomNotebook(tk.Frame):
             return self.current_page.content
         return None
 
+    def has_content(self, child: tk.Widget) -> bool:
+        for page in self.pages:
+            if page.content is child:
+                return True
+
+        return False
+
     def focus_set(self):
         if self.current_page:
             self.current_page.content.focus_set()
