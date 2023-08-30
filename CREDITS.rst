@@ -138,6 +138,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * phr0gger
 * Pop Vasile Alexandru
 * Radim
+* Ralf Michael Metzing
 * Rene Lehtma
 * Rune Langøy
 * Saishen, Inc.
