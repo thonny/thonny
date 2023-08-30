@@ -97,7 +97,7 @@ _page_cache = {}
 
 def read_page(url) -> str:
     if url not in _page_cache:
-        response = requests.get(url)
+        response = requests.get(url, headers={'Accept-Encoding': 'gzip'})
         if response.status_code != 200:
             raise RuntimeError(f"Status {response.status_code} for {url}")
         _page_cache[url] = response.text
