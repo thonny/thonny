@@ -7,8 +7,8 @@
         "info_url": "https://micropython.org/download/ARDUINO_NANO_ESP32",
         "downloads": [
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.20.0-\\d+-[a-z0-9]{10}"
@@ -24,8 +24,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -44,8 +44,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -64,8 +64,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -84,8 +84,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -104,8 +104,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-384-g2919a9fbf",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230823-unstable-v1.20.0-384-g2919a9fbf.bin"
+                "version": "20230915-unstable-v1.20.0-484-g5473200aa",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230915-unstable-v1.20.0-484-g5473200aa.bin"
             },
             {
                 "version": "1.19.1",
@@ -125,8 +125,8 @@
                 "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -146,8 +146,8 @@
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -167,8 +167,8 @@
                 "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             }
         ]
     },
@@ -183,8 +183,8 @@
                 "url": "https://micropython.org/resources/firmware/SIL_WESP32-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -203,8 +203,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -223,8 +223,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -243,12 +243,24 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20220618-v1.19.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "NanoS3",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/nanos3",
+        "downloads": [
+            {
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/nanos3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             }
         ]
     },
@@ -263,8 +275,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_PROS3-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -283,8 +295,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS2-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -303,8 +315,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -323,8 +335,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS3-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -343,8 +355,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -363,8 +375,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",
@@ -383,8 +395,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20230823-unstable-v1.20.0-394-g326dfd2a8.bin"
+                "version": "20230914-unstable-v1.20.0-475-g174bb28d8",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20230914-unstable-v1.20.0-475-g174bb28d8.bin"
             },
             {
                 "version": "1.19.1",

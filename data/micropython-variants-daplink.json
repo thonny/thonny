@@ -10,8 +10,8 @@
                 "url": "https://micropython.org/resources/firmware/MICROBIT-20230426-v1.20.0.hex"
             },
             {
-                "version": "20230823-unstable-v1.20.0-394-g326dfd2a8",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20230823-unstable-v1.20.0-394-g326dfd2a8.hex"
+                "version": "20230915-unstable-v1.20.0-484-g5473200aa",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20230915-unstable-v1.20.0-484-g5473200aa.hex"
             }
         ],
         "latest_prerelease_regex": "\\d{8}-unstable-v1.20.0-\\d+-[a-z0-9]{10}"
