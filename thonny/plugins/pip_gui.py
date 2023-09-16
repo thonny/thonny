@@ -7,7 +7,8 @@ import tkinter as tk
 import tkinter.font as tk_font
 import urllib.error
 import urllib.parse
-from abc import ABC
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from logging import exception, getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
@@ -39,7 +40,7 @@ logger = getLogger(__name__)
 
 _EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
-
+BG = "SystemDialogBackgroundActive"
 class PipDialog(CommonDialog, ABC):
     def __init__(self, master):
         self._state = "idle"  # possible values: "listing", "fetching", "idle"
@@ -68,7 +69,7 @@ class PipDialog(CommonDialog, ABC):
         self._start_update_list()
 
     def get_search_button_text(self):
-        return tr("Search on PyPI")
+        return tr("Search")
 
     def get_install_button_text(self):
         return tr("Install")
@@ -88,14 +89,21 @@ class PipDialog(CommonDialog, ABC):
             padx=self.get_medium_padding(),
             pady=(self.get_medium_padding(), 0),
         )
-        header_frame.columnconfigure(0, weight=1)
+        header_frame.columnconfigure(1, weight=1)
         header_frame.rowconfigure(1, weight=1)
 
         default_font = tk_font.nametofont("TkDefaultFont")
         name_font = default_font.copy()
         name_font.configure(size=default_font["size"] * 2)
+
+        label = tk.Label(header_frame, text="Installed", relief="flat", width=20, anchor="w", justify="left")
+        label.grid(row=1, column=0, sticky="nsw", padx=(0,20))
+
+        label2 = tk.Label(header_frame, text="micropython-lib:", relief="flat", width=30, anchor="e", justify="right")
+        label2.grid(row=1, column=1, sticky="nsew", padx=(0,5))
+
         self.search_box = ttk.Entry(header_frame)
-        self.search_box.grid(row=1, column=0, sticky="nsew")
+        self.search_box.grid(row=1, column=2, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
         self.search_box.bind("<KP_Enter>", self._on_search, False)
 
@@ -108,12 +116,12 @@ class PipDialog(CommonDialog, ABC):
             command=self._on_search,
             width=len(self.get_search_button_text()) + 2,
         )
-        self.search_button.grid(row=1, column=1, sticky="nse", padx=(self.get_small_padding(), 0))
+        self.search_button.grid(row=1, column=3, sticky="nse", padx=(self.get_small_padding(), 0))
 
         main_pw = tk.PanedWindow(
             parent,
             orient=tk.HORIZONTAL,
-            background=lookup_style_option("TPanedWindow", "background"),
+            background=BG,
             sashwidth=self.get_large_padding(),
         )
         main_pw.grid(
@@ -126,7 +134,7 @@ class PipDialog(CommonDialog, ABC):
         parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
 
-        listframe = ttk.Frame(main_pw, relief="flat", borderwidth=1)
+        listframe = ttk.Frame(main_pw, relief="flat", borderwidth=0)
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
 
@@ -137,9 +145,9 @@ class PipDialog(CommonDialog, ABC):
             height=23,
             selectborderwidth=0,
             relief="flat",
-            # highlightthickness=4,
-            # highlightbackground="red",
-            # highlightcolor="green",
+            highlightthickness=0,
+            highlightbackground="red",
+            highlightcolor="green",
             borderwidth=0,
         )
         self.listbox.insert("end", " <" + tr("INSTALL") + ">")
@@ -152,14 +160,14 @@ class PipDialog(CommonDialog, ABC):
         list_scrollbar["command"] = self.listbox.yview
         self.listbox["yscrollcommand"] = list_scrollbar.set
 
-        info_frame = ttk.Frame(main_pw)
+        info_frame = tk.Frame(main_pw, background=BG)
         info_frame.columnconfigure(0, weight=1)
         info_frame.rowconfigure(1, weight=1)
 
         main_pw.add(listframe)
         main_pw.add(info_frame)
 
-        self.title_label = ttk.Label(info_frame, text="", font=name_font)
+        self.title_label = tk.Label(info_frame, text="", font=name_font, background=BG)
         self.title_label.grid(
             row=0, column=0, sticky="w", padx=0, pady=(0, self.get_large_padding())
         )
@@ -168,7 +176,7 @@ class PipDialog(CommonDialog, ABC):
             info_frame,
             read_only=True,
             horizontal_scrollbar=False,
-            background=lookup_style_option("TFrame", "background"),
+            background=BG,
             vertical_scrollbar_class=AutoScrollbar,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
@@ -252,7 +260,7 @@ class PipDialog(CommonDialog, ABC):
         self.advanced_button.grid(row=0, column=2, sticky="w", padx=(self.get_small_padding(), 0))
 
         self.close_button = ttk.Button(info_frame, text=tr("Close"), command=self._on_close)
-        self.close_button.grid(row=2, column=3, sticky="e")
+        #self.close_button.grid(row=2, column=3, sticky="e")
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
@@ -362,6 +370,9 @@ class PipDialog(CommonDialog, ABC):
             self._show_extra_instructions()
 
         self._select_list_item(0)
+
+        bt = ttk.Button(self.info_text, text="Install")
+        self.info_text.window_create("end", window=bt)
 
     def _show_extra_instructions(self):
         pass
@@ -1427,6 +1438,30 @@ class DetailsDialog(CommonDialog):
         self._closed = True
         self.destroy()
 
+@dataclass(frozen=True)
+class IndexSearchResult:
+    dist_name: str
+    source: str
+    starred: bool
+
+
+class IndexHelper(ABC):
+    @abstractmethod
+    def search(self, query: str) -> List[IndexSearchResult]:
+        ...
+
+    @abstractmethod
+    def fetch_dist_info(self, name:str, version:str) -> DistInfo:
+        ...
+
+
+class PyPiIndexHelper(IndexHelper):
+    def search(self, query: str) -> List[IndexSearchResult]:
+        _perform_pypi_search(query)
+
+    def fetch_dist_info(self, name:str, version:str) -> DistInfo:
+        ...
+
 
 def _fetch_url_future(url, fallback_url=None, timeout=10):
     from urllib.request import urlopen
@@ -1501,6 +1536,29 @@ def _start_fetching_package_info(name, url: str, fallback_url: str, completion_h
             get_workbench().after(200, poll_fetch_complete)
 
     poll_fetch_complete()
+
+
+def _perform_pypi_search(
+    query: str, source: Optional[str] = None
+) -> List[Dict[str, str]]:
+    import urllib.parse
+    from urllib.request import urlopen
+
+    logger.info("Performing PyPI search for %r", query)
+
+    url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
+    with urlopen(url, timeout=10) as fp:
+        data = fp.read()
+
+    results = _extract_pypi_search_results(data.decode("utf-8"))
+
+    for result in results:
+        if source:
+            result["source"] = source
+        result["distance"] = levenshtein_distance(query, result["name"])
+
+    logger.info("Got %r matches")
+    return results
 
 
 def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
