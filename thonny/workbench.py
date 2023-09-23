@@ -1096,7 +1096,7 @@ class Workbench(tk.Tk):
         if include_in_menu:
 
             def dispatch_from_menu():
-                # I don't like that Tk menu toggles checbutton variable
+                # I don't like that Tk menu toggles checkbutton variable
                 # automatically before calling the handler.
                 # So I revert the toggle before calling the actual handler.
                 # This way the handler doesn't have to worry whether it
