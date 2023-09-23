@@ -88,6 +88,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Farshid Meidani
 * Filip Schouwenaars
 * Fizban
+* Florentina (@emryswaves)
 * freddii
 * fstengel
 * Gabriel Slørdahl
