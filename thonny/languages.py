@@ -26,7 +26,7 @@ LANGUAGES_DICT = {
     "pl_PL": "Polski",
     "pt_PT": "Português (PT)",
     "pt_BR": "Português (BR)",
-    "ro_RO": "Român",
+    "ro_RO": "Română",
     "ru_RU": "Русский",
     "sl_SI": "Slovenščina",
     "sk_SK": "Slovenčina [BETA]",
