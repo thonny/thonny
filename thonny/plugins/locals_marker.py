@@ -3,6 +3,7 @@ from logging import getLogger
 
 from thonny import get_workbench
 
+logger = getLogger(__name__)
 
 class LocalsHighlighter:
     def __init__(self, text):
