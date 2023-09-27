@@ -90,6 +90,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Filip Schouwenaars
 * Fizban
 * Físicamaldonado
+* Florentina (@emryswaves)
 * freddii
 * fstengel
 * Gabriel Slørdahl

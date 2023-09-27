@@ -2,6 +2,15 @@
 Version history
 ===============
 
+4.1.3 (2023-09-28)
+==================
+* Fix first run crash on macOS (#2860)
+* Fix package upgrade and uninstall in portable variant (#2902)
+* Fix esptool flasher proposing wrong starting address for ESP32-S2 devices, #2920
+* Fix cursor jumping to Shell when program waits for input and the user types opening parenthesis in the editor, #2834
+* Add Catalan translation (by Pere)
+* Update German, French, Portuguese and Romanian translations. (See POEditor for contributions)
+
 4.1.2 (2023-08-12)
 ==================
 * Avoid repetitive attempts to restart backend after connection gets lost during a Run (#2836)

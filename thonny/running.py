@@ -417,6 +417,7 @@ class Runner:
         )
 
         if not self.is_waiting_toplevel_command():
+            logger.info("Trying to execute current but runner is %r", self.get_state())
             self._proxy.interrupt()
 
             try:
