@@ -104,8 +104,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230426-v1.20.0.bin"
             },
             {
-                "version": "20230915-unstable-v1.20.0-484-g5473200aa",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230915-unstable-v1.20.0-484-g5473200aa.bin"
+                "version": "20230927-unstable-v1.20.0-494-g72ef2e629",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20230927-unstable-v1.20.0-494-g72ef2e629.bin"
             },
             {
                 "version": "1.19.1",
