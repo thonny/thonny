@@ -781,7 +781,7 @@ class PipDialog(CommonDialog, ABC):
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
 
-        install_args = []
+        install_args = ["--progress-bar", "off"]
         if self._use_user_install():
             install_args.append("--user")
 
