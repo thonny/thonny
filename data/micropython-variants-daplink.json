@@ -6,15 +6,15 @@
         "info_url": "https://micropython.org/download/MICROBIT",
         "downloads": [
             {
-                "version": "1.20.0",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20230426-v1.20.0.hex"
+                "version": "1.21.0",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20231005-v1.21.0.hex"
             },
             {
-                "version": "20230927-unstable-v1.20.0-494-g72ef2e629",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20230927-unstable-v1.20.0-494-g72ef2e629.hex"
+                "version": "1.20.0",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20230426-v1.20.0.hex"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-unstable-v1.20.0-\\d+-[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-unstable-v1.21.0-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "BBC",
