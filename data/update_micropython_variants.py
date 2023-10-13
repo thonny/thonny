@@ -139,7 +139,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
-    ["0.0.3", "0.0.2"],
+    ["0.0.4", "0.0.3"],
     badger_variants,
 )
 
@@ -171,20 +171,24 @@ pimoroni_variants = [
         "model": "Pico W",
     },
     {
-        "_id": "pimoroni-picow_cosmic_unicorn",
+        "_id": "pimoroni-cosmic_unicorn",
         "model": "Cosmic Unicorn",
     },
     {
-        "_id": "pimoroni-picow_enviro",
+        "_id": "pimoroni-enviro",
         "model": "Enviro",
     },
     {
-        "_id": "pimoroni-picow_galactic_unicorn",
+        "_id": "pimoroni-galactic_unicorn",
         "model": "Galactic Unicorn",
     },
     {
-        "_id": "pimoroni-picow_inky_frame",
+        "_id": "pimoroni-inky_frame",
         "model": "Inky Frame",
+    },
+    {
+        "_id": "pimoroni-stellar_unicorn",
+        "model": "Stellar Unicorn",
     },
     {
         "_id": "pimoroni-tiny2040",
@@ -205,7 +209,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
-    ["1.20.6", "1.19.18"],
+    ["1.21.0", "1.20.6"],
     pimoroni_variants,
 )
 
