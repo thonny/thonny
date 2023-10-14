@@ -5,7 +5,7 @@
 echo "Starting postinstall"
 echo "Thonny was installed to $2"
 
-PYVER="3.10"
+PYVER="3.12"
 PYFWK="$2/Thonny.app/Contents/Frameworks/Python.framework"
 PYBIN="$PYFWK/Versions/$PYVER/bin"
 PYINT="$PYBIN/python$PYVER"
@@ -32,9 +32,9 @@ echo "Compiling standard library"
 echo "Tweaking cffi"
 if [[ $(uname -m) == 'arm64' ]]
 then
-  mv $PYLIB/site-packages/_cffi_backend.cpython-310-darwin-arm46.so $PYLIB/site-packages/_cffi_backend.cpython-310-darwin.so
+  mv $PYLIB/site-packages/_cffi_backend.cpython-312-darwin-arm46.so $PYLIB/site-packages/_cffi_backend.cpython-312-darwin.so
 else
-  rm $PYLIB/site-packages/_cffi_backend.cpython-310-darwin-arm46.so
+  rm $PYLIB/site-packages/_cffi_backend.cpython-312-darwin-arm46.so
 fi
 
 

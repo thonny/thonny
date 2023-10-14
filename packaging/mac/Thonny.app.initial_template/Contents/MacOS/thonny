@@ -8,8 +8,8 @@ import os.path
 execdir = os.path.dirname(sys.argv[0])
 executable = os.path.join(execdir, "Python")
 resdir = os.path.join(os.path.dirname(execdir), "Resources")
-libdir = os.path.join(os.path.dirname(execdir), "Frameworks/Python.framework/Versions/3.10/lib")
-ssl_cert_dir = libdir + "/python3.10/site-packages/certifi"
+libdir = os.path.join(os.path.dirname(execdir), "Frameworks/Python.framework/Versions/3.12/lib")
+ssl_cert_dir = libdir + "/python3.12/site-packages/certifi"
 mainprogram = os.path.join(resdir, "thonnymain.py")
 
 sys.argv.insert(1, mainprogram)

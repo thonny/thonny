@@ -24,7 +24,7 @@
 						<key>BundleOverwriteAction</key>
 						<string>upgrade</string>
 						<key>RootRelativeBundlePath</key>
-						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/Resources/Python.app</string>
+						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.12/Resources/Python.app</string>
 					</dict>
 				</array>
 				<key>RootRelativeBundlePath</key>

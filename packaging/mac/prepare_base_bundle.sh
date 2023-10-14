@@ -6,7 +6,7 @@ set -e
 # Before running this
 # * Install Python (official python.org dmg). This version takes official Python installation as base
 
-export PREFIX=$HOME/thonny_template_build_310
+export PREFIX=$HOME/thonny_template_build_312
 APP_TEMPLATE=$PREFIX/Thonny.app
 export LOCAL_FRAMEWORKS=$APP_TEMPLATE/Contents/Frameworks
 
