@@ -1,0 +1,158 @@
+from time import sleep 
+sword = 0
+enemy_health = 100
+print("Welcome to the Dungeon Crawler Game!")
+
+
+sleep(1) 
+print("A wise old man appears before you.")
+print("He offers you a choice of two classes.")
+print("Tank or Damage")
+class = input().lower()
+if class == "tank":
+    damage = 50
+    health = 100
+elif class == "damage":
+    damage = 100
+    health = 50
+else:
+    damage = 50
+    health = 50
+print("Interesting choice. Good luck.")
+
+print("You are in a dark dungeon. You can go left, right, or straight ahead.") 
+
+  
+
+direction = input("Which direction will you choose? (left/right/straight/quit): ").lower() 
+
+sleep(1) 
+
+if direction == "left": 
+
+    
+    print("You turn left and find a room with two doors: one is red, and the other is blue.")
+
+    door_choice = input("Which door will you open? (red/blue): ").lower()
+
+    sleep(1)
+
+    if door_choice == "red":
+
+        print("You find a dragon guarding a pile of gold!")
+
+        sleep(1)
+
+        print("Do you wish to fight the dragon (fight) or try to sneak past it (sneak)")
+
+        dragon_choice = input().lower()
+
+        sleep(1)
+
+        if dragon_choice == "fight":
+
+            print("You slay the dragon and take the gold. You win! Congratulations!")
+
+        else:
+
+            print("The dragon heard you moving and eats you for breakfast. Game over!")
+
+    elif door_choice == "blue":
+
+        print("You enter a room filled with poisonous gas. Game over!")
+
+    else:
+
+        print("Invalid input. Please choose a valid door (red/blue).")
+
+  
+
+elif direction == "right":
+
+    print("You turn right and find a locked chest.")
+    import random
+    options=["sword", "hex"]
+    selection=random.choice(options)
+    print("Do you choose to take the item?Y/N")
+    itemchoice = input().lower()
+    if itemchoice == "y":
+        print("The chest contained a {selection}!")
+        if selection == "sword":
+            sword = sword + 1
+            print("An evil wizard appears before you, about to attack!")
+            print("Dodge either up, left or right!")
+            dodge = input().lower()
+            if dodge == "left" or dodge == "right":
+                print("You evade the wizard's spell!")
+                print("The wizard attacks again! Roll or Jump!")
+                evade = input().lower()
+                if evade == "roll":
+                    print("You successfully evade the attack!")
+                    print("You now have an opening to attack!")
+                    print("You slash the wizard with your sword inflicting {damage} damage!")
+                    enemy_health = enemy_health - damage
+                    if enemy_health != 0:
+                        print("You have 1 more chance!")
+                        print("Attack! Head or Chest!")
+                        attack = input().lower()
+                        if attack = "head":
+                            print("The evil wizard drops to the ground, defeated. Game over!")
+                        else:
+                            print("The evil wizard dodges the attack!")
+                            print("He strikes you through the heart with a magical blade. Game over!"")
+                    else:
+                        print("The evil wizard drops to the ground, defeated. Game over!")
+                    
+                        
+                else:
+                    print("You lost 50 health!")
+                    health = health - 50
+                    if health != 0:
+                        print("The wizard looks as though he is charging up an ultra attack!")
+                        print("You have an opening to attack!")
+                        print("Attack! Hard or Fast!")
+                        attack2 = input().lower()
+                        if attack2 == "hard":
+                            print("The evil wizard drops to the ground, defeated. Game over!")
+                        else:
+                            print("The evil wizard is injured, but not enough!")
+                            print("The evil wizard unleashes his ultra attack, sending you to the hell dimension. Game over!")
+                        
+                    else:
+                        print("The evil wizard has defeated you. Game over!")
+                
+                
+            else:
+                print("The evil wizard's spell eliminates you. Game over!")
+
+        else:
+            print("The hex burnt you to a crisp. Game over!")
+    else:
+        print("An evil wizard appears before you, but you have no weapon!")
+        print("The evil wizard's spell eliminates you. Game over!")
+            
+    
+    
+    
+
+  
+
+  
+
+elif direction == "straight":
+
+    print("You move straight ahead and find a dark corridor.")
+
+  
+
+  
+
+elif direction == "quit":
+
+    print("Thanks for playing. Come back soon!")
+
+  
+
+else:
+
+    print("Invalid input. Please choose a valid direction (left/right/straight/quit).")
