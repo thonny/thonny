@@ -149,6 +149,7 @@ class Workbench(tk.Tk):
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
         self._commands = []  # type: List[Dict[str, Any]]
+        self._notebook_drop_targets: List[tk.Widget] = []
         self._toolbar_buttons = {}
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = []  # type: List[Type]
@@ -1638,7 +1639,7 @@ class Workbench(tk.Tk):
                 raise RuntimeError("View %s not created" % view_id)
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
-            master = self._view_notebooks[location]
+            notebook = self._view_notebooks[location]
 
             # create the view
             view = class_(self)  # View's master is workbench to allow making it maximized
@@ -1646,7 +1647,8 @@ class Workbench(tk.Tk):
             self._view_records[view_id]["instance"] = view
 
             # create the view home_widget to be added into notebook
-            view.home_widget = ttk.Frame(master)
+            view.home_widget = ttk.Frame(self._main_pw)
+            view.home_widget.notebook = notebook
             view.home_widget.columnconfigure(0, weight=1)
             view.home_widget.rowconfigure(0, weight=1)
             view.home_widget.maximizable_widget = view  # type: ignore
@@ -1654,7 +1656,7 @@ class Workbench(tk.Tk):
             if hasattr(view, "position_key"):
                 view.home_widget.position_key = view.position_key  # type: ignore
 
-            # initially the view will be in it's home_widget
+            # initially the view will be in its home_widget
             view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
             view.hidden = True
 
@@ -1749,7 +1751,7 @@ class Workbench(tk.Tk):
         # NB! Don't forget that view.home_widget is added to notebook, not view directly
         # get or create
         view = self.get_view(view_id)
-        notebook = view.home_widget.master  # type: ignore
+        notebook = view.home_widget.notebook  # type: ignore
 
         if hasattr(view, "before_show") and view.before_show() == False:  # type: ignore
             return False
@@ -1788,7 +1790,7 @@ class Workbench(tk.Tk):
             if hasattr(view, "before_hide") and view.before_hide() == False:
                 return False
 
-            view.home_widget.master.forget(view.home_widget)
+            view.home_widget.notebook.forget(view.home_widget)
             self.set_option("view." + view_id + ".visible", False)
 
             self.event_generate("HideView", view=view, view_id=view_id)
@@ -2641,6 +2643,41 @@ class Workbench(tk.Tk):
 
     def is_using_aqua_based_theme(self) -> bool:
         return "aqua" in self._current_theme_name.lower()
+
+    def show_notebook_drop_targets(self):
+        from thonny.custom_notebook import NotebookTabDropTarget
+
+        if self._notebook_drop_targets:
+            # Already visible. Assuming the location and size of the Workbench hasn't changed during DND,
+            # so nothing to do.
+            return
+
+        positions = {
+            "nw": dict(relx=0.0, rely=0.0),
+            "w": dict(relx=0.0, rely=0.5),
+            "sw": dict(relx=0.0, rely=1.0),
+            "s": dict(relx=0.5, rely=1.0),
+            "se": dict(relx=1.0, rely=1.0),
+            "e": dict(relx=1.0, rely=0.5),
+            "ne": dict(relx=1.0, rely=0.0),
+        }
+
+        for key, nb in self._view_notebooks.items():
+            width = ems_to_pixels(3)
+            height = ems_to_pixels(8)
+            if key == "s":
+                width, height = height, width
+
+            target = NotebookTabDropTarget(master=self, notebook=nb, width=width, height=height)
+            pos = positions[key]
+            target.place(in_=self._main_pw, anchor=key, **pos)
+            self._notebook_drop_targets.append(target)
+
+    def hide_notebook_drop_targets(self):
+        for item in self._notebook_drop_targets:
+            item.destroy()
+
+        self._notebook_drop_targets = []
 
 
 class WorkbenchEvent(Record):

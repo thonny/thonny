@@ -848,6 +848,9 @@ class AutomaticNotebook(CustomNotebook):
         if len(self.tabs()) > 0 and not self.is_visible():
             self.master.insert("auto", self)
 
+    def allows_dragging_to_another_notebook(self) -> bool:
+        return True
+
 
 class TreeFrame(ttk.Frame):
     def __init__(

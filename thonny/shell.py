@@ -160,7 +160,7 @@ class ShellView(tk.PanedWindow):
             return
 
         container = cast(ttk.Frame, getattr(self, "home_widget"))
-        notebook = cast(CustomNotebook, container.master)
+        notebook = cast(CustomNotebook, container.notebook)
 
         # Should update tab text only if the tab is present
         for tab in notebook.winfo_children():

@@ -138,7 +138,7 @@ class VariablesView(VariablesFrame):
         if self.hidden:
             return
 
-        self.home_widget.master.tab(self.home_widget, text=text)
+        self.home_widget.notebook.tab(self.home_widget, text=text)
 
 
 def load_plugin() -> None:

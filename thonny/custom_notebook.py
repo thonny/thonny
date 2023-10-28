@@ -4,11 +4,82 @@ import sys
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
+from thonny import dnd  # inspired by and very similar to tkinter.dnd
 from thonny.languages import tr
 
 logger = getLogger(__name__)
+
+
+class CustomNotebookTabRow(tk.Frame):
+    def __init__(self, master: CustomNotebook, **kw):
+        self.notebook = master
+        self.root = master.winfo_toplevel()
+        super().__init__(master, **kw)
+        self.filler = tk.Frame(self, background=self.notebook.base_style_conf["background"])
+        self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
+        self._insertion_mark = tk.Frame(
+            self, background="black", width=_ems_to_pixels(0.3), height=_ems_to_pixels(2)
+        )
+        self._insertion_index = None
+
+    def dnd_accept(self, source, event):
+        assert isinstance(source, CustomNotebookTab)
+        return self
+
+    def dnd_enter(self, source, event):
+        self.dnd_motion(source, event)
+
+    def dnd_motion(self, source: CustomNotebookTab, event: tk.Event):
+        x = event.x_root - self.winfo_rootx()
+        y = event.y_root - self.winfo_rooty()
+        insertion_index, insertion_widget = self._compute_insertion_position(x, y)
+        source_index = source.notebook.index_of_tab(source)
+        if source.notebook is self.notebook and insertion_index in [source_index, source_index + 1]:
+            # no point in moving a tab right before or after itself
+            self._insertion_mark.place_forget()
+        else:
+            self._show_insertion_mark(insertion_index, insertion_widget)
+
+    def dnd_leave(self, source, event):
+        self.hide_insertion_mark()
+
+    def dnd_commit(self, source, event):
+        logger.info("dnd_commit with insertion_index %r", self._insertion_index)
+        if self._insertion_index is not None:
+            self.notebook.insert_from_another_notebook_or_position(
+                self._insertion_index, source.notebook.get_page_by_tab(source)
+            )
+        self.dnd_leave(source, event)
+
+    def _compute_insertion_position(self, mouse_x: int, mouse_y: int) -> Tuple[int, tk.Widget]:
+        dist_from_closest_left_edge = None
+        closest_left_edge_widget = None
+        closest_left_edge_index = None
+        items = [page.tab for page in self.notebook.pages] + [self.filler]
+        for i, item in enumerate(items):
+            dist_from_left_edge = abs(item.winfo_x() - mouse_x)
+            if (
+                dist_from_closest_left_edge is None
+                or dist_from_left_edge < dist_from_closest_left_edge
+            ):
+                dist_from_closest_left_edge = dist_from_left_edge
+                closest_left_edge_widget = item
+                closest_left_edge_index = i
+
+        return closest_left_edge_index, closest_left_edge_widget
+
+    def _show_insertion_mark(self, insertion_index: int, right_neigbour: tk.Widget) -> None:
+        self._insertion_mark.place_configure(
+            x=right_neigbour.winfo_x(), y=0, height=self.winfo_height()
+        )
+        self._insertion_index = insertion_index
+        self._insertion_mark.lift()
+
+    def hide_insertion_mark(self) -> None:
+        self._insertion_mark.place_forget()
+        self._insertion_index = None
 
 
 class CustomNotebook(tk.Frame):
@@ -21,11 +92,8 @@ class CustomNotebook(tk.Frame):
         self.columnconfigure(0, weight=1)
 
         # Can't use ttk.Frame, because can't change its color in aqua
-        self.tab_row = tk.Frame(self, background=self.style_conf["bordercolor"])
+        self.tab_row = CustomNotebookTabRow(self, background=self.style_conf["bordercolor"])
         self.tab_row.grid(row=0, column=0, sticky="new")
-
-        self.filler = tk.Frame(self.tab_row, background=self.base_style_conf["background"])
-        self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
         self.tab_row.columnconfigure(999, weight=1)
 
         self.current_page: Optional[CustomNotebookPage] = None
@@ -34,16 +102,37 @@ class CustomNotebook(tk.Frame):
     def add(self, child: tk.Widget, text: str) -> None:
         self.insert("end", child, text=text)
 
-    def insert(self, pos: Union[int, Literal["end"]], child: tk.Widget, text: str) -> None:
+    def insert(
+        self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str
+    ) -> None:
         tab = CustomNotebookTab(self, title=text, closable=self.closable)
         page = CustomNotebookPage(tab, child)
+        if isinstance(pos, tk.Widget):
+            pos = self.index(pos)
+
         if pos == "end":
             self.pages.append(page)
         else:
-            self.pages.insert(self.index(pos), page)
+            logger.info("Inserting %r to position %r in %r", child, pos, self.pages)
+            self.pages.insert(pos, page)
 
         self._rearrange_tabs()
         self.select_tab(page.tab)
+
+    def add_from_another_notebook(self, page: CustomNotebookPage) -> None:
+        self.insert_from_another_notebook_or_position("end", page)
+
+    def insert_from_another_notebook_or_position(
+        self, pos: Union[int, Literal["end"]], page: CustomNotebookPage
+    ) -> None:
+        original_notebook = page.tab.notebook
+        if original_notebook == self and pos >= self.index_of_tab(page.tab):
+            # tab will be removed first, so the new target index will be one less
+            pos -= 1
+
+        original_notebook.remove(page.content, keep_alive=True)
+        self.insert(pos, page.content, text=page.tab.get_title())
+        setattr(page.content, "notebook", self)
 
     def _rearrange_tabs(self) -> None:
         for i, page in enumerate(self.pages):
@@ -67,7 +156,7 @@ class CustomNotebook(tk.Frame):
             return
 
         new_page.content.grid_propagate(False)
-        new_page.content.grid(row=1, column=0, sticky="nsew", padx=(1, 1), pady=(0, 1))
+        new_page.content.grid(row=1, column=0, sticky="nsew", padx=(1, 1), pady=(0, 1), in_=self)
         if self.current_page:
             self.current_page.content.grid_remove()
             # new_page.content.tkraise(self.current_page.content)
@@ -90,7 +179,7 @@ class CustomNotebook(tk.Frame):
     def select_page(self, page: CustomNotebookPage) -> None:
         self.select_by_index(self.pages.index(page))
 
-    def index(self, tab_id: Optional[str, tk.Widget]) -> int:
+    def index(self, tab_id: Union[str, tk.Widget]) -> int:
         if tab_id == "end":
             return len(self.pages)
 
@@ -99,6 +188,13 @@ class CustomNotebook(tk.Frame):
                 return i
         else:
             raise RuntimeError(f"Can't find {tab_id!r}")
+
+    def index_of_tab(self, tab: CustomNotebookTab) -> int:
+        for i, page in enumerate(self.pages):
+            if page.tab is tab:
+                return i
+        else:
+            raise RuntimeError(f"Can't find {tab!r}")
 
     def tab(self, tab_id: Union[str, tk.Widget], text: str):
         page = self.pages[self.index(tab_id)]
@@ -111,6 +207,9 @@ class CustomNotebook(tk.Frame):
         return [page.content for page in self.pages]
 
     def forget(self, child: tk.Widget) -> None:
+        self.remove(child, keep_alive=False)
+
+    def remove(self, child: tk.Widget, keep_alive: bool) -> None:
         for i, page in enumerate(self.pages):
             if child is page.content:
                 break
@@ -131,10 +230,11 @@ class CustomNotebook(tk.Frame):
         del self.pages[i]
         self._rearrange_tabs()
 
-        if hasattr(child, "close"):
-            child.close()
-        else:
-            child.destroy()
+        if not keep_alive:
+            if hasattr(child, "close"):
+                child.close()
+            else:
+                child.destroy()
 
     def get_child_by_index(self, index: int) -> tk.Widget:
         return self.pages[index].content
@@ -179,6 +279,9 @@ class CustomNotebook(tk.Frame):
             else:
                 self.close_tab(page.tab)
 
+    def allows_dragging_to_another_notebook(self) -> bool:
+        return False
+
 
 class CustomNotebookTab(tk.Frame):
     close_image = None
@@ -193,6 +296,9 @@ class CustomNotebookTab(tk.Frame):
 
         self.notebook = notebook
         self.title = title
+        self.drag_start_x_root = 0
+        self.drag_start_y_root = 0
+
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.label = tk.Label(self, text=title, foreground=self.base_style["foreground"])
@@ -242,6 +348,9 @@ class CustomNotebookTab(tk.Frame):
     def set_title(self, text: str) -> None:
         self.label.configure(text=text)
 
+    def get_title(self) -> str:
+        return self.label.cget("text")
+
     def _right_btn_press(self, event):
         self.menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
 
@@ -257,8 +366,11 @@ class CustomNotebookTab(tk.Frame):
     def _close_other_tabs(self) -> None:
         self.notebook.close_tabs(except_tab=self)
 
-    def on_click(self, event):
+    def on_click(self, event: tk.Event):
         self.notebook.select_tab(self)
+        self.drag_start_x_root = event.x_root
+        self.drag_start_y_root = event.y_root
+        dnd.dnd_start(self, event)
 
     def on_button_click(self, event):
         self.notebook.close_tab(self)
@@ -291,11 +403,85 @@ class CustomNotebookTab(tk.Frame):
             self.button.configure(background=main_background)
         self.indicator.configure(background=indicator_background, height=indicator_height)
 
+    def dnd_motion_anywhere(self, source: CustomNotebookTab, event: tk.Event):
+        toplevel = self.winfo_toplevel()
+        delta_x = abs(source.drag_start_x_root - event.x_root)
+        delta_y = abs(source.drag_start_y_root - event.y_root)
+        moved_enough = _ems_to_pixels(2)
+        if (
+            (delta_x > moved_enough or delta_y > moved_enough)
+            and hasattr(toplevel, "show_notebook_drop_targets")
+            and self.notebook.allows_dragging_to_another_notebook()
+        ):
+            toplevel.show_notebook_drop_targets()
+
+    def dnd_end(self, target, event):
+        logger.info("Ending DND operation with target %r", target)
+        toplevel = self.winfo_toplevel()
+        if (
+            hasattr(toplevel, "hide_notebook_drop_targets")
+            and self.notebook.allows_dragging_to_another_notebook()
+        ):
+            toplevel.hide_notebook_drop_targets()
+
 
 class CustomNotebookPage:
     def __init__(self, tab: CustomNotebookTab, content: tk.Widget):
         self.tab = tab
         self.content = content
+
+
+class NotebookTabDropTarget(tk.Canvas):
+    def __init__(
+        self,
+        master: Union[tk.Tk, tk.Toplevel, tk.Widget],
+        notebook: CustomNotebook,
+        width: int,
+        height: int,
+    ):
+        self.notebook = notebook
+        self.inactive_color = "#E4E4E4"
+        self.active_color = "gray"
+        super().__init__(
+            master=master,
+            width=width,
+            height=height,
+            borderwidth=0,
+            highlightthickness=0,
+            background=self.inactive_color,
+        )
+
+        borderwidth = _ems_to_pixels(0.2)
+        dash_step = _ems_to_pixels(0.5)
+        self.rect_id = self.create_rectangle(
+            1,
+            1,
+            width - borderwidth,
+            height - borderwidth,
+            dash=(dash_step, dash_step * 2),
+            width=borderwidth,
+            fill=self.inactive_color,
+        )
+
+    def dnd_accept(self, source: CustomNotebookTab, event: tk.Event):
+        assert isinstance(source, CustomNotebookTab)
+        return self
+
+    def dnd_enter(self, source: CustomNotebookTab, event: tk.Event):
+        self.configure(background=self.active_color)
+        self.itemconfigure(self.rect_id, fill=self.active_color)
+        self.dnd_motion(source, event)
+
+    def dnd_motion(self, source: CustomNotebookTab, event: tk.Event):
+        pass
+
+    def dnd_leave(self, source: CustomNotebookTab, event: tk.Event):
+        self.configure(background=self.inactive_color)
+        self.itemconfigure(self.rect_id, fill=self.inactive_color)
+
+    def dnd_commit(self, source: CustomNotebookTab, event: tk.Event):
+        self.dnd_leave(source, event)
+        self.notebook.add_from_another_notebook(source.notebook.get_page_by_tab(source))
 
 
 def _get_image(name: str) -> tk.PhotoImage:
@@ -315,6 +501,8 @@ def _get_style_configuration(name: str) -> Dict:
 
     return get_style_configuration(name)
 
+
+"""
 
 class TextFrame(tk.Frame):
     def __init__(self, master):
@@ -346,7 +534,6 @@ class TextFrame(tk.Frame):
         self.text["yscrollcommand"] = self.scrollbar.set
 
 
-"""
 if __name__ == "__main__":
     if sys.platform == "win32":
         import ctypes
