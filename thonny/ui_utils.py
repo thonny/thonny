@@ -824,13 +824,16 @@ class AutomaticNotebook(CustomNotebook):
         super().hide(tab_id)
         self._update_visibility()
 
-    def forget(self, tab_id):
+    def remove(self, tab_id, keep_alive: bool):
         if tab_id in self.tabs() or tab_id in self.winfo_children():
-            super().forget(tab_id)
+            super().remove(tab_id, keep_alive=keep_alive)
         self._update_visibility()
 
     def is_visible(self):
-        return self in self.master.pane_widgets()
+        if not isinstance(self.master, AutomaticPanedWindow):
+            return self.winfo_ismapped()
+        else:
+            return self in self.master.pane_widgets()
 
     def get_visible_child(self):
         for child in self.winfo_children():

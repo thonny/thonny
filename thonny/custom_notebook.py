@@ -228,6 +228,7 @@ class CustomNotebook(tk.Frame):
         self.pages[i].tab.grid_forget()
 
         del self.pages[i]
+        self.current_page = None
         self._rearrange_tabs()
 
         if not keep_alive:
