@@ -206,6 +206,9 @@ class CustomNotebook(tk.Frame):
     def winfo_children(self) -> List[tk.Widget]:
         return [page.content for page in self.pages]
 
+    def hide(self, tab_id):
+        self.remove(tab_id, keep_alive=True)
+
     def forget(self, child: tk.Widget) -> None:
         self.remove(child, keep_alive=False)
 
