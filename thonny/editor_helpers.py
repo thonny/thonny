@@ -354,7 +354,7 @@ def get_text_filename(text: SyntaxText) -> Optional[str]:
     if isinstance(text, ShellText):
         return "<Shell>"
     elif isinstance(text, CodeViewText):
-        editor = getattr(text.master, "home_widget")
+        editor = text.master.master
         if isinstance(editor, Editor):
             return editor.get_filename()
 

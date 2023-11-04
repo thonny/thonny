@@ -6,7 +6,7 @@ import tkinter as tk
 import traceback
 from logging import getLogger
 from tkinter import ttk
-from typing import cast
+from typing import Optional, cast
 
 from _tkinter import TclError
 
@@ -21,7 +21,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
 )
-from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
@@ -154,21 +153,8 @@ class ShellView(tk.PanedWindow):
 
     def set_osc_title(self, text: str) -> None:
         self._osc_title = text
-
-        if not hasattr(self, "home_widget"):
-            logger.warning("No home widget")
-            return
-
-        container = cast(ttk.Frame, getattr(self, "home_widget"))
-        notebook = cast(CustomNotebook, container.notebook)
-
-        # Should update tab text only if the tab is present
-        for tab in notebook.winfo_children():
-            try:
-                if container == tab:
-                    notebook.tab(container, text=self.get_tab_text())
-            except TclError:
-                logger.exception("Could not update tab title")
+        if self.containing_notebook is not None:
+            self.containing_notebook.tab(self, text=text)
 
     def init_plotter(self):
         self.plotter = None

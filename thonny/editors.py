@@ -61,11 +61,10 @@ class Editor(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
-        self.notebook = master  # type: EditorNotebook
+        self.containing_notebook = master  # type: EditorNotebook
 
-        # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
-            get_workbench(),
+            self,
             propose_remove_line_numbers=True,
             font="EditorFont",
             text_class=EditorCodeViewText,
@@ -76,8 +75,6 @@ class Editor(ttk.Frame):
         )
 
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
-        self._code_view.home_widget = self  # don't forget home
-        self.maximizable_widget = self._code_view
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -291,7 +288,7 @@ class Editor(ttk.Frame):
             if not save_filename:
                 return None
 
-            if self.notebook.get_editor(save_filename) is not None:
+            if self.containing_notebook.get_editor(save_filename) is not None:
                 messagebox.showerror(
                     tr("File is open"),
                     tr(
@@ -570,7 +567,7 @@ class Editor(ttk.Frame):
 
     def _on_text_change(self, event):
         # may not be added to the Notebook yet
-        if self.notebook.has_content(self):
+        if self.containing_notebook.has_content(self):
             self.update_title()
 
     def destroy(self):
@@ -907,9 +904,7 @@ class EditorNotebook(CustomNotebook):
                 continue
             else:
                 editor = self.get_child_by_index(tab_index)
-                if self.check_allow_closing(editor):
-                    self.forget(editor)
-                    editor.destroy()
+                self.close_editor(editor, force=False)
 
     def _cmd_close_file(self):
         self.close_tab(self.index(self.select()))
@@ -926,7 +921,7 @@ class EditorNotebook(CustomNotebook):
     def close_editor(self, editor, force=False):
         if not force and not self.check_allow_closing(editor):
             return
-        self.forget(editor)
+        self._plain_forget(editor)
         editor.destroy()
 
     def _cmd_save_file(self):

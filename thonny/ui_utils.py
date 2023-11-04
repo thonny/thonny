@@ -10,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+from abc import ABC, abstractmethod
 from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # @UnusedImport
@@ -18,7 +19,7 @@ from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
-from thonny.custom_notebook import CustomNotebook
+from thonny.custom_notebook import CustomNotebook, CustomNotebookPage, CustomNotebookTab
 from thonny.languages import get_button_padding, tr
 from thonny.misc_utils import (
     running_on_linux,
@@ -442,7 +443,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self.unbind("<<ThemeChanged>>", self._update_appearance_binding)
         tk.PanedWindow.destroy(self)
 
-    def is_visible(self):
+    def _is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return self.winfo_ismapped()
         else:
@@ -571,215 +572,15 @@ class AutomaticPanedWindow(tk.PanedWindow):
         if not isinstance(self.master, AutomaticPanedWindow):
             return
 
-        if len(self.panes()) == 0 and self.is_visible():
+        if len(self.panes()) == 0 and self._is_visible():
             self.master.forget(self)
 
-        if len(self.panes()) > 0 and not self.is_visible():
+        if len(self.panes()) > 0 and not self._is_visible():
             self.master.insert("auto", self)
 
     def _update_appearance(self, event=None):
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", ems_to_pixels(0.6)))
         self.configure(background=lookup_style_option(".", "background"))
-
-
-class ClosableNotebook(ttk.Notebook):
-    def __init__(self, master, style="ButtonNotebook.TNotebook", **kw):
-        super().__init__(master, style=style, **kw)
-
-        self.tab_menu = self.create_tab_menu()
-        self._popup_index = None
-        self.pressed_index = None
-
-        self.bind("<ButtonPress-1>", self._letf_btn_press, True)
-        self.bind("<ButtonRelease-1>", self._left_btn_release, True)
-        if running_on_mac_os():
-            self.bind("<ButtonPress-2>", self._right_btn_press, True)
-            self.bind("<Control-Button-1>", self._right_btn_press, True)
-            self.bind("<ButtonPress-3>", self._middle_btn_press, True)
-        else:
-            self.bind("<ButtonPress-3>", self._right_btn_press, True)
-            self.bind("<ButtonPress-2>", self._middle_btn_press, True)
-
-        # self._check_update_style()
-
-    def create_tab_menu(self):
-        menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
-        menu.add_command(label=tr("Close"), command=self._close_tab_from_menu)
-        menu.add_command(label=tr("Close others"), command=self._close_other_tabs)
-        menu.add_command(label=tr("Close all"), command=self.close_tabs)
-        return menu
-
-    def _letf_btn_press(self, event):
-        try:
-            elem = self.identify(event.x, event.y)
-            index = self.index("@%d,%d" % (event.x, event.y))
-
-            if "closebutton" in elem:
-                self.state(["pressed"])
-                self.pressed_index = index
-        except Exception:
-            # may fail, if clicked outside of tab
-            return
-
-    def _left_btn_release(self, event):
-        if not self.instate(["pressed"]):
-            return
-
-        try:
-            elem = self.identify(event.x, event.y)
-            index = self.index("@%d,%d" % (event.x, event.y))
-        except Exception:
-            # may fail, when mouse is dragged
-            return
-        else:
-            if "closebutton" in elem and self.pressed_index == index:
-                self.close_tab(index)
-
-            self.state(["!pressed"])
-        finally:
-            self.pressed_index = None
-
-    def _right_btn_press(self, event):
-        try:
-            index = self.index("@%d,%d" % (event.x, event.y))
-            self._popup_index = index
-            self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
-        except Exception:
-            logger.exception("Opening tab menu")
-
-    def _middle_btn_press(self, event):
-        try:
-            index = self.index("@%d,%d" % (event.x, event.y))
-            self.close_tab(index)
-
-        except Exception:
-            logger.exception("Middle click on tab")
-
-    def _close_tab_from_menu(self):
-        self.close_tab(self._popup_index)
-
-    def _close_other_tabs(self):
-        self.close_tabs(except_index=self._popup_index)
-
-    def close_tabs(self, except_index=None):
-        for tab_index in reversed(range(len(self.winfo_children()))):
-            if except_index is not None and tab_index == except_index:
-                continue
-            else:
-                self.close_tab(tab_index)
-
-    def close_tab(self, index):
-        child = self.get_child_by_index(index)
-        if hasattr(child, "close"):
-            child.close()
-        else:
-            self.forget(index)
-            child.destroy()
-
-    def get_child_by_index(self, index):
-        tab_id = self.tabs()[index]
-        if tab_id:
-            return self.nametowidget(tab_id)
-        else:
-            return None
-
-    def get_current_child(self):
-        child_id = self.select()
-        if child_id:
-            return self.nametowidget(child_id)
-        else:
-            return None
-
-    def focus_set(self):
-        editor = self.get_current_child()
-        if editor:
-            editor.focus_set()
-        else:
-            super().focus_set()
-
-    def _check_update_style(self):
-        style = ttk.Style()
-        if "closebutton" in style.element_names():
-            # It's done already
-            return
-
-        # respect if required images have been defined already
-        if "img_close" not in self.image_names():
-            img_dir = os.path.join(os.path.dirname(__file__), "res")
-            ClosableNotebook._close_img = tk.PhotoImage(
-                "img_tab_close", file=os.path.join(img_dir, "tab_close.gif")
-            )
-            ClosableNotebook._close_active_img = tk.PhotoImage(
-                "img_tab_close_active", file=os.path.join(img_dir, "tab_close_active.gif")
-            )
-
-        style.element_create(
-            "closebutton",
-            "image",
-            "img_tab_close",
-            ("active", "pressed", "!disabled", "img_tab_close_active"),
-            ("active", "!disabled", "img_tab_close_active"),
-            border=8,
-            sticky="",
-        )
-
-        style.layout(
-            "ButtonNotebook.TNotebook.Tab",
-            [
-                (
-                    "Notebook.tab",
-                    {
-                        "sticky": "nswe",
-                        "children": [
-                            (
-                                "Notebook.padding",
-                                {
-                                    "side": "top",
-                                    "sticky": "nswe",
-                                    "children": [
-                                        (
-                                            "Notebook.focus",
-                                            {
-                                                "side": "top",
-                                                "sticky": "nswe",
-                                                "children": [
-                                                    (
-                                                        "Notebook.label",
-                                                        {"side": "left", "sticky": ""},
-                                                    ),
-                                                    (
-                                                        "Notebook.closebutton",
-                                                        {"side": "left", "sticky": ""},
-                                                    ),
-                                                ],
-                                            },
-                                        )
-                                    ],
-                                },
-                            )
-                        ],
-                    },
-                )
-            ],
-        )
-
-    def _check_remove_padding(self, kw):
-        # Windows themes produce 1-pixel padding to the bottom of the pane
-        # Don't know how to get rid of it using themes
-        if "padding" not in kw and ttk.Style().theme_use().lower() in (
-            "windows",
-            "xpnative",
-            "vista",
-        ):
-            kw["padding"] = (0, 0, 0, -1)
-
-    def add(self, child, **kw):
-        self._check_remove_padding(kw)
-        super().add(child, **kw)
-
-    def insert(self, pos, child, **kw):
-        self._check_remove_padding(kw)
-        super().insert(pos, child, **kw)
 
 
 class AutomaticNotebook(CustomNotebook):
@@ -800,55 +601,30 @@ class AutomaticNotebook(CustomNotebook):
         # constructor hasn't completed yet
         self.preferred_size_in_pw = preferred_size_in_pw
 
-    def add(self, child, **kw):
-        super().add(child, **kw)
+    def after_add_or_insert(self, page: CustomNotebookPage) -> None:
+        super().after_add_or_insert(page)
         self._update_visibility()
+        get_workbench().event_generate("NotebookPageOpened", page=page)
 
-    def insert(self, pos, child, **kw):
-        if pos == "auto":
-            for sibling in [page.content for page in self.pages]:
-                if (
-                    not hasattr(sibling, "position_key")
-                    or sibling.position_key == None
-                    or sibling.position_key > child.position_key
-                ):
-                    pos = sibling
-                    break
-            else:
-                pos = "end"
-
-        super().insert(pos, child, **kw)
+    def after_forget(self, page: CustomNotebookPage):
+        # see the comment at after_add_or_insert
+        super().after_forget(page)
         self._update_visibility()
+        get_workbench().event_generate("NotebookPageClosed", page=page)
 
-    def hide(self, tab_id):
-        super().hide(tab_id)
-        self._update_visibility()
-
-    def remove(self, tab_id, keep_alive: bool):
-        if tab_id in self.tabs() or tab_id in self.winfo_children():
-            super().remove(tab_id, keep_alive=keep_alive)
-        self._update_visibility()
-
-    def is_visible(self):
+    def _is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return self.winfo_ismapped()
         else:
             return self in self.master.pane_widgets()
 
-    def get_visible_child(self):
-        for child in self.winfo_children():
-            if str(child) == str(self.select()):
-                return child
-
-        return None
-
     def _update_visibility(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return
-        if len(self.tabs()) == 0 and self.is_visible():
+        if len(self.tabs()) == 0 and self._is_visible():
             self.master.remove(self)
 
-        if len(self.tabs()) > 0 and not self.is_visible():
+        if len(self.tabs()) > 0 and not self._is_visible():
             self.master.insert("auto", self)
 
     def allows_dragging_to_another_notebook(self) -> bool:

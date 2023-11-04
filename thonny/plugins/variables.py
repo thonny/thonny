@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
-from tkinter import messagebox, ttk
+from tkinter import ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
@@ -76,10 +76,12 @@ class VariablesView(VariablesFrame):
         self.clear_error()
         # TODO: update only if something has changed
         self.update_variables(globals_)
-        if module_name == "__main__":
-            self._set_tab_caption(tr("Variables"))
-        else:
-            self._set_tab_caption(tr("Variables") + " (%s)" % module_name)
+
+        if self.containing_notebook is not None:
+            if module_name == "__main__":
+                self.containing_notebook.tab(self, text=get_default_tab_text())
+            else:
+                self.containing_notebook.tab(self, text=get_default_tab_text() + " (%s)" % module_name)
 
         if is_active:
             self._last_active_info = (globals_, module_name)
@@ -101,7 +103,8 @@ class VariablesView(VariablesFrame):
             groups.insert(1, ("NONLOCALS", nonlocals))
 
         self.update_variables(groups)
-        self._set_tab_caption("Variables (%s)" % frame_name)
+        if self.containing_notebook is not None:
+            self.containing_notebook.tab(self, text=get_default_tab_text() + " (%s)" % frame_name)
 
         if is_active:
             self._last_active_info = (locals_, globals_, freevars, frame_name)
@@ -133,13 +136,12 @@ class VariablesView(VariablesFrame):
                     is_active,
                 )
 
-    def _set_tab_caption(self, text):
-        # pylint: disable=no-member
-        if self.hidden:
-            return
 
-        self.home_widget.notebook.tab(self.home_widget, text=text)
+def get_default_tab_text() -> str:
+    return tr("Variables")
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(VariablesView, tr("Variables"), "ne", default_position_key="AAA")
+    get_workbench().add_view(
+        VariablesView, get_default_tab_text(), "ne", default_position_key="AAA"
+    )

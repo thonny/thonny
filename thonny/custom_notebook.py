@@ -3,8 +3,7 @@ from __future__ import annotations
 import sys
 import tkinter as tk
 from logging import getLogger
-from tkinter import ttk
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union, cast
 
 from thonny import dnd  # inspired by and very similar to tkinter.dnd
 from thonny.languages import tr
@@ -100,9 +99,29 @@ class CustomNotebook(tk.Frame):
         self.pages: List[CustomNotebookPage] = []
 
     def add(self, child: tk.Widget, text: str) -> None:
-        self.insert("end", child, text=text)
+        self._plain_insert("end", child, text=text)
 
     def insert(
+        self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str
+    ) -> None:
+        if pos == "auto":
+            child_position_key = getattr(child, "position_key", None)
+            if child_position_key is not None:
+                for sibling_content in [page.content for page in self.pages]:
+                    sibling_position_key = getattr(sibling_content, "position_key", None)
+
+                    if sibling_position_key is None or sibling_position_key > child_position_key:
+                        pos = sibling_content
+                        break
+                else:
+                    pos = "end"
+            else:
+                logger.warning("auto insert without position_key")
+                pos = "end"
+
+        self._plain_insert(pos, child, text)
+
+    def _plain_insert(
         self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str
     ) -> None:
         tab = CustomNotebookTab(self, title=text, closable=self.closable)
@@ -117,7 +136,10 @@ class CustomNotebook(tk.Frame):
             self.pages.insert(pos, page)
 
         self._rearrange_tabs()
-        self.select_tab(page.tab)
+        if len(self.pages) == 1:
+            self.select_tab(page.tab)
+        child.containing_notebook = self
+        self.after_add_or_insert(page)
 
     def add_from_another_notebook(self, page: CustomNotebookPage) -> None:
         self.insert_from_another_notebook_or_position("end", page)
@@ -130,9 +152,9 @@ class CustomNotebook(tk.Frame):
             # tab will be removed first, so the new target index will be one less
             pos -= 1
 
-        original_notebook.remove(page.content, keep_alive=True)
-        self.insert(pos, page.content, text=page.tab.get_title())
-        setattr(page.content, "notebook", self)
+        original_notebook._plain_forget(page.content)
+        self._plain_insert(pos, page.content, text=page.tab.get_title())
+        setattr(page.content, "containing_notebook", self)
 
     def _rearrange_tabs(self) -> None:
         for i, page in enumerate(self.pages):
@@ -160,13 +182,15 @@ class CustomNotebook(tk.Frame):
         if self.current_page:
             self.current_page.content.grid_remove()
             # new_page.content.tkraise(self.current_page.content)
-
+        print("new", new_page.content)
         new_page.tab.update_state(True)
         if self.current_page:
+            print("old", self.current_page.content)
             self.current_page.tab.update_state(False)
 
+        print("Current page becomes", new_page.content)
         self.current_page = new_page
-        self.event_generate("<<NotebookTabChanged>>")  # TODO:
+        self.event_generate("<<NotebookTabChanged>>")
 
     def select_tab(self, tab: CustomNotebookTab) -> None:
         for i, page in enumerate(self.pages):
@@ -206,13 +230,10 @@ class CustomNotebook(tk.Frame):
     def winfo_children(self) -> List[tk.Widget]:
         return [page.content for page in self.pages]
 
-    def hide(self, tab_id):
-        self.remove(tab_id, keep_alive=True)
-
     def forget(self, child: tk.Widget) -> None:
-        self.remove(child, keep_alive=False)
+        self._plain_forget(child)
 
-    def remove(self, child: tk.Widget, keep_alive: bool) -> None:
+    def _plain_forget(self, child: tk.Widget) -> None:
         for i, page in enumerate(self.pages):
             if child is page.content:
                 break
@@ -231,14 +252,16 @@ class CustomNotebook(tk.Frame):
         self.pages[i].tab.grid_forget()
 
         del self.pages[i]
-        self.current_page = None
         self._rearrange_tabs()
 
-        if not keep_alive:
-            if hasattr(child, "close"):
-                child.close()
-            else:
-                child.destroy()
+        child.containing_notebook = None
+        self.after_forget(page)
+
+    def after_add_or_insert(self, page: CustomNotebookPage) -> None:
+        self.event_generate("<<NotebookTabOpened>>")
+
+    def after_forget(self, page: CustomNotebookPage) -> None:
+        self.event_generate("<<NotebookTabClosed>>")
 
     def get_child_by_index(self, index: int) -> tk.Widget:
         return self.pages[index].content
@@ -274,7 +297,7 @@ class CustomNotebook(tk.Frame):
         else:
             page = self.get_page_by_tab(index_or_tab)
 
-        self.forget(page.content)
+        self._plain_forget(page.content)
 
     def close_tabs(self, except_tab: Optional[CustomNotebookTab] = None):
         for page in reversed(self.pages):

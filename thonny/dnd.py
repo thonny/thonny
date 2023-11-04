@@ -167,7 +167,7 @@ class DndHandler:
                 new_target = attr(source, event)
                 if new_target is not None:
                     break
-            target_widget = getattr(target_widget, "home_widget", target_widget.master)
+            target_widget = target_widget.master
         old_target = self.target
         if old_target is new_target:
             if old_target is not None:

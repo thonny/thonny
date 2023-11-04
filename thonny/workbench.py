@@ -10,6 +10,7 @@ import re
 import shutil
 import socket
 import sys
+import tkinter
 import tkinter as tk
 import tkinter.font as tk_font
 import traceback
@@ -33,6 +34,7 @@ from thonny import (
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
+from thonny.custom_notebook import CustomNotebookPage
 from thonny.editors import EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.misc_utils import (
@@ -189,6 +191,10 @@ class Workbench(tk.Tk):
         self._init_program_arguments_frame()
         self._init_regular_mode_link()  # TODO:
 
+        # Need to register opened handler before opening views
+        self.bind("NotebookPageOpened", self._notebook_page_opened, True)
+        self.bind("NotebookPageClosed", self._notebook_page_closed, True)
+
         self._show_views()
         # Make sure ShellView is loaded
         get_shell()
@@ -200,9 +206,11 @@ class Workbench(tk.Tk):
         except Exception:
             self.report_exception()
 
+        print(self._event_handlers)
+
         self._editor_notebook.focus_set()
         logger.info("Opening views")
-        self._try_action(self._open_views)
+        self._try_action(self._restore_active_views)
 
         self.bind_class("EditorCodeViewText", "<<CursorMove>>", self.update_title, True)
         self.bind_class("EditorCodeViewText", "<<Modified>>", self.update_title, True)
@@ -331,7 +339,6 @@ class Workbench(tk.Tk):
         # I don't actually need saved options for Full screen/maximize view,
         # but it's easier to create menu items, if I use configuration manager's variables
         self.set_default("view.full_screen", False)
-        self.set_default("view.maximize_view", False)
 
         # In order to avoid confusion set these settings to False
         # even if they were True when Thonny was last run
@@ -1638,27 +1645,12 @@ class Workbench(tk.Tk):
             if not create:
                 raise RuntimeError("View %s not created" % view_id)
             class_ = self._view_records[view_id]["class"]
-            location = self._view_records[view_id]["location"]
-            notebook = self._view_notebooks[location]
-
-            # create the view
-            view = class_(self)  # View's master is workbench to allow making it maximized
+            # View's master must contain all notebooks to allow dragging between notebooks
+            view = class_(self._main_pw)
+            view.containing_notebook = None
             view.position_key = self._view_records[view_id]["position_key"]
+            view.view_id = view_id
             self._view_records[view_id]["instance"] = view
-
-            # create the view home_widget to be added into notebook
-            view.home_widget = ttk.Frame(self._main_pw)
-            view.home_widget.notebook = notebook
-            view.home_widget.columnconfigure(0, weight=1)
-            view.home_widget.rowconfigure(0, weight=1)
-            view.home_widget.maximizable_widget = view  # type: ignore
-            view.home_widget.close = lambda: self.hide_view(view_id)  # type: ignore
-            if hasattr(view, "position_key"):
-                view.home_widget.position_key = view.position_key  # type: ignore
-
-            # initially the view will be in its home_widget
-            view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
-            view.hidden = True
 
         return self._view_records[view_id]["instance"]
 
@@ -1741,62 +1733,65 @@ class Workbench(tk.Tk):
         """View must be already registered.
 
         Args:
-            view_id: View class name
-            without package name (eg. 'ShellView')"""
+            view_id: View class name without package name (e.g. 'ShellView')"""
 
         if view_id == "MainFileBrowser":
             # Was renamed in 3.1.1
             view_id = "FilesView"
 
-        # NB! Don't forget that view.home_widget is added to notebook, not view directly
         # get or create
         view = self.get_view(view_id)
-        notebook = view.home_widget.notebook  # type: ignore
+        containing_notebook = getattr(view, "containing_notebook", None)
 
         if hasattr(view, "before_show") and view.before_show() == False:  # type: ignore
             return False
 
-        if view.hidden:  # type: ignore
+        if containing_notebook is None:
+            location = self._view_records[view_id]["location"]
+            notebook = self._view_notebooks[location]
             label = None
             if hasattr(view, "get_tab_text"):
                 label = view.get_tab_text()
             if not label:
                 label = self._view_records[view_id]["label"]
-            notebook.insert("auto", view.home_widget, text=label)  # type: ignore
-            view.hidden = False  # type: ignore
+            logger.info("Adding view %r to notebook %s", view, location)
+            notebook.insert("auto", view, text=label)  # type: ignore
             if hasattr(view, "on_show"):  # type: ignore
                 view.on_show()
 
         # switch to the tab
-        notebook.select(view.home_widget)  # type: ignore
+        view.containing_notebook.select(view)  # type: ignore
 
         # add focus
         if set_focus:
             view.focus_set()
 
-        self.set_option("view." + view_id + ".visible", True)
-        self.event_generate("ShowView", view=view, view_id=view_id)
         return view
 
-    def hide_view(self, view_id: str) -> Union[bool, None]:
-        # NB! Don't forget that view.home_widget is added to notebook, not view directly
+    def _notebook_page_opened(self, event) -> None:
+        logger.info("Notebook page opened: %r", event)
+        page: CustomNotebookPage = event.page
+        view_id = getattr(page.content, "view_id", None)
+        if view_id is not None:
+            self.set_option("view." + view_id + ".visible", True)
+            self.event_generate("ShowView", view=event.page.content, view_id=view_id)
 
-        if "instance" in self._view_records[view_id]:
-            # TODO: handle the case, when view is maximized
-            view = self._view_records[view_id]["instance"]
-            if view.hidden:
-                return True
-
-            if hasattr(view, "before_hide") and view.before_hide() == False:
-                return False
-
-            view.home_widget.notebook.forget(view.home_widget)
+    def _notebook_page_closed(self, event) -> None:
+        logger.info("Notebook page closed: %r", event)
+        page: CustomNotebookPage = event.page
+        view_id = getattr(page.content, "view_id", None)
+        if view_id is not None:
             self.set_option("view." + view_id + ".visible", False)
+            self.event_generate("HideView", view=event.page.content, view_id=view_id)
 
-            self.event_generate("HideView", view=view, view_id=view_id)
-            view.hidden = True
+    def hide_view(self, view_id: str) -> None:
+        if "instance" in self._view_records[view_id]:
+            view = self._view_records[view_id]["instance"]
+            if view.containing_notebook is None:
+                # Already hidden
+                return
 
-        return True
+            view.containing_notebook.forget(view)
 
     def queue_event(self, sequence: str, event: Optional[Record] = None) -> None:
         """
@@ -2170,45 +2165,10 @@ class Workbench(tk.Tk):
             self.geometry(new_geometry)
 
     def _maximize_view(self, event=None) -> None:
-        if self._maximized_view is not None:
-            return
-
-        # find the widget that can be relocated
-        widget = self.focus_get()
-        if isinstance(widget, (EditorNotebook, AutomaticNotebook)):
-            current_tab = widget.get_current_child()
-            if current_tab is None:
-                return
-
-            if not hasattr(current_tab, "maximizable_widget"):
-                return
-
-            widget = current_tab.maximizable_widget
-
-        while widget is not None:
-            if hasattr(widget, "home_widget"):
-                # if widget is view, then widget.master is workbench
-                widget.grid(row=1, column=0, sticky=tk.NSEW, in_=widget.master)  # type: ignore
-                # hide main_frame
-                self._main_frame.grid_forget()
-                self._maximized_view = widget
-                self.get_variable("view.maximize_view").set(True)
-                break
-            else:
-                widget = widget.master  # type: ignore
+        raise NotImplementedError()
 
     def _unmaximize_view(self, event=None) -> None:
-        if self._maximized_view is None:
-            return
-
-        # restore main_frame
-        self._main_frame.grid(row=1, column=0, sticky=tk.NSEW, in_=self)
-        # put the maximized view back to its home_widget
-        self._maximized_view.grid(
-            row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.home_widget  # type: ignore
-        )
-        self._maximized_view = None
-        self.get_variable("view.maximize_view").set(False)
+        raise NotImplementedError()
 
     def show_options(self, page_key=None):
         dlg = ConfigurationDialog(self, self._configuration_pages)
@@ -2473,7 +2433,7 @@ class Workbench(tk.Tk):
             dlg = ui_utils.LongTextDialog(title, msg, parent=self)
             ui_utils.show_dialog(dlg, self)
 
-    def _open_views(self) -> None:
+    def _restore_active_views(self) -> None:
         for nb_name in self._view_notebooks:
             view_name = self.get_option("layout.notebook_" + nb_name + "_visible_view")
             if view_name != None:
@@ -2502,13 +2462,9 @@ class Workbench(tk.Tk):
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self))
 
         for nb_name in self._view_notebooks:
-            widget = self._view_notebooks[nb_name].get_visible_child()
-            if hasattr(widget, "maximizable_widget"):
-                view = widget.maximizable_widget
-                view_name = type(view).__name__
-                self.set_option("layout.notebook_" + nb_name + "_visible_view", view_name)
-            else:
-                self.set_option("layout.notebook_" + nb_name + "_visible_view", None)
+            view = self._view_notebooks[nb_name].get_current_child()
+            view_name = type(view).__name__
+            self.set_option("layout.notebook_" + nb_name + "_visible_view", view_name)
 
         if not ui_utils.get_zoomed(self) or running_on_mac_os():
             # can't restore zoom on mac without setting actual dimensions
