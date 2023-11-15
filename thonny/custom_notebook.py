@@ -99,30 +99,17 @@ class CustomNotebook(tk.Frame):
         self.pages: List[CustomNotebookPage] = []
 
     def add(self, child: tk.Widget, text: str) -> None:
-        self._plain_insert("end", child, text=text)
+        self._insert("end", child, text=text)
 
-    def insert(
-        self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str
-    ) -> None:
-        if pos == "auto":
-            child_position_key = getattr(child, "position_key", None)
-            if child_position_key is not None:
-                for sibling_content in [page.content for page in self.pages]:
-                    sibling_position_key = getattr(sibling_content, "position_key", None)
+    def insert(self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str):
+        self._insert(pos, child, text)
 
-                    if sibling_position_key is None or sibling_position_key > child_position_key:
-                        pos = sibling_content
-                        break
-                else:
-                    pos = "end"
-            else:
-                logger.warning("auto insert without position_key")
-                pos = "end"
-
-        self._plain_insert(pos, child, text)
-
-    def _plain_insert(
-        self, pos: Union[int, Literal["end"], tk.Widget], child: tk.Widget, text: str
+    def _insert(
+        self,
+        pos: Union[int, Literal["end"], tk.Widget],
+        child: tk.Widget,
+        text: str,
+        old_notebook: Optional[CustomNotebook] = None,
     ) -> None:
         tab = CustomNotebookTab(self, title=text, closable=self.closable)
         page = CustomNotebookPage(tab, child)
@@ -132,14 +119,17 @@ class CustomNotebook(tk.Frame):
         if pos == "end":
             self.pages.append(page)
         else:
+            assert isinstance(pos, int), f"Got {pos!r} instead of int"
             logger.info("Inserting %r to position %r in %r", child, pos, self.pages)
             self.pages.insert(pos, page)
 
         self._rearrange_tabs()
-        if len(self.pages) == 1:
-            self.select_tab(page.tab)
+        self.select_tab(page.tab)
         child.containing_notebook = self
-        self.after_add_or_insert(page)
+        if old_notebook is not None:
+            self.after_move(page, old_notebook)
+        else:
+            self.after_add_or_insert(page)
 
     def add_from_another_notebook(self, page: CustomNotebookPage) -> None:
         self.insert_from_another_notebook_or_position("end", page)
@@ -152,8 +142,8 @@ class CustomNotebook(tk.Frame):
             # tab will be removed first, so the new target index will be one less
             pos -= 1
 
-        original_notebook._plain_forget(page.content)
-        self._plain_insert(pos, page.content, text=page.tab.get_title())
+        original_notebook._forget(page.content, to_be_moved=True)
+        self._insert(pos, page.content, text=page.tab.get_title(), old_notebook=original_notebook)
         setattr(page.content, "containing_notebook", self)
 
     def _rearrange_tabs(self) -> None:
@@ -182,10 +172,8 @@ class CustomNotebook(tk.Frame):
         if self.current_page:
             self.current_page.content.grid_remove()
             # new_page.content.tkraise(self.current_page.content)
-        print("new", new_page.content)
         new_page.tab.update_state(True)
         if self.current_page:
-            print("old", self.current_page.content)
             self.current_page.tab.update_state(False)
 
         print("Current page becomes", new_page.content)
@@ -204,6 +192,7 @@ class CustomNotebook(tk.Frame):
         self.select_by_index(self.pages.index(page))
 
     def index(self, tab_id: Union[str, tk.Widget]) -> int:
+        print("pages", self.pages)
         if tab_id == "end":
             return len(self.pages)
 
@@ -231,9 +220,9 @@ class CustomNotebook(tk.Frame):
         return [page.content for page in self.pages]
 
     def forget(self, child: tk.Widget) -> None:
-        self._plain_forget(child)
+        self._forget(child)
 
-    def _plain_forget(self, child: tk.Widget) -> None:
+    def _forget(self, child: tk.Widget, to_be_moved: bool = False) -> None:
         for i, page in enumerate(self.pages):
             if child is page.content:
                 break
@@ -255,13 +244,17 @@ class CustomNotebook(tk.Frame):
         self._rearrange_tabs()
 
         child.containing_notebook = None
-        self.after_forget(page)
+        if not to_be_moved:
+            self.after_forget(page)
 
     def after_add_or_insert(self, page: CustomNotebookPage) -> None:
         self.event_generate("<<NotebookTabOpened>>")
 
     def after_forget(self, page: CustomNotebookPage) -> None:
         self.event_generate("<<NotebookTabClosed>>")
+
+    def after_move(self, page: CustomNotebookPage, old_notebook: CustomNotebook) -> None:
+        self.event_generate("<<NotebookTabMoved>>")
 
     def get_child_by_index(self, index: int) -> tk.Widget:
         return self.pages[index].content
@@ -297,7 +290,7 @@ class CustomNotebook(tk.Frame):
         else:
             page = self.get_page_by_tab(index_or_tab)
 
-        self._plain_forget(page.content)
+        self._forget(page.content)
 
     def close_tabs(self, except_tab: Optional[CustomNotebookTab] = None):
         for page in reversed(self.pages):
@@ -456,6 +449,9 @@ class CustomNotebookPage:
     def __init__(self, tab: CustomNotebookTab, content: tk.Widget):
         self.tab = tab
         self.content = content
+
+    def __repr__(self):
+        return f"CustomNotebookPage({self.tab.title}, {self.content})"
 
 
 class NotebookTabDropTarget(tk.Canvas):

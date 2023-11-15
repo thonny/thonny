@@ -81,7 +81,9 @@ class VariablesView(VariablesFrame):
             if module_name == "__main__":
                 self.containing_notebook.tab(self, text=get_default_tab_text())
             else:
-                self.containing_notebook.tab(self, text=get_default_tab_text() + " (%s)" % module_name)
+                self.containing_notebook.tab(
+                    self, text=get_default_tab_text() + " (%s)" % module_name
+                )
 
         if is_active:
             self._last_active_info = (globals_, module_name)
@@ -142,6 +144,4 @@ def get_default_tab_text() -> str:
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(
-        VariablesView, get_default_tab_text(), "ne", default_position_key="AAA"
-    )
+    get_workbench().add_view(VariablesView, get_default_tab_text(), "ne", default_position_key="A")

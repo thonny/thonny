@@ -589,7 +589,8 @@ class AutomaticNotebook(CustomNotebook):
     Remember its own position key. Automatically updates its visibility.
     """
 
-    def __init__(self, master, position_key, preferred_size_in_pw=None):
+    def __init__(self, master, location_in_workbench, position_key, preferred_size_in_pw=None):
+        self.location_in_workbench = location_in_workbench
         if get_workbench().in_simple_mode():
             closable = False
         else:
@@ -611,6 +612,16 @@ class AutomaticNotebook(CustomNotebook):
         super().after_forget(page)
         self._update_visibility()
         get_workbench().event_generate("NotebookPageClosed", page=page)
+
+    def after_move(self, page: CustomNotebookPage, old_notebook: CustomNotebook):
+        # see the comment at after_add_or_insert
+        super().after_move(page, old_notebook)
+        self._update_visibility()
+        if old_notebook is not self and isinstance(old_notebook, AutomaticNotebook):
+            old_notebook._update_visibility()
+        get_workbench().event_generate(
+            "NotebookPageMoved", page=page, new_notebook=self, old_notebook=old_notebook
+        )
 
     def _is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):

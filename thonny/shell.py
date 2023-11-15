@@ -21,6 +21,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
 )
+from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
@@ -80,6 +81,7 @@ ANSI_COLOR_NAMES = {
 class ShellView(tk.PanedWindow):
     def __init__(self, master):
         self._osc_title = None
+        self.containing_notebook: Optional[CustomNotebook] = None
         super().__init__(
             master,
             orient="horizontal",
