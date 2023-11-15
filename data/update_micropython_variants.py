@@ -223,22 +223,34 @@ all_variants += pimoroni_variants
 ########################################################
 pololu_variants = [
     {
-        "_id": "pololu-3pi-2040-robot",
-        "model": "3pi+ 2040 Robot",
-    },
-]
-
-print(f"Updating {len(pololu_variants)} Pololu variants")
-add_defaults_and_downloads_to_variants(
-    {
         "vendor": "Pololu",
+        "model": "3pi+ 2040 Robot",
         "family": "rp2",
         "info_url": "https://github.com/pololu/micropython-build/releases/",
-        "_download_url_pattern": "https://github.com/pololu/micropython-build/releases/download/{version}/micropython-{id}-v1.20.0-{version}.uf2",
+        "downloads": [
+            {
+                "version": "231113",
+                "url": "https://github.com/pololu/micropython-build/releases/download/231113/micropython-pololu-3pi-2040-robot-v1.22.0-preview-231113.uf2"
+            },
+            {
+                "version": "230510",
+                "url": "https://github.com/pololu/micropython-build/releases/download/230510/micropython-pololu-3pi-2040-robot-v1.20.0-230510.uf2"
+            },
+        ]
     },
-    ["230510"],
-    pololu_variants,
-)
+    {
+        "vendor": "Pololu",
+        "model": "Zumo 2040 Robot",
+        "family": "rp2",
+        "info_url": "https://github.com/pololu/micropython-build/releases/",
+        "downloads": [
+            {
+                "version": "231113",
+                "url": "https://github.com/pololu/micropython-build/releases/download/231113/micropython-pololu-zumo-2040-robot-v1.22.0-preview-231113.uf2"
+            },
+        ]
+    },
+]
 
 all_variants += pololu_variants
 
