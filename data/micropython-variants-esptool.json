@@ -11,7 +11,7 @@
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20231005-v1.21.0.bin"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-unstable-v1.21.0-\\d+-[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-v1.22.0-preview-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "Espressif",

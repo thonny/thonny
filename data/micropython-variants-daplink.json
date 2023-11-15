@@ -14,7 +14,7 @@
                 "url": "https://micropython.org/resources/firmware/MICROBIT-20230426-v1.20.0.hex"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-unstable-v1.21.0-\\d+-[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-v1.22.0-preview-\\d+-[a-z0-9]{10}"
     },
     {
         "vendor": "BBC",
@@ -41,6 +41,10 @@
         "title": "micro:bit v2 (original simplified API)",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
+            {
+                "version": "2.1.2",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.2/micropython-microbit-v2.1.2.hex",
+            },
             {
                 "version": "2.1.1",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.1/micropython-microbit-v2.1.1.hex"

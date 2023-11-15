@@ -12,7 +12,7 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = r"\d{8}-unstable-v1.21.0-\d+-[a-z0-9]{10}"
+UNSTABLE_VERSION = r"\d{8}-v1.22.0-preview-\d+-[a-z0-9]{10}"
 PREV_RELEVANT_VERSION = "1.20.0"
 PREV_RELEVANT_VERSION_IN_URL = "20230426-v1.20.0"
 
@@ -281,6 +281,10 @@ simplified_microbits = [
         "family": "nrf52",
         "info_url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/",
         "downloads": [
+            {
+                "version": "2.1.2",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.2/micropython-microbit-v2.1.2.hex",
+            },
             {
                 "version": "2.1.1",
                 "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.1/micropython-microbit-v2.1.1.hex",
