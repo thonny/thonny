@@ -414,7 +414,8 @@ def _get_interpreters():
             os.path.expanduser("~/anaconda3/bin"),
         ]
 
-        virtualenvwrapper = os.path.join(os.path.expanduser("~/.virtualenvs"), "*/bin")
+        workon_home = os.environ.get("WORKON_HOME", os.path.expanduser("~/.virtualenvs"))
+        virtualenvwrapper = os.path.join(workon_home, "*/bin")
         dirs += glob.glob(virtualenvwrapper)
 
         for dir_ in dirs:

@@ -303,7 +303,7 @@ class AssistantView(tktextext.TextFrame):
                     ("em",),
                 )
 
-        #if self.text.get("1.0", "end").strip():
+        # if self.text.get("1.0", "end").strip():
         #    self._append_feedback_link()
 
         if self._exception_info:
