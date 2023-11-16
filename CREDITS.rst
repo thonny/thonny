@@ -74,6 +74,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Celso Isayah Dias
 * Chad Purdy
 * @chechigp
+* @ChrisMayfield
 * codemee
 * Collision Detection
 * cspaier
@@ -94,6 +95,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * freddii
 * fstengel
 * Gabriel Slørdahl
+* @Gadgetoid
 * Gagan Saksena
 * Georges Khaznadar
 * Helmut Ascheid
