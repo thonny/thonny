@@ -446,7 +446,7 @@ checks_by_id = {
         "msg_text": "Bad option value %r",
         "msg_xpln": "Used when a bad value for an inline option is encountered.",
         "tho_xpln": "",
-        "usage": "warning",
+        "usage": "skip", # makes it easier to support both Pylint 2 and 3
     },
     "E0013": {
         "msg_id": "E0013",
