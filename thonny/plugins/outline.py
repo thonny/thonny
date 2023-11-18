@@ -80,8 +80,14 @@ class OutlineView(ttk.Frame):
         active_node = root_node
 
         lineno = 0
+        in_multiline_string = False
         for line in source.split("\n"):
             lineno += 1
+            if len(re.findall(r'\"\"\"', line)) % 2 == 1:      # an odd number of """s to toggle
+                in_multiline_string = not in_multiline_string  # multi-line string environment on/off
+                continue
+            if in_multiline_string:
+                continue
             m = re.match(r"[ ]*[\w]{1}", line)
             if m:
                 indent = len(m.group(0))
