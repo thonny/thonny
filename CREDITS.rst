@@ -140,6 +140,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Pop Vasile Alexandru
 * Radim
 * Ralf Michael Metzing
+* @rauferd
 * Rene Lehtma
 * Rune Langøy
 * Saishen, Inc.
