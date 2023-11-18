@@ -948,6 +948,13 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             upgrade = False
 
+        if "--progress-bar" in args:
+            # Pipkin doesn't support it
+            pos = args.index("--progress-bar")
+            assert args[pos + 1] in ["on", "off"]
+            del args[pos + 1]
+            del args[pos]
+
         if "-r" in args:
             pos = args.index("-r")
             req_file = args[pos + 1]
