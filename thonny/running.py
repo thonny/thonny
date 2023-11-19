@@ -988,6 +988,7 @@ class SubprocessProxy(BackendProxy, ABC):
         self._response_queue = None
         self._sys_path = []
         self._usersitepackages = None
+        self._externally_managed = None
         self._reported_executable = None
         self._gui_update_loop_id = None
         self._in_venv = None
@@ -1267,6 +1268,9 @@ class SubprocessProxy(BackendProxy, ABC):
         if "usersitepackages" in msg:
             self._usersitepackages = msg["usersitepackages"]
 
+        if "externally_managed" in msg:
+            self._externally_managed = msg["externally_managed"]
+
         if "prefix" in msg:
             self._sys_prefix = msg["prefix"]
 
@@ -1290,6 +1294,9 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def get_user_site_packages(self):
         return self._usersitepackages
+
+    def is_externally_managed(self):
+        return self._externally_managed or False
 
     def get_cwd(self):
         return self._cwd
