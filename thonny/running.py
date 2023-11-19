@@ -825,8 +825,11 @@ class Runner:
 
     def using_venv(self) -> bool:
         from thonny.plugins.cpython_frontend import LocalCPythonProxy
+        from thonny.plugins.cpython_ssh.cps_front import SshCPythonProxy
 
-        return isinstance(self._proxy, LocalCPythonProxy) and self._proxy._in_venv
+        return (
+            isinstance(self._proxy, (LocalCPythonProxy, SshCPythonProxy)) and self._proxy._in_venv
+        )
 
 
 class BackendProxy(ABC):
