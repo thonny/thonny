@@ -132,6 +132,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Miro Hrončok
 * NathanBnm
 * Nicolas Despres
+* @omani
 * Paul Egbert
 * Pavel Minaev
 * Peter Marshall
