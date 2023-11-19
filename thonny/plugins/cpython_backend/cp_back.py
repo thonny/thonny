@@ -48,6 +48,7 @@ from thonny.common import (
     get_python_version_string,
     get_single_dir_child_data,
     path_startswith,
+    running_in_virtual_environment,
     serialize_message,
     update_system_path,
 )
@@ -418,16 +419,12 @@ class MainCPythonBackend(MainBackend):
             main_dir=self._main_dir,
             sys_path=sys.path,
             usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
+            externally_managed=self._is_externally_managed(),
             prefix=sys.prefix,
             welcome_text=f"Python {get_python_version_string()} ({sys.executable})",
             executable=sys.executable,
             exe_dirs=get_exe_dirs(),
-            in_venv=(
-                hasattr(sys, "base_prefix")
-                and sys.base_prefix != sys.prefix
-                or hasattr(sys, "real_prefix")
-                and getattr(sys, "real_prefix") != sys.prefix
-            ),
+            in_venv=running_in_virtual_environment(),
             python_version=get_python_version_string(),
             cwd=os.getcwd(),
         )
@@ -1086,6 +1083,22 @@ class MainCPythonBackend(MainBackend):
     def _check_update_tty_mode(self, cmd):
         if "tty_mode" in cmd:
             self._tty_mode = cmd["tty_mode"]
+
+    def _is_externally_managed(self):
+        if running_in_virtual_environment():
+            return False
+
+        import sysconfig
+
+        get_default_scheme = getattr(sysconfig, "get_default_scheme", None)
+        if get_default_scheme is None:
+            # before Python 3.10
+            get_default_scheme = getattr(sysconfig, "_get_default_scheme")
+
+        marker_path = os.path.join(
+            sysconfig.get_path("stdlib", get_default_scheme()), "EXTERNALLY-MANAGED"
+        )
+        return os.path.isfile(marker_path)
 
 
 class FakeStream:

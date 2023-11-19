@@ -16,7 +16,7 @@ class CPythonPipDialog(BackendPipDialog, ABC):
         return (
             self._use_user_install()
             and not get_runner().get_backend_proxy().get_user_site_packages()
-        )
+        ) or self._backend_proxy.is_externally_managed()
 
     def _get_target_directory(self):
         if self._use_user_install():
@@ -41,6 +41,21 @@ class CPythonPipDialog(BackendPipDialog, ABC):
 
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
+
+    def _show_read_only_instructions(self):
+        if self._backend_proxy.is_externally_managed():
+            self._append_info_text(tr("Browse the packages") + "\n\n", ("caption",))
+            self.info_text.direct_insert(
+                "end",
+                tr(
+                    "The packages of this interpreter can be managed via your system package manager."
+                )
+                + "\n\n",
+            )
+            self.info_text.direct_insert(
+                "end",
+                tr("For pip-installing a package, you need to use a virtual environment.") + "\n\n",
+            )
 
 
 class LocalCPythonPipDialog(CPythonPipDialog):

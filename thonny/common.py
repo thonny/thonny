@@ -799,6 +799,15 @@ def is_private_python(executable):
     return result
 
 
+def running_in_virtual_environment() -> bool:
+    return (
+        hasattr(sys, "base_prefix")
+        and sys.base_prefix != sys.prefix
+        or hasattr(sys, "real_prefix")
+        and getattr(sys, "real_prefix") != sys.prefix
+    )
+
+
 def is_remote_path(s: str) -> bool:
     return REMOTE_PATH_MARKER in s
 

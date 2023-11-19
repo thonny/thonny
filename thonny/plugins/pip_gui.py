@@ -16,7 +16,13 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
-from thonny.common import DistInfo, InlineCommand, normpath_with_actual_case, path_startswith
+from thonny.common import (
+    DistInfo,
+    InlineCommand,
+    normpath_with_actual_case,
+    path_startswith,
+    running_in_virtual_environment,
+)
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, levenshtein_distance
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
@@ -1129,13 +1135,7 @@ class PluginsPipDialog(PipDialog):
         return not self._targets_virtual_environment()
 
     def _targets_virtual_environment(self):
-        # https://stackoverflow.com/a/42580137/261181
-        return (
-            hasattr(sys, "base_prefix")
-            and sys.base_prefix != sys.prefix
-            or hasattr(sys, "real_prefix")
-            and getattr(sys, "real_prefix") != sys.prefix
-        )
+        return running_in_virtual_environment()
 
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]

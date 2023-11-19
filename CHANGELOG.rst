@@ -2,6 +2,14 @@
 Version history
 ===============
 
+4.1.4 (2023-11-19)
+==================
+* Fix regression in MicroPython package installation, #2979
+* Add better error message for externally managed environments, #3009
+* Fix package installation in remote virtual environments
+* Update Raspberry Pi detection
+* Silence "bad-option-value"-s given by Pylint 3
+
 4.1.3 (2023-09-28)
 ==================
 * Fix first run crash on macOS (#2860)
