@@ -1,3 +1,4 @@
+import glob
 import os.path
 import subprocess
 import sys
@@ -412,6 +413,11 @@ def _get_interpreters():
             os.path.expanduser("~/.local/bin"),
             os.path.expanduser("~/anaconda3/bin"),
         ]
+
+        workon_home = os.environ.get("WORKON_HOME", os.path.expanduser("~/.virtualenvs"))
+        virtualenvwrapper = os.path.join(workon_home, "*/bin")
+        dirs += glob.glob(virtualenvwrapper)
+
         for dir_ in dirs:
             # if the dir_ is just a link to another dir_, skip it
             # (not to show items twice)
