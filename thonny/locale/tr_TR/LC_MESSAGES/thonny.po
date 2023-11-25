@@ -395,7 +395,7 @@ msgstr "Kapat"
 
 #: thonny/plugins/pip_gui.py:382
 msgid "Click "
-msgstr "Click_"
+msgstr "Tıkla "
 
 #: thonny/plugins/pip_gui.py:383 thonny/plugins/pip_gui.py:393
 msgid "here"
