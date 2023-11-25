@@ -857,11 +857,11 @@ msgstr "Hata ayıklama modu (daha ayrıntılı tanılama günlükleri sağlar)"
 
 #: thonny/plugins/general_config_page.py:56
 msgid "UI mode"
-msgstr "UI modu"
+msgstr "Arayüz modu"
 
 #: thonny/plugins/general_config_page.py:69
 msgid "UI scaling factor"
-msgstr "UI ölçeklendirme faktörü"
+msgstr "Arayüz ölçeklendirme faktörü"
 
 #: thonny/plugins/general_config_page.py:88
 msgid "NB! Restart Thonny after changing these options!"
@@ -1159,7 +1159,7 @@ msgstr "Terminal"
 
 #: thonny/plugins/theme_and_font_config_page.py:39
 msgid "UI theme"
-msgstr "UI teması"
+msgstr "Arayüz teması"
 
 #: thonny/plugins/theme_and_font_config_page.py:52
 msgid "Syntax theme"
@@ -1187,7 +1187,7 @@ msgstr "Cevap"
 
 #: thonny/plugins/theme_and_font_config_page.py:151
 msgid "unclosed_string"
-msgstr "unclosed_string"
+msgstr "kapatılmamış dize"
 
 #: thonny/plugins/theme_and_font_config_page.py:153
 msgid "blah, blah"
