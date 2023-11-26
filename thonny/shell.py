@@ -156,7 +156,7 @@ class ShellView(tk.PanedWindow):
     def set_osc_title(self, text: str) -> None:
         self._osc_title = text
         if self.containing_notebook is not None:
-            self.containing_notebook.tab(self, text=text)
+            self.containing_notebook.tab(self, self.get_tab_text())
 
     def init_plotter(self):
         self.plotter = None
