@@ -638,6 +638,7 @@ class UploadDownloadMixin(ABC):
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
                     completed_cost += self._get_file_fixed_cost() + item["size"]
             except OSError as e:
+                logger.exception("OSError during upload")
                 errors.append(
                     "Could not copy %s to %s: %s"
                     % (item["source_path"], item["target_path"], str(e))

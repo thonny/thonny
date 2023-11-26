@@ -1,4 +1,5 @@
 import binascii
+import logging
 import os
 import re
 import struct
@@ -137,6 +138,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._submit_mode is None or self._connected_over_webrepl():
             self._submit_mode = self._infer_submit_mode()
 
+        self._submit_mode = RAW_SUBMIT_MODE
+
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
             self._write_block_size = self._infer_write_block_size()
@@ -267,7 +270,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             return 0.01
 
     def _process_until_initial_prompt(self, interrupt: bool, clean: bool) -> None:
-        logger.debug("_process_until_initial_prompt, clean=%s", clean)
+        logger.info("_process_until_initial_prompt, clean=%s", clean)
 
         poke_after = 0.05
         if interrupt:
@@ -516,7 +519,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
     def _clear_repl(self):
         """NB! assumes prompt and may be called without __thonny_helper"""
-        logger.debug("_create_fresh_repl")
+        logger.info("_create_fresh_repl")
         self._ensure_raw_mode()
         self._write(SOFT_REBOOT_CMD)
         assuming_ok = self._connection.soft_read(2, timeout=0.1)
@@ -524,12 +527,12 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             logger.warning("Got %r after requesting soft reboot")
         self._check_reconnect()
         self._forward_output_until_active_prompt()
-        logger.debug("Done _create_fresh_repl")
+        logger.info("Done _create_fresh_repl")
 
     def _soft_reboot_for_restarting_user_program(self):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
-        logger.debug("_soft_reboot_for_restarting_user_program")
+        logger.info("_soft_reboot_for_restarting_user_program")
         self._ensure_normal_mode()
         self._write(SOFT_REBOOT_CMD)
         self._check_reconnect()
@@ -557,7 +560,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._forward_unexpected_output()
 
         to_be_sent = script.encode("UTF-8")
-        logger.debug("Submitting via %s: %r", self._submit_mode, to_be_sent[:70])
+        log_sample_size = 1024 if logger.isEnabledFor(logging.DEBUG) else 256
+        logger.info("Submitting via %s: %r", self._submit_mode, to_be_sent[:log_sample_size])
         with self._interrupt_lock:
             if self._submit_mode == PASTE_SUBMIT_MODE:
                 self._submit_code_via_paste_mode(to_be_sent)
@@ -683,6 +687,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             data + self._connection.read_all()
         )
         window_size = data[0] | data[1] << 8
+        logger.debug("Raw paste window size: %r", window_size)
         window_remain = window_size
 
         # Write out the command_bytes data.
@@ -697,18 +702,19 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                     # Device indicated abrupt end, most likely a syntax error.
                     # Acknowledge it and finish.
                     self._write(b"\x04")
-                    logger.debug(
+                    logger.warning(
                         "Abrupt end of raw paste submit after submitting %s bytes out of %s",
                         i,
                         len(command_bytes),
                     )
-                    return
+                    raise ProtocolError("Abrupt end during raw paste")
                 else:
                     # Unexpected data from device.
                     logger.error("Unexpected read during raw paste: %r", data)
                     raise ProtocolError("Unexpected read during raw paste")
             # Send out as much data as possible that fits within the allowed window.
             b = command_bytes[i : min(i + window_remain, len(command_bytes))]
+            logger.debug("Writing %r bytes", len(b))
             self._write(b)
             window_remain -= len(b)
             i += len(b)
