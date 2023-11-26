@@ -54,6 +54,7 @@ from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
+RAW_PASTE_REFUSAL = b"R\x00"
 RAW_PASTE_CONTINUE = b"\x01"
 
 
@@ -655,7 +656,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._connection.set_text_mode(False)
         self._write(RAW_PASTE_COMMAND)
         response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
-        if response != RAW_PASTE_CONFIRMATION:
+        if response == RAW_PASTE_REFUSAL:
+            logger.info("Device refused raw paste")
+            raise RawPasteNotSupportedError()
+        elif response != RAW_PASTE_CONFIRMATION:
+            logger.info("Device didn't understand raw paste")
             # perhaps the device doesn't support raw paste ...
             response += self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=0.5)
             if response.endswith(FIRST_RAW_PROMPT):
