@@ -297,9 +297,9 @@
     "Toggle comment": "Açıklama satırını aç/kapat",
     "Tools": "Araçlar",
     "Try to detect port automatically": "Bağlantı noktasını otomatik olarak algılamayı dene",
-    "UI mode": "UI modu",
-    "UI scaling factor": "UI ölçeklendirme faktörü",
-    "UI theme": "UI teması",
+    "UI mode": "Arayüz modu",
+    "UI scaling factor": "Arayüz ölçeklendirme faktörü",
+    "UI theme": "Arayüz teması",
     "Uncheck if you want more traditional experience.": "Daha geleneksel bir deneyim istiyorsanız işareti kaldırın.",
     "Uncomment": "Açıklama satırını iptal et",
     "Undo": "Geri al",
@@ -337,7 +337,7 @@
     "supports basic ANSI-colors and styles": "temel ANSI renklerini ve stillerini destekler",
     "to locate and install the package file (usually with .whl, .tar.gz or .zip extension).": "paket dosyasını bulmak ve kurmak için (genellikle .whl, .tar.gz veya .zip uzantılı olurlar).",
     "to locate requirements.txt file and install the packages specified in it.": "requirements.txt dosyasını bulmak ve içinde belirtilen paketleri kurmak için.",
-    "unclosed_string": "unclosed_string",
+    "unclosed_string": "kapatılmamış_dize",
     "user site packages": "kullanıcı sitesi paketleri",
     "virtual environment": "sanal ortam"
 }
