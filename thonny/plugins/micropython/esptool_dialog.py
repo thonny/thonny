@@ -49,6 +49,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
         codes = ["esp32", "esp32s2", "esp32s3", "esp32c3"]
         if self.firmware_name == "MicroPython":
             codes.insert(0, "esp8266")
+        if self.firmware_name == "CircuitPython":
+            codes.append("esp32c6")
+            codes.append("esp32h2")
 
         return {family_code_to_name(code): code for code in codes}
 

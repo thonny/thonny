@@ -18,6 +18,8 @@ RELEVANT_FAMILIES = {
     "esp32s2",
     "esp32s3",
     "esp32c3",
+    "esp32c6",
+    "esp32h2",
     "nrf52840",
     "raspberrypi",
 }
@@ -123,7 +125,7 @@ save_variants(
 save_variants(
     all_variants,
     ["bin"],
-    {"esp32", "esp32s2", "esp32s3", "esp32c3"},
+    {"esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c6", "esp32h2"},
     "circuitpython-variants-esptool.json",
 )
 
