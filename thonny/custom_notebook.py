@@ -147,6 +147,9 @@ class CustomNotebook(tk.Frame):
         setattr(page.content, "containing_notebook", self)
 
     def _rearrange_tabs(self) -> None:
+        if len(self.pages) == 0:
+            self.current_page = None
+
         for i, page in enumerate(self.pages):
             page.tab.grid(row=0, column=i, sticky="nsew", padx=(1, 0), pady=(1, 0))
 
