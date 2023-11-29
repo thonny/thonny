@@ -67,6 +67,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Austin Bart
 * Avag. sayan
 * badukaire
+* @bmcage
 * Bui Huy Quang
 * borpol
 * CADTEC GmbH (cadtec.ch)
