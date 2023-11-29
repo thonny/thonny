@@ -43,7 +43,7 @@
         "downloads": [
             {
                 "version": "2.1.2",
-                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.2/micropython-microbit-v2.1.2.hex",
+                "url": "https://github.com/microbit-foundation/micropython-microbit-v2/releases/download/v2.1.2/micropython-microbit-v2.1.2.hex"
             },
             {
                 "version": "2.1.1",
