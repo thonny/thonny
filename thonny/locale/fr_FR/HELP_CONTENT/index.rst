@@ -6,7 +6,7 @@ Sujets spécifiques
 * `Ancrer les fenêtres utilisateurs <dock.rst>`_
 * `Support spécial pour les programmes Turtle <turtle.rst>`_
 * `Spécifier des arguments de programme <program_arguments.rst>`_
-* `Mode simple et mode expert <modes.rst>`_
+* `Mode ordinaire et mode simple <modes.rst>`_
 * `Le Shell <shell.rst>`_
 * `Le Grapheur <plotter.rst>`_
 * `L'Œil d'oiseau (Birdseye) <birdseye.rst>`_

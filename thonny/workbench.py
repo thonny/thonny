@@ -162,6 +162,8 @@ class Workbench(tk.Tk):
         self._init_language()
 
         self._active_ui_mode = os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
+        if self._active_ui_mode == "expert":  # not used since 5.0
+            self._active_ui_mode = "regular"
 
         self._init_scaling()
 
@@ -680,28 +682,27 @@ class Workbench(tk.Tk):
             group=70,
         )
 
-        if self.get_ui_mode() == "expert":
-            self.add_command(
-                "toggle_maximize_view",
-                "view",
-                tr("Maximize view"),
-                self._cmd_toggle_maximize_view,
-                flag_name="view.maximize_view",
-                default_sequence=None,
-                group=80,
-            )
-            self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
-            self.bind("<Escape>", self._unmaximize_view, True)
+        self.add_command(
+            "toggle_maximize_view",
+            "view",
+            tr("Maximize view"),
+            self._cmd_toggle_maximize_view,
+            flag_name="view.maximize_view",
+            default_sequence=None,
+            group=80,
+        )
+        self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
+        self.bind("<Escape>", self._unmaximize_view, True)
 
-            self.add_command(
-                "toggle_maximize_view",
-                "view",
-                tr("Full screen"),
-                self._cmd_toggle_full_screen,
-                flag_name="view.full_screen",
-                default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
-                group=80,
-            )
+        self.add_command(
+            "toggle_maximize_view",
+            "view",
+            tr("Full screen"),
+            self._cmd_toggle_full_screen,
+            flag_name="view.full_screen",
+            default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
+            group=80,
+        )
 
         if self.in_simple_mode():
             self.add_command(

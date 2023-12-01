@@ -7,7 +7,7 @@ Funksjonalitet
 * `Docking user windows <dock.rst>`_ (engelsk)
 * `Special support for Turtle programs <turtle.rst>`_ (engelsk)
 * `Specifying program arguments <program_arguments.rst>`_ (engelsk)
-* `Simple mode and expert mode <modes.rst>`_ (engelsk)
+* `Regular mode vs simple mode <modes.rst>`_ (engelsk)
 * `Plotter <plotter.rst>`_ (engelsk)
 * `Birdseye <birdseye.rst>`_ (engelsk)
 * `Web development with Flask <flask.rst>`_ (engelsk)

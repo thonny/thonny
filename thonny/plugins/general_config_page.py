@@ -69,7 +69,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         )
         self.add_combobox(
             "general.ui_mode",
-            ["simple", "regular", "expert"],
+            ["simple", "regular"],
             row=20,
             column=1,
             pady=(10, 0),
