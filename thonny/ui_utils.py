@@ -2327,6 +2327,8 @@ def get_size_option_name(window):
 def get_default_basic_theme():
     if running_on_windows():
         return "vista"
+    elif running_on_mac_os():
+        return "aqua"
     else:
         return "clam"
 

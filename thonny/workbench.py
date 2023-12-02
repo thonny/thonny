@@ -1454,8 +1454,8 @@ class Workbench(tk.Tk):
             return "Windows"
         elif running_on_rpi() and "Raspberry Pi" in available_themes:
             return "Raspberry Pi"
-        elif "Enhanced Clam" in available_themes:
-            return "Enhanced Clam"
+        elif "Kind of Aqua" in available_themes:
+            return "Kind of Aqua"
         else:
             return "clam"
 
