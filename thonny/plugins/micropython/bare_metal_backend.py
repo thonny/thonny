@@ -138,8 +138,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         if self._submit_mode is None or self._connected_over_webrepl():
             self._submit_mode = self._infer_submit_mode()
 
-        self._submit_mode = RAW_SUBMIT_MODE
-
         self._write_block_size = args.get("write_block_size", None)
         if self._write_block_size is None:
             self._write_block_size = self._infer_write_block_size()
