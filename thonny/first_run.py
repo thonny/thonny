@@ -69,7 +69,8 @@ class FirstRunWindow(tk.Tk):
             textvariable=variable,
             state="readonly",
             height=15,
-            width=33,  # becomes too wide with actual value length
+            # Actual length of longest value creates too wide combobox
+            width=33 if ui_utils.running_on_mac_os() else 40,
             values=values,
         )
         combobox.grid(
