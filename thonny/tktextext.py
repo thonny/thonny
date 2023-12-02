@@ -32,6 +32,7 @@ class TweakableText(tk.Text):
         self._original_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
         self._original_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
         self._original_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
+        self.bind("<Control-Tab>", self._redirect_ctrl_tab, False)
 
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
@@ -193,6 +194,10 @@ class TweakableText(tk.Text):
         self._last_operation_time = time.time()
         if not self._suppress_events:
             self.event_generate("<<TextChange>>")
+
+    def _redirect_ctrl_tab(self, event):
+        self.winfo_toplevel().event_generate("<<ControlTabInText>>", state=event.state)
+        return "break"
 
 
 class EnhancedText(TweakableText):

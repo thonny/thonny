@@ -221,6 +221,8 @@ class Workbench(tk.Tk):
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_toolbar, True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
+        self.bind("<Control-Tab>", self.select_another_tab, True)
+        self.bind("<<ControlTabInText>>", self.select_another_tab, True)
         self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
         self.bind("BackendRestart", self._on_backend_restart, True)
@@ -2752,6 +2754,22 @@ class Workbench(tk.Tk):
             item.destroy()
 
         self._notebook_drop_targets = []
+
+    def select_another_tab(self, event: tk.Event) -> Optional[str]:
+        # handles also Shift-Control-Tab
+        # needs to be bound here because Notebooks don't own their contents
+        widget = self.focus_get()
+        while widget is not None:
+            print("Widget", widget)
+            nb: CustomNotebook = getattr(widget, "containing_notebook", None)
+            if nb is not None:
+                return nb.select_another_tab(event)
+            else:
+                widget_name = widget.winfo_parent()
+                if widget_name and widget_name != ".":
+                    widget = widget.nametowidget(widget_name)
+
+        return None
 
 
 class WorkbenchEvent(Record):

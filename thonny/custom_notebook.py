@@ -144,7 +144,6 @@ class CustomNotebook(tk.Frame):
 
         original_notebook._forget(page.content, to_be_moved=True)
         self._insert(pos, page.content, text=page.tab.get_title(), old_notebook=original_notebook)
-        setattr(page.content, "containing_notebook", self)
 
     def _rearrange_tabs(self) -> None:
         if len(self.pages) == 0:
@@ -181,6 +180,7 @@ class CustomNotebook(tk.Frame):
 
         print("Current page becomes", new_page.content)
         self.current_page = new_page
+        self.current_page.content.focus_set()
         self.event_generate("<<NotebookTabChanged>>")
 
     def select_tab(self, tab: CustomNotebookTab) -> None:
@@ -190,6 +190,23 @@ class CustomNotebook(tk.Frame):
                 return
 
         raise ValueError(f"Unknown tab {tab}")
+
+    def select_another_tab(self, event: tk.Event) -> Optional[str]:
+        if len(self.pages) < 2:
+            self.bell()
+            return None
+
+        from thonny.ui_utils import shift_is_pressed
+
+        if shift_is_pressed(event):
+            offset = -1
+        else:
+            offset = 1
+
+        index = self.index(self.current_page.content)
+        new_index = (index + offset) % len(self.pages)
+        self.select_by_index(new_index)
+        return "break"
 
     def select_page(self, page: CustomNotebookPage) -> None:
         self.select_by_index(self.pages.index(page))
