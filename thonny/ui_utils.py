@@ -655,10 +655,7 @@ class TreeFrame(ttk.Frame):
         **tree_kw,
     ):
         ttk.Frame.__init__(self, master, borderwidth=borderwidth, relief=relief)
-        # http://wiki.tcl.tk/44444#pagetoc50f90d9a
-        self.vert_scrollbar = ttk.Scrollbar(
-            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
-        )
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         if show_scrollbar:
             self.vert_scrollbar.grid(
                 row=0, column=1, sticky=tk.NSEW, rowspan=2 if show_statusbar else 1
@@ -716,16 +713,6 @@ class TreeFrame(ttk.Frame):
 
     def clear_error(self):
         self.error_label.grid_remove()
-
-
-def scrollbar_style(orientation):
-    # In mac ttk.Scrollbar uses native rendering unless style attribute is set
-    # see http://wiki.tcl.tk/44444#pagetoc50f90d9a
-    # Native rendering doesn't look good in dark themes
-    if running_on_mac_os() and get_workbench().uses_dark_ui_theme():
-        return orientation + ".TScrollbar"
-    else:
-        return None
 
 
 def sequence_to_accelerator(sequence):

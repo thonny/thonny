@@ -4,7 +4,6 @@ from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import scrollbar_style
 
 
 class AssistantConfigPage(ConfigurationPage):
@@ -38,8 +37,6 @@ class AssistantConfigPage(ConfigurationPage):
 
         self.disabled_checks_box = TextFrame(
             self,
-            vertical_scrollbar_style=scrollbar_style("Vertical"),
-            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
             wrap="word",
             font="TkDefaultFont",

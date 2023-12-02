@@ -36,7 +36,6 @@ from thonny.ui_utils import (
     get_hyperlink_cursor,
     lookup_style_option,
     replace_unsupported_chars,
-    scrollbar_style,
     select_sequence,
     show_dialog,
     tr_btn,
@@ -93,9 +92,7 @@ class ShellView(tk.PanedWindow):
         main_frame = tk.Frame(self)
         self.add(main_frame, minsize=100)
 
-        self.vert_scrollbar = ttk.Scrollbar(
-            main_frame, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
-        )
+        self.vert_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         get_workbench().add_command(
             "clear_shell",

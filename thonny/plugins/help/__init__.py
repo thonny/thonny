@@ -8,7 +8,6 @@ from thonny import get_workbench, tktextext, ui_utils
 from thonny.config import try_load_configuration
 from thonny.languages import tr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import scrollbar_style
 
 
 class HelpView(TextFrame):
@@ -19,8 +18,6 @@ class HelpView(TextFrame):
             self,
             master,
             text_class=rst_utils.RstText,
-            vertical_scrollbar_style=scrollbar_style("Vertical"),
-            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
             borderwidth=0,
             wrap="word",

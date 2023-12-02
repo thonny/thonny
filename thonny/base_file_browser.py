@@ -24,7 +24,6 @@ from thonny.ui_utils import (
     get_hyperlink_cursor,
     lookup_style_option,
     open_with_default_app,
-    scrollbar_style,
     show_dialog,
 )
 
@@ -45,9 +44,7 @@ class BaseFileBrowser(ttk.Frame):
         self.path_to_highlight = None
 
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
-        self.vert_scrollbar = ttk.Scrollbar(
-            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
-        )
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
         stripe = check_create_aqua_scrollbar_stripe(self)
         if stripe is not None:

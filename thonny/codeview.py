@@ -13,7 +13,7 @@ from typing import Dict, Union  # @UnusedImport
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.tktextext import EnhancedText
-from thonny.ui_utils import EnhancedTextWithLogging, ask_string, scrollbar_style
+from thonny.ui_utils import EnhancedTextWithLogging, ask_string
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
@@ -155,8 +155,6 @@ class CodeView(tktextext.EnhancedTextFrame):
             master,
             undo=True,
             wrap=tk.NONE,
-            vertical_scrollbar_style=scrollbar_style("Vertical"),
-            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
             **frame_args,
         )

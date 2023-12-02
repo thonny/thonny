@@ -35,7 +35,6 @@ from thonny.ui_utils import (
     get_hyperlink_cursor,
     lookup_style_option,
     open_path_in_system_file_manager,
-    scrollbar_style,
 )
 from thonny.workdlg import SubprocessDialog
 
@@ -151,9 +150,7 @@ class PipDialog(CommonDialog, ABC):
         self.listbox.insert("end", " <" + tr("INSTALL") + ">")
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew")
-        list_scrollbar = AutoScrollbar(
-            listframe, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
-        )
+        list_scrollbar = AutoScrollbar(listframe, orient=tk.VERTICAL)
         list_scrollbar.grid(row=0, column=1, sticky="ns")
         list_scrollbar["command"] = self.listbox.yview
         self.listbox["yscrollcommand"] = list_scrollbar.set
@@ -176,8 +173,6 @@ class PipDialog(CommonDialog, ABC):
             horizontal_scrollbar=False,
             background=lookup_style_option("TFrame", "background"),
             vertical_scrollbar_class=AutoScrollbar,
-            vertical_scrollbar_style=scrollbar_style("Vertical"),
-            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             padx=ems_to_pixels(0.1),
             pady=0,
             width=70,

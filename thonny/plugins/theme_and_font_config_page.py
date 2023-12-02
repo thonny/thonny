@@ -8,7 +8,7 @@ from thonny.codeview import CodeView
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonny.shell import BaseShellText
-from thonny.ui_utils import create_string_var, scrollbar_style
+from thonny.ui_utils import create_string_var
 
 
 class ThemeAndFontConfigurationPage(ConfigurationPage):
@@ -167,8 +167,6 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             text_class=BaseShellText,
             height=4,
             width=30,
-            vertical_scrollbar_style=scrollbar_style("Vertical"),
-            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
             relief="groove",
             borderwidth=1,
