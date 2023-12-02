@@ -1175,10 +1175,14 @@ class Workbench(tk.Tk):
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
             assert caption is not None
+            assert image is not None
+            toolbar_image = self.get_image(image, for_toolbar=True)
+            disabled_toolbar_image = self.get_image(image, for_toolbar=True, disabled=True)
+
             self._add_toolbar_button(
                 command_id,
-                _image,
-                _disabled_image,
+                toolbar_image,
+                disabled_toolbar_image,
                 command_label,
                 caption,
                 caption if alternative_caption is None else alternative_caption,
@@ -1682,10 +1686,16 @@ class Workbench(tk.Tk):
         return os.path.dirname(sys.modules["thonny"].__file__)
 
     def get_image(
-        self, filename: str, tk_name: Optional[str] = None, disabled=False
+        self,
+        filename: str,
+        tk_name: Optional[str] = None,
+        disabled=False,
+        for_toolbar=False,
     ) -> tk.PhotoImage:
         if tk_name is None:
             tk_name = filename.replace(".", "_").replace("\\", "_").replace("/", "_")
+            if for_toolbar:
+                tk_name += "_toolbar"
             if disabled:
                 tk_name += "_disabled"
 
@@ -1722,6 +1732,10 @@ class Workbench(tk.Tk):
             treeview_rowheight > threshold
             and not filename.endswith("48.png")
             or treeview_rowheight > threshold * 1.5
+            or self.in_simple_mode()
+            and for_toolbar
+            and not filename.endswith("48.png")
+            and self.winfo_screenwidth() >= 1280
         ):
             scaled_filename = filename[:-4] + "_2x.png"
             scaled_filename_alt = filename[:-4] + "48.png"  # used in pi theme

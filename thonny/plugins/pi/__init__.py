@@ -285,44 +285,24 @@ def update_fonts():
 
 def load_plugin():
     # set custom images
-    if get_workbench().get_ui_mode() == "simple" and get_workbench().winfo_screenwidth() >= 1280:
-        images = {
-            "run-current-script": "media-playback-start48.png",
-            "stop": "process-stop48.png",
-            "new-file": "document-new48.png",
-            "open-file": "document-open48.png",
-            "save-file": "document-save48.png",
-            "debug-current-script": "debug-run48.png",
-            "step-over": "debug-step-over48.png",
-            "step-into": "debug-step-into48.png",
-            "step-out": "debug-step-out48.png",
-            "run-to-cursor": "debug-run-cursor48.png",
-            "tab-close": "window-close.png",
-            "tab-close-active": "window-close-act.png",
-            "resume": "resume48.png",
-            "zoom": "zoom48.png",
-            "quit": "quit48.png",
-            "Ukraine": "Ukraine48.png",
-        }
-    else:
-        images = {
-            "run-current-script": "media-playback-start.png",
-            "stop": "process-stop.png",
-            "new-file": "document-new.png",
-            "open-file": "document-open.png",
-            "save-file": "document-save.png",
-            "debug-current-script": "debug-run.png",
-            "step-over": "debug-step-over.png",
-            "step-into": "debug-step-into.png",
-            "step-out": "debug-step-out.png",
-            "run-to-cursor": "debug-run-cursor.png",
-            "tab-close": "window-close.png",
-            "tab-close-active": "window-close-act.png",
-            "resume": "resume.png",
-            "zoom": "zoom.png",
-            "quit": "quit.png",
-            "Ukraine": "Ukraine.png",
-        }
+    images = {
+        "run-current-script": "media-playback-start.png",
+        "stop": "process-stop.png",
+        "new-file": "document-new.png",
+        "open-file": "document-open.png",
+        "save-file": "document-save.png",
+        "debug-current-script": "debug-run.png",
+        "step-over": "debug-step-over.png",
+        "step-into": "debug-step-into.png",
+        "step-out": "debug-step-out.png",
+        "run-to-cursor": "debug-run-cursor.png",
+        "tab-close": "window-close.png",
+        "tab-close-active": "window-close-act.png",
+        "resume": "resume.png",
+        "zoom": "zoom.png",
+        "quit": "quit.png",
+        "Ukraine": "Ukraine.png",
+    }
 
     res_dir = os.path.join(os.path.dirname(__file__), "res")
     theme_image_map = {}
