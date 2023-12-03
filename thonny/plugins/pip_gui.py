@@ -874,7 +874,7 @@ class PipDialog(CommonDialog, ABC):
             open_path_in_system_file_manager(self._get_target_directory())
 
     def _install_file(self, filename, is_requirements_file):
-        args = self._get_install_file_command(filename, is_requirements_file)
+        args = self._get_install_file_args(filename, is_requirements_file)
 
         returncode, out, err = self._run_pip_with_dialog(
             command="install", args=args, title=tr("Installing '%s'") % os.path.basename(filename)
@@ -895,8 +895,8 @@ class PipDialog(CommonDialog, ABC):
 
         self._start_update_list(name)
 
-    def _get_install_file_command(self, filename, is_requirements_file):
-        args = ["install"]
+    def _get_install_file_args(self, filename, is_requirements_file):
+        args = []
         if self._use_user_install():
             args.append("--user")
         if is_requirements_file:
