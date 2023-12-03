@@ -849,7 +849,7 @@ class PipDialog(CommonDialog, ABC):
 
         filename = askopenfilename(
             master=self,
-            filetypes=[(tr("Package"), ".whl .zip .tar.gz"), (tr("all files"), ".*")],
+            filetypes=[(tr("Package"), ".whl .zip .gz"), (tr("all files"), ".*")],
             initialdir=get_workbench().get_local_cwd(),
             parent=self.winfo_toplevel(),
         )
