@@ -6,39 +6,86 @@ from tkinter import ttk
 
 from thonny import THONNY_USER_DIR, codeview, get_workbench, ui_utils
 from thonny.base_file_browser import BaseLocalFileBrowser
+from thonny.custom_notebook import CustomNotebook
+from thonny.editors import BaseEditor
 from thonny.languages import tr
+from thonny.misc_utils import get_menu_char
 from thonny.plugins.coloring import SyntaxColorer
-from thonny.ui_utils import CommonDialog, lookup_style_option
+from thonny.shell import BaseShellText
+from thonny.ui_utils import CommonDialog, CustomToolbutton, ems_to_pixels, lookup_style_option
 
 
 class ReplayWindow(CommonDialog):
     def __init__(self, master):
-        super().__init__(master, background=lookup_style_option("TFrame", "background"))
-        ui_utils.set_zoomed(self, True)
+        super().__init__(
+            master,
+            background=lookup_style_option("TFrame", "background"),
+            skip_tk_dialog_attributes=True,
+        )
+        outer_pad = ems_to_pixels(1)
+        inner_pad = ems_to_pixels(1)
 
-        self.main_pw = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
+        ui_utils.set_zoomed(self, True)
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.grid(row=0, column=0, sticky="nsew")
+        self.main_frame.rowconfigure(2, weight=1)
+        self.main_frame.columnconfigure(1, weight=1)
+
+        self.toolbar = ttk.Frame(self.main_frame)
+        self.toolbar.grid(row=1, column=1, padx=outer_pad, pady=(outer_pad, 0), sticky=tk.NSEW)
+        self.session_combo = ttk.Combobox(
+            self.toolbar,
+            values=[
+                "Today • since 20:37",
+                "Today • 16:23 • 2h 40min",
+                "Yesterday • 16:23 • 2h",
+                "2023-08-12 • 09:45 • 1h 15 min",
+                "2023-08-11 • 09:45 • 1h 15 min",
+                "2023-08-11 • 09:45 • 1h 15 min",
+                "< Load another file… >",
+            ],
+            width=23,
+            exportselection=False,
+            takefocus=False,
+            state="readonly",
+        )
+        self.session_combo.grid(column=1, row=1)
+
+        self.play_pause_button = CustomToolbutton(self.toolbar, self.toggle_play_pause, text=" ▶ ")
+        self.play_pause_button.grid(row=1, column=2, padx=(inner_pad, 0))
+
+        self.scrubber = ttk.Scale(
+            self.toolbar, from_=1, to=100, orient=tk.HORIZONTAL, takefocus=True
+        )
+        self.scrubber.grid(row=1, column=3, sticky="ew", padx=(inner_pad, 0))
+
+        self.menu_button = CustomToolbutton(
+            self.toolbar, self.post_menu, text=f" {get_menu_char()} "
+        )
+        self.menu_button.grid(row=1, column=4, padx=(inner_pad, 0))
+
+        self.toolbar.columnconfigure(3, weight=1)
+
+        self.main_pw = ReplayerPanedWindow(self.main_frame, orient=tk.HORIZONTAL, sashwidth=10)
         self.center_pw = ReplayerPanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
         self.right_frame = ttk.Frame(self.main_pw)
         self.right_pw = ReplayerPanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
-        shell_book = ttk.Notebook(self.main_pw)
+        shell_book = CustomNotebook(self.main_pw, closable=False)
         self.shell = ShellFrame(shell_book)
         self.details_frame = EventDetailsFrame(self.right_pw)
+
         self.log_frame = LogFrame(
             self.right_pw, self.editor_notebook, self.shell, self.details_frame
         )
-        self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)
-        self.control_frame = ControlFrame(self.right_frame)
 
-        self.main_pw.grid(padx=10, pady=10, sticky=tk.NSEW)
-        self.main_pw.add(self.browser, width=200)
+        self.main_pw.grid(row=2, column=1, padx=outer_pad, pady=outer_pad, sticky=tk.NSEW)
         self.main_pw.add(self.center_pw, width=1000)
-        self.main_pw.add(self.right_frame, width=200)
+        # self.main_pw.add(self.right_frame, width=200)
         self.center_pw.add(self.editor_notebook, height=700)
         self.center_pw.add(shell_book, height=300)
         shell_book.add(self.shell, text="Shell")
         self.right_pw.grid(sticky=tk.NSEW)
-        self.control_frame.grid(sticky=tk.NSEW)
         self.right_pw.add(self.log_frame, height=600)
         self.right_pw.add(self.details_frame, height=200)
         self.right_frame.columnconfigure(0, weight=1)
@@ -46,6 +93,15 @@ class ReplayWindow(CommonDialog):
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+
+        self.scrubber.focus_set()
+
+    def toggle_play_pause(self) -> None:
+        print("TOGGLE play pause")
+
+    def post_menu(self) -> None:
+        print("post menu")
+        self.session_combo.select_clear()
 
 
 class ReplayerFileBrowser(BaseLocalFileBrowser):
@@ -73,19 +129,6 @@ class ReplayerFileBrowser(BaseLocalFileBrowser):
         return "break"  # avoid default action of opening the node
 
 
-class ControlFrame(ttk.Frame):
-    def __init__(self, master, **kw):
-        ttk.Frame.__init__(self, master=master, **kw)
-
-        self.toggle_button = ttk.Button(self, text="Play")
-        self.speed_scale = ttk.Scale(self, from_=1, to=100, orient=tk.HORIZONTAL)
-
-        self.toggle_button.grid(row=0, column=0, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5))
-        self.speed_scale.grid(row=0, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(5, 0))
-
-        self.columnconfigure(1, weight=1)
-
-
 class LogFrame(ui_utils.TreeFrame):
     def __init__(self, master, editor_book, shell, details_frame):
         ui_utils.TreeFrame.__init__(self, master, ("desc", "pause"))
@@ -108,8 +151,8 @@ class LogFrame(ui_utils.TreeFrame):
         self.all_events = []
         self.last_event_index = -1
         self.loading = True
-        self.editor_notebook.reset()
-        self.shell.reset()
+        self.editor_notebook.clear()
+        self.shell.clear()
 
         import json
 
@@ -148,9 +191,9 @@ class LogFrame(ui_utils.TreeFrame):
             else:
                 self.editor_notebook.replay_event(event)
 
-    def reset(self):
-        self.shell.reset()
-        self.editor_notebook.reset()
+    def clear(self):
+        self.shell.clear()
+        self.editor_notebook.clear()
         self.last_event_index = -1
 
     def on_select(self, event):
@@ -174,7 +217,7 @@ class LogFrame(ui_utils.TreeFrame):
 
         elif event_index < self.last_event_index:
             # Undo by resetting and replaying again
-            self.reset()
+            self.clear()
             self.select_event(event_index)
 
 
@@ -214,7 +257,7 @@ class ReplayerCodeView(ttk.Frame):
             insertwidth=2,
             # selectborderwidth=2,
             inactiveselectbackground="gray",
-            # highlightthickness=0, # TODO: try different in Mac and Linux
+            highlightthickness=0,  # TODO: try different in Mac and Linux
             # highlightcolor="gray",
             padx=5,
             pady=5,
@@ -229,59 +272,39 @@ class ReplayerCodeView(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
 
-class ReplayerEditor(ttk.Frame):
+class ReplayerEditor(BaseEditor):
     def __init__(self, master):
-        ttk.Frame.__init__(self, master)
-        self.code_view = ReplayerCodeView(self)
-        self.code_view.grid(sticky=tk.NSEW)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        super().__init__(master, propose_remove_line_numbers=False)
+        self._code_view.text.set_read_only(True)
+        self.update_appearance()
 
     def replay_event(self, event):
         if event["sequence"] in ["TextInsert", "TextDelete"]:
             if event["sequence"] == "TextInsert":
-                self.code_view.text.insert(
+                self._code_view.text.direct_insert(
                     event["index"], event["text"], ast.literal_eval(event["tags"])
                 )
 
             elif event["sequence"] == "TextDelete":
                 if event["index2"] and event["index2"] != "None":
-                    self.code_view.text.delete(event["index1"], event["index2"])
+                    self._code_view.text.direct_delete(event["index1"], event["index2"])
                 else:
-                    self.code_view.text.delete(event["index1"])
+                    self._code_view.text.direct_delete(event["index1"])
 
             self.see_event(event)
 
     def see_event(self, event):
         for key in ["index", "index1", "index2"]:
             if key in event and event[key] and event[key] != "None":
-                self.code_view.text.see(event[key])
+                self._code_view.text.see(event[key])
 
-    def reset(self):
-        self.code_view.text.delete("1.0", "end")
+    def clear(self):
+        self._code_view.text.direct_delete("1.0", "end")
 
 
-class ReplayerEditorProper(ReplayerEditor):
+class ReplayerEditorNotebook(CustomNotebook):
     def __init__(self, master):
-        ReplayerEditor.__init__(self, master)
-        self.set_colorer()
-
-    def set_colorer(self):
-        self.colorer = SyntaxColorer(self.code_view.text)
-
-    def replay_event(self, event):
-        ReplayerEditor.replay_event(self, event)
-        # TODO: some problem when doing fast rewind
-        # self.colorer.notify_range("1.0", "end")
-
-    def reset(self):
-        ReplayerEditor.reset(self)
-        self.set_colorer()
-
-
-class ReplayerEditorNotebook(ttk.Notebook):
-    def __init__(self, master):
-        ttk.Notebook.__init__(self, master, padding=0)
+        CustomNotebook.__init__(self, master, closable=False)
         self._editors_by_text_widget_id = {}
 
     def clear(self):
@@ -292,7 +315,7 @@ class ReplayerEditorNotebook(ttk.Notebook):
 
     def get_editor_by_text_widget_id(self, text_widget_id):
         if text_widget_id not in self._editors_by_text_widget_id:
-            editor = ReplayerEditorProper(self)
+            editor = ReplayerEditor(self)
             self.add(editor, text="<untitled>")
             self._editors_by_text_widget_id[text_widget_id] = editor
 
@@ -308,7 +331,7 @@ class ReplayerEditorNotebook(ttk.Notebook):
             if "filename" in event:
                 self.tab(editor, text=os.path.basename(event["filename"]))
 
-    def reset(self):
+    def clear(self):
         for editor in self.winfo_children():
             self.forget(editor)
             editor.destroy()
@@ -316,33 +339,59 @@ class ReplayerEditorNotebook(ttk.Notebook):
         self._editors_by_text_widget_id = {}
 
 
-class ShellFrame(ReplayerEditor):
+class ShellFrame(ttk.Frame):
     def __init__(self, master):
-        ReplayerEditor.__init__(self, master)
+        super().__init__(master)
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
 
-        # TODO: use same source as shell
-        vert_spacing = 10
-        io_indent = 16
-        self.code_view.text.tag_configure("toplevel", font="EditorFont")
-        self.code_view.text.tag_configure("prompt", foreground="purple", font="BoldEditorFont")
-        self.code_view.text.tag_configure("command", foreground="black")
-        self.code_view.text.tag_configure("version", foreground="DarkGray")
-        self.code_view.text.tag_configure("automagic", foreground="DarkGray")
-        self.code_view.text.tag_configure(
-            "value", foreground="DarkBlue"
-        )  # TODO: see also _text_key_press and _text_key_release
-        self.code_view.text.tag_configure("error", foreground="Red")
-
-        self.code_view.text.tag_configure(
-            "io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font="IOFont"
+        self.text = BaseShellText(
+            self,
+            self,
+            font="EditorFont",
+            # foreground="white",
+            # background="#666666",
+            highlightthickness=0,
+            # highlightcolor="LightBlue",
+            borderwidth=0,
+            yscrollcommand=self.set_scrollbar,
+            padx=0,
+            pady=0,
+            insertwidth=2,
+            height=10,
+            undo=True,
         )
-        self.code_view.text.tag_configure("stdin", foreground="Blue")
-        self.code_view.text.tag_configure("stdout", foreground="Black")
-        self.code_view.text.tag_configure("stderr", foreground="Red")
-        self.code_view.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
 
-        self.code_view.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
-        self.code_view.text.tag_configure("inactive", foreground="#aaaaaa")
+        self.text.grid(row=1, column=1, sticky=tk.NSEW)
+        self.vert_scrollbar["command"] = self.text.yview
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+
+    def set_scrollbar(self, *args):
+        self.vert_scrollbar.set(*args)
+
+    def clear(self):
+        self.text.direct_delete("1.0", "end")
+
+    def replay_event(self, event):
+        if event["sequence"] in ["TextInsert", "TextDelete"]:
+            if event["sequence"] == "TextInsert":
+                self.text.direct_insert(
+                    event["index"], event["text"], ast.literal_eval(event["tags"])
+                )
+
+            elif event["sequence"] == "TextDelete":
+                if event["index2"] and event["index2"] != "None":
+                    self.text.direct_delete(event["index1"], event["index2"])
+                else:
+                    self.text.direct_delete(event["index1"])
+
+            self.see_event(event)
+
+    def see_event(self, event):
+        for key in ["index", "index1", "index2"]:
+            if key in event and event[key] and event[key] != "None":
+                self.text.see(event[key])
 
 
 class ReplayerPanedWindow(tk.PanedWindow):
@@ -353,11 +402,12 @@ class ReplayerPanedWindow(tk.PanedWindow):
         super().__init__(master=master, cnf=cnf)
 
 
-def load_plugin() -> None:
-    def open_replayer():
-        win = ReplayWindow(get_workbench())
-        ui_utils.show_dialog(win)
+def open_replayer():
+    win = ReplayWindow(get_workbench())
+    ui_utils.show_dialog(win, modal=False)
 
+
+def load_plugin() -> None:
     get_workbench().set_default("tools.replayer_last_browser_folder", None)
     get_workbench().add_command(
         "open_replayer", "tools", tr("Open replayer..."), open_replayer, group=110

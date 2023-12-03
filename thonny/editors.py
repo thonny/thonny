@@ -57,29 +57,61 @@ class EditorCodeViewText(CodeViewText):
         self.bindtags(self.bindtags() + ("EditorCodeViewText",))
 
 
-class Editor(ttk.Frame):
-    def __init__(self, master):
+class BaseEditor(ttk.Frame):
+    def __init__(self, master, propose_remove_line_numbers):
         ttk.Frame.__init__(self, master)
-        assert isinstance(master, EditorNotebook)
-        self.containing_notebook = master  # type: EditorNotebook
 
         self._code_view = CodeView(
             self,
-            propose_remove_line_numbers=True,
+            propose_remove_line_numbers=propose_remove_line_numbers,
             font="EditorFont",
             text_class=EditorCodeViewText,
             cursor=get_beam_cursor(),
         )
-        get_workbench().event_generate(
-            "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
-        )
-
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
         self._filename = None
+
+    def update_appearance(self):
+        self._code_view.set_gutter_visibility(
+            get_workbench().get_option("view.show_line_numbers") or get_workbench().in_simple_mode()
+        )
+        self._code_view.set_line_length_margin(
+            get_workbench().get_option("view.recommended_line_length")
+        )
+        self._code_view.text.update_tabs()
+        self._code_view.text.event_generate("<<UpdateAppearance>>")
+        self._code_view.grid_main_widgets()
+
+    def update_file_type(self):
+        if self._filename is None:
+            self._code_view.set_file_type(None)
+        else:
+            ext = self._filename.split(".")[-1].lower()
+            if ext in PYTHON_EXTENSIONS:
+                file_type = "python"
+            elif ext in PYTHONLIKE_EXTENSIONS:
+                file_type = "pythonlike"
+            else:
+                file_type = None
+
+            self._code_view.set_file_type(file_type)
+
+        self.update_appearance()
+
+
+class Editor(BaseEditor):
+    def __init__(self, master):
+        assert isinstance(master, EditorNotebook)
+        self.containing_notebook = master  # type: EditorNotebook
+        super().__init__(master, propose_remove_line_numbers=True)
+        get_workbench().event_generate(
+            "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
+        )
+
         self._last_known_mtime = None
 
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
@@ -358,22 +390,6 @@ class Editor(ttk.Frame):
 
         return True
 
-    def update_file_type(self):
-        if self._filename is None:
-            self._code_view.set_file_type(None)
-        else:
-            ext = self._filename.split(".")[-1].lower()
-            if ext in PYTHON_EXTENSIONS:
-                file_type = "python"
-            elif ext in PYTHONLIKE_EXTENSIONS:
-                file_type = "pythonlike"
-            else:
-                file_type = None
-
-            self._code_view.set_file_type(file_type)
-
-        self.update_appearance()
-
     def write_remote_file(self, save_filename, content_bytes, save_copy):
         if get_runner().ready_for_remote_file_operations(show_message=True):
             target_filename = extract_target_path(save_filename)
@@ -501,17 +517,6 @@ class Editor(ttk.Frame):
 
     def show(self):
         self.master.select(self)
-
-    def update_appearance(self):
-        self._code_view.set_gutter_visibility(
-            get_workbench().get_option("view.show_line_numbers") or get_workbench().in_simple_mode()
-        )
-        self._code_view.set_line_length_margin(
-            get_workbench().get_option("view.recommended_line_length")
-        )
-        self._code_view.text.update_tabs()
-        self._code_view.text.event_generate("<<UpdateAppearance>>")
-        self._code_view.grid_main_widgets()
 
     def _listen_debugger_progress(self, event):
         # Go read-only
