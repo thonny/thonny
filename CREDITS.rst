@@ -166,6 +166,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * tabreturn
 * TANAKA Masayuki
 * Thomas Helmuth
+* @tinyboxvk
 * TooLazy0x00
 * Toomas Mölder
 * Tristan Bunn
