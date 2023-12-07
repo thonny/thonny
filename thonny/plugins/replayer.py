@@ -103,6 +103,11 @@ class ReplayWindow(CommonDialog):
         print("post menu")
         self.session_combo.select_clear()
 
+    def load_session_list(self):
+        user_logs_path = os.path.join(THONNY_USER_DIR, "user_logs")
+        for name in os.listdir(user_logs_path):
+            pass
+
 
 class ReplayerFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, log_frame):

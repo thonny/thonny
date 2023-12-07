@@ -2,6 +2,8 @@ import os.path
 import time
 import tkinter as tk
 from datetime import datetime
+from logging import getLogger
+from typing import Dict, List, Optional, Tuple
 
 from thonny import THONNY_USER_DIR, get_workbench
 from thonny.languages import tr
@@ -9,11 +11,20 @@ from thonny.shell import ShellView
 from thonny.ui_utils import asksaveasfilename
 from thonny.workbench import WorkbenchEvent
 
+logger = getLogger(__name__)
+
+TIMESTAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
+
+SESSION_EVENTS = []
+
 
 class EventLogger:
-    def __init__(self, filename):
-        self._filename = filename
-        self._events = []
+    def __init__(self):
+        self._closing = False
+        self._start_time = time.localtime()
+        self._file_path = os.path.join(
+            get_log_dir(), format_time_range(time.localtime(), None) + ".jsonl"
+        )
 
         wb = get_workbench()
         wb.bind("WorkbenchClose", self._on_worbench_close, True)
@@ -58,6 +69,9 @@ class EventLogger:
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
         # TODO: if event data includes an Editor, then look up also text id
+        self._out_fp = open(self._file_path, mode="w", encoding="utf-8", buffering=1)
+
+        logger.info("Starting logging user events into %r", self._file_path)
 
     def _bind_workbench(self, sequence, only_workbench_widget=False):
         def handle(event):
@@ -116,64 +130,39 @@ class EventLogger:
         return data
 
     def _log_event(self, sequence, event):
+        if self._closing:
+            logger.info("Won't log %r because we are closing", sequence)
+            return
+
+        import json
+
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence
         data["time"] = datetime.now().isoformat()
         if len(data["time"]) == 19:
             # 0 fraction gets skipped, but reader assumes it
             data["time"] += ".0"
-        self._events.append(data)
+        SESSION_EVENTS.append(data)
+        json.dump(data, self._out_fp)
+        self._out_fp.write("\n")
 
     def _on_worbench_close(self, event=None):
-        import json
-
-        with open(self._filename, encoding="UTF-8", mode="w") as fp:
-            json.dump(self._events, fp, indent="    ")
-
-        self._check_compress_logs()
-
-    def _check_compress_logs(self):
-        import zipfile
-
-        # if uncompressed logs have grown over 10MB,
-        # compress these into new zipfile
-
-        log_dir = _get_log_dir()
-        total_size = 0
-        uncompressed_files = []
-        for item in os.listdir(log_dir):
-            if item.endswith(".txt"):
-                full_name = os.path.join(log_dir, item)
-                total_size += os.stat(full_name).st_size
-                uncompressed_files.append((item, full_name))
-
-        if total_size > 10 * 1024 * 1024:
-            zip_filename = _generate_timestamp_file_name("zip")
-            with zipfile.ZipFile(zip_filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
-                for item, full_name in uncompressed_files:
-                    zipf.write(full_name, arcname=item)
-
-            for _, full_name in uncompressed_files:
-                os.remove(full_name)
-
-
-def _generate_timestamp_file_name(extension):
-    # generate log filename
-    folder = _get_log_dir()
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-    for i in range(100):
-        filename = os.path.join(
-            folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.{}".format(i, extension))
+        # save the file, compress it and remove the uncompressed copy
+        self._closing = True
+        self._out_fp.close()
+        out_file_path = os.path.join(
+            get_log_dir(), format_time_range(self._start_time, time.localtime()) + ".jsonl.gz"
         )
-        if not os.path.exists(filename):
-            return filename
+        import gzip
 
-    raise RuntimeError()
+        with gzip.open(out_file_path, mode="wb") as out_fp:
+            with open(self._file_path, mode="rb") as in_fp:
+                out_fp.write(in_fp.read())
+
+        os.remove(self._file_path)
 
 
-def _get_log_dir():
+def get_log_dir():
     return os.path.join(THONNY_USER_DIR, "user_logs")
 
 
@@ -191,7 +180,7 @@ def export():
     if not filename:
         return
 
-    log_dir = _get_log_dir()
+    log_dir = get_log_dir()
 
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         for item in os.listdir(log_dir):
@@ -199,14 +188,70 @@ def export():
                 zipf.write(os.path.join(log_dir, item), arcname=item)
 
 
+def format_time_range(
+    start_time: time.struct_time, end_time: Optional[time.struct_time] = None
+) -> str:
+    start_str = time.strftime(TIMESTAMP_FORMAT, start_time)
+    if end_time is not None:
+        end_str = time.strftime(TIMESTAMP_FORMAT, end_time)
+    else:
+        end_str = "unknown"
+    return start_str + "__" + end_str
+
+
+def parse_time_range(s: str) -> Tuple[time.struct_time, Optional[time.struct_time]]:
+    parts = s.split("__")
+    assert len(parts) == 2
+    start_time = time.strptime(parts[0], TIMESTAMP_FORMAT)
+    if parts[1] == "unknown":
+        end_time = None
+    else:
+        end_time = time.strptime(parts[1], TIMESTAMP_FORMAT)
+
+    return start_time, end_time
+
+
+def parse_file_name(name: str) -> Tuple[time.struct_time, Optional[time.struct_time]]:
+    parts = name.split(".")
+    return parse_time_range(parts[0])
+
+
+def load_events_from_file(path: str) -> List[Dict]:
+    import json
+
+    if path.endswith(".txt"):
+        # old Json format before Thonny 5.0
+        with open(path, encoding="utf-8") as fp:
+            return json.load(fp)
+
+    else:
+        # new JSON lines format, compressed or not
+        if path.endswith(".jsonl.gz"):
+            import gzip
+
+            open_fun = gzip.open
+        else:
+            assert path.endswith(".jsonl")
+            open_fun = open
+
+        result = []
+        with open_fun(path, mode="r", encoding="utf-8") as fp:
+            for line in fp:
+                result.append(json.loads(line))
+
+        return result
+
+
 def load_plugin() -> None:
-    get_workbench().set_default("general.event_logging", False)
+    if not os.path.exists(get_log_dir()):
+        os.makedirs(get_log_dir())
+
+    get_workbench().set_default("general.event_logging", True)
 
     if get_workbench().get_option("general.event_logging"):
         get_workbench().add_command(
             "export_usage_logs", "tools", tr("Export usage logs..."), export, group=110
         )
 
-        filename = _generate_timestamp_file_name("txt")
         # create logger
-        EventLogger(filename)
+        EventLogger()
