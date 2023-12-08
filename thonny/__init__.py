@@ -211,7 +211,8 @@ def _check_welcome():
         win = FirstRunWindow(mgr)
         win.mainloop()
 
-        if win.ok and sys.platform == "darwin":
+        if win.ok and sys.platform == "darwin" and sys.version_info < (3, 12, 1):
+            # The problem was fixed in patched Tk 8.6.13 bundled with Python 3.12.1
             macos_app_path = _get_macos_app_path()
             if macos_app_path:
                 # Shouldn't proceed to the main window in the same process, as TkAqua will crash on opening a menu

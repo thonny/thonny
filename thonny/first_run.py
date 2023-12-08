@@ -1,8 +1,11 @@
 import os.path
 import tkinter as tk
+from logging import getLogger
 from tkinter import ttk
 
 from thonny import is_portable, languages, ui_utils
+
+logger = getLogger(__name__)
 
 STD_MODE_TEXT = "Regular"
 SIMPLE_MODE_TEXT = "Simplified"
@@ -11,6 +14,7 @@ RPI_MODE_TEXT = "Simplified, with Raspberry Pi theme and defaults"
 
 class FirstRunWindow(tk.Tk):
     def __init__(self, configuration_manager):
+        logger.info("Creating FirstRunWindow")
         super().__init__(className="Thonny")
         ttk.Style().theme_use(ui_utils.get_default_basic_theme())
 
