@@ -46,6 +46,7 @@ class CustomToolbutton(tk.Frame):
         compound=None,
         width=None,
         pad=None,
+        font=None,
     ):
         if isinstance(image, (list, tuple)):
             self.normal_image = image[0]
@@ -68,6 +69,10 @@ class CustomToolbutton(tk.Frame):
             self.current_image = self.normal_image
 
         super().__init__(master, background=self.normal_background)
+        kw = {}
+        if font is not None:
+            kw["font"] = font
+
         self.label = tk.Label(
             self,
             image=self.current_image,
@@ -75,6 +80,7 @@ class CustomToolbutton(tk.Frame):
             compound=compound,
             width=None if width is None else ems_to_pixels(width - 1),
             background=self.normal_background,
+            **kw,
         )
 
         # TODO: introduce padx and pady arguments
@@ -2151,19 +2157,20 @@ def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     if hasattr(dlg, "set_initial_focus"):
         dlg.set_initial_focus()
 
-    dlg.wait_window(dlg)
-    dlg.grab_release()
-    master.winfo_toplevel().lift()
-    master.winfo_toplevel().focus_force()
-    master.winfo_toplevel().grab_set()
-    if running_on_mac_os():
-        master.winfo_toplevel().grab_release()
+    if modal:
+        dlg.wait_window(dlg)
+        dlg.grab_release()
+        master.winfo_toplevel().lift()
+        master.winfo_toplevel().focus_force()
+        master.winfo_toplevel().grab_set()
+        if running_on_mac_os():
+            master.winfo_toplevel().grab_release()
 
-    if old_focused_widget is not None:
-        try:
-            old_focused_widget.focus_force()
-        except TclError:
-            pass
+        if old_focused_widget is not None:
+            try:
+                old_focused_widget.focus_force()
+            except TclError:
+                pass
 
 
 def popen_with_ui_thread_callback(*Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs):

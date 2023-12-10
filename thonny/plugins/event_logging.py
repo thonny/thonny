@@ -239,6 +239,12 @@ def load_events_from_file(path: str) -> List[Dict]:
             for line in fp:
                 result.append(json.loads(line))
 
+        for event in result:
+            if len(event["time"]) == 19:
+                # 0 fraction may have been skipped
+                event["time"] += ".0"
+            event["time"] = datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
+
         return result
 
 
