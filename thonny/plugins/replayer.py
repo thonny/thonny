@@ -1,11 +1,12 @@
 import ast
+import datetime
 import os.path
 import time
 import tkinter as tk
 import tkinter.font as tk_font
 from dataclasses import dataclass
 from logging import getLogger
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from typing import Callable, Dict, List
 
 from thonny import THONNY_USER_DIR, codeview, get_workbench, ui_utils
@@ -31,8 +32,8 @@ class ReplayWindow(CommonDialog):
         self.events = None
         self.last_event_index = -1
         self.loading = False
-        self.selecting = False
         self.commands: List[ReplayerCommand] = []
+        self._scrubbing_after_id = None
 
         super().__init__(
             master,
@@ -57,6 +58,7 @@ class ReplayWindow(CommonDialog):
             takefocus=False,
         )
         self.session_combo.grid(column=1, row=1, padx=(0, inner_pad))
+        self.session_combo.bind("<<ComboboxSelected>>", self.select_session, True)
 
         default_font = tk.font.nametofont("TkDefaultFont")
         self.larger_font = default_font.copy()
@@ -70,7 +72,13 @@ class ReplayWindow(CommonDialog):
         self._add_command(" › ", self.select_next_event, self.can_select_event, tr("Next event"))
 
         self.scrubber = ttk.Scale(
-            self.toolbar, from_=1, to=100, orient=tk.HORIZONTAL, takefocus=True
+            self.toolbar,
+            from_=1,
+            to=100,
+            orient=tk.HORIZONTAL,
+            takefocus=True,
+            command=self.on_scrub,
+            state="disabled",
         )
         self.scrubber.grid(row=1, column=10, sticky="ew", padx=(inner_pad, 0))
 
@@ -88,13 +96,14 @@ class ReplayWindow(CommonDialog):
         shell_book = CustomNotebook(self.center_pw, closable=False)
         self.shell = ShellFrame(shell_book)
 
-        self.center_pw.add(self.editor_notebook, height=700)
-        self.center_pw.add(shell_book, height=300)
+        self.center_pw.add(self.editor_notebook, height=700, minsize=100)
+        self.center_pw.add(shell_book, height=300, minsize=100)
         shell_book.add(self.shell, text="Shell")
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
+        self.update_title()
         self.scrubber.focus_set()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -108,7 +117,9 @@ class ReplayWindow(CommonDialog):
             else:
                 self.bell()
 
-        button = CustomToolbutton(self.toolbar, tested_command, text=label, font=self.larger_font)
+        button = CustomToolbutton(
+            self.toolbar, tested_command, text=label, font=self.larger_font, state="disabled"
+        )
         button.grid(row=1, column=len(self.commands) + 2, padx=(pad, 0))
 
         self.commands.append(ReplayerCommand(label, button, command, tester))
@@ -116,9 +127,7 @@ class ReplayWindow(CommonDialog):
 
     def refresh(self):
         self.session_combo.set_mapping(self.create_sessions_mapping())
-
-    def toggle_play_pause(self) -> None:
-        print("TOGGLE play pause")
+        self.session_combo.select_clear()
 
     def post_menu(self) -> None:
         print("post menu")
@@ -149,6 +158,7 @@ class ReplayWindow(CommonDialog):
                 date_s = _custom_date_format(start_time)
                 time_s = _custom_time_format(start_time, without_seconds) + " - "
                 if end_time is None:
+                    continue
                     time_s += "???"
                 else:
                     time_s += _custom_time_format(end_time, without_seconds)
@@ -161,12 +171,32 @@ class ReplayWindow(CommonDialog):
         print("Mapping", mapping)
         return mapping
 
+    def select_session(self, event: tk.Event) -> None:
+        from thonny.plugins.event_logging import load_events_from_file
+
+        session_path = self.session_combo.get_selected_value()
+        logger.info("User selected session %r", session_path)
+        if os.path.isfile(session_path):
+            events = load_events_from_file(session_path)
+            self.load_session(events)
+            self.session_combo.select_clear()
+        else:
+            raise RuntimeError("File does not exist: " + str(session_path))
+
     def load_session(self, events: List[Dict]) -> None:
         self.loading = True
         try:
-            self.events = events
+            self.events = events[:]
+            for event in self.events:
+                event["epoch_time"] = event["time"].timestamp()
             self.reset_session()
-            self.select_event(len(events) - 1)
+            self.scrubber.config(state="normal")
+            for cmd in self.commands:
+                cmd.button.configure(state="normal")
+
+            self.scrubber.config(from_=events[0]["epoch_time"], to=events[-1]["epoch_time"])
+            self.select_event(0)
+            self.scrubber.focus_set()
         finally:
             self.loading = False
 
@@ -180,19 +210,45 @@ class ReplayWindow(CommonDialog):
         print("Next run")
 
     def select_prev_event(self):
-        print("Prev event")
+        if self.last_event_index == 0:
+            self.bell()
+            return
+
+        self.select_event(self.last_event_index - 1)
 
     def select_next_event(self):
-        print("Next event")
+        if self.last_event_index == len(self.events) - 1:
+            self.bell()
+            return
 
-    def select_event(self, index: int) -> None:
-        assert not self.selecting
-        self.selecting = True
+        self.select_event(self.last_event_index + 1)
 
-        try:
-            self._select_event(index)
-        finally:
-            self.selecting = False
+    def find_closest_index(self, target_timestamp: float, start_index: int, end_index: int) -> int:
+        if start_index == end_index:
+            return start_index
+
+        if end_index - start_index == 1:
+            start_timestamp = self.events[start_index]["epoch_time"]
+            end_timestamp = self.events[end_index]["epoch_time"]
+            if abs(start_timestamp - target_timestamp) < abs(end_timestamp - target_timestamp):
+                return start_index
+            else:
+                return end_index
+
+        middle_index = (start_index + end_index) // 2
+        middle_timestamp = self.events[middle_index]["epoch_time"]
+        if target_timestamp < middle_timestamp:
+            return self.find_closest_index(target_timestamp, start_index, middle_index)
+        else:
+            return self.find_closest_index(target_timestamp, middle_index, end_index)
+
+    def select_event(self, index: int, from_scrubber: bool = False) -> None:
+        self._select_event(index)
+        event = self.events[self.last_event_index]
+        if not from_scrubber:
+            self.scrubber.set(event["epoch_time"])
+        self.update_title()
+        self.update_idletasks()
 
     def _select_event(self, index):
         if index > self.last_event_index:
@@ -206,16 +262,27 @@ class ReplayWindow(CommonDialog):
             self.reset_session()
             self._select_event(index)
 
+    def update_title(self):
+        s = tr("History")
+
+        if self.last_event_index is not None and self.last_event_index > -1:
+            timestamp = float(self.scrubber.cget("value"))
+            dt = datetime.datetime.fromtimestamp(timestamp)
+            date_s = dt.strftime("%x")
+            time_s = dt.strftime("%X")
+            s += f" • {date_s} • {time_s}"
+
+        self.title(s)
+
     def replay_event(self, event):
         "this should be called with events in correct order"
-
         if "text_widget_id" in event:
             if (
                 event.get("text_widget_context", None) == "shell"
                 or event.get("text_widget_class") == "ShellText"
             ):
                 self.shell.replay_event(event)
-            else:
+            elif event.get("text_widget_class") == "EditorCodeViewText":
                 self.editor_notebook.replay_event(event)
 
     def reset_session(self):
@@ -223,8 +290,12 @@ class ReplayWindow(CommonDialog):
         self.editor_notebook.clear()
         self.last_event_index = -1
 
-    def accepting_input(self):
-        return not self.loading and not self.selecting
+    def on_scrub(self, value):
+        if self.loading:
+            return
+
+        index = self.find_closest_index(float(value), 0, len(self.events) - 1)
+        self.select_event(index, from_scrubber=True)
 
     def on_close(self, event=None):
         self.withdraw()
@@ -306,7 +377,10 @@ class ReplayerEditorNotebook(CustomNotebook):
 
     def clear(self):
         for child in self.winfo_children():
+            self.forget(child)
             child.destroy()
+
+        assert self.current_page is None
 
         self._editors_by_text_widget_id = {}
 
@@ -321,7 +395,6 @@ class ReplayerEditorNotebook(CustomNotebook):
     def replay_event(self, event):
         if "text_widget_id" in event:
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-            # print(event.editor_id, id(editor), event)
             self.select(editor)
             editor.replay_event(event)
 

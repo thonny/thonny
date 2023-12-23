@@ -68,7 +68,6 @@ class EventLogger:
 
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
-        # TODO: if event data includes an Editor, then look up also text id
         self._out_fp = open(self._file_path, mode="w", encoding="utf-8", buffering=1)
 
         logger.info("Starting logging user events into %r", self._file_path)
@@ -135,6 +134,25 @@ class EventLogger:
             return
 
         import json
+
+        widget_str = getattr(event, "widget", None)
+        try:
+            widget = get_workbench().nametowidget(widget_str) if widget_str is not None else None
+        except:
+            logger.warning(
+                "Could not extract widget %r from event %r", widget_str, event, exc_info=True
+            )
+            widget = None
+
+        if widget is None:
+            widget = getattr(event, "text_widget", None)
+
+        if widget is not None:
+            if widget.winfo_toplevel() is not get_workbench():
+                logger.debug("Skipping non-workspace event %r", event)
+                return
+        else:
+            logger.warning("Event without widget: %r", event)
 
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence
@@ -235,7 +253,7 @@ def load_events_from_file(path: str) -> List[Dict]:
             open_fun = open
 
         result = []
-        with open_fun(path, mode="r", encoding="utf-8") as fp:
+        with open_fun(path, mode="rt", encoding="utf-8") as fp:
             for line in fp:
                 result.append(json.loads(line))
 
