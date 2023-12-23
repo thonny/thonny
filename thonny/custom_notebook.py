@@ -178,7 +178,6 @@ class CustomNotebook(tk.Frame):
         if self.current_page:
             self.current_page.tab.update_state(False)
 
-        print("Current page becomes", new_page.content)
         self.current_page = new_page
         self.current_page.content.focus_set()
         self.event_generate("<<NotebookTabChanged>>")
@@ -212,7 +211,6 @@ class CustomNotebook(tk.Frame):
         self.select_by_index(self.pages.index(page))
 
     def index(self, tab_id: Union[str, tk.Widget]) -> int:
-        print("pages", self.pages)
         if tab_id == "end":
             return len(self.pages)
 
