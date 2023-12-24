@@ -102,6 +102,24 @@ class BaseEditor(ttk.Frame):
 
         self.update_appearance()
 
+    def is_modified(self):
+        return bool(self._code_view.text.edit_modified())
+
+    def get_title(self):
+        if self._filename is None:
+            result = tr("<untitled>")
+        elif is_remote_path(self._filename):
+            path = extract_target_path(self._filename)
+            name = path.split("/")[-1]
+            result = "[ " + name + " ]"
+        else:
+            result = os.path.basename(self._filename)
+
+        if self.is_modified():
+            result += " *"
+
+        return result
+
 
 class Editor(BaseEditor):
     def __init__(self, master):
@@ -147,21 +165,6 @@ class Editor(BaseEditor):
             return self._filename
         else:
             return str(self.winfo_id())
-
-    def get_title(self):
-        if self.get_filename() is None:
-            result = tr("<untitled>")
-        elif is_remote_path(self.get_filename()):
-            path = extract_target_path(self.get_filename())
-            name = path.split("/")[-1]
-            result = "[ " + name + " ]"
-        else:
-            result = os.path.basename(self.get_filename())
-
-        if self.is_modified():
-            result += " *"
-
-        return result
 
     def check_for_external_changes(self):
         if self._filename is None:
@@ -303,9 +306,6 @@ class Editor(BaseEditor):
         self.get_text_widget().edit_modified(False)
         self.update_title()
         return True
-
-    def is_modified(self):
-        return bool(self._code_view.text.edit_modified())
 
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()

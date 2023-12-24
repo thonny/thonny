@@ -16,14 +16,16 @@ logger = getLogger(__name__)
 TIMESTAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
 SESSION_EVENTS = []
+SESSION_START_TIME: Optional[time.struct_time] = None
 
 
 class EventLogger:
     def __init__(self):
+        global SESSION_START_TIME
         self._closing = False
-        self._start_time = time.localtime()
+        SESSION_START_TIME = time.localtime()
         self._file_path = os.path.join(
-            get_log_dir(), format_time_range(time.localtime(), None) + ".jsonl"
+            get_log_dir(), format_time_range(SESSION_START_TIME, None) + ".jsonl"
         )
 
         wb = get_workbench()
@@ -166,13 +168,15 @@ class EventLogger:
 
     def _on_worbench_close(self, event=None):
         # save the file, compress it and remove the uncompressed copy
+        logger.info("Closing event log")
         self._closing = True
         self._out_fp.close()
         out_file_path = os.path.join(
-            get_log_dir(), format_time_range(self._start_time, time.localtime()) + ".jsonl.gz"
+            get_log_dir(), format_time_range(SESSION_START_TIME, time.localtime()) + ".jsonl.gz"
         )
         import gzip
 
+        logger.info("Events will be saved to %r", out_file_path)
         with gzip.open(out_file_path, mode="wb") as out_fp:
             with open(self._file_path, mode="rb") as in_fp:
                 out_fp.write(in_fp.read())
@@ -256,12 +260,6 @@ def load_events_from_file(path: str) -> List[Dict]:
         with open_fun(path, mode="rt", encoding="utf-8") as fp:
             for line in fp:
                 result.append(json.loads(line))
-
-        for event in result:
-            if len(event["time"]) == 19:
-                # 0 fraction may have been skipped
-                event["time"] += ".0"
-            event["time"] = datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
 
         return result
 

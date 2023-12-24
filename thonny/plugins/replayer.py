@@ -3,13 +3,12 @@ import datetime
 import os.path
 import time
 import tkinter as tk
-import tkinter.font as tk_font
 from dataclasses import dataclass
 from logging import getLogger
-from tkinter import messagebox, ttk
+from tkinter import ttk
 from typing import Callable, Dict, List
 
-from thonny import THONNY_USER_DIR, codeview, get_workbench, ui_utils
+from thonny import codeview, get_workbench, ui_utils
 from thonny.custom_notebook import CustomNotebook
 from thonny.editors import BaseEditor
 from thonny.languages import tr
@@ -25,6 +24,8 @@ from thonny.ui_utils import (
 
 logger = getLogger(__name__)
 _REPLAYER = None
+
+CURRENT_SESSION_VALUE = "__CURRENT_SESSION__"
 
 
 class ReplayWindow(CommonDialog):
@@ -134,7 +135,14 @@ class ReplayWindow(CommonDialog):
         self.session_combo.select_clear()
 
     def create_sessions_mapping(self):
-        from thonny.plugins.event_logging import get_log_dir, parse_file_name
+        from thonny.plugins.event_logging import SESSION_START_TIME, get_log_dir, parse_file_name
+
+        current_session_label = (
+            tr("Current session")
+            + f" • {_custom_time_format(SESSION_START_TIME, without_seconds=True)} - ???"
+        )
+
+        mapping = {current_session_label: CURRENT_SESSION_VALUE}
 
         log_dir = get_log_dir()
 
@@ -142,8 +150,6 @@ class ReplayWindow(CommonDialog):
 
         # Need to know how many sessions were started at the same minute
         all_minute_prefixes = [name[:16] for name in filenames]
-
-        mapping = {}
 
         for name in filenames:
             if not (name.endswith(".txt") or name.endswith(".jsonl") or name.endswith(".jsonl.gz")):
@@ -155,10 +161,13 @@ class ReplayWindow(CommonDialog):
                 minute_prefix = name[:16]
                 without_seconds = all_minute_prefixes.count(minute_prefix) == 1
                 start_time, end_time = parse_file_name(name)
+                # need mktime, because the tuples may have different value in dst field, which makes them unequal
+                if time.mktime(start_time) == time.mktime(SESSION_START_TIME):
+                    # Don't read current session from file
+                    continue
                 date_s = _custom_date_format(start_time)
                 time_s = _custom_time_format(start_time, without_seconds) + " - "
                 if end_time is None:
-                    continue
                     time_s += "???"
                 else:
                     time_s += _custom_time_format(end_time, without_seconds)
@@ -168,26 +177,33 @@ class ReplayWindow(CommonDialog):
                 label = name
             mapping[label] = full_path
 
-        print("Mapping", mapping)
         return mapping
 
     def select_session(self, event: tk.Event) -> None:
-        from thonny.plugins.event_logging import load_events_from_file
+        from thonny.plugins.event_logging import SESSION_EVENTS, load_events_from_file
 
         session_path = self.session_combo.get_selected_value()
         logger.info("User selected session %r", session_path)
-        if os.path.isfile(session_path):
+
+        if session_path == CURRENT_SESSION_VALUE:
+            events = SESSION_EVENTS.copy()
+        elif os.path.isfile(session_path):
             events = load_events_from_file(session_path)
-            self.load_session(events)
-            self.session_combo.select_clear()
         else:
             raise RuntimeError("File does not exist: " + str(session_path))
+
+        self.load_session(events)
+        self.session_combo.select_clear()
 
     def load_session(self, events: List[Dict]) -> None:
         self.loading = True
         try:
             self.events = events[:]
             for event in self.events:
+                if len(event["time"]) == 19:
+                    # 0 fraction may have been skipped
+                    event["time"] += ".0"
+                event["time"] = datetime.datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
                 event["epoch_time"] = event["time"].timestamp()
             self.reset_session()
             self.scrubber.config(state="normal")
@@ -361,6 +377,9 @@ class ReplayerEditor(BaseEditor):
 
             self.see_event(event)
 
+        if "filename" in event:
+            self._filename = event["filename"]
+
     def see_event(self, event):
         for key in ["index", "index1", "index2"]:
             if key in event and event[key] and event[key] != "None":
@@ -399,7 +418,7 @@ class ReplayerEditorNotebook(CustomNotebook):
             editor.replay_event(event)
 
             if "filename" in event:
-                self.tab(editor, text=os.path.basename(event["filename"]))
+                self.tab(editor, text=editor.get_title())
 
 
 class ShellFrame(ttk.Frame):
