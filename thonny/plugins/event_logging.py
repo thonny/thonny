@@ -140,18 +140,23 @@ class EventLogger:
         widget_str = getattr(event, "widget", None)
         try:
             widget = get_workbench().nametowidget(widget_str) if widget_str is not None else None
-        except:
-            logger.warning(
-                "Could not extract widget %r from event %r", widget_str, event, exc_info=True
-            )
+        except Exception as e:
+            if "popdown" not in str(e):
+                logger.warning(
+                    "Could not extract widget %r from event %r", widget_str, event, exc_info=True
+                )
             widget = None
 
         if widget is None:
             widget = getattr(event, "text_widget", None)
 
         if widget is not None:
-            if widget.winfo_toplevel() is not get_workbench():
-                logger.debug("Skipping non-workspace event %r", event)
+            try:
+                if widget.winfo_toplevel() is not get_workbench():
+                    logger.debug("Skipping non-workspace event %r", event)
+                    return
+            except tk.TclError:
+                logger.error("Could not get winfo_toplevel", exc_info=True)
                 return
         else:
             logger.warning("Event without widget: %r", event)

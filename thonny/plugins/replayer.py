@@ -18,14 +18,19 @@ from thonny.ui_utils import (
     CommonDialog,
     CustomToolbutton,
     MappingCombobox,
+    askopenfilename,
     ems_to_pixels,
     lookup_style_option,
+    select_sequence,
+    sequence_to_accelerator,
 )
 
 logger = getLogger(__name__)
 _REPLAYER = None
 
 CURRENT_SESSION_VALUE = "__CURRENT_SESSION__"
+
+_dialog_filetypes = [(tr("Event logs"), ".jsonl .gz"), (tr("all files"), ".*")]
 
 
 class ReplayWindow(CommonDialog):
@@ -44,6 +49,15 @@ class ReplayWindow(CommonDialog):
         outer_pad = ems_to_pixels(1)
         inner_pad = ems_to_pixels(1)
 
+        self.menu = tk.Menu(self)
+        load_from_file_sequence = select_sequence("<Control-o>", "<Command-o>")
+        self.menu.add_command(
+            label=tr("Load events from file"),
+            command=self.cmd_open,
+            accelerator=sequence_to_accelerator(load_from_file_sequence),
+        )
+        self.bind(load_from_file_sequence, self.cmd_open, True)
+
         ui_utils.set_zoomed(self, True)
         self.main_frame = ttk.Frame(self)
         self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -59,7 +73,7 @@ class ReplayWindow(CommonDialog):
             takefocus=False,
         )
         self.session_combo.grid(column=1, row=1, padx=(0, inner_pad))
-        self.session_combo.bind("<<ComboboxSelected>>", self.select_session, True)
+        self.session_combo.bind("<<ComboboxSelected>>", self.select_session_from_combobox, True)
 
         default_font = tk.font.nametofont("TkDefaultFont")
         self.larger_font = default_font.copy()
@@ -131,8 +145,13 @@ class ReplayWindow(CommonDialog):
         self.session_combo.select_clear()
 
     def post_menu(self) -> None:
-        print("post menu")
-        self.session_combo.select_clear()
+        post_x = (
+            self.menu_button.winfo_rootx()
+            + self.menu_button.winfo_width()
+            - self.menu.winfo_reqwidth()
+        )
+        post_y = self.menu_button.winfo_rooty() + self.menu_button.winfo_height()
+        self.menu.tk_popup(post_x, post_y)
 
     def create_sessions_mapping(self):
         from thonny.plugins.event_logging import SESSION_START_TIME, get_log_dir, parse_file_name
@@ -179,7 +198,7 @@ class ReplayWindow(CommonDialog):
 
         return mapping
 
-    def select_session(self, event: tk.Event) -> None:
+    def select_session_from_combobox(self, event: tk.Event) -> None:
         from thonny.plugins.event_logging import SESSION_EVENTS, load_events_from_file
 
         session_path = self.session_combo.get_selected_value()
@@ -266,6 +285,23 @@ class ReplayWindow(CommonDialog):
         self.update_title()
         self.update_idletasks()
 
+    def cmd_open(self, event=None):
+        try:
+            initialdir = get_workbench().get_option("tools.replayer_last_browser_folder")
+            if not os.path.isdir(initialdir):
+                initialdir = os.path.normpath(os.path.expanduser("./"))
+
+            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
+            if path:
+                self.session_combo.add_pair(os.path.basename(path), path)
+                self.session_combo.select_value(path)
+                self.select_session_from_combobox(event)
+                get_workbench().set_option(
+                    "tools.replayer_last_browser_folder", os.path.dirname(path)
+                )
+        finally:
+            return "break"
+
     def _select_event(self, index):
         if index > self.last_event_index:
             # replay all events between last replayed event up to and including this event
@@ -280,6 +316,9 @@ class ReplayWindow(CommonDialog):
 
     def update_title(self):
         s = tr("History")
+        session_label = self.session_combo.get()
+        if session_label:
+            s += f" • {session_label}"
 
         if self.last_event_index is not None and self.last_event_index > -1:
             timestamp = float(self.scrubber.cget("value"))
@@ -540,7 +579,7 @@ def _custom_time_format(timestamp: time.struct_time, without_seconds: bool):
 
 
 def load_plugin() -> None:
-    get_workbench().set_default("tools.replayer_last_browser_folder", None)
+    get_workbench().set_default("tools.replayer_last_browser_folder", os.path.expanduser("~/"))
     get_workbench().add_command(
         "open_replayer", "tools", tr("Open replayer..."), open_replayer, group=110
     )
