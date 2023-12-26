@@ -1324,12 +1324,7 @@ class MicroPythonBackend(MainBackend, ABC):
             return source
 
     def _mark_nodes_to_be_guarded_from_instrumentation(self, node, guarded_context):
-        if (
-            not guarded_context
-            and isinstance(node, ast.FunctionDef)
-            and node.decorator_list
-            and any(self._is_asm_pio_decorator(decorator) for decorator in node.decorator_list)
-        ):
+        if not guarded_context and isinstance(node, ast.FunctionDef):
             guarded_context = True
 
         node.guarded = guarded_context
