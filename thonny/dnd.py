@@ -139,7 +139,7 @@ class DndHandler:
         self.save_cursor = widget["cursor"] or ""
         widget.bind(self.release_pattern, self.on_release)
         widget.bind("<Motion>", self.on_motion)
-        widget["cursor"] = "hand2"
+        widget["cursor"] = "fleur"
 
     def __del__(self):
         root = self.root
