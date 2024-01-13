@@ -385,7 +385,11 @@ class ReplayWindow(CommonDialog):
         self.select_event(index, from_scrubber=True)
 
     def on_close(self, event=None):
+        global _REPLAYER
         self.destroy()
+        _REPLAYER = None
+
+        """Alternative:
         # self.withdraw()
 
         get_workbench().winfo_toplevel().lift()
@@ -393,7 +397,7 @@ class ReplayWindow(CommonDialog):
         get_workbench().winfo_toplevel().grab_set()
         if running_on_mac_os():
             get_workbench().winfo_toplevel().grab_release()
-
+        """
 
 class ReplayerCodeView(ttk.Frame):
     def __init__(self, master):
