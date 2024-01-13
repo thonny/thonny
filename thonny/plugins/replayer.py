@@ -399,6 +399,7 @@ class ReplayWindow(CommonDialog):
             get_workbench().winfo_toplevel().grab_release()
         """
 
+
 class ReplayerCodeView(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)

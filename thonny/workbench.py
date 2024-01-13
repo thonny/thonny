@@ -412,6 +412,7 @@ class Workbench(tk.Tk):
         self.get_menu("view", tr("View"))
         self.get_menu("run", tr("Run"))
         self.get_menu("tools", tr("Tools"))
+        self.get_menu("window", tr("Window"))
         self.get_menu("help", tr("Help"))
 
     def _load_plugins(self) -> None:
@@ -1654,7 +1655,7 @@ class Workbench(tk.Tk):
             else:
                 conf = get_style_configuration("Menu")
 
-            menu = tk.Menu(self._menubar, **conf)
+            menu = tk.Menu(self._menubar, name=name, **conf)
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
 

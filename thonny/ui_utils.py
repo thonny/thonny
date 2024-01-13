@@ -2115,7 +2115,9 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, width=None, height=None, modal=True):
+def show_dialog(
+    dlg, master=None, width=None, height=None, left=None, top=None, modal=True, transient=True
+):
     if getattr(dlg, "closed", False):
         return
 
@@ -2127,7 +2129,7 @@ def show_dialog(dlg, master=None, width=None, height=None, modal=True):
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
     old_focused_widget = master.focus_get()
-    if master.winfo_toplevel().winfo_viewable():
+    if transient and master.winfo_toplevel().winfo_viewable():
         dlg.transient(master.winfo_toplevel())
 
     saved_size = get_workbench().get_option(get_size_option_name(dlg))
