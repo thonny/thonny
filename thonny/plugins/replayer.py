@@ -575,7 +575,7 @@ def open_replayer():
     if _REPLAYER is None:
         _REPLAYER = ReplayWindow(get_workbench())
         _REPLAYER.refresh()
-        ui_utils.show_dialog(_REPLAYER, modal=False, width=1200, height=900)
+        ui_utils.show_dialog(_REPLAYER, modal=False, width=1200, height=900, transient=False)
     else:
         if _REPLAYER.winfo_ismapped():
             _REPLAYER.lift()

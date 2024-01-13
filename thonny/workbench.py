@@ -412,7 +412,6 @@ class Workbench(tk.Tk):
         self.get_menu("view", tr("View"))
         self.get_menu("run", tr("Run"))
         self.get_menu("tools", tr("Tools"))
-        self.get_menu("window", tr("Window"))
         self.get_menu("help", tr("Help"))
 
     def _load_plugins(self) -> None:
