@@ -5,7 +5,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
-from thonny import THONNY_USER_DIR, get_workbench
+from thonny import THONNY_USER_DIR, get_shell, get_workbench
 from thonny.languages import tr
 from thonny.shell import ShellView
 from thonny.ui_utils import asksaveasfilename
@@ -15,18 +15,17 @@ logger = getLogger(__name__)
 
 TIMESTAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
-SESSION_EVENTS = []
-SESSION_START_TIME: Optional[time.struct_time] = None
+session_events = []
+session_start_time: Optional[time.struct_time] = None
+session_start_epoch_time: Optional[float] = None
+
+IDLE_SECONDS_FOR_SESSION_SPLIT = 15 * 60
 
 
 class EventLogger:
     def __init__(self):
-        global SESSION_START_TIME
         self._closing = False
-        SESSION_START_TIME = time.localtime()
-        self._file_path = os.path.join(
-            get_log_dir(), format_time_range(SESSION_START_TIME, None) + ".jsonl"
-        )
+        self._last_event_epoch_time: Optional[float] = None
 
         wb = get_workbench()
         wb.bind("WorkbenchClose", self._on_worbench_close, True)
@@ -62,6 +61,7 @@ class EventLogger:
             "HideView",
             "TextInsert",
             "TextDelete",
+            "ToplevelResponse",
         ]:
             self._bind_workbench(sequence)
 
@@ -69,21 +69,18 @@ class EventLogger:
         self._bind_workbench("<FocusOut>", True)
 
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
-
-        self._out_fp = open(self._file_path, mode="w", encoding="utf-8", buffering=1)
-
-        logger.info("Starting logging user events into %r", self._file_path)
+        self._start_session()
 
     def _bind_workbench(self, sequence, only_workbench_widget=False):
         def handle(event):
             if not only_workbench_widget or event.widget == get_workbench():
-                self._log_event(sequence, event)
+                self._consider_splitting_and_log_event(sequence, event)
 
         get_workbench().bind(sequence, handle, True)
 
     def _bind_all(self, sequence):
         def handle(event):
-            self._log_event(sequence, event)
+            self._consider_splitting_and_log_event(sequence, event)
 
         tk._default_root.bind_all(sequence, handle, True)
 
@@ -130,11 +127,28 @@ class EventLogger:
 
         return data
 
+    def _consider_splitting_and_log_event(self, sequence, event):
+        now = time.time()
+        if (
+            self._last_event_epoch_time is not None
+            and now - self._last_event_epoch_time > IDLE_SECONDS_FOR_SESSION_SPLIT
+        ):
+            logger.info(
+                "Splitting because %r is more than %r seconds later than %r",
+                time.ctime(now),
+                IDLE_SECONDS_FOR_SESSION_SPLIT,
+                time.ctime(self._last_event_epoch_time),
+            )
+            self._split_session()
+
+        self._log_event(sequence, event)
+
     def _log_event(self, sequence, event):
         if self._closing:
             logger.info("Won't log %r because we are closing", sequence)
             return
 
+        event_time = datetime.now()
         import json
 
         widget_str = getattr(event, "widget", None)
@@ -163,21 +177,38 @@ class EventLogger:
 
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence
-        data["time"] = datetime.now().isoformat()
+        data["time"] = event_time.isoformat()
         if len(data["time"]) == 19:
             # 0 fraction gets skipped, but reader assumes it
             data["time"] += ".0"
-        SESSION_EVENTS.append(data)
+        session_events.append(data)
         json.dump(data, self._out_fp)
         self._out_fp.write("\n")
 
-    def _on_worbench_close(self, event=None):
+        self._last_event_epoch_time = event_time.timestamp()
+
+    def _on_worbench_close(self, event):
+        self._consider_splitting_and_log_event("WorkbenchClose", event)
+        self._closing = True
+        self._close_session()
+
+    def _start_session(self):
+        global session_start_time
+        now = datetime.now()
+        session_start_time = now.timetuple()
+
+        self._file_path = os.path.join(
+            get_log_dir(), format_time_range(session_start_time, None) + ".jsonl"
+        )
+        self._out_fp = open(self._file_path, mode="w", encoding="utf-8", buffering=1)
+        logger.info("Starting logging user events into %r", self._file_path)
+
+    def _close_session(self):
         # save the file, compress it and remove the uncompressed copy
         logger.info("Closing event log")
-        self._closing = True
         self._out_fp.close()
         out_file_path = os.path.join(
-            get_log_dir(), format_time_range(SESSION_START_TIME, time.localtime()) + ".jsonl.gz"
+            get_log_dir(), format_time_range(session_start_time, time.localtime()) + ".jsonl.gz"
         )
         import gzip
 
@@ -187,6 +218,31 @@ class EventLogger:
                 out_fp.write(in_fp.read())
 
         os.remove(self._file_path)
+        session_events.clear()
+
+    def _split_session(self):
+        self._close_session()
+        self._start_session()
+
+        texts = [
+            editor.get_text_widget()
+            for editor in get_workbench().get_editor_notebook().get_all_editors()
+        ]
+        texts.insert(0, get_shell().text)
+
+        for text in texts:
+            self._log_event(
+                "TextInsert",
+                WorkbenchEvent(
+                    sequence="TextInsert",
+                    index="1.0",
+                    text=text.get("1.0", "end-1c"),
+                    tags=(),
+                    text_widget=text,
+                    trivial_for_coloring=False,
+                    trivial_for_parens=False,
+                ),
+            )
 
 
 def get_log_dir():

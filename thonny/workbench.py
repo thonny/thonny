@@ -2446,7 +2446,7 @@ class Workbench(tk.Tk):
         try:
             self._save_layout()
             self._editor_notebook.remember_open_files()
-            self.event_generate("WorkbenchClose")
+            self.event_generate("WorkbenchClose", widget=self)
             self._configuration_manager.save()
             temp_dir = self.get_temp_dir(create_if_doesnt_exist=False)
             if os.path.exists(temp_dir):

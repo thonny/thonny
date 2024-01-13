@@ -141,7 +141,7 @@ class Editor(BaseEditor):
 
         self.update_appearance()
 
-    def get_text_widget(self):
+    def get_text_widget(self) -> tk.Text:
         return self._code_view.text
 
     def get_code_view(self):

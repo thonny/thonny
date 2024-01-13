@@ -6,7 +6,7 @@ import tkinter as tk
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from thonny import codeview, get_workbench, ui_utils
 from thonny.custom_notebook import CustomNotebook
@@ -24,6 +24,10 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
+
+KEY_EVENTS = ["ToplevelResponse"]
+
+FILE_TOKEN = "file://"
 
 logger = getLogger(__name__)
 _REPLAYER = None
@@ -79,8 +83,10 @@ class ReplayWindow(CommonDialog):
         self.larger_font = default_font.copy()
         self.larger_font.config(size=int(default_font.cget("size") * 1.3))
 
-        self._add_command(" « ", self.select_prev_run, self.can_select_event, tr("Previous run"))
-        self._add_command(" » ", self.select_next_run, self.can_select_event, tr("Next run"))
+        self._add_command(
+            " « ", self.select_prev_key_event, self.can_select_event, tr("Previous run")
+        )
+        self._add_command(" » ", self.select_next_key_event, self.can_select_event, tr("Next run"))
         self._add_command(
             " ‹ ", self.select_prev_event, self.can_select_event, tr("Previous event")
         )
@@ -122,6 +128,11 @@ class ReplayWindow(CommonDialog):
         self.scrubber.focus_set()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.after_idle(self._after_ready)
+
+    def _after_ready(self):
+        self.session_combo.select_value(CURRENT_SESSION_VALUE)
+        self.select_session_from_combobox(None)
 
     def _add_command(self, label: str, command: Callable, tester: Callable, tooltip: str) -> None:
         pad = ems_to_pixels(0.3)
@@ -154,11 +165,11 @@ class ReplayWindow(CommonDialog):
         self.menu.tk_popup(post_x, post_y)
 
     def create_sessions_mapping(self):
-        from thonny.plugins.event_logging import SESSION_START_TIME, get_log_dir, parse_file_name
+        from thonny.plugins.event_logging import get_log_dir, parse_file_name, session_start_time
 
         current_session_label = (
             tr("Current session")
-            + f" • {_custom_time_format(SESSION_START_TIME, without_seconds=True)} - ???"
+            + f" • {_custom_time_format(session_start_time, without_seconds=True)} - ???"
         )
 
         mapping = {current_session_label: CURRENT_SESSION_VALUE}
@@ -181,7 +192,7 @@ class ReplayWindow(CommonDialog):
                 without_seconds = all_minute_prefixes.count(minute_prefix) == 1
                 start_time, end_time = parse_file_name(name)
                 # need mktime, because the tuples may have different value in dst field, which makes them unequal
-                if time.mktime(start_time) == time.mktime(SESSION_START_TIME):
+                if time.mktime(start_time) == time.mktime(session_start_time):
                     # Don't read current session from file
                     continue
                 date_s = _custom_date_format(start_time)
@@ -198,14 +209,14 @@ class ReplayWindow(CommonDialog):
 
         return mapping
 
-    def select_session_from_combobox(self, event: tk.Event) -> None:
-        from thonny.plugins.event_logging import SESSION_EVENTS, load_events_from_file
+    def select_session_from_combobox(self, event: Optional[tk.Event] = None) -> None:
+        from thonny.plugins.event_logging import load_events_from_file, session_events
 
         session_path = self.session_combo.get_selected_value()
         logger.info("User selected session %r", session_path)
 
         if session_path == CURRENT_SESSION_VALUE:
-            events = SESSION_EVENTS.copy()
+            events = session_events.copy()
         elif os.path.isfile(session_path):
             events = load_events_from_file(session_path)
         else:
@@ -216,21 +227,25 @@ class ReplayWindow(CommonDialog):
 
     def load_session(self, events: List[Dict]) -> None:
         self.loading = True
+        self.events = events.copy()  # Need fixed list. The source list can be appended to
         try:
-            self.events = events[:]
             for event in self.events:
-                if len(event["time"]) == 19:
+                event_time_str = event["time"]
+                if len(event_time_str) == 19:
                     # 0 fraction may have been skipped
-                    event["time"] += ".0"
-                event["time"] = datetime.datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
-                event["epoch_time"] = event["time"].timestamp()
+                    event_time_str += ".0"
+                event_time = datetime.datetime.strptime(event_time_str, "%Y-%m-%dT%H:%M:%S.%f")
+                # yes, I'm modifying the argument. I'll live with this hack.
+                event["epoch_time"] = event_time.timestamp()
             self.reset_session()
             self.scrubber.config(state="normal")
             for cmd in self.commands:
                 cmd.button.configure(state="normal")
 
-            self.scrubber.config(from_=events[0]["epoch_time"], to=events[-1]["epoch_time"])
-            self.select_event(0)
+            self.scrubber.config(
+                from_=self.events[0]["epoch_time"], to=self.events[-1]["epoch_time"]
+            )
+            self.select_event(len(self.events) - 1)
             self.scrubber.focus_set()
         finally:
             self.loading = False
@@ -238,11 +253,25 @@ class ReplayWindow(CommonDialog):
     def can_select_event(self) -> bool:
         return True
 
-    def select_prev_run(self):
-        print("Prev run")
+    def select_prev_key_event(self):
+        index = self.last_event_index
+        while index > 0:
+            index -= 1
+            if self.events[index]["sequence"] in KEY_EVENTS:
+                self.select_event(index)
+                return
+        else:
+            self.bell()
 
-    def select_next_run(self):
-        print("Next run")
+    def select_next_key_event(self):
+        index = self.last_event_index
+        while index < len(self.events) - 1:
+            index += 1
+            if self.events[index]["sequence"] in KEY_EVENTS:
+                self.select_event(index)
+                return
+        else:
+            self.bell()
 
     def select_prev_event(self):
         if self.last_event_index == 0:
@@ -293,7 +322,7 @@ class ReplayWindow(CommonDialog):
 
             path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
             if path:
-                self.session_combo.add_pair(os.path.basename(path), path)
+                self.session_combo.add_pair(FILE_TOKEN + os.path.basename(path), path)
                 self.session_combo.select_value(path)
                 self.select_session_from_combobox(event)
                 get_workbench().set_option(
@@ -315,17 +344,20 @@ class ReplayWindow(CommonDialog):
             self._select_event(index)
 
     def update_title(self):
-        s = tr("History")
         session_label = self.session_combo.get()
-        if session_label:
-            s += f" • {session_label}"
+        if session_label and session_label.startswith(FILE_TOKEN):
+            s = session_label
+        else:
+            s = tr("History")
 
         if self.last_event_index is not None and self.last_event_index > -1:
+            event = self.events[self.last_event_index]
+            event_sequence = event["sequence"]
             timestamp = float(self.scrubber.cget("value"))
             dt = datetime.datetime.fromtimestamp(timestamp)
             date_s = dt.strftime("%x")
             time_s = dt.strftime("%X")
-            s += f" • {date_s} • {time_s}"
+            s += f" • {event_sequence} @ {date_s} • {time_s}"
 
         self.title(s)
 
@@ -353,7 +385,8 @@ class ReplayWindow(CommonDialog):
         self.select_event(index, from_scrubber=True)
 
     def on_close(self, event=None):
-        self.withdraw()
+        self.destroy()
+        # self.withdraw()
 
         get_workbench().winfo_toplevel().lift()
         get_workbench().winfo_toplevel().focus_force()
@@ -481,6 +514,7 @@ class ShellFrame(ttk.Frame):
             insertwidth=2,
             height=10,
             undo=True,
+            read_only=True,
         )
 
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
@@ -538,7 +572,6 @@ def open_replayer():
         _REPLAYER.refresh()
         ui_utils.show_dialog(_REPLAYER, modal=False, width=1200, height=900)
     else:
-        _REPLAYER.refresh()
         if _REPLAYER.winfo_ismapped():
             _REPLAYER.lift()
         else:
@@ -581,5 +614,11 @@ def _custom_time_format(timestamp: time.struct_time, without_seconds: bool):
 def load_plugin() -> None:
     get_workbench().set_default("tools.replayer_last_browser_folder", os.path.expanduser("~/"))
     get_workbench().add_command(
-        "open_replayer", "tools", tr("Open replayer..."), open_replayer, group=110
+        "open_replayer",
+        "tools",
+        tr("Open replayer..."),
+        open_replayer,
+        include_in_toolbar=False,
+        caption="Replayer",
+        group=110,
     )
