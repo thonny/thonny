@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import ast
 import datetime
 import os.path
+import re
 import time
 import tkinter as tk
 from dataclasses import dataclass
@@ -30,14 +33,14 @@ KEY_EVENTS = ["ToplevelResponse"]
 FILE_TOKEN = "file://"
 
 logger = getLogger(__name__)
-_REPLAYER = None
+instance: Optional[ReplayWindow] = None
 
 CURRENT_SESSION_VALUE = "__CURRENT_SESSION__"
 
 _dialog_filetypes = [(tr("Event logs"), ".jsonl .gz"), (tr("all files"), ".*")]
 
 
-class ReplayWindow(CommonDialog):
+class ReplayWindow(tk.Toplevel):
     def __init__(self, master):
         self.events = None
         self.last_event_index = -1
@@ -48,7 +51,6 @@ class ReplayWindow(CommonDialog):
         super().__init__(
             master,
             background=lookup_style_option("TFrame", "background"),
-            skip_tk_dialog_attributes=True,
         )
         outer_pad = ems_to_pixels(1)
         inner_pad = ems_to_pixels(1)
@@ -127,7 +129,7 @@ class ReplayWindow(CommonDialog):
         self.update_title()
         self.scrubber.focus_set()
 
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.protocol("WM_DELETE_WINDOW", self.close)
         self.after_idle(self._after_ready)
 
     def _after_ready(self):
@@ -384,10 +386,20 @@ class ReplayWindow(CommonDialog):
         index = self.find_closest_index(float(value), 0, len(self.events) - 1)
         self.select_event(index, from_scrubber=True)
 
-    def on_close(self, event=None):
-        global _REPLAYER
+    def close(self, event=None):
+        global instance
+
+        get_workbench().set_option("replayer.zoomed", ui_utils.get_zoomed(self))
+        if not ui_utils.get_zoomed(self) or running_on_mac_os():
+            # can't restore zoom on mac without setting actual dimensions
+            gparts = re.findall(r"\d+", self.wm_geometry())
+            get_workbench().set_option("replayer.width", int(gparts[0]))
+            get_workbench().set_option("replayer.height", int(gparts[1]))
+            get_workbench().set_option("replayer.left", int(gparts[2]))
+            get_workbench().set_option("replayer.top", int(gparts[3]))
+
         self.destroy()
-        _REPLAYER = None
+        instance = None
 
         """Alternative:
         # self.withdraw()
@@ -398,6 +410,49 @@ class ReplayWindow(CommonDialog):
         if running_on_mac_os():
             get_workbench().winfo_toplevel().grab_release()
         """
+
+    def show(self):
+        self.title("Thonny")
+
+        get_workbench().set_default("replayer.zoomed", False)
+        get_workbench().set_default("replayer.width", ems_to_pixels(70))
+        get_workbench().set_default("replayer.height", ems_to_pixels(50))
+        get_workbench().set_default("replayer.left", ems_to_pixels(20))
+        get_workbench().set_default("replayer.top", ems_to_pixels(10))
+
+        logger.info(
+            "height: %r, %r, %r",
+            get_workbench().get_option("replayer.height"),
+            ems_to_pixels(20),
+            self.winfo_screenheight(),
+        )
+
+        geometry = "{0}x{1}+{2}+{3}".format(
+            min(
+                max(get_workbench().get_option("replayer.width"), ems_to_pixels(30)),
+                self.winfo_screenwidth(),
+            ),
+            min(
+                max(get_workbench().get_option("replayer.height"), ems_to_pixels(20)),
+                self.winfo_screenheight(),
+            ),
+            min(
+                max(get_workbench().get_option("replayer.left"), 0),
+                self.winfo_screenwidth() - ems_to_pixels(10),
+            ),
+            min(
+                max(get_workbench().get_option("replayer.top"), 0),
+                self.winfo_screenheight() - ems_to_pixels(10),
+            ),
+        )
+        logger.info("Replayer geometry: %r", geometry)
+        self.geometry(geometry)
+
+        if get_workbench().get_option("replayer.zoomed"):
+            ui_utils.set_zoomed(self, True)
+
+        self.lift()
+        self.deiconify()
 
 
 class ReplayerCodeView(ttk.Frame):
@@ -571,16 +626,16 @@ class ReplayerCommand:
 
 
 def open_replayer():
-    global _REPLAYER
-    if _REPLAYER is None:
-        _REPLAYER = ReplayWindow(get_workbench())
-        _REPLAYER.refresh()
-        ui_utils.show_dialog(_REPLAYER, modal=False, width=1200, height=900, transient=False)
+    global instance
+    if instance is None:
+        instance = ReplayWindow(get_workbench())
+        instance.refresh()
+        instance.show()
     else:
-        if _REPLAYER.winfo_ismapped():
-            _REPLAYER.lift()
+        if instance.winfo_ismapped():
+            instance.lift()
         else:
-            _REPLAYER.deiconify()
+            instance.deiconify()
 
 
 def _custom_date_format(timestamp: time.struct_time):
