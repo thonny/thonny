@@ -38,8 +38,9 @@ class CommonDialog(tk.Toplevel):
         super().__init__(master=master, class_="Thonny", **kw)
         self.withdraw()  # remain invisible until size calculations are done
 
-        # TODO: Is it still required ?
-        # self.bind("<FocusIn>", self._unlock_on_focus_in, True)
+        # Opening a dialog and minimizing everything with Win-D in Windows makes the main
+        # window and dialog stuck. This is a work-around.
+        self.bind("<FocusIn>", self._unlock_on_focus_in, True)
 
         if not skip_tk_dialog_attributes:
             # https://bugs.python.org/issue43655
