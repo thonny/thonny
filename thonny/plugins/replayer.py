@@ -18,7 +18,6 @@ from thonny.languages import tr
 from thonny.misc_utils import get_menu_char, running_on_mac_os
 from thonny.shell import BaseShellText
 from thonny.ui_utils import (
-    CommonDialog,
     CustomToolbutton,
     MappingCombobox,
     askopenfilename,
@@ -64,7 +63,6 @@ class ReplayWindow(tk.Toplevel):
         )
         self.bind(load_from_file_sequence, self.cmd_open, True)
 
-        ui_utils.set_zoomed(self, True)
         self.main_frame = ttk.Frame(self)
         self.main_frame.grid(row=0, column=0, sticky="nsew")
         self.main_frame.rowconfigure(2, weight=1)
@@ -111,6 +109,9 @@ class ReplayWindow(tk.Toplevel):
         self.menu_button.grid(row=1, column=20, padx=(inner_pad, 0))
 
         self.toolbar.columnconfigure(10, weight=1)
+
+        get_workbench().set_default("replayer.sash_position", ems_to_pixels(30))
+        sash_position = get_workbench().get_option("replayer.sash_position")
         self.center_pw = ReplayerPanedWindow(
             self.main_frame, orient=tk.VERTICAL, sashwidth=ems_to_pixels(0.7)
         )
@@ -119,8 +120,8 @@ class ReplayWindow(tk.Toplevel):
         shell_book = CustomNotebook(self.center_pw, closable=False)
         self.shell = ShellFrame(shell_book)
 
-        self.center_pw.add(self.editor_notebook, height=700, minsize=100)
-        self.center_pw.add(shell_book, height=300, minsize=100)
+        self.center_pw.add(self.editor_notebook, height=sash_position, minsize=ems_to_pixels(2))
+        self.center_pw.add(shell_book, minsize=ems_to_pixels(2))
         shell_book.add(self.shell, text="Shell")
 
         self.columnconfigure(0, weight=1)
@@ -398,6 +399,8 @@ class ReplayWindow(tk.Toplevel):
             get_workbench().set_option("replayer.left", int(gparts[2]))
             get_workbench().set_option("replayer.top", int(gparts[3]))
 
+        get_workbench().set_option("replayer.sash_position", self.editor_notebook.winfo_height())
+
         self.destroy()
         instance = None
 
@@ -610,11 +613,9 @@ class ShellFrame(ttk.Frame):
 
 
 class ReplayerPanedWindow(tk.PanedWindow):
-    def __init__(self, master=None, cnf={}, **kw):
-        cnf = cnf.copy()
-        cnf.update(kw)
-        cnf["background"] = lookup_style_option("TFrame", "background")
-        super().__init__(master=master, cnf=cnf)
+    def __init__(self, master=None, **kw):
+        kw["background"] = lookup_style_option("TFrame", "background")
+        super().__init__(master=master, **kw)
 
 
 @dataclass
