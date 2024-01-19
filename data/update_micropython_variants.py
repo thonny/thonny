@@ -229,12 +229,24 @@ pololu_variants = [
         "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
             {
+                "version": "240117",
+                "url": "https://github.com/pololu/micropython-build/releases/download/240117/micropython-pololu-3pi-2040-robot-v1.22.1-240117.uf2"
+            },
+            {
                 "version": "231113",
                 "url": "https://github.com/pololu/micropython-build/releases/download/231113/micropython-pololu-3pi-2040-robot-v1.22.0-preview-231113.uf2"
             },
             {
                 "version": "230510",
                 "url": "https://github.com/pololu/micropython-build/releases/download/230510/micropython-pololu-3pi-2040-robot-v1.20.0-230510.uf2"
+            },
+            {
+                "version": "230405",
+                "url": "https://github.com/pololu/micropython-build/releases/download/230405/micropython-pololu-3pi-2040-robot-v1.19.1-230405.uf2"
+            },
+            {
+                "version": "230303",
+                "url": "https://github.com/pololu/micropython-build/releases/download/230303/micropython-pololu-3pi-2040-robot-v1.19.1-230303.uf2"
             },
         ]
     },
@@ -244,6 +256,10 @@ pololu_variants = [
         "family": "rp2",
         "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
+            {
+                "version": "240117",
+                "url": "https://github.com/pololu/micropython-build/releases/download/240117/micropython-pololu-zumo-2040-robot-v1.22.1-240117.uf2"
+            },
             {
                 "version": "231113",
                 "url": "https://github.com/pololu/micropython-build/releases/download/231113/micropython-pololu-zumo-2040-robot-v1.22.0-preview-231113.uf2"
