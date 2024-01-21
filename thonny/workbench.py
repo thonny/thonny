@@ -261,6 +261,10 @@ class Workbench(tk.Tk):
             )
         self.poll_events()
 
+        from thonny.plugins import replayer
+
+        replayer.open_replayer()
+
     def poll_events(self) -> None:
         if self._event_queue is None or self._closing:
             self._event_polling_id = None

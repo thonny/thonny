@@ -8,7 +8,12 @@ def on_key(event):
 text = tk.Text(root)
 text.grid()
 
-text.insert("1.0", "Essa\ntessa\nkossa")
+print(repr(text.get("1.0", "end")))
+print(text.index("end"), text.index("insert"))
+text.insert("1.0", "Essa\n")
+
+print(repr(text.get("1.0", "end")))
+print(repr(text.get("end")))
 
 text.tag_add("see", "1.0")
 text.tag_add("too", "1.0", "end")

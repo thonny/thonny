@@ -812,6 +812,8 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
         return result
 
     def direct_delete(self, index1, index2=None, **kw):
+        print("END BEFORE", self.index("end"))
+        print("DELETING", index1, index2, kw)
         try:
             # index1 may be eg "sel.first" and it doesn't make sense *after* deletion
             concrete_index1 = self.index(index1)
@@ -843,6 +845,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                 trivial_for_coloring=trivial_for_coloring,
                 trivial_for_parens=trivial_for_parens,
             )
+            print("END AFTER", self.index("end"), repr(self.get("1.0", "end")))
 
     def _is_trivial_edit(self, chars, line_before, line_after):
         # line is taken after edit for insertion and before edit for deletion
