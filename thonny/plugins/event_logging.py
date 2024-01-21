@@ -48,9 +48,11 @@ class EventLogger:
         for sequence in [
             "UiCommandDispatched",
             "MagicCommand",
-            "Open",
-            "Save",
-            "SaveAs",
+            "Open",  # Event happens before the editor text gets updated
+            "Opened",
+            "Save",  # Event happens before save is attempted, user may cancel or saving may fail
+            "SaveAs",  # Event happens before save is attempted, user may cancel or saving may fail
+            "Saved",
             "NewFile",
             "EditorTextCreated",
             "EditorTextDestroyed",
@@ -167,7 +169,7 @@ class EventLogger:
         if widget is not None:
             try:
                 if widget.winfo_toplevel() is not get_workbench():
-                    logger.debug("Skipping non-workspace event %r", event)
+                    # logger.debug("Skipping non-workspace event %r", event)
                     return
             except tk.TclError:
                 logger.error("Could not get winfo_toplevel", exc_info=True)

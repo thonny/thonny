@@ -17,6 +17,7 @@ from thonny.editors import BaseEditor
 from thonny.languages import tr
 from thonny.misc_utils import get_menu_char, running_on_mac_os
 from thonny.shell import BaseShellText
+from thonny.tktextext import TweakableText
 from thonny.ui_utils import (
     CustomToolbutton,
     MappingCombobox,
@@ -32,14 +33,14 @@ KEY_EVENTS = ["ToplevelResponse"]
 FILE_TOKEN = "file://"
 
 logger = getLogger(__name__)
-instance: Optional[ReplayWindow] = None
+instance: Optional[Replayer] = None
 
 CURRENT_SESSION_VALUE = "__CURRENT_SESSION__"
 
-_dialog_filetypes = [(tr("Event logs"), ".jsonl .gz"), (tr("all files"), ".*")]
+_dialog_filetypes = [(tr("Event logs"), ".jsonl .gz .txt"), (tr("all files"), ".*")]
 
 
-class ReplayWindow(tk.Toplevel):
+class Replayer(tk.Toplevel):
     def __init__(self, master):
         self.events = None
         self.last_event_index = -1
@@ -167,6 +168,23 @@ class ReplayWindow(tk.Toplevel):
         post_y = self.menu_button.winfo_rooty() + self.menu_button.winfo_height()
         self.menu.tk_popup(post_x, post_y)
 
+    def cmd_open(self, event=None):
+        try:
+            initialdir = get_workbench().get_option("tools.replayer_last_browser_folder")
+            if not os.path.isdir(initialdir):
+                initialdir = os.path.normpath(os.path.expanduser("./"))
+
+            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
+            if path:
+                self.session_combo.add_pair(FILE_TOKEN + os.path.basename(path), path)
+                self.session_combo.select_value(path)
+                self.select_session_from_combobox(event)
+                get_workbench().set_option(
+                    "tools.replayer_last_browser_folder", os.path.dirname(path)
+                )
+        finally:
+            return "break"
+
     def create_sessions_mapping(self):
         from thonny.plugins.event_logging import get_log_dir, parse_file_name, session_start_time
 
@@ -230,7 +248,30 @@ class ReplayWindow(tk.Toplevel):
 
     def load_session(self, events: List[Dict]) -> None:
         self.loading = True
-        self.events = events.copy()  # Need fixed list. The source list can be appended to
+        # Need a fixed copy. The source list can be appended to, and we want to tweak things.
+        self.events = events.copy()
+
+        for event in self.events:
+            if event["sequence"] == "ToplevelResponse":
+                break
+        else:
+            # Infer ToplevelResponse events for old format logs
+            for i in reversed(range(0, len(self.events) - 1)):
+                event = self.events[i]
+                if (
+                    event["sequence"] == "TextInsert"
+                    and event["text"] == ">>> "
+                    and "prompt" in event["tags"]
+                ):
+                    self.events.insert(
+                        i + 1,
+                        {
+                            "event_type": "ToplevelResponse",
+                            "sequence": "ToplevelResponse",
+                            "time": event["time"],
+                        },
+                    )
+
         try:
             for event in self.events:
                 event_time_str = event["time"]
@@ -248,6 +289,7 @@ class ReplayWindow(tk.Toplevel):
             self.scrubber.config(
                 from_=self.events[0]["epoch_time"], to=self.events[-1]["epoch_time"]
             )
+            # need to apply all events in order to record reversion information
             self.select_event(len(self.events) - 1)
             self.scrubber.focus_set()
         finally:
@@ -310,48 +352,32 @@ class ReplayWindow(tk.Toplevel):
             return self.find_closest_index(target_timestamp, middle_index, end_index)
 
     def select_event(self, index: int, from_scrubber: bool = False) -> None:
-        self._select_event(index)
+        self._do_select_event(index)
         event = self.events[self.last_event_index]
         if not from_scrubber:
             self.scrubber.set(event["epoch_time"])
         self.update_title()
         self.update_idletasks()
 
-    def cmd_open(self, event=None):
-        try:
-            initialdir = get_workbench().get_option("tools.replayer_last_browser_folder")
-            if not os.path.isdir(initialdir):
-                initialdir = os.path.normpath(os.path.expanduser("./"))
-
-            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
-            if path:
-                self.session_combo.add_pair(FILE_TOKEN + os.path.basename(path), path)
-                self.session_combo.select_value(path)
-                self.select_session_from_combobox(event)
-                get_workbench().set_option(
-                    "tools.replayer_last_browser_folder", os.path.dirname(path)
-                )
-        finally:
-            return "break"
-
-    def _select_event(self, index):
+    def _do_select_event(self, index):
         if index > self.last_event_index:
             # replay all events between last replayed event up to and including this event
             while self.last_event_index < index:
-                self.replay_event(self.events[self.last_event_index + 1])
+                self.process_event(self.events[self.last_event_index + 1], reverse=False)
                 self.last_event_index += 1
 
         elif index < self.last_event_index:
-            # Undo by resetting and replaying again
-            self.reset_session()
-            self._select_event(index)
+            # undo events up to and including the event following the desired event
+            while self.last_event_index > index:
+                self.process_event(self.events[self.last_event_index], reverse=True)
+                self.last_event_index -= 1
 
     def update_title(self):
         session_label = self.session_combo.get()
         if session_label and session_label.startswith(FILE_TOKEN):
             s = session_label
         else:
-            s = tr("History")
+            s = tr("Thonny Replayer")
 
         if self.last_event_index is not None and self.last_event_index > -1:
             event = self.events[self.last_event_index]
@@ -364,16 +390,16 @@ class ReplayWindow(tk.Toplevel):
 
         self.title(s)
 
-    def replay_event(self, event):
+    def process_event(self, event, reverse: bool):
         "this should be called with events in correct order"
         if "text_widget_id" in event:
             if (
                 event.get("text_widget_context", None) == "shell"
                 or event.get("text_widget_class") == "ShellText"
             ):
-                self.shell.replay_event(event)
+                self.shell.process_event(event, reverse)
             elif event.get("text_widget_class") == "EditorCodeViewText":
-                self.editor_notebook.replay_event(event)
+                self.editor_notebook.process_event(event, reverse)
 
     def reset_session(self):
         self.shell.clear()
@@ -497,31 +523,52 @@ class ReplayerEditor(BaseEditor):
         self._code_view.text.set_read_only(True)
         self.update_appearance()
 
-    def replay_event(self, event):
+    def process_event(self, event, reverse):
+        if not reverse:
+            self.apply_event(event)
+        else:
+            self.revert_event(event)
+
+    def apply_event(self, event):
+        if "previous_modified" not in event and event["sequence"] in [
+            "TextInsert",
+            "TextDelete",
+            "Opened",
+            "Saved",
+        ]:
+            # Mark the state change
+            event["previous_modified"] = self.is_modified()
+
         if event["sequence"] in ["TextInsert", "TextDelete"]:
-            if event["sequence"] == "TextInsert":
-                self._code_view.text.direct_insert(
-                    event["index"], event["text"], ast.literal_eval(event["tags"])
-                )
-
-            elif event["sequence"] == "TextDelete":
-                if event["index2"] and event["index2"] != "None":
-                    self._code_view.text.direct_delete(event["index1"], event["index2"])
-                else:
-                    self._code_view.text.direct_delete(event["index1"])
-
-            self.see_event(event)
+            _apply_event_on_text(event, self._code_view.text)
+            self._code_view.text.edit_modified(True)
+        elif event["sequence"] in ["Opened", "Saved"]:
+            # Can't use old events Open, Save and SaveAs as they are not aligned with edit_modified
+            self._code_view.text.edit_modified(False)
 
         if "filename" in event:
+            if "previous_filename" not in event:
+                # store information for reverting this event
+                event["previous_filename"] = self._filename
+
             self._filename = event["filename"]
 
-    def see_event(self, event):
-        for key in ["index", "index1", "index2"]:
-            if key in event and event[key] and event[key] != "None":
-                self._code_view.text.see(event[key])
+    def revert_event(self, event):
+        _revert_event_on_text(event, self._code_view.text)
+        if "previous_modified" in event:
+            self._code_view.text.edit_modified(event["previous_modified"])
+
+        if "previous_filename" in event:
+            self._filename = event["previous_filename"]
+
+    def shorten_filename_for_title(self, path: str) -> str:
+        # the path can be saved in Posix and replayed in Windows and vice versa
+        return path.replace("\\", "/").split("/")[-1]
 
     def clear(self):
         self._code_view.text.direct_delete("1.0", "end")
+        self._filename = None
+        self._code_view.text.edit_modified(False)
 
 
 class ReplayerEditorNotebook(CustomNotebook):
@@ -546,11 +593,11 @@ class ReplayerEditorNotebook(CustomNotebook):
 
         return self._editors_by_text_widget_id[text_widget_id]
 
-    def replay_event(self, event):
+    def process_event(self, event, reverse):
         if "text_widget_id" in event:
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
             self.select(editor)
-            editor.replay_event(event)
+            editor.process_event(event, reverse)
 
             if "filename" in event:
                 self.tab(editor, text=editor.get_title())
@@ -591,25 +638,12 @@ class ShellFrame(ttk.Frame):
     def clear(self):
         self.text.direct_delete("1.0", "end")
 
-    def replay_event(self, event):
+    def process_event(self, event, reverse):
         if event["sequence"] in ["TextInsert", "TextDelete"]:
-            if event["sequence"] == "TextInsert":
-                self.text.direct_insert(
-                    event["index"], event["text"], ast.literal_eval(event["tags"])
-                )
-
-            elif event["sequence"] == "TextDelete":
-                if event["index2"] and event["index2"] != "None":
-                    self.text.direct_delete(event["index1"], event["index2"])
-                else:
-                    self.text.direct_delete(event["index1"])
-
-            self.see_event(event)
-
-    def see_event(self, event):
-        for key in ["index", "index1", "index2"]:
-            if key in event and event[key] and event[key] != "None":
-                self.text.see(event[key])
+            if not reverse:
+                _apply_event_on_text(event, self.text)
+            else:
+                _revert_event_on_text(event, self.text)
 
 
 class ReplayerPanedWindow(tk.PanedWindow):
@@ -626,10 +660,76 @@ class ReplayerCommand:
     tester: Callable
 
 
+def _apply_event_on_text(event: Dict, text: TweakableText) -> None:
+    if event["sequence"] == "TextInsert":
+        text.direct_insert(event["index"], event["text"], ast.literal_eval(event["tags"]))
+        text.see(event["index"])
+
+    elif event["sequence"] == "TextDelete":
+        index1 = event["index1"]
+        index2 = event.get("index2", None)
+        if index2 == "None":
+            index2 = None
+        index2 = index2 or index1 + "+1c"
+
+        assert index1
+        assert index2
+
+        if "chunks" not in event:
+            # remember the information required for reverting the event
+            event["chunks"] = _export_text_range_with_tags(text, index1, index2)
+            # logger.trace("Deletion from %r to %r chunks %r", index1, index2, event["chunks"])
+
+        text.direct_delete(index1, index2)
+        text.see(event["index1"])
+
+
+def _revert_event_on_text(event: Dict, text: TweakableText) -> None:
+    if event["sequence"] == "TextInsert":
+        index1 = event["index"]
+        text_len = len(event["text"])
+        text.direct_delete(index1, f"{index1}+{text_len}c")
+        text.see(event["index"])
+    elif event["sequence"] == "TextDelete":
+        assert "chunks" in event
+        for chunk in event["chunks"]:
+            text.direct_insert(chunk["start_index"], chunk["chars"], chunk["tags"])
+        if event["chunks"]:  # yes, there can be deletions of 0 chars. Beats me.
+            text.see(event["chunks"][0]["start_index"])
+            text.see("%s+%dc" % (event["chunks"][-1]["start_index"], len(event)))
+
+
+def _export_text_range_with_tags(text: tk.Text, index1: str, index2: str) -> List[Dict]:
+    # If this approach brings some problems then consider using Text.dump
+    # logger.debug("Exporting %r to %r", index1, index2)
+    chunks = []
+    offset = 0
+    while True:
+        current_index = f"{index1}+{offset}c"
+        if text.compare(current_index, "<", index2):
+            char = text.get(current_index)
+            tags = text.tag_names(current_index)
+            chunks.append({"start_index": current_index, "chars": char, "tags": tags})
+            offset += 1
+        else:
+            break
+
+    i = len(chunks) - 1
+    while i > 0:
+        # try combining with preceding chunk
+        if chunks[i]["tags"] == chunks[i - 1]["tags"]:
+            chunks[i - 1]["chars"] += chunks[i]["chars"]
+            del chunks[i]
+
+        i -= 1
+
+    return chunks
+
+
 def open_replayer():
     global instance
     if instance is None:
-        instance = ReplayWindow(get_workbench())
+        instance = Replayer(get_workbench())
         instance.refresh()
         instance.show()
     else:

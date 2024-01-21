@@ -113,12 +113,15 @@ class BaseEditor(ttk.Frame):
             name = path.split("/")[-1]
             result = "[ " + name + " ]"
         else:
-            result = os.path.basename(self._filename)
+            result = self.shorten_filename_for_title(self._filename)
 
         if self.is_modified():
             result += " *"
 
         return result
+
+    def shorten_filename_for_title(self, path: str) -> str:
+        return os.path.basename(path)
 
 
 class Editor(BaseEditor):
@@ -277,6 +280,7 @@ class Editor(BaseEditor):
         self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
+        get_workbench().event_generate("Opened", editor=self, filename=self._filename)
         return True
 
     def _load_remote_file(self, filename):
@@ -350,7 +354,10 @@ class Editor(BaseEditor):
             self._filename = save_filename
             self.update_file_type()
 
-        self.update_title()
+        if not save_copy or self._filename == save_filename:
+            self.update_title()
+            get_workbench().event_generate("Saved", editor=self, filename=self._filename)
+
         return save_filename
 
     def write_local_file(self, save_filename, content_bytes, save_copy):
