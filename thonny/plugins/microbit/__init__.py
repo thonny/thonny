@@ -73,6 +73,9 @@ class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
         dlg = MicrobitFlashingDialog(self, "MicroPython")
         ui_utils.show_dialog(dlg)
 
+    def may_have_rtc(self):
+        return False
+
 
 class MicrobitFlashingDialog(Uf2FlashingDialog):
     """
