@@ -1,5 +1,6 @@
 # Bootstrap script for Thonny as an application bundle.
 # Inspired by https://github.com/python/cpython/blob/master/Mac/IDLE/IDLE.app/Contents/Resources/idlemain.py
+# See https://github.com/python/cpython/issues/112916#issuecomment-1872822685 for possible improvement
 import os.path
 import sys
 
