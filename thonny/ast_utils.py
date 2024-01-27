@@ -106,9 +106,7 @@ def get_last_child(node, skip_incorrect=True):
         # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
-    elif isinstance(
-        node, (ast.Index, ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
-    ):
+    elif isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)):
         return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):

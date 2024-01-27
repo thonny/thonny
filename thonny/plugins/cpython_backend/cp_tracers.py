@@ -1055,7 +1055,8 @@ class NiceTracer(Tracer):
         # ignore module docstring if it is before from __future__ import
         if (
             isinstance(root.body[0], ast.Expr)
-            and isinstance(root.body[0].value, ast.Str)
+            and isinstance(root.body[0].value, ast.Constant)
+            and isinstance(root.body[0].value.value, str)
             and len(root.body) > 1
             and isinstance(root.body[1], ast.ImportFrom)
             and root.body[1].module == "__future__"
@@ -1115,17 +1116,11 @@ class NiceTracer(Tracer):
                         node.lineno, node.col_offset, node.end_lineno, node.end_col_offset
                     )
 
-            if isinstance(node, ast.Str):
-                add_tag(node, "skipexport")
-
-            if hasattr(ast, "JoinedStr") and isinstance(node, ast.JoinedStr):
+            if isinstance(node, ast.JoinedStr):
                 # can't present children normally without
                 # ast giving correct locations for them
                 # https://bugs.python.org/issue29051
                 add_tag(node, "ignore_children")
-
-            elif isinstance(node, ast.Num):
-                add_tag(node, "skipexport")
 
             elif isinstance(node, ast.List):
                 add_tag(node, "skipexport")
@@ -1142,10 +1137,7 @@ class NiceTracer(Tracer):
             elif isinstance(node, ast.Name):
                 add_tag(node, "skipexport")
 
-            elif isinstance(node, ast.NameConstant):
-                add_tag(node, "skipexport")
-
-            elif hasattr(ast, "Constant") and isinstance(node, ast.Constant):
+            elif isinstance(node, ast.Constant):
                 add_tag(node, "skipexport")
 
             elif isinstance(node, ast.Expr):
@@ -1419,7 +1411,7 @@ class NiceTracer(Tracer):
         assert isinstance(node, (ast.expr, ast.stmt))
         node_id = id(node)
         self._nodes[node_id] = node
-        return ast.Num(node_id)
+        return ast.Constant(node_id)
 
     def _debug(self, *args):
         logger.debug("TRACER: " + str(args))
