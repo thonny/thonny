@@ -363,7 +363,9 @@ class MicroPythonBackend(MainBackend, ABC):
             return None
 
         # Don't confuse MicroPython and CircuitPython
-        return "micro:bit" in self._welcome_text.lower() and "MicroPython" in self._welcome_text
+        return (
+            "micro:bit" in self._welcome_text.lower() or "calliope" in self._welcome_text.lower()
+        ) and "MicroPython" in self._welcome_text
 
     def _connected_to_pyboard(self):
         if not self._welcome_text:
