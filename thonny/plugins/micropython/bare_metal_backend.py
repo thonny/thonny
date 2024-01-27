@@ -182,7 +182,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._prepare_after_soft_reboot(False)
 
     def _get_helper_code(self):
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             return super()._get_helper_code()
 
         result = super()._get_helper_code()
@@ -344,7 +344,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         now = self._get_time_for_rtc()
 
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             return
         elif self._connected_to_circuitpython():
             if "rtc" not in self._builtin_modules:
@@ -403,7 +403,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             print("WARNING: Could not sync device's clock: " + val)
 
     def _get_utc_timetuple_from_device(self) -> Union[tuple, str]:
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             return "This device does not have a real-time clock"
         elif self._connected_to_circuitpython():
             specific_script = dedent(
@@ -465,7 +465,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return self._evaluate(script)
 
     def _update_cwd(self):
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             self._cwd = ""
         else:
             super()._update_cwd()
@@ -1098,7 +1098,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             used = self._evaluate(
                 dedent(
                     """
@@ -1397,7 +1397,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             """
                 )
             )
-        elif self._using_microbit_micropython():
+        elif self._using_simplified_micropython():
             # doesn't have neither BytesIO.flush, nor os.sync
             self._execute_without_output(
                 dedent(
@@ -1682,7 +1682,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def _get_file_operation_block_size(self):
         # don't forget that the size may be expanded up to 4x where converted to Python
         # bytes literal
-        if self._using_microbit_micropython():
+        if self._using_simplified_micropython():
             return 512
         else:
             return 1024
