@@ -1,3 +1,7 @@
+"""
+Downloads: https://adafruit-circuit-python.s3.amazonaws.com/index.html?prefix=bin/
+"""
+
 from html.parser import HTMLParser
 from typing import Dict
 
