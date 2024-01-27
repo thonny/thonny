@@ -27,6 +27,7 @@ class EditorInfoBox(tk.Toplevel):
         self._target_text_widget: Optional[SyntaxText] = None
 
         get_workbench().bind("<FocusOut>", self._workbench_focus_out, True)
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self.hide, True)
 
         # If the box has received focus, then it may lose it by a messagebox
         # or mouse click on the main window
