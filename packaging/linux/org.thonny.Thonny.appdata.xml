@@ -17,14 +17,6 @@
     <p>See the homepage for more information, screenshots and a walk-through video.</p>
   </description>
   
-  <categories>
-    <category>Development</category>
-    <category>Education</category>
-    <category>Debugger</category>
-    <category>IDE</category>
-    <category>ComputerScience</category>
-  </categories>
-  
   <launchable type="desktop-id">org.thonny.Thonny.desktop</launchable>
 
   <url type="homepage">https://thonny.org</url>
