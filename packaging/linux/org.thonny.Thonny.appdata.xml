@@ -6,6 +6,7 @@
   <project_license>MIT</project_license>
   <name>Thonny</name>
   <summary>Python IDE for beginners</summary>
+  <developer_name>Aivar Annamaa</developer_name>
 
   <description>
     <p>Thonny is a simple Python IDE with features useful for learning programming.
