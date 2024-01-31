@@ -6,6 +6,7 @@
   <project_license>MIT</project_license>
   <name>Thonny</name>
   <summary>Python IDE for beginners</summary>
+  <developer_name>Aivar Annamaa</developer_name>
 
   <description>
     <p>Thonny is a simple Python IDE with features useful for learning programming.
@@ -15,14 +16,6 @@
     and special mode for learning about references.</p>
     <p>See the homepage for more information, screenshots and a walk-through video.</p>
   </description>
-  
-  <categories>
-    <category>Development</category>
-    <category>Education</category>
-    <category>Debugger</category>
-    <category>IDE</category>
-    <category>ComputerScience</category>
-  </categories>
   
   <launchable type="desktop-id">org.thonny.Thonny.desktop</launchable>
 
