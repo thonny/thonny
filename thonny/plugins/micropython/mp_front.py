@@ -1062,20 +1062,13 @@ _PORTS_CACHE_TIME = 0
 def get_serial_port_label(p) -> str:
     # On Windows, port is given also in description
     if p.product:
-        desc = p.product.strip()
+        desc = p.product
     elif p.interface:
-        desc = p.interface.strip()
+        desc = p.interface
     else:
         desc = p.description.replace(f" ({p.device})", "")
 
-    desc = desc.replace("\x00", "")
-
-    if desc == "USB Serial Device":
-        # Try finding something less generic
-        if p.product:
-            desc = p.product
-        elif p.interface:
-            desc = p.interface
+    desc = desc.replace("\x00", "").strip()
 
     return f"{desc} @ {p.device}"
 
