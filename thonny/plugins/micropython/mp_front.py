@@ -17,7 +17,7 @@ from thonny.plugins.backend_config_page import (
     get_ssh_password,
 )
 from thonny.running import SubprocessProxy
-from thonny.ui_utils import create_string_var, create_url_label, ems_to_pixels
+from thonny.ui_utils import TreeFrame, create_string_var, create_url_label, ems_to_pixels
 
 logger = getLogger(__name__)
 
@@ -444,12 +444,14 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
-        self._ports_by_desc = {get_serial_port_label(p): p.device for p in list_serial_ports()}
-        self._ports_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
+        ports = list_serial_ports()
+        self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
+        self._port_names_by_desc = {get_serial_port_label(p): p.device for p in ports}
+        self._port_names_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:
-            self._ports_by_desc[self._WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
+            self._port_names_by_desc[self._WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
 
         def port_order(p):
             _, name = p
@@ -462,7 +464,9 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                 return name
 
         # order by port, auto first
-        port_descriptions = [key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)]
+        port_descriptions = [
+            key for key, _ in sorted(self._port_names_by_desc.items(), key=port_order)
+        ]
 
         self._port_desc_variable = create_string_var(
             self.get_stored_port_desc(), self._on_change_port
@@ -479,6 +483,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self.columnconfigure(0, weight=1)
 
         self._webrepl_frame = None
+        self._serial_frame = None
 
         self.add_checkbox(
             self.backend_name + ".interrupt_on_connect",
@@ -575,6 +580,48 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         return result
 
+    def _get_serial_frame(self):
+        if self._serial_frame is not None:
+            return self._serial_frame
+
+        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5)
+        tree = self._serial_frame.tree
+
+        tree.column("attribute", width=ems_to_pixels(10), anchor="w", stretch=False)
+        tree.column("value", width=ems_to_pixels(30), anchor="w", stretch=True)
+        tree.heading("attribute", text=tr("Attribute"), anchor="w")
+        tree.heading("value", text=tr("Value"), anchor="w")
+
+        return self._serial_frame
+
+    def _update_serial_frame(self):
+        tree_frame = self._get_serial_frame()
+        tree_frame.clear()
+
+        port = self.get_selected_port()
+        if port is None:
+            return
+
+        tree = tree_frame.tree
+        if port.vid and port.pid:
+            vidhex = hex(port.vid)[2:].upper()
+            pidhex = hex(port.pid)[2:].upper()
+            vidpid = f"{vidhex}:{pidhex}"
+        else:
+            vidpid = f"{port.vid}:{port.pid}"
+
+        atts = {
+            "Manufacturer": port.manufacturer,
+            "Product": port.product,
+            "VID:PID": vidpid,
+            "Serial number": port.serial_number,
+            "Intf / Loc": f"{port.interface} / {port.location}",
+        }
+        for key, value in atts.items():
+            node_id = tree.insert("", "end")
+            tree.set(node_id, "attribute", key)
+            tree.set(node_id, "value", str(value or ""))
+
     def _get_webrepl_frame(self):
         if self._webrepl_frame is not None:
             return self._webrepl_frame
@@ -601,8 +648,8 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
     def get_stored_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
-        for desc in self._ports_by_desc:
-            if self._ports_by_desc[desc] == name:
+        for desc in self._port_names_by_desc:
+            if self._port_names_by_desc[desc] == name:
                 return desc
 
         return ""
@@ -610,6 +657,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def get_selected_port_name(self):
         port_desc = self._port_desc_variable.get()
         if not port_desc:
+            return None
+        return self._port_names_by_desc[port_desc]
+
+    def get_selected_port(self):
+        port_desc = self._port_desc_variable.get()
+        if not port_desc or port_desc not in self._ports_by_desc:
             return None
         return self._ports_by_desc[port_desc]
 
@@ -652,7 +705,11 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
             self._get_webrepl_frame().grid(row=6, column=0, sticky="nwe")
+            if self._serial_frame and self._serial_frame.winfo_ismapped():
+                self._serial_frame.grid_forget()
         else:
+            self._get_serial_frame().grid(row=6, column=0, sticky="nwe", pady=(ems_to_pixels(1), 0))
+            self._update_serial_frame()
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
 
