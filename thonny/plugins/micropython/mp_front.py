@@ -22,6 +22,7 @@ from thonny.ui_utils import TreeFrame, create_string_var, create_url_label, ems_
 logger = getLogger(__name__)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
+WEBREPL_OPTION_DESC = "< WebREPL >"
 WEBREPL_PORT_VALUE = "webrepl"
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
@@ -428,6 +429,9 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         super().__init__(master)
 
         self._has_opened_python_flasher = False
+        self._port_names_by_desc = {}
+        self._ports_by_desc = {}
+        self._port_polling_after_id = None
 
         intro_text = self._get_intro_text()
         if intro_text:
@@ -444,38 +448,12 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         )
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
-        ports = list_serial_ports()
-        self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
-        self._port_names_by_desc = {get_serial_port_label(p): p.device for p in ports}
-        self._port_names_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
-
-        self._WEBREPL_OPTION_DESC = "< WebREPL >"
-        if self.allow_webrepl:
-            self._port_names_by_desc[self._WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
-
-        def port_order(p):
-            _, name = p
-            if name is None:
-                return ""
-            elif name.startswith("COM") and len(name) == 4:
-                # Make one-digit COM ports go before COM10
-                return name.replace("COM", "COM0")
-            else:
-                return name
-
-        # order by port, auto first
-        port_descriptions = [
-            key for key, _ in sorted(self._port_names_by_desc.items(), key=port_order)
-        ]
-
-        self._port_desc_variable = create_string_var(
-            self.get_stored_port_desc(), self._on_change_port
-        )
+        self._port_desc_variable = create_string_var("", self._on_change_port)
         self._port_combo = ttk.Combobox(
             self,
             exportselection=False,
             textvariable=self._port_desc_variable,
-            values=port_descriptions,
+            values=[],
         )
         self._port_combo.state(["!disabled", "readonly"])
 
@@ -545,7 +523,47 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             )
             python_link.grid(row=i, column=1, sticky="e")
 
-        self._on_change_port()
+        self._keep_refreshing_ports(first_time=True)
+
+    def _keep_refreshing_ports(self, first_time=False):
+        old_port_desc = self._port_desc_variable.get()
+        ports = list_serial_ports(max_cache_age=0, skip_logging=True)
+        self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
+        self._port_names_by_desc = {get_serial_port_label(p): p.device for p in ports}
+        self._port_names_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
+
+        if self.allow_webrepl:
+            self._port_names_by_desc[WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
+
+        def port_order(p):
+            _, name = p
+            if name is None:
+                return ""
+            elif name.startswith("COM") and len(name) == 4:
+                # Make one-digit COM ports go before COM10
+                return name.replace("COM", "COM0")
+            else:
+                return name
+
+        # order by port, auto first
+        port_descriptions = [
+            key for key, _ in sorted(self._port_names_by_desc.items(), key=port_order)
+        ]
+        self._port_combo["values"] = port_descriptions
+
+        # update selection after first update
+        if self._port_desc_variable.get() == "" and first_time:
+            self._port_desc_variable.set(self.get_stored_port_desc())
+
+        if self._port_desc_variable.get() not in self._port_names_by_desc:
+            self._port_desc_variable.set("")
+
+        new_port_desc = self._port_desc_variable.get()
+        if new_port_desc != old_port_desc:
+            self._port_desc_variable.set(new_port_desc)
+            self._on_change_port()
+
+        self._port_polling_after_id = self.after(500, self._keep_refreshing_ports)
 
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "MicroPython"
@@ -615,7 +633,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             "Product": port.product,
             "VID:PID": vidpid,
             "Serial number": port.serial_number,
-            "Intf / Loc": f"{port.interface} / {port.location}",
+            "Interface": port.interface,
         }
         for key, value in atts.items():
             node_id = tree.insert("", "end")
@@ -702,8 +720,15 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                     self.backend_name + ".webrepl_password", self._webrepl_password_var.get()
                 )
 
+    def destroy(self):
+        if self._port_polling_after_id is not None:
+            self.after_cancel(self._port_polling_after_id)
+            self._port_polling_after_id = None
+
+        super().destroy()
+
     def _on_change_port(self, *args):
-        if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
+        if self._port_desc_variable.get() == WEBREPL_OPTION_DESC:
             self._get_webrepl_frame().grid(row=6, column=0, sticky="nwe")
             if self._serial_frame and self._serial_frame.winfo_ismapped():
                 self._serial_frame.grid_forget()
