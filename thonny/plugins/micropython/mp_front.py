@@ -555,11 +555,17 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         if self._port_desc_variable.get() == "" and first_time:
             self._port_desc_variable.set(self.get_stored_port_desc())
 
-        if self._port_desc_variable.get() not in self._port_names_by_desc:
+        new_port_desc = self._port_desc_variable.get()
+        if new_port_desc != "" and new_port_desc not in self._port_names_by_desc:
+            logger.info(
+                "Description %r not in %r anymore", new_port_desc, list(self._ports_by_desc.keys())
+            )
             self._port_desc_variable.set("")
 
         new_port_desc = self._port_desc_variable.get()
         if new_port_desc != old_port_desc:
+            if new_port_desc != "":
+                logger.info("Changing port from %r to %r", old_port_desc, new_port_desc)
             self._port_desc_variable.set(new_port_desc)
             self._on_change_port()
 
@@ -602,7 +608,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         if self._serial_frame is not None:
             return self._serial_frame
 
-        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5)
+        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5, show="tree")
         tree = self._serial_frame.tree
 
         tree.column("attribute", width=ems_to_pixels(10), anchor="w", stretch=False)
@@ -622,8 +628,8 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         tree = tree_frame.tree
         if port.vid and port.pid:
-            vidhex = hex(port.vid)[2:].upper()
-            pidhex = hex(port.pid)[2:].upper()
+            vidhex = hex(port.vid)[2:].upper().rjust(4, "0")
+            pidhex = hex(port.pid)[2:].upper().rjust(4, "0")
             vidpid = f"{vidhex}:{pidhex}"
         else:
             vidpid = f"{port.vid}:{port.pid}"
@@ -1056,11 +1062,13 @@ _PORTS_CACHE_TIME = 0
 def get_serial_port_label(p) -> str:
     # On Windows, port is given also in description
     if p.product:
-        desc = p.product
+        desc = p.product.strip()
     elif p.interface:
-        desc = p.interface
+        desc = p.interface.strip()
     else:
         desc = p.description.replace(f" ({p.device})", "")
+
+    desc = desc.replace("\x00", "")
 
     if desc == "USB Serial Device":
         # Try finding something less generic
