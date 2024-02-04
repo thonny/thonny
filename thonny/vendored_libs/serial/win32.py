@@ -189,6 +189,10 @@ CancelIoEx = _stdcall_libraries['kernel32'].CancelIoEx
 CancelIoEx.restype = BOOL
 CancelIoEx.argtypes = [HANDLE, LPOVERLAPPED]
 
+DeviceIoControl = _stdcall_libraries['kernel32'].DeviceIoControl
+DeviceIoControl.restype = BOOL
+DeviceIoControl.argtypes = [HANDLE, DWORD, LPVOID, DWORD, LPVOID, DWORD, LPDWORD, LPOVERLAPPED]
+
 ONESTOPBIT = 0  # Variable c_int
 TWOSTOPBITS = 2  # Variable c_int
 ONE5STOPBITS = 1
