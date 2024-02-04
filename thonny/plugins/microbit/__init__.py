@@ -1,12 +1,13 @@
 from thonny.languages import tr
-from thonny.plugins.micropython import BareMetalMicroPythonProxy, add_micropython_backend
+from thonny.plugins.micropython import add_micropython_backend
 from thonny.plugins.micropython.mp_common import PASTE_SUBMIT_MODE
 from thonny.plugins.simplified_micropython.simplified_mp_front import (
     SimplifiedMicroPythonConfigPage,
+    SimplifiedMicroPythonProxy,
 )
 
 
-class MicrobitProxy(BareMetalMicroPythonProxy):
+class MicrobitProxy(SimplifiedMicroPythonProxy):
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.microbit.microbit_back
 
