@@ -1,10 +1,9 @@
-import sys
 from logging import getLogger
 from typing import List
 
 from thonny import ui_utils
 from thonny.languages import tr
-from thonny.plugins.microbit import MicrobitFlashingDialog
+from thonny.plugins.micropython.daplink_flasher import DaplinkFlashingDialog
 from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
 from thonny.plugins.micropython.mp_front import (
     BareMetalMicroPythonConfigPage,
@@ -102,7 +101,7 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
         elif kind == "esptool":
             try_launch_esptool_dialog(self.winfo_toplevel(), "CircuitPython")
         elif kind == "BBC micro:bit":
-            dlg = MicrobitFlashingDialog(self, "CircuitPython")
+            dlg = DaplinkFlashingDialog(self, "CircuitPython")
             ui_utils.show_dialog(dlg)
 
     def _get_flasher_link_title(self) -> str:

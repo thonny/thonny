@@ -271,7 +271,7 @@ pololu_variants = [
 all_variants += pololu_variants
 
 #####################################################
-simplified_microbits = [
+simplified_microbits_and_calliopes = [
     {
         "vendor": "BBC",
         "model": "micro:bit v1",
@@ -312,9 +312,17 @@ simplified_microbits = [
         ],
         "popular": True,
     },
+    {
+        "vendor": "Calliope",
+        "model": "Calliope mini 3",
+        "family": "nrf52",
+        "info_url": "https://github.com/calliope-mini/calliope-mini-micropython",
+        "downloads": [],
+        "popular": True,
+    },
 ]
-print(f"Adding {len(simplified_microbits)} simplified micro:bit-s")
-all_variants += simplified_microbits
+print(f"Adding {len(simplified_microbits_and_calliopes)} simplified micro:bit-s")
+all_variants += simplified_microbits_and_calliopes
 
 print(f"Got {len(all_variants)} boards")
 
