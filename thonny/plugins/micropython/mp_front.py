@@ -225,6 +225,8 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if last_backs.get((p.vid, p.pid), "") == cls.backend_name:
             return True
 
+        # Avoid CDC2 interfaces, see
+        # https://github.com/adafruit/Adafruit_Board_Toolkit/blob/d1d3423ffa8fc91f7752b4eda8584d333e3da7d2/adafruit_board_toolkit/circuitpython_serial.py#L80
         if "CircuitPython CDC " in (p.interface or ""):
             return cls._is_for_circuitpython()
 
