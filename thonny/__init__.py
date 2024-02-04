@@ -5,6 +5,12 @@ import time
 from logging import getLogger
 from typing import TYPE_CHECKING, List, Optional, cast
 
+# This sys.path modification is relevant only in UI process, but it doesn't also hurt in back-end
+sys.path.insert(
+    0,
+    os.path.normpath(os.path.join(os.path.dirname(__file__), "vendored_libs")),
+)
+
 from thonny.common import is_private_python, is_virtual_executable
 
 _last_module_count = 0

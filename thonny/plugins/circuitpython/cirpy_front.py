@@ -86,11 +86,7 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
         if (p.vid, p.pid) in get_uart_adapter_vids_pids():
             return True
 
-        if "adafruit_board_toolkit" in sys.modules or sys.platform == "linux":
-            # can trust p.interface value
-            return "CircuitPython CDC " in (p.interface or "")
-        else:
-            return super()._is_potential_port(p)
+        return "CircuitPython CDC " in (p.interface or "")
 
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
