@@ -581,30 +581,11 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._has_opened_python_flasher = True
 
     def _get_intro_text(self):
-        result = (
+        return (
             tr("Connect your device to the computer and select corresponding port below")
             + "\n"
-            + "("
-            + tr('look for your device name, "USB Serial" or "UART"')
-            + ").\n"
             + tr("If you can't find it, you may need to install proper USB driver first.")
         )
-        if self.allow_webrepl:
-            result = (
-                ("Connecting via USB cable:")
-                + "\n"
-                + result
-                + "\n\n"
-                + ("Connecting via WebREPL:")
-                + "\n"
-                + (
-                    "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                    + "(import webrepl_setup), connect your computer and device to same network and select\n"
-                    + "< WebREPL > below"
-                )
-            )
-
-        return result
 
     def _get_serial_frame(self):
         if self._serial_frame is not None:
@@ -654,21 +635,28 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._webrepl_frame = ttk.Frame(self)
 
+        instructions = (
+            "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
+            + "(import webrepl_setup) and connect your computer and device to the same network"
+        )
+        instr_label = ttk.Label(self._webrepl_frame, text=instructions)
+        instr_label.grid(row=0, column=0, sticky="nw", pady=(10, 0), columnspan=2)
+
         self._webrepl_url_var = create_string_var(
             get_workbench().get_option(self.backend_name + ".webrepl_url")
         )
         url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
-        url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
+        url_label.grid(row=1, column=0, sticky="nw", pady=(15, 0))
         url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=30)
-        url_entry.grid(row=1, column=0, sticky="nw")
+        url_entry.grid(row=2, column=0, sticky="nw")
 
         self._webrepl_password_var = create_string_var(
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
         pw_label = ttk.Label(self._webrepl_frame, text=tr("Password"))
-        pw_label.grid(row=0, column=1, sticky="nw", pady=(10, 0), padx=(10, 0))
+        pw_label.grid(row=1, column=1, sticky="nw", pady=(10, 0), padx=(10, 0))
         pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=15)
-        pw_entry.grid(row=1, column=1, sticky="nw", padx=(10, 0))
+        pw_entry.grid(row=2, column=1, sticky="nw", padx=(10, 0))
 
         return self._webrepl_frame
 
