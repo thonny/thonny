@@ -21,10 +21,6 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -s -m pip install --no-warn-script-location --pre --no-cache-dir thonny
 @rem %BUILDDIR%\python -s -m pip install --no-warn-script-location ..\setuptools\thonny-4.0.0b4.dev1-py3-none-any.whl
 
-@echo ............... PATCHING PYSERIAL ...................................
-copy /Y .\patched_pyserial\list_ports_windows.py %BUILDDIR%\Lib\site-packages\serial\tools\list_ports_windows.py
-copy /Y .\patched_pyserial\win32.py %BUILDDIR%\Lib\site-packages\serial\win32.py
-
 @echo ............... CLEANING PYTHON ............................
 @rem move following 3 files to avoid confusion (user may think they're Thonny license etc.)
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON_LICENSE.txt
