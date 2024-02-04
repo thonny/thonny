@@ -862,36 +862,6 @@ def iterate_comports(enable_iocontrol=True):
                 # Just like the previous version.
                 get_usb_info_from_device_property(g_hdi, devinfo, szHardwareID_str, info)
 
-            # friendly name
-            szFriendlyName = ctypes.create_unicode_buffer(250)
-            if SetupDiGetDeviceRegistryProperty(
-                    g_hdi,
-                    ctypes.byref(devinfo),
-                    SPDRP_FRIENDLYNAME,
-                    #~ SPDRP_DEVICEDESC,
-                    None,
-                    ctypes.byref(szFriendlyName),
-                    ctypes.sizeof(szFriendlyName) - 1,
-                    None):
-                info.description = szFriendlyName.value
-            #~ else:
-                # Ignore ERROR_INSUFFICIENT_BUFFER
-                #~ if ctypes.GetLastError() != ERROR_INSUFFICIENT_BUFFER:
-                    #~ raise IOError("failed to get details for %s (%s)" % (devinfo, szHardwareID.value))
-                # ignore errors and still include the port in the list, friendly name will be same as port name
-
-            # manufacturer
-            szManufacturer = ctypes.create_unicode_buffer(250)
-            if SetupDiGetDeviceRegistryProperty(
-                    g_hdi,
-                    ctypes.byref(devinfo),
-                    SPDRP_MFG,
-                    #~ SPDRP_DEVICEDESC,
-                    None,
-                    ctypes.byref(szManufacturer),
-                    ctypes.sizeof(szManufacturer) - 1,
-                    None):
-                info.manufacturer = szManufacturer.value
             # interface
             devproptype = DEVPROPTYPE()
             szInterface = ctypes.create_unicode_buffer(250)
