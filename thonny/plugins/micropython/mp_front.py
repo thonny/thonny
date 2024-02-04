@@ -1096,18 +1096,11 @@ def _list_serial_ports_uncached(skip_logging: bool = False):
             os.path.islink = lambda _: False
 
         if sys.platform == "win32":
-            from serial import win32
-
-            if hasattr(win32, "DeviceIoControl"):
-                # this is patched version
+            try:
+                from adafruit_board_toolkit._list_ports_windows import comports
+            except ImportError:
+                logger.info("Falling back to serial.tools.list_ports.comports")
                 from serial.tools.list_ports import comports
-            else:
-                try:
-                    logger.debug("Falling back to adafruit_board_toolkit")
-                    from adafruit_board_toolkit._list_ports_windows import comports
-                except ImportError:
-                    logger.debug("Falling back to unpatched serial.tools.list_ports.comports")
-                    from serial.tools.list_ports import comports
         elif sys.platform == "darwin":
             try:
                 from adafruit_board_toolkit._list_ports_osx import comports
