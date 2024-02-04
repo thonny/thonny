@@ -12,7 +12,7 @@
 #
 # where <regexp> is a Python regexp according to the re module
 #
-# violating the normal definition for URLs, the charachter `&` is used to
+# violating the normal definition for URLs, the character `&` is used to
 # separate parameters from the arguments (instead of `?`, but the question mark
 # is heavily used in regexp'es)
 #

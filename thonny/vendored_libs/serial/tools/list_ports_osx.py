@@ -277,7 +277,7 @@ def comports(include_links=False):
             if not usb_device:
                 usb_device = GetParentDeviceByType(service, "IOUSBDevice")
             if usb_device:
-                # fetch some useful informations from properties
+                # fetch some useful information from properties
                 info.vid = get_int_property(usb_device, "idVendor", kCFNumberSInt16Type)
                 info.pid = get_int_property(usb_device, "idProduct", kCFNumberSInt16Type)
                 info.serial_number = get_string_property(usb_device, kUSBSerialNumberString)

@@ -1,6 +1,6 @@
 #! python
 #
-# This module implements a RFC2217 compatible client. RF2217 descibes a
+# This module implements a RFC2217 compatible client. RF2217 describes a
 # protocol to access serial ports over TCP/IP and allows setting the baud rate,
 # modem control lines etc.
 #
@@ -462,7 +462,7 @@ class Serial(SerialBase):
 
         self.is_open = True
         self._thread = threading.Thread(target=self._telnet_read_loop)
-        self._thread.setDaemon(True)
+        self._thread.daemon = True
         self._thread.setName('pySerial RFC 2217 reader thread for {}'.format(self._port))
         self._thread.start()
 

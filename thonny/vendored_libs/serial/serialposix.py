@@ -32,6 +32,7 @@ from __future__ import absolute_import
 import errno
 import fcntl
 import os
+import platform
 import select
 import struct
 import sys
@@ -80,8 +81,14 @@ if plat[:5] == 'linux':    # Linux (confirmed)  # noqa
     CMSPAR = 0o10000000000  # Use "stick" (mark/space) parity
 
     # baudrate ioctls
-    TCGETS2 = 0x802C542A
-    TCSETS2 = 0x402C542B
+    if platform.machine().lower() == "mips":
+        TCGETS2 = 0x4030542A
+        TCSETS2 = 0x8030542B
+        BAUDRATE_OFFSET = 10
+    else:
+        TCGETS2 = 0x802C542A
+        TCSETS2 = 0x402C542B
+        BAUDRATE_OFFSET = 9
     BOTHER = 0o010000
 
     # RS485 ioctls
@@ -154,7 +161,7 @@ if plat[:5] == 'linux':    # Linux (confirmed)  # noqa
                 # set custom speed
                 buf[2] &= ~termios.CBAUD
                 buf[2] |= BOTHER
-                buf[9] = buf[10] = baudrate
+                buf[BAUDRATE_OFFSET] = buf[BAUDRATE_OFFSET + 1] = baudrate
 
                 # set serial_struct
                 fcntl.ioctl(self.fd, TCSETS2, buf)

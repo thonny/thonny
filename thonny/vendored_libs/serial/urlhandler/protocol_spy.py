@@ -22,6 +22,7 @@
 
 from __future__ import absolute_import
 
+import logging
 import sys
 import time
 
@@ -152,6 +153,46 @@ class FormatHexdump(object):
         self.write_line(time.time() - self.start_time, name, value)
 
 
+class FormatLog(object):
+    """\
+    Write data to logging module.
+    """
+
+    def __init__(self, output, color):
+        # output and color is ignored
+        self.log = logging.getLogger(output)
+
+    def rx(self, data):
+        """show received data"""
+        if data:
+            self.log.info('RX {!r}'.format(data))
+
+    def tx(self, data):
+        """show transmitted data"""
+        self.log.info('TX {!r}'.format(data))
+
+    def control(self, name, value):
+        """show control calls"""
+        self.log.info('{}: {}'.format(name, value))
+
+
+class FormatLogHex(FormatLog):
+    """\
+    Write data to logging module.
+    """
+
+    def rx(self, data):
+        """show received data"""
+        if data:
+            for offset, row in hexdump(data):
+                self.log.info('RX {}{}'.format('{:04X}  '.format(offset), row))
+
+    def tx(self, data):
+        """show transmitted data"""
+        for offset, row in hexdump(data):
+            self.log.info('TX {}{}'.format('{:04X}  '.format(offset), row))
+
+
 class Serial(serial.Serial):
     """\
     Inherit the native Serial port implementation and wrap all the methods and
@@ -189,6 +230,12 @@ class Serial(serial.Serial):
                     color = True
                 elif option == 'raw':
                     formatter = FormatRaw
+                elif option == 'rawlog':
+                    formatter = FormatLog
+                    output = values[0] if values[0] else 'serial'
+                elif option == 'log':
+                    formatter = FormatLogHex
+                    output = values[0] if values[0] else 'serial'
                 elif option == 'all':
                     self.show_all = True
                 else:

@@ -43,7 +43,8 @@ def key_description(character):
 class ConsoleBase(object):
     """OS abstraction for console (input/output codec, no echo)"""
 
-    def __init__(self):
+    def __init__(self, miniterm):
+        self.miniterm = miniterm
         if sys.version_info >= (3, 0):
             self.byte_output = sys.stdout.buffer
         else:
@@ -104,16 +105,16 @@ if os.name == 'nt':  # noqa
 
     class Console(ConsoleBase):
         fncodes = {
-            ';': '\1bOP',  # F1
-            '<': '\1bOQ',  # F2
-            '=': '\1bOR',  # F3
-            '>': '\1bOS',  # F4
-            '?': '\1b[15~',  # F5
-            '@': '\1b[17~',  # F6
-            'A': '\1b[18~',  # F7
-            'B': '\1b[19~',  # F8
-            'C': '\1b[20~',  # F9
-            'D': '\1b[21~',  # F10
+            ';': '\x1bOP',  # F1
+            '<': '\x1bOQ',  # F2
+            '=': '\x1bOR',  # F3
+            '>': '\x1bOS',  # F4
+            '?': '\x1b[15~',  # F5
+            '@': '\x1b[17~',  # F6
+            'A': '\x1b[18~',  # F7
+            'B': '\x1b[19~',  # F8
+            'C': '\x1b[20~',  # F9
+            'D': '\x1b[21~',  # F10
         }
         navcodes = {
             'H': '\x1b[A',  # UP
@@ -124,12 +125,12 @@ if os.name == 'nt':  # noqa
             'O': '\x1b[F',  # END
             'R': '\x1b[2~',  # INSERT
             'S': '\x1b[3~',  # DELETE
-            'I': '\x1b[5~',  # PGUP
-            'Q': '\x1b[6~',  # PGDN        
+            'I': '\x1b[5~',  # PAGE UP
+            'Q': '\x1b[6~',  # PAGE DOWN
         }
-        
-        def __init__(self):
-            super(Console, self).__init__()
+
+        def __init__(self, miniterm):
+            super(Console, self).__init__(miniterm)
             self._saved_ocp = ctypes.windll.kernel32.GetConsoleOutputCP()
             self._saved_icp = ctypes.windll.kernel32.GetConsoleCP()
             ctypes.windll.kernel32.SetConsoleOutputCP(65001)
@@ -139,7 +140,7 @@ if os.name == 'nt':  # noqa
             if platform.release() == '10' and int(platform.version().split('.')[2]) > 10586:
                 ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
                 import ctypes.wintypes as wintypes
-                if not hasattr(wintypes, 'LPDWORD'): # PY2
+                if not hasattr(wintypes, 'LPDWORD'):  # PY2
                     wintypes.LPDWORD = ctypes.POINTER(wintypes.DWORD)
                 SetConsoleMode = ctypes.windll.kernel32.SetConsoleMode
                 GetConsoleMode = ctypes.windll.kernel32.GetConsoleMode
@@ -160,7 +161,7 @@ if os.name == 'nt':  # noqa
             ctypes.windll.kernel32.SetConsoleCP(self._saved_icp)
             try:
                 ctypes.windll.kernel32.SetConsoleMode(ctypes.windll.kernel32.GetStdHandle(-11), self._saved_cm)
-            except AttributeError: # in case no _saved_cm
+            except AttributeError:  # in case no _saved_cm
                 pass
 
         def getkey(self):
@@ -190,13 +191,15 @@ elif os.name == 'posix':
     import atexit
     import termios
     import fcntl
+    import signal
 
     class Console(ConsoleBase):
-        def __init__(self):
-            super(Console, self).__init__()
+        def __init__(self, miniterm):
+            super(Console, self).__init__(miniterm)
             self.fd = sys.stdin.fileno()
             self.old = termios.tcgetattr(self.fd)
             atexit.register(self.cleanup)
+            signal.signal(signal.SIGINT, self.sigint)
             if sys.version_info < (3, 0):
                 self.enc_stdin = codecs.getreader(sys.stdin.encoding)(sys.stdin)
             else:
@@ -220,6 +223,11 @@ elif os.name == 'posix':
 
         def cleanup(self):
             termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old)
+
+        def sigint(self, sig, frame):
+            """signal handler for a clean exit on SIGINT"""
+            self.miniterm.stop()
+            self.cancel()
 
 else:
     raise NotImplementedError(
@@ -372,7 +380,8 @@ def ask_for_port():
         sys.stderr.write('--- {:2}: {:20} {!r}\n'.format(n, port, desc))
         ports.append(port)
     while True:
-        port = raw_input('--- Enter port index or full name: ')
+        sys.stderr.write('--- Enter port index or full name: ')
+        port = raw_input('')
         try:
             index = int(port) - 1
             if not 0 <= index < len(ports):
@@ -392,7 +401,7 @@ class Miniterm(object):
     """
 
     def __init__(self, serial_instance, echo=False, eol='crlf', filters=()):
-        self.console = Console()
+        self.console = Console(self)
         self.serial = serial_instance
         self.echo = echo
         self.raw = False
@@ -408,6 +417,7 @@ class Miniterm(object):
         self.receiver_thread = None
         self.rx_decoder = None
         self.tx_decoder = None
+        self.tx_encoder = None
 
     def _start_reader(self):
         """Start reader thread"""
@@ -635,7 +645,7 @@ class Miniterm(object):
             sys.stderr.write('--- unknown menu character {} --\n'.format(key_description(c)))
 
     def upload_file(self):
-        """Ask user for filenname and send its contents"""
+        """Ask user for filename and send its contents"""
         sys.stderr.write('\n--- File to upload: ')
         sys.stderr.flush()
         with self.console:
@@ -810,7 +820,7 @@ class Miniterm(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # default args can be used to override when calling main() from an other script
 # e.g to create a miniterm-my-device.py
-def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr=None):
+def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr=None, serial_instance=None, default_eol='CRLF'):
     """Command line tool, entry point"""
 
     import argparse
@@ -839,6 +849,20 @@ def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr
         type=lambda c: c.upper(),
         help='set parity, one of {N E O S M}, default: N',
         default='N')
+
+    group.add_argument(
+        '--data',
+        choices=[5, 6, 7, 8],
+        type=int,
+        help='set data bits, default: %(default)s',
+        default=8)
+
+    group.add_argument(
+        '--stop',
+        choices=[1, 2, 3],
+        type=int,
+        help='set stop bits (1, 2, 1.5), default: %(default)s',
+        default=1)
 
     group.add_argument(
         '--rtscts',
@@ -904,7 +928,7 @@ def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr
         choices=['CR', 'LF', 'CRLF'],
         type=lambda c: c.upper(),
         help='end of line mode',
-        default='CRLF')
+        default=default_eol)
 
     group.add_argument(
         '--raw',
@@ -959,7 +983,7 @@ def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr
     else:
         filters = ['default']
 
-    while True:
+    while serial_instance is None:
         # no port given on command line -> ask user now
         if args.port is None or args.port == '-':
             try:
@@ -970,11 +994,15 @@ def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr
             else:
                 if not args.port:
                     parser.error('port is not given')
+
+        stopbits = serial.STOPBITS_ONE_POINT_FIVE if args.stop == 3 else args.stop
         try:
             serial_instance = serial.serial_for_url(
                 args.port,
                 args.baudrate,
+                bytesize=args.data,
                 parity=args.parity,
+                stopbits=stopbits,
                 rtscts=args.rtscts,
                 xonxoff=args.xonxoff,
                 do_not_open=True)
@@ -1036,6 +1064,7 @@ def main(default_port=None, default_baudrate=9600, default_rts=None, default_dtr
         sys.stderr.write('\n--- exit ---\n')
     miniterm.join()
     miniterm.close()
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if __name__ == '__main__':

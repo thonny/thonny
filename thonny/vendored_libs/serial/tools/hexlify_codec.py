@@ -9,7 +9,7 @@
 """\
 Python 'hex' Codec - 2-digit hex with spaces content transfer encoding.
 
-Encode and decode may be a bit missleading at first sight...
+Encode and decode may be a bit misleading at first sight...
 
 The textual representation is a hex dump: e.g. "40 41"
 The "encoded" data of this is the binary form, e.g. b"@A"

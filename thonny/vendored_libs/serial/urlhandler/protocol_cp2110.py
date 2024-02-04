@@ -99,7 +99,7 @@ class Serial(SerialBase):
         else:
             self.is_open = True
             self._thread = threading.Thread(target=self._hid_read_loop)
-            self._thread.setDaemon(True)
+            self._thread.daemon = True
             self._thread.setName('pySerial CP2110 reader thread for {}'.format(self._port))
             self._thread.start()
 
