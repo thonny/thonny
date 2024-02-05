@@ -111,10 +111,6 @@ def list_volumes(skip_letters=set()) -> Sequence[str]:
         try:
             return list_volumes_sync()
         except DBusError as error:
-            logger.exception("Could not list volumes with dbus-next")
-            if "Object does not exist at path" in error.text:
-                # it looks like this can happen with certain timing only
-                return []
             if "org.freedesktop.DBus.Error.ServiceUnknown" not in error.text:
                 raise
             # Fallback to using the 'mount' command on Linux if the Udisks D-Bus service is unavailable.
