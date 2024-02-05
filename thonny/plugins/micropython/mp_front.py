@@ -591,7 +591,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         if self._serial_frame is not None:
             return self._serial_frame
 
-        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5, show="tree")
+        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5)
         tree = self._serial_frame.tree
 
         tree.column("attribute", width=ems_to_pixels(10), anchor="w", stretch=False)
@@ -599,6 +599,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         tree.heading("attribute", text=tr("Attribute"), anchor="w")
         tree.heading("value", text=tr("Value"), anchor="w")
 
+        tree["show"] = ""
         return self._serial_frame
 
     def _update_serial_frame(self):
@@ -618,11 +619,11 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             vidpid = f"{port.vid}:{port.pid}"
 
         atts = {
-            "Manufacturer": port.manufacturer,
-            "Product": port.product,
-            "VID:PID": vidpid,
-            "Serial number": port.serial_number,
-            "Interface": port.interface,
+            "Manufacturer:": port.manufacturer,
+            "Product:": port.product,
+            "VID/PID:": vidpid,
+            "Serial number:": port.serial_number,
+            "Interface:": port.interface,
         }
         for key, value in atts.items():
             node_id = tree.insert("", "end")
