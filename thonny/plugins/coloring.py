@@ -14,6 +14,7 @@ In Shell only current command entry is colored
 
 Regexes are adapted from idlelib
 """
+
 import re
 import tkinter
 from logging import getLogger

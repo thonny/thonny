@@ -228,9 +228,11 @@ class SingleWindowDebugger(Debugger):
                 frame_info.locals,
                 frame_info.globals,
                 frame_info.freevars,
-                frame_info.module_name
-                if frame_info.code_name == "<module>"
-                else frame_info.code_name,
+                (
+                    frame_info.module_name
+                    if frame_info.code_name == "<module>"
+                    else frame_info.code_name
+                ),
             )
 
     def handle_debugger_return(self, msg):

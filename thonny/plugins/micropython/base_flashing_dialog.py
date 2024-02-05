@@ -63,12 +63,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
         super().__init__(master, autostart=False)
 
     @abstractmethod
-    def get_variants_url(self) -> str:
-        ...
+    def get_variants_url(self) -> str: ...
 
     @abstractmethod
-    def get_target_label(self) -> str:
-        ...
+    def get_target_label(self) -> str: ...
 
     def populate_main_frame(self):
         epadx = self.get_large_padding()
@@ -134,8 +132,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self.main_frame.columnconfigure(2, weight=1)
 
     @abstractmethod
-    def get_families_mapping(self) -> Dict[str, str]:
-        ...
+    def get_families_mapping(self) -> Dict[str, str]: ...
 
     def update_ui(self):
         for widget in self.main_frame.winfo_children():
@@ -190,8 +187,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         super().update_ui()
 
     @abstractmethod
-    def find_targets(self) -> Dict[str, TargetInfo]:
-        ...
+    def find_targets(self) -> Dict[str, TargetInfo]: ...
 
     def show_new_targets(self, targets: Dict[str, TargetInfo]) -> None:
         self._target_combo.set_mapping(targets)
@@ -201,8 +197,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
             self._target_combo.select_none()
 
     @abstractmethod
-    def compute_target_info_text_and_label(self, target: TargetInfo) -> Tuple[str, str]:
-        ...
+    def compute_target_info_text_and_label(self, target: TargetInfo) -> Tuple[str, str]: ...
 
     def _update_target_info(self):
         current_target = self._target_combo.get_selected_value()
@@ -300,8 +295,9 @@ class BaseFlashingDialog(WorkDialog, ABC):
         return result
 
     @abstractmethod
-    def _variant_can_be_recommended_for_target(self, variant: Dict[str, Any], target: TargetInfo):
-        ...
+    def _variant_can_be_recommended_for_target(
+        self, variant: Dict[str, Any], target: TargetInfo
+    ): ...
 
     def _download_variants(self):
         logger.info("Downloading %r", self.get_variants_url())
@@ -535,8 +531,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         download_info: Optional[Dict[str, str]],
         target_info: Optional[TargetInfo],
         work_options: Dict[str, Any],
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     def register_settings_changed(self, event=None):
         if self._state == "done":

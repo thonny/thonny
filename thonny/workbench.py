@@ -633,11 +633,11 @@ class Workbench(tk.Tk):
             tr("Exit"),
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
-            extra_sequences=["<Alt-F4>"]
-            if running_on_linux()
-            else ["<Control-q>"]
-            if running_on_windows()
-            else [],
+            extra_sequences=(
+                ["<Alt-F4>"]
+                if running_on_linux()
+                else ["<Control-q>"] if running_on_windows() else []
+            ),
         )
 
         self.add_command("show_options", "tools", tr("Options..."), self.show_options, group=180)

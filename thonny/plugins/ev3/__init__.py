@@ -27,6 +27,7 @@ Plus any modules on the filesystem
 
 
 """
+
 from tkinter import ttk
 
 from thonny import get_workbench

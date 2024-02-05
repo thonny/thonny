@@ -2,7 +2,6 @@
 Mostly copied/adapted from idlelib.HyperParser and idlelib.PyParse
 """
 
-
 import re
 import string
 from collections.abc import Mapping

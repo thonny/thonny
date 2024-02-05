@@ -997,9 +997,11 @@ class NiceTracer(Tracer):
                     # otherwise frame id-s would be reused and this would
                     # mess up communication with the frontend.
                     system_frame=system_frame,
-                    locals=None
-                    if system_frame.f_locals is system_frame.f_globals
-                    else self._backend.export_variables(system_frame.f_locals),
+                    locals=(
+                        None
+                        if system_frame.f_locals is system_frame.f_globals
+                        else self._backend.export_variables(system_frame.f_locals)
+                    ),
                     globals=export_globals(module_name, system_frame),
                     event=custom_frame.event,
                     focus=custom_frame.focus,
