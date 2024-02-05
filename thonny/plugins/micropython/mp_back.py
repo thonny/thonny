@@ -114,11 +114,6 @@ logger = getLogger(__name__)
 
 class MicroPythonBackend(MainBackend, ABC):
     def __init__(self, clean, args):
-        # Make pipkin available
-        sys.path.insert(
-            0,
-            os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "vendored_libs")),
-        )
         logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)
         self._connection: MicroPythonConnection
         self._args = args

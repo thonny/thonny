@@ -5,9 +5,8 @@ import time
 from logging import getLogger
 from typing import TYPE_CHECKING, List, Optional, cast
 
-# This sys.path modification is relevant only in UI process, but it doesn't also hurt in back-end
 sys.path.insert(
-    0,
+    1,
     os.path.normpath(os.path.join(os.path.dirname(__file__), "vendored_libs")),
 )
 
