@@ -9,7 +9,7 @@ Send2Trash==1.8.*
 esptool==4.6.*; platform_machine != 'ARM64' or sys_platform != 'win32'
 bcrypt==3.2.*; platform_machine != 'ARM64' or sys_platform != 'win32' # 3.2 has builds available for RPi (https://www.piwheels.org/project/bcrypt/). Should be good enough for paramiko
 cryptography==38.*; platform_machine != 'ARM64' or sys_platform != 'win32'  # 38 is good fit for macoOS, see also ~/thonny_alt_packages
-paramiko==3.3.*; platform_machine != 'ARM64' or sys_platform != 'win32'
+paramiko==3.4.*; platform_machine != 'ARM64' or sys_platform != 'win32'
 
 websockets==12.0.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
