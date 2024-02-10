@@ -61,17 +61,21 @@ async def list_volumes() -> Sequence[str]:
 
     discovered_usb_drives = []
     for a_drive in drives:
-        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, a_drive, introspection)
-        interface = proxy_object.get_interface("org.freedesktop.UDisks2.Drive")
-        connection_bus = await interface.get_connection_bus()
-        time_media_detected = await interface.get_time_media_detected()
-        if connection_bus == "usb":
-            discovered_usb_drives.append(
-                {
-                    "drive": a_drive,
-                    "time_media_detected": time_media_detected,
-                }
-            )
+        try:
+            proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, a_drive, introspection)
+            interface = proxy_object.get_interface("org.freedesktop.UDisks2.Drive")
+            connection_bus = await interface.get_connection_bus()
+            time_media_detected = await interface.get_time_media_detected()
+            if connection_bus == "usb":
+                discovered_usb_drives.append(
+                    {
+                        "drive": a_drive,
+                        "time_media_detected": time_media_detected,
+                    }
+                )
+        except DBusError as dbus_error:
+            logger.error(f"\nEncountered a DBus error while checking if the drive '{a_drive}' was a USB drive: {dbus_error}\n")
+            continue
     logger.debug(f"\nUSB Drives: {discovered_usb_drives}\n")
 
     if len(discovered_usb_drives) == 0:
@@ -81,21 +85,25 @@ async def list_volumes() -> Sequence[str]:
     # Find the block devices associated with each USB drive
     discovered_block_devices = []
     for block_device in block_devices:
-        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
-        interface = proxy_object.get_interface("org.freedesktop.UDisks2.Block")
-        id_usage = await interface.get_id_usage()
-        if id_usage != "filesystem":
+        try:
+            proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
+            interface = proxy_object.get_interface("org.freedesktop.UDisks2.Block")
+            id_usage = await interface.get_id_usage()
+            if id_usage != "filesystem":
+                continue
+            a_drive = await interface.get_drive()
+            for dictionary in discovered_usb_drives:
+                if dictionary["drive"] == a_drive:
+                    discovered_block_devices.append(
+                        {
+                            "block_device": block_device,
+                            "time_media_detected": dictionary["time_media_detected"],
+                        }
+                    )
+                    break
+        except DBusError as dbus_error:
+            logger.error(f"\nEncountered a DBus error checking if the block device '{block_device}' was from a USB drive: {dbus_error}\n")
             continue
-        a_drive = await interface.get_drive()
-        for dictionary in discovered_usb_drives:
-            if dictionary["drive"] == a_drive:
-                discovered_block_devices.append(
-                    {
-                        "block_device": block_device,
-                        "time_media_detected": dictionary["time_media_detected"],
-                    }
-                )
-                break
     logger.debug(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
 
     if len(discovered_block_devices) == 0:
@@ -111,20 +119,24 @@ async def list_volumes() -> Sequence[str]:
 
     discovered_mount_points = []
     for block_device in discovered_block_devices:
-        # Make sure that the filesystem is mounted and get the mount point.
-        proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
-        interface = proxy_object.get_interface("org.freedesktop.UDisks2.Filesystem")
-
-        mount_point = None
         try:
-            mount_point = await interface.call_mount({})
-        except DBusError as error:
-            if "is already mounted" not in error.text:
-                raise
-            mount_points = await interface.get_mount_points()
-            # todo Double check that I don't need to account for endianess or other encoding formats here.
-            mount_point = mount_points[0].decode("utf-8")
-        discovered_mount_points.append(mount_point.rstrip("\x00"))
+            # Make sure that the filesystem is mounted and get the mount point.
+            proxy_object = bus.get_proxy_object(UDISKS2_BUS_NAME, block_device, introspection)
+            interface = proxy_object.get_interface("org.freedesktop.UDisks2.Filesystem")
+
+            mount_point = None
+            try:
+                mount_point = await interface.call_mount({})
+            except DBusError as error:
+                if "is already mounted" not in error.text:
+                    raise
+                mount_points = await interface.get_mount_points()
+                # todo Double check that I don't need to account for endianess or other encoding formats here.
+                mount_point = mount_points[0].decode("utf-8")
+            discovered_mount_points.append(mount_point.rstrip("\x00"))
+        except DBusError as dbus_error:
+            logger.error(f"\nEncountered a DBus error checking for the mount point of the block device '{block_device}': {dbus_error}\n")
+            continue
     logger.debug(f"\nFilesystem Mount Points: {discovered_mount_points}\n")
 
     return discovered_mount_points
