@@ -528,7 +528,17 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._keep_refreshing_ports(first_time=True)
 
     def _keep_refreshing_ports(self, first_time=False):
+        ports_by_desc_before = self._ports_by_desc.copy()
         self._refresh_ports(first_time=first_time)
+        if (
+            not self._port_desc_variable.get()
+            and self._ports_by_desc != ports_by_desc_before
+            and not first_time
+        ):
+            new_descs = self._ports_by_desc.keys() - ports_by_desc_before.keys()
+            if len(new_descs) == 1:
+                self._port_desc_variable.set(new_descs.pop())
+
         self._port_polling_after_id = self.after(500, self._keep_refreshing_ports)
 
     def _refresh_ports(self, first_time=False):
