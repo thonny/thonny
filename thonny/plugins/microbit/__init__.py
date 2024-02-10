@@ -14,8 +14,10 @@ class MicrobitProxy(SimplifiedMicroPythonProxy):
         return thonny.plugins.microbit.microbit_back.__file__
 
     @classmethod
-    def get_known_usb_vids_pids(cls):
-        return {(0x0D28, 0x0204)}
+    def _is_potential_port(cls, p):
+        return (
+            p.vid == 0x0D28 and p.pid == 0x0204 and p.product and "micro:bit" in p.product.lower()
+        )
 
 
 class MicrobitConfigPage(SimplifiedMicroPythonConfigPage):
