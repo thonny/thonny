@@ -210,9 +210,13 @@ class Uf2FlashingDialog(BaseFlashingDialog):
             new_ports = list_serial_ports_with_hw_info()
             added_ports = set(new_ports) - set(old_ports)
             if added_ports:
-                for p in added_ports:
-                    self.append_text("Found port %s\n" % p)
+                for port_tuple in added_ports:
+                    self.append_text("Found port %s (%s)\n" % port_tuple)
                     self.set_action_text("Found port")
+
+                if len(added_ports) == 1:
+                    self.new_port, _ = added_ports.pop()
+
                 return
             if self._state == "cancelling":
                 return
@@ -238,11 +242,12 @@ def find_uf2_property(lines: List[str], prop_name: str) -> Optional[str]:
     return None
 
 
-def show_uf2_installer(master, firmware_name: str) -> None:
+def show_uf2_installer(master, firmware_name: str) -> Optional[str]:
     dlg = Uf2FlashingDialog(master, firmware_name=firmware_name)
     from thonny import ui_utils
 
     ui_utils.show_dialog(dlg)
+    return dlg.new_port
 
 
 def uf2_device_is_present_in_bootloader_mode() -> bool:
@@ -272,4 +277,4 @@ def create_volume_description(path: str) -> str:
 
 
 def list_serial_ports_with_hw_info():
-    return [f"{p.device} ({p.hwid})" for p in list_serial_ports(max_cache_age=0)]
+    return [(p.device, p.hwid) for p in list_serial_ports(max_cache_age=0)]

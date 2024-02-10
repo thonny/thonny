@@ -57,6 +57,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         self._last_handled_family_target = None
         self._last_handled_variant = None
         self.firmware_name = firmware_name
+        self.new_port = None  # Contains the port that appeared after installation
 
         threading.Thread(target=self._download_variants, daemon=True).start()
 
@@ -415,6 +416,10 @@ class BaseFlashingDialog(WorkDialog, ABC):
             daemon=True,
         ).start()
         return True
+
+    def cancel_work(self):
+        super().cancel_work()
+        self.new_port = None
 
     def prepare_work_get_options(self) -> Dict[str, Any]:
         return {}

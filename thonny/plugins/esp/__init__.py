@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import List
+from typing import List, Optional
 
 from thonny.plugins.micropython import BareMetalMicroPythonConfigPage, BareMetalMicroPythonProxy
 from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
@@ -48,11 +48,11 @@ class ESP32Proxy(ESPProxy):
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):
-    def _open_flashing_dialog(self, kind: str) -> None:
+    def _open_flashing_dialog(self, kind: str) -> Optional[str]:
         if kind == "esptool":
-            try_launch_esptool_dialog(self.winfo_toplevel(), "MicroPython")
+            return try_launch_esptool_dialog(self.winfo_toplevel(), "MicroPython")
         elif kind == "UF2":
-            show_uf2_installer(self, firmware_name="MicroPython")
+            return show_uf2_installer(self, firmware_name="MicroPython")
         else:
             raise ValueError(f"Unexpected kind{kind}")
 

@@ -528,6 +528,10 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._keep_refreshing_ports(first_time=True)
 
     def _keep_refreshing_ports(self, first_time=False):
+        self._refresh_ports(first_time=first_time)
+        self._port_polling_after_id = self.after(500, self._keep_refreshing_ports)
+
+    def _refresh_ports(self, first_time=False):
         old_port_desc = self._port_desc_variable.get()
         ports = list_serial_ports(max_cache_age=0, skip_logging=True)
         self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
@@ -571,13 +575,18 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
             self._port_desc_variable.set(new_port_desc)
             self._on_change_port()
 
-        self._port_polling_after_id = self.after(500, self._keep_refreshing_ports)
-
     def _get_flasher_link_title(self) -> str:
         return tr("Install or update %s") % "MicroPython"
 
     def _handle_python_installer_link(self, kind: str):
-        self._open_flashing_dialog(kind)
+        new_port = self._open_flashing_dialog(kind)
+        if new_port:
+            # Try to select the new port
+            self._refresh_ports()
+            for desc, name in self._port_names_by_desc.items():
+                if name == new_port:
+                    self._port_desc_variable.set(desc)
+                    break
         self._has_opened_python_flasher = True
 
     def _get_intro_text(self):
@@ -744,7 +753,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def get_flashing_dialog_kinds(self) -> List[str]:
         return []
 
-    def _open_flashing_dialog(self, kind: str) -> None:
+    def _open_flashing_dialog(self, kind: str) -> Optional[str]:
         raise NotImplementedError()
 
     @property

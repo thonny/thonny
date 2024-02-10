@@ -1,6 +1,6 @@
 import sys
 from time import sleep
-from typing import List
+from typing import List, Optional
 
 from thonny import ui_utils
 from thonny.plugins.micropython import BareMetalMicroPythonConfigPage, BareMetalMicroPythonProxy
@@ -36,10 +36,11 @@ class SimplifiedMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
     def get_flashing_dialog_kinds(self) -> List[str]:
         return [""]
 
-    def _open_flashing_dialog(self, kind: str) -> None:
+    def _open_flashing_dialog(self, kind: str) -> Optional[str]:
         assert kind == ""
         dlg = DaplinkFlashingDialog(self, "MicroPython")
         ui_utils.show_dialog(dlg)
+        return None
 
     def may_have_rtc(self):
         return False
