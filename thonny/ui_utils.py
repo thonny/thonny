@@ -692,6 +692,13 @@ class TreeFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
         self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
         self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
+        self.tree.bind("<Button-3>", self.on_secondary_click, True)
+        if misc_utils.running_on_mac_os():
+            self.tree.bind("<2>", self.on_secondary_click, True)
+            self.tree.bind("<Control-1>", self.on_secondary_click, True)
+
+        self.context_menu = tk.Menu(self.tree, tearoff=0)
+        self.context_menu.add_command(command=self.on_copy, label="Copy")
 
         self.error_label = ttk.Label(self.tree)
 
@@ -707,6 +714,20 @@ class TreeFrame(ttk.Frame):
 
     def clear(self):
         self._clear_tree()
+
+    def on_secondary_click(self, event):
+        self.tree.identify_row(event.y)
+        self.context_menu.post(event.x_root, event.y_root)
+
+    def on_copy(self):
+        texts = []
+        for item in self.tree.selection():
+            text = self.tree.item(item, option="text")
+            values = map(str, self.tree.item(item, option="values"))
+            combined = text + "\t" + "\t".join(values)
+            texts.append(combined.strip("\t"))
+        self.clipboard_clear()
+        self.clipboard_append(os.linesep.join(texts))
 
     def on_select(self, event):
         pass
