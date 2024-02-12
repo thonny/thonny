@@ -10,7 +10,7 @@ sys.path.insert(
     os.path.normpath(os.path.join(os.path.dirname(__file__), "vendored_libs")),
 )
 
-from thonny.common import is_private_python, is_virtual_executable
+from thonny.common import is_private_python, is_virtual_executable, running_in_virtual_environment
 
 _last_module_count = 0
 _last_modules = set()
@@ -89,7 +89,11 @@ def _compute_thonny_user_dir():
         else:
             root_dir = os.path.join(os.path.dirname(sys.executable), "..")
         return os.path.normpath(os.path.abspath(os.path.join(root_dir, "user_data")))
-    elif is_virtual_executable(sys.executable) and not is_private_python(sys.executable):
+    elif (
+        running_in_virtual_environment()
+        and is_virtual_executable(sys.executable)
+        and not is_private_python(sys.executable)
+    ):
         return os.path.join(sys.prefix, ".thonny")
     elif sys.platform == "win32":
         return os.path.join(_get_roaming_appdata_dir(), "Thonny")
