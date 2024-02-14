@@ -127,7 +127,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
             "\n"
             "1. Put your device into bootloader mode: \n"
             "     - some devices have to be plugged in while holding the BOOTSEL button,\n"
-            "     - some require double-tapping the RESET button with proper rythm.\n"
+            "     - some require double-tapping the RESET button with proper rhythm.\n"
             "2. Wait for couple of seconds until the target volume appears.\n"
             "3. Select desired variant and version.\n"
             "4. Click 'Install' and wait for some seconds until done.\n"
