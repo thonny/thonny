@@ -1,0 +1,2081 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Thonny\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Дзмітры К <dzmitry@lidacity.by>\n"
+"Language-Team: dzmitry@lidacity.by\n"
+"Language: be\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#: thonny/workbench.py:375
+msgid "File"
+msgstr "Файл"
+
+#: thonny/workbench.py:376
+msgid "Edit"
+msgstr "Праўка"
+
+#: thonny/workbench.py:377
+msgid "View"
+msgstr "Выгляд"
+
+#: thonny/running.py:161 thonny/workbench.py:378
+msgid "Run"
+msgstr "Выканаць"
+
+#: thonny/workbench.py:379
+msgid "Tools"
+msgstr "Інструменты"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:380
+msgid "Help"
+msgstr "Дапамога"
+
+#: thonny/workbench.py:598
+msgid "Exit"
+msgstr "Выйсці"
+
+#: thonny/workbench.py:625
+msgid "Decrease font size"
+msgstr "Паменшыць памер шрыфту"
+
+#: thonny/workbench.py:637
+msgid "Focus editor"
+msgstr "Перайсці ў сродак праўкі"
+
+#: thonny/workbench.py:646
+msgid "Focus shell"
+msgstr "Перайсці ў абалонку"
+
+#: thonny/workbench.py:656
+msgid "Maximize view"
+msgstr "Разгарнуць выгляд"
+
+#: thonny/workbench.py:668
+msgid "Full screen"
+msgstr "Поўны экран"
+
+#: thonny/workbench.py:1467
+msgid "Program arguments"
+msgstr "Аргументы праграмы"
+
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
+msgid "About Thonny"
+msgstr "Пра Thonny"
+
+#: thonny/plugins/about.py:81
+msgid ""
+"Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr ""
+"Распрацавана ў\n"
+"эстонскім Тартускім універсітэце\n"
+"пры ўдзеле супольнасці распрацоўнікаў\n"
+"з адкрытым зыходным кодам,\n"
+"фонда распрацоўкі Raspbery Pi\n"
+"і кампані Cybernetica"
+
+#: thonny/plugins/about.py:101
+msgid ""
+"This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr ""
+"Гэтае праграмнае забеспячэнне пастаўляецца\n"
+"БЕЗ ЯКІХ-НЕБУДЗЬ ГАРАНТЫЙ!\n"
+"Гэта бяспратнае праграмнае забеспячэнне, і вы можаце\n"
+"распаўсюджваць яго на пэўных умовах,\n"
+"глядзіце падрабязнасці\n"
+"https://opensource.org/licenses/MIT"
+
+#: thonny/plugins/about.py:142
+msgid "Version history"
+msgstr "Гісторыя версій"
+
+#: thonny/plugins/about.py:149
+msgid "Report problems"
+msgstr "Паведаміць аб праблеме"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "Аўтаматычна адчыняць акно Памочніка пры аварыйным завяршэнні праграмы"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "Аўтаматычна адчыняць акно Памочніка, калі ў ім з'явіцца папярэджанне для вашага коду"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "Выканаць абраныя праверкі Pylint"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "Выканаць праверкі MyPy"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "Адключыць праверкі (па адным ідэнтыфікатару на радок)"
+
+#: thonny/assistance.py:981 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "Памочнік"
+
+#: thonny/plugins/autocomplete.py:529
+msgid "Auto-complete"
+msgstr "Аўтаматычнае завяршэнне"
+
+#: thonny/plugins/backend_config_page.py:335
+msgid "Interpreter"
+msgstr "Інтэпрэтатар"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "Пра Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:56
+msgid ""
+"Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr ""
+"Birdseye — гэта адладчык Python, які неабходна ўсталяваць асобна.\n"
+"\n"
+"Ці жадаеце вы адчыніць старонку даведкі і даведацца больш?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "Адладзіць бягучы сцэнар (birdseye)"
+
+#: thonny/plugins/commenting_indenting.py:171
+msgid "Toggle comment"
+msgstr "Пераключыць каментар"
+
+#: thonny/plugins/commenting_indenting.py:181
+msgid "Comment out"
+msgstr "Пракаментаваць"
+
+#: thonny/plugins/commenting_indenting.py:191
+msgid "Uncomment"
+msgstr "Раскаментаваць"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "Адкаціць"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "Зрабіць нанова"
+
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49 thonny/ui_utils.py:2339
+msgid "Cut"
+msgstr "Выразаць"
+
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61 thonny/ui_utils.py:2340
+msgid "Copy"
+msgstr "Капіраваць"
+
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737 thonny/plugins/common_editing_commands.py:73
+#: thonny/ui_utils.py:2341
+msgid "Paste"
+msgstr "Уставіць"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "Абраць усё"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1402
+msgid "Run to cursor"
+msgstr "Выканаць да курсору"
+
+#: thonny/plugins/debugger.py:985
+msgid "Can't close yet"
+msgstr "Пакуль не магу зачыніць"
+
+#: thonny/plugins/debugger.py:986
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "Ужывайце каманду \"Стоп\", калі вы жадаеце адмяніць адладку"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "Замацаваць прыстасаваныя вокны"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "Падсвятліць імёны, якія супадаюць"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "Падсвятліць лакальныя зменныя"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "Падсвятліць парныя дужкі"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "Падсвятліць сінтаксічныя элементы"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "Падсвятліць бягучы радок (патрабуецца адчыніць нанова сродак праўкі)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "Паказаць нумары радкоў"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid ""
+"Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr ""
+"Рэкамендуемая найбольшая даўжыня радкоў\n"
+"(калі 0, ліні водступу будуць нябачныя)"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "Сродак праўкі"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "Экспартаваць часопіс ужывання..."
+
+#: thonny/plugins/event_view.py:39
+msgid "Events"
+msgstr "Падзеі"
+
+#: thonny/plugins/files.py:609
+msgid "Files"
+msgstr "Файлы"
+
+#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:438
+msgid "Find & Replace"
+msgstr "Знайсці і замяніць"
+
+#: thonny/plugins/find_replace.py:66
+msgid "Find:"
+msgstr "Знайсці:"
+
+#: thonny/plugins/find_replace.py:90
+msgid "Replace with:"
+msgstr "Замяніць на:"
+
+#: thonny/plugins/find_replace.py:108
+msgid "Case sensitive"
+msgstr "Адчувальны да рэгістра"
+
+#: thonny/plugins/find_replace.py:115
+msgid "Up"
+msgstr "Уверх"
+
+#: thonny/plugins/find_replace.py:119
+msgid "Down"
+msgstr "Уніз"
+
+#: thonny/plugins/find_replace.py:128
+msgid "Find"
+msgstr "Знайсці"
+
+#: thonny/plugins/find_replace.py:138
+msgid "Replace"
+msgstr "Замяніць"
+
+#: thonny/plugins/find_replace.py:146
+msgid "Replace+Find"
+msgstr "Замяніць і знайсці"
+
+#: thonny/plugins/find_replace.py:156
+msgid "Replace all"
+msgstr "Замяніць усё"
+
+#: thonny/plugins/find_replace.py:254
+msgid "Enter string to be replaced."
+msgstr "Увядзіце радок для замены."
+
+#: thonny/plugins/find_replace.py:339
+msgid "The specified text was not found!"
+msgstr "Паказаны тэкст не знойдзены!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "Дазволіць толькі адзін асобнік Thonny"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "Адчыніць нанова ўсе файлы з папярэдняга сеансу"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "Адключыць гук апавяшчэння"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "Рэжым маштабавання шрыфту"
+
+#: thonny/plugins/heap.py:37
+msgid ""
+"Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr ""
+"Рэжым кучы ўключаны.\n"
+"Зачыніце прагляд кучы, каб адключыць яго."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "Куча"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "Мова"
+
+#: thonny/plugins/notes.py:35
+msgid ""
+"This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr ""
+"Дадзенае акно прызначана для вашых працоўных нататак - інструкцый па прызначэнні, фрагментаў коду і чаго "
+"заўгодна.\n"
+"\n"
+"Усё будзе аўтаматычна захавана і загружана, калы вы адчыніце Thonny у наступны раз.\n"
+"\n"
+"Не саромейцеся выдаляць гэты тэкст, каб вызваліць месца для вашых уласных нататак."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "Нататкі"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "Папярэдні аб'ект"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "Наступны аб'ект"
+
+#: thonny/plugins/object_inspector.py:732
+msgid "Object inspector"
+msgstr "Інспектар аб'ектаў"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "План"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "Рэжым Pygame Zero"
+
+#: thonny/plugins/pip_gui.py:80
+msgid "Uninstall"
+msgstr "Выдаліць"
+
+#: thonny/editors.py:693 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:496 thonny/ui_utils.py:1884
+#: thonny/workdlg.py:203
+msgid "Close"
+msgstr "Зачыніць"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "Click "
+msgstr "Пстрыкніце "
+
+#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+msgid "here"
+msgstr "тут,"
+
+#: thonny/plugins/pip_gui.py:77
+msgid "Upgrade"
+msgstr "Абнавіць"
+
+#: thonny/plugins/micropython/base_flashing_dialog.py:398 thonny/plugins/pip_gui.py:74
+msgid "Install"
+msgstr "Усталяваць"
+
+#: thonny/plugins/pip_gui.py:570
+msgid "Could not find the package from PyPI."
+msgstr "Не атрымалася знайсці пакет у PyPI."
+
+#: thonny/plugins/pip_gui.py:592
+msgid "Latest stable version"
+msgstr "Апошняя стабільная версія"
+
+#: thonny/plugins/pip_gui.py:594
+msgid "Latest version"
+msgstr "Апошняя версія"
+
+#: thonny/plugins/pip_gui.py:596
+msgid "Summary"
+msgstr "Рэзюмэ"
+
+#: thonny/plugins/pip_gui.py:598
+msgid "Author"
+msgstr "Аўтар"
+
+#: thonny/plugins/pip_gui.py:602
+msgid "Homepage"
+msgstr "Хатняя старонка"
+
+#: thonny/plugins/pip_gui.py:604
+msgid "Bugtracker"
+msgstr "Сродак адсочвання памылак"
+
+#: thonny/plugins/pip_gui.py:606
+msgid "Documentation"
+msgstr "Дакументацыя"
+
+#: thonny/plugins/pip_gui.py:608
+msgid "PyPI page"
+msgstr "Старонка PyPI"
+
+#: thonny/plugins/pip_gui.py:648
+msgid "Requires"
+msgstr "Залежнасці"
+
+#: thonny/plugins/pip_gui.py:802
+msgid "Really uninstall?"
+msgstr "Ці сапраўды выдаліць?"
+
+#: thonny/plugins/pip_gui.py:807
+msgid "Are you sure you want to uninstall it?"
+msgstr "Ці жадаеце выдаліць?"
+
+#: thonny/plugins/variables.py:22
+msgid ""
+"Back to\n"
+"current frame"
+msgstr ""
+"Назад да\n"
+"бягучага акна"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82 thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "Зменныя"
+
+#: thonny/base_file_browser.py:1576
+msgid "This computer"
+msgstr "Гэты кампутар"
+
+#: thonny/base_file_browser.py:648
+msgid "Refresh"
+msgstr "Абнавіць"
+
+#: thonny/base_file_browser.py:657
+msgid "Focus into"
+msgstr "Перайсці ў"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423 thonny/plugins/autocomplete.py:303
+#: thonny/plugins/highlight_names.py:86
+msgid "Error"
+msgstr "Памылка"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+msgid "You need to select a file!"
+msgstr "Вам трэба абраць файл!"
+
+#: thonny/base_file_browser.py:1427
+msgid "Overwrite?"
+msgstr "Ці перазапісаць?"
+
+#: thonny/base_file_browser.py:1427
+msgid "Do you want to overwrite '%s' ?"
+msgstr "Ці жадаеце вы запісаць '%s' нанова?"
+
+#: thonny/editors.py:658 thonny/editors.py:660
+msgid "New"
+msgstr "Новы"
+
+#: thonny/editors.py:671
+msgid "Open..."
+msgstr "Адчыніць..."
+
+#: thonny/editors.py:673
+msgid "Load"
+msgstr "Загрузіць"
+
+#: thonny/editors.py:682
+msgid "Recent files"
+msgstr "Нядаўнія файлы"
+
+#: thonny/editors.py:704 thonny/ui_utils.py:498
+msgid "Close all"
+msgstr "Зачыніць усё"
+
+#: thonny/editors.py:714 thonny/editors.py:716
+msgid "Save"
+msgstr "Захаваць"
+
+#: thonny/editors.py:739
+msgid "Save as..."
+msgstr "Захаваць як..."
+
+#: thonny/editors.py:750
+msgid "Save copy..."
+msgstr "Захаваць копію..."
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "Налады Thonny"
+
+#: thonny/running.py:160
+msgid "Run current script"
+msgstr "Выканаць бягучы сцэнар"
+
+#: thonny/running.py:191
+msgid "Run current script in terminal"
+msgstr "Выканаць бягучы сцэнар у тэрмінале"
+
+#: thonny/running.py:204
+msgid "Stop/Restart backend"
+msgstr "Спыніць/запусціць нанова серверную частку"
+
+#: thonny/running.py:205
+msgid "Stop"
+msgstr "Спыніць"
+
+#: thonny/running.py:216
+msgid "Interrupt execution"
+msgstr "Перапыніць выкананне"
+
+#: thonny/running.py:229
+msgid "Send EOF / Soft reboot"
+msgstr "Адправіць EOF / праграмная загрузка нанова"
+
+#: thonny/running.py:240
+msgid "Disconnect"
+msgstr "Раз'яднаць"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:295
+msgid "Python interpreters"
+msgstr "Інтэрпрэтатары Python"
+
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:296 thonny/plugins/pip_gui.py:848
+#: thonny/plugins/pip_gui.py:861
+msgid "all files"
+msgstr "усе файлы"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:324
+msgid "Select empty directory for new virtual environment"
+msgstr "Абраць пусты каталог для новага віртуальнага асяроддзя"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:331
+msgid "Bad directory"
+msgstr "Неправільны каталог"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:332
+msgid ""
+"Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr ""
+"Абраны каталог не пусты.\n"
+"Абярыце іншы ці адмяніце."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:349
+msgid "Creating virtual environment"
+msgstr "Стварэнне віртуальнага асяроддзя"
+
+#: thonny/shell.py:101
+msgid "Clear shell"
+msgstr "Ачысціць абалонку"
+
+#: thonny/shell.py:185
+msgid "Plotter"
+msgstr "Плотэр"
+
+#: thonny/shell.py:317
+msgid "Clear"
+msgstr "Ачысціць"
+
+#: thonny/shell.py:330
+msgid "Show Plotter"
+msgstr "Паказаць плотэр"
+
+#: thonny/shell.py:1660
+msgid ""
+"For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr ""
+"Па меркаваннях прадукцыйнасці, абалонка пазбягае поўнага адлюстравання вельмі доўгіх радкоў цалкам (глядзіце "
+"Інструменты → Налады → Абалонка).\n"
+"Тут вы можаце ўзаемадзейнічаць з зыходным фрагментам тэксту."
+
+#: thonny/shell.py:1671
+msgid "Wrap text (may be slow)"
+msgstr "Пераносіць радкі (можа быць павольным)"
+
+#: thonny/ui_utils.py:1879
+msgid "Copy to clipboard"
+msgstr "Капіраваць ў буфер абмену"
+
+#: thonny/shell.py:1713
+msgid "Squeezed text (%d characters)"
+msgstr "Сціснуты тэкст (%d знакаў)"
+
+#: thonny/shell.py:1883
+msgid ""
+"Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr ""
+"Плотэр візуалізуе серыю\n"
+"лікаў, якія надрукаваныя ў абалонцы."
+
+#: thonny/shell.py:1885
+msgid "See Help for details."
+msgstr "Падрабязнасці глядзіце ў даведцы."
+
+#: thonny/ui_utils.py:497
+msgid "Close others"
+msgstr "Зачыніць іншыя"
+
+#: thonny/ui_utils.py:1734
+msgid "Copying"
+msgstr "Капіраванне"
+
+#: thonny/ui_utils.py:1737
+msgid ""
+"Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr ""
+"Капіраванее\n"
+"  %s\n"
+"у\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1338 thonny/ui_utils.py:160
+#: thonny/ui_utils.py:1745 thonny/ui_utils.py:1831 thonny/workdlg.py:205 thonny/workdlg.py:259
+msgid "Cancel"
+msgstr "Адмяніць"
+
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25 thonny/plugins/about.py:115
+#: thonny/plugins/backend_config_page.py:283 thonny/ui_utils.py:157 thonny/ui_utils.py:1828
+#: thonny/workdlg.py:256
+msgid "OK"
+msgstr "ОК"
+
+#: thonny/ui_utils.py:2345
+msgid "Select All"
+msgstr "Абраць усё"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149 thonny/workbench.py:164
+msgid "Shell"
+msgstr "Абалонка"
+
+#: thonny/workbench.py:608
+msgid "Options..."
+msgstr "Налады..."
+
+#: thonny/workbench.py:615
+msgid "Increase font size"
+msgstr "Павялічыць памер шрыфту"
+
+#: thonny/workbench.py:679
+msgid "Change font size"
+msgstr "Змяніць памер шрыфту"
+
+#: thonny/workbench.py:680
+msgid "Zoom"
+msgstr "Павелічэнне"
+
+#: thonny/workbench.py:689
+msgid "Exit Thonny"
+msgstr "Выйсці з Thonny"
+
+#: thonny/workbench.py:692
+msgid "Quit"
+msgstr "Выйсці"
+
+#: thonny/workbench.py:1247 thonny/workbench.py:1255
+msgid "Overwriting theme '%s'"
+msgstr "Перазапісаць тэму '%s'"
+
+#: thonny/workbench.py:1438
+msgid "Program arguments:"
+msgstr "Аргументы праграмы:"
+
+#: thonny/workbench.py:1492
+msgid "Regular mode"
+msgstr "Звычайны рэжым"
+
+#: thonny/workbench.py:1493
+msgid ""
+"Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr ""
+"Канфігурацыя была абноўленая. Запусціце Thonny нанова, каб пачаць працу ў звычайным рэжыме.\n"
+"\n"
+"(Глядзіце 'Інструменты → Налады → Агульныя', калі пазней перадумаеце.)"
+
+#: thonny/plugins/ast_view.py:211
+msgid "Program tree"
+msgstr "Дрэва праграмы"
+
+#: thonny/plugins/debugger.py:1284
+msgid "Resume"
+msgstr "Аднавіць"
+
+#: thonny/plugins/debugger.py:1300
+msgid "Run / resume"
+msgstr "Выканаць / аднавіць"
+
+#: thonny/plugins/debugger.py:1315
+msgid "Debug current script"
+msgstr "Адладзіць бягучы сцэнар"
+
+#: thonny/plugins/debugger.py:1317
+msgid "Debug"
+msgstr "Адладзіць"
+
+#: thonny/plugins/debugger.py:1328
+msgid "Debug current script (nicer)"
+msgstr "Адладзіць бягучы сцэнар (лепш)"
+
+#: thonny/plugins/debugger.py:1340
+msgid "Debug current script (faster)"
+msgstr "Адладзіць бягучы сцэнар (хутка)"
+
+#: thonny/plugins/debugger.py:1351
+msgid "Step over"
+msgstr "Крок праз"
+
+#: thonny/plugins/debugger.py:1353
+msgid "Over"
+msgstr "Праз"
+
+#: thonny/plugins/debugger.py:1364
+msgid "Step into"
+msgstr "Крок у"
+
+#: thonny/plugins/debugger.py:1366
+msgid "Into"
+msgstr "У"
+
+#: thonny/plugins/debugger.py:1377
+msgid "Step out"
+msgstr "Выйсці з"
+
+#: thonny/plugins/debugger.py:1379
+msgid "Out"
+msgstr "З"
+
+#: thonny/plugins/debugger.py:1414
+msgid "Step back"
+msgstr "Крок назад"
+
+#: thonny/plugins/debugger.py:1416
+msgid "Back"
+msgstr "Назад"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Stack"
+msgstr "Стэк"
+
+#: thonny/plugins/debugger.py:1423
+msgid "Exception"
+msgstr "Выключэнне"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "Рэгістраваць падзеі ўжывання праграмы ў часопіс"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "Рэжым адладкі (больш падрабязныя часопісы дыягностыкі)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "Рэжым карыстальніцкага інтэрфейсу"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "Каэфіцыент маштабавання карыстальніцкага інтэрфейсу"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr ""
+"Заўвага!\n"
+"Запусціце Thonny нанова пасля змены налад!"
+
+#: thonny/plugins/general_config_page.py:148
+msgid "General"
+msgstr "Агульныя"
+
+#: thonny/plugins/pip_gui.py:142
+msgid "INSTALL"
+msgstr "УСТАЛЯВАЦЬ"
+
+#: thonny/plugins/pip_gui.py:367
+msgid "Browse the packages"
+msgstr "Агляд пакетаў"
+
+#: thonny/plugins/pip_gui.py:370
+msgid ""
+"With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr ""
+"З бягучым інтэрпрэтатарам вы можце праглядаць пакеты толькі тут.\n"
+"Ужывайце 'Інструменты → Адчыніць сістэмную абалонку...', каб ўсталяваць, абнавіць ці выдаліць."
+
+#: thonny/plugins/pip_gui.py:378
+msgid "Packages' directory"
+msgstr "Каталог пакетаў"
+
+#: thonny/plugins/pip_gui.py:382
+msgid "Install from PyPI"
+msgstr "Усталяваць з PyPI"
+
+#: thonny/plugins/pip_gui.py:385
+msgid ""
+"If you don't know where to get the package from, then most likely you'll want to search the Python Package "
+"Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr ""
+"Калі вы не ведаеце, адкуль узяць пакет, то, хутчэй за ўсё, вам захочацца выканаць пошук па індэксе пакетаў "
+"Python.\n"
+"Пачніце з уводу назвы пакета ў поле пошуку вышэй і націсніце Enter."
+
+#: thonny/plugins/pip_gui.py:402
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "каб знайсці файл requirements.txt і ўсталяваць названыя ў ім пакеты."
+
+#: thonny/plugins/pip_gui.py:408
+msgid "Click"
+msgstr "Пстрыкніце"
+
+#: thonny/plugins/pip_gui.py:413
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "каб знайсці і ўсталяваць файл пакета (звычайна з пашырэннем .whl, .tar.gz ці .zip)."
+
+#: thonny/plugins/pip_gui.py:420
+msgid "Upgrade or uninstall"
+msgstr "Абнавіць ці выдаліць"
+
+#: thonny/plugins/pip_gui.py:422
+msgid "Start by selecting the package from the left."
+msgstr "Пачніце з выбару пакета злева."
+
+#: thonny/plugins/pip_gui.py:430
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "Тут пералічаныя ўсе даступныя пакеты, але дазваляецца абнавіць і выдаліць толькі пакеты з"
+
+#: thonny/plugins/pip_gui.py:440
+msgid ""
+"New packages will be also installed into this directory. Other locations must be managed by alternative "
+"means."
+msgstr ""
+"Новыя пакеты таксама будуць усталяваныя ў гэты каталог.\n"
+"Кіраванне іншымі размяшчэннямі павінна ажыццяўляцца іншымі сродкамі."
+
+#: thonny/plugins/pip_gui.py:493
+msgid "Installed version:"
+msgstr "Усталяваная верстя:"
+
+#: thonny/plugins/pip_gui.py:495
+msgid "Installed to:"
+msgstr "Усталяваная ў:"
+
+#: thonny/plugins/pip_gui.py:573
+msgid "Please check your spelling!"
+msgstr "Калі ласка, праверце правільнасць напісання!"
+
+#: thonny/plugins/pip_gui.py:577
+msgid "Could not find the package info from PyPI."
+msgstr "Не атрымалася знайсці інфармацыю аб пакеце ў PyPI."
+
+#: thonny/plugins/pip_gui.py:579 thonny/plugins/pip_gui.py:1408
+msgid "Error code:"
+msgstr "Код памылкі:"
+
+#: thonny/plugins/pip_gui.py:748
+msgid "Can't find package name from the list:"
+msgstr "Не атрымалася знайсці назву пакета ў спісе:"
+
+#: thonny/plugins/pip_gui.py:803
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "Пакет '{}' неабходны для ўсталявання і выдалення іншых пакетаў."
+
+#: thonny/plugins/pip_gui.py:848
+msgid "Package"
+msgstr "Пакет"
+
+#: thonny/plugins/pip_gui.py:960
+msgid "Manage packages for %s"
+msgstr "Кіраванне пакетамі для %s"
+
+#: thonny/editors.py:587 thonny/plugins/micropython/pip_gui.py:25 thonny/plugins/pip_gui.py:1034
+msgid "Confirmation"
+msgstr "Пацверджанне"
+
+#: thonny/plugins/pip_gui.py:1035
+msgid ""
+"Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr ""
+"Падобна на тое, што вы жадаеце ўсталяваць пакет, які звязаны з Thonny. \n"
+"Калі вы мелі намер усталяваць дадатак для Thonny, то замест гэтага вам варта\n"
+"ужыць 'Інструменты → Кіраванне дадаткамі...'\n"
+"\n"
+"Ці ўпэўненыя вы, што жадаеце ўсталяваць %s для сервернай часткі?"
+
+#: thonny/plugins/pip_gui.py:1141
+msgid ""
+"NB! There may be another version available which is compatible with current Thonny version. Click on '...' "
+"button to choose the version to install."
+msgstr ""
+"Заўвага!\n"
+"Можа быць даступная іншая версія, якая сумяшчальная з бягучай версіяй Thonny.\n"
+"Націсніце кнопку '...', каб абраць версію для ўсталявання."
+
+#: thonny/plugins/pip_gui.py:1149
+msgid "Thonny plugin without requirements"
+msgstr "Дадаткі Thonny без залежнасцяў"
+
+#: thonny/plugins/pip_gui.py:1165
+msgid "Unsuitable requirements"
+msgstr "Залежнасці, якія не падыходзяць"
+
+#: thonny/plugins/pip_gui.py:1166
+msgid "This package requires different Thonny version:"
+msgstr "Для дадзенага пакета патрабуецца іншая версія Thonny:"
+
+#: thonny/plugins/pip_gui.py:1170
+msgid "If you still want it, then please install it from the command line."
+msgstr "Калі вы ўсё яшчэ жадаеце яго, то, калі ласка, усталюйце яго з каманднага радка."
+
+#: thonny/plugins/pip_gui.py:1207
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr ""
+"Заўвага!\n"
+"Вам неабходна запусціць Thonny нанова пасля ўсталявання, абнаўлення ці выдалення дадатку."
+
+#: thonny/plugins/pip_gui.py:1217
+msgid "Thonny plug-ins"
+msgstr "Дадаткі Thonny"
+
+#: thonny/plugins/pip_gui.py:1253
+msgid "Advanced install / upgrade / downgrade"
+msgstr "Пашыраная ўсталяванне / абнаўленне / адкат версіі"
+
+#: thonny/plugins/pip_gui.py:1262
+msgid "Desired version"
+msgstr "Жаданая версія"
+
+#: thonny/plugins/pip_gui.py:1321
+msgid "Upgrade dependencies"
+msgstr "Залежнасці ад абнаўлення"
+
+#: thonny/plugins/pip_gui.py:1406
+msgid "Requires:"
+msgstr "Патрабуецца:"
+
+#: thonny/plugins/pip_gui.py:1410
+msgid "Error:"
+msgstr "Памылка:"
+
+#: thonny/plugins/pip_gui.py:1601
+msgid "Manage packages..."
+msgstr "Кіраваць пакетамі..."
+
+#: thonny/plugins/pip_gui.py:1607
+msgid "Manage plug-ins..."
+msgstr "Кіраваць дадаткамі..."
+
+#: thonny/plugins/replayer.py:364
+msgid "Open replayer..."
+msgstr "Адчыніць паўторна..."
+
+#: thonny/plugins/run_debug_config_page.py:21
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "Змяніць працоўны каталог на каталог сцэнара пры запуску Выканаць / Адладзіць"
+
+#: thonny/plugins/run_debug_config_page.py:35
+msgid "Show function calls (frames) in separate windows"
+msgstr "Паказаць выклікі функцый (блокаў) у асобных вокнах"
+
+#: thonny/plugins/run_debug_config_page.py:36
+msgid "Uncheck if you want more traditional experience."
+msgstr "Не птушка, калі вы жадаеце атрымаць больш традыцыйны вопыт."
+
+#: thonny/plugins/run_debug_config_page.py:42
+msgid "Open and close Stack view automatically"
+msgstr "Аўтаматычна адчыняць і зачыняць прагляд стэку"
+
+#: thonny/plugins/run_debug_config_page.py:43
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "Адчыняе прагляд стэку пры першым выкліку і зачыняе яго, калі праграма вяртаецца ў асноўны блок."
+
+#: thonny/plugins/run_debug_config_page.py:52
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "Дазволіць доступ да бібліятэк (па-за межамі асноўнага каталогу праграмы)"
+
+#: thonny/plugins/run_debug_config_page.py:53
+msgid "May make debugging slower."
+msgstr "Можа запаволіць адладку."
+
+#: thonny/plugins/run_debug_config_page.py:58
+msgid "Preferred debugger"
+msgstr "Пераважны адладчык"
+
+#: thonny/plugins/run_debug_config_page.py:70
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(ужываецца па пстрычке на кнопку адладкі на панэлі інструментаў)"
+
+#: thonny/plugins/run_debug_config_page.py:75
+msgid "Birdseye port"
+msgstr "Порт Birdseye"
+
+#: thonny/plugins/run_debug_config_page.py:79
+msgid "(restart Thonny after changing this)"
+msgstr "(запусціць Thonny нанова пасля змены)"
+
+#: thonny/plugins/run_debug_config_page.py:87
+msgid "Run & Debug"
+msgstr "Выканаць і адладзіць"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "Эмуляцыя тэрміналу"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "падтрымка асноўных колераў ANSI і стылей"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "Найбольшая колькасць радкоў, якія захоўваюцца."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr ""
+"Заўвага!\n"
+"Вялікія значэнні могуць прывесці да зніжэння прадукцыйнасці!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "Найбольшая даўжыня фрагментаў лініі перад сціскам"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "Запуск бягучага сцэнару ў тэрмінале"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "Перайсці ў Python REPL пасля завяршэння праграмы"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Пакінуць акно тэрміналу адчыненым пасля завяршэння працэсу Python"
+
+#: thonny/plugins/terminal_config_page.py:31
+msgid ""
+"NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr ""
+"Заўвага!\n"
+"Аўтаматычнае закрыццё павінна быць уключана ў наладах тэрмінала \n"
+"(Профілі → Абалонка → Пры выхадзе з абалонкі)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "Тэрмінал"
+
+#: thonny/plugins/theme_and_font_config_page.py:39
+msgid "UI theme"
+msgstr "Тэма карыстальніцкага інтэрфейсу"
+
+#: thonny/plugins/theme_and_font_config_page.py:52
+msgid "Syntax theme"
+msgstr "Тэма падсвятлення сінтаксісу"
+
+#: thonny/plugins/theme_and_font_config_page.py:84
+msgid "Editor font"
+msgstr "Шрыфт сродку праўкі"
+
+#: thonny/plugins/theme_and_font_config_page.py:107
+msgid "IO font"
+msgstr "Шрыфт акна ўводу-вываду"
+
+#: thonny/plugins/theme_and_font_config_page.py:132
+msgid "Preview"
+msgstr "Папярэдні прагляд"
+
+#: thonny/plugins/theme_and_font_config_page.py:150
+msgid "This is a comment"
+msgstr "Гэта каментар"
+
+#: thonny/plugins/theme_and_font_config_page.py:153
+msgid "The answer is"
+msgstr "Адказ"
+
+#: thonny/plugins/theme_and_font_config_page.py:157
+msgid "unclosed_string"
+msgstr "незачынены_радок"
+
+#: thonny/plugins/theme_and_font_config_page.py:159
+msgid "blah, blah"
+msgstr "бла, бла"
+
+#: thonny/plugins/theme_and_font_config_page.py:183
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr ""
+"Заўвага!\n"
+"Некаторыя элементы стылю змяняюцца толькі пасля запуску Thonny нанова!"
+
+#: thonny/plugins/theme_and_font_config_page.py:222
+msgid "Enter an integer"
+msgstr "Увязіце лік"
+
+#: thonny/plugins/theme_and_font_config_page.py:235
+msgid "Theme & Font"
+msgstr "Тэма і шрыфт"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Адчыніць каталог з праграмай Thonny..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Адчыніць каталог з дадзенымі Thonny..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "Дахаты"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "Змест дапамогі"
+
+#: thonny/plugins/micropython/mp_front.py:303
+msgid "CircuitPython device"
+msgstr "Прылада CircuitPython"
+
+#: thonny/plugins/micropython/mp_front.py:307
+msgid "MicroPython device"
+msgstr "Прылада MicroPython"
+
+#: thonny/plugins/micropython/mp_front.py:558
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "Злучыць прыладу з кампутарам і абраць адпаведны порт ніжэй"
+
+#: thonny/plugins/micropython/mp_front.py:561
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "знайдзіце назву вашай прылады, \"USB Serial\" ці \"UART\""
+
+#: thonny/plugins/micropython/mp_front.py:563
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "Калі вы не можаце зняйсці яго, магчыма, вам спачатку спатрэбіцца ўсталяваць адпаведны драйвер USB."
+
+#: thonny/plugins/micropython/mp_front.py:453
+msgid "Port"
+msgstr "Порт"
+
+#: thonny/plugins/micropython/mp_front.py:458
+msgid "Try to detect port automatically"
+msgstr "Паспрабаваць аўтаматычна вызначыць порт"
+
+#: thonny/plugins/micropython/__init__.py:24
+msgid "MicroPython (generic)"
+msgstr "MicroPython (агульны)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "Надрукаваць..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "Адчыніць сістэмную абалонку..."
+
+#: thonny/plugins/backend_config_page.py:109
+msgid "Details"
+msgstr "Падрабязнасці"
+
+#: thonny/plugins/pip_gui.py:395
+msgid "Install from requirements file"
+msgstr "Усталяваць з файлу requirements"
+
+#: thonny/plugins/pip_gui.py:407
+msgid "Install from local file"
+msgstr "Усталяваць з лакальнага файлу"
+
+#: thonny/plugins/pip_gui.py:1200
+msgid ""
+"This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr ""
+"Дадзенае дыялогавае акно прызначана для кіравання дадаткамі Thonny і іх залежнасцямі.\n"
+"Калі вы жадаеце ўсталяваць пакеты для ўласных праграм, абярыце 'Інструменты → Кіраванне пакетамі...'"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (агульны)"
+
+#: thonny/plugins/commenting_indenting.py:142
+msgid "Indent selected lines"
+msgstr "Павялічыць водступ у абраных радках"
+
+#: thonny/plugins/commenting_indenting.py:152
+msgid "Dedent selected lines"
+msgstr "Выкрасліць абраныя радкі"
+
+#: thonny/workbench.py:1481
+msgid ""
+"Switch to\n"
+"regular\n"
+"mode"
+msgstr ""
+"Пераключыць у\n"
+"звычайны \n"
+"рэжым"
+
+#: thonny/plugins/microbit/__init__.py:62
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Пераканайцеся, што MicroPython быў усталяваны на ваш micro:bit."
+
+#: thonny/plugins/microbit/__init__.py:64
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Не забывайце, што main.py працуе без ўбудаванага асноўнага сцэнара."
+
+#: thonny/misc_utils.py:177
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr ""
+"Не атрымалася знайсці дыск '%s'.\n"
+"Ці жадаеце вы знайсці яго?"
+
+#: thonny/misc_utils.py:180
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr ""
+"Знойдзена некалькі дыскаў '%s'.\n"
+"Ці жадаеце вы абраць адзін?"
+
+#: thonny/misc_utils.py:196
+msgid "Can't find suitable disk"
+msgstr "Не атрымалася знайсці дыск, які падыходзіць"
+
+#: thonny/base_file_browser.py:294
+msgid "%d items"
+msgstr "%d элементаў"
+
+#: thonny/base_file_browser.py:743
+msgid "Move to Trash"
+msgstr "Перамясціць у сметнік"
+
+#: thonny/base_file_browser.py:746
+msgid "Delete"
+msgstr "Выдаліць"
+
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
+msgid "New directory"
+msgstr "Новы каталог"
+
+#: thonny/base_file_browser.py:749
+msgid "Properties"
+msgstr "Уласцівасці"
+
+#: thonny/base_file_browser.py:751
+msgid "Storage space"
+msgstr "Месца ў сховішчы"
+
+#: thonny/base_file_browser.py:761
+msgid "Path"
+msgstr "Шлях"
+
+#: thonny/base_file_browser.py:763
+msgid "Directory properties"
+msgstr "Уласцівасці каталогу"
+
+#: thonny/base_file_browser.py:765
+msgid "File properties"
+msgstr "Уласцівасці файлу"
+
+#: thonny/base_file_browser.py:767
+msgid "bytes"
+msgstr "байтаў"
+
+#: thonny/base_file_browser.py:770
+msgid "Size"
+msgstr "Памер"
+
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
+msgid "Modified"
+msgstr "Зменены"
+
+#: thonny/base_file_browser.py:842
+msgid "Deleting %s"
+msgstr "Выдаленне %s"
+
+#: thonny/editors.py:262
+msgid "Loading"
+msgstr "Загрузка"
+
+#: thonny/editors.py:395
+msgid "Saving"
+msgstr "Захаванне"
+
+#: thonny/plugins/files.py:219
+msgid "Upload to %s"
+msgstr "Загрузіць у в %s"
+
+#: thonny/plugins/files.py:420
+msgid "Downloading %s to %s"
+msgstr "Спампоўка %s у %s"
+
+#: thonny/plugins/files.py:326
+msgid "Download to %s"
+msgstr "Спампаваць у %s"
+
+#: thonny/base_file_browser.py:650
+msgid "Open in system file manager"
+msgstr "Адчыніць у сістэмным кіраўніку файлаў"
+
+#: thonny/base_file_browser.py:678
+msgid "Hide hidden files"
+msgstr "Схаваць схаваныя файлы"
+
+#: thonny/base_file_browser.py:678
+msgid "Show hidden files"
+msgstr "Паказаць схаваныя файлы"
+
+#: thonny/base_file_browser.py:661
+msgid "Open in Thonny"
+msgstr "Адчыніць у Thonny"
+
+#: thonny/base_file_browser.py:692
+msgid "Open in system default app"
+msgstr "Адчыніць у сістэмнай першапачатковай праграме"
+
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
+msgid "Configure %s files"
+msgstr "Наладзіць %s файлаў"
+
+#: thonny/base_file_browser.py:701
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "Што рабіць з файлам %s, калі двойчы пстрыкнуць па ім у файлавым аглядальніку Thonny?"
+
+#: thonny/base_file_browser.py:1258 thonny/editors.py:986 thonny/editors.py:988
+msgid "Deleting"
+msgstr "Выдаленне"
+
+#: thonny/base_file_browser.py:1265
+msgid "Creating directory"
+msgstr "Стварэнне каталогу"
+
+#: thonny/editors.py:260
+msgid "Loading %s"
+msgstr "Загрузка %s"
+
+#: thonny/editors.py:390
+msgid "Saving to %s"
+msgstr "Захаванне ў в %s"
+
+#: thonny/editors.py:728 thonny/editors.py:730
+msgid "Save All files"
+msgstr "Захаваць усе файлы"
+
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:880
+msgid "Configure interpreter..."
+msgstr "Наладзіць інтэрпрэтатар..."
+
+#: thonny/workbench.py:1591
+msgid "Device"
+msgstr "Прылада"
+
+#: thonny/workdlg.py:234
+msgid "Cancelling"
+msgstr "Адмена"
+
+#: thonny/workdlg.py:270
+msgid "Starting"
+msgstr "Запуск"
+
+#: thonny/plugins/backend_config_page.py:249
+msgid "Authentication"
+msgstr "Ідэнтыфікацыя"
+
+#: thonny/plugins/backend_config_page.py:251
+msgid ""
+"Enter the passphrase of your private key for\n"
+"{}"
+msgstr ""
+"Увядзіце кодавую фразу вашага закрытага ключа для\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:254
+msgid ""
+"Enter your password for\n"
+"{}"
+msgstr ""
+"Увядзіце пароль для\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:486
+msgid ""
+"The representation above is an approximate value of this float. The exact stored value is %s which is about "
+"%s"
+msgstr ""
+"Прыведзенае вышэй прадстаўленне з'яўляецца прыблізным значэннем гэтага ліку з коскай.\n"
+"Дакладнае захаванае значэнне роўнае – %s, што складае каля %s"
+
+#: thonny/plugins/pip_gui.py:682
+msgid "Search results"
+msgstr "Вынікі пошуку"
+
+#: thonny/plugins/pip_gui.py:683
+msgid "Searching"
+msgstr "Пошук"
+
+#: thonny/plugins/pip_gui.py:787 thonny/plugins/pip_gui.py:876
+msgid "Installing '%s'"
+msgstr "Усталяванне '%s'"
+
+#: thonny/plugins/pip_gui.py:793
+msgid "Upgrading '%s'"
+msgstr "Абнаўленне '%s'"
+
+#: thonny/plugins/pip_gui.py:800
+msgid "Uninstalling '%s'"
+msgstr "Выдаленне '%s'"
+
+#: thonny/plugins/pip_gui.py:814
+msgid "Installing"
+msgstr "Усталяванне"
+
+#: thonny/plugins/pip_gui.py:1562
+msgid "Package manager is not available for this interpreter"
+msgstr "Кіраўнік пакетаў недаступны для гэтага інтэрпрэтатара"
+
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1576
+msgid "Not supported"
+msgstr "Не падтрымліваецца"
+
+#: thonny/plugins/micropython/pip_gui.py:142 thonny/plugins/pip_gui.py:1581
+msgid "Not available"
+msgstr "Недаступны"
+
+#: thonny/plugins/pip_gui.py:1582
+msgid "You need to stop your program before launching the package manager."
+msgstr "Вам неабходна спыніць вашую праграму перад запускам кіраўніка пакетаў."
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "Адчыніць вылічаныя значэнні ў Інспектары аб'ектаў"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:234
+msgid "Python executable"
+msgstr "Выконваемы файл Python"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:258
+msgid ""
+"NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr ""
+"Заўвага!\n"
+"Кнопка выбору файла можа працаваць некарэктна пры выбары выконваемых файлаў\n"
+"з віртуальнага асяроддзя. У гэтым выпадку абярыце сцэнар 'актываваць' праграму замест\n"
+"інтэрпрэтатара (ці ўвядзіце шлях непасрэдна ў полі)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "Падалены Python 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:313
+msgid "Not connected"
+msgstr "Без злучэння"
+
+#: thonny/plugins/micropython/__init__.py:35
+msgid "MicroPython (local)"
+msgstr "MicroPython (лакальны)"
+
+#: thonny/plugins/micropython/__init__.py:46
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:144
+msgid "no absolute lib directory in sys.path"
+msgstr "у sys.path няма абсалютнага каталогу lib"
+
+#: thonny/plugins/pip_gui.py:71
+msgid "Search on PyPI"
+msgstr "Знайсці на PyPI"
+
+#: thonny/base_file_browser.py:693
+msgid "Open in Thonny's text editor"
+msgstr "Адчыніць у тэкставым сродку праўкі Thonny"
+
+#: thonny/base_file_browser.py:346
+msgid "Storage space on this drive or filesystem"
+msgstr "Месца для захоўвання на гэтым дыску ці файлавай сістэме"
+
+#: thonny/base_file_browser.py:347
+msgid "total space"
+msgstr "агульны памер"
+
+#: thonny/base_file_browser.py:349
+msgid "used space"
+msgstr "ужыта"
+
+#: thonny/base_file_browser.py:350
+msgid "free space"
+msgstr "вольна"
+
+#: thonny/base_file_browser.py:357
+msgid "Storage info"
+msgstr "Інфармацыя аб сховішчы"
+
+#: thonny/plugins/commenting_indenting.py:162
+msgid "Replace tabs with spaces"
+msgstr "Замяніць табуляцыю прабеламі"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "Падсвятліць сімвалы табуляцыі"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "Водступ з знакамі табуляцыі (не рэкамендуецца для Python)"
+
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
+msgid "Name"
+msgstr "Імя"
+
+#: thonny/base_file_browser.py:96
+msgid "Size (bytes)"
+msgstr "Памер (байтаў)"
+
+#: thonny/base_file_browser.py:879
+msgid ""
+"Enter name for new directory under\n"
+"%s"
+msgstr ""
+"Увядзіце імя дла новага каталогу ў\n"
+"%s"
+
+#: thonny/base_file_browser.py:902
+msgid "Nothing selected"
+msgstr "Нічога не абрана"
+
+#: thonny/base_file_browser.py:902
+msgid "Select an item and try again!"
+msgstr "Абярыце элемент і паўтарыце спробу!"
+
+#: thonny/base_file_browser.py:1329
+msgid "Open from %s"
+msgstr "Адчыніць з %s"
+
+#: thonny/base_file_browser.py:1332
+msgid "Save to %s"
+msgstr "Захаваць у %s"
+
+#: thonny/base_file_browser.py:1351
+msgid "File name:"
+msgstr "Імя файлу:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538 thonny/plugins/object_inspector.py:617
+msgid "Value ID"
+msgstr "Ідэнтыфікатар значэння"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23 thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value"
+msgstr "Значэнне"
+
+#: thonny/plugins/backend_config_page.py:272
+msgid "Save password"
+msgstr "Захаваць пароль"
+
+#: thonny/plugins/debugger.py:557
+msgid "Function call at %s"
+msgstr "Выклік функцыі ў %s"
+
+#: thonny/plugins/debugger.py:1006
+msgid "Local variables"
+msgstr "Лакальныя зменныя"
+
+#: thonny/plugins/debugger.py:1038
+msgid "Function"
+msgstr "Функцыя"
+
+#: thonny/plugins/debugger.py:1039
+msgid "Location"
+msgstr "Месцазнаходжанне"
+
+#: thonny/plugins/debugger.py:1115
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "Калі апошняя каманда выклыкала выключэнне, то ў гэтым праглядзе будзе паказаная трасіроўка стэку."
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "Ідэнтыфікатар"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "Дадзеныя"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "Атрыбуты"
+
+#: thonny/plugins/object_inspector.py:537
+msgid "Index"
+msgstr "Індэкс"
+
+#: thonny/plugins/object_inspector.py:615
+msgid "Key ID"
+msgstr "Ідэнтыфікатар ключа"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key"
+msgstr "Ключ"
+
+#: thonny/plugins/variables.py:39
+msgid ""
+"Back to\n"
+"%s"
+msgstr ""
+"Назад да\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:453
+msgid "Port or WebREPL"
+msgstr "Порт ці WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:599
+msgid "Password"
+msgstr "Пароль"
+
+#: thonny/plugins/debugger.py:964
+msgid "Source code"
+msgstr "Зыходны код"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Ужываць файлавыя дыялогі Tk замест Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "Абрярыце, калі файлавыя дыялогавыя вокны з файламі адлюстроўваюцца за галоўным акном"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "Зменныя асяроддзя (па адному КЛЮЧ=ЗНАЧЭННЕ на радок)"
+
+#: thonny/base_file_browser.py:722
+msgid "New file"
+msgstr "Новы файл"
+
+#: thonny/base_file_browser.py:740
+msgid "Rename"
+msgstr "Пераназваць"
+
+#: thonny/base_file_browser.py:928
+msgid "Rename '%s'"
+msgstr "Пераназваць '%s'"
+
+#: thonny/base_file_browser.py:928
+msgid "Enter new name"
+msgstr "Увядзіце новае імя"
+
+#: thonny/base_file_browser.py:1016
+msgid "Paste failed"
+msgstr "Не атрымалася ўставіць"
+
+#: thonny/base_file_browser.py:1016
+msgid "There are conflicting folders"
+msgstr "Ёсць каталогі, якія канфліктуюць"
+
+#: thonny/base_file_browser.py:1144
+msgid "File already exists"
+msgstr "Файл ужл існуе"
+
+#: thonny/base_file_browser.py:1212
+msgid ""
+"If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting "
+"'Configure ... files'."
+msgstr ""
+"Калі гэта тэкставы файл, вы можаце наладзіць яго для адкрыцця ў Thonny, калі пстрыкнуць яго правай кнопкай "
+"мышы і абраць 'Наладзіць ... файлаў'."
+
+#: thonny/editors.py:38
+msgid "Python files"
+msgstr "Файлы Python"
+
+#: thonny/editors.py:123 thonny/editors.py:189
+msgid "<untitled>"
+msgstr "<без назвы>"
+
+#: thonny/editors.py:150
+msgid "File is gone"
+msgstr "Файл выдалены"
+
+#: thonny/editors.py:153
+msgid "Do you want to also close the editor?"
+msgstr "Ці жадаеце вы так сама зачыніць сродак праўкі?"
+
+#: thonny/editors.py:169
+msgid "External modification"
+msgstr "Вонкавая мадыфікацыя"
+
+#: thonny/editors.py:172
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr "Ці жадаеце вы выдаліць бягучы змест сродку праўкі і загрузіць файл нанова з дыску?"
+
+#: thonny/editors.py:588
+msgid "Python files usually have .py extension."
+msgstr "Файлы Python звычайна маюць пашырэнне .py."
+
+#: thonny/editors.py:590
+msgid "Did you mean '%s'?"
+msgstr "Ці мелі вы на ўвазе '%s'?"
+
+#: thonny/editors.py:759
+msgid "Move / rename..."
+msgstr "Перамясціць / пераназваць..."
+
+#: thonny/editors.py:768
+msgid "Go to line..."
+msgstr "Перайсці да радка..."
+
+#: thonny/editors.py:1010
+msgid "Line number"
+msgstr "Нумар радка"
+
+#: thonny/editors.py:1156
+msgid "Do you want to save files before closing?"
+msgstr "Ці жадаеце вы захаваць файлы перад закрыццём?"
+
+#: thonny/editors.py:1158
+msgid "Do you want to save file before closing?"
+msgstr "Ці жадаеце вы захаваць файл перад закрыццём?"
+
+#: thonny/editors.py:1161
+msgid "Save On Close"
+msgstr "Захаваць пры закрыцці"
+
+#: thonny/misc_utils.py:539
+msgid "Command not available"
+msgstr "Каманда недаступная"
+
+#: thonny/misc_utils.py:540
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "Гэта каманда недаступная, калі Thonny запускаецца праз Flatpak"
+
+#: thonny/workbench.py:700 thonny/workbench.py:799
+msgid "Support Ukraine"
+msgstr "Падтрымаць Украіну"
+
+#: thonny/plugins/backend_config_page.py:90
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Які тып інтэрпрэтатара варта ўжываць Thonny для запуску вашага коду?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "Паказаць інфармацыю пра наладу"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "Аўтаматычна паказваць інфармацыю аб наладзе пасля ўводу '('"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "Аўтаматычна прапанаваць варыянты завяршэння пры ўводзе тэксту"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "Аўтаматычна паказваць дакументацыю для варыянтаў завяршэння"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "Запытаць варыянты завяршэння з дапамогай клавішы Tab ў сродках праўкі"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "Запытаць варыянты завяршэння з дапамогай клавішы Tab ў абалонцы"
+
+#: thonny/editors.py:213 thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "Праблема"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "Не атрымалася знайсці вызначэнне"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "Ачысціць абалонку перад запускам новага працэсу (Выканаць, Адладка, Спыніць/Запусціць нанова, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:196
+msgid "Thonny's Python"
+msgstr "Python у Thonny"
+
+#: thonny/plugins/micropython/mp_front.py:496
+msgid "Interrupt working program on connect"
+msgstr "Перапыніць працу праграмы пры злучэнні"
+
+#: thonny/plugins/micropython/mp_front.py:504
+msgid "Synchronize device's real time clock"
+msgstr "Сінхранізаваць гадзіннік рэальнага часу прылады"
+
+#: thonny/plugins/micropython/mp_front.py:510
+msgid "Use local time in real time clock"
+msgstr "Ужываць мясцовы час у гадзінніку рэальнага часу"
+
+#: thonny/plugins/micropython/mp_front.py:516
+msgid "Restart interpreter before running a script"
+msgstr "Запусціць нанова інтэрпрэтатар перад запускам сцэнара"
+
+#: thonny/plugins/micropython/pip_gui.py:26
+msgid ""
+"This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr ""
+"Гэтае не падобна на пакет MicroPython/CircuitPython. \n"
+"Ці ўпэўненыя вы, што жадаеце яго ўсталяваць?"
+
+#: thonny/base_file_browser.py:853
+msgid "Moving to Trash"
+msgstr "Перамяшчэнне ў сметнік"
+
+#: thonny/base_file_browser.py:854
+msgid "Move %s to Trash?"
+msgstr "Перамясціць %s у сметнік?"
+
+#: thonny/base_file_browser.py:861
+msgid "Moving %s to Trash"
+msgstr "Перамяшчэнне %s у сметнік"
+
+#: thonny/base_file_browser.py:666
+msgid "Open in default external app"
+msgstr "Адчыніць у першапачатковай вонкавай праграме"
+
+#: thonny/base_file_browser.py:1210
+msgid "Opening remote files in external app is not supported."
+msgstr "Адкрыццё падаленых файлаў ў вонкавай праграме не падтрымліваецца."
+
+#: thonny/base_file_browser.py:1217
+msgid ""
+"If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "Калі файл трэба адчыніць у вонкавай праграме, то спампуйце яго ў лакальны каталог і адчыніце адтуль!"
+
+#: thonny/editors.py:151
+msgid "Looks like '%s' was deleted or moved."
+msgstr "Падобна на тое, што '%s' быў выдалены ці перамешчаны."
+
+#: thonny/editors.py:170
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "Падобна на тое, што '%s' быў зменены па-за сродкам праўкі."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:256
+msgid "NB! Thonny only supports Python %s and later"
+msgstr ""
+"Заўвага!\n"
+"Thonny падтрымлівае толькі Python %s і пазнейшыя версіі"
+
+#: thonny/editors.py:1010
+msgid "Go to line"
+msgstr "Перайсці да радка"
+
+#: thonny/workbench.py:703
+msgid "Support"
+msgstr "Падтрымка"
+
+#: thonny/editors.py:399 thonny/editors.py:414
+msgid "Could not save"
+msgstr "Не атрымалася захаваць"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "Папярэджанне"
+
+#: thonny/plugins/general_config_page.py:136
+msgid ""
+"If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr ""
+"Калі вы складаеце значэнне зменнай асяроддзя ў двукоссі, двукоссі будуць часткай значэння.\n"
+"Ці хацелі вы гэтага?"
+
+#: thonny/workbench.py:870
+msgid "Install MicroPython"
+msgstr "Усталяваць MicroPython"
+
+#: thonny/workbench.py:874
+msgid "Install CircuitPython"
+msgstr "Усталяваць CircuitPython"
+
+#: thonny/plugins/backend_config_page.py:210
+msgid "Make uploaded shebang scripts executable"
+msgstr "Зрабіць загружаныя сцэнары shebang як выконваемыя"
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr "Зрабіць захаваныя сцэнары shebang як выконваемыя"
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr "Актываваць віртуальнае асяроддзе"
+
+#: thonny/plugins/micropython/pip_gui.py:119 thonny/plugins/pip_gui.py:426
+msgid "Target"
+msgstr "Мэтавы каталог"
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr "Візуалізаваць бягучы сцэнар у Python Tutor"
+
+#: thonny/plugins/todo_view.py:43
+msgid "Line"
+msgstr "Радок"
+
+#: thonny/plugins/todo_view.py:44
+msgid "Info"
+msgstr "Інфармацыя"
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr "Радок з пазнакай #todo не знойдзены"
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr "TODO"
+
+#: thonny/plugins/circuitpython/cirpy_front.py:113 thonny/plugins/micropython/mp_front.py:550
+msgid "Install or update %s"
+msgstr "Усталяваць ці абнавіць %s"
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr "Лакальны Python 3"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:266
+msgid ""
+"You can activate an existing virtual environment also via the right-click context menu in the file "
+"navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr ""
+"Вы таксама можаце актываваць існуючае віртуальнае асяроддзе з дапамогай кантэкстнага меню правай кнопкі мышы "
+"ў навігацыі па файлах пры выбары каталога віртуальнага асяроддзя ці файла 'pyveng.cfg' унутры яе."
+
+#: thonny/plugins/ev3/__init__.py:72
+msgid "Preparations (skip the VS Code part)"
+msgstr "Падрыхтоўка (прапусціць частку VS Code)"
+
+#: thonny/plugins/ev3/__init__.py:78
+msgid "Default password"
+msgstr "Першапачатковы пароль"
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr "Інфармацыя"
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr "Для адладкі праграму спачатку неабходна захаваць."
+
+#: thonny/editors.py:213
+msgid "%s doesn't look like a text file"
+msgstr "%s не падобны на тэкставы файл"
+
+#: thonny/editors.py:219
+msgid "Problem loading file"
+msgstr "Праблема з загрузкай файлу"
+
+#: thonny/editors.py:220
+msgid ""
+"This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr ""
+"Надобна на тое, што ў гэтага файла пораблемы з кадоўкай.\n"
+"\n"
+"Пераканайцеся, што ён у UTF-8 ці змяшчае падказку абправільнай кадоўцы."
+
+#: thonny/editors.py:295
+msgid "File is open"
+msgstr "Файл адчынены"
+
+#: thonny/editors.py:296
+msgid ""
+"This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr ""
+"Гэты файл ужо адчынены ў Thonny.\n"
+"\n"
+"Калі вы жадаеце захаваць з гэтым іменем,\n"
+"спачатку зачыніце сродак праўкі!"
+
+#: thonny/editors.py:349
+msgid "Permission Error"
+msgstr "Памылка дазволу"
+
+#: thonny/editors.py:350
+msgid "Looks like this file or folder is not writable."
+msgstr "Падобна на тое, што файл ці каталог недаступны да запісу."
+
+#: thonny/editors.py:414
+msgid "Back-end is not ready"
+msgstr "Серверная частка не гатовая"
+
+#: thonny/editors.py:419
+msgid "Where to save to?"
+msgstr "Куды захаваць?"
+
+#: thonny/editors.py:490
+msgid "Potential problem"
+msgstr "Магчымая праблема"
+
+#: thonny/editors.py:491
+msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
+msgstr "Калі вы назавеце свой сцэнар '%s', вы не зможаце імпартаваць бібліятэчны модуль з іменем '%s'."
+
+#: thonny/editors.py:497
+msgid "Do you still want to use this name for your script?"
+msgstr "Ці сапраўды вы жадаеце ўжываць гэтую назву для вашага сцэнара?"
+
+#: thonny/editors.py:1053
+msgid ""
+"Got permission error when trying to load\n"
+"%s"
+msgstr ""
+"Атрымана памылка дазволу пры спробе загрузкі\n"
+"%s"
+
+#: thonny/editors.py:1055
+msgid "Try opening it with File => Open."
+msgstr "Паспрабуйце адчыніць яго з дапамогай каманды Файл → Адчыніць."
+
+#: thonny/editors.py:1057
+msgid "Permission error"
+msgstr "Памылка дазволу"
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr "Дазволіць выкананне сцэнараў без назвы"
+
+#: thonny/plugins/pip_gui.py:600
+msgid "License"
+msgstr "Ліцэнзія"
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr "Папярэдзіць, калі карыстальніцкі модуль зацяняе бібліятэчны модуль"
+
+#: thonny/plugins/micropython/pip_gui.py:65
+msgid "Search micropython-lib and PyPI"
+msgstr "Знайсці micropython-lib і PyPI"

@@ -10,6 +10,7 @@ BASE_LANGUAGE_NAME = "English (US) [default]"
 # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
 LANGUAGES_DICT = {
+    "be_BY": "Беларуская",
     "ca_ES": "Català",
     "cs_CZ": "Čeština [BETA]",
     "de_DE": "Deutsch",
