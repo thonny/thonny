@@ -404,6 +404,10 @@ class PipDialog(CommonDialog, ABC):
             "end",
             " "
             + tr("to locate requirements.txt file and install the packages specified in it.")
+            + "\n"
+            + tr(
+                "You can also install from a requirements.txt file via the right-click context menu in the file navigation."
+            )
             + "\n\n",
         )
 

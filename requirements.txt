@@ -6,5 +6,8 @@ mypy>=0.761
 asttokens>=2.0
 Send2Trash>=1.5
 
+black
+flake8
+
 # wheel is required by pipkin, which is currently vendored
 wheel

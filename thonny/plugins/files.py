@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import pathlib
 import tkinter as tk
@@ -25,7 +26,7 @@ from thonny.common import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
-from thonny.running import InlineCommandDialog, construct_cd_command
+from thonny.running import InlineCommandDialog, construct_cd_command, WINDOWS_EXE
 from thonny.ui_utils import lookup_style_option
 
 logger = getLogger(__name__)
@@ -130,6 +131,19 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         super().__init__(master)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
+        self.ctxdisp = FileBrowserContextDispatcher(self)
+        self.add_ctx_handler(VirtualEnvContextHandler())
+        self.add_ctx_handler(ShellScriptContextHandler())
+        self.add_ctx_handler(PythonShellScriptContextHandler())
+        self.add_ctx_handler(RequirementsFreezeContextHandler())
+        self.add_ctx_handler(RequirementsInstallerContextHandler())
+        self.add_ctx_handler(UnittestContextHandler())
+        self.add_ctx_handler(BlackFormatContextHandler())
+        self.add_ctx_handler(Flake8ContextHandler())
+
+    def add_ctx_handler(self, handler):
+        self.ctxdisp.add_handler(handler)
+
     def is_active_browser(self):
         return True
 
@@ -219,18 +233,113 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         self.menu.add_command(label=tr("Upload to %s") % target_dir_desc, command=_upload)
 
     def add_first_menu_items(self, context):
-        if self.check_for_venv():
-            self.menu.add_command(
-                label=tr("Activate virtual environment"), command=lambda: self.do_activate_venv()
-            )
-            self.menu.add_separator()
+        if self.get_selected_path():
+            self.ctxdisp.add_first_menu_items()
 
         super().add_first_menu_items(context)
 
     def add_middle_menu_items(self, context):
+        if self.get_selected_path():
+            self.ctxdisp.add_middle_menu_items()
+
         self.check_add_upload_command()
         super().add_middle_menu_items(context)
 
+
+class FileBrowserContextDispatcher(object):
+    def __init__(self, filebrowser):
+        self.filebrowser = filebrowser
+        self.ctxhandlers = []
+
+    def add_handler(self, handler):
+        handler.disp = self
+        self.ctxhandlers.append(handler)
+
+    def add_first_menu_items(self):
+        assert self.filebrowser.get_selected_path()
+        for handler in self.ctxhandlers:
+            handler.add_first_menu_items()
+
+    def add_middle_menu_items(self):
+        assert self.filebrowser.get_selected_path()
+        for handler in self.ctxhandlers:
+            handler.add_middle_menu_items()
+
+
+class FileBrowserContextHandler(object):
+    def __init__(self):
+        # this is set when adding to outer FileBrowserContextDispatcher
+        self.disp = None
+
+    # helper
+
+    def get_browser(self):
+        assert self.disp
+        return self.disp.filebrowser
+
+    def get_active_local_dir(self):
+        return self.get_browser().get_active_directory()
+
+    def get_selected_path(self):
+        return self.get_browser().get_selected_path()
+
+    def get_selected_paths(self):
+        selection = self.get_browser().get_selection_info(True)
+        if selection:
+            return selection["paths"]
+        return []
+
+    def get_selected_name(self):
+        return self.get_browser().get_selected_name()
+
+    def get_menu(self):
+        return self.get_browser().menu
+
+    def add_separator(self):
+        self.get_menu().add_separator()
+
+    def add_command(self, label, command):
+        self.get_menu().add_command(label=label, command=command)
+
+    # todo move to e.g. runner ?
+    def get_backend_python(self):
+        if running_on_windows():
+            return WINDOWS_EXE
+        else:
+            # todo config / global func
+            # python or python3
+            return "python3"
+
+    def check_python_or_module(self, fnam):
+        nam = os.path.basename(fnam)
+        path = self.get_selected_path()
+        if os.path.isdir(path):
+            return os.path.exists(os.path.join(path, "__init__.py"))
+        # only for python files
+        return nam.lower().endswith(".py")
+
+    #
+
+    def cd_and_run_script(self, path, cmdline):
+        if path:
+            get_shell().submit_magic_command(["%cd", path])
+
+        def _run_code():
+            get_shell().submit_magic_command(cmdline)
+
+        # run after short delay
+        self.get_browser().after(112, _run_code)
+
+    # overwrite this
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        pass
+
+
+class VirtualEnvContextHandler(FileBrowserContextHandler):
     def _get_venv_path(self):
         path = self.get_selected_path()
         if not path:
@@ -272,6 +381,302 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             get_runner().cmd_stop_restart()
         else:
             messagebox.showerror("Error", f"Could not find {backend_python!r}", master=self)
+
+    def do_util_install_venv(self, method):
+        venv_path = self._get_venv_path()
+
+        backend_python = self.get_backend_python()
+        cmdline = " ".join([f"!{backend_python}", "-m", "venv", method, venv_path])
+        path = os.path.dirname(venv_path)
+
+        self.cd_and_run_script(path, cmdline)
+
+    def do_util_install_clear_venv(self, method=""):
+        venv_path = self._get_venv_path()
+
+        # use python from thonny
+        backend_python = sys.executable
+        cmdline = " ".join([f"!{backend_python}", "-m", "venv", "--clear", method, venv_path])
+        path = os.path.dirname(venv_path)
+
+        self.cd_and_run_script(path, cmdline)
+
+    def add_first_menu_items(self):
+        if self.check_for_venv():
+            self.add_command(
+                label=tr("Activate virtual environment"), command=lambda: self.do_activate_venv()
+            )
+            self.add_separator()
+
+    def add_middle_menu_items(self):
+        if self.check_for_venv():
+            self.add_command(
+                label=tr("Upgrade virtual environment"),
+                command=lambda: self.do_util_install_venv("--upgrade"),
+            )
+            self.add_command(
+                label=tr("Clear and install virtual environment (copy)"),
+                command=lambda: self.do_util_install_clear_venv("--copies"),
+            )
+            self.add_command(
+                label=tr("Clear and install virtual environment (symlink)"),
+                command=lambda: self.do_util_install_clear_venv("--symlinks"),
+            )
+            self.add_separator()
+
+
+class ShellScriptContextHandler(FileBrowserContextHandler):
+    def get_supported_extensions(self):
+        if running_on_windows():
+            return [".bat"]
+        else:
+            return [".sh"]
+
+    def check_shell_ext(self, fnam):
+        base, ext = os.path.splitext(fnam)
+        exts = self.get_supported_extensions()
+        return ext.lower() in exts
+
+    def get_script_runtime(self, fnam):
+        return "!" + os.path.join(".", fnam)
+
+    def do_run_script(self, param=None, cd_path=True):
+        sel_fnam = self.get_selected_path()
+
+        path = os.path.dirname(sel_fnam) if cd_path else None
+        fnam = os.path.basename(sel_fnam)
+        runtime = self.get_script_runtime(fnam)
+
+        # or use this
+        # -> from thonny.misc_utils import construct_cmd_line
+        cmdline = " ".join([runtime, param if param else ""])
+
+        self.cd_and_run_script(path, cmdline)
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_shell_ext(fnam):
+            self.add_command(label=tr("Run script in shell"), command=lambda: self.do_run_script())
+            self.add_separator()
+
+
+class PythonShellScriptContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        param = ""
+        if self.check_python_module(self.get_selected_path()):
+            param = "-m"
+        backend_python = self.get_backend_python()
+        return " ".join([f"!{backend_python}", param, fnam])
+
+    def check_python_ext(self, fnam):
+        _, ext = os.path.splitext(fnam)
+        return ext.lower() == ".py"
+
+    def check_python_module(self, fnam):
+        if os.path.isdir(fnam):
+            return os.path.exists(os.path.join(fnam, "__main__.py"))
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        found = False
+        if self.check_python_ext(fnam):
+            self.add_command(
+                label=tr("Run python script in shell"), command=lambda: self.do_run_script()
+            )
+            found = True
+        elif self.check_python_module(fnam):
+            self.add_command(
+                label=tr("Run python module in shell"), command=lambda: self.do_run_script()
+            )
+            found = True
+        if found:
+            self.add_separator()
+
+
+class RequirementsInstallerContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+        return " ".join([f"!{backend_python}", "-m", "pip", "install", "-r", fnam])
+
+    def check_req_txt(self, fnam):
+        nam = os.path.basename(fnam)
+        return nam.lower() == "requirements.txt"
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_req_txt(fnam):
+            self.add_command(
+                label=tr("Install requirements packages"), command=lambda: self.do_run_script()
+            )
+            self.add_command(
+                label=tr("Upgrade requirements packages"), command=lambda: self.do_run_script("-U")
+            )
+            self.add_command(
+                label=tr("Force reinstall requirements packages"),
+                command=lambda: self.do_run_script("--force-reinstall"),
+            )
+            self.add_separator()
+
+
+class RequirementsFreezeContextHandler(ShellScriptContextHandler):
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        # pip adds addtional packages automatically at the end
+        # todo
+        # document somewhere that the additional listed packages
+        # are not necessarily required for running the project
+        return " ".join([f"!{backend_python}", "-m", "pip", "freeze", "-r", fnam])
+
+    def check_req_txt(self, fnam):
+        nam = os.path.basename(fnam)
+        return nam.lower() == "requirements.txt"
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_req_txt(fnam):
+            self.add_command(
+                label=tr("Print freeze requirements packages"), command=lambda: self.do_run_script()
+            )
+
+
+class UnittestContextHandler(ShellScriptContextHandler):
+    def do_run_script(self, param=None, cd_path=True):
+        return super().do_run_script(param=param, cd_path=False)
+
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        discover_ = ""
+        path = self.get_selected_path()
+        if os.path.isdir(path):
+            discover_ = "discover -s"
+        else:
+            fnam, ext = os.path.splitext(fnam)
+            basetest = os.path.split(os.path.dirname(path))[-1]
+            fnam = basetest + "." + fnam
+
+        return " ".join([f"!{backend_python}", "-m", "unittest", discover_, fnam])
+
+    def check_unittest(self, fnam):
+        nam = os.path.basename(fnam)
+        # check if name contains "test" as pattern
+        # also test subfolder need that pattern!!!
+        test_nam = nam.lower().find("test") >= 0
+        if test_nam:
+            path = self.get_selected_path()
+            if os.path.isdir(path):
+                return True
+            # only for python files
+            return nam.lower().endswith(".py")
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        if self.check_unittest(fnam):
+            self.add_command(label=tr("Run unittest"), command=lambda: self.do_run_script())
+            self.add_command(
+                label=tr("Run unittest (verbose)"), command=lambda: self.do_run_script("-v")
+            )
+            self.add_separator()
+
+
+class BlackFormatContextHandler(ShellScriptContextHandler):
+
+    # todo
+    # have sort of hyperlinks in output to enable navigation to source code line
+
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+
+        cur = self.get_active_local_dir()
+        cut_len = len(cur) + 1
+
+        # collect all
+        # todo ??? restrict to folder an .py only ???
+        sel = map(lambda x: x[cut_len:], self.get_selected_paths())
+        files = list(map(lambda x: f"'{x}'", sel))
+
+        backend_python = self.get_backend_python()
+
+        # since there is no workspace folder in thonny
+        # this might be confusing because the config is picked
+        # pedening on the place of call (on an expanded folder or active folder)
+        # todo deps -> workspace
+        CONFIG = ""
+        if os.path.exists(os.path.join(cur, "black.cfg")):
+            CONFIG = "--config 'black.cfg'"
+
+        return " ".join([f"!{backend_python}", "-m", "black", CONFIG, *files])
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        # this does a relaxed checking since a folder might contain also other files ...
+        # todo ???
+        if self.check_python_or_module(fnam):
+            self.add_command(
+                label=tr("Format with black PEP08"),
+                command=lambda: self.do_run_script(cd_path=False),
+            )
+            self.add_separator()
+
+
+class Flake8ContextHandler(ShellScriptContextHandler):
+
+    # todo
+    # have sort of hyperlinks in output to enable navigation to source code line
+
+    def get_script_runtime(self, fnam):
+        nam = os.path.basename(fnam)
+        backend_python = self.get_backend_python()
+
+        cur = self.get_active_local_dir()
+        cut_len = len(cur) + 1
+
+        # collect all
+        # todo ??? restrict to folder an .py only ???
+        sel = map(lambda x: x[cut_len:], self.get_selected_paths())
+        files = list(map(lambda x: f"'{x}'", sel))
+
+        # since there is no workspace folder in thonny
+        # this might be confusing because the config is picked
+        # pedening on the place of call (on an expanded folder or active folder)
+        # todo deps -> workspace
+        CONFIG = ""
+        if os.path.exists(os.path.join(cur, "flake8.cfg")):
+            CONFIG = "--config 'flake8.cfg'"
+
+        return " ".join([f"!{backend_python}", "-m", "flake8", CONFIG, *files])
+
+    def add_first_menu_items(self):
+        pass
+
+    def add_middle_menu_items(self):
+        fnam = self.get_selected_path()
+        # this does a relaxed checking since a folder might contain also other files ...
+        # todo ???
+        if self.check_python_or_module(fnam):
+            self.add_command(
+                label=tr("Run flake8"), command=lambda: self.do_run_script(cd_path=False)
+            )
+            self.add_separator()
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
