@@ -552,6 +552,9 @@ class RequirementsFreezeContextHandler(ShellScriptContextHandler):
 
 
 class UnittestContextHandler(ShellScriptContextHandler):
+    def do_run_script(self, param=None, cd_path=True):
+        return super().do_run_script(param=param, cd_path=False)
+
     def get_script_runtime(self, fnam):
         nam = os.path.basename(fnam)
         backend_python = self.get_backend_python()
@@ -560,6 +563,10 @@ class UnittestContextHandler(ShellScriptContextHandler):
         path = self.get_selected_path()
         if os.path.isdir(path):
             discover_ = "discover -s"
+        else:
+            fnam, ext = os.path.splitext(fnam)
+            basetest = os.path.split(os.path.dirname(path))[-1]
+            fnam = basetest + "." + fnam
 
         return " ".join([f"!{backend_python}", "-m", "unittest", discover_, fnam])
 
