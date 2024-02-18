@@ -1,6 +1,8 @@
+import atexit
 import copy
 import json
 import logging
+import os.path
 import re
 from html.parser import HTMLParser
 from typing import Set, Dict, List, Union, Optional, Any
@@ -11,6 +13,22 @@ FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/53
 
 VARIANT_KEY_ORDER = ["vendor", "model", "family", "title", "info_url", "downloads", "popular"]
 
+PAGE_CACHE_PATH = "page_cache.json"
+
+def load_page_cache():
+    if os.path.exists(PAGE_CACHE_PATH):
+        with open(PAGE_CACHE_PATH, "rt", encoding="utf-8") as fp:
+            return json.load(fp)
+    else:
+        return {}
+
+_page_cache = load_page_cache()
+
+def save_page_cache():
+    with open(PAGE_CACHE_PATH, "wt", encoding="utf-8") as fp:
+        json.dump(_page_cache, fp)
+
+atexit.register(save_page_cache)
 
 def re_escape_model_name(name: str) -> str:
     return re.escape(name).replace("\\ ", " ").replace("\\-", "-").replace("\\_", "_")
@@ -58,20 +76,20 @@ def find_download_links(
     result = stables + unstables
     for item in result:
         url = item["url"]
-        response = requests.head(url)
-        if response.status_code not in [200, 302]:
+        status_code = get_url_status_code(url)
+        if status_code not in [200, 302]:
             #print(f"Got {response.status_code} when downloading {url}")
-            raise RuntimeError(f"Got {response.status_code} when downloading {url}")
+            raise RuntimeError(f"Got {status_code} when downloading {url}")
 
     return stables + unstables
 
 
 def add_download_link_if_exists(links: List[Dict[str, str]], link: str, version: str) -> None:
-    response = requests.head(link)
-    if response.status_code in [200, 302]:
+    status_code = get_url_status_code(link)
+    if status_code in [200, 302]:
         links.append({"version": version, "url": link})
     else:
-        print(f"Could not download {link}, status: {response.status_code}")
+        print(f"Could not download {link}, status: {status_code}")
 
 
 def get_attr_value(attrs, name):
@@ -92,7 +110,12 @@ class FileLinksParser(HTMLParser):
             self.links.append(get_attr_value(attrs, "href"))
 
 
-_page_cache = {}
+def get_url_status_code(url):
+    if "STATUS_CODES" not in _page_cache:
+        _page_cache["STATUS_CODES"] = {}
+    if url not in _page_cache["STATUS_CODES"]:
+        _page_cache["STATUS_CODES"][url] = requests.head(url).status_code
+    return _page_cache["STATUS_CODES"][url]
 
 
 def read_page(url) -> str:
