@@ -82,7 +82,9 @@ class BaseEditor(ttk.Frame):
         self._code_view.set_line_length_margin(
             get_workbench().get_option("view.recommended_line_length")
         )
-        self._code_view.text.update_tabs()
+        self._code_view.text.update_tab_stops()
+        self._code_view.text.indent_width = get_workbench().get_option("edit.indent_width")
+        self._code_view.text.tab_width = get_workbench().get_option("edit.tab_width")
         self._code_view.text.event_generate("<<UpdateAppearance>>")
         self._code_view.grid_main_widgets()
 
@@ -416,6 +418,8 @@ class Editor(BaseEditor):
                 dialog_title=tr("Saving"),
             )
 
+                result = {"error": "Unknown error"}
+
             if "error" in result:
                 messagebox.showerror(tr("Could not save"), str(result["error"]))
                 return False
@@ -626,6 +630,8 @@ class EditorNotebook(CustomNotebook):
         get_workbench().set_default("view.recommended_line_length", 0)
         get_workbench().set_default("edit.indent_with_tabs", False)
         get_workbench().set_default("edit.auto_refresh_saved_files", True)
+        get_workbench().set_default("edit.indent_width", 4)
+        get_workbench().set_default("edit.tab_width", 4)
         get_workbench().set_default("file.make_saved_shebang_scripts_executable", True)
 
         self._recent_menu = tk.Menu(

@@ -208,7 +208,16 @@ class EnhancedText(TweakableText):
     Most of the code is adapted from idlelib.EditorWindow.
     """
 
-    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
+    def __init__(
+        self,
+        master,
+        indent_width: int = 4,
+        tab_width: int = 4,
+        style="Text",
+        tag_current_line=False,
+        cnf={},
+        **kw,
+    ):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
         kw["autoseparators"] = False
@@ -216,8 +225,8 @@ class EnhancedText(TweakableText):
         self._original_options = kw.copy()
 
         super().__init__(master=master, cnf=cnf, **kw)
-        self.tabwidth = 4
-        self.indent_width = 4
+        self.tab_width = tab_width
+        self.indent_width = indent_width
 
         self._last_event_kind = None
         self._last_key_time = None
@@ -410,7 +419,7 @@ class EnhancedText(TweakableText):
 
         # Ick.  It may require *inserting* spaces if we back up over a
         # tab character!  This is written to be clear, not fast.
-        have = len(chars.expandtabs(self.tabwidth))
+        have = len(chars.expandtabs(self.tab_width))
         assert have > 0
         want = ((have - 1) // self.indent_width) * self.indent_width
         # Debug prompt is multilined....
@@ -424,7 +433,7 @@ class EnhancedText(TweakableText):
                 break
             chars = chars[:-1]
             ncharsdeleted = ncharsdeleted + 1
-            have = len(chars.expandtabs(self.tabwidth))
+            have = len(chars.expandtabs(self.tab_width))
             if have <= want or chars[-1] not in " \t":
                 break
         text.delete("insert-%dc" % ncharsdeleted, "insert")
@@ -459,7 +468,7 @@ class EnhancedText(TweakableText):
             self.delete(first, last)
             self.mark_set("insert", first)
         prefix = self.get("insert linestart", "insert")
-        raw, effective = classifyws(prefix, self.tabwidth)
+        raw, effective = classifyws(prefix, self.tab_width)
         if raw == len(prefix):
             # only whitespace to the left
             self._reindent_to(effective + self.indent_width)
@@ -468,7 +477,7 @@ class EnhancedText(TweakableText):
             if self.should_indent_with_tabs():
                 pad = "\t"
             else:
-                effective = len(prefix.expandtabs(self.tabwidth))
+                effective = len(prefix.expandtabs(self.tab_width))
                 n = self.indent_width
                 pad = " " * (n - effective % n)
             self.insert("insert", pad)
@@ -605,7 +614,7 @@ class EnhancedText(TweakableText):
         for pos in range(len(lines)):
             line = lines[pos]
             if line:
-                raw, effective = classifyws(line, self.tabwidth)
+                raw, effective = classifyws(line, self.tab_width)
                 if increase:
                     effective = effective + self.indent_width
                 else:
@@ -688,7 +697,7 @@ class EnhancedText(TweakableText):
     def _make_blanks(self, n):
         # Make string that displays as n leading blanks.
         if self.should_indent_with_tabs():
-            ntabs, nspaces = divmod(n, self.tabwidth)
+            ntabs, nspaces = divmod(n, self.tab_width)
             return "\t" * ntabs + " " * nspaces
         else:
             return " " * n
@@ -798,6 +807,8 @@ class TextFrame(ttk.Frame):
     def __init__(
         self,
         master,
+        indent_width: int = 4,
+        tab_width: int = 4,
         text_class=EnhancedText,
         horizontal_scrollbar=True,
         vertical_scrollbar=True,
@@ -896,6 +907,8 @@ class EnhancedTextFrame(TextFrame):
     def __init__(
         self,
         master,
+        indent_width: int = 4,
+        tab_width: int = 4,
         line_numbers=False,
         line_length_margin=0,
         first_line_number=1,
@@ -914,6 +927,8 @@ class EnhancedTextFrame(TextFrame):
 
         super().__init__(
             master,
+            indent_width=indent_width,
+            tab_width=tab_width,
             text_class=text_class,
             horizontal_scrollbar=horizontal_scrollbar,
             vertical_scrollbar=vertical_scrollbar,
@@ -1194,7 +1209,7 @@ def get_text_font(text):
         return font
 
 
-def classifyws(s, tabwidth):
+def classifyws(s, tab_width):
     raw = effective = 0
     for ch in s:
         if ch == " ":
@@ -1202,7 +1217,7 @@ def classifyws(s, tabwidth):
             effective = effective + 1
         elif ch == "\t":
             raw = raw + 1
-            effective = (effective // tabwidth + 1) * tabwidth
+            effective = (effective // tab_width + 1) * tab_width
         else:
             break
     return raw, effective

@@ -541,8 +541,12 @@ class ReplayerCodeView(ttk.Frame):
         self.vbar.grid(row=0, column=2, sticky=tk.NSEW)
         self.hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
         self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+        indent_width = get_workbench().get_option("edit.indent_width")
+        tab_width = get_workbench().get_option("edit.tab_width")
         self.text = codeview.SyntaxText(
             self,
+            indent_width=indent_width,
+            tab_width=tab_width,
             yscrollcommand=self.vbar.set,
             xscrollcommand=self.hbar.set,
             borderwidth=0,

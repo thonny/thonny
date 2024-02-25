@@ -799,9 +799,24 @@ def set_zoomed(toplevel, value):
 
 
 class EnhancedTextWithLogging(tktextext.EnhancedText):
-    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
+    def __init__(
+        self,
+        master,
+        indent_width: int,
+        tab_width: int,
+        style="Text",
+        tag_current_line=False,
+        cnf={},
+        **kw,
+    ):
         super().__init__(
-            master=master, style=style, tag_current_line=tag_current_line, cnf=cnf, **kw
+            master=master,
+            indent_width=indent_width,
+            tab_width=tab_width,
+            style=style,
+            tag_current_line=tag_current_line,
+            cnf=cnf,
+            **kw,
         )
 
         self._last_event_changed_line_count = False
@@ -2545,6 +2560,20 @@ def open_with_default_app(path):
         subprocess.run(["open", path])
     else:
         subprocess.run(["xdg-open", path])
+
+
+def compute_tab_stops(tab_width_in_chars: int, font: tk.font.Font, offset_px=0) -> List[int]:
+    tab_pixels = font.measure("n" * tab_width_in_chars)
+
+    tabs = []
+    if offset_px > 0:
+        tabs.append(offset_px)
+
+    for _ in range(20):
+        offset_px += tab_pixels
+        tabs.append(offset_px)
+
+    return tabs
 
 
 if __name__ == "__main__":

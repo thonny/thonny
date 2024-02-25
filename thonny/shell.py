@@ -30,6 +30,7 @@ from thonny.ui_utils import (
     CommonDialog,
     EnhancedTextWithLogging,
     TextMenu,
+    compute_tab_stops,
     create_tooltip,
     ems_to_pixels,
     get_beam_cursor,
@@ -108,6 +109,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().set_default("shell.tty_mode", True)
         get_workbench().set_default("shell.auto_inspect_values", True)
         get_workbench().set_default("shell.clear_for_new_process", True)
+        get_workbench().set_default("shell.io_tab_width", 8)
 
         self.text = ShellText(
             main_frame,
@@ -287,8 +289,10 @@ class ShellView(tk.PanedWindow):
         if self.plotter is not None and self.plotter.winfo_ismapped():
             self.plotter.update_plot()
 
-    def update_tabs(self):
-        self.text.update_tabs()
+    def update_appearance(self):
+        self.text.update_tab_stops()
+        self.text.indent_width = get_workbench().get_option("edit.indent_width")
+        self.text.tab_width = get_workbench().get_option("edit.tab_width")
 
     def resize_plotter(self):
         if len(self.panes()) > 1 and self.text.winfo_width() > 5:
@@ -334,7 +338,9 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._last_main_file = None
         kw["tabstyle"] = "wordprocessor"
         kw["cursor"] = get_beam_cursor()
-        super().__init__(master, **kw)
+        indent_width = get_workbench().get_option("edit.indent_width")
+        tab_width = get_workbench().get_option("edit.tab_width")
+        super().__init__(master, indent_width=indent_width, tab_width=tab_width, **kw)
 
         self._command_history = (
             []
@@ -421,7 +427,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.active_extra_tags = []
 
-        self.update_tabs()
+        self.update_tab_stops()
 
         self.tag_raise("io_hyperlink")
         self.tag_raise("stacktrace_hyperlink")
@@ -918,17 +924,20 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         if focused_view is not None:
             focused_view.focus()
 
-    def update_tabs(self):
-        tab_chars = 8
-        tab_pixels = tk.font.nametofont("IOFont").measure("n" * tab_chars)
+    def update_tab_stops(self):
+        # Code tabs
+        code_tab_chars = get_workbench().get_option("edit.tab_width")
+        code_font = tk.font.nametofont(self["font"])
+        code_tab_stops = compute_tab_stops(code_tab_chars, code_font, self.io_indent)
+        logger.debug("Using following tab stops for code: %r", code_tab_stops)
+        self.configure(tabs=tuple(code_tab_stops), tabstyle="wordprocessor")
 
-        offset = self.io_indent
-        tabs = [offset]
-        for _ in range(20):
-            offset += tab_pixels
-            tabs.append(offset)
-
-        self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
+        # IO tabs
+        io_tab_chars = get_workbench().get_option("shell.io_tab_width")
+        io_font = tk.font.nametofont("IOFont")
+        io_tab_stops = compute_tab_stops(io_tab_chars, io_font, self.io_indent)
+        logger.debug("Using following tab stops for IO: %r", io_tab_stops)
+        self.tag_configure("io", tabs=io_tab_stops, tabstyle="wordprocessor")
 
     def restart(self, automatic: bool = False, was_running: bool = False):
         logger.info("BaseShellText.restart(%r)", automatic)
@@ -1206,7 +1215,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             return False
 
         # First check if it has unclosed parens, unclosed string or ending with : or \
-        parser = roughparse.RoughParser(self.indent_width, self.tabwidth)
+        parser = roughparse.RoughParser(self.indent_width, self.tab_width)
         parser.set_str(source.rstrip() + "\n")
         if parser.get_continuation_type() != roughparse.C_NONE or parser.is_block_opener():
             return False

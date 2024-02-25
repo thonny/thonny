@@ -119,6 +119,12 @@ def _cmd_dedent_selection():
 def _cmd_replace_tabs():
     text = _get_focused_writable_text()
     if text is not None:
+        indent_width = getattr(
+            text, "indent_width", get_workbench().get_option("edit.indent_width")
+        )
+        if indent_width == 0:
+            indent_width = 4
+        indent = indent_width * " "
         orig_lines = text.get("1.0", "end").splitlines(keepends=True)
         new_lines = []
         for line in orig_lines:
@@ -128,7 +134,7 @@ def _cmd_replace_tabs():
                     leading_tab_count += 1
                 else:
                     break
-            new_lines.append(leading_tab_count * "    " + line[leading_tab_count:])
+            new_lines.append(leading_tab_count * indent + line[leading_tab_count:])
 
         text.delete("1.0", "end")
 

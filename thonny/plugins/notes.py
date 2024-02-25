@@ -8,7 +8,17 @@ from thonny.ui_utils import TextMenu
 
 class NotesText(EnhancedText):
     def __init__(self, master, **kw):
-        EnhancedText.__init__(self, master=master, wrap="word", undo=True, **kw)
+        indent_width = get_workbench().get_option("edit.indent_width")
+        tab_width = get_workbench().get_option("edit.tab_width")
+        EnhancedText.__init__(
+            self,
+            master=master,
+            indent_width=indent_width,
+            tab_width=tab_width,
+            wrap="word",
+            undo=True,
+            **kw,
+        )
         self.context_menu = TextMenu(self)
 
     def on_secondary_click(self, event=None):

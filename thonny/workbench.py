@@ -2082,7 +2082,7 @@ class Workbench(tk.Tk):
             # shell may be not created yet
             pass
         else:
-            shell.update_tabs()
+            shell.update_appearance()
 
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(

@@ -565,8 +565,8 @@ def get_runner() -> "Runner":
     return cast("Runner", _runner)
 
 
-def get_shell() -> "ShellView":
-    return cast("ShellView", get_workbench().get_view("ShellView"))
+def get_shell(create: bool = True) -> "ShellView":
+    return cast("ShellView", get_workbench().get_view("ShellView", create=create))
 
 
 report_time("After loading thonny module")
