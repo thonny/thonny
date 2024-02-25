@@ -418,6 +418,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-cosmic_unicorn-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-cosmic_unicorn-v1.20.6-micropython.uf2"
             }
@@ -430,6 +434,10 @@
         "title": "Enviro (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
+            {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-enviro-v1.22.1-micropython.uf2"
+            },
             {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-enviro-v1.20.6-micropython.uf2"
@@ -444,6 +452,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-galactic_unicorn-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-galactic_unicorn-v1.20.6-micropython.uf2"
             }
@@ -457,6 +469,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-inky_frame-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-inky_frame-v1.20.6-micropython.uf2"
             }
@@ -469,6 +485,10 @@
         "title": "Pico LiPo (16MB) (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
+            {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-picolipo_16mb-v1.22.1-micropython.uf2"
+            },
             {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picolipo_16mb-v1.20.6-micropython.uf2"
@@ -503,6 +523,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-picolipo_4mb-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picolipo_4mb-v1.20.6-micropython.uf2"
             }
@@ -536,6 +560,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-stellar_unicorn-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-stellar_unicorn-v1.20.6-micropython.uf2"
             }
@@ -548,6 +576,10 @@
         "title": "Tiny 2040 (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
+            {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-tiny2040-v1.22.1-micropython.uf2"
+            },
             {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-tiny2040-v1.20.6-micropython.uf2"
@@ -581,6 +613,10 @@
         "title": "Tufty 2040 (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
+            {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-tufty2040-v1.22.1-micropython.uf2"
+            },
             {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-tufty2040-v1.20.6-micropython.uf2"
@@ -695,6 +731,10 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-pico-v1.22.1-micropython.uf2"
+            },
+            {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-pico-v1.20.6-micropython.uf2"
             }
@@ -729,6 +769,10 @@
         "title": "Pico W / Pico WH (with Pimoroni libraries)",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
+            {
+                "version": "1.22.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.1/pimoroni-picow-v1.22.1-micropython.uf2"
+            },
             {
                 "version": "1.20.6",
                 "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picow-v1.20.6-micropython.uf2"
