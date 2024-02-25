@@ -74,7 +74,9 @@ async def list_volumes() -> Sequence[str]:
                     }
                 )
         except DBusError as dbus_error:
-            logger.error(f"\nEncountered a DBus error while checking if the drive '{a_drive}' was a USB drive: {dbus_error}\n")
+            logger.error(
+                f"\nEncountered a DBus error while checking if the drive '{a_drive}' was a USB drive: {dbus_error}\n"
+            )
             continue
     logger.debug(f"\nUSB Drives: {discovered_usb_drives}\n")
 
@@ -102,7 +104,9 @@ async def list_volumes() -> Sequence[str]:
                     )
                     break
         except DBusError as dbus_error:
-            logger.error(f"\nEncountered a DBus error checking if the block device '{block_device}' was from a USB drive: {dbus_error}\n")
+            logger.error(
+                f"\nEncountered a DBus error checking if the block device '{block_device}' was from a USB drive: {dbus_error}\n"
+            )
             continue
     logger.debug(f"\nDiscovered Block Devices: {discovered_block_devices}\n")
 
@@ -135,7 +139,9 @@ async def list_volumes() -> Sequence[str]:
                 mount_point = mount_points[0].decode("utf-8")
             discovered_mount_points.append(mount_point.rstrip("\x00"))
         except DBusError as dbus_error:
-            logger.error(f"\nEncountered a DBus error checking for the mount point of the block device '{block_device}': {dbus_error}\n")
+            logger.error(
+                f"\nEncountered a DBus error checking for the mount point of the block device '{block_device}': {dbus_error}\n"
+            )
             continue
     logger.debug(f"\nFilesystem Mount Points: {discovered_mount_points}\n")
 
