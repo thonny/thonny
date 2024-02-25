@@ -84,6 +84,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Dominic Twyman
 * Dominik George
 * Donald Butt
+* @dsb3
 * Duncan Ogilvie (@mrexodia)
 * Eliot Blennerhassett
 * Emanuel Angelo
