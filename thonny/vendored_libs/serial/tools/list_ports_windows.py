@@ -13,16 +13,8 @@ from __future__ import absolute_import
 # pylint: disable=invalid-name,too-few-public-methods
 import re
 import ctypes
-from ctypes.wintypes import BOOL
-from ctypes.wintypes import HWND
-from ctypes.wintypes import DWORD
-from ctypes.wintypes import WORD
-from ctypes.wintypes import LONG
-from ctypes.wintypes import ULONG
-from ctypes.wintypes import HKEY
-from ctypes.wintypes import PULONG
-from serial.win32 import ULONG_PTR
-from serial.win32 import CreateFileW, GENERIC_WRITE, OPEN_EXISTING, DeviceIoControl, CloseHandle
+from ctypes.wintypes import BOOL, HWND, DWORD, WORD, LONG, ULONG, HKEY, PULONG, HANDLE, LPVOID
+from serial.win32 import CreateFileW, GENERIC_WRITE, OPEN_EXISTING, CloseHandle, ULONG_PTR, LPOVERLAPPED
 from serial.tools import list_ports_common
 
 
@@ -264,6 +256,10 @@ CM_Get_DevNode_Status.restype = DWORD
 CM_Get_DevNode_PropertyW = cfgmgr32.CM_Get_DevNode_PropertyW
 CM_Get_DevNode_PropertyW.argtypes = [DWORD, PDEVPROPKEY, PULONG, PBYTE, PULONG, ULONG]
 CM_Get_DevNode_PropertyW.restype = DWORD
+
+DeviceIoControl = ctypes.windll.kernel32.DeviceIoControl
+DeviceIoControl.argtypes = [HANDLE, DWORD, LPVOID, DWORD, LPVOID, DWORD, LPDWORD, LPOVERLAPPED]
+DeviceIoControl.restype = BOOL
 
 DIGCF_PRESENT = 2
 DIGCF_DEVICEINTERFACE = 16
@@ -619,7 +615,7 @@ def get_device_property(instance_number, property_key):
     )
     if ret != CR_BUFFER_SMALL and ret != CR_SUCCESS:
         return None
-    buffer = ctypes.create_unicode_buffer(buffer_size.value)
+    buffer = ctypes.create_string_buffer(buffer_size.value)
     if CM_Get_DevNode_PropertyW(
             instance_number,
             ctypes.byref(property_key),
@@ -630,11 +626,11 @@ def get_device_property(instance_number, property_key):
     ) != CR_SUCCESS:
         return None
     if property_type.value == DEVPROP_TYPE_STRING:
-        return buffer.value
+        return ctypes.wstring_at(buffer, buffer_size.value // 2 - 1)
     elif property_type.value == DEVPROP_TYPE_UINT32:
         return ctypes.cast(buffer, PULONG).contents.value
     elif property_type.value == DEVPROP_TYPE_STRING_LIST:
-        return ctypes.wstring_at(buffer, buffer_size.value).strip('\0').split('\0')
+        return ctypes.wstring_at(buffer, buffer_size.value // 2).strip('\0').split('\0')
     else:
         raise NotImplementedError(f'DEVPROPTYPE {property_type.value} is not implemented!')
 
