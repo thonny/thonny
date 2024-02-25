@@ -10,14 +10,20 @@ from tkinter import messagebox, ttk
 from typing import Any, Dict
 
 import thonny
-from thonny import get_runner, get_shell, get_workbench, running, ui_utils
+from thonny import (
+    get_runner,
+    get_shell,
+    get_workbench,
+    running,
+    running_in_virtual_environment,
+    ui_utils,
+)
 from thonny.common import (
     InlineCommand,
     InlineResponse,
     ToplevelCommand,
     get_base_executable,
     is_private_python,
-    is_virtual_executable,
     normpath_with_actual_case,
 )
 from thonny.languages import tr
@@ -473,7 +479,7 @@ def _get_interpreters():
 
 
 def get_default_cpython_executable_for_backend() -> str:
-    if is_private_python(sys.executable) and is_virtual_executable(sys.executable):
+    if is_private_python(sys.executable) and running_in_virtual_environment():
         # Private venv. Make an exception and use base Python for default backend.
         default_path = get_base_executable()
     else:
