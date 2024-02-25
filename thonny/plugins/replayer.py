@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import ast
 import datetime
+import json
 import os.path
 import re
 import time
 import tkinter as tk
 from dataclasses import dataclass
 from logging import getLogger
+from pprint import pformat
 from tkinter import ttk
 from typing import Callable, Dict, List, Optional
 
@@ -17,7 +19,7 @@ from thonny.editors import BaseEditor
 from thonny.languages import tr
 from thonny.misc_utils import get_menu_char, running_on_mac_os
 from thonny.shell import BaseShellText
-from thonny.tktextext import TweakableText
+from thonny.tktextext import TextFrame, TweakableText
 from thonny.ui_utils import (
     CustomToolbutton,
     MappingCombobox,
@@ -47,6 +49,10 @@ class Replayer(tk.Toplevel):
         self.loading = False
         self.commands: List[ReplayerCommand] = []
         self._scrubbing_after_id = None
+        self._details_frame: Optional[TextFrame] = None
+        self._details_frame_visibility_var = get_workbench().get_variable(
+            "replayer.show_event_details"
+        )
 
         super().__init__(
             master,
@@ -63,6 +69,11 @@ class Replayer(tk.Toplevel):
             accelerator=sequence_to_accelerator(load_from_file_sequence),
         )
         self.bind(load_from_file_sequence, self.cmd_open, True)
+        self.menu.add_checkbutton(
+            label=tr("Show event details"),
+            command=self.update_event_frame_visibility,
+            variable=self._details_frame_visibility_var,
+        )
 
         self.main_frame = ttk.Frame(self)
         self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -113,17 +124,21 @@ class Replayer(tk.Toplevel):
 
         get_workbench().set_default("replayer.sash_position", ems_to_pixels(30))
         sash_position = get_workbench().get_option("replayer.sash_position")
-        self.center_pw = ReplayerPanedWindow(
+        self.paned_window = ReplayerPanedWindow(
             self.main_frame, orient=tk.VERTICAL, sashwidth=ems_to_pixels(0.7)
         )
-        self.center_pw.grid(row=2, column=1, sticky="nsew", padx=outer_pad, pady=outer_pad)
-        self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
-        shell_book = CustomNotebook(self.center_pw, closable=False)
-        self.shell = ShellFrame(shell_book)
+        self.paned_window.grid(row=2, column=1, sticky="nsew", padx=outer_pad, pady=outer_pad)
+        self.editor_notebook = ReplayerEditorNotebook(self.paned_window)
+        self.shell_book = CustomNotebook(self.paned_window, closable=False)
+        self.shell = ShellFrame(self.shell_book)
 
-        self.center_pw.add(self.editor_notebook, height=sash_position, minsize=ems_to_pixels(2))
-        self.center_pw.add(shell_book, minsize=ems_to_pixels(2))
-        shell_book.add(self.shell, text="Shell")
+        self.paned_window.add(self.editor_notebook, height=sash_position, minsize=ems_to_pixels(2))
+        self.paned_window.add(self.shell_book, minsize=ems_to_pixels(2))
+        self.shell_book.add(self.shell, text=tr("Shell"))
+
+        if self._details_frame_visibility_var.get():
+            self.create_details_frame()
+            self.shell_book.select(self.shell)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -357,6 +372,7 @@ class Replayer(tk.Toplevel):
         if not from_scrubber:
             self.scrubber.set(event["epoch_time"])
         self.update_title()
+        self.update_details()
         self.update_idletasks()
 
     def _do_select_event(self, index):
@@ -390,6 +406,19 @@ class Replayer(tk.Toplevel):
 
         self.title(s)
 
+    def update_details(self):
+        if self._details_frame is None:
+            return
+
+        self._details_frame.text.direct_delete("1.0", "end")
+
+        if not self.events:
+            return
+
+        event = self.events[self.last_event_index]
+        event_str = pformat(event, indent=2)
+        self._details_frame.text.direct_insert("1.0", event_str)
+
     def process_event(self, event, reverse: bool):
         "this should be called with events in correct order"
         if "text_widget_id" in event:
@@ -412,6 +441,26 @@ class Replayer(tk.Toplevel):
 
         index = self.find_closest_index(float(value), 0, len(self.events) - 1)
         self.select_event(index, from_scrubber=True)
+
+    def create_details_frame(self):
+        assert self._details_frame is None
+        self._details_frame = TextFrame(self, vertical_scrollbar=False, relief="flat")
+        self._details_frame.text.set_read_only(True)
+        self.shell_book.add(self._details_frame, text=tr("Event details"))
+
+    def destroy_details_frame(self):
+        assert self._details_frame is not None
+        self.shell_book.forget(self._details_frame)
+        self._details_frame.destroy()
+        self._details_frame = None
+
+    def update_event_frame_visibility(self):
+        if self._details_frame is None:
+            assert self._details_frame_visibility_var.get()
+            self.create_details_frame()
+        else:
+            assert not self._details_frame_visibility_var.get()
+            self.destroy_details_frame()
 
     def close(self, event=None):
         global instance
@@ -774,6 +823,7 @@ def _custom_time_format(timestamp: time.struct_time, without_seconds: bool):
 
 def load_plugin() -> None:
     get_workbench().set_default("tools.replayer_last_browser_folder", os.path.expanduser("~/"))
+    get_workbench().set_default("replayer.show_event_details", False)
     get_workbench().add_command(
         "open_replayer",
         "tools",
