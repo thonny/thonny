@@ -152,6 +152,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Sami Almuhammady
 * sailslack
 * Scott Blackledge
+* @scottfp
 * segalion
 * Simon Gijsen
 * Simon Long
