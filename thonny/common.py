@@ -786,13 +786,6 @@ def read_one_incoming_message_str(line_reader):
     return msg_str
 
 
-def is_virtual_executable(executable):
-    exe_dir = os.path.dirname(executable)
-    return os.path.exists(os.path.join(exe_dir, "activate")) or os.path.exists(
-        os.path.join(exe_dir, "activate.bat")
-    )
-
-
 def is_private_python(executable):
     result = os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
     logger.debug("is_private_python(%r) == %r", executable, result)
