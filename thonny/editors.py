@@ -418,6 +418,7 @@ class Editor(BaseEditor):
                 dialog_title=tr("Saving"),
             )
 
+            if result is None:
                 result = {"error": "Unknown error"}
 
             if "error" in result:
