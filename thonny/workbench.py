@@ -1864,56 +1864,74 @@ class Workbench(tk.Tk):
             assert view_id is not None
 
             logger.info(
-                "Moving view from %r to %r",
+                "Moving view %r from %r to %r",
+                view_id,
                 old_notebook.location_in_workbench,
                 new_notebook.location_in_workbench,
             )
-            new_views: List[str] = self.get_option(
+            new_notebook_views: List[str] = self.get_option(
                 "layout.notebook_" + new_notebook.location_in_workbench + ".views"
-            )
-            logger.info(
-                "Updating view order %r for notebook %r",
-                new_views,
-                new_notebook.location_in_workbench,
             )
 
             if new_notebook is not old_notebook:
-                old_views: List[str] = self.get_option(
+                old_notebook_views: List[str] = self.get_option(
                     "layout.notebook_" + old_notebook.location_in_workbench + ".views"
                 )
-                assert view_id in old_views
-                assert view_id not in new_views
-                old_views.remove(view_id)
+                logger.info(
+                    "Removing %r from views %r of notebook %r",
+                    view_id,
+                    old_notebook_views,
+                    new_notebook.location_in_workbench,
+                )
+                logger.info(
+                    "Adding %r to views %r of notebook %r",
+                    view_id,
+                    new_notebook_views,
+                    new_notebook.location_in_workbench,
+                )
+                assert view_id in old_notebook_views
+                assert view_id not in new_notebook_views
+                old_notebook_views.remove(view_id)
                 self.set_option(
-                    "layout.notebook_" + old_notebook.location_in_workbench + ".views", old_views
+                    "layout.notebook_" + old_notebook.location_in_workbench + ".views",
+                    old_notebook_views,
                 )
             else:
-                assert view_id in new_views
-                new_views.remove(view_id)  # will put it back soon
+                logger.info(
+                    "Moving %r among views %r of notebook %r",
+                    view_id,
+                    new_notebook_views,
+                    new_notebook.location_in_workbench,
+                )
+                assert view_id in new_notebook_views
+                new_notebook_views.remove(view_id)  # will put it back soon
 
-            assert view_id not in new_views
+            assert view_id not in new_notebook_views
 
             # Adjust saved view position in the configuration list. Not trivial, because the list also contains
             # hidden views but the notebook doesn't.
             index_in_nb = new_notebook.index(page.content)
             logger.info("index in nb %r", index_in_nb)
             if index_in_nb == len(new_notebook.pages) - 1:
-                new_views.append(view_id)
+                new_notebook_views.append(view_id)
                 logger.info("appending")
             else:
                 right_neighbor_page = new_notebook.pages[index_in_nb + 1]
                 right_neighbor_view_id = right_neighbor_page.content.view_id
-                right_neighbor_conf_index = new_views.index(right_neighbor_view_id)
+                right_neighbor_conf_index = new_notebook_views.index(right_neighbor_view_id)
                 logger.info(
                     "Right neighbor %r index %r", right_neighbor_view_id, right_neighbor_conf_index
                 )
-                new_views.insert(right_neighbor_conf_index, view_id)
+                new_notebook_views.insert(right_neighbor_conf_index, view_id)
 
             self.set_option(
-                "layout.notebook_" + new_notebook.location_in_workbench + ".views", new_views
+                "layout.notebook_" + new_notebook.location_in_workbench + ".views",
+                new_notebook_views,
             )
             logger.info(
-                "New view order for notebook %r: %r", new_notebook.location_in_workbench, new_views
+                "New view order for notebook %r: %r",
+                new_notebook.location_in_workbench,
+                self.get_option("layout.notebook_" + new_notebook.location_in_workbench + ".views"),
             )
             self.event_generate("MoveView", view=event.page.content, view_id=view_id)
 
