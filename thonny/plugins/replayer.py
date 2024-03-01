@@ -129,6 +129,7 @@ class Replayer(tk.Toplevel):
         )
         self.paned_window.grid(row=2, column=1, sticky="nsew", padx=outer_pad, pady=outer_pad)
         self.editor_notebook = ReplayerEditorNotebook(self.paned_window)
+        self.editor_notebook.bind("<<NotebookTabChanged>>", self.update_title, True)
         self.shell_book = CustomNotebook(self.paned_window, closable=False)
         self.shell = ShellFrame(self.shell_book)
 
@@ -367,15 +368,16 @@ class Replayer(tk.Toplevel):
             return self.find_closest_index(target_timestamp, middle_index, end_index)
 
     def select_event(self, index: int, from_scrubber: bool = False) -> None:
-        self._do_select_event(index)
+        self.process_events_towards(index)
         event = self.events[self.last_event_index]
         if not from_scrubber:
             self.scrubber.set(event["epoch_time"])
+        self.editor_notebook.complete_select_event(event)
         self.update_title()
         self.update_details()
         self.update_idletasks()
 
-    def _do_select_event(self, index):
+    def process_events_towards(self, index):
         if index > self.last_event_index:
             # replay all events between last replayed event up to and including this event
             while self.last_event_index < index:
@@ -388,7 +390,7 @@ class Replayer(tk.Toplevel):
                 self.process_event(self.events[self.last_event_index], reverse=True)
                 self.last_event_index -= 1
 
-    def update_title(self):
+    def update_title(self, event=None):
         session_label = self.session_combo.get()
         if session_label and session_label.startswith(FILE_TOKEN):
             s = session_label
@@ -635,6 +637,7 @@ class ReplayerEditorNotebook(CustomNotebook):
     def __init__(self, master):
         CustomNotebook.__init__(self, master, closable=False)
         self._editors_by_text_widget_id = {}
+        self.bind("<<NotebookTabChanged>>", self.on_tab_changed, True)
 
     def clear(self):
         for child in self.winfo_children():
@@ -645,7 +648,7 @@ class ReplayerEditorNotebook(CustomNotebook):
 
         self._editors_by_text_widget_id = {}
 
-    def get_editor_by_text_widget_id(self, text_widget_id):
+    def get_editor_by_text_widget_id(self, text_widget_id) -> Optional[ReplayerEditor]:
         if text_widget_id not in self._editors_by_text_widget_id:
             editor = ReplayerEditor(self)
             self.add(editor, text="<untitled>")
@@ -656,8 +659,18 @@ class ReplayerEditorNotebook(CustomNotebook):
     def process_event(self, event, reverse):
         if "text_widget_id" in event:
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-            self.select(editor)
             editor.process_event(event, reverse)
+
+    def on_tab_changed(self, event):
+        editor: Optional[ReplayerEditor] = self.get_current_child()
+        if editor is not None:
+            _see_last_change_in_text(editor.get_text_widget())
+
+    def complete_select_event(self, event):
+        if "text_widget_id" in event:
+            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
+            _see_last_change_in_text(editor.get_text_widget())
+            self.select(editor)
 
             if "filename" in event:
                 self.tab(editor, text=editor.get_title())
@@ -720,10 +733,22 @@ class ReplayerCommand:
     tester: Callable
 
 
+def _see_last_change_in_text(text: TweakableText) -> None:
+    last_event_indices = getattr(text, "last_event_indices", None)
+    if last_event_indices is None or len(last_event_indices) == 0:
+        return
+
+    for index in last_event_indices:
+        text.see(index)
+
+    text.mark_set("insert", last_event_indices[-1])
+    text.focus_set()
+
+
 def _apply_event_on_text(event: Dict, text: TweakableText) -> None:
     if event["sequence"] == "TextInsert":
         text.direct_insert(event["index"], event["text"], ast.literal_eval(event["tags"]))
-        text.see(event["index"])
+        text.last_event_indices = [event["index"], "%s+%dc" % (event["index"], len(event["text"]))]
 
     elif event["sequence"] == "TextDelete":
         index1 = event["index1"]
@@ -741,7 +766,7 @@ def _apply_event_on_text(event: Dict, text: TweakableText) -> None:
             # logger.trace("Deletion from %r to %r chunks %r", index1, index2, event["chunks"])
 
         text.direct_delete(index1, index2)
-        text.see(event["index1"])
+        text.last_event_indices = [index1]
 
 
 def _revert_event_on_text(event: Dict, text: TweakableText) -> None:
@@ -749,14 +774,20 @@ def _revert_event_on_text(event: Dict, text: TweakableText) -> None:
         index1 = event["index"]
         text_len = len(event["text"])
         text.direct_delete(index1, f"{index1}+{text_len}c")
-        text.see(event["index"])
+        text.last_change_indices = [index1]
     elif event["sequence"] == "TextDelete":
         assert "chunks" in event
+        char_count = 0
         for chunk in event["chunks"]:
             text.direct_insert(chunk["start_index"], chunk["chars"], chunk["tags"])
+            char_count += len(chunk["chars"])
         if event["chunks"]:  # yes, there can be deletions of 0 chars. Beats me.
-            text.see(event["chunks"][0]["start_index"])
-            text.see("%s+%dc" % (event["chunks"][-1]["start_index"], len(event)))
+            text.last_change_indices = [
+                event["chunks"][0]["start_index"],
+                "%s+%dc" % (event["chunks"][-1]["start_index"], char_count),
+            ]
+        else:
+            text.last_change_indices = []
 
 
 def _export_text_range_with_tags(text: tk.Text, index1: str, index2: str) -> List[Dict]:
