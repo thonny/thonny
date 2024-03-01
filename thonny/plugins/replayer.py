@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import datetime
-import json
 import os.path
 import re
 import time
@@ -375,7 +374,7 @@ class Replayer(tk.Toplevel):
         self.editor_notebook.complete_select_event(event)
         self.update_title()
         self.update_details()
-        self.update_idletasks()
+        # self.update_idletasks()
 
     def process_events_towards(self, index):
         if index > self.last_event_index:
