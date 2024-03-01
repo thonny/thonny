@@ -397,12 +397,19 @@ class Replayer(tk.Toplevel):
 
         if self.last_event_index is not None and self.last_event_index > -1:
             event = self.events[self.last_event_index]
-            event_sequence = event["sequence"]
             timestamp = float(self.scrubber.cget("value"))
             dt = datetime.datetime.fromtimestamp(timestamp)
-            date_s = dt.strftime("%x")
             time_s = dt.strftime("%X")
-            s += f" • {event_sequence} @ {date_s} • {time_s}"
+            s += f" • Event {self.last_event_index} @ {time_s}"
+
+        editor: Optional[ReplayerEditor] = self.editor_notebook.get_current_child()
+        if editor is not None:
+            if editor._filename is not None:
+                editor_desc = editor._filename
+            else:
+                editor_desc = tr("<untitled>")
+
+            s += f" • {editor_desc}"
 
         self.title(s)
 
