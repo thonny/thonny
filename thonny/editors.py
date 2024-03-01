@@ -6,7 +6,7 @@ import tkinter as tk
 import traceback
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from _tkinter import TclError
 
@@ -24,7 +24,7 @@ from thonny.common import (
     normpath_with_actual_case,
     universal_dirname,
 )
-from thonny.custom_notebook import CustomNotebook, CustomNotebookTab
+from thonny.custom_notebook import CustomNotebook, CustomNotebookPage, CustomNotebookTab
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
@@ -1203,6 +1203,27 @@ class EditorNotebook(CustomNotebook):
                 editor.check_for_external_changes()
         finally:
             self._checking_external_changes = False
+
+    def after_insert(
+        self,
+        pos: Union[int, Literal["end"]],
+        page: CustomNotebookPage,
+        old_notebook: Optional[CustomNotebook],
+    ) -> None:
+        super().after_insert(pos, page, old_notebook)
+        editor: Editor = page.content
+        get_workbench().event_generate(
+            "InsertEditorToNotebook", pos=pos, editor=editor, text_widget=editor.get_text_widget()
+        )
+
+    def after_forget(
+        self, pos: int, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
+    ) -> None:
+        super().after_forget(pos, page, new_notebook)
+        editor: Editor = page.content
+        get_workbench().event_generate(
+            "RemoveEditorFromNotebook", pos=pos, editor=editor, text_widget=editor.get_text_widget()
+        )
 
 
 def get_current_breakpoints():

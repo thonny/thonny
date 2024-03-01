@@ -624,9 +624,11 @@ class AutomaticNotebook(CustomNotebook):
                 "NotebookPageMoved", page=page, new_notebook=self, old_notebook=old_notebook
             )
 
-    def after_forget(self, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]):
+    def after_forget(
+        self, pos: int, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
+    ):
         # see the comment at after_add_or_insert
-        super().after_forget(page, new_notebook)
+        super().after_forget(pos, page, new_notebook)
         self._update_visibility()
         if new_notebook is None:
             get_workbench().event_generate("NotebookPageClosed", page=page)

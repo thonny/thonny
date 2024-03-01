@@ -266,11 +266,30 @@ class Replayer(tk.Toplevel):
         # Need a fixed copy. The source list can be appended to, and we want to tweak things.
         self.events = events.copy()
 
+        # Generate InsertEditorToNotebook events for old format logs
+        for event in self.events:
+            if event["sequence"] == "InsertEditorToNotebook":
+                break
+        else:
+            for i in reversed(range(0, len(self.events) - 1)):
+                event = self.events[i]
+                if event["sequence"] == "EditorTextCreated":
+                    self.events.insert(
+                        i + 1,
+                        {
+                            "event_type": "EditorTextCreated",
+                            "sequence": "EditorTextCreated",
+                            "time": event["time"],
+                            "editor_id": event["editor_id"],
+                            "text_widget_id": event["text_widget_id"],
+                        },
+                    )
+
+        # Generate ToplevelResponse events for old format logs
         for event in self.events:
             if event["sequence"] == "ToplevelResponse":
                 break
         else:
-            # Infer ToplevelResponse events for old format logs
             for i in reversed(range(0, len(self.events) - 1)):
                 event = self.events[i]
                 if (
@@ -650,7 +669,6 @@ class ReplayerEditorNotebook(CustomNotebook):
     def get_editor_by_text_widget_id(self, text_widget_id) -> Optional[ReplayerEditor]:
         if text_widget_id not in self._editors_by_text_widget_id:
             editor = ReplayerEditor(self)
-            self.add(editor, text="<untitled>")
             self._editors_by_text_widget_id[text_widget_id] = editor
 
         return self._editors_by_text_widget_id[text_widget_id]
@@ -660,6 +678,22 @@ class ReplayerEditorNotebook(CustomNotebook):
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
             editor.process_event(event, reverse)
 
+            if (
+                event["sequence"] == "InsertEditorToNotebook"
+                and not reverse
+                or event["sequence"] == "RemoveEditorFromNotebook"
+                and reverse
+            ):
+                self.insert(event["pos"], editor, text=editor.get_title())
+
+            if (
+                event["sequence"] == "InsertEditorToNotebook"
+                and reverse
+                or event["sequence"] == "RemoveEditorFromNotebook"
+                and not reverse
+            ):
+                self.forget(editor)
+
     def on_tab_changed(self, event):
         editor: Optional[ReplayerEditor] = self.get_current_child()
         if editor is not None:
@@ -668,11 +702,12 @@ class ReplayerEditorNotebook(CustomNotebook):
     def complete_select_event(self, event):
         if "text_widget_id" in event:
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-            _see_last_change_in_text(editor.get_text_widget())
-            self.select(editor)
 
-            if "filename" in event:
-                self.tab(editor, text=editor.get_title())
+            if self.has_content(editor):
+                self.select(editor)
+                _see_last_change_in_text(editor.get_text_widget())
+                if "filename" in event:
+                    self.tab(editor, text=editor.get_title())
 
 
 class ShellFrame(ttk.Frame):

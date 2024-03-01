@@ -55,8 +55,10 @@ class EventLogger:
             "Saved",
             "NewFile",
             "EditorTextCreated",
-            "EditorTextDestroyed",
+            # "EditorTextDestroyed", # Can't determine toplevel of a destroyed Text
             # "ShellTextCreated", # Too bad, this event happens before event_logging is loaded
+            "InsertEditorToNotebook",
+            "RemoveEditorFromNotebook",
             "ShellCommand",
             "ShellInput",
             "ShowView",

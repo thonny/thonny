@@ -260,7 +260,7 @@ class CustomNotebook(tk.Frame):
         self._rearrange_tabs()
 
         child.containing_notebook = None
-        self.after_forget(page, new_notebook)
+        self.after_forget(i, page, new_notebook)
 
     def after_insert(
         self,
@@ -271,7 +271,7 @@ class CustomNotebook(tk.Frame):
         self.event_generate("<<NotebookTabInserted>>")
 
     def after_forget(
-        self, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
+        self, pos: int, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
     ) -> None:
         self.event_generate("<<NotebookTabForgotten>>")
 
