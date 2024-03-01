@@ -940,7 +940,7 @@ class EditorNotebook(CustomNotebook):
     def close_editor(self, editor, force=False):
         if not force and not self.check_allow_closing(editor):
             return
-        self._forget(editor)
+        self.forget(editor)
         editor.destroy()
 
     def _cmd_save_file(self):
