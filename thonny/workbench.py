@@ -1789,13 +1789,19 @@ class Workbench(tk.Tk):
             logger.info("Adding view %r to notebook %s", view, notebook)
 
             # Compute the position among current visible views in this notebook
-            nb_views = self.get_option("layout.notebook_" + nb_name + ".views")
-            assert view_id in nb_views
+            nb_view_order: List[str] = self.get_option("layout.notebook_" + nb_name + ".views")
+            visible_nb_views = []
+            for page in notebook.pages:
+                other_view_id = getattr(page.content, "view_id", None)
+                if other_view_id is not None:
+                    visible_nb_views.append(other_view_id)
+
+            assert view_id not in visible_nb_views
+            assert view_id in nb_view_order
+
             visible_on_the_left = 0
-            for other_view_id in nb_views:
-                if not self.get_option("view." + other_view_id + ".visible"):
-                    continue
-                if other_view_id != view_id:
+            for visible_view_id in visible_nb_views:
+                if nb_view_order.index(visible_view_id) < nb_view_order.index(view_id):
                     visible_on_the_left += 1
                 else:
                     break
