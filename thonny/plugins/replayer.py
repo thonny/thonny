@@ -48,6 +48,7 @@ class Replayer(tk.Toplevel):
         self.loading = False
         self.commands: List[ReplayerCommand] = []
         self._scrubbing_after_id = None
+        self._selecting_event = False
         self._details_frame: Optional[TextFrame] = None
         self._details_frame_visibility_var = get_workbench().get_variable(
             "replayer.show_event_details"
@@ -277,8 +278,8 @@ class Replayer(tk.Toplevel):
                     self.events.insert(
                         i + 1,
                         {
-                            "event_type": "EditorTextCreated",
-                            "sequence": "EditorTextCreated",
+                            "sequence": "InsertEditorToNotebook",
+                            "pos": "end",
                             "time": event["time"],
                             "editor_id": event["editor_id"],
                             "text_widget_id": event["text_widget_id"],
@@ -386,14 +387,19 @@ class Replayer(tk.Toplevel):
             return self.find_closest_index(target_timestamp, middle_index, end_index)
 
     def select_event(self, index: int, from_scrubber: bool = False) -> None:
-        self.process_events_towards(index)
-        event = self.events[self.last_event_index]
-        if not from_scrubber:
-            self.scrubber.set(event["epoch_time"])
-        self.editor_notebook.complete_select_event(event)
-        self.update_title()
-        self.update_details()
-        # self.update_idletasks()
+        assert not self._selecting_event
+        self._selecting_event = True
+        try:
+            self.process_events_towards(index)
+            event = self.events[self.last_event_index]
+            if not from_scrubber:
+                self.scrubber.set(event["epoch_time"])
+            self.editor_notebook.complete_select_event(event)
+            self.update_title()
+            self.update_details()
+            # self.update_idletasks()
+        finally:
+            self._selecting_event = False
 
     def process_events_towards(self, index):
         if index > self.last_event_index:
@@ -448,14 +454,17 @@ class Replayer(tk.Toplevel):
 
     def process_event(self, event, reverse: bool):
         "this should be called with events in correct order"
-        if "text_widget_id" in event:
-            if (
+        text_widget_id = event.get("text_widget_id", None)
+        if text_widget_id is not None:
+            if "Editor" in event["sequence"] or self.editor_notebook.is_editor_text_id(
+                text_widget_id
+            ):
+                self.editor_notebook.process_event(event, reverse)
+            elif (
                 event.get("text_widget_context", None) == "shell"
                 or event.get("text_widget_class") == "ShellText"
             ):
                 self.shell.process_event(event, reverse)
-            elif event.get("text_widget_class") == "EditorCodeViewText":
-                self.editor_notebook.process_event(event, reverse)
 
     def reset_session(self):
         self.shell.clear()
@@ -463,7 +472,7 @@ class Replayer(tk.Toplevel):
         self.last_event_index = -1
 
     def on_scrub(self, value):
-        if self.loading:
+        if self.loading or self._selecting_event:
             return
 
         index = self.find_closest_index(float(value), 0, len(self.events) - 1)
@@ -677,7 +686,6 @@ class ReplayerEditorNotebook(CustomNotebook):
         if "text_widget_id" in event:
             editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
             editor.process_event(event, reverse)
-
             if (
                 event["sequence"] == "InsertEditorToNotebook"
                 and not reverse
@@ -708,6 +716,9 @@ class ReplayerEditorNotebook(CustomNotebook):
                 _see_last_change_in_text(editor.get_text_widget())
                 if "filename" in event:
                     self.tab(editor, text=editor.get_title())
+
+    def is_editor_text_id(self, text_widget_id: int) -> bool:
+        return text_widget_id in self._editors_by_text_widget_id
 
 
 class ShellFrame(ttk.Frame):
