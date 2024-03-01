@@ -126,10 +126,8 @@ class CustomNotebook(tk.Frame):
         self._rearrange_tabs()
         self.select_tab(page.tab)
         child.containing_notebook = self
-        if old_notebook is not None:
-            self.after_move(page, old_notebook)
-        else:
-            self.after_add_or_insert(page)
+
+        self.after_insert(pos, page, old_notebook)
 
     def add_from_another_notebook(self, page: CustomNotebookPage) -> None:
         self.insert_from_another_notebook_or_position("end", page)
@@ -142,7 +140,7 @@ class CustomNotebook(tk.Frame):
             # tab will be removed first, so the new target index will be one less
             pos -= 1
 
-        original_notebook._forget(page.content, to_be_moved=True)
+        original_notebook._forget(page.content, new_notebook=self)
         self._insert(pos, page.content, text=page.tab.get_title(), old_notebook=original_notebook)
 
     def _rearrange_tabs(self) -> None:
@@ -238,9 +236,9 @@ class CustomNotebook(tk.Frame):
         return [page.content for page in self.pages]
 
     def forget(self, child: tk.Widget) -> None:
-        self._forget(child)
+        self._forget(child, None)
 
-    def _forget(self, child: tk.Widget, to_be_moved: bool = False) -> None:
+    def _forget(self, child: tk.Widget, new_notebook: Optional[CustomNotebook]) -> None:
         for i, page in enumerate(self.pages):
             if child is page.content:
                 break
@@ -262,17 +260,20 @@ class CustomNotebook(tk.Frame):
         self._rearrange_tabs()
 
         child.containing_notebook = None
-        if not to_be_moved:
-            self.after_forget(page)
+        self.after_forget(page, new_notebook)
 
-    def after_add_or_insert(self, page: CustomNotebookPage) -> None:
-        self.event_generate("<<NotebookTabOpened>>")
+    def after_insert(
+        self,
+        pos: Union[int, Literal["end"]],
+        page: CustomNotebookPage,
+        old_notebook: Optional[CustomNotebook],
+    ) -> None:
+        self.event_generate("<<NotebookTabInserted>>")
 
-    def after_forget(self, page: CustomNotebookPage) -> None:
-        self.event_generate("<<NotebookTabClosed>>")
-
-    def after_move(self, page: CustomNotebookPage, old_notebook: CustomNotebook) -> None:
-        self.event_generate("<<NotebookTabMoved>>")
+    def after_forget(
+        self, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
+    ) -> None:
+        self.event_generate("<<NotebookTabForgotten>>")
 
     def get_child_by_index(self, index: int) -> tk.Widget:
         return self.pages[index].content
@@ -308,7 +309,7 @@ class CustomNotebook(tk.Frame):
         else:
             page = self.get_page_by_tab(index_or_tab)
 
-        self._forget(page.content)
+        self._forget(page.content, None)
 
     def close_tabs(self, except_tab: Optional[CustomNotebookTab] = None):
         for page in reversed(self.pages):

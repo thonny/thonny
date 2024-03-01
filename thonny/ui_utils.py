@@ -13,7 +13,7 @@ import traceback
 from abc import ABC, abstractmethod
 from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # @UnusedImport
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union  # @UnusedImport
 
 from _tkinter import TclError
 
@@ -609,26 +609,28 @@ class AutomaticNotebook(CustomNotebook):
         # constructor hasn't completed yet
         self.preferred_size_in_pw = preferred_size_in_pw
 
-    def after_add_or_insert(self, page: CustomNotebookPage) -> None:
-        super().after_add_or_insert(page)
+    def after_insert(
+        self,
+        pos: Union[int, Literal["end"]],
+        page: CustomNotebookPage,
+        old_notebook: Optional[CustomNotebook],
+    ) -> None:
+        super().after_insert(pos, page, old_notebook)
         self._update_visibility()
-        get_workbench().event_generate("NotebookPageOpened", page=page)
+        if old_notebook is None:
+            get_workbench().event_generate("NotebookPageOpened", page=page)
+        else:
+            get_workbench().event_generate(
+                "NotebookPageMoved", page=page, new_notebook=self, old_notebook=old_notebook
+            )
 
-    def after_forget(self, page: CustomNotebookPage):
+    def after_forget(self, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]):
         # see the comment at after_add_or_insert
-        super().after_forget(page)
+        super().after_forget(page, new_notebook)
         self._update_visibility()
-        get_workbench().event_generate("NotebookPageClosed", page=page)
-
-    def after_move(self, page: CustomNotebookPage, old_notebook: CustomNotebook):
-        # see the comment at after_add_or_insert
-        super().after_move(page, old_notebook)
-        self._update_visibility()
-        if old_notebook is not self and isinstance(old_notebook, AutomaticNotebook):
-            old_notebook._update_visibility()
-        get_workbench().event_generate(
-            "NotebookPageMoved", page=page, new_notebook=self, old_notebook=old_notebook
-        )
+        if new_notebook is None:
+            get_workbench().event_generate("NotebookPageClosed", page=page)
+        # if there is new_notebook, then Workbench gets its Moved event from it
 
     def _is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
