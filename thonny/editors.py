@@ -125,6 +125,13 @@ class BaseEditor(ttk.Frame):
     def shorten_filename_for_title(self, path: str) -> str:
         return os.path.basename(path)
 
+    def get_text_widget(self) -> CodeViewText:
+        return self._code_view.text
+
+    def get_code_view(self):
+        # TODO: try to get rid of this
+        return self._code_view
+
 
 class Editor(BaseEditor):
     def __init__(self, master):
@@ -145,13 +152,6 @@ class Editor(BaseEditor):
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
 
         self.update_appearance()
-
-    def get_text_widget(self) -> tk.Text:
-        return self._code_view.text
-
-    def get_code_view(self):
-        # TODO: try to get rid of this
-        return self._code_view
 
     def get_content(self) -> str:
         return self._code_view.get_content()
