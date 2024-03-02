@@ -55,7 +55,7 @@ from thonny.common import (
 
 _REPL_HELPER_NAME = "_thonny_repl_print"
 
-_CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
+_CONFIG_FILENAME = os.path.join(thonny.get_thonny_user_dir(), "backend_configuration.ini")
 
 
 _backend = None

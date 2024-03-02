@@ -10,14 +10,7 @@ from tkinter import messagebox, ttk
 from typing import Any, Dict
 
 import thonny
-from thonny import (
-    get_runner,
-    get_shell,
-    get_workbench,
-    running,
-    running_in_virtual_environment,
-    ui_utils,
-)
+from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -25,6 +18,7 @@ from thonny.common import (
     get_base_executable,
     is_private_python,
     normpath_with_actual_case,
+    running_in_virtual_environment,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
@@ -52,7 +46,7 @@ class LocalCPythonProxy(SubprocessProxy):
 
     def _get_launch_cwd(self):
         # use a directory which doesn't contain misleading modules
-        empty_dir = os.path.join(thonny.THONNY_USER_DIR, "leave_this_empty")
+        empty_dir = os.path.join(thonny.get_thonny_user_dir(), "leave_this_empty")
         os.makedirs(empty_dir, exist_ok=True)
         return empty_dir
 

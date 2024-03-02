@@ -982,9 +982,9 @@ def interrupt_local_process() -> None:
 
 
 def get_ssh_password_file_path():
-    from thonny import THONNY_USER_DIR
+    from thonny import get_thonny_user_dir
 
-    return os.path.join(THONNY_USER_DIR, "ssh_password")
+    return os.path.join(get_thonny_user_dir(), "ssh_password")
 
 
 def delete_stored_ssh_password():

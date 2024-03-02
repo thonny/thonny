@@ -5,7 +5,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
-from thonny import THONNY_USER_DIR, get_shell, get_workbench
+from thonny import get_shell, get_thonny_user_dir, get_workbench
 from thonny.languages import tr
 from thonny.shell import ShellView
 from thonny.ui_utils import asksaveasfilename
@@ -250,7 +250,7 @@ class EventLogger:
 
 
 def get_log_dir():
-    return os.path.join(THONNY_USER_DIR, "user_logs")
+    return os.path.join(get_thonny_user_dir(), "user_logs")
 
 
 def export():

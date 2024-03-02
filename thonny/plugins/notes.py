@@ -1,6 +1,6 @@
 import os.path
 
-from thonny import THONNY_USER_DIR, get_workbench, ui_utils
+from thonny import get_thonny_user_dir, get_workbench, ui_utils
 from thonny.languages import tr
 from thonny.tktextext import EnhancedText, TextFrame
 from thonny.ui_utils import TextMenu
@@ -28,7 +28,7 @@ class NotesText(EnhancedText):
 
 class NotesView(TextFrame):
     def __init__(self, master):
-        self.filename = os.path.join(THONNY_USER_DIR, "user_notes.txt")
+        self.filename = os.path.join(get_thonny_user_dir(), "user_notes.txt")
         super().__init__(
             master, text_class=NotesText, horizontal_scrollbar_class=ui_utils.AutoScrollbar
         )

@@ -61,5 +61,5 @@ for idx, value in enumerate(sys.argv):
 
 # Now it is safe to import thonny.
 if __name__ == '__main__':
-    import thonny
-    thonny.launch()
+    import thonny.main
+    thonny.main.run()

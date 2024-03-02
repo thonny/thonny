@@ -1,7 +1,7 @@
 import os.path
 from tkinter.messagebox import askyesno, showinfo
 
-from thonny import THONNY_USER_DIR, get_workbench
+from thonny import get_thonny_user_dir, get_workbench
 
 
 def load_plugin():
@@ -22,7 +22,7 @@ def load_plugin():
                 "Thonny versions before 3.0 (and first 3.0 betas) used to keep "
                 + "configuration, logs and such in '%s'" % old_data_dir
                 + ". "
-                + "Since 3.0 this data is kept in a new location: '%s'.\n\n" % THONNY_USER_DIR
+                + "Since 3.0 this data is kept in a new location: '%s'.\n\n" % get_thonny_user_dir()
                 + "If you don't intend to use older Thonny versions anymore, "
                 + "you probably want to delete the old directory and reclaim disk space.\n\n"
                 + "Do you want me to delete this directory now?",

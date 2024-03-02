@@ -87,5 +87,5 @@ setup(
         "thonny.plugins.esp": ["*api_stubs/**"],
         "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
     },
-    entry_points={"gui_scripts": ["thonny = thonny:launch"]},
+    entry_points={"gui_scripts": ["thonny = thonny.main:run"]},
 )

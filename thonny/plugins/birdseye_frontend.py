@@ -3,7 +3,7 @@ import os.path
 import subprocess
 from tkinter import messagebox
 
-from thonny import THONNY_USER_DIR, get_runner, get_workbench, running
+from thonny import get_runner, get_thonny_user_dir, get_workbench, running
 from thonny.languages import tr
 
 _server_started = False
@@ -21,7 +21,7 @@ def _start_debug_enabled():
 def start_server():
     global _server_process
 
-    out_err_filename = os.path.join(THONNY_USER_DIR, "birdseye.log")
+    out_err_filename = os.path.join(get_thonny_user_dir(), "birdseye.log")
     output_file = open(out_err_filename, "w")
     _server_process = subprocess.Popen(
         [

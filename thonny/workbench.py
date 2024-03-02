@@ -23,10 +23,10 @@ from warnings import warn
 
 import thonny
 from thonny import (
-    THONNY_USER_DIR,
     assistance,
     get_runner,
     get_shell,
+    get_thonny_user_dir,
     is_portable,
     languages,
     ui_utils,
@@ -293,7 +293,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
     def _init_configuration(self) -> None:
-        self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE)
+        self._configuration_manager = try_load_configuration(thonny.get_configuration_file())
         self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget], int]]
 
         self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
@@ -2740,7 +2740,7 @@ class Workbench(tk.Tk):
         return self._toolbar
 
     def get_temp_dir(self, create_if_doesnt_exist=True):
-        path = os.path.join(THONNY_USER_DIR, "temp")
+        path = os.path.join(get_thonny_user_dir(), "temp")
         if create_if_doesnt_exist:
             os.makedirs(path, exist_ok=True)
         return path

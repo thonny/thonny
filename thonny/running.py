@@ -26,10 +26,10 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union  # @UnusedImp
 
 import thonny
 from thonny import (
-    THONNY_USER_DIR,
     common,
     get_runner,
     get_shell,
+    get_thonny_user_dir,
     get_version,
     get_workbench,
     report_time,
@@ -694,7 +694,7 @@ class Runner:
         err = f"Process ended with exit code {returncode}."
 
         try:
-            faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
+            faults_file = os.path.join(get_thonny_user_dir(), "backend_faults.log")
             if os.path.exists(faults_file):
                 with open(faults_file, encoding="ASCII", errors="replace") as fp:
                     err += fp.read()
@@ -1050,7 +1050,7 @@ class SubprocessProxy(BackendProxy, ABC):
         env["PYTHONSAFEPATH"] = "1"
 
         # Let back-end know about plug-ins
-        env["THONNY_USER_DIR"] = THONNY_USER_DIR
+        env["THONNY_USER_DIR"] = get_thonny_user_dir()
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
 
         env["THONNY_LANGUAGE"] = get_workbench().get_option("general.language")

@@ -386,7 +386,6 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 
 
 if __name__ == "__main__":
-    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     thonny.configure_backend_logging()
     print(PROCESS_ACK)
 
