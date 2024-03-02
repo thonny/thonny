@@ -805,20 +805,31 @@ class SshMixin(UploadDownloadMixin):
         # * change to desired directory
         #
         # About -onlcr: https://stackoverflow.com/q/35887380/261181
+        # can't trust the env-argument of the exec_command, as the server may ignore it
+        env_str = " ".join([f"env {key}={shlex.quote(value)}" for key, value in env.items()])
         cmd_line_str = (
             "echo $$ ; stty -echo ; stty -onlcr ; "
             + (" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else "")
-            + (" exec " + " ".join(map(shlex.quote, cmd_items)))
+            + (f" exec {env_str} " + " ".join(map(shlex.quote, cmd_items)))
         )
-        stdin, stdout, _ = self._client.exec_command(
-            cmd_line_str, bufsize=0, get_pty=True, environment=env
-        )
+        logger.info("Starting remote process with following cmd line:\n%s", cmd_line_str)
+        stdin, stdout, _ = self._client.exec_command(cmd_line_str, bufsize=0, get_pty=True)
 
         # stderr gets directed to stdout because of pty
-        pid = stdout.readline().strip()
-        ack = stdout.readline().strip()
+        first_line = stdout.readline()
+        second_line = stdout.readline()
+        pid = first_line.strip()
+        ack = second_line.strip()
         if ack != PROCESS_ACK:
-            raise RuntimeError(f"Got {ack!r} instead of expected {PROCESS_ACK!r}")
+            print(f"Got {ack!r} instead of expected {PROCESS_ACK!r}", file=sys.stderr)
+            print("Whole output:", file=sys.stderr)
+            print(first_line, end="", file=sys.stderr)
+            print(second_line, end="", file=sys.stderr)
+            while True:
+                line = stdout.readline()
+                if not line:
+                    break
+                print(line, end="", file=sys.stderr)
         channel = stdout.channel
 
         return RemoteProcess(self._client, channel, stdin, stdout, pid)
