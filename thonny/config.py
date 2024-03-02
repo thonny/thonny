@@ -137,7 +137,7 @@ class ConfigurationManager:
             elif isinstance(value, str):
                 var = tk.StringVar(value=value)
             elif isinstance(value, float):
-                var = tk.StringVar(value=value)
+                var = tk.StringVar(value=str(value))
             else:
                 raise KeyError(
                     "Can't create Tk Variable for " + name + ". Type is " + str(type(value))
