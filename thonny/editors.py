@@ -267,19 +267,25 @@ class Editor(BaseEditor):
         return True
 
     def _load_local_file(self, filename, keep_undo=False):
-        with open(filename, "rb") as fp:
-            source = fp.read()
+        if os.path.exists(filename):
+            with open(filename, "rb") as fp:
+                source = fp.read()
+                exists = True
+        else:
+            source = b""
+            exists = False
 
         # Make sure Windows filenames have proper format
         filename = normpath_with_actual_case(filename)
         self._filename = filename
         self.update_file_type()
-        self._last_known_mtime = os.path.getmtime(self._filename)
+        if exists:
+            self._last_known_mtime = os.path.getmtime(self._filename)
 
         get_workbench().event_generate("Open", editor=self, filename=filename)
         if not self._code_view.set_content_as_bytes(source, keep_undo):
             return False
-        self.get_text_widget().edit_modified(False)
+        self.get_text_widget().edit_modified(not exists)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
         get_workbench().event_generate("Opened", editor=self, filename=self._filename)
@@ -814,9 +820,7 @@ class EditorNotebook(CustomNotebook):
 
             cur_file = get_workbench().get_option("file.current_file")
             # choose correct active file
-            if len(cmd_line_filenames) > 0:
-                self.show_file(cmd_line_filenames[0])
-            elif cur_file and os.path.exists(cur_file):
+            if cur_file and os.path.exists(cur_file):
                 self.show_file(cur_file)
             else:
                 self._cmd_new_file()
