@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from logging import getLogger
 from pprint import pformat
 from tkinter import ttk
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, cast
 
 from thonny import codeview, get_workbench, ui_utils
 from thonny.custom_notebook import CustomNotebook
@@ -42,12 +42,11 @@ _dialog_filetypes = [(tr("Event logs"), ".jsonl .gz .txt"), (tr("all files"), ".
 
 
 class Replayer(tk.Toplevel):
-    def __init__(self, master, session_filename: Optional[str] = None):
+    def __init__(self, master):
         self.events = None
         self.last_event_index = -1
         self.loading = False
         self.commands: List[ReplayerCommand] = []
-        self._initial_session_filename = session_filename
         self._scrubbing_after_id = None
         self._selecting_event = False
         self._details_frame: Optional[TextFrame] = None
@@ -154,8 +153,6 @@ class Replayer(tk.Toplevel):
     def _after_ready(self):
         self.session_combo.select_value(CURRENT_SESSION_VALUE)
         self.select_session_from_combobox(None)
-        if self._initial_session_filename:
-            self.open_file(self._initial_session_filename)
 
     def _add_command(self, label: str, command: Callable, tester: Callable, tooltip: str) -> None:
         pad = ems_to_pixels(0.3)
@@ -395,10 +392,17 @@ class Replayer(tk.Toplevel):
         self._selecting_event = True
         try:
             self.process_events_towards(index)
+            assert self.last_event_index == index
             event = self.events[self.last_event_index]
             if not from_scrubber:
                 self.scrubber.set(event["epoch_time"])
-            self.editor_notebook.complete_select_event(event)
+
+            # process_event did the minimal amount of UI changes, because the intermediate
+            # states were not visible.
+            # Now need to finish up updates for the visible state.
+            self.editor_notebook.complete_select_event()
+            self.shell.complete_select_event()
+
             self.update_title()
             self.update_details()
             # self.update_idletasks()
@@ -458,17 +462,8 @@ class Replayer(tk.Toplevel):
 
     def process_event(self, event, reverse: bool):
         "this should be called with events in correct order"
-        text_widget_id = event.get("text_widget_id", None)
-        if text_widget_id is not None:
-            if "Editor" in event["sequence"] or self.editor_notebook.is_editor_text_id(
-                text_widget_id
-            ):
-                self.editor_notebook.process_event(event, reverse)
-            elif (
-                event.get("text_widget_context", None) == "shell"
-                or event.get("text_widget_class") == "ShellText"
-            ):
-                self.shell.process_event(event, reverse)
+        self.shell.process_event(event, reverse)
+        self.editor_notebook.process_event(event, reverse)
 
     def reset_session(self):
         self.shell.clear()
@@ -663,6 +658,9 @@ class ReplayerEditor(BaseEditor):
         self._filename = None
         self._code_view.text.edit_modified(False)
 
+    def complete_select_event(self):
+        _see_last_change_in_text(self.get_text_widget())
+
 
 class ReplayerEditorNotebook(CustomNotebook):
     def __init__(self, master):
@@ -679,6 +677,20 @@ class ReplayerEditorNotebook(CustomNotebook):
 
         self._editors_by_text_widget_id = {}
 
+    def get_editor_for_event(self, event) -> Optional[ReplayerEditor]:
+        text_widget_id = event.get("text_widget_id", None)
+        if text_widget_id is None:
+            return None
+        if text_widget_id in self._editors_by_text_widget_id:
+            return self._editors_by_text_widget_id[text_widget_id]
+
+        if "editor_id" in event or "Editor" in event["sequence"]:
+            editor = ReplayerEditor(self)
+            self._editors_by_text_widget_id[text_widget_id] = editor
+            return editor
+
+        return None
+
     def get_editor_by_text_widget_id(self, text_widget_id) -> Optional[ReplayerEditor]:
         if text_widget_id not in self._editors_by_text_widget_id:
             editor = ReplayerEditor(self)
@@ -687,39 +699,48 @@ class ReplayerEditorNotebook(CustomNotebook):
         return self._editors_by_text_widget_id[text_widget_id]
 
     def process_event(self, event, reverse):
-        if "text_widget_id" in event:
-            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-            editor.process_event(event, reverse)
-            if (
-                event["sequence"] == "InsertEditorToNotebook"
-                and not reverse
-                or event["sequence"] == "RemoveEditorFromNotebook"
-                and reverse
-            ):
-                self.insert(event["pos"], editor, text=editor.get_title())
+        editor = self.get_editor_for_event(event)
+        if editor is None:
+            return
 
-            if (
-                event["sequence"] == "InsertEditorToNotebook"
-                and reverse
-                or event["sequence"] == "RemoveEditorFromNotebook"
-                and not reverse
-            ):
-                self.forget(editor)
+        editor.process_event(event, reverse)
+
+        # change visibility and active editor
+        if (
+            event["sequence"] == "InsertEditorToNotebook"
+            and not reverse
+            or event["sequence"] == "RemoveEditorFromNotebook"
+            and reverse
+        ):
+            self.insert(event["pos"], editor, text=editor.get_title())
+
+        elif (
+            event["sequence"] == "InsertEditorToNotebook"
+            and reverse
+            or event["sequence"] == "RemoveEditorFromNotebook"
+            and not reverse
+        ):
+            self.forget(editor)
+
+        else:
+            if not reverse:
+                if "previous_active_editor" not in event:
+                    event["previous_active_editor"] = self.get_current_child()
+                # TODO: is it slow?
+                self.select(editor)
+            else:
+                self.select(event["previous_active_editor"])
 
     def on_tab_changed(self, event):
         editor: Optional[ReplayerEditor] = self.get_current_child()
         if editor is not None:
             _see_last_change_in_text(editor.get_text_widget())
 
-    def complete_select_event(self, event):
-        if "text_widget_id" in event:
-            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-
-            if self.has_content(editor):
-                self.select(editor)
-                _see_last_change_in_text(editor.get_text_widget())
-                if "filename" in event:
-                    self.tab(editor, text=editor.get_title())
+    def complete_select_event(self):
+        for editor_page in self.pages:
+            editor = cast(ReplayerEditor, editor_page.content)
+            editor.complete_select_event()
+            self.tab(editor, text=editor.get_title())
 
     def is_editor_text_id(self, text_widget_id: int) -> bool:
         return text_widget_id in self._editors_by_text_widget_id
@@ -760,12 +781,24 @@ class ShellFrame(ttk.Frame):
     def clear(self):
         self.text.direct_delete("1.0", "end")
 
+    def is_shell_event(self, event) -> bool:
+        return (
+            event.get("text_widget_context", None) == "shell"
+            or event.get("text_widget_class") == "ShellText"
+        )
+
     def process_event(self, event, reverse):
+        if not self.is_shell_event(event):
+            return
+
         if event["sequence"] in ["TextInsert", "TextDelete"]:
             if not reverse:
                 _apply_event_on_text(event, self.text)
             else:
                 _revert_event_on_text(event, self.text)
+
+    def complete_select_event(self):
+        _see_last_change_in_text(self.text)
 
 
 class ReplayerPanedWindow(tk.PanedWindow):
@@ -869,7 +902,7 @@ def _export_text_range_with_tags(text: tk.Text, index1: str, index2: str) -> Lis
 def open_replayer(session_filename: Optional[str] = None):
     global instance
     if instance is None:
-        instance = Replayer(get_workbench(), session_filename)
+        instance = Replayer(get_workbench())
         instance.refresh()
         instance.show()
     else:
@@ -877,6 +910,10 @@ def open_replayer(session_filename: Optional[str] = None):
             instance.lift()
         else:
             instance.deiconify()
+
+    if session_filename:
+        instance.update_idletasks()
+        instance.open_file(session_filename)
 
 
 def _custom_date_format(timestamp: time.struct_time):
