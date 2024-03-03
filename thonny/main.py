@@ -1,6 +1,8 @@
+import argparse
 import logging
 import os
 import sys
+from typing import Any, Dict, List
 
 import thonny
 from thonny import (
@@ -11,6 +13,7 @@ from thonny import (
     get_ipc_file_path,
     get_runner,
     get_thonny_user_dir,
+    get_version,
     prepare_thonny_user_dir,
 )
 
@@ -18,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 def run() -> int:
+    # First make sure the command line is good
+    parsed_args = _parse_arguments_to_dict(sys.argv[1:])
+
     # Temporary compatibility measure for the breaking change introduced in version 5.0
     thonny.THONNY_USER_DIR = get_thonny_user_dir()
 
@@ -44,7 +50,7 @@ def run() -> int:
 
     if _should_delegate():
         try:
-            _delegate_to_existing_instance(sys.argv[1:])
+            _delegate_to_existing_instance(parsed_args)
             print("Delegated to an existing Thonny instance. Exiting now.")
             return 0
         except Exception:
@@ -57,7 +63,7 @@ def run() -> int:
     try:
         from thonny import workbench
 
-        bench = workbench.Workbench()
+        bench = workbench.Workbench(parsed_args)
         bench.mainloop()
         return 0
 
@@ -109,17 +115,10 @@ def _should_delegate():
     return configuration_manager.get_option("general.single_instance")
 
 
-def _delegate_to_existing_instance(args):
+def _delegate_to_existing_instance(parsed_args: Dict[str, Any]):
     import socket
 
     from thonny import workbench
-
-    transformed_args = []
-    for arg in args:
-        if not arg.startswith("-"):
-            arg = os.path.abspath(arg)
-
-        transformed_args.append(arg)
 
     try:
         sock, secret = _create_client_socket()
@@ -133,7 +132,7 @@ def _delegate_to_existing_instance(args):
             traceback.print_exc()
         raise
 
-    data = repr((secret, transformed_args)).encode(encoding="utf_8")
+    data = repr((secret, parsed_args)).encode(encoding="utf_8")
 
     sock.settimeout(2.0)
     sock.sendall(data)
@@ -188,3 +187,40 @@ def _set_dpi_aware():
 
 def _get_frontend_log_file():
     return os.path.join(get_thonny_user_dir(), "frontend.log")
+
+
+def _parse_arguments_to_dict(raw_args: List[str]) -> Dict[str, Any]:
+    parser = argparse.ArgumentParser(
+        description="Python IDE for beginners",
+        allow_abbrev=False,
+        add_help=False,
+    )
+
+    parser.add_argument(
+        "-h",
+        "" "--help",
+        help="Show this help message and exit",
+        action="help",
+    )
+
+    parser.add_argument(
+        "--version", help="Show Thonny version and exit", action="version", version=get_version()
+    )
+
+    parser.add_argument(
+        "files",
+        help="",
+        nargs="*",
+        metavar="<python_file>",
+    )
+
+    parser.add_argument(
+        "--replayer",
+        help="Open the log file in Replayer. Pass empty string to open Replayer without loading a file",
+        metavar="<log_file>",
+    )
+
+    parsed_args = vars(parser.parse_args(args=raw_args))
+    # Need to store CWD, because Thonny may be with different cwd by the time of opening the files
+    parsed_args["cwd"] = os.getcwd()
+    return parsed_args

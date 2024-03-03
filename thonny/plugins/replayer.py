@@ -42,11 +42,12 @@ _dialog_filetypes = [(tr("Event logs"), ".jsonl .gz .txt"), (tr("all files"), ".
 
 
 class Replayer(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, session_filename: Optional[str] = None):
         self.events = None
         self.last_event_index = -1
         self.loading = False
         self.commands: List[ReplayerCommand] = []
+        self._initial_session_filename = session_filename
         self._scrubbing_after_id = None
         self._selecting_event = False
         self._details_frame: Optional[TextFrame] = None
@@ -153,6 +154,8 @@ class Replayer(tk.Toplevel):
     def _after_ready(self):
         self.session_combo.select_value(CURRENT_SESSION_VALUE)
         self.select_session_from_combobox(None)
+        if self._initial_session_filename:
+            self.open_file(self._initial_session_filename)
 
     def _add_command(self, label: str, command: Callable, tester: Callable, tooltip: str) -> None:
         pad = ems_to_pixels(0.3)
@@ -192,14 +195,15 @@ class Replayer(tk.Toplevel):
 
             path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
             if path:
-                self.session_combo.add_pair(FILE_TOKEN + os.path.basename(path), path)
-                self.session_combo.select_value(path)
-                self.select_session_from_combobox(event)
-                get_workbench().set_option(
-                    "tools.replayer_last_browser_folder", os.path.dirname(path)
-                )
+                self.open_file(path)
         finally:
             return "break"
+
+    def open_file(self, path: str) -> None:
+        self.session_combo.add_pair(FILE_TOKEN + os.path.basename(path), path)
+        self.session_combo.select_value(path)
+        self.select_session_from_combobox()
+        get_workbench().set_option("tools.replayer_last_browser_folder", os.path.dirname(path))
 
     def create_sessions_mapping(self):
         from thonny.plugins.event_logging import get_log_dir, parse_file_name, session_start_time
@@ -862,10 +866,10 @@ def _export_text_range_with_tags(text: tk.Text, index1: str, index2: str) -> Lis
     return chunks
 
 
-def open_replayer():
+def open_replayer(session_filename: Optional[str] = None):
     global instance
     if instance is None:
-        instance = Replayer(get_workbench())
+        instance = Replayer(get_workbench(), session_filename)
         instance.refresh()
         instance.show()
     else:

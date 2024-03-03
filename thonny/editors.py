@@ -796,17 +796,8 @@ class EditorNotebook(CustomNotebook):
 
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
 
-    def load_startup_files(self):
-        """If no filename was sent from command line
-        then load previous files (if setting allows)"""
-
-        cmd_line_filenames = [
-            os.path.abspath(name) for name in sys.argv[1:] if os.path.exists(name)
-        ]
-
-        if len(cmd_line_filenames) > 0:
-            filenames = cmd_line_filenames
-        elif get_workbench().get_option("file.reopen_all_files"):
+    def load_previous_files(self):
+        if get_workbench().get_option("file.reopen_all_files"):
             filenames = get_workbench().get_option("file.open_files")
         elif get_workbench().get_option("file.current_file"):
             filenames = [get_workbench().get_option("file.current_file")]

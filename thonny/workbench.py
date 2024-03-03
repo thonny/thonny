@@ -121,9 +121,10 @@ class Workbench(tk.Tk):
 
     """
 
-    def __init__(self) -> None:
+    def __init__(self, parsed_args: Dict[str, Any]) -> None:
         logger.info("Starting Workbench")
         thonny._workbench = self
+        self._initial_args = parsed_args
         self.ready = False
         self._closing = False
         self._destroyed = False
@@ -206,12 +207,6 @@ class Workbench(tk.Tk):
 
         self._init_commands()
         self._init_icon()
-        try:
-            self._editor_notebook.load_startup_files()
-        except Exception:
-            self.report_exception()
-
-        self._editor_notebook.focus_set()
         logger.info("Opening views")
         self._try_action(self._restore_selected_views)
 
@@ -259,6 +254,9 @@ class Workbench(tk.Tk):
                 "Using default settings",
                 master=self,
             )
+        self._editor_notebook.load_previous_files()
+        self._load_stuff_from_command_line(self._initial_args)
+        self._editor_notebook.focus_set()
         self.poll_events()
 
     def poll_events(self) -> None:
@@ -271,6 +269,28 @@ class Workbench(tk.Tk):
             self.event_generate(sequence, event)
 
         self._event_polling_id = self.after(20, self.poll_events)
+
+    def _load_stuff_from_command_line(self, parsed_args: Dict[str, Any]) -> None:
+        logger.info("Processing arguments %r", parsed_args)
+        try:
+            for file in parsed_args["files"]:
+                if not os.path.isabs(file):
+                    file = os.path.join(parsed_args["cwd"], file)
+                self._editor_notebook.show_file(file)
+
+            replayer_file = parsed_args["replayer"]
+            # NB! replayer_file may be empty string
+            if replayer_file is not None:
+                replayer_file = replayer_file.strip() or None
+                if replayer_file is not None and not os.path.isabs(replayer_file):
+                    replayer_file = os.path.join(parsed_args["cwd"], replayer_file)
+
+                from thonny.plugins import replayer
+
+                replayer.open_replayer(replayer_file)
+
+        except Exception:
+            self.report_exception()
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
@@ -451,7 +471,7 @@ class Workbench(tk.Tk):
             return getattr(m, "load_order_key", m.__name__)
 
         for m in sorted(modules, key=module_sort_key):
-            logger.debug("Loading %r", m.__file__)
+            logger.debug("Loading plugin %r from file %r", m.__name__, m.__file__)
             getattr(m, load_function_name)()
 
     def _init_fonts(self) -> None:
@@ -571,7 +591,7 @@ class Workbench(tk.Tk):
             self._ipc_requests = None
             return
 
-        self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
+        self._ipc_requests = queue.Queue()  # type: queue.Queue[Dict[str, Any]]
         server_socket, actual_secret = self._create_server_socket()
         server_socket.listen(10)
 
@@ -587,9 +607,9 @@ class Workbench(tk.Tk):
                             data += new_data
                         else:
                             break
-                    proposed_secret, args = ast.literal_eval(data.decode("UTF-8"))
+                    proposed_secret, parsed_args = ast.literal_eval(data.decode("UTF-8"))
                     if proposed_secret == actual_secret:
-                        self._ipc_requests.put(args)
+                        self._ipc_requests.put(parsed_args)
                         # respond OK
                         client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
                         client_socket.shutdown(socket.SHUT_WR)
@@ -2451,14 +2471,9 @@ class Workbench(tk.Tk):
                 return
 
             while not self._ipc_requests.empty():
-                args = self._ipc_requests.get()
-                try:
-                    for filename in args:
-                        if os.path.isfile(filename):
-                            self.get_editor_notebook().show_file(filename)
-
-                except Exception as e:
-                    logger.exception("Problem processing ipc request", exc_info=e)
+                parsed_args = self._ipc_requests.get()
+                logger.info("Handling IPC request %r", parsed_args)
+                self._load_stuff_from_command_line(parsed_args)
 
             self.become_active_window()
         finally:
