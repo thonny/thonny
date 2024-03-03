@@ -125,6 +125,7 @@ class Workbench(tk.Tk):
         logger.info("Starting Workbench")
         thonny._workbench = self
         self._initial_args = parsed_args
+        self._have_seen_visibility_events = False
         self.ready = False
         self._closing = False
         self._destroyed = False
@@ -239,10 +240,17 @@ class Workbench(tk.Tk):
                 print(name)
         """
 
+        self.bind("<Visibility>", self._on_visibility, True)
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
-        self.after_idle(self.finalize_startup)
+
+    def _on_visibility(self, event):
+        if not self._have_seen_visibility_events:
+            self._have_seen_visibility_events = True
+            logger.info("First <Visibility> event")
+            self.after_idle(self.finalize_startup)
 
     def finalize_startup(self):
+        logger.info("Finalizing startup")
         self.ready = True
         self.event_generate("WorkbenchReady")
         self._editor_notebook.update_appearance()
