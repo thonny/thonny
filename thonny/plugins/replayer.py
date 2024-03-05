@@ -722,7 +722,7 @@ class ReplayerEditorNotebook(CustomNotebook):
         ):
             self.forget(editor)
 
-        else:
+        elif event["sequence"] in ["TextInsert", "TextDelete"]:
             if not reverse:
                 if "previous_active_editor" not in event:
                     event["previous_active_editor"] = self.get_current_child()
