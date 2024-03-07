@@ -667,6 +667,7 @@ class ReplayerEditor(BaseEditor):
 
     def complete_select_event(self):
         _see_last_change_in_text(self.get_text_widget())
+        self.get_code_view().update_gutter()
 
 
 class ReplayerEditorNotebook(CustomNotebook):
