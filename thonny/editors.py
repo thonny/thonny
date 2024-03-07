@@ -58,7 +58,7 @@ class EditorCodeViewText(CodeViewText):
 
 
 class BaseEditor(ttk.Frame):
-    def __init__(self, master, propose_remove_line_numbers):
+    def __init__(self, master, propose_remove_line_numbers, suppress_events=False):
         ttk.Frame.__init__(self, master)
 
         self._code_view = CodeView(
@@ -67,6 +67,7 @@ class BaseEditor(ttk.Frame):
             font="EditorFont",
             text_class=EditorCodeViewText,
             cursor=get_beam_cursor(),
+            suppress_events=suppress_events
         )
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
 

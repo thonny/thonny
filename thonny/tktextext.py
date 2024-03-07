@@ -16,11 +16,11 @@ logger = getLogger(__name__)
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
 
-    def __init__(self, master=None, cnf={}, read_only=False, **kw):
+    def __init__(self, master=None, cnf={}, read_only=False, suppress_events=False, **kw):
         super().__init__(master=master, cnf=cnf, **kw)
 
         self._read_only = read_only
-        self._suppress_events = False
+        self._suppress_events = suppress_events
         self._edit_count: int = 0
         self._last_operation_time: float = time.time()
 

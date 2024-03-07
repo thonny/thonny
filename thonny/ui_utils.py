@@ -840,15 +840,16 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
         trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
             chars, line_before, line_after
         )
-        get_workbench().event_generate(
-            "TextInsert",
-            index=concrete_index,
-            text=chars,
-            tags=tags,
-            text_widget=self,
-            trivial_for_coloring=trivial_for_coloring,
-            trivial_for_parens=trivial_for_parens,
-        )
+        if not self._suppress_events:
+            get_workbench().event_generate(
+                "TextInsert",
+                index=concrete_index,
+                text=chars,
+                tags=tags,
+                text_widget=self,
+                trivial_for_coloring=trivial_for_coloring,
+                trivial_for_parens=trivial_for_parens,
+            )
         return result
 
     def direct_delete(self, index1, index2=None, **kw):
@@ -875,14 +876,15 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
                 chars, line_before, line_after
             )
-            get_workbench().event_generate(
-                "TextDelete",
-                index1=concrete_index1,
-                index2=concrete_index2,
-                text_widget=self,
-                trivial_for_coloring=trivial_for_coloring,
-                trivial_for_parens=trivial_for_parens,
-            )
+            if not self._suppress_events:
+                get_workbench().event_generate(
+                    "TextDelete",
+                    index1=concrete_index1,
+                    index2=concrete_index2,
+                    text_widget=self,
+                    trivial_for_coloring=trivial_for_coloring,
+                    trivial_for_parens=trivial_for_parens,
+                )
 
     def _is_trivial_edit(self, chars, line_before, line_after):
         # line is taken after edit for insertion and before edit for deletion
