@@ -614,7 +614,7 @@ class ReplayerCodeView(ttk.Frame):
 
 class ReplayerEditor(BaseEditor):
     def __init__(self, master):
-        super().__init__(master, propose_remove_line_numbers=False)
+        super().__init__(master, propose_remove_line_numbers=False, suppress_events=True)
         self._code_view.text.set_read_only(True)
         self.update_appearance()
 
@@ -775,6 +775,7 @@ class ShellFrame(ttk.Frame):
             height=10,
             undo=True,
             read_only=True,
+            suppress_events=True,
         )
 
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
