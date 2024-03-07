@@ -203,14 +203,18 @@ class Replayer(tk.Toplevel):
         get_workbench().set_option("tools.replayer_last_browser_folder", os.path.dirname(path))
 
     def create_sessions_mapping(self):
-        from thonny.plugins.event_logging import get_log_dir, parse_file_name, session_start_time
+        from thonny.plugins.event_logging import get_log_dir, parse_file_name
+        from thonny.plugins import event_logging
 
-        current_session_label = (
-            tr("Current session")
-            + f" • {_custom_time_format(session_start_time, without_seconds=True)} - ???"
-        )
+        mapping = {}
 
-        mapping = {current_session_label: CURRENT_SESSION_VALUE}
+        if event_logging.session_start_time is not None:
+            current_session_label = (
+                tr("Current session")
+                + f" • {_custom_time_format(event_logging.session_start_time, without_seconds=True)} - ???"
+            )
+
+            mapping[current_session_label] = CURRENT_SESSION_VALUE
 
         log_dir = get_log_dir()
 
@@ -230,7 +234,7 @@ class Replayer(tk.Toplevel):
                 without_seconds = all_minute_prefixes.count(minute_prefix) == 1
                 start_time, end_time = parse_file_name(name)
                 # need mktime, because the tuples may have different value in dst field, which makes them unequal
-                if time.mktime(start_time) == time.mktime(session_start_time):
+                if event_logging.session_start_time is not None and time.mktime(start_time) == time.mktime(event_logging.session_start_time):
                     # Don't read current session from file
                     continue
                 date_s = _custom_date_format(start_time)
@@ -253,7 +257,10 @@ class Replayer(tk.Toplevel):
         session_path = self.session_combo.get_selected_value()
         logger.info("User selected session %r", session_path)
 
-        if session_path == CURRENT_SESSION_VALUE:
+        if session_path is None:
+            logger.info("No session path")
+            return
+        elif session_path == CURRENT_SESSION_VALUE:
             events = session_events.copy()
         elif os.path.isfile(session_path):
             events = load_events_from_file(session_path)
