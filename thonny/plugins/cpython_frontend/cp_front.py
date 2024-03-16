@@ -21,7 +21,7 @@ from thonny.common import (
     running_in_virtual_environment,
 )
 from thonny.languages import tr
-from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.misc_utils import inside_flatpak, running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     TabbedBackendDetailsConfigurationPage,
@@ -343,8 +343,13 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         assert os.path.isdir(path)
         path = normpath_with_actual_case(path)
 
+        args = [running.get_front_interpreter_for_subprocess(), "-m", "venv"]
+        if inside_flatpak():
+            args.append("--without-pip")
+        args.append(path)
+
         proc = subprocess.Popen(
-            [running.get_front_interpreter_for_subprocess(), "-m", "venv", path],
+            args,
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -362,6 +367,21 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 
         if os.path.exists(exe_path):
             self._configuration_variable.set(exe_path)
+
+            if inside_flatpak():
+                proc = subprocess.Popen(
+                    [exe_path, "-m", "ensurepip", "--default-pip", "--upgrade"],
+                    stdin=None,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    universal_newlines=True,
+                )
+                from thonny.workdlg import SubprocessDialog
+
+                dlg = SubprocessDialog(
+                    self, proc, tr("Initializing virtual environment"), autostart=True
+                )
+                ui_utils.show_dialog(dlg)
 
     def should_restart(self, changed_options: List[str]):
         return self._configuration_variable.modified
