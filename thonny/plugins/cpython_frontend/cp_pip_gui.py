@@ -2,8 +2,8 @@ import os
 from abc import ABC
 
 import thonny
-from thonny import get_runner, is_private_python
-from thonny.common import normpath_with_actual_case
+from thonny import get_runner
+from thonny.common import normpath_with_actual_case, is_private_python
 from thonny.languages import tr
 from thonny.plugins.cpython_frontend.cp_front import LocalCPythonProxy
 from thonny.plugins.pip_gui import BackendPipDialog
