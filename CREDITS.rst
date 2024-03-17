@@ -63,6 +63,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Ankith
 * Antonio Carlos
 * atesin
+* athompson673
 * Augene J. Pak
 * Austin Bart
 * Avag. sayan
