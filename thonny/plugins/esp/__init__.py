@@ -25,9 +25,6 @@ class ESPProxy(BareMetalMicroPythonProxy):
 
 
 class ESP8266Proxy(ESPProxy):
-    description = "MicroPython on ESP8266"
-    config_page_constructor = "ESP8266"
-
     @classmethod
     def get_known_usb_vids_pids(cls):
         return get_uart_adapter_vids_pids()
