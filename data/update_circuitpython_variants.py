@@ -15,7 +15,7 @@ from update_variants_common import get_attr_value, save_variants
 
 base_url = "https://circuitpython.org/downloads"
 
-PREV_RELEVANT_VERSION = "8.1.0"
+PREV_RELEVANT_VERSION = "8.2.10"
 RELEVANT_FAMILIES = {
     "atmel-samd",
     "esp32",
