@@ -141,6 +141,20 @@ class Workbench(tk.Tk):
 
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
+
+        # Reference: https://wiki.tcl-lang.org/page/Modern+Bindings+for+the+Text+Widget
+        filename = os.path.join(self.get_package_dir(), "res", "modernText.tcl")
+        if os.path.exists(filename):
+            try:
+                # Load the modernText library into the Tcl interpreter
+                self.evalfile(filename)
+                # Make sure modernText loaded properly
+                self.exprlong("$::modernText::mouseSelectIgnoresKbd")
+            except tk.TclError as x:
+                logger.error(f"Tcl error from modernText: {x}")
+        else:
+            logger.error(f"Not found: {filename}")
+
         ui_utils.add_messagebox_parent_checker()
         self._event_handlers = {}  # type: Dict[str, Set[Callable]]
         self._images = (
