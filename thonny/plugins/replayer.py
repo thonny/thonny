@@ -204,8 +204,8 @@ class Replayer(tk.Toplevel):
         get_workbench().set_option("tools.replayer_last_browser_folder", os.path.dirname(path))
 
     def create_sessions_mapping(self):
-        from thonny.plugins.event_logging import get_log_dir, parse_file_name
         from thonny.plugins import event_logging
+        from thonny.plugins.event_logging import get_log_dir, parse_file_name
 
         mapping = {}
 
@@ -235,7 +235,9 @@ class Replayer(tk.Toplevel):
                 without_seconds = all_minute_prefixes.count(minute_prefix) == 1
                 start_time, end_time = parse_file_name(name)
                 # need mktime, because the tuples may have different value in dst field, which makes them unequal
-                if event_logging.session_start_time is not None and time.mktime(start_time) == time.mktime(event_logging.session_start_time):
+                if event_logging.session_start_time is not None and time.mktime(
+                    start_time
+                ) == time.mktime(event_logging.session_start_time):
                     # Don't read current session from file
                     continue
                 date_s = _custom_date_format(start_time)

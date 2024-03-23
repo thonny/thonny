@@ -4,11 +4,10 @@ import re
 import sys
 import tkinter as tk
 import traceback
+from _tkinter import TclError
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
 from typing import Literal, Optional, Union
-
-from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
@@ -67,7 +66,7 @@ class BaseEditor(ttk.Frame):
             font="EditorFont",
             text_class=EditorCodeViewText,
             cursor=get_beam_cursor(),
-            suppress_events=suppress_events
+            suppress_events=suppress_events,
         )
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
 

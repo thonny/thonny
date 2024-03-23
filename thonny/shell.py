@@ -4,11 +4,10 @@ import os.path
 import re
 import tkinter as tk
 import traceback
+from _tkinter import TclError
 from logging import getLogger
 from tkinter import ttk
 from typing import Optional, cast
-
-from _tkinter import TclError
 
 from thonny import get_runner, get_shell, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return

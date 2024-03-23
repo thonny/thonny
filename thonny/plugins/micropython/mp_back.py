@@ -1004,8 +1004,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._execute_without_output("__thonny_helper.os.mkdir(%r)" % path)
 
     @abstractmethod
-    def _create_pipkin_adapter(self):
-        ...
+    def _create_pipkin_adapter(self): ...
 
     def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
         import pipkin.common

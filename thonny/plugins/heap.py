@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
-from tkinter import ttk
-
 from _tkinter import TclError
+from tkinter import ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
