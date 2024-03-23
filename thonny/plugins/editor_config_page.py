@@ -1,6 +1,7 @@
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
+from typing import List
 
 from thonny import get_shell, get_workbench
 from thonny.config_ui import (
@@ -17,7 +18,7 @@ logger = getLogger(__name__)
 
 class EditorConfigurationPage(ConfigurationPage):
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
 
         group_spacing = ems_to_pixels(2)
 
@@ -112,7 +113,7 @@ class EditorConfigurationPage(ConfigurationPage):
 
         self.columnconfigure(1, weight=1)
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         get_workbench().get_editor_notebook().update_appearance()
         shell = get_shell(create=False)
         if shell is not None:

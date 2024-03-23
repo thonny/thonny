@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 import time
+import tkinter as tk
 from logging import getLogger
 from textwrap import dedent
 from tkinter import messagebox, ttk
@@ -9,11 +10,17 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
+from thonny.config_ui import (
+    add_option_checkbox,
+    add_option_combobox,
+    add_option_entry,
+    add_text_row,
+)
 from thonny.languages import tr
-from thonny.misc_utils import list_volumes
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
+    TabbedBackendDetailsConfigurationPage,
     get_ssh_password,
 )
 from thonny.running import SubprocessProxy
@@ -424,9 +431,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         )
 
 
-class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
-    backend_name = None  # Will be overwritten on Workbench.add_backend
-
+class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
 
@@ -435,72 +440,48 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         self._ports_by_desc = {}
         self._port_polling_after_id = None
 
+        self._webrepl_frame = None
+        self._serial_frame = None
+
+        self.connection_page = self.create_and_add_empty_page(tr("Connection"))
+        self.options_page = self.create_and_add_empty_page(tr("Options"))
+
+        self._init_connection_page()
+        self._init_options_page()
+
+        self.notebook.select(self.connection_page)
+
+    def _init_connection_page(self) -> None:
         intro_text = self._get_intro_text()
         if intro_text:
-            intro_label = ttk.Label(self, text=intro_text)
-            intro_label.grid(row=0, column=0, sticky="nw")
+            add_text_row(self.connection_page, intro_text)
 
         intro_url = self._get_intro_url()
         if intro_url:
-            intro_url_label = create_url_label(self, intro_url)
-            intro_url_label.grid(row=1, column=0, sticky="nw")
+            intro_url_label = create_url_label(self.connection_page, intro_url)
+            intro_url_label.grid(row=1, column=0, columnspan=2, sticky="nw")
 
         port_label = ttk.Label(
-            self, text=tr("Port or WebREPL") if self.allow_webrepl else tr("Port")
+            self.connection_page, text=tr("Port or WebREPL") if self.allow_webrepl else tr("Port")
         )
-        port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
+        port_label.grid(row=3, column=0, columnspan=2, sticky="nw", pady=(10, 0))
 
         self._port_desc_variable = create_string_var("", self._on_change_port)
         self._port_combo = ttk.Combobox(
-            self,
+            self.connection_page,
             exportselection=False,
             textvariable=self._port_desc_variable,
             values=[],
         )
         self._port_combo.state(["!disabled", "readonly"])
 
-        self._port_combo.grid(row=4, column=0, sticky="new")
+        self._port_combo.grid(row=4, column=0, columnspan=2, sticky="new")
         self.columnconfigure(0, weight=1)
 
-        self._webrepl_frame = None
-        self._serial_frame = None
-
-        self.add_checkbox(
-            self.backend_name + ".interrupt_on_connect",
-            row=10,
-            description=tr("Interrupt working program on connect"),
-            pady=(ems_to_pixels(2.0), 0),
-        )
-
-        if self.may_have_rtc():
-            self.add_checkbox(
-                self.backend_name + ".sync_time",
-                row=11,
-                description=tr("Synchronize device's real time clock"),
-            )
-
-            self.add_checkbox(
-                self.backend_name + ".local_rtc",
-                row=12,
-                description=tr("Use local time in real time clock"),
-            )
-
-        self.add_checkbox(
-            self.backend_name + ".restart_interpreter_before_run",
-            row=13,
-            description=tr("Restart interpreter before running a script"),
-        )
-
-        self.add_checkbox(
-            self.backend_name + ".populate_argv",
-            row=14,
-            description=tr("Populate sys.argv on run"),
-        )
-
-        last_row = ttk.Frame(self)
-        last_row.grid(row=100, sticky="swe")
-        self.rowconfigure(100, weight=1)
-        last_row.columnconfigure(1, weight=1)
+        # following should go to the bottom
+        self.connection_page.rowconfigure(100, weight=1)
+        last_row = ttk.Frame(self.connection_page)
+        last_row.grid(row=100, columnspan=2, sticky="se")
 
         kinds = self.get_flashing_dialog_kinds()
         for i, kind in enumerate(kinds):
@@ -523,9 +504,41 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
                 link_text,
                 _click_flashing_link,
             )
-            python_link.grid(row=i, column=1, sticky="e")
+            python_link.grid(row=i, column=1, sticky="se")
 
         self._keep_refreshing_ports(first_time=True)
+
+    def _init_options_page(self) -> None:
+        add_option_checkbox(
+            self.options_page,
+            self.backend_name + ".interrupt_on_connect",
+            tr("Interrupt working program on connect"),
+        )
+
+        if self.may_have_rtc():
+            add_option_checkbox(
+                self.options_page,
+                self.backend_name + ".sync_time",
+                tr("Synchronize device's real time clock"),
+            )
+
+            add_option_checkbox(
+                self.options_page,
+                self.backend_name + ".local_rtc",
+                tr("Use local time in real time clock"),
+            )
+
+        add_option_checkbox(
+            self.options_page,
+            self.backend_name + ".restart_interpreter_before_run",
+            tr("Restart interpreter before running a script"),
+        )
+
+        add_option_checkbox(
+            self.options_page,
+            self.backend_name + ".populate_argv",
+            tr("Populate sys.argv on run"),
+        )
 
     def _keep_refreshing_ports(self, first_time=False):
         ports_by_desc_before = self._ports_by_desc.copy()
@@ -610,7 +623,9 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         if self._serial_frame is not None:
             return self._serial_frame
 
-        self._serial_frame = TreeFrame(self, columns=("attribute", "value"), height=5)
+        self._serial_frame = TreeFrame(
+            self.connection_page, columns=("attribute", "value"), height=5
+        )
         tree = self._serial_frame.tree
 
         tree.column("attribute", width=ems_to_pixels(10), anchor="w", stretch=False)
@@ -653,7 +668,7 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
         if self._webrepl_frame is not None:
             return self._webrepl_frame
 
-        self._webrepl_frame = ttk.Frame(self)
+        self._webrepl_frame = ttk.Frame(self.connection_page)
 
         instructions = (
             "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
@@ -712,10 +727,10 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     def webrepl_selected(self):
         return self.get_selected_port_name() == WEBREPL_PORT_VALUE
 
-    def should_restart(self):
+    def should_restart(self, changed_options: List[str]):
         return self.is_modified() or self._has_opened_python_flasher
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         if not self.is_modified():
             return
 
@@ -745,11 +760,13 @@ class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
 
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == WEBREPL_OPTION_DESC:
-            self._get_webrepl_frame().grid(row=6, column=0, sticky="nwe")
+            self._get_webrepl_frame().grid(row=6, column=0, columnspan=2, sticky="nwe")
             if self._serial_frame and self._serial_frame.winfo_ismapped():
                 self._serial_frame.grid_forget()
         else:
-            self._get_serial_frame().grid(row=6, column=0, sticky="nwe", pady=(ems_to_pixels(1), 0))
+            self._get_serial_frame().grid(
+                row=6, column=0, columnspan=2, sticky="nwe", pady=(ems_to_pixels(1), 0)
+            )
             self._update_serial_frame()
             if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
                 self._webrepl_frame.grid_forget()
@@ -901,25 +918,18 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         return os.path.exists(executable) or shutil.which(executable)
 
 
-class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
-    backend_name = None  # Will be overwritten on Workbench.add_backend
+class LocalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
     def __init__(self, master):
         super().__init__(master)
+        self.executable_page = self.create_and_add_empty_page(tr("Executable"))
 
-        self._changed = False
-        self._executable_var = self._add_text_field(
-            "Interpreter", "LocalMicroPython.executable", 30
+        add_option_entry(
+            self.executable_page, "LocalMicroPython.executable", tr("Interpreter"), width=30
         )
 
-    def _on_change(self):
-        self._changed = True
-
-    def apply(self):
-        get_workbench().set_option("LocalMicroPython.executable", self._executable_var.get())
-
-    def should_restart(self):
-        return self._changed
+    def should_restart(self, changed_options: List[str]):
+        return "LocalMicroPython.executable" in changed_options
 
 
 class SshMicroPythonProxy(MicroPythonProxy):
@@ -1167,8 +1177,8 @@ def add_micropython_backend(
     submit_mode=None,
     write_block_size=None,
     write_block_delay=None,
-    dtr=None,
-    rts=None,
+    dtr=True,
+    rts=True,
 ):
     if bare_metal:
         get_workbench().set_default(name + ".port", "auto")

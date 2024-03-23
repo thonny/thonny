@@ -1,3 +1,5 @@
+from typing import List
+
 from thonny import get_workbench
 from thonny.config_ui import (
     ConfigurationPage,
@@ -38,7 +40,7 @@ class AssistantConfigPage(ConfigurationPage):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(get_last_grid_row(self), weight=1)
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         disabled_checks_str = (
             self.disabled_checks_box.text.get("1.0", "end")
             .replace("\r", "")

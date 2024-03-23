@@ -7,7 +7,7 @@ import tkinter as tk
 import traceback
 from logging import getLogger
 from tkinter import messagebox, ttk
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import thonny
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
@@ -22,7 +22,10 @@ from thonny.common import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.plugins.backend_config_page import (
+    BackendDetailsConfigPage,
+    TabbedBackendDetailsConfigurationPage,
+)
 from thonny.running import WINDOWS_EXE, SubprocessProxy, get_front_interpreter_for_subprocess
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
@@ -224,19 +227,21 @@ class LocalCPythonProxy(SubprocessProxy):
         return os.path.exists(conf[f"{cls.backend_name}.executable"])
 
 
-class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
+class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
+
+        self.executable_page = self.create_and_add_empty_page(tr("Executable"))
 
         self._configuration_variable = create_string_var(
             get_workbench().get_option("LocalCPython.executable")
         )
 
-        entry_label = ttk.Label(self, text=tr("Python executable"))
+        entry_label = ttk.Label(self.executable_page, text=tr("Python executable"))
         entry_label.grid(row=0, column=1, columnspan=2, sticky=tk.W)
 
         self._entry = ttk.Combobox(
-            self,
+            self.executable_page,
             exportselection=False,
             textvariable=self._configuration_variable,
             values=_get_interpreters(),
@@ -246,13 +251,13 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         self._entry.grid(row=1, column=1, sticky=tk.NSEW)
 
         self._select_button = ttk.Button(
-            self,
+            self.executable_page,
             text="...",
             width=3,
             command=self._select_executable,
         )
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
-        self.columnconfigure(1, weight=1)
+        self.executable_page.columnconfigure(1, weight=1)
 
         extra_text = tr("NB! Thonny only supports Python %s and later") % "3.8"
         if running_on_mac_os():
@@ -261,7 +266,7 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
                 + "from a virtual environment. In this case choose the 'activate' script instead\n"
                 + "of the interpreter (or enter the path directly to the box)!"
             )
-        extra_label = ttk.Label(self, text=extra_text)
+        extra_label = ttk.Label(self.executable_page, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
 
         venv_text = tr(
@@ -272,12 +277,12 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         )
         venv_text = "\n".join(textwrap.wrap(venv_text, 80))
 
-        venv_label = ttk.Label(self, text=venv_text)
+        venv_label = ttk.Label(self.executable_page, text=venv_text)
         venv_label.grid(row=3, column=1, columnspan=2, pady=10, sticky="w")
 
-        last_row = ttk.Frame(self)
+        last_row = ttk.Frame(self.executable_page)
         last_row.grid(row=100, sticky="swe", column=1, columnspan=2)
-        self.rowconfigure(100, weight=1)
+        self.executable_page.rowconfigure(100, weight=1)
         last_row.columnconfigure(1, weight=1)
         new_venv_link = ui_utils.create_action_label(
             last_row,
@@ -358,11 +363,11 @@ class LocalCPythonConfigurationPage(BackendDetailsConfigPage):
         if os.path.exists(exe_path):
             self._configuration_variable.set(exe_path)
 
-    def should_restart(self):
+    def should_restart(self, changed_options: List[str]):
         return self._configuration_variable.modified
 
-    def apply(self):
-        if not self.should_restart():
+    def apply(self, changed_options: List[str]):
+        if not self.should_restart(changed_options):
             return
 
         path = self._configuration_variable.get()

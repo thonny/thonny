@@ -5,7 +5,7 @@ from thonny.languages import tr
 
 class ShellConfigurationPage(ConfigurationPage):
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
         self.columnconfigure(1, weight=1)
 
         add_option_checkbox(

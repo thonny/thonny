@@ -1,4 +1,5 @@
 from tkinter import messagebox
+from typing import List
 
 from thonny import get_workbench, languages
 from thonny.config_ui import (
@@ -16,7 +17,7 @@ from thonny.ui_utils import get_last_grid_row
 
 class GeneralConfigurationPage(ConfigurationPage):
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
 
         add_option_checkbox(
             self, "general.single_instance", tr("Allow only single Thonny instance")
@@ -92,7 +93,7 @@ class GeneralConfigurationPage(ConfigurationPage):
             font="BoldTkDefaultFont",
         )
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         get_workbench().update_debug_mode()
 
         env = []

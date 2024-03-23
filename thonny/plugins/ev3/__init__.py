@@ -31,6 +31,12 @@ Plus any modules on the filesystem
 from tkinter import ttk
 
 from thonny import get_workbench
+from thonny.config_ui import (
+    add_label_and_text,
+    add_label_and_url,
+    add_text_row,
+    add_vertical_separator,
+)
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import (
@@ -66,25 +72,18 @@ class EV3MicroPythonProxy(SshMicroPythonProxy):
 
 
 class EV3MicroPythonConfigPage(SshMicroPythonConfigPage):
-    def __init__(self, master):
-        super().__init__(master)
-        inner_pad = ems_to_pixels(0.6)
-
-        preps_label = ttk.Label(self, text=tr("Preparations (skip the VS Code part)"))
-        preps_label.grid(row=0, column=0, pady=(0, inner_pad), sticky="w")
-
-        pybricks_url = create_url_label(self, "https://pybricks.com/ev3-micropython/")
-        pybricks_url.grid(row=0, column=1, pady=(0, inner_pad), padx=ems_to_pixels(1), sticky="w")
-
-        ttk.Label(self, text=tr("Default password")).grid(
-            row=6, column=0, pady=(0, inner_pad), sticky="w"
+    def _init_connection_page(self):
+        add_label_and_url(
+            self.connection_page,
+            tr("Preparations (skip the VS Code part)"),
+            "https://pybricks.com/ev3-micropython/",
         )
-        default_pw_box = ttk.Entry(self)
-        default_pw_box.insert(0, "maker")
-        default_pw_box["state"] = "disabled"
-        default_pw_box.grid(
-            row=6, column=1, pady=(0, inner_pad), padx=ems_to_pixels(1), sticky="we"
-        )
+
+        add_vertical_separator(self.connection_page)
+        super()._init_connection_page()
+        add_vertical_separator(self.connection_page)
+
+        add_label_and_text(self.connection_page, "EV3 default password", "maker")
 
     def has_editable_interpreter(self) -> bool:
         return False

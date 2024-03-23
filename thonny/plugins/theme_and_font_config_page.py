@@ -2,6 +2,7 @@ import textwrap
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
+from typing import List
 
 from thonny import get_workbench, tktextext, ui_utils
 from thonny.codeview import CodeView
@@ -13,7 +14,7 @@ from thonny.ui_utils import create_string_var
 
 class ThemeAndFontConfigurationPage(ConfigurationPage):
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
 
         self._init_themes()
         self._init_fonts()
@@ -182,7 +183,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             font="BoldTkDefaultFont",
         ).grid(row=40, column=1, columnspan=5, sticky="w", pady=(5, 0))
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         # don't do anything, as preview already did the thing
         return
 

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import CommonDialog, MappingCombobox, ems_to_pixels
+from thonny.ui_utils import CommonDialog, MappingCombobox, create_url_label, ems_to_pixels
 
 logger = getLogger(__name__)
 
@@ -93,7 +93,15 @@ class ConfigurationDialog(CommonDialog):
     def _ok(self, event=None):
         for _, title, page in self._page_records:
             try:
-                if page.apply() is False:
+                changed_options = TODO
+                # Before 5.0, method apply did not have changed_options parameter
+                from inspect import signature
+
+                if len(signature(page.apply).parameters) > 0:
+                    result = page.apply(changed_options)
+                else:
+                    result = page.apply()
+                if not result:
                     return
             except Exception:
                 get_workbench().report_exception("Error when applying options in " + title)
@@ -170,7 +178,7 @@ class ConfigurationPage(ttk.Frame):
         entry = ttk.Entry(self, textvariable=variable, **kw)
         entry.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan, padx=padx)
 
-    def apply(self):
+    def apply(self, changed_options: List[str]):
         """Apply method should return False, when page contains invalid
         input and configuration dialog should not be closed."""
         pass
@@ -298,6 +306,82 @@ def add_option_entry(
     )
 
     return entry
+
+
+def add_label_and_url(
+    master: tk.Widget,
+    description: str,
+    url: str,
+    row: Optional[int] = None,
+    column: int = 0,
+    label_columnspan: int = 1,
+    label_pady: Union[Tuple, int, str] = 0,
+    label_padx: Union[Tuple, int, str, None] = None,
+    url_columnspan: int = 1,
+    url_pady: Union[Tuple, int, str] = 0,
+    url_padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> ttk.Label:
+    if row is None:
+        row = master.grid_size()[1]
+
+    if label_padx is None:
+        label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
+
+    label = ttk.Label(master, text=description)
+    label.grid(
+        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+    )
+
+    url_label = create_url_label(master, url=url)
+    url_label.grid(
+        row=row,
+        column=column + 1,
+        columnspan=url_columnspan,
+        sticky="w",
+        pady=url_pady,
+        padx=url_padx,
+    )
+
+    return url_label
+
+
+def add_label_and_text(
+    master: tk.Widget,
+    description: str,
+    text: str,
+    row: Optional[int] = None,
+    column: int = 0,
+    label_columnspan: int = 1,
+    label_pady: Union[Tuple, int, str] = 0,
+    label_padx: Union[Tuple, int, str, None] = None,
+    text_columnspan: int = 1,
+    text_pady: Union[Tuple, int, str] = 0,
+    text_padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> ttk.Label:
+    if row is None:
+        row = master.grid_size()[1]
+
+    if label_padx is None:
+        label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
+
+    label = ttk.Label(master, text=description)
+    label.grid(
+        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+    )
+
+    text_label = ttk.Label(master, text=text)
+    text_label.grid(
+        row=row,
+        column=column + 1,
+        columnspan=text_columnspan,
+        sticky="w",
+        pady=text_pady,
+        padx=text_padx,
+    )
+
+    return text_label
 
 
 def add_option_box_for_list_of_strings(
