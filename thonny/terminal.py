@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 
-def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True):
+def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title:str = None):
     from thonny.running import get_environment_with_overrides
 
     env = get_environment_with_overrides(env_overrides)
