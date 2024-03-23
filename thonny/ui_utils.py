@@ -1374,10 +1374,7 @@ class EnhancedVar(tk.Variable):
         super().__init__(master=master, value=value, name=name)
         self.modified = False
         self.modification_listener = modification_listener
-        if sys.version_info < (3, 6):
-            self.trace("w", self._on_write)
-        else:
-            self.trace_add("write", self._on_write)
+        self.trace_add("write", self._on_write)
 
     def _on_write(self, *args):
         self.modified = True
@@ -2451,21 +2448,26 @@ def windows_known_extensions_are_hidden() -> bool:
 
 
 class MappingCombobox(ttk.Combobox):
-    def __init__(self, master, mapping=None, **kw):
-        super().__init__(master, **kw)
-
-        if mapping is None:
-            mapping = {}
-
-        self.mapping: Dict[str, Any]
-        self.set_mapping(mapping)
+    def __init__(
+        self, master, mapping: Dict[str, Any], value_variable: Optional[tk.Variable] = None, **kw
+    ):
+        self.mapping = mapping
+        self.value_variable = value_variable
         self.mapping_desc_variable = tk.StringVar(value="")
+
+        super().__init__(master, **kw)
+        self.set_mapping(mapping)
         self.configure(textvariable=self.mapping_desc_variable)
 
         if kw.get("state", None) == "disabled":
             self.state(["readonly"])
         else:
             self.state(["!disabled", "readonly"])
+
+        self.bind("<<ComboboxSelected>>", self.on_select_value, True)
+
+        if self.value_variable is not None:
+            self.select_value(self.value_variable.get())
 
     def set_mapping(self, mapping: Dict[str, Any]):
         self.mapping = mapping
@@ -2474,6 +2476,10 @@ class MappingCombobox(ttk.Combobox):
     def add_pair(self, label, value):
         self.mapping[label] = value
         self["values"] = list(self.mapping)
+
+    def on_select_value(self, *event):
+        if self.value_variable is not None:
+            self.value_variable.set(self.get_selected_value())
 
     def get_selected_value(self) -> Any:
         desc = self.mapping_desc_variable.get()
@@ -2580,6 +2586,10 @@ def compute_tab_stops(tab_width_in_chars: int, font: tk.font.Font, offset_px=0) 
         tabs.append(offset_px)
 
     return tabs
+
+
+def get_last_grid_row(container: tk.Widget) -> int:
+    return container.grid_size()[1] - 1
 
 
 if __name__ == "__main__":

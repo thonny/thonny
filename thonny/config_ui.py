@@ -1,14 +1,19 @@
 import sys
 import tkinter as tk
+import warnings
 from logging import getLogger
 from tkinter import ttk
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from thonny import get_workbench, ui_utils
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog
+from thonny.tktextext import TextFrame
+from thonny.ui_utils import CommonDialog, MappingCombobox, ems_to_pixels
 
 logger = getLogger(__name__)
+
+LABEL_PADDING_EMS = 1
+SEPARATOR_HEIGHT_EMS = 2
 
 
 class ConfigurationDialog(CommonDialog):
@@ -123,6 +128,9 @@ class ConfigurationPage(ttk.Frame):
     def add_checkbox(
         self, flag_name, description, row=None, column=0, padx=0, pady=0, columnspan=1, tooltip=None
     ):
+        warnings.warn(
+            "Consider using thonny.config_ui.add_option_checkbox instead", DeprecationWarning
+        )
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
         checkbox.grid(
@@ -135,6 +143,9 @@ class ConfigurationPage(ttk.Frame):
     def add_combobox(
         self, variable, values, row=None, column=0, padx=0, pady=0, columnspan=1, width=None
     ):
+        warnings.warn(
+            "Consider using thonny.config_ui.add_option_combobox instead", DeprecationWarning
+        )
         if isinstance(variable, str):
             variable = get_workbench().get_variable(variable)
         combobox = ttk.Combobox(
@@ -152,6 +163,9 @@ class ConfigurationPage(ttk.Frame):
         return variable
 
     def add_entry(self, option_name, row=None, column=0, pady=0, padx=0, columnspan=1, **kw):
+        warnings.warn(
+            "Consider using thonny.config_ui.add_option_entry instead", DeprecationWarning
+        )
         variable = get_workbench().get_variable(option_name)
         entry = ttk.Entry(self, textvariable=variable, **kw)
         entry.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan, padx=padx)
@@ -164,3 +178,213 @@ class ConfigurationPage(ttk.Frame):
     def cancel(self):
         """Called when dialog gets cancelled"""
         pass
+
+
+def add_option_checkbox(
+    master: tk.Widget,
+    option_name: str,
+    description: str,
+    row: Optional[int] = None,
+    column: int = 0,
+    columnspan: int = 3,
+    pady: Union[Tuple, int, str] = 0,
+    padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> ttk.Checkbutton:
+    if row is None:
+        row = master.grid_size()[1]
+    variable = get_workbench().get_variable(option_name)
+
+    checkbox = ttk.Checkbutton(master, text=description, variable=variable)
+    checkbox.grid(row=row, column=column, columnspan=columnspan, sticky=tk.W, padx=padx, pady=pady)
+
+    return checkbox
+
+
+def add_option_combobox(
+    master: tk.Widget,
+    option_name: str,
+    description: str,
+    choices: Union[List[Any], Dict[str, Any]],
+    height: int = 15,
+    width: Optional[int] = None,
+    row: Optional[int] = None,
+    column: int = 0,
+    label_columnspan: int = 1,
+    label_pady: Union[Tuple, int, str] = 0,
+    label_padx: Union[Tuple, int, str, None] = None,
+    combobox_columnspan: int = 1,
+    combobox_pady: Union[Tuple, int, str] = 0,
+    combobox_padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> ttk.Combobox:
+    if row is None:
+        row = master.grid_size()[1]
+
+    if label_padx is None:
+        label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
+
+    label = ttk.Label(master, text=description)
+    label.grid(
+        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+    )
+
+    if isinstance(choices, list):
+        mapping = {str(x): x for x in choices}
+    else:
+        assert isinstance(choices, dict)
+        mapping = choices
+
+    variable = get_workbench().get_variable(option_name)
+    combobox = MappingCombobox(
+        master,
+        mapping=mapping,
+        exportselection=False,
+        value_variable=variable,
+        height=height,
+        width=width,
+    )
+    combobox.grid(
+        row=row,
+        column=column + 1,
+        columnspan=combobox_columnspan,
+        sticky="w",
+        pady=combobox_pady,
+        padx=combobox_padx,
+    )
+
+    return combobox
+
+
+def add_option_entry(
+    master: tk.Widget,
+    option_name: str,
+    description: str,
+    width: Optional[int] = None,
+    row: Optional[int] = None,
+    column: int = 0,
+    label_columnspan: int = 1,
+    label_pady: Union[Tuple, int, str] = 0,
+    label_padx: Union[Tuple, int, str, None] = None,
+    entry_columnspan: int = 1,
+    entry_pady: Union[Tuple, int, str] = 0,
+    entry_padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> ttk.Entry:
+    if row is None:
+        row = master.grid_size()[1]
+
+    if label_padx is None:
+        label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
+
+    label = ttk.Label(master, text=description)
+    label.grid(
+        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+    )
+
+    variable = get_workbench().get_variable(option_name)
+    entry = ttk.Entry(
+        master,
+        textvariable=variable,
+        width=width,
+    )
+    entry.grid(
+        row=row,
+        column=column + 1,
+        columnspan=entry_columnspan,
+        sticky="w",
+        pady=entry_pady,
+        padx=entry_padx,
+    )
+
+    return entry
+
+
+def add_option_box_for_list_of_strings(
+    master: tk.Widget,
+    option_name: str,
+    description: str,
+    height: int = 15,
+    width: Optional[int] = None,
+    row: Optional[int] = None,
+    column: int = 0,
+    label_columnspan: int = 3,
+    label_pady: Union[Tuple, int, str] = 0,
+    label_padx: Union[Tuple, int, str] = 0,
+    box_columnspan: int = 3,
+    box_pady: Union[Tuple, int, str] = 0,
+    box_padx: Union[Tuple, int, str] = 0,
+    tooltip: Optional[str] = None,
+) -> TextFrame:
+    if row is None:
+        row = master.grid_size()[1]
+
+    label = ttk.Label(master, text=description)
+    label.grid(
+        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+    )
+
+    text_frame = TextFrame(
+        master,
+        horizontal_scrollbar_class=ui_utils.AutoScrollbar,
+        wrap="none",
+        font="TkDefaultFont",
+        # cursor="arrow",
+        padx=ems_to_pixels(0.3),
+        pady=ems_to_pixels(0.3),
+        height=height,
+        width=width,
+        borderwidth=1,
+        undo=True,
+        relief="groove",
+    )
+    text_frame.grid(
+        row=row + 1,
+        column=column,
+        columnspan=box_columnspan,
+        sticky="nsew",
+        pady=box_pady,
+        padx=box_padx,
+    )
+
+    lines = get_workbench().get_option(option_name, [])
+    text_frame.text.insert("1.0", "\n".join(lines) + "\n")
+
+    return text_frame
+
+
+def add_text_row(
+    master: tk.Widget,
+    description: str,
+    font: Union[str, tk.font.Font] = "TkDefaultFont",
+    row: Optional[int] = None,
+    column: int = 0,
+    columnspan: int = 3,
+    pady: Union[Tuple, int, str] = 0,
+    padx: Union[Tuple, int, str] = 0,
+) -> ttk.Label:
+    if row is None:
+        row = master.grid_size()[1]
+
+    label = ttk.Label(master, text=description, font=font)
+    label.grid(row=row, column=column, columnspan=columnspan, sticky="w", pady=pady, padx=padx)
+
+    return label
+
+
+def add_vertical_separator(
+    master: tk.Widget,
+    row: Optional[int] = None,
+    column: int = 0,
+    height: Union[str, int, None] = None,
+) -> ttk.Frame:
+    if row is None:
+        row = master.grid_size()[1]
+
+    if height is None:
+        height = ems_to_pixels(SEPARATOR_HEIGHT_EMS)
+
+    frame = ttk.Frame(master, height=height, width="1c")
+    frame.grid(row=row, column=column)
+
+    return frame

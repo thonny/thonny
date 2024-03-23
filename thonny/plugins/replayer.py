@@ -84,6 +84,7 @@ class Replayer(tk.Toplevel):
         self.toolbar.grid(row=1, column=1, padx=outer_pad, pady=(outer_pad, 0), sticky=tk.NSEW)
         self.session_combo = MappingCombobox(
             self.toolbar,
+            mapping={},
             width=23,
             exportselection=False,
             takefocus=False,

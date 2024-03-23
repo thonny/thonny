@@ -664,9 +664,7 @@ class Workbench(tk.Tk):
             extra_sequences=(
                 ["<Alt-F4>"]
                 if running_on_linux()
-                else ["<Control-q>"]
-                if running_on_windows()
-                else []
+                else ["<Control-q>"] if running_on_windows() else []
             ),
         )
 

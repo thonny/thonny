@@ -79,7 +79,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
         target_label = ttk.Label(self.main_frame, text=self.get_target_label())
         target_label.grid(row=1, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
-        self._target_combo = MappingCombobox(self.main_frame, exportselection=False)
+        self._target_combo = MappingCombobox(self.main_frame, mapping={}, exportselection=False)
         self._target_combo.grid(
             row=1, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(epady, 0)
         )
@@ -108,7 +108,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         variant_label = ttk.Label(self.main_frame, text=f"variant")
         variant_label.grid(row=6, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_combo = MappingCombobox(
-            self.main_frame, exportselection=False, state="disabled"
+            self.main_frame, mapping={}, exportselection=False, state="disabled"
         )
         self._variant_combo.grid(
             row=6, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
@@ -118,7 +118,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         version_label = ttk.Label(self.main_frame, text="version")
         version_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._version_combo = MappingCombobox(
-            self.main_frame, exportselection=False, state="disabled"
+            self.main_frame, mapping={}, exportselection=False, state="disabled"
         )
         self._version_combo.grid(
             row=7, column=2, sticky="nsew", padx=(ipadx, epadx), pady=(ipady, 0)
