@@ -445,9 +445,11 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
         self.connection_page = self.create_and_add_empty_page(tr("Connection"))
         self.options_page = self.create_and_add_empty_page(tr("Options"))
+        self.advanced_page = self.create_and_add_empty_page(tr("Advanced"))
 
         self._init_connection_page()
         self._init_options_page()
+        self._init_advanced_page()
 
         self.notebook.select(self.connection_page)
 
@@ -538,6 +540,33 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             self.options_page,
             self.backend_name + ".populate_argv",
             tr("Populate sys.argv on run"),
+        )
+
+    def _init_advanced_page(self) -> None:
+        add_text_row(
+            self.advanced_page,
+            "Depending on the device and OS, different DTR and RTS signals\n"
+            "may be required for optimal operation over a USB connection." + "\n",
+        )
+
+        add_option_combobox(
+            self.advanced_page,
+            f"{self.backend_name}.dtr",
+            "DTR",
+            choices={
+                "True (default)": True,
+                "False": False,
+            },
+        )
+
+        add_option_combobox(
+            self.advanced_page,
+            f"{self.backend_name}.rts",
+            "RTS",
+            choices={
+                "True (default)": True,
+                "False": False,
+            },
         )
 
     def _keep_refreshing_ports(self, first_time=False):

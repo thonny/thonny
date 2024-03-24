@@ -28,6 +28,9 @@ class SerialConnection(MicroPythonConnection):
             self._serial = serial.Serial(
                 port=None, baudrate=baudrate, timeout=None, write_timeout=2, exclusive=True
             )
+            logger.info(
+                "Before opening serial port, DTR=%r, RTS=%r", self._serial.dtr, self._serial.rts
+            )
             # Tweaking dtr and rts was proposed by
             # https://github.com/thonny/thonny/pull/1187
             # but in some cases it messes up communication.
