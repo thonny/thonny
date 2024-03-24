@@ -215,11 +215,18 @@ def _check_bundle_with_tooltip_icon(widget: tk.Widget, tooltip: Optional[str]) -
     widget.grid(row=0, column=0, in_=frame, sticky="w")
     widget.lift()
 
-    icon = ttk.Label(frame, text=" ⓘ")
+    icon = ttk.Label(frame, text=" ⓘ", foreground="#3c81f7")
     icon.grid(row=0, column=1, in_=frame)
     ui_utils.create_tooltip(icon, tooltip)
 
     return frame
+
+
+def _ensure_pady(pady: Union[int, str, Tuple, None]) -> Union[int, str, Tuple]:
+    if pady is None:
+        return (0, ems_to_pixels(0.2))
+    else:
+        return pady
 
 
 def add_option_checkbox(
@@ -229,12 +236,15 @@ def add_option_checkbox(
     row: Optional[int] = None,
     column: int = 0,
     columnspan: int = 3,
-    pady: Union[Tuple, int, str] = 0,
+    pady: Union[Tuple, int, str, None] = None,
     padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> ttk.Checkbutton:
     if row is None:
         row = master.grid_size()[1]
+
+    pady = _ensure_pady(pady)
+
     variable = get_workbench().get_variable(option_name)
 
     checkbox = ttk.Checkbutton(master, text=description, variable=variable)
@@ -254,15 +264,18 @@ def add_option_combobox(
     row: Optional[int] = None,
     column: int = 0,
     label_columnspan: int = 1,
-    label_pady: Union[Tuple, int, str] = 0,
+    label_pady: Union[Tuple, int, str, None] = None,
     label_padx: Union[Tuple, int, str, None] = None,
     combobox_columnspan: int = 1,
-    combobox_pady: Union[Tuple, int, str] = 0,
+    combobox_pady: Union[Tuple, int, str, None] = None,
     combobox_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> ttk.Combobox:
     if row is None:
         row = master.grid_size()[1]
+
+    label_pady = _ensure_pady(label_pady)
+    combobox_pady = _ensure_pady(combobox_pady)
 
     if label_padx is None:
         label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
@@ -308,15 +321,18 @@ def add_option_entry(
     row: Optional[int] = None,
     column: int = 0,
     label_columnspan: int = 1,
-    label_pady: Union[Tuple, int, str] = 0,
+    label_pady: Union[Tuple, int, str, None] = None,
     label_padx: Union[Tuple, int, str, None] = None,
     entry_columnspan: int = 1,
-    entry_pady: Union[Tuple, int, str] = 0,
+    entry_pady: Union[Tuple, int, str, None] = None,
     entry_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> ttk.Entry:
     if row is None:
         row = master.grid_size()[1]
+
+    label_pady = _ensure_pady(label_pady)
+    entry_pady = _ensure_pady(entry_pady)
 
     if label_padx is None:
         label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
@@ -352,15 +368,18 @@ def add_label_and_url(
     row: Optional[int] = None,
     column: int = 0,
     label_columnspan: int = 1,
-    label_pady: Union[Tuple, int, str] = 0,
+    label_pady: Union[Tuple, int, str, None] = None,
     label_padx: Union[Tuple, int, str, None] = None,
     url_columnspan: int = 1,
-    url_pady: Union[Tuple, int, str] = 0,
+    url_pady: Union[Tuple, int, str, None] = None,
     url_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> ttk.Label:
     if row is None:
         row = master.grid_size()[1]
+
+    label_pady = _ensure_pady(label_pady)
+    url_pady = _ensure_pady(url_pady)
 
     if label_padx is None:
         label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
@@ -391,16 +410,18 @@ def add_label_and_text(
     row: Optional[int] = None,
     column: int = 0,
     label_columnspan: int = 1,
-    label_pady: Union[Tuple, int, str] = 0,
+    label_pady: Union[Tuple, int, str, None] = None,
     label_padx: Union[Tuple, int, str, None] = None,
     text_columnspan: int = 1,
-    text_pady: Union[Tuple, int, str] = 0,
+    text_pady: Union[Tuple, int, str, None] = None,
     text_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> ttk.Label:
     if row is None:
         row = master.grid_size()[1]
 
+    label_pady = _ensure_pady(label_pady)
+    text_pady = _ensure_pady(text_pady)
     if label_padx is None:
         label_padx = (0, ems_to_pixels(LABEL_PADDING_EMS))
 
@@ -432,15 +453,18 @@ def add_label_and_box_for_list_of_strings(
     row: Optional[int] = None,
     column: int = 0,
     label_columnspan: int = 3,
-    label_pady: Union[Tuple, int, str] = 0,
+    label_pady: Union[Tuple, int, str, None] = None,
     label_padx: Union[Tuple, int, str] = 0,
     box_columnspan: int = 3,
-    box_pady: Union[Tuple, int, str] = 0,
+    box_pady: Union[Tuple, int, str, None] = None,
     box_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
 ) -> TextFrame:
     if row is None:
         row = master.grid_size()[1]
+
+    label_pady = _ensure_pady(label_pady)
+    box_pady = _ensure_pady(box_pady)
 
     label = ttk.Label(master, text=description)
     widget = _check_bundle_with_tooltip_icon(label, tooltip)
@@ -483,11 +507,13 @@ def add_text_row(
     row: Optional[int] = None,
     column: int = 0,
     columnspan: int = 3,
-    pady: Union[Tuple, int, str] = 0,
+    pady: Union[Tuple, int, str, None] = None,
     padx: Union[Tuple, int, str] = 0,
 ) -> ttk.Label:
     if row is None:
         row = master.grid_size()[1]
+
+    pady = _ensure_pady(pady)
 
     label = ttk.Label(master, text=description, font=font)
     label.grid(row=row, column=column, columnspan=columnspan, sticky="w", pady=pady, padx=padx)
