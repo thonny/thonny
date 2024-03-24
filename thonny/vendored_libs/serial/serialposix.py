@@ -283,6 +283,7 @@ TIOCMSET = getattr(termios, 'TIOCMSET', 0x5418)
 # TIOCM_LE = getattr(termios, 'TIOCM_LE', 0x001)
 TIOCM_DTR = getattr(termios, 'TIOCM_DTR', 0x002)
 TIOCM_RTS = getattr(termios, 'TIOCM_RTS', 0x004)
+TIOCM_DTRRTS = getattr(termios, 'TIOCM_DTR', 0x002) | getattr(termios, 'TIOCM_RTS', 0x004)
 # TIOCM_ST = getattr(termios, 'TIOCM_ST', 0x008)
 # TIOCM_SR = getattr(termios, 'TIOCM_SR', 0x010)
 
@@ -303,6 +304,7 @@ TIOCOUTQ = getattr(termios, 'TIOCOUTQ', 0x5411)
 TIOCM_zero_str = struct.pack('I', 0)
 TIOCM_RTS_str = struct.pack('I', TIOCM_RTS)
 TIOCM_DTR_str = struct.pack('I', TIOCM_DTR)
+TIOCM_DTRRTS_str = struct.pack('I', TIOCM_DTRRTS)
 
 TIOCSBRK = getattr(termios, 'TIOCSBRK', 0x5427)
 TIOCCBRK = getattr(termios, 'TIOCCBRK', 0x5428)
@@ -339,10 +341,13 @@ class Serial(SerialBase, PlatformSpecific):
             self._reconfigure_port(force_update=True)
 
             try:
-                if not self._dsrdtr:
-                    self._update_dtr_state()
-                if not self._rtscts:
-                    self._update_rts_state()
+                if (not self._rtscts) and (not self._dsrdtr):
+                    self._update_rts_and_dtr_state()
+                else:
+                    if not self._rtscts:
+                        self._update_rts_state()
+                    if not self._dsrdtr:
+                        self._update_dtr_state()
             except IOError as e:
                 # ignore Invalid argument and Inappropriate ioctl
                 if e.errno not in (errno.EINVAL, errno.ENOTTY):
@@ -706,6 +711,21 @@ class Serial(SerialBase, PlatformSpecific):
         if not self.is_open:
             raise PortNotOpenError()
         termios.tcsendbreak(self.fd, int(duration / 0.25))
+
+    def _update_rts_and_dtr_state(self):
+        """Set terminal status line: Request To Send and Data Terminal Ready"""
+        if self._dtr_state:
+            if self._rts_state:
+                fcntl.ioctl(self.fd, TIOCMBIS, TIOCM_DTRRTS_str )
+            else:
+                fcntl.ioctl(self.fd, TIOCMBIS, TIOCM_DTR_str)
+                fcntl.ioctl(self.fd, TIOCMBIC, TIOCM_RTS_str)
+        else:
+            if self._rts_state:
+                fcntl.ioctl(self.fd, TIOCMBIC, TIOCM_DTR_str)
+                fcntl.ioctl(self.fd, TIOCMBIS, TIOCM_RTS_str)
+            else:
+                fcntl.ioctl(self.fd, TIOCMBIC, TIOCM_DTRRTS_str )
 
     def _update_rts_state(self):
         """Set terminal status line: Request To Send"""
