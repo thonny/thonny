@@ -207,6 +207,21 @@ class ConfigurationPage(ttk.Frame):
         pass
 
 
+def _check_bundle_with_tooltip_icon(widget: tk.Widget, tooltip: Optional[str]) -> tk.Widget:
+    if tooltip is None:
+        return widget
+
+    frame = ttk.Frame(widget.master)
+    widget.grid(row=0, column=0, in_=frame, sticky="w")
+    widget.lift()
+
+    icon = ttk.Label(frame, text=" ⓘ")
+    icon.grid(row=0, column=1, in_=frame)
+    ui_utils.create_tooltip(icon, tooltip)
+
+    return frame
+
+
 def add_option_checkbox(
     master: tk.Widget,
     option_name: str,
@@ -223,7 +238,8 @@ def add_option_checkbox(
     variable = get_workbench().get_variable(option_name)
 
     checkbox = ttk.Checkbutton(master, text=description, variable=variable)
-    checkbox.grid(row=row, column=column, columnspan=columnspan, sticky=tk.W, padx=padx, pady=pady)
+    widget = _check_bundle_with_tooltip_icon(checkbox, tooltip)
+    widget.grid(row=row, column=column, columnspan=columnspan, sticky=tk.W, padx=padx, pady=pady)
 
     return checkbox
 
@@ -271,7 +287,8 @@ def add_option_combobox(
         height=height,
         width=width,
     )
-    combobox.grid(
+    widget = _check_bundle_with_tooltip_icon(combobox, tooltip)
+    widget.grid(
         row=row,
         column=column + 1,
         columnspan=combobox_columnspan,
@@ -315,7 +332,8 @@ def add_option_entry(
         textvariable=variable,
         width=width,
     )
-    entry.grid(
+    widget = _check_bundle_with_tooltip_icon(entry, tooltip)
+    widget.grid(
         row=row,
         column=column + 1,
         columnspan=entry_columnspan,
@@ -353,7 +371,8 @@ def add_label_and_url(
     )
 
     url_label = create_url_label(master, url=url)
-    url_label.grid(
+    widget = _check_bundle_with_tooltip_icon(url_label, tooltip)
+    widget.grid(
         row=row,
         column=column + 1,
         columnspan=url_columnspan,
@@ -391,7 +410,8 @@ def add_label_and_text(
     )
 
     text_label = ttk.Label(master, text=text)
-    text_label.grid(
+    widget = _check_bundle_with_tooltip_icon(text_label, tooltip)
+    widget.grid(
         row=row,
         column=column + 1,
         columnspan=text_columnspan,
@@ -423,7 +443,8 @@ def add_label_and_box_for_list_of_strings(
         row = master.grid_size()[1]
 
     label = ttk.Label(master, text=description)
-    label.grid(
+    widget = _check_bundle_with_tooltip_icon(label, tooltip)
+    widget.grid(
         row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
     )
 
