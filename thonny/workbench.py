@@ -1636,6 +1636,9 @@ class Workbench(tk.Tk):
         # Need to return Any, otherwise each typed call site needs to cast
         return self._configuration_manager.get_option(name, default)
 
+    def has_option(self, name: str) -> bool:
+        return self._configuration_manager.get_option(name, "missingOption") != "missingOption"
+
     def set_option(self, name: str, value: Any) -> None:
         self._configuration_manager.set_option(name, value)
 

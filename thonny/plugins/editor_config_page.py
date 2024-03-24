@@ -1,6 +1,4 @@
-import tkinter as tk
 from logging import getLogger
-from tkinter import ttk
 from typing import List
 
 from thonny import get_shell, get_workbench
@@ -11,7 +9,6 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
-from thonny.ui_utils import ems_to_pixels
 
 logger = getLogger(__name__)
 
@@ -20,19 +17,11 @@ class EditorConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
 
-        group_spacing = ems_to_pixels(2)
-
-        try:
+        if get_workbench().has_option("view.name_highlighting"):
             add_option_checkbox(self, "view.name_highlighting", tr("Highlight matching names"))
-        except Exception:
-            # name matcher may have been disabled
-            logger.warning("Couldn't create name matcher checkbox")
 
-        try:
+        if get_workbench().has_option("view.locals_highlighting"):
             add_option_checkbox(self, "view.locals_highlighting", tr("Highlight local variables"))
-        except Exception:
-            # locals highlighter may have been disabled
-            logger.warning("Couldn't create name locals highlighter checkbox")
 
         add_option_checkbox(self, "view.paren_highlighting", tr("Highlight parentheses"))
         add_option_checkbox(self, "view.syntax_coloring", tr("Highlight syntax elements"))
@@ -72,9 +61,9 @@ class EditorConfigurationPage(ConfigurationPage):
             tr("Request completions with Tab-key in Shell"),
         )
 
-        add_option_checkbox(
-            self, "view.show_line_numbers", tr("Show line numbers"), pady=(group_spacing, 0)
-        )
+        add_vertical_separator(self)
+
+        add_option_checkbox(self, "view.show_line_numbers", tr("Show line numbers"))
         add_option_checkbox(
             self,
             f"file.make_saved_shebang_scripts_executable",

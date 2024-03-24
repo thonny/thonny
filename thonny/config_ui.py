@@ -13,7 +13,6 @@ from thonny.ui_utils import CommonDialog, MappingCombobox, create_url_label, ems
 logger = getLogger(__name__)
 
 LABEL_PADDING_EMS = 1
-SEPARATOR_HEIGHT_EMS = 2
 
 
 class ConfigurationDialog(CommonDialog):
@@ -224,7 +223,7 @@ def _check_bundle_with_tooltip_icon(widget: tk.Widget, tooltip: Optional[str]) -
 
 def _ensure_pady(pady: Union[int, str, Tuple, None]) -> Union[int, str, Tuple]:
     if pady is None:
-        return (0, ems_to_pixels(0.2))
+        return (0, ems_to_pixels(0.1))
     else:
         return pady
 
@@ -448,7 +447,7 @@ def add_label_and_box_for_list_of_strings(
     master: tk.Widget,
     description: str,
     lines: List[str],
-    height: int = 15,
+    height: int = 4,
     width: Optional[int] = None,
     row: Optional[int] = None,
     column: int = 0,
@@ -531,7 +530,7 @@ def add_vertical_separator(
         row = master.grid_size()[1]
 
     if height is None:
-        height = ems_to_pixels(SEPARATOR_HEIGHT_EMS)
+        height = ems_to_pixels(1)
 
     frame = ttk.Frame(master, height=height, width="1c")
     frame.grid(row=row, column=column)
