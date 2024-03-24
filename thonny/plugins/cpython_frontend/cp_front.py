@@ -366,14 +366,6 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
     def should_restart(self, changed_options: List[str]):
         return self._configuration_variable.modified
 
-    def apply(self, changed_options: List[str]):
-        if not self.should_restart(changed_options):
-            return
-
-        path = self._configuration_variable.get()
-        if os.path.isfile(path):
-            get_workbench().set_option("LocalCPython.executable", path)
-
 
 def _get_interpreters():
     result = set()

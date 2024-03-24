@@ -1340,10 +1340,10 @@ class Workbench(tk.Tk):
 
         self._syntax_themes[name] = (parent, settings)
 
-    def get_usable_ui_theme_names(self) -> Sequence[str]:
+    def get_usable_ui_theme_names(self) -> List[str]:
         return sorted([name for name in self._ui_themes if self._ui_themes[name][0] is not None])
 
-    def get_syntax_theme_names(self) -> Sequence[str]:
+    def get_syntax_theme_names(self) -> List[str]:
         return sorted(self._syntax_themes.keys())
 
     def get_ui_mode(self) -> str:
@@ -1628,6 +1628,9 @@ class Workbench(tk.Tk):
 
     def get_backends(self) -> Dict[str, BackendSpec]:
         return self._backends
+
+    def get_options_snapshot(self) -> Dict[str, Any]:
+        return self._configuration_manager.get_snapshot()
 
     def get_option(self, name: str, default=None) -> Any:
         # Need to return Any, otherwise each typed call site needs to cast

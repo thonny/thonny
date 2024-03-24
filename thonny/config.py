@@ -7,6 +7,7 @@ import os.path
 import tkinter as tk
 from configparser import ConfigParser
 from logging import exception, getLogger
+from typing import Any, Dict
 
 logger = getLogger(__name__)
 
@@ -37,7 +38,7 @@ class ConfigurationManager:
         self._filename = filename
         self._defaults = {}
         self._defaults_overrides_str = {}
-        self._variables = {}  # Tk variables
+        self._variables: Dict[str, tk.Variable] = {}
 
         if os.path.exists(self._filename):
             with open(self._filename, "r", encoding="UTF-8") as fp:
@@ -144,6 +145,9 @@ class ConfigurationManager:
                 )
             self._variables[name] = var
             return var
+
+    def get_snapshot(self) -> Dict[str, Any]:
+        return {name: self.get_option(name) for name in self._defaults}
 
     def save(self):
         # save all tk variables

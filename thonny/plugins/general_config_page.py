@@ -4,7 +4,7 @@ from typing import List
 from thonny import get_workbench, languages
 from thonny.config_ui import (
     ConfigurationPage,
-    add_option_box_for_list_of_strings,
+    add_label_and_box_for_list_of_strings,
     add_option_checkbox,
     add_option_combobox,
     add_text_row,
@@ -79,8 +79,10 @@ class GeneralConfigurationPage(ConfigurationPage):
 
         add_vertical_separator(self)
 
-        self.env_box = add_option_box_for_list_of_strings(
-            self, "general.environment", tr("Environment variables (one KEY=VALUE per line)")
+        self.env_box = add_label_and_box_for_list_of_strings(
+            self,
+            tr("Environment variables (one KEY=VALUE per line)"),
+            get_workbench().get_option("general.environment"),
         )
         self.rowconfigure(get_last_grid_row(self), weight=1)
         self.columnconfigure(1, weight=1)

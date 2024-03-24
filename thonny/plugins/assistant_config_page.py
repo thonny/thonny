@@ -3,7 +3,7 @@ from typing import List
 from thonny import get_workbench
 from thonny.config_ui import (
     ConfigurationPage,
-    add_option_box_for_list_of_strings,
+    add_label_and_box_for_list_of_strings,
     add_option_checkbox,
     add_vertical_separator,
 )
@@ -34,8 +34,10 @@ class AssistantConfigPage(ConfigurationPage):
             add_option_checkbox(self, "assistance.use_mypy", tr("Perform MyPy checks"))
 
         add_vertical_separator(self)
-        self.disabled_checks_box = add_option_box_for_list_of_strings(
-            self, "assistance.disabled_checks", tr("Disabled checks (one id per line)")
+        self.disabled_checks_box = add_label_and_box_for_list_of_strings(
+            self,
+            tr("Disabled checks (one id per line)"),
+            get_workbench().get_option("assistance.disabled_checks"),
         )
         self.columnconfigure(1, weight=1)
         self.rowconfigure(get_last_grid_row(self), weight=1)

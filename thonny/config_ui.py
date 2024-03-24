@@ -29,6 +29,8 @@ class ConfigurationDialog(CommonDialog):
         self.backend_restart_required = False
         self.gui_restart_required = False
 
+        self._initial_option_values = get_workbench().get_options_snapshot()
+
         main_frame = ttk.Frame(self)  # otherwise there is wrong color background with clam
         main_frame.grid(row=0, column=0, sticky=tk.NSEW)
         main_frame.columnconfigure(0, weight=1)
@@ -90,10 +92,19 @@ class ConfigurationDialog(CommonDialog):
             if self._page_records[i][0] == key:
                 self._notebook.select(tab)
 
+    def get_changed_options(self) -> List[str]:
+        return [
+            name
+            for name in self._initial_option_values
+            if self._initial_option_values[name] != get_workbench().get_option(name)
+        ]
+
     def _ok(self, event=None):
+        changed_options = self.get_changed_options()
         for _, title, page in self._page_records:
             try:
-                changed_options = TODO
+                logger.info("Applying changed options: %r", changed_options)
+
                 # Before 5.0, method apply did not have changed_options parameter
                 from inspect import signature
 
@@ -101,7 +112,10 @@ class ConfigurationDialog(CommonDialog):
                     result = page.apply(changed_options)
                 else:
                     result = page.apply()
-                if not result:
+
+                # note that it matters whether the result *is* False, or is convertible to False
+                if result is False:
+                    logger.info("%s refused apply", title)
                     return
             except Exception:
                 get_workbench().report_exception("Error when applying options in " + title)
@@ -109,6 +123,11 @@ class ConfigurationDialog(CommonDialog):
         self.destroy()
 
     def _cancel(self, event=None):
+        changed_options = self.get_changed_options()
+        logger.info("Reverting changed options %r", changed_options)
+        for name in changed_options:
+            get_workbench().set_option(name, self._initial_option_values[name])
+
         for _, title, page in self._page_records:
             try:
                 page.cancel()
@@ -127,7 +146,7 @@ class ConfigurationPage(ttk.Frame):
 
     It's not required that configuration pages inherit from this class
     (can be any widget), but the class must have constructor with single parameter
-    for getting the master."""
+    for providing the master and methods apply and cancel"""
 
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -384,10 +403,10 @@ def add_label_and_text(
     return text_label
 
 
-def add_option_box_for_list_of_strings(
+def add_label_and_box_for_list_of_strings(
     master: tk.Widget,
-    option_name: str,
     description: str,
+    lines: List[str],
     height: int = 15,
     width: Optional[int] = None,
     row: Optional[int] = None,
@@ -431,7 +450,6 @@ def add_option_box_for_list_of_strings(
         padx=box_padx,
     )
 
-    lines = get_workbench().get_option(option_name, [])
     text_frame.text.insert("1.0", "\n".join(lines) + "\n")
 
     return text_frame

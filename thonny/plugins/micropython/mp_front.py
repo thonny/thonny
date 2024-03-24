@@ -715,7 +715,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             return None
         return self._ports_by_desc[port_desc]
 
-    def is_modified(self):
+    def _connection_is_modified(self):
         return (
             self._port_desc_variable.modified
             or self.webrepl_selected()
@@ -728,10 +728,10 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
         return self.get_selected_port_name() == WEBREPL_PORT_VALUE
 
     def should_restart(self, changed_options: List[str]):
-        return self.is_modified() or self._has_opened_python_flasher
+        return self._connection_is_modified() or self._has_opened_python_flasher
 
     def apply(self, changed_options: List[str]):
-        if not self.is_modified():
+        if not self._connection_is_modified():
             return
 
         else:
