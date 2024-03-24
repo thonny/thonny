@@ -451,7 +451,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
         self._init_options_page()
         self._init_advanced_page()
 
-        self.notebook.select(self.connection_page)
+        self.notebook.select(self.advanced_page)
 
     def _init_connection_page(self) -> None:
         intro_text = self._get_intro_text()
@@ -545,18 +545,21 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
     def _init_advanced_page(self) -> None:
         add_text_row(
             self.advanced_page,
-            "Depending on the device and OS, different DTR and RTS signals\n"
-            "may be required for optimal operation over a USB connection." + "\n",
+            "Depending on the device, serial driver and OS,\n"
+            "specific DTR/RTS combination may be required for optimal operation." + "\n",
         )
+
+        dtr_rts_width = 60
 
         add_option_combobox(
             self.advanced_page,
             f"{self.backend_name}.dtr",
             "DTR",
             choices={
-                "True (default)": True,
-                "False": False,
+                "True   (default)": True,
+                "False   (may be useful together with RTS=False)": False,
             },
+            width=dtr_rts_width,
         )
 
         add_option_combobox(
@@ -564,9 +567,10 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             f"{self.backend_name}.rts",
             "RTS",
             choices={
-                "True (default)": True,
-                "False": False,
+                "True   (default)": True,
+                "False   (may prevent reset on connect/disconnect)": False,
             },
+            width=dtr_rts_width,
         )
 
     def _keep_refreshing_ports(self, first_time=False):
@@ -653,7 +657,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             return self._serial_frame
 
         self._serial_frame = TreeFrame(
-            self.connection_page, columns=("attribute", "value"), height=5
+            self.connection_page, columns=("attribute", "value"), height=5, show_scrollbar=False
         )
         tree = self._serial_frame.tree
 
