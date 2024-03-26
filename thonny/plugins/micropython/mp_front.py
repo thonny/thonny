@@ -142,6 +142,10 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         if self._port is None:
             return
 
+        # refresh the ports cache, so that the next uncached request (in BackendRestart handler)
+        # is less likely to race with the back-end process trying to open a port and getting a
+        # PermissionError (has happened in Windows)
+        list_serial_ports(max_cache_age=0, skip_logging=False)
         super()._start_background_process(clean=clean, extra_args=extra_args)
 
     def _get_launcher_with_args(self):
