@@ -1166,13 +1166,15 @@ def _list_serial_ports_uncached(skip_logging: bool = False):
 
         irrelevant = ["/dev/cu.Bluetooth-Incoming-Port", "/dev/cu.iPhone-WirelessiAP"]
         result = []
-        for p in comports():
+        for p in unfiltered_result:
             if p.device not in irrelevant:
                 result.append(p)
 
         return result
     finally:
         os.path.islink = old_islink
+        if not skip_logging:
+            logger.info("Done listing serial ports")
 
 
 def port_exists(device):
