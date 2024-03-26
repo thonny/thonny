@@ -255,7 +255,7 @@ def add_option_checkbox(
 
 def add_option_combobox(
     master: tk.Widget,
-    option_name: str,
+    option_name_or_variable: Union[tk.Variable, str, None],
     description: str,
     choices: Union[List[Any], Dict[str, Any]],
     height: int = 15,
@@ -269,7 +269,7 @@ def add_option_combobox(
     combobox_pady: Union[Tuple, int, str, None] = None,
     combobox_padx: Union[Tuple, int, str] = 0,
     tooltip: Optional[str] = None,
-) -> ttk.Combobox:
+) -> MappingCombobox:
     if row is None:
         row = master.grid_size()[1]
 
@@ -290,7 +290,14 @@ def add_option_combobox(
         assert isinstance(choices, dict)
         mapping = choices
 
-    variable = get_workbench().get_variable(option_name)
+    if isinstance(option_name_or_variable, str):
+        variable = get_workbench().get_variable(option_name_or_variable)
+    elif isinstance(option_name_or_variable, tk.Variable):
+        variable = option_name_or_variable
+    else:
+        assert option_name_or_variable is None
+        variable = option_name_or_variable
+
     combobox = MappingCombobox(
         master,
         mapping=mapping,
@@ -308,6 +315,9 @@ def add_option_combobox(
         pady=combobox_pady,
         padx=combobox_padx,
     )
+
+    combobox.select_clear()
+    combobox.bind("<<ComboboxSelected>>", lambda _: combobox.select_clear(), True)
 
     return combobox
 
