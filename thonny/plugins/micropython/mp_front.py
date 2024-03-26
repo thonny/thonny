@@ -1166,6 +1166,7 @@ def _list_serial_ports_uncached(skip_logging: bool = False):
 
         irrelevant = ["/dev/cu.Bluetooth-Incoming-Port", "/dev/cu.iPhone-WirelessiAP"]
         result = []
+        unfiltered_result = comports()
         for p in unfiltered_result:
             if p.device not in irrelevant:
                 result.append(p)
