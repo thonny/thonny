@@ -546,32 +546,42 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
         add_text_row(
             self.advanced_page,
             "Depending on the device, serial driver and OS,\n"
-            "specific DTR/RTS combination may be required for optimal operation." + "\n",
+            "specific DTR / RTS combination may be required for optimal operation." + "\n",
         )
 
-        dtr_rts_width = 60
-
-        add_option_combobox(
+        # dtr and rts options are stored separately, but it's more useful to present
+        # and describe the combination
+        dtr_rts_combobox = add_option_combobox(
             self.advanced_page,
-            f"{self.backend_name}.dtr",
-            "DTR",
+            None,
+            "DTR / RTS",
             choices={
-                "True   (default)": True,
-                "False   (may be useful together with RTS=False)": False,
+                "True / True   (best for most boards, may reset some ESP-s)": (True, True),
+                "True / False   (best for some ESP-s, may start bootloader on hard reset)": (
+                    True,
+                    False,
+                ),
+                "False / True   (bad for most boards)": (False, True),
+                "False / False   (best for most ESP-s, may reset some)": (False, False),
             },
-            width=dtr_rts_width,
+            width=60,
         )
 
-        add_option_combobox(
-            self.advanced_page,
-            f"{self.backend_name}.rts",
-            "RTS",
-            choices={
-                "True   (default)": True,
-                "False   (may prevent reset on connect/disconnect)": False,
-            },
-            width=dtr_rts_width,
-        )
+        dtr = get_workbench().get_option(self.backend_name + ".dtr")
+        if dtr is None:
+            dtr = True
+        rts = get_workbench().get_option(self.backend_name + ".rts")
+        if rts is None:
+            rts = True
+
+        dtr_rts_combobox.select_value((dtr, rts))
+
+        def set_dtr_rts_options(event):
+            dtr, rts = dtr_rts_combobox.get_selected_value()
+            get_workbench().set_option(self.backend_name + ".dtr", dtr)
+            get_workbench().set_option(self.backend_name + ".rts", rts)
+
+        dtr_rts_combobox.bind("<<ComboboxSelected>>", set_dtr_rts_options, True)
 
     def _keep_refreshing_ports(self, first_time=False):
         ports_by_desc_before = self._ports_by_desc.copy()
