@@ -89,6 +89,9 @@ INTERRUPT_SEQUENCE = "<Control-c>"
 CSI_TERMINATOR = re.compile("[@-~]")
 OSC_TERMINATOR = re.compile(r"\a|\x1B\\")
 
+TERMINATION_TIMEOUT = 2
+TERMINATION_POLL_INTERVAL = 0.02
+
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
 
@@ -1178,8 +1181,19 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def _close_backend(self):
         if self._proc is not None and self._proc.poll() is None:
-            logger.info("Killing backend process")
-            self._proc.kill()
+            logger.info("Trying to terminate backend process")
+            self._proc.terminate()
+            # Wait a bit
+            for i in range(int(TERMINATION_TIMEOUT / TERMINATION_POLL_INTERVAL)):
+                time.sleep(TERMINATION_POLL_INTERVAL)
+                if self._proc.poll() is not None:
+                    logger.info("Terminated in %s seconds", (i + 1) * TERMINATION_POLL_INTERVAL)
+                    break
+            else:
+                logger.info(
+                    "Could terminate backend process in %s seconds. Will kill.", TERMINATION_TIMEOUT
+                )
+                self._proc.kill()
 
         self._proc = None
         self._response_queue = None
