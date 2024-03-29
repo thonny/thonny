@@ -154,7 +154,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "port": self._port,
             "dtr": get_workbench().get_option(self.backend_name + ".dtr"),
             "rts": get_workbench().get_option(self.backend_name + ".rts"),
-            "submit_mode": get_workbench().get_option(self.backend_name + ".submit_mode"),
+            "submit_mode": self._get_submit_mode(),
+            "write_block_size": self._get_write_block_size(),
+            "write_block_delay": self._get_write_block_delay(),
             "interrupt_on_connect": get_workbench().get_option(
                 self.backend_name + ".interrupt_on_connect"
             ),
@@ -186,11 +188,23 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
         return thonny.plugins.micropython.bare_metal_backend.__file__
 
+    def _get_submit_mode(self):
+        if self._port == WEBREPL_PORT_VALUE:
+            return get_workbench().get_option(self.backend_name + ".webrepl_submit_mode")
+        else:
+            return get_workbench().get_option(self.backend_name + ".submit_mode")
+
     def _get_write_block_size(self):
-        return get_workbench().get_option(self.backend_name + ".write_block_size")
+        if self._port == WEBREPL_PORT_VALUE:
+            return get_workbench().get_option(self.backend_name + ".webrepl_write_block_size")
+        else:
+            return get_workbench().get_option(self.backend_name + ".write_block_size")
 
     def _get_write_block_delay(self):
-        return get_workbench().get_option(self.backend_name + ".write_block_delay")
+        if self._port == WEBREPL_PORT_VALUE:
+            return get_workbench().get_option(self.backend_name + ".webrepl_write_block_delay")
+        else:
+            return get_workbench().get_option(self.backend_name + ".write_block_delay")
 
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
@@ -1230,9 +1244,12 @@ def add_micropython_backend(
     validate_time=False,
     sync_time=None,
     local_rtc=True,
-    submit_mode=None,
-    write_block_size=None,
-    write_block_delay=None,
+    submit_mode="raw_paste",
+    write_block_size=256,
+    write_block_delay=0.01,
+    webrepl_submit_mode="paste",
+    webrepl_write_block_size=255,
+    webrepl_write_block_delay=0.5,
     dtr=True,
     rts=True,
 ):
@@ -1243,6 +1260,9 @@ def add_micropython_backend(
         get_workbench().set_default(name + ".submit_mode", submit_mode)
         get_workbench().set_default(name + ".write_block_size", write_block_size)
         get_workbench().set_default(name + ".write_block_delay", write_block_delay)
+        get_workbench().set_default(name + ".webrepl_submit_mode", webrepl_submit_mode)
+        get_workbench().set_default(name + ".webrepl_write_block_size", webrepl_write_block_size)
+        get_workbench().set_default(name + ".webrepl_write_block_delay", webrepl_write_block_delay)
         get_workbench().set_default(name + ".dtr", dtr)
         get_workbench().set_default(name + ".rts", rts)
         get_workbench().set_default(name + ".interrupt_on_connect", True)
