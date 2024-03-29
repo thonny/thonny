@@ -11,10 +11,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.config_ui import (
+    LABEL_PADDING_EMS,
     add_option_checkbox,
     add_option_combobox,
     add_option_entry,
     add_text_row,
+    add_vertical_separator,
 )
 from thonny.languages import tr
 from thonny.plugins.backend_config_page import (
@@ -24,7 +26,13 @@ from thonny.plugins.backend_config_page import (
     get_ssh_password,
 )
 from thonny.running import SubprocessProxy
-from thonny.ui_utils import TreeFrame, create_string_var, create_url_label, ems_to_pixels
+from thonny.ui_utils import (
+    TreeFrame,
+    create_string_var,
+    create_url_label,
+    ems_to_pixels,
+    get_last_grid_row,
+)
 
 logger = getLogger(__name__)
 
@@ -160,8 +168,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "interrupt_on_connect": get_workbench().get_option(
                 self.backend_name + ".interrupt_on_connect"
             ),
-            "write_block_size": self._get_write_block_size(),
-            "write_block_delay": self._get_write_block_delay(),
             "proxy_class": self.__class__.__name__,
         }
         if self._port == WEBREPL_PORT_VALUE:
@@ -463,13 +469,13 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
         self.connection_page = self.create_and_add_empty_page(tr("Connection"))
         self.options_page = self.create_and_add_empty_page(tr("Options"))
-        self.advanced_page = self.create_and_add_empty_page(tr("Advanced"))
+        self.advanced_page = self.create_and_add_empty_page(tr("Advanced"), weighty_column=5)
 
         self._init_connection_page()
         self._init_options_page()
         self._init_advanced_page()
 
-        self.notebook.select(self.advanced_page)
+        self.notebook.select(self.connection_page)
 
     def _init_connection_page(self) -> None:
         intro_text = self._get_intro_text()
@@ -563,8 +569,8 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
     def _init_advanced_page(self) -> None:
         add_text_row(
             self.advanced_page,
-            "Depending on the device, serial driver and OS,\n"
-            "specific DTR / RTS combination may be required for optimal operation." + "\n",
+            "Your device, serial driver and OS may require specific DTR / RTS signals for proper connection",
+            columnspan=6,
         )
 
         # dtr and rts options are stored separately, but it's more useful to present
@@ -586,6 +592,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
                 "False / False   (best for most ESP-s on Windows)": (False, False),
             },
             width=60,
+            combobox_columnspan=5,
         )
 
         dtr = get_workbench().get_option(self.backend_name + ".dtr")
@@ -603,6 +610,113 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             get_workbench().set_option(self.backend_name + ".rts", rts)
 
         dtr_rts_combobox.bind("<<ComboboxSelected>>", set_dtr_rts_options, True)
+
+        # Submit modes
+        def add_submit_mode_widgets(
+            option_name_qualifier: str,
+            raw_paste_comment: str,
+            paste_comment: str,
+            raw_comment: str,
+        ):
+            mode_combobox = add_option_combobox(
+                self.advanced_page,
+                f"{self.backend_name}.{option_name_qualifier}submit_mode",
+                "Submit mode",
+                choices={
+                    f"raw-paste   ({raw_paste_comment})": "raw_paste",
+                    f"paste   ({paste_comment})": "paste",
+                    f"raw   ({raw_comment})": "raw",
+                },
+                column=0,
+                width=27,
+            )
+
+            row = get_last_grid_row(self.advanced_page)
+
+            size_combobox = add_option_combobox(
+                self.advanced_page,
+                f"{self.backend_name}.{option_name_qualifier}write_block_size",
+                "block size",
+                choices={
+                    f"512": 512,
+                    f"256": 256,
+                    f"255": 255,
+                    f"128": 128,
+                    f"64": 64,
+                    f"32": 32,
+                    f"30": 30,
+                },
+                width=4,
+                label_padx=ems_to_pixels(0.5),
+                row=row,
+                column=2,
+            )
+            size_label = self.advanced_page.grid_slaves(row=row, column=2)[0]
+
+            delay_combobox = add_option_combobox(
+                self.advanced_page,
+                f"{self.backend_name}.{option_name_qualifier}write_block_delay",
+                "block delay",
+                choices={
+                    f"0.01": 0.01,
+                    f"0.02": 0.02,
+                    f"0.05": 0.05,
+                    f"0.1": 0.1,
+                    f"0.2": 0.2,
+                    f"0.5": 0.5,
+                },
+                width=4,
+                label_padx=ems_to_pixels(0.5),
+                row=row,
+                column=4,
+            )
+            delay_label = self.advanced_page.grid_slaves(row=row, column=4)[0]
+
+            def update_visible_fields(event=None):
+                if mode_combobox.get_selected_value() == "raw":
+                    delay_combobox.grid()
+                    delay_label.grid()
+                else:
+                    delay_combobox.grid_remove()
+                    delay_label.grid_remove()
+
+                if mode_combobox.get_selected_value() in ["paste", "raw"]:
+                    size_combobox.grid()
+                    size_label.grid()
+                else:
+                    size_combobox.grid_remove()
+                    size_label.grid_remove()
+
+            mode_combobox.bind("<<ComboboxSelected>>", update_visible_fields, True)
+            update_visible_fields()
+
+        add_vertical_separator(self.advanced_page)
+
+        add_text_row(
+            self.advanced_page,
+            f"In case of serial communication errors, try different modes of sending commands to {self.get_firmware_name()} REPL",
+            columnspan=6,
+        )
+
+        add_submit_mode_widgets(
+            "", raw_paste_comment="fastest", paste_comment="next to try", raw_comment="slowest"
+        )
+
+        if self.allow_webrepl:
+            add_vertical_separator(self.advanced_page)
+
+            add_text_row(
+                self.advanced_page,
+                f"WebREPL connection may require different submit mode",
+                columnspan=6,
+            )
+
+            add_submit_mode_widgets(
+                "webrepl_",
+                raw_paste_comment="probably doesn't work",
+                paste_comment="try with blocks of 255 bytes",
+                raw_comment="may require long delays",
+            )
 
     def _keep_refreshing_ports(self, first_time=False):
         ports_by_desc_before = self._ports_by_desc.copy()
