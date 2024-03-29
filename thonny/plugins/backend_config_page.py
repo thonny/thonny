@@ -37,9 +37,9 @@ class TabbedBackendDetailsConfigurationPage(BackendDetailsConfigPage):
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(row=0, column=0, sticky="nsew")
 
-    def create_and_add_empty_page(self, caption: str) -> ttk.Frame:
+    def create_and_add_empty_page(self, caption: str, weighty_column=1) -> ttk.Frame:
         page = ttk.Frame(self.notebook, padding=self.get_tab_content_padding())
-        page.columnconfigure(1, weight=1)
+        page.columnconfigure(weighty_column, weight=1)
         self.notebook.add(page, text=caption)
         return page
 
@@ -100,7 +100,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
         self._combo.state(["!disabled", "readonly"])
 
-        self.content_frame = tk.Frame(self, background="red")
+        self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=2, column=0, sticky="nsew")
         self.content_frame.columnconfigure(0, weight=1)
         self.content_frame.rowconfigure(0, weight=1)
