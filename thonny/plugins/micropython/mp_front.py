@@ -560,13 +560,16 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             None,
             "DTR / RTS",
             choices={
-                "True / True   (best for most boards, may reset some ESP-s)": (True, True),
-                "True / False   (best for some ESP-s, may start bootloader on hard reset)": (
+                "True / True   (good for most boards, may reset ESP-s on Windows)": (
+                    True,
+                    True,
+                ),
+                "True / False   (best for some ESP-s)": (
                     True,
                     False,
                 ),
                 "False / True   (bad for most boards)": (False, True),
-                "False / False   (best for most ESP-s, may reset some)": (False, False),
+                "False / False   (best for most ESP-s on Windows)": (False, False),
             },
             width=60,
         )
