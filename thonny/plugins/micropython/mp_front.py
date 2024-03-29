@@ -649,7 +649,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             self._on_change_port()
 
     def _get_flasher_link_title(self) -> str:
-        return tr("Install or update %s") % "MicroPython"
+        return tr("Install or update %s") % self.get_firmware_name()
 
     def _handle_python_installer_link(self, kind: str):
         new_port = self._open_flashing_dialog(kind)
@@ -832,6 +832,9 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
     def _open_flashing_dialog(self, kind: str) -> Optional[str]:
         raise NotImplementedError()
+
+    def get_firmware_name(self) -> str:
+        return "MicroPython"
 
     @property
     def allow_webrepl(self):

@@ -105,5 +105,5 @@ class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
             ui_utils.show_dialog(dlg)
             return None
 
-    def _get_flasher_link_title(self) -> str:
-        return tr("Install or update %s") % "CircuitPython"
+    def get_firmware_name(self) -> str:
+        return "MicroPython"
