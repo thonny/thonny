@@ -628,7 +628,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
                     f"raw   ({raw_comment})": "raw",
                 },
                 column=0,
-                width=27,
+                width=30,
             )
 
             row = get_last_grid_row(self.advanced_page)
