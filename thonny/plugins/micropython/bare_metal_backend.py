@@ -134,18 +134,9 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._startup_time = time.time()
         self._last_inferred_fs_mount: Optional[str] = None
 
-        self._submit_mode = args.get("submit_mode", None)
-        if self._submit_mode is None or self._connected_over_webrepl():
-            self._submit_mode = self._infer_submit_mode()
-
-        self._write_block_size = args.get("write_block_size", None)
-        if self._write_block_size is None:
-            self._write_block_size = self._infer_write_block_size()
-
-        # write delay is used only with original raw submit mode
-        self._write_block_delay = args.get("write_block_delay", None)
-        if self._write_block_delay is None:
-            self._write_block_delay = self._infer_write_block_delay()
+        self._submit_mode = args.get("submit_mode", None) or "raw_paste"
+        self._write_block_size = args.get("write_block_size", None) or 127
+        self._write_block_delay = args.get("write_block_delay", None) or 0.01
 
         # Serial over Bluetooth (eg. with Robot Inventor Hub in Windows) may need
         # flow control even for data read from the device.
@@ -237,16 +228,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
         return result
 
-    def _infer_write_block_size(self):
-        # https://forum.micropython.org/viewtopic.php?f=15&t=3698
-        # https://forum.micropython.org/viewtopic.php?f=15&t=4896&p=28132
-
-        # M5Stack Atom (FT232 USB) may produce corrupted output on Windows with
-        # paste mode and larger block sizes (problem confirmed with 128, 64 and 30 bytes blocks)
-        # https://github.com/thonny/thonny/issues/2143
-        # Don't know any other good solutions besides avoiding paste mode for this device.
-        return 127
-
     def _infer_read_block_size(self):
         # TODO:
         # in Windows it should be > 0 if the port is bluetooth over serial
@@ -255,17 +236,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # otherwise None
         # or hwid: BTHENUM\{00001101-0000-1000-8000-00805F9B34FB}_VID&00010397_PID&0002\8&1748680D&0&A8E2C19C9760_C0000000)
         return 0
-
-    def _infer_write_block_delay(self):
-        if self._submit_mode in (PASTE_SUBMIT_MODE, RAW_PASTE_SUBMIT_MODE):
-            return 0
-        elif self._connected_over_webrepl():
-            # ESP-32 needs long delay to work reliably over raw mode WebREPL
-            # https://github.com/micropython/micropython/issues/2497
-            # TODO: consider removing when this gets fixed
-            return 0.5
-        else:
-            return 0.01
 
     def _process_until_initial_prompt(self, interrupt: bool, clean: bool) -> None:
         logger.info("_process_until_initial_prompt, clean=%s", clean)
@@ -567,19 +537,13 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
                 try:
                     self._submit_code_via_raw_paste_mode(to_be_sent)
                 except RawPasteNotSupportedError:
-                    # raw is safest, as some M5 ESP32-s don't play nice with paste mode,
-                    # even with as small block size as 30 (echo is randomly missing characters)
-                    self._submit_mode = RAW_SUBMIT_MODE
-                    self._write_block_size = self._infer_write_block_size()
-                    self._write_block_delay = self._infer_write_block_delay()
-                    logger.warning(
-                        "Could not use raw_paste, falling back to %s"
-                        + " with write_block_size %s and write_block_delay %s",
-                        self._submit_mode,
-                        self._write_block_size,
-                        self._write_block_delay,
+                    print("This device does not support raw-paste mode.", file=sys.stderr)
+                    print(
+                        "Please select different mode in 'Tools => Options => Interpreter => Advanced'.",
+                        file=sys.stderr,
                     )
-                    self._submit_code_via_raw_mode(to_be_sent)
+                    logger.error("Could not use raw_paste, exiting")
+                    exit(1)
             else:
                 self._submit_code_via_raw_mode(to_be_sent)
 
