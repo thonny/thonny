@@ -651,30 +651,45 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             raise ProtocolError("Could not read command confirmation")
 
     def _submit_code_via_raw_paste_mode(self, script_bytes: bytes) -> None:
-        # Occasionally, the device initially supports raw paste but later doesn't allow it (?)
-        # https://github.com/thonny/thonny/issues/1545
-
         self._ensure_raw_mode()
         self._connection.set_text_mode(False)
-        self._write(RAW_PASTE_COMMAND)
-        response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
-        if response == RAW_PASTE_REFUSAL:
-            logger.info("Device refused raw paste")
-            raise RawPasteNotSupportedError()
-        elif response != RAW_PASTE_CONFIRMATION:
-            logger.info("Device didn't understand raw paste")
-            # perhaps the device doesn't support raw paste ...
-            response += self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=0.5)
-            if response.endswith(FIRST_RAW_PROMPT):
-                # ... yup, it doesn't support it
-                self._last_prompt = FIRST_RAW_PROMPT
-                raise RawPasteNotSupportedError()
-            else:
-                logger.error("Got %r instead of raw-paste confirmation", response)
-                raise ProtocolError("Could not get raw-paste confirmation")
+        try:
+            # I've seen the situation where the device can do raw-paste, but it doesn't work for some commands
+            # (e.g. after doing "import webrepl_setup" with Pico and MP 1.22.2)
+            # This may mean we mistakenly thought we started in raw mode (e.g. because the program presented
+            # a prompt, which looks like raw prompt).
+            # Because of this, it's worth trying again in certain case (see below).
+            for i in range(2):
+                if i > 0:
+                    logger.info("Trying raw-paste again")
 
-        self._raw_paste_write(script_bytes)
-        self._connection.set_text_mode(True)
+                self._write(RAW_PASTE_COMMAND)
+                response = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
+                if response == RAW_PASTE_CONFIRMATION:
+                    self._raw_paste_write(script_bytes)
+                    return
+                elif response == RAW_PASTE_REFUSAL:
+                    # clear refusal, no point in trying again
+                    logger.info("Device refused raw paste")
+                    raise RawPasteNotSupportedError()
+                else:
+                    logger.info("Got %r instead of raw-paste confirmation.", response)
+                    # perhaps the device doesn't understand raw paste ...
+                    response += self._connection.soft_read_until(FIRST_RAW_PROMPT, timeout=0.5)
+                    if response.endswith(FIRST_RAW_PROMPT):
+                        self._last_prompt = FIRST_RAW_PROMPT
+                        if i == 0:
+                            # not sure yet, maybe we were not in raw mode when we started. Let's try once again
+                            continue
+                        else:
+                            # still no luck, so let's say it out:
+                            raise RawPasteNotSupportedError()
+                    else:
+                        logger.error("Got %r instead of raw-paste confirmation", response)
+                        raise ProtocolError("Could not get raw-paste confirmation")
+
+        finally:
+            self._connection.set_text_mode(True)
 
     def _raw_paste_write(self, command_bytes):
         # Adapted from https://github.com/micropython/micropython/commit/a59282b9bfb6928cd68b696258c0dd2280244eb3#diff-cf10d3c1fe676599a983c0ec85b78c56c9a6f21b2d896c69b3e13f34d454153e
