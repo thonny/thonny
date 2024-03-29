@@ -281,7 +281,12 @@ def add_option_combobox(
 
     label = ttk.Label(master, text=description)
     label.grid(
-        row=row, column=0, columnspan=label_columnspan, sticky="w", pady=label_pady, padx=label_padx
+        row=row,
+        column=column,
+        columnspan=label_columnspan,
+        sticky="w",
+        pady=label_pady,
+        padx=label_padx,
     )
 
     if isinstance(choices, list):
