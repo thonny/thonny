@@ -6,8 +6,12 @@
         "info_url": "https://circuitpython.org/board/01space_lcd042_esp32c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/01space_lcd042_esp32c3/en_US/adafruit-circuitpython-01space_lcd042_esp32c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/01space_lcd042_esp32c3/en_US/adafruit-circuitpython-01space_lcd042_esp32c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/01space_lcd042_esp32c3/en_US/adafruit-circuitpython-01space_lcd042_esp32c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -22,8 +26,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_reverse_tft/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_reverse_tft-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -38,8 +46,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_reverse_tft/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_reverse_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_reverse_tft-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -55,8 +67,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32_v2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32_v2/en_US/adafruit-circuitpython-adafruit_feather_esp32_v2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -71,8 +87,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -87,8 +107,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_bme280/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2/en_US/adafruit-circuitpython-adafruit_feather_esp32s2-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -99,8 +123,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s2_tft/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s2_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s2_tft-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -115,8 +143,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_4mbflash_2mbpsram/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_4mbflash_2mbpsram-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -131,8 +163,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_nopsram/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_nopsram-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -147,8 +183,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32s3_tft/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32s3_tft/en_US/adafruit-circuitpython-adafruit_feather_esp32s3_tft-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -163,8 +203,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_esp32c6_4mbflash_nopsram/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32c6_4mbflash_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32c6_4mbflash_nopsram-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32c6_4mbflash_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32c6_4mbflash_nopsram-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_esp32c6_4mbflash_nopsram/en_US/adafruit-circuitpython-adafruit_feather_esp32c6_4mbflash_nopsram-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -176,8 +220,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_feather_huzzah32/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -192,8 +240,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_funhouse/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_funhouse/en_US/adafruit-circuitpython-adafruit_funhouse-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -209,8 +261,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_huzzah32_breakout/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_huzzah32_breakout/en_US/adafruit-circuitpython-adafruit_huzzah32_breakout-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_huzzah32_breakout/en_US/adafruit-circuitpython-adafruit_huzzah32_breakout-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_huzzah32_breakout/en_US/adafruit-circuitpython-adafruit_huzzah32_breakout-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -226,8 +282,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_itsybitsy_esp32/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_itsybitsy_esp32/en_US/adafruit-circuitpython-adafruit_itsybitsy_esp32-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_itsybitsy_esp32/en_US/adafruit-circuitpython-adafruit_itsybitsy_esp32-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_itsybitsy_esp32/en_US/adafruit-circuitpython-adafruit_itsybitsy_esp32-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -238,8 +298,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_magtag_2.9_grayscale/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_magtag_2.9_grayscale/en_US/adafruit-circuitpython-adafruit_magtag_2.9_grayscale-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -254,8 +318,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_matrixportal_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_matrixportal_s3/en_US/adafruit-circuitpython-adafruit_matrixportal_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_matrixportal_s3/en_US/adafruit-circuitpython-adafruit_matrixportal_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_matrixportal_s3/en_US/adafruit-circuitpython-adafruit_matrixportal_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -270,8 +338,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_esp32s3_camera/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s3_camera/en_US/adafruit-circuitpython-adafruit_esp32s3_camera-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s3_camera/en_US/adafruit-circuitpython-adafruit_esp32s3_camera-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_esp32s3_camera/en_US/adafruit-circuitpython-adafruit_esp32s3_camera-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -282,8 +354,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_metro_esp32s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s2/en_US/adafruit-circuitpython-adafruit_metro_esp32s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -298,8 +374,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_metro_esp32s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s3/en_US/adafruit-circuitpython-adafruit_metro_esp32s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s3/en_US/adafruit-circuitpython-adafruit_metro_esp32s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_metro_esp32s3/en_US/adafruit-circuitpython-adafruit_metro_esp32s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -315,8 +395,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32_pico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32_pico/en_US/adafruit-circuitpython-adafruit_qtpy_esp32_pico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -332,8 +416,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32c3/en_US/adafruit-circuitpython-adafruit_qtpy_esp32c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -349,8 +437,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s2/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -366,8 +458,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s3_4mbflash_2mbpsram/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_4mbflash_2mbpsram-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_4mbflash_2mbpsram-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_4mbflash_2mbpsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_4mbflash_2mbpsram-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -383,8 +479,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qtpy_esp32s3_nopsram/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qtpy_esp32s3_nopsram/en_US/adafruit-circuitpython-adafruit_qtpy_esp32s3_nopsram-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -399,8 +499,12 @@
         "info_url": "https://circuitpython.org/board/adafruit_qualia_s3_rgb666/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/adafruit_qualia_s3_rgb666/en_US/adafruit-circuitpython-adafruit_qualia_s3_rgb666-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qualia_s3_rgb666/en_US/adafruit-circuitpython-adafruit_qualia_s3_rgb666-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/adafruit_qualia_s3_rgb666/en_US/adafruit-circuitpython-adafruit_qualia_s3_rgb666-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -411,8 +515,12 @@
         "info_url": "https://circuitpython.org/board/ai_thinker_esp32-c3s/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -427,8 +535,12 @@
         "info_url": "https://circuitpython.org/board/ai_thinker_esp32-c3s-2m/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp32-c3s-2m/en_US/adafruit-circuitpython-ai_thinker_esp32-c3s-2m-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -443,8 +555,12 @@
         "info_url": "https://circuitpython.org/board/ai_thinker_esp_12k_nodemcu/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/ai_thinker_esp_12k_nodemcu/en_US/adafruit-circuitpython-ai_thinker_esp_12k_nodemcu-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -459,8 +575,12 @@
         "info_url": "https://circuitpython.org/board/arduino_nano_esp32s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3/en_US/adafruit-circuitpython-arduino_nano_esp32s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3/en_US/adafruit-circuitpython-arduino_nano_esp32s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3/en_US/adafruit-circuitpython-arduino_nano_esp32s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -475,8 +595,12 @@
         "info_url": "https://circuitpython.org/board/arduino_nano_esp32s3_inverted_statusled/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3_inverted_statusled/en_US/adafruit-circuitpython-arduino_nano_esp32s3_inverted_statusled-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3_inverted_statusled/en_US/adafruit-circuitpython-arduino_nano_esp32s3_inverted_statusled-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/arduino_nano_esp32s3_inverted_statusled/en_US/adafruit-circuitpython-arduino_nano_esp32s3_inverted_statusled-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -492,8 +616,12 @@
         "info_url": "https://circuitpython.org/board/atmegazero_esp32s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/atmegazero_esp32s2/en_US/adafruit-circuitpython-atmegazero_esp32s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -508,8 +636,12 @@
         "info_url": "https://circuitpython.org/board/bpi_bit_s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_bit_s2/en_US/adafruit-circuitpython-bpi_bit_s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -524,8 +656,12 @@
         "info_url": "https://circuitpython.org/board/bpi_leaf_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_leaf_s3/en_US/adafruit-circuitpython-bpi_leaf_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -540,8 +676,12 @@
         "info_url": "https://circuitpython.org/board/bpi_picow_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/bpi_picow_s3/en_US/adafruit-circuitpython-bpi_picow_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -556,8 +696,12 @@
         "info_url": "https://circuitpython.org/board/brainboardz_neuron/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/brainboardz_neuron/en_US/adafruit-circuitpython-brainboardz_neuron-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -586,8 +730,12 @@
         "info_url": "https://circuitpython.org/board/crumpspace_crumps2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/crumpspace_crumps2/en_US/adafruit-circuitpython-crumpspace_crumps2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -602,8 +750,12 @@
         "info_url": "https://circuitpython.org/board/cytron_maker_feather_aiot_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/cytron_maker_feather_aiot_s3/en_US/adafruit-circuitpython-cytron_maker_feather_aiot_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -618,8 +770,12 @@
         "info_url": "https://circuitpython.org/board/maker_badge/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/maker_badge/en_US/adafruit-circuitpython-maker_badge-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -635,8 +791,12 @@
         "info_url": "https://circuitpython.org/board/beetle-esp32-c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/beetle-esp32-c3/en_US/adafruit-circuitpython-beetle-esp32-c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -651,8 +811,12 @@
         "info_url": "https://circuitpython.org/board/firebeetle2_esp32s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/firebeetle2_esp32s3/en_US/adafruit-circuitpython-firebeetle2_esp32s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/firebeetle2_esp32s3/en_US/adafruit-circuitpython-firebeetle2_esp32s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/firebeetle2_esp32s3/en_US/adafruit-circuitpython-firebeetle2_esp32s3-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -664,8 +828,12 @@
         "info_url": "https://circuitpython.org/board/doit_esp32_devkit_v1/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/doit_esp32_devkit_v1/en_US/adafruit-circuitpython-doit_esp32_devkit_v1-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -680,8 +848,12 @@
         "info_url": "https://circuitpython.org/board/electroniccats_bastwifi/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/electroniccats_bastwifi/en_US/adafruit-circuitpython-electroniccats_bastwifi-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -696,8 +868,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32_eye/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_eye/en_US/adafruit-circuitpython-espressif_esp32_eye-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -712,8 +888,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32c3_devkitm_1_n4/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c3_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c3_devkitm_1_n4-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -728,8 +908,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32c6_devkitm_1_n4/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c6_devkitm_1_n4-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c6_devkitm_1_n4-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32c6_devkitm_1_n4-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -740,8 +924,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32c6_devkitc_1_n8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32c6_devkitc_1_n8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32c6_devkitc_1_n8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32c6_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32c6_devkitc_1_n8-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -752,8 +940,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32_devkitc_v4_wroom_32e/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wroom_32e/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wroom_32e-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wroom_32e/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wroom_32e-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wroom_32e/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wroom_32e-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -764,8 +956,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32_devkitc_v4_wrover/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wrover/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wrover-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wrover/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wrover-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_devkitc_v4_wrover/en_US/adafruit-circuitpython-espressif_esp32_devkitc_v4_wrover-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -776,8 +972,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32h2_devkitm_1_n4/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32h2_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32h2_devkitm_1_n4-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32h2_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32h2_devkitm_1_n4-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32h2_devkitm_1_n4/en_US/adafruit-circuitpython-espressif_esp32h2_devkitm_1_n4-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -788,8 +988,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32_lyrat/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_lyrat/en_US/adafruit-circuitpython-espressif_esp32_lyrat-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_lyrat/en_US/adafruit-circuitpython-espressif_esp32_lyrat-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32_lyrat/en_US/adafruit-circuitpython-espressif_esp32_lyrat-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -804,8 +1008,12 @@
         "info_url": "https://circuitpython.org/board/espressif_hmi_devkit_1/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_hmi_devkit_1/en_US/adafruit-circuitpython-espressif_hmi_devkit_1-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -820,8 +1028,12 @@
         "info_url": "https://circuitpython.org/board/espressif_kaluga_1/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1/en_US/adafruit-circuitpython-espressif_kaluga_1-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -836,8 +1048,12 @@
         "info_url": "https://circuitpython.org/board/espressif_kaluga_1.3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_kaluga_1.3/en_US/adafruit-circuitpython-espressif_kaluga_1.3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -852,8 +1068,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n4/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -868,8 +1088,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n4r2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n4r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n4r2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -884,8 +1108,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s2_devkitc_1_n8r2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s2_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s2_devkitc_1_n8r2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -900,8 +1128,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_box/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box/en_US/adafruit-circuitpython-espressif_esp32s3_box-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -916,8 +1148,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_box_lite/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_box_lite/en_US/adafruit-circuitpython-espressif_esp32s3_box_lite-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -932,8 +1168,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_lcd_ev/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_lcd_ev/en_US/adafruit-circuitpython-espressif_esp32s3_lcd_ev-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_lcd_ev/en_US/adafruit-circuitpython-espressif_esp32s3_lcd_ev-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_lcd_ev/en_US/adafruit-circuitpython-espressif_esp32s3_lcd_ev-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -944,8 +1184,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n32r8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n32r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n32r8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -960,8 +1204,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -976,8 +1224,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r2/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -992,8 +1244,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1008,8 +1264,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitm_1_n8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitm_1_n8/en_US/adafruit-circuitpython-espressif_esp32s3_devkitm_1_n8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1024,8 +1284,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_eye/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_eye/en_US/adafruit-circuitpython-espressif_esp32s3_eye-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1040,8 +1304,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_usb_otg_n8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_usb_otg_n8/en_US/adafruit-circuitpython-espressif_esp32s3_usb_otg_n8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1056,8 +1324,12 @@
         "info_url": "https://circuitpython.org/board/espressif_saola_1_wroom/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wroom/en_US/adafruit-circuitpython-espressif_saola_1_wroom-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1072,8 +1344,12 @@
         "info_url": "https://circuitpython.org/board/espressif_saola_1_wrover/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_saola_1_wrover/en_US/adafruit-circuitpython-espressif_saola_1_wrover-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1089,8 +1365,12 @@
         "info_url": "https://circuitpython.org/board/franzininho_wifi_wroom/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wroom/en_US/adafruit-circuitpython-franzininho_wifi_wroom-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1106,8 +1386,12 @@
         "info_url": "https://circuitpython.org/board/franzininho_wifi_wrover/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1122,8 +1406,12 @@
         "info_url": "https://circuitpython.org/board/gravitech_cucumber_m/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_m/en_US/adafruit-circuitpython-gravitech_cucumber_m-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1138,8 +1426,12 @@
         "info_url": "https://circuitpython.org/board/gravitech_cucumber_ms/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_ms/en_US/adafruit-circuitpython-gravitech_cucumber_ms-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1154,8 +1446,12 @@
         "info_url": "https://circuitpython.org/board/gravitech_cucumber_r/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_r/en_US/adafruit-circuitpython-gravitech_cucumber_r-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1170,8 +1466,12 @@
         "info_url": "https://circuitpython.org/board/gravitech_cucumber_rs/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/gravitech_cucumber_rs/en_US/adafruit-circuitpython-gravitech_cucumber_rs-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1186,8 +1486,12 @@
         "info_url": "https://circuitpython.org/board/hiibot_iots2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/hiibot_iots2/en_US/adafruit-circuitpython-hiibot_iots2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1202,8 +1506,12 @@
         "info_url": "https://circuitpython.org/board/hardkernel_odroid_go/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/hardkernel_odroid_go/en_US/adafruit-circuitpython-hardkernel_odroid_go-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1218,8 +1526,12 @@
         "info_url": "https://circuitpython.org/board/heltec_esp32s3_wifi_lora_v3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/heltec_esp32s3_wifi_lora_v3/en_US/adafruit-circuitpython-heltec_esp32s3_wifi_lora_v3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/heltec_esp32s3_wifi_lora_v3/en_US/adafruit-circuitpython-heltec_esp32s3_wifi_lora_v3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/heltec_esp32s3_wifi_lora_v3/en_US/adafruit-circuitpython-heltec_esp32s3_wifi_lora_v3-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1230,8 +1542,12 @@
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r8_hacktablet/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8_hacktablet/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8_hacktablet-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8_hacktablet/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8_hacktablet-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/espressif_esp32s3_devkitc_1_n8r8_hacktablet/en_US/adafruit-circuitpython-espressif_esp32s3_devkitc_1_n8r8_hacktablet-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1242,8 +1558,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_tdeck/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_tdeck/en_US/adafruit-circuitpython-lilygo_tdeck-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tdeck/en_US/adafruit-circuitpython-lilygo_tdeck-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tdeck/en_US/adafruit-circuitpython-lilygo_tdeck-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1254,8 +1574,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_tdisplay_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_tdisplay_s3/en_US/adafruit-circuitpython-lilygo_tdisplay_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tdisplay_s3/en_US/adafruit-circuitpython-lilygo_tdisplay_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tdisplay_s3/en_US/adafruit-circuitpython-lilygo_tdisplay_s3-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1266,8 +1590,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_tembed_esp32s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_tembed_esp32s3/en_US/adafruit-circuitpython-lilygo_tembed_esp32s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tembed_esp32s3/en_US/adafruit-circuitpython-lilygo_tembed_esp32s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_tembed_esp32s3/en_US/adafruit-circuitpython-lilygo_tembed_esp32s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1282,8 +1610,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_twatch_2020_v3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_twatch_2020_v3/en_US/adafruit-circuitpython-lilygo_twatch_2020_v3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_twatch_2020_v3/en_US/adafruit-circuitpython-lilygo_twatch_2020_v3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_twatch_2020_v3/en_US/adafruit-circuitpython-lilygo_twatch_2020_v3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1298,8 +1630,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_t-01c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-01c3/en_US/adafruit-circuitpython-lilygo_ttgo_t-01c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1314,8 +1650,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_tdisplay_esp32_16m/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_16m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_16m-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_16m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_16m-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_16m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_16m-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1330,8 +1670,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_tdisplay_esp32_4m/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_4m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_4m-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_4m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_4m-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_tdisplay_esp32_4m/en_US/adafruit-circuitpython-lilygo_ttgo_tdisplay_esp32_4m-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1342,8 +1686,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_t-oi-plus/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t-oi-plus/en_US/adafruit-circuitpython-lilygo_ttgo_t-oi-plus-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1358,8 +1706,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1374,8 +1726,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_s2_st7789/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_s2_st7789/en_US/adafruit-circuitpython-lilygo_ttgo_t8_s2_st7789-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1390,8 +1746,12 @@
         "info_url": "https://circuitpython.org/board/lilygo_ttgo_t8_esp32_s2_wroom/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lilygo_ttgo_t8_esp32_s2_wroom/en_US/adafruit-circuitpython-lilygo_ttgo_t8_esp32_s2_wroom-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1407,8 +1767,12 @@
         "info_url": "https://circuitpython.org/board/luatos_core_esp32c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3/en_US/adafruit-circuitpython-luatos_core_esp32c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1424,8 +1788,12 @@
         "info_url": "https://circuitpython.org/board/luatos_core_esp32c3_ch343/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3_ch343/en_US/adafruit-circuitpython-luatos_core_esp32c3_ch343-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3_ch343/en_US/adafruit-circuitpython-luatos_core_esp32c3_ch343-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/luatos_core_esp32c3_ch343/en_US/adafruit-circuitpython-luatos_core_esp32c3_ch343-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1436,8 +1804,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atom_echo/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_echo/en_US/adafruit-circuitpython-m5stack_atom_echo-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1452,8 +1824,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atom_lite/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_lite/en_US/adafruit-circuitpython-m5stack_atom_lite-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1468,8 +1844,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atom_matrix/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_matrix/en_US/adafruit-circuitpython-m5stack_atom_matrix-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1484,8 +1864,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atoms3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3/en_US/adafruit-circuitpython-m5stack_atoms3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3/en_US/adafruit-circuitpython-m5stack_atoms3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3/en_US/adafruit-circuitpython-m5stack_atoms3-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1496,8 +1880,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atoms3_lite/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3_lite/en_US/adafruit-circuitpython-m5stack_atoms3_lite-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3_lite/en_US/adafruit-circuitpython-m5stack_atoms3_lite-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3_lite/en_US/adafruit-circuitpython-m5stack_atoms3_lite-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1512,8 +1900,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atoms3u/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3u/en_US/adafruit-circuitpython-m5stack_atoms3u-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3u/en_US/adafruit-circuitpython-m5stack_atoms3u-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atoms3u/en_US/adafruit-circuitpython-m5stack_atoms3u-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1524,8 +1916,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_atom_u/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_atom_u/en_US/adafruit-circuitpython-m5stack_atom_u-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1541,8 +1937,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_cardputer/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_cardputer/en_US/adafruit-circuitpython-m5stack_cardputer-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_cardputer/en_US/adafruit-circuitpython-m5stack_cardputer-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_cardputer/en_US/adafruit-circuitpython-m5stack_cardputer-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1553,8 +1953,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_core2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_core2/en_US/adafruit-circuitpython-m5stack_core2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core2/en_US/adafruit-circuitpython-m5stack_core2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core2/en_US/adafruit-circuitpython-m5stack_core2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1569,8 +1973,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_dial/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_dial/en_US/adafruit-circuitpython-m5stack_dial-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_dial/en_US/adafruit-circuitpython-m5stack_dial-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_dial/en_US/adafruit-circuitpython-m5stack_dial-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1581,8 +1989,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_core_basic/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_basic/en_US/adafruit-circuitpython-m5stack_core_basic-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1598,8 +2010,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_core_fire/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_core_fire/en_US/adafruit-circuitpython-m5stack_core_fire-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1614,8 +2030,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_m5paper/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_m5paper/en_US/adafruit-circuitpython-m5stack_m5paper-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_m5paper/en_US/adafruit-circuitpython-m5stack_m5paper-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_m5paper/en_US/adafruit-circuitpython-m5stack_m5paper-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1626,8 +2046,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_stamp_c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stamp_c3/en_US/adafruit-circuitpython-m5stack_stamp_c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1642,8 +2066,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_stick_c/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c/en_US/adafruit-circuitpython-m5stack_stick_c-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1658,8 +2086,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_stick_c_plus/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c_plus/en_US/adafruit-circuitpython-m5stack_stick_c_plus-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c_plus/en_US/adafruit-circuitpython-m5stack_stick_c_plus-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_stick_c_plus/en_US/adafruit-circuitpython-m5stack_stick_c_plus-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1671,8 +2103,12 @@
         "info_url": "https://circuitpython.org/board/m5stack_timer_camera_x/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/m5stack_timer_camera_x/en_US/adafruit-circuitpython-m5stack_timer_camera_x-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_timer_camera_x/en_US/adafruit-circuitpython-m5stack_timer_camera_x-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/m5stack_timer_camera_x/en_US/adafruit-circuitpython-m5stack_timer_camera_x-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1687,8 +2123,12 @@
         "info_url": "https://circuitpython.org/board/makerfabs_tft7/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/makerfabs_tft7/en_US/adafruit-circuitpython-makerfabs_tft7-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/makerfabs_tft7/en_US/adafruit-circuitpython-makerfabs_tft7-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/makerfabs_tft7/en_US/adafruit-circuitpython-makerfabs_tft7-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1699,8 +2139,12 @@
         "info_url": "https://circuitpython.org/board/magiclick_s3_n4r2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/magiclick_s3_n4r2/en_US/adafruit-circuitpython-magiclick_s3_n4r2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/magiclick_s3_n4r2/en_US/adafruit-circuitpython-magiclick_s3_n4r2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/magiclick_s3_n4r2/en_US/adafruit-circuitpython-magiclick_s3_n4r2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1716,8 +2160,12 @@
         "info_url": "https://circuitpython.org/board/microdev_micro_c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_c3/en_US/adafruit-circuitpython-microdev_micro_c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1733,8 +2181,12 @@
         "info_url": "https://circuitpython.org/board/microdev_micro_s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/microdev_micro_s2/en_US/adafruit-circuitpython-microdev_micro_s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1749,8 +2201,12 @@
         "info_url": "https://circuitpython.org/board/mixgo_ce_serial/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_serial/en_US/adafruit-circuitpython-mixgo_ce_serial-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1765,8 +2221,12 @@
         "info_url": "https://circuitpython.org/board/mixgo_ce_udisk/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/mixgo_ce_udisk/en_US/adafruit-circuitpython-mixgo_ce_udisk-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1781,8 +2241,12 @@
         "info_url": "https://circuitpython.org/board/morpheans_morphesp-240/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/morpheans_morphesp-240/en_US/adafruit-circuitpython-morpheans_morphesp-240-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1797,8 +2261,12 @@
         "info_url": "https://circuitpython.org/board/muselab_nanoesp32_s2_wroom/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wroom/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wroom-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1813,8 +2281,12 @@
         "info_url": "https://circuitpython.org/board/muselab_nanoesp32_s2_wrover/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/muselab_nanoesp32_s2_wrover/en_US/adafruit-circuitpython-muselab_nanoesp32_s2_wrover-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1829,8 +2301,12 @@
         "info_url": "https://circuitpython.org/board/odt_pixelwing_esp32_s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/odt_pixelwing_esp32_s2/en_US/adafruit-circuitpython-odt_pixelwing_esp32_s2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1846,8 +2322,12 @@
         "info_url": "https://circuitpython.org/board/oxocard_artwork/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/oxocard_artwork/en_US/adafruit-circuitpython-oxocard_artwork-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_artwork/en_US/adafruit-circuitpython-oxocard_artwork-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_artwork/en_US/adafruit-circuitpython-oxocard_artwork-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1859,8 +2339,12 @@
         "info_url": "https://circuitpython.org/board/oxocard_connect/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/oxocard_connect/en_US/adafruit-circuitpython-oxocard_connect-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_connect/en_US/adafruit-circuitpython-oxocard_connect-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_connect/en_US/adafruit-circuitpython-oxocard_connect-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1872,8 +2356,12 @@
         "info_url": "https://circuitpython.org/board/oxocard_galaxy/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/oxocard_galaxy/en_US/adafruit-circuitpython-oxocard_galaxy-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_galaxy/en_US/adafruit-circuitpython-oxocard_galaxy-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_galaxy/en_US/adafruit-circuitpython-oxocard_galaxy-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1885,8 +2373,12 @@
         "info_url": "https://circuitpython.org/board/oxocard_science/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/oxocard_science/en_US/adafruit-circuitpython-oxocard_science-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_science/en_US/adafruit-circuitpython-oxocard_science-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/oxocard_science/en_US/adafruit-circuitpython-oxocard_science-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1898,8 +2390,12 @@
         "info_url": "https://circuitpython.org/board/seeed_xiao_esp32c3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/seeed_xiao_esp32c3/en_US/adafruit-circuitpython-seeed_xiao_esp32c3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1915,8 +2411,12 @@
         "info_url": "https://circuitpython.org/board/sensebox_mcu_esp32s2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/sensebox_mcu_esp32s2/en_US/adafruit-circuitpython-sensebox_mcu_esp32s2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/sensebox_mcu_esp32s2/en_US/adafruit-circuitpython-sensebox_mcu_esp32s2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/sensebox_mcu_esp32s2/en_US/adafruit-circuitpython-sensebox_mcu_esp32s2-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1927,8 +2427,12 @@
         "info_url": "https://circuitpython.org/board/smartbeedesigns_bee_data_logger/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_data_logger/en_US/adafruit-circuitpython-smartbeedesigns_bee_data_logger-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_data_logger/en_US/adafruit-circuitpython-smartbeedesigns_bee_data_logger-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_data_logger/en_US/adafruit-circuitpython-smartbeedesigns_bee_data_logger-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1943,8 +2447,12 @@
         "info_url": "https://circuitpython.org/board/smartbeedesigns_bee_motion_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_motion_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_motion_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1959,12 +2467,29 @@
         "info_url": "https://circuitpython.org/board/smartbeedesigns_bee_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
                 "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-8.2.10.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Sunton",
+        "model": "Sunton ESP32-2432S028",
+        "family": "esp32",
+        "title": "ESP32-2432S028",
+        "info_url": "https://circuitpython.org/board/sunton_esp32_2432S028/",
+        "downloads": [
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/sunton_esp32_2432S028/en_US/adafruit-circuitpython-sunton_esp32_2432S028-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -1976,8 +2501,12 @@
         "info_url": "https://circuitpython.org/board/targett_module_clip_wroom/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wroom/en_US/adafruit-circuitpython-targett_module_clip_wroom-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -1993,8 +2522,12 @@
         "info_url": "https://circuitpython.org/board/targett_module_clip_wrover/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/targett_module_clip_wrover/en_US/adafruit-circuitpython-targett_module_clip_wrover-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2009,8 +2542,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_kart/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_kart/en_US/adafruit-circuitpython-deneyap_kart-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart/en_US/adafruit-circuitpython-deneyap_kart-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart/en_US/adafruit-circuitpython-deneyap_kart-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2025,8 +2562,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_kart_1a/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a/en_US/adafruit-circuitpython-deneyap_kart_1a-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a/en_US/adafruit-circuitpython-deneyap_kart_1a-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a/en_US/adafruit-circuitpython-deneyap_kart_1a-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2041,8 +2582,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_kart_1a_v2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a_v2/en_US/adafruit-circuitpython-deneyap_kart_1a_v2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a_v2/en_US/adafruit-circuitpython-deneyap_kart_1a_v2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_1a_v2/en_US/adafruit-circuitpython-deneyap_kart_1a_v2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2057,8 +2602,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_kart_g/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_g/en_US/adafruit-circuitpython-deneyap_kart_g-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_g/en_US/adafruit-circuitpython-deneyap_kart_g-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_kart_g/en_US/adafruit-circuitpython-deneyap_kart_g-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2073,8 +2622,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_mini/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_mini/en_US/adafruit-circuitpython-deneyap_mini-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini/en_US/adafruit-circuitpython-deneyap_mini-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini/en_US/adafruit-circuitpython-deneyap_mini-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2089,8 +2642,12 @@
         "info_url": "https://circuitpython.org/board/deneyap_mini_v2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/deneyap_mini_v2/en_US/adafruit-circuitpython-deneyap_mini_v2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini_v2/en_US/adafruit-circuitpython-deneyap_mini_v2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/deneyap_mini_v2/en_US/adafruit-circuitpython-deneyap_mini_v2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2106,8 +2663,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_bling/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_bling/en_US/adafruit-circuitpython-unexpectedmaker_bling-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_bling/en_US/adafruit-circuitpython-unexpectedmaker_bling-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_bling/en_US/adafruit-circuitpython-unexpectedmaker_bling-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2123,8 +2684,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_blizzard_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_blizzard_s3/en_US/adafruit-circuitpython-unexpectedmaker_blizzard_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_blizzard_s3/en_US/adafruit-circuitpython-unexpectedmaker_blizzard_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_blizzard_s3/en_US/adafruit-circuitpython-unexpectedmaker_blizzard_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2140,8 +2705,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2/en_US/adafruit-circuitpython-unexpectedmaker_feathers2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2157,8 +2726,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2_neo/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_neo/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_neo-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2174,8 +2747,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers2_prerelease/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers2_prerelease/en_US/adafruit-circuitpython-unexpectedmaker_feathers2_prerelease-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2191,8 +2768,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_feathers3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_feathers3/en_US/adafruit-circuitpython-unexpectedmaker_feathers3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2208,8 +2789,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_nanos3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_nanos3/en_US/adafruit-circuitpython-unexpectedmaker_nanos3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_nanos3/en_US/adafruit-circuitpython-unexpectedmaker_nanos3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_nanos3/en_US/adafruit-circuitpython-unexpectedmaker_nanos3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2225,8 +2810,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_pros3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_pros3/en_US/adafruit-circuitpython-unexpectedmaker_pros3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2242,8 +2831,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinyc6/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinyc6/en_US/adafruit-circuitpython-unexpectedmaker_tinyc6-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinyc6/en_US/adafruit-circuitpython-unexpectedmaker_tinyc6-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinyc6/en_US/adafruit-circuitpython-unexpectedmaker_tinyc6-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -2255,8 +2848,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinypico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico/en_US/adafruit-circuitpython-unexpectedmaker_tinypico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2272,8 +2869,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinypico_nano/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinypico_nano/en_US/adafruit-circuitpython-unexpectedmaker_tinypico_nano-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2289,8 +2890,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinys2/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys2/en_US/adafruit-circuitpython-unexpectedmaker_tinys2-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2306,8 +2911,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinys3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinys3/en_US/adafruit-circuitpython-unexpectedmaker_tinys3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2323,8 +2932,12 @@
         "info_url": "https://circuitpython.org/board/unexpectedmaker_tinywatch_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinywatch_s3/en_US/adafruit-circuitpython-unexpectedmaker_tinywatch_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinywatch_s3/en_US/adafruit-circuitpython-unexpectedmaker_tinywatch_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/unexpectedmaker_tinywatch_s3/en_US/adafruit-circuitpython-unexpectedmaker_tinywatch_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2339,8 +2952,12 @@
         "info_url": "https://circuitpython.org/board/yd_esp32_s3_n16r8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n16r8/en_US/adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n16r8/en_US/adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n16r8/en_US/adafruit-circuitpython-yd_esp32_s3_n16r8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2355,8 +2972,12 @@
         "info_url": "https://circuitpython.org/board/yd_esp32_s3_n8r8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n8r8/en_US/adafruit-circuitpython-yd_esp32_s3_n8r8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n8r8/en_US/adafruit-circuitpython-yd_esp32_s3_n8r8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/yd_esp32_s3_n8r8/en_US/adafruit-circuitpython-yd_esp32_s3_n8r8-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2371,8 +2992,12 @@
         "info_url": "https://circuitpython.org/board/waveshare_esp32s2_pico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32s2_pico/en_US/adafruit-circuitpython-waveshare_esp32s2_pico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2387,12 +3012,28 @@
         "info_url": "https://circuitpython.org/board/waveshare_esp32_s2_pico_lcd/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
                 "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s2_pico_lcd/en_US/adafruit-circuitpython-waveshare_esp32_s2_pico_lcd-en_US-8.2.10.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Waveshare",
+        "model": "ESP32-S3-GEEK",
+        "family": "esp32s3",
+        "info_url": "https://circuitpython.org/board/waveshare_esp32_s3_geek/",
+        "downloads": [
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_geek/en_US/adafruit-circuitpython-waveshare_esp32_s3_geek-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -2403,8 +3044,12 @@
         "info_url": "https://circuitpython.org/board/waveshare_esp32_s3_pico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_pico/en_US/adafruit-circuitpython-waveshare_esp32_s3_pico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_pico/en_US/adafruit-circuitpython-waveshare_esp32_s3_pico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_pico/en_US/adafruit-circuitpython-waveshare_esp32_s3_pico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2420,8 +3065,12 @@
         "info_url": "https://circuitpython.org/board/waveshare_esp32_s3_zero/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_zero/en_US/adafruit-circuitpython-waveshare_esp32_s3_zero-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_zero/en_US/adafruit-circuitpython-waveshare_esp32_s3_zero-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/waveshare_esp32_s3_zero/en_US/adafruit-circuitpython-waveshare_esp32_s3_zero-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -2433,8 +3082,12 @@
         "info_url": "https://circuitpython.org/board/weact_esp32c6_n4/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n4/en_US/adafruit-circuitpython-weact_esp32c6_n4-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n4/en_US/adafruit-circuitpython-weact_esp32c6_n4-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n4/en_US/adafruit-circuitpython-weact_esp32c6_n4-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -2446,8 +3099,12 @@
         "info_url": "https://circuitpython.org/board/weact_esp32c6_n8/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n8/en_US/adafruit-circuitpython-weact_esp32c6_n8-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n8/en_US/adafruit-circuitpython-weact_esp32c6_n8-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/weact_esp32c6_n8/en_US/adafruit-circuitpython-weact_esp32c6_n8-en_US-9.1.0-beta.0.bin"
             }
         ]
     },
@@ -2458,8 +3115,12 @@
         "info_url": "https://circuitpython.org/board/lolin_c3_mini/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_mini/en_US/adafruit-circuitpython-lolin_c3_mini-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2474,8 +3135,12 @@
         "info_url": "https://circuitpython.org/board/lolin_c3_pico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_c3_pico/en_US/adafruit-circuitpython-lolin_c3_pico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_pico/en_US/adafruit-circuitpython-lolin_c3_pico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_c3_pico/en_US/adafruit-circuitpython-lolin_c3_pico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2490,8 +3155,12 @@
         "info_url": "https://circuitpython.org/board/lolin_s2_mini/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_mini/en_US/adafruit-circuitpython-lolin_s2_mini-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2506,8 +3175,12 @@
         "info_url": "https://circuitpython.org/board/lolin_s2_pico/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s2_pico/en_US/adafruit-circuitpython-lolin_s2_pico-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2522,8 +3195,12 @@
         "info_url": "https://circuitpython.org/board/lolin_s3/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3/en_US/adafruit-circuitpython-lolin_s3-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2538,8 +3215,12 @@
         "info_url": "https://circuitpython.org/board/lolin_s3_mini/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_s3_mini/en_US/adafruit-circuitpython-lolin_s3_mini-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3_mini/en_US/adafruit-circuitpython-lolin_s3_mini-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3_mini/en_US/adafruit-circuitpython-lolin_s3_mini-en_US-9.1.0-beta.0.bin"
             },
             {
                 "version": "8.2.10",
@@ -2554,8 +3235,12 @@
         "info_url": "https://circuitpython.org/board/lolin_s3_pro/",
         "downloads": [
             {
-                "version": "9.0.0",
-                "url": "https://downloads.circuitpython.org/bin/lolin_s3_pro/en_US/adafruit-circuitpython-lolin_s3_pro-en_US-9.0.0.bin"
+                "version": "9.0.2",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3_pro/en_US/adafruit-circuitpython-lolin_s3_pro-en_US-9.0.2.bin"
+            },
+            {
+                "version": "9.1.0-beta.0",
+                "url": "https://downloads.circuitpython.org/bin/lolin_s3_pro/en_US/adafruit-circuitpython-lolin_s3_pro-en_US-9.1.0-beta.0.bin"
             }
         ]
     }

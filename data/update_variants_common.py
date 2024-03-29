@@ -59,7 +59,7 @@ def find_download_links(
         try:
             content += read_page(url)
         except Exception:
-            logging.exception("Could not read page %s", url)
+            logging.error("Could not read page %s", url)
 
     parser.feed(content)
 
