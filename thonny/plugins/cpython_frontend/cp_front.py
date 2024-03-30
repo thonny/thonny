@@ -152,11 +152,6 @@ class LocalCPythonProxy(SubprocessProxy):
 
         run_in_terminal(cmd, os.path.dirname(script_path), keep_open=keep_open)
 
-    def get_pip_gui_class(self):
-        from thonny.plugins.cpython_frontend.cp_pip_gui import LocalCPythonPipDialog
-
-        return LocalCPythonPipDialog
-
     def can_run_remote_files(self):
         return False
 
@@ -225,6 +220,35 @@ class LocalCPythonProxy(SubprocessProxy):
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return os.path.exists(conf[f"{cls.backend_name}.executable"])
+
+    def can_install_packages_from_files(self) -> bool:
+        return True
+
+    def _prefer_user_install(self):
+        return not (
+            self._in_venv
+            or thonny.is_portable()
+            and is_private_python(self.get_target_executable())
+        )
+
+    def get_packages_target_dir_with_comment(self):
+        if self.is_externally_managed():
+            return None, tr(
+                "The packages of this interpreter can be managed via your system package manager."
+            ) + "\n" + tr("For pip-installing a package, you need to use a virtual environment.")
+
+        if self._prefer_user_install():
+            usp = self.get_user_site_packages()
+            os.makedirs(usp, exist_ok=True)
+            return normpath_with_actual_case(usp), "user site-packages"
+        else:
+            sp = self.get_site_packages()
+            if sp is None:
+                return None, "could not find target directory"
+            return normpath_with_actual_case(sp), "site-packages"
+
+    def normalize_target_path(self, path: str) -> str:
+        return normpath_with_actual_case(path)
 
 
 class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):

@@ -7,7 +7,7 @@ import tkinter as tk
 import tkinter.font as tk_font
 import urllib.error
 import urllib.parse
-from abc import ABC
+from abc import ABC, abstractmethod
 from logging import exception, getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
@@ -368,19 +368,7 @@ class PipDialog(CommonDialog, ABC):
         pass
 
     def _show_read_only_instructions(self):
-        self._append_info_text(tr("Browse the packages") + "\n", ("caption",))
-        self.info_text.direct_insert(
-            "end",
-            tr(
-                "With current interpreter you can only browse the packages here.\n"
-                + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-            )
-            + "\n\n",
-        )
-
-        if self._get_target_directory():
-            self._append_info_text(tr("Packages' directory") + "\n", ("caption",))
-            self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
+        pass
 
     def _show_instructions_about_installing_from_pypi(self):
         self._append_info_text(tr("Install from PyPI") + "\n", ("caption",))
@@ -428,57 +416,10 @@ class PipDialog(CommonDialog, ABC):
 
     def _show_instructions_about_target(self):
         self._append_info_text(tr("Target") + "\n", ("caption",))
-        if self._use_user_install():
-            self.info_text.direct_insert(
-                "end",
-                tr(
-                    "This dialog lists all available packages,"
-                    + " but allows upgrading and uninstalling only packages from"
-                )
-                + " ",
-            )
-            self._append_info_text(self._get_target_directory(), ("url"))
-            self.info_text.direct_insert(
-                "end",
-                ". "
-                + tr(
-                    "New packages will be also installed into this directory."
-                    + " Other locations must be managed by alternative means."
-                ),
-            )
-        else:
-            self._append_info_text(self._get_target_directory(), ("url"))
-
-    def _get_package_metadata_url(self, name: str, version_str: Optional[str]) -> str:
-        # Fetch info from PyPI
-        if version_str is None:
-            return "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
-        else:
-            return "https://pypi.org/pypi/{}/{}/json".format(
-                urllib.parse.quote(name), urllib.parse.quote(version_str)
-            )
-
-    def _get_package_metadata_fallback_url(
-        self, name: str, version_str: Optional[str]
-    ) -> Optional[str]:
-        return None
+        self._append_location_to_info_path(self._get_target_directory())
 
     def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
-        import json
-        from urllib.request import urlopen
-
-        """Running in a background thread"""
-        # Fetch info from PyPI
-        if version_str is None:
-            url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
-        else:
-            url = "https://pypi.org/pypi/{}/{}/json".format(
-                urllib.parse.quote(name), urllib.parse.quote(version_str)
-            )
-
-        logger.info("Downloading package info from %s", url)
-        with urlopen(url) as fp:
-            return json.load(fp)
+        return get_package_info_from_pypi(name, version_str)
 
     def _start_show_package_info(self, name):
         self.current_package_data = None
@@ -549,8 +490,9 @@ class PipDialog(CommonDialog, ABC):
 
         poll_fetch_complete()
 
+    @abstractmethod
     def _append_location_to_info_path(self, path):
-        self.info_text.direct_insert("end", path)
+        raise NotImplementedError()
 
     def _show_package_info(self, name, data, error_code=None):
         self._set_state("idle")
@@ -665,17 +607,9 @@ class PipDialog(CommonDialog, ABC):
         else:
             return self._normalize_target_path(dist.location) != self._get_target_directory()
 
-    def _normalize_name(self, name):
-        # looks like (in some cases?) pip list gives the name as it was used during install
-        # ie. the list may contain lowercase entry, when actual metadata has uppercase name
-        # Example: when you "pip install cx-freeze", then "pip list"
-        # really returns "cx-freeze" although correct name is "cx_Freeze"
-
-        # https://www.python.org/dev/peps/pep-0503/#id4
-        return re.sub(r"[-_.]+", "-", name).lower().strip()
-
+    @abstractmethod
     def _normalize_target_path(self, path: str) -> str:
-        return path
+        raise NotImplementedError()
 
     def _start_search(self, query, discard_selection=True):
         self.current_package_data = None
@@ -707,7 +641,7 @@ class PipDialog(CommonDialog, ABC):
 
         poll_fetch_complete()
 
-    def _show_search_results(self, query, results: Union[Dict[str, List[Dict]], str]) -> None:
+    def _show_search_results(self, query, results: Union[List[Dict], str]) -> None:
         self._set_state("idle")
         self._clear_info_text()
 
@@ -722,32 +656,28 @@ class PipDialog(CommonDialog, ABC):
             self._append_info_text(query, ("url",))
             return
 
-        for source, source_results in results.items():
-            if len(results) > 1:
-                self._append_info_text(source + "\n", tags=("caption",))
+        for item in results:
+            # self._append_info_text("•")
+            tags = ("url",)
+            if item["name"].lower() == query.lower():
+                tags = tags + ("bold",)
 
-            for item in source_results:
-                # self._append_info_text("•")
-                tags = ("url",)
-                if item["name"].lower() == query.lower():
-                    tags = tags + ("bold",)
-
-                self._append_info_text(item["name"], tags)
-                if item.get("source"):
-                    self._append_info_text(" @ " + item["source"])
-                self._append_info_text("\n")
-                self.info_text.direct_insert(
-                    "end", (item.get("description") or "<No description>").strip() + "\n"
-                )
-                self._append_info_text("\n")
+            self._append_info_text(item["name"], tags)
+            if item.get("source"):
+                self._append_info_text(" @ " + item["source"])
+            self._append_info_text("\n")
+            self.info_text.direct_insert(
+                "end", (item.get("description") or "<No description>").strip() + "\n"
+            )
+            self._append_info_text("\n")
 
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
             index = name_or_index
         else:
-            normalized_items = list(map(self._normalize_name, self.listbox.get(0, "end")))
+            normalized_items = list(map(normalize_package_name, self.listbox.get(0, "end")))
             try:
-                index = normalized_items.index(self._normalize_name(name_or_index))
+                index = normalized_items.index(normalize_package_name(name_or_index))
             except Exception:
                 exception(tr("Can't find package name from the list:") + " " + name_or_index)
                 return
@@ -783,8 +713,6 @@ class PipDialog(CommonDialog, ABC):
         name = self.current_package_data["info"]["name"]
 
         install_args = ["--progress-bar", "off"]
-        if self._use_user_install():
-            install_args.append("--user")
 
         if action == "install":
             command = "install"
@@ -814,33 +742,11 @@ class PipDialog(CommonDialog, ABC):
                 return False
             args = ["--yes", name]
         elif action == "advanced":
-            command = "install"
-            title = tr("Installing")
-            details = _ask_installation_details(
-                self,
-                data,
-                _get_latest_stable_version(list(data["releases"].keys())),
-                self.does_support_update_deps_switch(),
-            )
-            if details is None:  # Cancel
-                return False
-
-            version, package_data, upgrade_deps = details
-            if not self._confirm_install(package_data):
-                return False
-
-            args = install_args
-            if upgrade_deps:
-                args.append("--upgrade")
-
-            args.append(name + "==" + version)
+            raise NotImplementedError()
         else:
             raise RuntimeError("Unknown action")
 
         self._run_pip_with_dialog(command, args, title=title)
-        return True
-
-    def does_support_update_deps_switch(self):
         return True
 
     def _handle_install_file_click(self, event):
@@ -897,8 +803,6 @@ class PipDialog(CommonDialog, ABC):
 
     def _get_install_file_args(self, filename, is_requirements_file):
         args = []
-        if self._use_user_install():
-            args.append("--user")
         if is_requirements_file:
             args.append("-r")
         args.append(filename)
@@ -930,9 +834,9 @@ class PipDialog(CommonDialog, ABC):
             return dist.version
 
     def _get_active_dist(self, name):
-        normname = self._normalize_name(name)
+        normname = normalize_package_name(name)
         for key in self._active_distributions:
-            if self._normalize_name(key) == normname:
+            if normalize_package_name(key) == normname:
                 return self._active_distributions[key]
 
         return None
@@ -944,12 +848,6 @@ class PipDialog(CommonDialog, ABC):
 
     def _get_interpreter_description(self):
         raise NotImplementedError()
-
-    def _use_user_install(self):
-        raise NotImplementedError()
-
-    def _targets_virtual_environment(self):
-        return False
 
     def _has_remote_target(self):
         raise NotImplementedError()
@@ -967,33 +865,22 @@ class PipDialog(CommonDialog, ABC):
         return True
 
     def _is_read_only(self):
-        raise NotImplementedError()
+        return self._get_target_directory() is None
 
-    def _fetch_search_results(self, query: str) -> Dict[str, List[Dict[str, str]]]:
-        """Will be executed in background thread"""
-        return {"*": self._perform_pypi_search(query)}
+    @abstractmethod
+    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]: ...
 
-    def _perform_pypi_search(
-        self, query: str, source: Optional[str] = None
-    ) -> List[Dict[str, str]]:
-        import urllib.parse
-        from urllib.request import urlopen
-
-        logger.info("Performing PyPI search for %r", query)
-
-        url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
-        with urlopen(url, timeout=10) as fp:
-            data = fp.read()
-
-        results = _extract_pypi_search_results(data.decode("utf-8"))
-
-        for result in results:
-            if source:
-                result["source"] = source
-            result["distance"] = levenshtein_distance(query, result["name"])
-
-        logger.info("Got %r matches")
-        return results
+    def _advertise_pipkin(self):
+        self._append_info_text("\n\n")
+        self._append_info_text("Under the hood " + "\n", ("caption", "right"))
+        self._append_info_text(
+            "This dialog uses `pipkin`, a new command line tool for managing "
+            "MicroPython and CircuitPython packages. ",
+            ("right",),
+        )
+        self._append_info_text("See ", ("right",))
+        self._append_info_text("https://pypi.org/project/pipkin/", ("url", "right"))
+        self._append_info_text(" for more info. \n", ("right",))
 
 
 class BackendPipDialog(PipDialog):
@@ -1031,28 +918,18 @@ class BackendPipDialog(PipDialog):
         self._update_list(self._last_name_to_show)
 
     def _confirm_install(self, package_data):
-        name = package_data["info"]["name"]
-
-        if name.lower().startswith("thonny"):
-            return messagebox.askyesno(
+        for question in self._backend_proxy.get_package_installation_confirmations(package_data):
+            if not messagebox.askyesno(
                 tr("Confirmation"),
-                tr(
-                    "Looks like you are installing a Thonny-related package.\n"
-                    + "If you meant to install a Thonny plugin, then you should\n"
-                    + "choose 'Tools → Manage plugins...' instead\n"
-                    + "\n"
-                    + "Are you sure you want to install %s for the back-end?"
-                )
-                % name,
+                question,
                 master=self,
-            )
-        else:
-            return True
+            ):
+                return False
+        return True
 
     def _run_pip_with_dialog(
         self, command: str, args: List[str], title: str
     ) -> Tuple[int, str, str]:
-        proxy = get_runner().get_backend_proxy()
         if command == "install":
             back_cmd = InlineCommand("install_distributions", args=args)
         elif command == "uninstall":
@@ -1072,6 +949,50 @@ class BackendPipDialog(PipDialog):
 
         return dlg.returncode, dlg.stdout, dlg.stderr
 
+    def _get_interpreter_description(self):
+        return self._backend_proxy.get_full_label()
+
+    def _installer_runs_locally(self):
+        return self._backend_proxy.can_install_packages_from_files()
+
+    def _get_target_directory(self):
+        return self._backend_proxy.get_packages_target_dir_with_comment()[0]
+
+    def _normalize_target_path(self, path: str) -> str:
+        return self._backend_proxy.normalize_target_path(path)
+
+    def _append_location_to_info_path(self, path):
+        if self._backend_proxy.uses_local_filesystem():
+            tags = ("url",)
+        else:
+            tags = ()
+        self.info_text.direct_insert("end", self._normalize_target_path(path), tags)
+
+    def _show_extra_instructions(self):
+        from thonny.plugins.micropython.mp_front import MicroPythonProxy
+
+        if isinstance(self._backend_proxy, MicroPythonProxy):
+            self._advertise_pipkin()
+
+    def _show_read_only_instructions(self):
+        path, comment = self._backend_proxy.get_packages_target_dir_with_comment()
+        assert path is None
+
+        self._append_info_text(tr("Installation is not possible") + "\n", ("caption",))
+        self.info_text.direct_insert(
+            "end",
+            comment + "\n\n",
+        )
+
+    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
+        return self._backend_proxy.search_packages(query)
+
+    def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
+        return self._backend_proxy.get_package_info_from_index(name, version_str)
+
+    def get_search_button_text(self):
+        return self._backend_proxy.get_search_button_text()
+
 
 class PluginsPipDialog(PipDialog):
     def __init__(self, master):
@@ -1086,9 +1007,6 @@ class PluginsPipDialog(PipDialog):
 
     def _installer_runs_locally(self):
         return True
-
-    def _is_read_only(self):
-        return False
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
@@ -1125,12 +1043,6 @@ class PluginsPipDialog(PipDialog):
 
     def _get_interpreter_description(self):
         return get_front_interpreter_for_subprocess(sys.executable)
-
-    def _use_user_install(self):
-        return not self._targets_virtual_environment()
-
-    def _targets_virtual_environment(self):
-        return running_in_virtual_environment()
 
     def _confirm_install(self, package_data):
         if not self._looks_like_plug_in(package_data) and not messagebox.askyesno(
@@ -1196,17 +1108,17 @@ class PluginsPipDialog(PipDialog):
         return False
 
     def _get_target_directory(self):
-        if self._use_user_install():
-            target = thonny.get_sys_path_directory_containg_plugins()
-            os.makedirs(target, exist_ok=True)
-            return self._normalize_target_path(target)
-        else:
+        if running_in_virtual_environment():
             for d in sys.path:
                 if ("site-packages" in d or "dist-packages" in d) and path_startswith(
                     d, sys.prefix
                 ):
-                    return self._normalize_target_path(d)
+                    return normpath_with_actual_case(d)
             return None
+        else:
+            target = thonny.get_sys_path_directory_containg_plugins()
+            os.makedirs(target, exist_ok=True)
+            return normpath_with_actual_case(target)
 
     def _normalize_target_path(self, path: str) -> str:
         return normpath_with_actual_case(path)
@@ -1241,8 +1153,6 @@ class PluginsPipDialog(PipDialog):
             cmd += [
                 "--no-warn-script-location",
             ]
-            if self._use_user_install():
-                cmd += ["--user"]
         cmd += args
 
         proc = running.create_frontend_python_process(
@@ -1256,192 +1166,11 @@ class PluginsPipDialog(PipDialog):
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr
 
+    def _append_location_to_info_path(self, path):
+        self.info_text.direct_insert("end", self._normalize_target_path(path), ("url",))
 
-class DetailsDialog(CommonDialog):
-    def __init__(self, master, package_metadata, selected_version, support_update_deps_switch):
-        from distutils.version import StrictVersion
-
-        assert isinstance(master, PipDialog)
-        self._pip_dialog = cast(PipDialog, master)
-
-        super().__init__(master)
-        self.result = None
-        self._closed = False
-        self._version_data = None
-        self._package_name = package_metadata["info"]["name"]
-        self.title(tr("Advanced install / upgrade / downgrade"))
-
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        main_frame = ttk.Frame(self)  # To get styled background
-        main_frame.grid(sticky="nsew")
-        main_frame.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(0, weight=1)
-
-        version_label = ttk.Label(main_frame, text=tr("Desired version"))
-        version_label.grid(
-            row=0,
-            column=0,
-            columnspan=2,
-            padx=self.get_medium_padding(),
-            pady=(self.get_medium_padding(), 0),
-            sticky="w",
-        )
-
-        def version_sort_key(s):
-            # Trying to massage understandable versions into valid StrictVersions
-            if s.replace(".", "").isnumeric():  # stable release
-                s2 = s + "b999"  # make it latest beta version
-            elif "rc" in s:
-                s2 = s.replace("rc", "b8")
-            else:
-                s2 = s
-            try:
-                return StrictVersion(s2)
-            except Exception:
-                # use only numbers
-                nums = re.findall(r"\d+", s)
-                while len(nums) < 2:
-                    nums.append("0")
-                return StrictVersion(".".join(nums[:3]))
-
-        version_strings = list(package_metadata["releases"].keys())
-        version_strings.sort(key=version_sort_key, reverse=True)
-        self.version_var = ui_utils.create_string_var(
-            selected_version, self._start_fetching_version_info
-        )
-        self.version_combo = ttk.Combobox(
-            main_frame, textvariable=self.version_var, values=version_strings, exportselection=False
-        )
-
-        self.version_combo.state(["!disabled", "readonly"])
-        self.version_combo.grid(
-            row=1,
-            column=0,
-            columnspan=2,
-            pady=(0, self.get_medium_padding()),
-            padx=self.get_medium_padding(),
-            sticky="ew",
-        )
-
-        self.requires_label = ttk.Label(main_frame, text="")
-        self.requires_label.grid(
-            row=2,
-            column=0,
-            columnspan=2,
-            pady=(0, self.get_medium_padding()),
-            padx=self.get_medium_padding(),
-            sticky="ew",
-        )
-
-        self.update_deps_var = tk.IntVar()
-        self.update_deps_var.set(0)
-        self.update_deps_cb = ttk.Checkbutton(
-            main_frame, text=tr("Upgrade dependencies"), variable=self.update_deps_var
-        )
-        if support_update_deps_switch:
-            self.update_deps_cb.grid(
-                row=3, column=0, columnspan=2, padx=self.get_medium_padding(), sticky="w"
-            )
-
-        self.ok_button = ttk.Button(
-            main_frame, text=master.get_install_button_text(), command=self._ok
-        )
-        self.ok_button.grid(
-            row=4,
-            column=0,
-            pady=self.get_medium_padding(),
-            padx=(self.get_medium_padding(), 0),
-            sticky="se",
-        )
-        self.cancel_button = ttk.Button(main_frame, text=tr("Cancel"), command=self._cancel)
-        self.cancel_button.grid(
-            row=4,
-            column=1,
-            pady=self.get_medium_padding(),
-            padx=(self.get_small_padding(), self.get_medium_padding()),
-            sticky="se",
-        )
-
-        # self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.version_combo.focus_set()
-
-        self.bind("<Escape>", self._cancel, True)
-        self.protocol("WM_DELETE_WINDOW", self._cancel)
-
-        if self.version_var.get().strip():
-            self._start_fetching_version_info()
-
-    def _set_state(self, state):
-        self._state = state
-        widgets = [
-            self.version_combo,
-            # self.search_box, # looks funny when disabled
-            self.ok_button,
-            self.update_deps_cb,
-        ]
-
-        if state == "idle":
-            self.config(cursor="")
-            for widget in widgets:
-                if widget == self.version_combo:
-                    widget.state(["!disabled", "readonly"])
-                else:
-                    widget["state"] = tk.NORMAL
-        else:
-            self.config(cursor=get_busy_cursor())
-            for widget in widgets:
-                widget["state"] = tk.DISABLED
-
-        if self.version_var.get().strip() == "" or not self._version_data:
-            self.ok_button["state"] = tk.DISABLED
-
-    def _start_fetching_version_info(self):
-        self._set_state("busy")
-        _start_fetching_package_info(
-            self._package_name,
-            url=self._pip_dialog._get_package_metadata_url(
-                self._package_name, self.version_var.get()
-            ),
-            fallback_url=self._pip_dialog._get_package_metadata_fallback_url(
-                self._package_name, self.version_var.get()
-            ),
-            completion_handler=self._show_version_info,
-        )
-
-    def _show_version_info(self, name, info, error_code=None):
-        if self._closed:
-            return
-
-        self._version_data = info
-        reqs = ""
-        if (
-            not error_code
-            and "requires_dist" in info["info"]
-            and isinstance(info["info"]["requires_dist"], list)
-        ):
-            deps = [d for d in info["info"]["requires_dist"] if not _EXTRA_MARKER_RE.match(d)]
-            if deps:
-                reqs = tr("Requires:") + "\n  * " + "\n  * ".join(deps)
-        elif error_code:
-            reqs = tr("Error code:") + " " + str(error_code)
-            if "error" in info:
-                reqs += "\n" + tr("Error:") + " " + info["error"]
-        else:
-            reqs = ""
-
-        self.requires_label.configure(text=reqs)
-        self._set_state("idle")
-
-    def _ok(self, event=None):
-        self.result = (self.version_var.get(), self._version_data, bool(self.update_deps_var.get()))
-        self._closed = True
-        self.destroy()
-
-    def _cancel(self, event=None):
-        self.result = None
-        self._closed = True
-        self.destroy()
+    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
+        return perform_pypi_search(query)
 
 
 def _fetch_url_future(url, fallback_url=None, timeout=10):
@@ -1480,43 +1209,51 @@ def _get_latest_stable_version(version_strings):
     return str(sorted(versions)[-1])
 
 
-def _ask_installation_details(master, data, selected_version, support_update_deps_switch):
-    dlg = DetailsDialog(master, data, selected_version, support_update_deps_switch)
-    ui_utils.show_dialog(dlg, master)
-    return dlg.result
+def normalize_package_name(name):
+    # looks like (in some cases?) pip list gives the name as it was used during install
+    # ie. the list may contain lowercase entry, when actual metadata has uppercase name
+    # Example: when you "pip install cx-freeze", then "pip list"
+    # really returns "cx-freeze" although correct name is "cx_Freeze"
+
+    # https://www.python.org/dev/peps/pep-0503/#id4
+    return re.sub(r"[-_.]+", "-", name).lower().strip()
 
 
-def _start_fetching_package_info(name, url: str, fallback_url: str, completion_handler):
-    import urllib.error
+def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[str, str]]:
     import urllib.parse
+    from urllib.request import urlopen
 
-    url_future = _fetch_url_future(url=url, fallback_url=fallback_url)
+    logger.info("Performing PyPI search for %r", query)
 
-    def poll_fetch_complete():
-        import json
+    url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
+    with urlopen(url, timeout=10) as fp:
+        data = fp.read()
 
-        if url_future.done():
-            try:
-                _, bin_data = url_future.result()
-                raw_data = bin_data.decode("UTF-8")
-                data = json.loads(raw_data)
-                if "info" in data and "name" not in data["info"]:
-                    # this is the case of micropython.org/pi
-                    data["info"]["name"] = name
+    results = _extract_pypi_search_results(data.decode("utf-8"))
 
-                completion_handler(name, data)
-            except urllib.error.HTTPError as e:
-                completion_handler(
-                    name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
-                )
-            except Exception as e:
-                completion_handler(
-                    name, {"info": {"name": name}, "error": str(e), "releases": {}}, e
-                )
-        else:
-            get_workbench().after(200, poll_fetch_complete)
+    for result in results:
+        if source:
+            result["source"] = source
+        result["distance"] = levenshtein_distance(query, result["name"])
 
-    poll_fetch_complete()
+    logger.info("Got %r matches")
+    return results
+
+
+def get_package_info_from_pypi(name: str, version_str: Optional[str]) -> Dict:
+    import json
+    from urllib.request import urlopen
+
+    if version_str is None:
+        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
+    else:
+        url = "https://pypi.org/pypi/{}/{}/json".format(
+            urllib.parse.quote(name), urllib.parse.quote(version_str)
+        )
+
+    logger.info("Downloading package info from %s", url)
+    with urlopen(url) as fp:
+        return json.load(fp)
 
 
 def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
@@ -1577,24 +1314,8 @@ def _extract_click_text(widget, event, tag):
     return None
 
 
-def get_not_supported_translation():
-    return tr("Package manager is not available for this interpreter")
-
-
 def load_plugin() -> None:
-    def get_pip_gui_class():
-        proxy = get_runner().get_backend_proxy()
-        if proxy is None:
-            return None
-        pip_gui_class = proxy.get_pip_gui_class()
-        return pip_gui_class
-
     def open_backend_pip_gui(*args):
-        pg_class = get_pip_gui_class()
-        if pg_class is None:
-            showerror(tr("Not supported"), get_not_supported_translation())
-            return
-
         if not get_runner().is_waiting_toplevel_command():
             showerror(
                 tr("Not available"),
@@ -1603,12 +1324,8 @@ def load_plugin() -> None:
             )
             return
 
-        pg = pg_class(get_workbench())
+        pg = BackendPipDialog(get_workbench())
         ui_utils.show_dialog(pg)
-
-    def open_backend_pip_gui_enabled():
-        class_ = get_pip_gui_class()
-        return class_ is not None
 
     def open_plugins_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
@@ -1619,7 +1336,6 @@ def load_plugin() -> None:
         "tools",
         tr("Manage packages..."),
         open_backend_pip_gui,
-        tester=open_backend_pip_gui_enabled,
         group=80,
     )
     get_workbench().add_command(

@@ -144,11 +144,6 @@ class SshCPythonProxy(SubprocessProxy):
         confs = sorted(cls.get_last_configurations(), key=cls.get_switcher_configuration_label)
         return [(conf, cls.get_switcher_configuration_label(conf)) for conf in confs]
 
-    def get_pip_gui_class(self):
-        from thonny.plugins.cpython_ssh.cps_pip_gui import SshCPythonPipDialog
-
-        return SshCPythonPipDialog
-
     def has_custom_system_shell(self):
         return True
 
@@ -172,6 +167,9 @@ class SshCPythonProxy(SubprocessProxy):
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return True
+
+    def can_install_packages_from_files(self) -> bool:
+        return False
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):

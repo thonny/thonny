@@ -22,7 +22,16 @@ from logging import getLogger
 from threading import Thread
 from time import sleep
 from tkinter import messagebox, ttk
-from typing import Any, Callable, Dict, List, Optional, Set, Union  # @UnusedImport; @UnusedImport
+from typing import (  # @UnusedImport; @UnusedImport
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import thonny
 from thonny import (
@@ -874,9 +883,6 @@ class BackendProxy(ABC):
     def get_backend_name(self):
         return type(self).backend_name
 
-    def get_pip_gui_class(self):
-        return None
-
     @abstractmethod
     def interrupt(self):
         """Tries to interrupt current command without resetting the backend"""
@@ -970,6 +976,49 @@ class BackendProxy(ABC):
 
     def open_custom_system_shell(self) -> None:
         raise NotImplementedError()
+
+    def get_package_installation_confirmations(self, package_data: Dict) -> List[str]:
+        name = package_data["info"]["name"]
+        if "thonny" in name.lower():
+            return [
+                tr(
+                    "Looks like you are installing a Thonny-related package.\n"
+                    + "If you meant to install a Thonny plugin, then you should\n"
+                    + "choose 'Tools → Manage plugins...' instead\n"
+                    + "\n"
+                    + "Are you sure you want to install %s for the back-end?"
+                )
+                % name
+            ]
+
+        return []
+
+    def supports_packages(self) -> bool:
+        return True
+
+    @abstractmethod
+    def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def can_install_packages_from_files(self) -> bool:
+        raise NotImplementedError()
+
+    def normalize_target_path(self, path: str) -> str:
+        return path
+
+    def search_packages(self, query: str) -> List[Dict[str, Any]]:
+        from thonny.plugins.pip_gui import perform_pypi_search
+
+        return perform_pypi_search(query)
+
+    def get_package_info_from_index(self, name: str, version_str: Optional[str]) -> Dict:
+        from thonny.plugins.pip_gui import get_package_info_from_pypi
+
+        return get_package_info_from_pypi(name, version_str)
+
+    def get_search_button_text(self) -> str:
+        return tr("Search on PyPI")
 
 
 class SubprocessProxy(BackendProxy, ABC):

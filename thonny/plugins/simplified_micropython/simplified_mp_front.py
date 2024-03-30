@@ -1,8 +1,9 @@
 import sys
 from time import sleep
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from thonny import ui_utils
+from thonny.languages import tr
 from thonny.plugins.micropython import BareMetalMicroPythonConfigPage, BareMetalMicroPythonProxy
 from thonny.plugins.micropython.daplink_flasher import DaplinkFlashingDialog
 
@@ -30,6 +31,15 @@ class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
         return {(0x0D28, 0x0204)}
+
+    def supports_packages(self) -> bool:
+        return False
+
+    def can_install_packages_from_files(self) -> bool:
+        raise False
+
+    def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
+        return None, tr("This device does not support packages")
 
 
 class SimplifiedMicroPythonConfigPage(BareMetalMicroPythonConfigPage):

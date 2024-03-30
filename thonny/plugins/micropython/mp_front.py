@@ -19,6 +19,7 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
+from thonny.misc_utils import levenshtein_distance
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
@@ -41,29 +42,29 @@ WEBREPL_OPTION_DESC = "< WebREPL >"
 WEBREPL_PORT_VALUE = "webrepl"
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
+MICROPYTHON_ORG_JSON = "https://micropython.org/pi/v2/index.json"
+_mp_org_index_cache = None
+
 
 class MicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._lib_dirs = []
         super().__init__(clean, running.get_front_interpreter_for_subprocess())
 
-    def get_pip_gui_class(self):
-        return None
-
-    def get_pip_target_dir(self) -> Optional[str]:
+    def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
         lib_dirs = self.get_lib_dirs()
         if not lib_dirs:
-            return None
+            return None, "could not determine target directory"
 
         for path in lib_dirs:
             if path.startswith("/home/"):
-                return path
+                return path, None
 
         for path in ["/lib", "/flash/lib"]:
             if path in lib_dirs:
-                return path
+                return path, None
 
-        return lib_dirs[0]
+        return lib_dirs[0], None
 
     def get_lib_dirs(self):
         return self._lib_dirs
@@ -99,6 +100,124 @@ class MicroPythonProxy(SubprocessProxy):
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return True
 
+    def get_package_installation_confirmations(self, package_data: Dict) -> List[str]:
+        result = super().get_package_installation_confirmations(package_data)
+
+        if not self.looks_like_suitable_package(package_data):
+            result.append(
+                tr(
+                    "This doesn't look like MicroPython/CircuitPython package.\n"
+                    "Are you sure you want to install it?"
+                )
+            )
+        return result
+
+    def looks_like_suitable_package(self, package_data: Dict) -> bool:
+        if package_data.get("mp_org", False):
+            return True
+
+        name = package_data["info"]["name"]
+        for token in ["micropython", "circuitpython", "pycopy"]:
+            if token in name.lower():
+                return True
+
+        classifiers = package_data["info"].get("classifiers", [])
+        logger.debug("package classifiers: %s", classifiers)
+        for mp_class in [
+            "Programming Language :: Python :: Implementation :: MicroPython",
+            "Programming Language :: Python :: Implementation :: CircuitPython",
+        ]:
+            if mp_class in classifiers:
+                return True
+
+        return False
+
+    def search_packages(self, query: str) -> List[Dict[str, Any]]:
+        from thonny.plugins.pip_gui import perform_pypi_search
+
+        mp_org_result = self._perform_micropython_org_search(query)
+        pypi_result = perform_pypi_search(query, source="PyPI")
+
+        combined_result = []
+        mp_org_names = set()
+
+        for item in mp_org_result:
+            combined_result.append(item)
+            mp_org_names.add(item["name"])
+
+        for item in pypi_result:
+            # TODO: normalize?
+            if item["name"] not in mp_org_names:
+                # add slight penalty for non-perfect PyPI matches, as most users look for mp.org results
+                if item["distance"] != 0:
+                    item["distance"] += 1
+                combined_result.append(item)
+
+        sorted_result = sorted(combined_result, key=lambda x: x["distance"])
+        filtered_result = filter(lambda x: x["distance"] < 5, sorted_result[:20])
+
+        return list(filtered_result)
+
+    def _perform_micropython_org_search(self, query: str) -> List[Dict[str, str]]:
+        logger.info("Searching %r for %r", MICROPYTHON_ORG_JSON, query)
+        data = self._get_mp_org_index_data()
+
+        result = []
+        for package in data["packages"]:
+            result.append(
+                {
+                    "name": package["name"],
+                    "description": package["description"] or None,
+                    "source": "micropython-lib",
+                    "distance": levenshtein_distance(query, package["name"]),
+                }
+            )
+
+        logger.info("Got %r items", len(result))
+        return result
+
+    def _get_mp_org_index_data(self) -> Dict[str, Any]:
+        global _mp_org_index_cache
+        if not _mp_org_index_cache:
+            import json
+            from urllib.request import urlopen
+
+            with urlopen(MICROPYTHON_ORG_JSON, timeout=10) as fp:
+                _mp_org_index_cache = json.load(fp)
+
+        return _mp_org_index_cache
+
+    def get_package_info_from_index(self, name: str, version_str: Optional[str]) -> Dict:
+        from thonny.plugins.pip_gui import normalize_package_name
+
+        # Try mp.org first
+        index_data = self._get_mp_org_index_data()
+
+        for package in index_data["packages"]:
+            if normalize_package_name(package["name"]) == normalize_package_name(name):
+                info = {
+                    "name": package["name"],
+                    "version": package["version"],
+                }
+                if package.get("author"):
+                    info["author"] = package["author"]
+                if package.get("license"):
+                    info["license"] = package["license"]
+                if package.get("description"):
+                    info["summary"] = package["description"]
+                # TODO: deps?
+
+                releases = {ver: [] for ver in package["versions"]["py"]}
+
+                return {"info": info, "releases": releases, "mp_org": True}
+
+        from thonny.plugins.pip_gui import get_package_info_from_pypi
+
+        return get_package_info_from_pypi(name, version_str)
+
+    def get_search_button_text(self) -> str:
+        return tr("Search micropython-lib and PyPI")
+
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -110,11 +229,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def get_target_executable(self) -> Optional[str]:
         return None
-
-    def get_pip_gui_class(self):
-        from thonny.plugins.micropython.pip_gui import MicroPythonPipDialog
-
-        return MicroPythonPipDialog
 
     def destroy(self, for_restart: bool = False):
         super().destroy(for_restart=for_restart)
@@ -453,6 +567,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             "In order to run your script in terminal, save it on the device\n"
             "as main script, select 'Tools => Open system shell' and press Ctrl+D",
         )
+
+    def can_install_packages_from_files(self) -> bool:
+        return True
 
 
 class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
@@ -1098,6 +1215,9 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         executable = conf[f"{cls.backend_name}.executable"]
         return os.path.exists(executable) or shutil.which(executable)
 
+    def can_install_packages_from_files(self) -> bool:
+        return True
+
 
 class LocalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
@@ -1250,6 +1370,9 @@ class SshMicroPythonProxy(MicroPythonProxy):
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return True
+
+    def can_install_packages_from_files(self) -> bool:
+        return False
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
