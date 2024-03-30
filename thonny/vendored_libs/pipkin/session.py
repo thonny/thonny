@@ -505,9 +505,9 @@ class Session:
                 "install",
                 "--no-warn-script-location",
                 "--upgrade",
-                "pip==22.2.2",
-                "setuptools==65.4.1",
-                "wheel==0.38.4",
+                "pip==23.3.2",
+                "setuptools==68.2.2",
+                "wheel==0.41.3",
             ]
             subprocess.check_call(
                 pip_cmd,
@@ -649,7 +649,9 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
         except Exception:
             exe = sys.executable
 
-        venv_name = hashlib.md5(str((exe, sys.version_info[0:2])).encode("utf-8")).hexdigest()
+        import pipkin
+        venv_path_source = str((exe, sys.version_info[0:2], pipkin.__version__.split(".")[0]))
+        venv_name = hashlib.md5(venv_path_source.encode("utf-8")).hexdigest()
         return os.path.join(self._get_workspaces_dir(), venv_name)
 
     def _get_workspaces_dir(self) -> str:
