@@ -1133,6 +1133,18 @@ class PluginsPipDialog(PipDialog):
         return running_in_virtual_environment()
 
     def _confirm_install(self, package_data):
+        if not self._looks_like_plug_in(package_data) and not messagebox.askyesno(
+            tr("Confirmation"),
+            tr(
+                "This doesn't look like Thonny plug-in.\n\n"
+                "If you want to install it for your programs, then use\n"
+                "'Tools => Manage packages' instead.\n\n"
+                "Are you sure you want to install it as Thonny plug-in?"
+            ),
+            master=self,
+        ):
+            return False
+
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
 
@@ -1173,6 +1185,15 @@ class PluginsPipDialog(PipDialog):
                 return False
 
         return True
+
+    def _looks_like_plug_in(self, package_data):
+        name = package_data["name"].lower()
+        if "thonny" in name:
+            return True
+        if name in ["birdseye"]:
+            return True
+
+        return False
 
     def _get_target_directory(self):
         if self._use_user_install():
