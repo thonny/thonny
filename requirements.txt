@@ -5,6 +5,7 @@ docutils>=0.16
 mypy>=0.761
 asttokens>=2.0
 Send2Trash>=1.5
+packaging>=20.9
 
 # wheel is required by pipkin, which is currently vendored
 wheel

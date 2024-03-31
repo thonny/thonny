@@ -29,9 +29,10 @@ from pipkin.util import (
 
 logger = getLogger(__name__)
 
-INITIAL_VENV_DISTS = ["pip", "setuptools", "pkg_resources", "wheel"]
-INITIAL_VENV_FILES = ["easy_install.py"]
+MANAGEMENT_DISTS = ["pip", "setuptools", "pkg_resources", "wheel"]
+MANAGEMENT_FILES = ["easy_install.py"]
 META_ENCODING = "utf-8"
+PIP_VERSION = "24.0"
 
 
 @dataclass(frozen=True)
@@ -369,7 +370,7 @@ class Session:
 
     def _format_exclusion_args(self, excludes: Optional[List[str]]) -> List[str]:
         args = []
-        for exclude in (excludes or []) + ["pip", "pkg_resources", "setuptools", "wheel"]:
+        for exclude in (excludes or []) + MANAGEMENT_DISTS:
             args += ["--exclude", exclude]
 
         return args
@@ -504,10 +505,7 @@ class Session:
                 "--disable-pip-version-check",
                 "install",
                 "--no-warn-script-location",
-                "--upgrade",
-                "pip==23.3.2",
-                "setuptools==68.2.2",
-                "wheel==0.41.3",
+                f"pip=={PIP_VERSION}",
             ]
             subprocess.check_call(
                 pip_cmd,
@@ -587,7 +585,7 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
         logger.debug("Clearing %s", sp_path)
         for name in os.listdir(sp_path):
             full_path = os.path.join(sp_path, name)
-            if self._is_initial_venv_item(name):
+            if self._is_management_item(name):
                 logger.debug("skipping %r", name)
                 continue
             elif os.path.isfile(full_path):
@@ -650,7 +648,10 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
             exe = sys.executable
 
         import pipkin
-        venv_path_source = str((exe, sys.version_info[0:2], pipkin.__version__.split(".")[0]))
+
+        venv_path_source = str(
+            (exe, sys.version_info[0:2], pipkin.__version__.split(".", maxsplit=1)[0], PIP_VERSION)
+        )
         venv_name = hashlib.md5(venv_path_source.encode("utf-8")).hexdigest()
         return os.path.join(self._get_workspaces_dir(), venv_name)
 
@@ -664,12 +665,12 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
             result = os.path.join(result, "cache")
         return result
 
-    def _is_initial_venv_item(self, name: str) -> bool:
+    def _is_management_item(self, name: str) -> bool:
         return (
-            name in INITIAL_VENV_FILES
-            or name in INITIAL_VENV_DISTS
+            name in MANAGEMENT_FILES
+            or name in MANAGEMENT_DISTS
             or name.endswith(".dist-info")
-            and name.split("-")[0] in INITIAL_VENV_DISTS
+            and name.split("-")[0] in MANAGEMENT_DISTS
         )
 
     def _get_venv_state(self, root: str = None) -> Dict[str, float]:
@@ -679,7 +680,7 @@ pip._vendor.distlib.markers.DEFAULT_CONTEXT = \
 
         result = {}
         for item_name in os.listdir(root):
-            if self._is_initial_venv_item(item_name):
+            if self._is_management_item(item_name):
                 continue
 
             if item_name.endswith(".dist-info"):

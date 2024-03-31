@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import copy
 import email.parser
 import errno
@@ -47,12 +48,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
-from pkg_resources import safe_name, safe_version
-
 from pipkin.util import (
     create_dist_info_version_name,
     custom_normalize_dist_name,
     parse_dist_file_name,
+    safe_name,
+    safe_version,
 )
 
 MP_ORG_INDEX_V1 = "https://micropython.org/pi"
@@ -452,9 +453,9 @@ class MpOrgV2IndexDownloader(BaseIndexDownloader):
         urls_per_wheel_path = {}
 
         for wheel_path, short_hash in version_meta.get("hashes", []):
-            urls_per_wheel_path[
-                wheel_path
-            ] = f"{self._index_url}/file/{short_hash[:2]}/{short_hash}"
+            urls_per_wheel_path[wheel_path] = (
+                f"{self._index_url}/file/{short_hash[:2]}/{short_hash}"
+            )
 
         for wheel_path, url in version_meta.get("urls", []):
             urls_per_wheel_path[wheel_path] = url
