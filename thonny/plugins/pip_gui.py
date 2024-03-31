@@ -45,7 +45,7 @@ logger = getLogger(__name__)
 _EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
 
-class PipDialog(CommonDialog, ABC):
+class PipFrame(ttk.Frame, ABC):
     def __init__(self, master):
         self._state = "idle"  # possible values: "listing", "fetching", "idle"
         self._process = None
@@ -55,19 +55,10 @@ class PipDialog(CommonDialog, ABC):
 
         super().__init__(master)
 
-        main_frame = ttk.Frame(self)
-        main_frame.grid(sticky=tk.NSEW, ipadx=self.get_medium_padding())
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-
-        self.title(self._get_title())
-
-        self._create_widgets(main_frame)
+        self._create_widgets(self)
 
         self.search_box.focus_set()
 
-        self.bind("<Escape>", self._on_close, True)
-        self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._show_instructions()
 
         self._start_update_list()
@@ -156,6 +147,7 @@ class PipDialog(CommonDialog, ABC):
         self.listbox["yscrollcommand"] = list_scrollbar.set
 
         info_frame = ttk.Frame(main_pw)
+        self.info_frame = info_frame
         info_frame.columnconfigure(0, weight=1)
         info_frame.rowconfigure(1, weight=1)
 
@@ -251,9 +243,6 @@ class PipDialog(CommonDialog, ABC):
         )
 
         self.advanced_button.grid(row=0, column=2, sticky="w", padx=(self.get_small_padding(), 0))
-
-        self.close_button = ttk.Button(info_frame, text=tr("Close"), command=self._on_close)
-        self.close_button.grid(row=2, column=3, sticky="e")
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
@@ -822,10 +811,6 @@ class PipDialog(CommonDialog, ABC):
             else:
                 self._start_show_package_info(url)
 
-    def _on_close(self, event=None):
-        self._closed = True
-        self.destroy()
-
     def _get_active_version(self, name):
         dist = self._get_active_dist(name)
         if dist is None:
@@ -858,9 +843,6 @@ class PipDialog(CommonDialog, ABC):
     def _get_target_directory(self):
         raise NotImplementedError()
 
-    def _get_title(self):
-        return tr("Manage packages for %s") % self._get_interpreter_description()
-
     def _confirm_install(self, package_data):
         return True
 
@@ -882,8 +864,17 @@ class PipDialog(CommonDialog, ABC):
         self._append_info_text("https://pypi.org/project/pipkin/", ("url", "right"))
         self._append_info_text(" for more info. \n", ("right",))
 
+    def get_large_padding(self):
+        return ems_to_pixels(1.5)
 
-class BackendPipDialog(PipDialog):
+    def get_medium_padding(self):
+        return ems_to_pixels(1)
+
+    def get_small_padding(self):
+        return ems_to_pixels(0.6)
+
+
+class BackendPipFrame(PipFrame):
     def __init__(self, master):
         self._backend_proxy = get_runner().get_backend_proxy()
         super().__init__(master)
@@ -994,10 +985,9 @@ class BackendPipDialog(PipDialog):
         return self._backend_proxy.get_search_button_text()
 
 
-class PluginsPipDialog(PipDialog):
+class PluginsPipFrame(PipFrame):
     def __init__(self, master):
-        PipDialog.__init__(self, master)
-
+        super().__init__(master)
         # make sure directory exists, so user can put her plug-ins there
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
@@ -1123,30 +1113,6 @@ class PluginsPipDialog(PipDialog):
     def _normalize_target_path(self, path: str) -> str:
         return normpath_with_actual_case(path)
 
-    def _create_widgets(self, parent):
-        banner = ttk.Frame(parent, style="Tip.TFrame")
-        banner.grid(row=0, column=0, sticky="nsew")
-
-        banner_msg = (
-            tr(
-                "This dialog is for managing Thonny plug-ins and their dependencies.\n"
-                + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
-            )
-            + "\n"
-        )
-
-        banner_msg += "\n" + tr(
-            "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
-        )
-
-        banner_text = ttk.Label(banner, text=banner_msg, style="Tip.TLabel", justify="left")
-        banner_text.grid(pady=self.get_medium_padding(), padx=self.get_medium_padding())
-
-        PipDialog._create_widgets(self, parent)
-
-    def _get_title(self):
-        return tr("Thonny plug-ins")
-
     def _run_pip_with_dialog(self, command: str, args: Dict, title: str) -> Tuple[int, str, str]:
         cmd = ["-m", "pip", "--disable-pip-version-check", "--no-color", command]
         if command == "install":
@@ -1171,6 +1137,54 @@ class PluginsPipDialog(PipDialog):
 
     def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
         return perform_pypi_search(query)
+
+
+class PluginsPipDialog(CommonDialog):
+    def __init__(self, master):
+        super().__init__(master)
+
+        banner = ttk.Frame(self, style="Tip.TFrame")
+        banner.grid(row=0, column=0, sticky="nsew")
+
+        banner_msg = (
+            tr(
+                "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+                + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+            )
+            + "\n"
+        )
+
+        banner_msg += "\n" + tr(
+            "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+        )
+
+        banner_text = ttk.Label(banner, text=banner_msg, style="Tip.TLabel", justify="left")
+        banner_text.grid(pady=self.get_medium_padding(), padx=self.get_medium_padding())
+
+        banner.grid(row=0, column=0)
+
+        pip_frame = PluginsPipFrame(self)
+        pip_frame.grid(row=1, sticky=tk.NSEW, ipadx=self.get_medium_padding())
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        self.close_button = ttk.Button(
+            pip_frame.info_frame, text=tr("Close"), command=self._on_close
+        )
+        self.close_button.grid(row=2, column=3, sticky="e")
+
+        self.title(tr("Thonny plug-ins"))
+
+        self.bind("<Escape>", self._on_close, True)
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    def _on_close(self, event=None):
+        self._closed = True
+        self.destroy()
+
+
+class PackagesView(PipFrame):
+    pass
 
 
 def _fetch_url_future(url, fallback_url=None, timeout=10):
@@ -1316,20 +1330,13 @@ def _extract_click_text(widget, event, tag):
 
 def load_plugin() -> None:
     def open_backend_pip_gui(*args):
-        if not get_runner().is_waiting_toplevel_command():
-            showerror(
-                tr("Not available"),
-                tr("You need to stop your program before launching the package manager."),
-                master=get_workbench(),
-            )
-            return
-
-        pg = BackendPipDialog(get_workbench())
-        ui_utils.show_dialog(pg)
+        get_workbench().show_view("PackagesView")
 
     def open_plugins_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
         ui_utils.show_dialog(pg)
+
+    get_workbench().add_view(BackendPipFrame, tr("Packages"), "s")
 
     get_workbench().add_command(
         "backendpipgui",
