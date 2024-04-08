@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import math
 import os
 import re
 import subprocess
@@ -24,11 +25,12 @@ from thonny.common import (
     running_in_virtual_environment,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, levenshtein_distance
+from thonny.misc_utils import construct_cmd_line, get_menu_char, levenshtein_distance
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
+    CustomToolbutton,
     askopenfilename,
     ems_to_pixels,
     get_busy_cursor,
@@ -38,8 +40,6 @@ from thonny.ui_utils import (
 )
 from thonny.workdlg import SubprocessDialog
 
-PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
-
 logger = getLogger(__name__)
 
 _EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
@@ -47,8 +47,7 @@ _EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
 class PipFrame(ttk.Frame, ABC):
     def __init__(self, master):
-        self._state = "idle"  # possible values: "listing", "fetching", "idle"
-        self._process = None
+        self._state = "inactive"  # possible values: "inactive", "listing", "fetching", "idle"
         self._closed = False
         self._active_distributions = {}
         self.current_package_data = None
@@ -57,14 +56,10 @@ class PipFrame(ttk.Frame, ABC):
 
         self._create_widgets(self)
 
-        self.search_box.focus_set()
-
+    def load_content(self):
         self._show_instructions()
-
         self._start_update_list()
-
-    def get_search_button_text(self):
-        return tr("Search on PyPI")
+        self.search_box.focus_set()
 
     def get_install_button_text(self):
         return tr("Install")
@@ -81,48 +76,60 @@ class PipFrame(ttk.Frame, ABC):
             row=1,
             column=0,
             sticky="nsew",
-            padx=self.get_medium_padding(),
-            pady=(self.get_medium_padding(), 0),
+            padx=self.get_small_padding(),
+            pady=ems_to_pixels(0.5),
         )
         header_frame.columnconfigure(0, weight=1)
         header_frame.rowconfigure(1, weight=1)
 
-        default_font = tk_font.nametofont("TkDefaultFont")
-        name_font = default_font.copy()
-        name_font.configure(size=default_font["size"] * 2)
-        self.search_box = ttk.Entry(header_frame)
-        self.search_box.grid(row=1, column=0, sticky="nsew")
+        self.summary_label = ttk.Label(header_frame, text=tr("Installed packages: %d") % 12)
+        self.summary_label.grid(row=1, column=0, sticky="nsw")
+
+        self.search_label = ttk.Label(header_frame, text=tr("Search PyPI") + ": ")
+        self.search_label.grid(row=1, column=1, sticky="nsw")
+
+        self.search_box = ttk.Entry(header_frame, width=15)
+        self.search_box.grid(row=1, column=2, sticky="nse")
         self.search_box.bind("<Return>", self._on_search, False)
         self.search_box.bind("<KP_Enter>", self._on_search, False)
 
         # Selecting chars in the search box with mouse didn't make the box active on Linux without following line
         self.search_box.bind("<B1-Motion>", lambda _: self.search_box.focus_set())
 
-        self.search_button = ttk.Button(
+        search_button_text = " 🔍"
+        self.search_button = CustomToolbutton(
             header_frame,
-            text=self.get_search_button_text(),
+            text=search_button_text,
             command=self._on_search,
-            width=len(self.get_search_button_text()) + 2,
+            # width=len(search_button_text) + 2,
         )
-        self.search_button.grid(row=1, column=1, sticky="nse", padx=(self.get_small_padding(), 0))
+        self.search_button.grid(row=1, column=3, sticky="nse", padx=(self.get_small_padding(), 0))
+
+        self.menu_button = CustomToolbutton(
+            header_frame,
+            text=get_menu_char(),
+            command=self._post_general_menu,
+            width=1,
+        )
+        self.menu_button.grid(row=1, column=4, sticky="nse", padx=(self.get_large_padding(), 0))
 
         main_pw = tk.PanedWindow(
             parent,
             orient=tk.HORIZONTAL,
-            background=lookup_style_option("TPanedWindow", "background"),
+            background="white",  # lookup_style_option("TPanedWindow", "background"),
             sashwidth=self.get_large_padding(),
         )
         main_pw.grid(
             row=2,
             column=0,
             sticky="nsew",
-            padx=self.get_medium_padding(),
-            pady=(self.get_medium_padding(), self.get_medium_padding()),
+            padx=self.get_pw_padding(),
+            pady=(0, self.get_pw_padding()),
         )
         parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
 
-        listframe = ttk.Frame(main_pw, relief="flat", borderwidth=1)
+        listframe = ttk.Frame(main_pw)
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
 
@@ -138,7 +145,6 @@ class PipFrame(ttk.Frame, ABC):
             # highlightcolor="green",
             borderwidth=0,
         )
-        self.listbox.insert("end", " <" + tr("INSTALL") + ">")
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew")
         list_scrollbar = AutoScrollbar(listframe, orient=tk.VERTICAL)
@@ -146,32 +152,19 @@ class PipFrame(ttk.Frame, ABC):
         list_scrollbar["command"] = self.listbox.yview
         self.listbox["yscrollcommand"] = list_scrollbar.set
 
-        info_frame = ttk.Frame(main_pw)
-        self.info_frame = info_frame
-        info_frame.columnconfigure(0, weight=1)
-        info_frame.rowconfigure(1, weight=1)
-
-        main_pw.add(listframe)
-        main_pw.add(info_frame)
-
-        self.title_label = ttk.Label(info_frame, text="", font=name_font)
-        self.title_label.grid(
-            row=0, column=0, sticky="w", padx=0, pady=(0, self.get_large_padding())
-        )
-
         info_text_frame = tktextext.TextFrame(
-            info_frame,
+            main_pw,
             read_only=True,
             horizontal_scrollbar=False,
-            background=lookup_style_option("TFrame", "background"),
+            # background=lookup_style_option("TFrame", "background"),
             vertical_scrollbar_class=AutoScrollbar,
             padx=ems_to_pixels(0.1),
             pady=0,
             width=70,
-            height=10,
+            height=5,
         )
         info_text_frame.configure(borderwidth=0)
-        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew")
         self.info_text = info_text_frame.text
         link_color = lookup_style_option("Url.TLabel", "foreground", "red")
         self.info_text.tag_configure("url", foreground=link_color, underline=True)
@@ -205,7 +198,16 @@ class PipFrame(ttk.Frame, ABC):
             "install_file", "<Leave>", lambda e: self.info_text.config(cursor="")
         )
 
+        default_font = tk_font.nametofont("TkDefaultFont")
         self.info_text.configure(font=default_font, wrap="word")
+
+        title_font = default_font.copy()
+        title_font.configure(size=math.ceil(default_font["size"] * 1.5))
+        self.info_text.tag_configure("title", font=title_font)
+
+        bold_title_font = title_font.copy()
+        bold_title_font.configure(size=title_font["size"], weight="bold")
+        self.info_text.tag_configure("boldtitle", font=bold_title_font)
 
         bold_font = default_font.copy()
         # need to explicitly copy size, because Tk 8.6 on certain Ubuntus use bigger font in copies
@@ -214,42 +216,20 @@ class PipFrame(ttk.Frame, ABC):
         self.info_text.tag_configure("bold", font=bold_font)
         self.info_text.tag_configure("right", justify="right")
 
-        self.command_frame = ttk.Frame(info_frame)
-        self.command_frame.grid(row=2, column=0, sticky="w")
+        # self.info_text.tag_configure()
 
-        self.install_button = ttk.Button(
-            self.command_frame,
-            text=" " + self.get_upgrade_button_text() + " ",
-            command=self._on_install_click,
-            width=20,
-        )
+        main_pw.add(listframe)
+        main_pw.add(info_text_frame)
 
-        self.install_button.grid(row=0, column=0, sticky="w", padx=0)
-
-        self.uninstall_button = ttk.Button(
-            self.command_frame,
-            text=self.get_uninstall_button_text(),
-            command=self._on_uninstall_click,
-            width=20,
-        )
-
-        self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(self.get_small_padding(), 0))
-
-        self.advanced_button = ttk.Button(
-            self.command_frame,
-            text="...",
-            width=3,
-            command=lambda: self._perform_pip_action("advanced"),
-        )
-
-        self.advanced_button.grid(row=0, column=2, sticky="w", padx=(self.get_small_padding(), 0))
+    def _post_general_menu(self):
+        pass
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
         action_buttons = [
-            self.install_button,
-            self.advanced_button,
-            self.uninstall_button,
+            # self.install_button,
+            # self.advanced_button,
+            # self.uninstall_button,
         ]
 
         other_widgets = [
@@ -285,7 +265,8 @@ class PipFrame(ttk.Frame, ABC):
         raise NotImplementedError()
 
     def _update_list(self, name_to_show):
-        self.listbox.delete(1, "end")
+        self.listbox.delete(0, "end")
+        self.listbox.insert("end", " <" + tr("INSTALL") + ">")
         for name in sorted(self._active_distributions.keys()):
             self.listbox.insert("end", " " + name)
 
@@ -325,8 +306,6 @@ class PipFrame(ttk.Frame, ABC):
 
     def _clear(self):
         self.current_package_data = None
-        self.title_label.grid_remove()
-        self.command_frame.grid_remove()
         self._clear_info_text()
 
     def _clear_info_text(self):
@@ -416,14 +395,9 @@ class PipFrame(ttk.Frame, ABC):
         self._set_state("fetching")
 
         self._clear_info_text()
-        self.title_label["text"] = ""
-        self.title_label.grid()
-        self.command_frame.grid()
-        self.uninstall_button["text"] = self.get_uninstall_button_text()
-
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
-            self.title_label["text"] = active_dist.project_name
+            self._append_info_text(active_dist.project_name + "\n", ("title",))
             self._append_info_text(tr("Installed version:") + " ", ("caption",))
             self._append_info_text(active_dist.version + "\n")
             self._append_info_text(tr("Installed to:") + " ", ("caption",))
@@ -434,23 +408,16 @@ class PipFrame(ttk.Frame, ABC):
             self._select_list_item(0)
 
         # update gui
-        if self._is_read_only_package(name):
-            self.install_button.grid_remove()
-            self.uninstall_button.grid_remove()
-            self.advanced_button.grid_remove()
-        else:
-            self.install_button.grid(row=0, column=0)
-            self.advanced_button.grid(row=0, column=2)
+        if not self._is_read_only_package(name):
+            # self.install_button.grid(row=0, column=0)
+            # self.advanced_button.grid(row=0, column=2)
 
             if active_dist is not None:
                 # existing package in target directory
-                self.install_button["text"] = self.get_upgrade_button_text()
-                self.install_button["state"] = "disabled"
-                self.uninstall_button.grid(row=0, column=1)
+                "TODO: add upgrade button"
             else:
                 # new package
-                self.install_button["text"] = self.get_install_button_text()
-                self.uninstall_button.grid_remove()
+                "TODO: add install button"
 
         # start download and polling
         from concurrent.futures.thread import ThreadPoolExecutor
@@ -521,12 +488,36 @@ class PipFrame(ttk.Frame, ABC):
 
         info = data["info"]
         # NB! Json from micropython.org index doesn't have all the same fields as PyPI!
-        self.title_label["text"] = info["name"]  # search name could have been a bit different
+        self._append_info_text(info["name"], tags=("title",))
+        self._append_info_text("   ", tags=("right",))
+        # self._append_info_text("   9.3.3", tags=())
+        #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
+        self.info_text.window_create(
+            "end",
+            window=CustomToolbutton(
+                self.info_text, text=" 9.3.3  ⏷ ", background="white", borderwidth=0
+            ),
+        )
+        self._append_info_text("  ")
+        # self.info_text.window_create("end", window=CustomToolbutton(self.info_text, text=" Install "))
+        # self._append_info_text("  ")
+        # self.info_text.window_create("end", window=CustomToolbutton(self.info_text, text=" → 9.4.0 "))
+        # self._append_info_text("  ")
+        self.info_text.window_create(
+            "end", window=CustomToolbutton(self.info_text, text=" Uninstall ")
+        )
+        self._append_info_text("  ")
+        self.info_text.window_create(
+            "end", window=CustomToolbutton(self.info_text, text=f" {get_menu_char()} ")
+        )
+        self._append_info_text("\n\n")
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
+        """
         if latest_stable_version is not None:
             write_att(tr("Latest stable version"), latest_stable_version)
         else:
             write_att(tr("Latest version"), info["version"])
+        """
         if "summary" in info:
             write_att(tr("Summary"), info["summary"])
         if "author" in info:
@@ -582,13 +573,6 @@ class PipFrame(ttk.Frame, ABC):
 
             write_att(tr("Requires"), ", ".join(remaining_requires_dist))
 
-        if self._get_active_version(name) != latest_stable_version or not self._get_active_version(
-            name
-        ):
-            self.install_button["state"] = "normal"
-        else:
-            self.install_button["state"] = "disabled"
-
     def _is_read_only_package(self, name):
         dist = self._get_active_dist(name)
         if dist is None:
@@ -605,8 +589,7 @@ class PipFrame(ttk.Frame, ABC):
         # Fetch info from PyPI
         self._set_state("fetching")
         self._clear()
-        self.title_label.grid()
-        self.title_label["text"] = tr("Search results")
+        self._append_info_text(tr("Search results") + "\n", tags=("title",))
         self.info_text.direct_insert("1.0", tr("Searching") + " ...")
         if discard_selection:
             self._select_list_item(0)
@@ -873,19 +856,35 @@ class PipFrame(ttk.Frame, ABC):
     def get_small_padding(self):
         return ems_to_pixels(0.6)
 
+    def get_pw_padding(self):
+        return self.get_medium_padding()
+
 
 class BackendPipFrame(PipFrame):
     def __init__(self, master):
-        self._backend_proxy = get_runner().get_backend_proxy()
+        self._last_name_to_show = None
         super().__init__(master)
 
-        self._last_name_to_show = None
+        get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
+
+        if self._get_proxy():
+            self.load_content()
+
+    def on_toplevel_response(self, event=None):
+        if self._state == "inactive":
+            self.load_content()
+
+    def _get_proxy(self) -> Optional[running.BackendProxy]:
+        runner = get_runner()
+        if runner is None:
+            return None
+        return runner.get_backend_proxy()
 
     def _has_remote_target(self):
-        return get_runner().get_backend_proxy().supports_remote_files()
+        return self._get_proxy().supports_remote_files()
 
     def _start_update_list(self, name_to_show=None):
-        assert self._get_state() in [None, "idle"]
+        assert self._get_state() in [None, "idle", "inactive"]
         self._set_state("listing")
 
         get_workbench().bind("get_active_distributions_response", self._complete_update_list, True)
@@ -909,7 +908,7 @@ class BackendPipFrame(PipFrame):
         self._update_list(self._last_name_to_show)
 
     def _confirm_install(self, package_data):
-        for question in self._backend_proxy.get_package_installation_confirmations(package_data):
+        for question in self._get_proxy().get_package_installation_confirmations(package_data):
             if not messagebox.askyesno(
                 tr("Confirmation"),
                 question,
@@ -941,19 +940,19 @@ class BackendPipFrame(PipFrame):
         return dlg.returncode, dlg.stdout, dlg.stderr
 
     def _get_interpreter_description(self):
-        return self._backend_proxy.get_full_label()
+        return self._get_proxy().get_full_label()
 
     def _installer_runs_locally(self):
-        return self._backend_proxy.can_install_packages_from_files()
+        return self._get_proxy().can_install_packages_from_files()
 
     def _get_target_directory(self):
-        return self._backend_proxy.get_packages_target_dir_with_comment()[0]
+        return self._get_proxy().get_packages_target_dir_with_comment()[0]
 
     def _normalize_target_path(self, path: str) -> str:
-        return self._backend_proxy.normalize_target_path(path)
+        return self._get_proxy().normalize_target_path(path)
 
     def _append_location_to_info_path(self, path):
-        if self._backend_proxy.uses_local_filesystem():
+        if self._get_proxy().uses_local_filesystem():
             tags = ("url",)
         else:
             tags = ()
@@ -962,11 +961,11 @@ class BackendPipFrame(PipFrame):
     def _show_extra_instructions(self):
         from thonny.plugins.micropython.mp_front import MicroPythonProxy
 
-        if isinstance(self._backend_proxy, MicroPythonProxy):
+        if isinstance(self._get_proxy(), MicroPythonProxy):
             self._advertise_pipkin()
 
     def _show_read_only_instructions(self):
-        path, comment = self._backend_proxy.get_packages_target_dir_with_comment()
+        path, comment = self._get_proxy().get_packages_target_dir_with_comment()
         assert path is None
 
         self._append_info_text(tr("Installation is not possible") + "\n", ("caption",))
@@ -976,13 +975,13 @@ class BackendPipFrame(PipFrame):
         )
 
     def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
-        return self._backend_proxy.search_packages(query)
+        return self._get_proxy().search_packages(query)
 
     def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
-        return self._backend_proxy.get_package_info_from_index(name, version_str)
+        return self._get_proxy().get_package_info_from_index(name, version_str)
 
-    def get_search_button_text(self):
-        return self._backend_proxy.get_search_button_text()
+    def get_pw_padding(self):
+        return 0
 
 
 class PluginsPipFrame(PipFrame):
@@ -991,6 +990,7 @@ class PluginsPipFrame(PipFrame):
         # make sure directory exists, so user can put her plug-ins there
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
+        self.load_content()
 
     def _has_remote_target(self):
         return False
@@ -999,7 +999,7 @@ class PluginsPipFrame(PipFrame):
         return True
 
     def _start_update_list(self, name_to_show=None):
-        assert self._get_state() in [None, "idle"]
+        assert self._get_state() in [None, "idle", "inactive"]
         import pkg_resources
 
         pkg_resources._initialize_master_working_set()
@@ -1183,7 +1183,7 @@ class PluginsPipDialog(CommonDialog):
         self.destroy()
 
 
-class PackagesView(PipFrame):
+class PackagesView(BackendPipFrame):
     pass
 
 
@@ -1336,7 +1336,7 @@ def load_plugin() -> None:
         pg = PluginsPipDialog(get_workbench())
         ui_utils.show_dialog(pg)
 
-    get_workbench().add_view(BackendPipFrame, tr("Packages"), "s")
+    get_workbench().add_view(PackagesView, tr("Packages"), "s")
 
     get_workbench().add_command(
         "backendpipgui",

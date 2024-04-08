@@ -46,6 +46,8 @@ class CustomToolbutton(tk.Frame):
         width=None,
         pad=None,
         font=None,
+        background=None,
+        borderwidth=0,
     ):
         if isinstance(image, (list, tuple)):
             self.normal_image = image[0]
@@ -59,7 +61,7 @@ class CustomToolbutton(tk.Frame):
         style_conf = get_style_configuration("CustomToolbutton")
         if self.style:
             style_conf |= get_style_configuration(self.style)
-        self.normal_background = style_conf["background"]
+        self.normal_background = background or style_conf["background"]
         self.hover_background = style_conf["activebackground"]
 
         if state == "disabled":
@@ -67,7 +69,9 @@ class CustomToolbutton(tk.Frame):
         else:
             self.current_image = self.normal_image
 
-        super().__init__(master, background=self.normal_background)
+        super().__init__(
+            master, background=self.normal_background, borderwidth=borderwidth, relief="solid"
+        )
         kw = {}
         if font is not None:
             kw["font"] = font

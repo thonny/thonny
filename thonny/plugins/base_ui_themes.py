@@ -710,6 +710,11 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                     "indicatorbackground": "systemWindowBackgroundColor",
                 }
             },
+            "Listbox": {
+                "configure": {
+                    "background": "white",
+                }
+            },
         },
     ]
 
