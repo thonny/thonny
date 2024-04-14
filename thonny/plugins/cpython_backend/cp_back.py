@@ -43,6 +43,7 @@ from thonny.common import (
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
+    export_distributions_info,
     get_augmented_system_path,
     get_exe_dirs,
     get_python_version_string,
@@ -563,7 +564,7 @@ class MainCPythonBackend(MainBackend):
 
     def _cmd_get_active_distributions(self, cmd):
         return dict(
-            distributions=self._get_distributions_info(),
+            distributions=export_distributions_info(),
         )
 
     def _cmd_install_distributions(self, cmd):
@@ -665,49 +666,14 @@ class MainCPythonBackend(MainBackend):
             except Exception as e:
                 print("Could not delete %s: %s" % (path, str(e)), file=sys.stderr)
 
-    def _perform_pip_operation_and_list(
-        self, cmd_line: List[str]
-    ) -> Tuple[int, Dict[str, DistInfo]]:
+    def _perform_pip_operation_and_list(self, cmd_line: List[str]) -> Tuple[int, List[DistInfo]]:
         extra_switches = ["--disable-pip-version-check"]
         proxy = os.environ.get("https_proxy", os.environ.get("http_proxy", None))
         if proxy:
             extra_switches.append("--proxy=" + proxy)
 
         returncode = subprocess.call([sys.executable, "-m", "pip"] + extra_switches + cmd_line)
-        return returncode, self._get_distributions_info()
-
-    def _get_distributions_info(self) -> Dict[str, DistInfo]:
-        # Avoiding pip, because pip is slow.
-        # If it is called after first installation to user site packages
-        # this dir is not yet in sys.path
-        # This would be required also when using Python 3.8 and importlib.metadata.distributions()
-        if (
-            site.ENABLE_USER_SITE
-            and site.getusersitepackages()
-            and os.path.exists(site.getusersitepackages())
-            and site.getusersitepackages() not in sys.path
-        ):
-            # insert before first site packages item
-            for i, item in enumerate(sys.path):
-                if "site-packages" in item or "dist-packages" in item:
-                    sys.path.insert(i, site.getusersitepackages())
-                    break
-            else:
-                sys.path.append(site.getusersitepackages())
-
-        import pkg_resources
-
-        # TODO: consider using importlib.metadata.distributions()
-        pkg_resources._initialize_master_working_set()
-        return {
-            dist.key: DistInfo(
-                key=dist.key,
-                project_name=dist.project_name,
-                location=dist.location,
-                version=dist.version,
-            )
-            for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
-        }
+        return returncode, export_distributions_info()
 
     def _get_sep(self) -> str:
         return os.path.sep

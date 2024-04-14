@@ -9,17 +9,21 @@ import tkinter.font as tk_font
 import urllib.error
 import urllib.parse
 from abc import ABC, abstractmethod
-from logging import exception, getLogger
+from logging import getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
-from tkinter.messagebox import showerror
-from typing import Dict, List, Optional, Tuple, Union, cast
+from tkinter.messagebox import showerror, showwarning
+from typing import Dict, List, Optional, Tuple, Union
+
+from packaging.requirements import Requirement
+from packaging.utils import NormalizedName, canonicalize_name, canonicalize_version
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import (
     DistInfo,
     InlineCommand,
+    export_distributions_info,
     normpath_with_actual_case,
     path_startswith,
     running_in_virtual_environment,
@@ -32,6 +36,7 @@ from thonny.ui_utils import (
     CommonDialog,
     CustomToolbutton,
     askopenfilename,
+    create_custom_toolbutton_in_frame,
     ems_to_pixels,
     get_busy_cursor,
     get_hyperlink_cursor,
@@ -49,8 +54,11 @@ class PipFrame(ttk.Frame, ABC):
     def __init__(self, master):
         self._state = "inactive"  # possible values: "inactive", "listing", "fetching", "idle"
         self._closed = False
-        self._active_distributions = {}
-        self.current_package_data = None
+        self._installed_dists: Dict[NormalizedName, DistInfo] = {}
+        self._version_list_cache: Dict[NormalizedName, List[str]] = {}
+        self._current_dist_info: Optional[DistInfo] = None
+        self._version_button: Optional[CustomToolbutton] = None
+        self._action_button: Optional[CustomToolbutton] = None
 
         super().__init__(master)
 
@@ -60,15 +68,6 @@ class PipFrame(ttk.Frame, ABC):
         self._show_instructions()
         self._start_update_list()
         self.search_box.focus_set()
-
-    def get_install_button_text(self):
-        return tr("Install")
-
-    def get_upgrade_button_text(self):
-        return tr("Upgrade")
-
-    def get_uninstall_button_text(self):
-        return tr("Uninstall")
 
     def _create_widgets(self, parent):
         header_frame = ttk.Frame(parent)
@@ -203,11 +202,9 @@ class PipFrame(ttk.Frame, ABC):
 
         title_font = default_font.copy()
         title_font.configure(size=math.ceil(default_font["size"] * 1.5))
-        self.info_text.tag_configure("title", font=title_font)
-
-        bold_title_font = title_font.copy()
-        bold_title_font.configure(size=title_font["size"], weight="bold")
-        self.info_text.tag_configure("boldtitle", font=bold_title_font)
+        self.info_text.tag_configure(
+            "title", font=title_font, spacing1=ems_to_pixels(1.3), spacing3=ems_to_pixels(1)
+        )
 
         bold_font = default_font.copy()
         # need to explicitly copy size, because Tk 8.6 on certain Ubuntus use bigger font in copies
@@ -220,6 +217,8 @@ class PipFrame(ttk.Frame, ABC):
 
         main_pw.add(listframe)
         main_pw.add(info_text_frame)
+
+        self._version_menu = tk.Menu(self.info_text, tearoff=False)
 
     def _post_general_menu(self):
         pass
@@ -238,7 +237,7 @@ class PipFrame(ttk.Frame, ABC):
             self.search_button,
         ]
 
-        if state == "idle" and not self._is_read_only():
+        if state == "idle" and not self._is_read_only_env():
             for widget in action_buttons:
                 widget["state"] = tk.NORMAL
         else:
@@ -267,10 +266,10 @@ class PipFrame(ttk.Frame, ABC):
     def _update_list(self, name_to_show):
         self.listbox.delete(0, "end")
         self.listbox.insert("end", " <" + tr("INSTALL") + ">")
-        for name in sorted(self._active_distributions.keys()):
+        for name in sorted(self._installed_dists.keys()):
             self.listbox.insert("end", " " + name)
 
-        if name_to_show is None or name_to_show not in self._active_distributions.keys():
+        if name_to_show is None or name_to_show not in self._installed_dists.keys():
             self._show_instructions()
         else:
             self._on_listbox_select_package(name_to_show)
@@ -286,7 +285,7 @@ class PipFrame(ttk.Frame, ABC):
                 self._on_listbox_select_package(self.listbox.get(selection[0]).strip())
 
     def _on_listbox_select_package(self, name):
-        self._start_show_package_info(name)
+        self._start_show_package_info(name, self._installed_dists[name].version)
 
     def _on_search(self, event=None):
         if self._get_state() != "idle":
@@ -299,16 +298,22 @@ class PipFrame(ttk.Frame, ABC):
         self._start_search(self.search_box.get().strip())
 
     def _on_install_click(self):
-        self._perform_pip_action("install")
+        if self._confirm_install(self._current_dist_info):
+            self._install_current()
+            self.load_content()
 
     def _on_uninstall_click(self):
-        self._perform_pip_action("uninstall")
+        if self._confirm_uninstall(self._current_dist_info):
+            self._uninstall_current()
+            self.load_content()
 
     def _clear(self):
-        self.current_package_data = None
+        self._current_dist_info = None
         self._clear_info_text()
 
     def _clear_info_text(self):
+        self._version_button = None
+        self._action_button = None
         self.info_text.direct_delete("1.0", "end")
 
     def _append_info_text(self, text, tags=()):
@@ -316,7 +321,7 @@ class PipFrame(ttk.Frame, ABC):
 
     def _show_instructions(self):
         self._clear()
-        if self._is_read_only():
+        if self._is_read_only_env():
             self._show_read_only_instructions()
         else:
             self._show_instructions_about_installing_from_pypi()
@@ -386,158 +391,157 @@ class PipFrame(ttk.Frame, ABC):
         self._append_info_text(tr("Target") + "\n", ("caption",))
         self._append_location_to_info_path(self._get_target_directory())
 
-    def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
-        return get_package_info_from_pypi(name, version_str)
+    def _get_dist_info(self, name: str, version: str) -> DistInfo:
+        installed_dist = self._installed_dists.get(canonicalize_name(name))
+        if installed_dist is not None and canonicalize_version(
+            installed_dist.version
+        ) == canonicalize_version(version):
+            return installed_dist
 
-    def _start_show_package_info(self, name):
-        self.current_package_data = None
+        return download_dist_info_from_pypi(name, version)
+
+    def _get_version_list(self, name: str) -> List[str]:
+        norm_name = canonicalize_name(name)
+        if norm_name not in self._version_list_cache:
+            self._version_list_cache[norm_name] = self._download_version_list(name)
+
+        return self._version_list_cache[norm_name]
+
+    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+        return download_dist_info_from_pypi(name, version)
+
+    def _download_version_list(self, name: str) -> List[str]:
+        return try_download_version_list_from_pypi(name)
+
+    def _start_show_package_info(self, name, version):
+        self._current_dist_info = None
         # Fetch info from PyPI
         self._set_state("fetching")
 
         self._clear_info_text()
-        active_dist = self._get_active_dist(name)
-        if active_dist is not None:
-            self._append_info_text(active_dist.project_name + "\n", ("title",))
-            self._append_info_text(tr("Installed version:") + " ", ("caption",))
-            self._append_info_text(active_dist.version + "\n")
-            self._append_info_text(tr("Installed to:") + " ", ("caption",))
-            self._append_location_to_info_path(active_dist.location)
-            self._append_info_text("\n\n")
+
+        self._append_info_text(name, tags=("title",))
+        self._append_info_text("   ")
+        bordercolor = "#aaaaaa"  # TODO
+
+        norm_installed_version = self._get_normalized_installed_version(name)
+        norm_new_version = canonicalize_version(version)
+        is_installed = norm_new_version == norm_installed_version
+
+        if is_installed:
+            version_text = version + " (" + tr("installed") + ")"
+            action = (self._on_uninstall_click,)
+            action_text = tr("Uninstall")
+        else:
+            version_text = version
+            action = self._on_install_click
+            if norm_installed_version is None:
+                action_text = tr("Install")
+            elif norm_installed_version < norm_new_version:
+                action_text = tr("Upgrade to this version")
+            else:
+                assert norm_installed_version > norm_new_version
+                action_text = tr("Downgrade to this version")
+
+        version_button_frame = create_custom_toolbutton_in_frame(
+            #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
+            self.info_text,
+            text=f" {version_text}  ⏷ ",
+            command=self._show_version_menu,
+            state="disabled",
+            background="white",
+            borderwidth=1,
+            bordercolor=bordercolor,
+        )
+        self._version_button = version_button_frame.button
+        self.info_text.window_create("end", window=version_button_frame)
+
+        if not self._is_read_only_env() and not self._is_read_only_dist(name, version):
+            self._append_info_text("  ")
+            action_button_frame = create_custom_toolbutton_in_frame(
+                self.info_text,
+                text=f" {action_text} ",
+                command=action,
+                state="disabled",
+                borderwidth=1,
+                bordercolor=bordercolor,
+            )
+            self._action_button = action_button_frame.button
+            self.info_text.window_create("end", window=action_button_frame)
+
+        self._append_info_text("\n")
+
+        if is_installed:
             self._select_list_item(name)
         else:
+            logger.info("Selecting '%s' over '%s'", norm_new_version, norm_installed_version)
             self._select_list_item(0)
-
-        # update gui
-        if not self._is_read_only_package(name):
-            # self.install_button.grid(row=0, column=0)
-            # self.advanced_button.grid(row=0, column=2)
-
-            if active_dist is not None:
-                # existing package in target directory
-                "TODO: add upgrade button"
-            else:
-                # new package
-                "TODO: add install button"
 
         # start download and polling
         from concurrent.futures.thread import ThreadPoolExecutor
 
         executor = ThreadPoolExecutor(max_workers=1)
-        download_future = executor.submit(self._download_package_info, name, None)
+        dist_info_future = executor.submit(self._get_dist_info, name, version)
+        version_list_future = executor.submit(self._get_version_list, name)
 
         def poll_fetch_complete():
-            if download_future.done():
+            if dist_info_future.done() and version_list_future.done():
                 try:
-                    data = download_future.result()
-                    if "info" in data and "name" not in data["info"]:
-                        # this is the case of micropython.org/pi
-                        data["info"]["name"] = name
-                    self._show_package_info(name, data)
-                except urllib.error.HTTPError as e:
-                    self._show_package_info(
-                        name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
-                    )
+                    info = dist_info_future.result()
+                    versions = version_list_future.result()
                 except Exception as e:
-                    self._show_package_info(
-                        name, {"info": {"name": name}, "error": str(e), "releases": {}}, e
+                    logger.exception("Error downloading")
+                    self._append_info_text(
+                        "Could not download package info or list of versions: " + str(e)
                     )
+                    self._set_state("idle")
+                    assert self._version_button is not None
+                    self._version_button.configure(state="normal")
+                else:
+                    self._complete_show_package_info(name, info, versions)
             else:
                 get_workbench().after(200, poll_fetch_complete)
 
         poll_fetch_complete()
 
-    @abstractmethod
-    def _append_location_to_info_path(self, path):
-        raise NotImplementedError()
-
-    def _show_package_info(self, name, data, error_code=None):
+    def _complete_show_package_info(self, name, dist_info: DistInfo, version_list: List[str]):
         self._set_state("idle")
+        assert self._version_button is not None
+        self._version_button.configure(state="normal")
 
-        self.current_package_data = data
+        if self._action_button is not None:
+            self._action_button.configure(state="normal")
 
-        def write(s, tag=None):
-            if tag is None:
-                tags = ()
-            else:
-                tags = (tag,)
-            self._append_info_text(s, tags)
+        # TODO: if is installed, then do a sanity check to make sure the dists are
+        # really related, not simply sharing the name
 
-        def write_att(caption, value, value_tag=None):
-            write(caption + ": ", "caption")
-            write(value, value_tag)
-            write("\n")
+        self._current_dist_info = dist_info
 
-        if error_code is not None:
-            if error_code == 404:
-                write(tr("Could not find the package from PyPI."))
-                if not self._get_active_version(name):
-                    # new package
-                    write("\n" + tr("Please check your spelling!"))
+        def write_att(caption, value, value_tags=()):
+            self._append_info_text(caption + ": ", "caption")
+            self._append_info_text(value, tags=value_tags)
+            self._append_info_text("\n")
 
-            else:
-                write(
-                    tr("Could not find the package info from PyPI.")
-                    + " "
-                    + tr("Error code:")
-                    + " "
-                    + str(error_code)
-                )
-                logger.exception("Coult not fetch package info for %r", name)
-
-            return
-
-        info = data["info"]
         # NB! Json from micropython.org index doesn't have all the same fields as PyPI!
-        self._append_info_text(info["name"], tags=("title",))
-        self._append_info_text("   ", tags=("right",))
-        # self._append_info_text("   9.3.3", tags=())
-        #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
-        self.info_text.window_create(
-            "end",
-            window=CustomToolbutton(
-                self.info_text, text=" 9.3.3  ⏷ ", background="white", borderwidth=0
-            ),
-        )
-        self._append_info_text("  ")
-        # self.info_text.window_create("end", window=CustomToolbutton(self.info_text, text=" Install "))
-        # self._append_info_text("  ")
-        # self.info_text.window_create("end", window=CustomToolbutton(self.info_text, text=" → 9.4.0 "))
-        # self._append_info_text("  ")
-        self.info_text.window_create(
-            "end", window=CustomToolbutton(self.info_text, text=" Uninstall ")
-        )
-        self._append_info_text("  ")
-        self.info_text.window_create(
-            "end", window=CustomToolbutton(self.info_text, text=f" {get_menu_char()} ")
-        )
-        self._append_info_text("\n\n")
-        latest_stable_version = _get_latest_stable_version(data["releases"].keys())
-        """
-        if latest_stable_version is not None:
-            write_att(tr("Latest stable version"), latest_stable_version)
-        else:
-            write_att(tr("Latest version"), info["version"])
-        """
-        if "summary" in info:
-            write_att(tr("Summary"), info["summary"])
-        if "author" in info:
-            write_att(tr("Author"), info["author"])
-        if "license" in info:
-            write_att(tr("License"), info["license"])
-        if "home_page" in info:
-            write_att(tr("Homepage"), info["home_page"], "url")
-        if info.get("bugtrack_url", None):
-            write_att(tr("Bugtracker"), info["bugtrack_url"], "url")
-        if info.get("docs_url", None):
-            write_att(tr("Documentation"), info["docs_url"], "url")
-        if info.get("package_url", None):
-            write_att(tr("PyPI page"), info["package_url"], "url")
-        if info.get("requires_dist", None):
+        if dist_info.summary:
+            write_att(tr("Summary"), dist_info.summary)
+        if dist_info.author:
+            write_att(tr("Author"), dist_info.author)
+        if dist_info.license:
+            write_att(tr("License"), dist_info.license)
+        if dist_info.home_page:
+            write_att(tr("Homepage"), dist_info.home_page, ("url",))
+        # if info.get("bugtrack_url", None):
+        #    write_att(tr("Bugtracker"), info["bugtrack_url"], ("url",))
+        # if info.get("docs_url", None):
+        #    write_att(tr("Documentation"), info["docs_url"], ("url",))
+        if dist_info.package_url:
+            write_att(tr("PyPI page"), dist_info.package_url, ("url",))
+        if dist_info.requires:
             # Available only when release is created by a binary wheel
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
-            requires_dist = info["requires_dist"]
-            assert isinstance(requires_dist, list)
-            assert all(isinstance(item, str) for item in requires_dist)
+            assert isinstance(dist_info.requires, list)
+            assert all(isinstance(item, str) for item in dist_info.requires)
 
             # See https://www.python.org/dev/peps/pep-0345/#environment-markers.
             # This will filter only the most obvious dependencies marked simply with
@@ -546,7 +550,7 @@ class PipFrame(ttk.Frame, ABC):
             # more informative (*e.g.*, the desired platform).
             remaining_requires_dist = []  # type: List[str]
 
-            for item in requires_dist:
+            for item in dist_info.requires:
                 if ";" not in item:
                     remaining_requires_dist.append(item)
                     continue
@@ -573,19 +577,70 @@ class PipFrame(ttk.Frame, ABC):
 
             write_att(tr("Requires"), ", ".join(remaining_requires_dist))
 
-    def _is_read_only_package(self, name):
-        dist = self._get_active_dist(name)
-        if dist is None:
+    def _show_version_menu(self):
+        self._version_menu.delete(0, "end")
+        versions = self._get_version_list(self._current_dist_info.name)
+
+        installed_version = self._get_normalized_installed_version(self._current_dist_info.name)
+        variable = tk.StringVar(self, value=self._current_dist_info.version)
+        installed_version_is_in_list = False
+
+        for version in reversed(versions):
+            if canonicalize_version(version) == installed_version:
+                installed_version_is_in_list = True
+
+            def show_version(name=self._current_dist_info.name, version=version):
+                self._start_show_package_info(name, version)
+
+            label = version
+            if canonicalize_version(version) == installed_version:
+                label += " (" + tr("Installed") + ")"
+
+            self._version_menu.add_radiobutton(
+                label=label,
+                command=show_version,
+                variable=variable,
+                value=version,
+            )
+
+        if installed_version and not installed_version_is_in_list:
+            showwarning(
+                tr("Warning"),
+                "Currently installed version not found in the package index\n"
+                f"Make sure installed '{self._current_dist_info.name}' is related to "
+                f"'{self._current_dist_info.name}' at the index",
+                master=self.winfo_toplevel(),
+            )
+
+        post_x = self._version_button.winfo_rootx()
+        post_y = self._version_button.winfo_rooty() + self._version_button.winfo_height()
+        self._version_menu.tk_popup(post_x, post_y)
+
+    @abstractmethod
+    def _append_location_to_info_path(self, path):
+        raise NotImplementedError()
+
+    def _get_normalized_installed_version(self, name: str) -> Optional[str]:
+        info = self._installed_dists.get(canonicalize_name(name))
+        if info is None:
+            return None
+        return canonicalize_version(info.version)
+
+    def _is_read_only_dist(self, name: str, version: str):
+        info = self._installed_dists.get(canonicalize_name(name))
+        if info is None or canonicalize_version(info.version) != canonicalize_version(version):
             return False
-        else:
-            return self._normalize_target_path(dist.location) != self._get_target_directory()
+
+        return self._normalize_target_path(info.installed_location) != self._normalize_target_path(
+            self._get_target_directory()
+        )
 
     @abstractmethod
     def _normalize_target_path(self, path: str) -> str:
         raise NotImplementedError()
 
     def _start_search(self, query, discard_selection=True):
-        self.current_package_data = None
+        self._current_dist_info = None
         # Fetch info from PyPI
         self._set_state("fetching")
         self._clear()
@@ -647,11 +702,16 @@ class PipFrame(ttk.Frame, ABC):
         if isinstance(name_or_index, int):
             index = name_or_index
         else:
-            normalized_items = list(map(normalize_package_name, self.listbox.get(0, "end")))
+            normalized_items = [
+                canonicalize_name(name.strip()) for name in self.listbox.get(0, "end")
+            ]
+            norm_name = canonicalize_name(name_or_index)
             try:
-                index = normalized_items.index(normalize_package_name(name_or_index))
-            except Exception:
-                exception(tr("Can't find package name from the list:") + " " + name_or_index)
+                index = normalized_items.index(norm_name)
+            except ValueError:
+                logger.exception(
+                    "Can't find package name %r from the list %r", name_or_index, normalized_items
+                )
                 return
 
         old_state = self.listbox["state"]
@@ -663,63 +723,6 @@ class PipFrame(ttk.Frame, ABC):
             self.listbox.see(index)
         finally:
             self.listbox["state"] = old_state
-
-    def _perform_pip_action(self, action: str) -> None:
-        if self._perform_pip_action_without_refresh(action):
-            if action == "uninstall":
-                self._show_instructions()  # Make the old package go away as fast as possible
-            self._start_update_list(
-                None if action == "uninstall" else self.current_package_data["info"]["name"]
-            )
-
-            if self._has_remote_target():
-                get_workbench().event_generate("RemoteFilesChanged")
-
-    def _perform_pip_action_without_refresh(self, action: str) -> bool:
-        """Returns whether the action was at least started and some packages might have been
-        modified.
-        """
-        assert self._get_state() == "idle"
-        assert self.current_package_data is not None
-        data = self.current_package_data
-        name = self.current_package_data["info"]["name"]
-
-        install_args = ["--progress-bar", "off"]
-
-        if action == "install":
-            command = "install"
-            title = tr("Installing '%s'") % name
-            if not self._confirm_install(self.current_package_data):
-                return False
-
-            args = install_args
-            if self._get_active_version(name) is not None:
-                title = tr("Upgrading '%s'") % name
-                args.append("--upgrade")
-
-            args.append(name)
-
-        elif action == "uninstall":
-            command = "uninstall"
-            title = tr("Uninstalling '%s'") % name
-            if name in ["pip", "setuptools"] and not messagebox.askyesno(
-                tr("Really uninstall?"),
-                tr(
-                    "Package '{}' is required for installing and uninstalling other packages."
-                ).format(name)
-                + "\n\n"
-                + tr("Are you sure you want to uninstall it?"),
-                master=self,
-            ):
-                return False
-            args = ["--yes", name]
-        elif action == "advanced":
-            raise NotImplementedError()
-        else:
-            raise RuntimeError("Unknown action")
-
-        self._run_pip_with_dialog(command, args, title=title)
-        return True
 
     def _handle_install_file_click(self, event):
         if self._get_state() != "idle":
@@ -751,8 +754,23 @@ class PipFrame(ttk.Frame, ABC):
         if self._get_target_directory():
             open_path_in_system_file_manager(self._get_target_directory())
 
+    def _install_current(self):
+        spec = self._current_dist_info.name + "==" + self._current_dist_info.version
+        self._run_pip_with_dialog(
+            command="install", args=[spec], title=tr("Installing '%s'") % spec
+        )
+
+    def _uninstall_current(self):
+        spec = self._current_dist_info.name
+        self._run_pip_with_dialog(
+            command="uninstall", args=[spec], title=tr("Uninstalling '%s'") % spec
+        )
+
     def _install_file(self, filename, is_requirements_file):
-        args = self._get_install_file_args(filename, is_requirements_file)
+        args = []
+        if is_requirements_file:
+            args.append("-r")
+        args.append(filename)
 
         returncode, out, err = self._run_pip_with_dialog(
             command="install", args=args, title=tr("Installing '%s'") % os.path.basename(filename)
@@ -772,14 +790,6 @@ class PipFrame(ttk.Frame, ABC):
             name = elements[-1].strip()
 
         self._start_update_list(name)
-
-    def _get_install_file_args(self, filename, is_requirements_file):
-        args = []
-        if is_requirements_file:
-            args.append("-r")
-        args.append(filename)
-
-        return args
 
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
@@ -802,10 +812,10 @@ class PipFrame(ttk.Frame, ABC):
             return dist.version
 
     def _get_active_dist(self, name):
-        normname = normalize_package_name(name)
-        for key in self._active_distributions:
-            if normalize_package_name(key) == normname:
-                return self._active_distributions[key]
+        normname = canonicalize_name(name)
+        for key in self._installed_dists:
+            if canonicalize_name(key) == normname:
+                return self._installed_dists[key]
 
         return None
 
@@ -829,7 +839,19 @@ class PipFrame(ttk.Frame, ABC):
     def _confirm_install(self, package_data):
         return True
 
-    def _is_read_only(self):
+    def _confirm_uninstall(self, info: DistInfo):
+        if info.name in ["pip", "setuptools"] and not messagebox.askyesno(
+            tr("Really uninstall?"),
+            tr("Package '{}' is required for installing and uninstalling other packages.").format(
+                info.name
+            )
+            + "\n\n"
+            + tr("Are you sure you want to uninstall it?"),
+            master=self,
+        ):
+            return False
+
+    def _is_read_only_env(self):
         return self._get_target_directory() is None
 
     @abstractmethod
@@ -903,7 +925,7 @@ class BackendPipFrame(PipFrame):
             self._set_state("idle", True)
             return
 
-        self._active_distributions = msg.distributions
+        self._installed_dists = {canonicalize_name(d.name): d for d in msg.distributions}
         self._set_state("idle", True)
         self._update_list(self._last_name_to_show)
 
@@ -977,8 +999,11 @@ class BackendPipFrame(PipFrame):
     def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
         return self._get_proxy().search_packages(query)
 
-    def _download_package_info(self, name: str, version_str: Optional[str]) -> Dict:
-        return self._get_proxy().get_package_info_from_index(name, version_str)
+    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+        return self._get_proxy().get_package_info_from_index(name, version)
+
+    def _download_version_list(self, name: str) -> List[str]:
+        return self._get_proxy().get_version_list_from_index(name)
 
     def get_pw_padding(self):
         return 0
@@ -1000,30 +1025,17 @@ class PluginsPipFrame(PipFrame):
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle", "inactive"]
-        import pkg_resources
 
-        pkg_resources._initialize_master_working_set()
-
-        self._active_distributions = {
-            dist.key: DistInfo(
-                project_name=dist.project_name,
-                key=dist.key,
-                location=dist.location,
-                version=dist.version,
-            )
-            for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
-        }
+        self._installed_dists = export_distributions_info_as_dict()
 
         self._update_list(name_to_show)
 
     def _conflicts_with_thonny_version(self, req_strings):
-        import pkg_resources
-
         try:
             conflicts = []
             for req_string in req_strings:
-                req = pkg_resources.Requirement.parse(req_string)
-                if req.project_name == "thonny" and thonny.get_version() not in req:
+                req = Requirement(req_string)
+                if req.name == "thonny" and thonny.get_version() not in req:
                     conflicts.append(req_string)
 
             return conflicts
@@ -1207,32 +1219,6 @@ def _fetch_url_future(url, fallback_url=None, timeout=10):
     return executor.submit(load_url)
 
 
-def _get_latest_stable_version(version_strings):
-    from distutils.version import LooseVersion
-
-    versions = []
-    for s in version_strings:
-        if s.replace(".", "").isnumeric():  # Assuming stable versions have only dots and numbers
-            versions.append(
-                LooseVersion(s)
-            )  # LooseVersion __str__ doesn't change the version string
-
-    if len(versions) == 0:
-        return None
-
-    return str(sorted(versions)[-1])
-
-
-def normalize_package_name(name):
-    # looks like (in some cases?) pip list gives the name as it was used during install
-    # ie. the list may contain lowercase entry, when actual metadata has uppercase name
-    # Example: when you "pip install cx-freeze", then "pip list"
-    # really returns "cx-freeze" although correct name is "cx_Freeze"
-
-    # https://www.python.org/dev/peps/pep-0503/#id4
-    return re.sub(r"[-_.]+", "-", name).lower().strip()
-
-
 def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[str, str]]:
     import urllib.parse
     from urllib.request import urlopen
@@ -1254,20 +1240,58 @@ def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[s
     return results
 
 
-def get_package_info_from_pypi(name: str, version_str: Optional[str]) -> Dict:
-    import json
-    from urllib.request import urlopen
+def download_dist_info_from_pypi(name: str, version: str) -> DistInfo:
+    # versioned data does not have releases, so need to make 2 downloads
+    info = download_dist_data_from_pypi(name, version)["info"]
 
-    if version_str is None:
+    return DistInfo(
+        name=info["name"],
+        version=info["version"],
+        summary=info["summary"] or None,
+        license=info["license"] or None,
+        author=info["author"] or None,
+        classifiers=info["classifiers"] or None,
+        home_page=info["home_page"] or info["project_url"],
+        package_url=info["package_url"],
+        requires=info["requires_dist"],
+        installed_location=None,
+    )
+
+
+def try_download_version_list_from_pypi(name: str) -> List[str]:
+    try:
+        releases = download_dist_data_from_pypi(name, None)["releases"]
+        return list(releases.keys())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            # package is not at PyPI
+            return []
+        else:
+            raise
+
+
+def download_dist_data_from_pypi(name: str, version: Optional[str]) -> Dict:
+    import json
+    from urllib.request import Request, urlopen
+
+    if version is None:
         url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
     else:
         url = "https://pypi.org/pypi/{}/{}/json".format(
-            urllib.parse.quote(name), urllib.parse.quote(version_str)
+            urllib.parse.quote(name), urllib.parse.quote(version)
         )
 
-    logger.info("Downloading package info from %s", url)
-    with urlopen(url) as fp:
-        return json.load(fp)
+    logger.info("Downloading package info (%r, %r) from %s", name, version, url)
+
+    req = Request(url, headers={"Accept-Encoding": "gzip, deflate"})
+    with urlopen(req) as fp:
+        if fp.info().get("Content-Encoding") == "gzip":
+            import gzip
+
+            data = gzip.decompress(fp.read())
+        else:
+            data = fp.read()
+    return json.loads(data)
 
 
 def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
@@ -1326,6 +1350,10 @@ def _extract_click_text(widget, event, tag):
         logger.exception("extracting click text")
 
     return None
+
+
+def export_distributions_info_as_dict() -> Dict[NormalizedName, DistInfo]:
+    return {canonicalize_name(d.name): d for d in export_distributions_info()}
 
 
 def load_plugin() -> None:

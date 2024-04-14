@@ -3,6 +3,7 @@
 """
 Classes used both by front-end and back-end
 """
+import dataclasses
 import os.path
 import site
 import sys
@@ -58,10 +59,16 @@ TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_
 
 @dataclass(frozen=True)
 class DistInfo:
-    key: str
-    project_name: str
+    name: str
     version: str
-    location: str
+    summary: Optional[str] = None
+    license: Optional[str] = None
+    author: Optional[str] = None
+    classifiers: List[str] = dataclasses.field(default_factory=list)
+    home_page: Optional[str] = None
+    package_url: Optional[str] = None
+    requires: List[str] = dataclasses.field(default_factory=list)
+    installed_location: Optional[str] = None
 
 
 class Record:
@@ -807,3 +814,40 @@ def is_remote_path(s: str) -> bool:
 
 def is_local_path(s: str) -> bool:
     return not is_remote_path(s) and not s.startswith("<")
+
+
+def export_distributions_info() -> List[DistInfo]:
+    # If it is called after first installation to user site packages
+    # this dir is not yet in sys.path
+    # This would be required also when using Python 3.8 and importlib.metadata.distributions()
+    if (
+        site.ENABLE_USER_SITE
+        and site.getusersitepackages()
+        and os.path.exists(site.getusersitepackages())
+        and site.getusersitepackages() not in sys.path
+    ):
+        # insert before first site packages item
+        for i, item in enumerate(sys.path):
+            if "site-packages" in item or "dist-packages" in item:
+                sys.path.insert(i, site.getusersitepackages())
+                break
+        else:
+            sys.path.append(site.getusersitepackages())
+
+    from importlib.metadata import distributions
+
+    return [
+        DistInfo(
+            name=dist.name,
+            version=dist.version,
+            requires=dist.requires or [],
+            summary=dist.metadata["Summary"] or None,
+            author=dist.metadata["Author"] or None,
+            license=dist.metadata["License"] or None,
+            home_page=dist.metadata["Home-page"] or None,
+            package_url=None,
+            classifiers=[value for (key, value) in dist.metadata.items() if key == "Classifier"],
+            installed_location=str(dist.locate_file("")),
+        )
+        for dist in distributions()
+    ]

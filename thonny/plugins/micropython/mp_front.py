@@ -8,8 +8,10 @@ from textwrap import dedent
 from tkinter import messagebox, ttk
 from typing import Any, Dict, List, Optional, Tuple
 
+from packaging.utils import canonicalize_name
+
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
-from thonny.common import CommandToBackend, EOFCommand, ImmediateCommand, InlineCommand
+from thonny.common import CommandToBackend, DistInfo, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.config_ui import (
     LABEL_PADDING_EMS,
     add_option_checkbox,
@@ -187,14 +189,12 @@ class MicroPythonProxy(SubprocessProxy):
 
         return _mp_org_index_cache
 
-    def get_package_info_from_index(self, name: str, version_str: Optional[str]) -> Dict:
-        from thonny.plugins.pip_gui import normalize_package_name
-
+    def get_package_info_from_index(self, name: str, version: str) -> DistInfo:
         # Try mp.org first
         index_data = self._get_mp_org_index_data()
 
         for package in index_data["packages"]:
-            if normalize_package_name(package["name"]) == normalize_package_name(name):
+            if canonicalize_name(package["name"]) == canonicalize_name(name):
                 info = {
                     "name": package["name"],
                     "version": package["version"],
@@ -211,9 +211,17 @@ class MicroPythonProxy(SubprocessProxy):
 
                 return {"info": info, "releases": releases, "mp_org": True}
 
-        from thonny.plugins.pip_gui import get_package_info_from_pypi
+        return super().get_package_info_from_index(name, version)
 
-        return get_package_info_from_pypi(name, version_str)
+    def get_version_list_from_index(self, name: str) -> List[str]:
+        # Try mp.org first
+        index_data = self._get_mp_org_index_data()
+
+        for package in index_data["packages"]:
+            if canonicalize_name(package["name"]) == canonicalize_name(name):
+                return package["versions"].get("py", [])
+
+        return super().get_version_list_from_index(name)
 
     def get_search_button_text(self) -> str:
         return tr("Search micropython-lib and PyPI")

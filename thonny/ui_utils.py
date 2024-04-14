@@ -2595,5 +2595,12 @@ def get_last_grid_row(container: tk.Widget) -> int:
     return container.grid_size()[1] - 1
 
 
+def create_custom_toolbutton_in_frame(master, borderwidth, bordercolor, **kwargs):
+    frame = tk.Frame(master, background=bordercolor)
+    frame.button = CustomToolbutton(frame, **kwargs)
+    frame.button.grid(pady=borderwidth, padx=borderwidth)
+    return frame
+
+
 if __name__ == "__main__":
     print(windows_known_extensions_are_hidden())

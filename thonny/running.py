@@ -49,6 +49,7 @@ from thonny.common import (
     CommandToBackend,
     DebuggerCommand,
     DebuggerResponse,
+    DistInfo,
     EOFCommand,
     InlineCommand,
     InlineResponse,
@@ -1012,10 +1013,15 @@ class BackendProxy(ABC):
 
         return perform_pypi_search(query)
 
-    def get_package_info_from_index(self, name: str, version_str: Optional[str]) -> Dict:
-        from thonny.plugins.pip_gui import get_package_info_from_pypi
+    def get_package_info_from_index(self, name: str, version: str) -> DistInfo:
+        from thonny.plugins.pip_gui import download_dist_info_from_pypi
 
-        return get_package_info_from_pypi(name, version_str)
+        return download_dist_info_from_pypi(name, version)
+
+    def get_version_list_from_index(self, name: str) -> List[str]:
+        from thonny.plugins.pip_gui import try_download_version_list_from_pypi
+
+        return try_download_version_list_from_pypi(name)
 
     def get_search_button_text(self) -> str:
         return tr("Search on PyPI")
