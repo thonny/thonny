@@ -29,7 +29,13 @@ from thonny.common import (
     running_in_virtual_environment,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, get_menu_char, levenshtein_distance
+from thonny.misc_utils import (
+    construct_cmd_line,
+    download_and_parse_json,
+    download_bytes,
+    get_menu_char,
+    levenshtein_distance,
+)
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -1199,35 +1205,13 @@ class PackagesView(BackendPipFrame):
     pass
 
 
-def _fetch_url_future(url, fallback_url=None, timeout=10):
-    from urllib.request import urlopen
-
-    def load_url():
-        try:
-            with urlopen(url, timeout=timeout) as conn:
-                return (conn, conn.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 404 and fallback_url is not None:
-                with urlopen(fallback_url, timeout=timeout) as conn:
-                    return (conn, conn.read())
-            else:
-                raise
-
-    from concurrent.futures.thread import ThreadPoolExecutor
-
-    executor = ThreadPoolExecutor(max_workers=1)
-    return executor.submit(load_url)
-
-
 def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[str, str]]:
     import urllib.parse
-    from urllib.request import urlopen
 
     logger.info("Performing PyPI search for %r", query)
 
     url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
-    with urlopen(url, timeout=10) as fp:
-        data = fp.read()
+    data = download_bytes(url)
 
     results = _extract_pypi_search_results(data.decode("utf-8"))
 
@@ -1271,9 +1255,6 @@ def try_download_version_list_from_pypi(name: str) -> List[str]:
 
 
 def download_dist_data_from_pypi(name: str, version: Optional[str]) -> Dict:
-    import json
-    from urllib.request import Request, urlopen
-
     if version is None:
         url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
     else:
@@ -1283,15 +1264,7 @@ def download_dist_data_from_pypi(name: str, version: Optional[str]) -> Dict:
 
     logger.info("Downloading package info (%r, %r) from %s", name, version, url)
 
-    req = Request(url, headers={"Accept-Encoding": "gzip, deflate"})
-    with urlopen(req) as fp:
-        if fp.info().get("Content-Encoding") == "gzip":
-            import gzip
-
-            data = gzip.decompress(fp.read())
-        else:
-            data = fp.read()
-    return json.loads(data)
+    return download_and_parse_json(url)
 
 
 def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:

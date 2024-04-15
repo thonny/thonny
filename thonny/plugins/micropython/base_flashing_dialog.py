@@ -15,12 +15,11 @@ from typing import Any, Dict, List, Optional, Tuple
 from thonny import get_runner
 from thonny.common import UserError
 from thonny.languages import tr
+from thonny.misc_utils import download_and_parse_json, download_bytes
 from thonny.ui_utils import AdvancedLabel, MappingCombobox, set_text_if_different
 from thonny.workdlg import WorkDialog
 
 logger = getLogger(__name__)
-
-FAKE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
 FAMILY_CODES_TO_NAMES = {
     "rp2": "RP2",
@@ -302,22 +301,9 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
     def _download_variants(self):
         logger.info("Downloading %r", self.get_variants_url())
-        import json
-        from urllib.request import urlopen
 
         try:
-            req = urllib.request.Request(
-                self.get_variants_url(),
-                data=None,
-                headers={
-                    "User-Agent": FAKE_USER_AGENT,
-                    "Cache-Control": "no-cache",
-                },
-            )
-            with urlopen(req) as fp:
-                json_str = fp.read().decode("UTF-8")
-                # logger.debug("Variants info: %r", json_str)
-            variants = json.loads(json_str)
+            variants = download_and_parse_json(self.get_variants_url())
             logger.info("Got %r variants", len(variants))
             self._tweak_variants(variants)
         except Exception:
@@ -350,22 +336,11 @@ class BaseFlashingDialog(WorkDialog, ABC):
             new_regex = variant.get("latest_prerelease_regex", None)
             if new_regex:
                 latest_prerelease_regex = new_regex
-                import json
-                import urllib.request
 
                 logger.info("Downloading %r", variant["info_url"])
                 try:
-                    req = urllib.request.Request(
-                        variant["info_url"],
-                        data=None,
-                        headers={
-                            "User-Agent": FAKE_USER_AGENT,
-                            "Cache-Control": "no-cache",
-                        },
-                    )
-                    with urllib.request.urlopen(req) as fp:
-                        html_str = fp.read().decode("UTF-8", errors="replace")
-                        # logger.debug("Variants info: %r", json_str)
+                    html_str = download_bytes(variant["info_url"]).decode("UTF-8", errors="replace")
+                    # logger.debug("Variants info: %r", json_str)
 
                     match = re.search(latest_prerelease_regex, html_str)
                     if match:

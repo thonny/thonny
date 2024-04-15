@@ -22,6 +22,7 @@ from thonny.config_ui import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_distance
+from thonny.misc_utils import download_and_parse_json, levenshtein_distance
 from thonny.plugins.backend_config_page import (
     BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
@@ -181,11 +182,7 @@ class MicroPythonProxy(SubprocessProxy):
     def _get_mp_org_index_data(self) -> Dict[str, Any]:
         global _mp_org_index_cache
         if not _mp_org_index_cache:
-            import json
-            from urllib.request import urlopen
-
-            with urlopen(MICROPYTHON_ORG_JSON, timeout=10) as fp:
-                _mp_org_index_cache = json.load(fp)
+            _mp_org_index_cache = download_and_parse_json(MICROPYTHON_ORG_JSON, timeout=10)
 
         return _mp_org_index_cache
 
