@@ -1,0 +1,434 @@
+{
+    "__future__": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/__future__",
+        "description": "MicroPython port of Python standard library module '__future__'"
+    },
+    "abc": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/abc",
+        "description": "MicroPython port of Python standard library module 'abc'"
+    },
+    "aioble": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble",
+        "description": "This library provides an object-oriented, asyncio-based wrapper for MicroPython's bluetooth API."
+    },
+    "aioble-central": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-central",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioble-client": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-client",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioble-core": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-core",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioble-l2cap": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-l2cap",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioble-peripheral": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-peripheral"
+    },
+    "aioble-security": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-security",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioble-server": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble-server",
+        "description": "A subset of the modules in 'aioble'"
+    },
+    "aioespnow": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/aioespnow",
+        "description": "A supplementary module which extends the micropython 'espnow' module to provide 'asyncio' support."
+    },
+    "aiohttp": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-ecosys/aiohttp",
+        "description": "aiohttp is an HTTP client module for MicroPython asyncio module, with API mostly compatible with CPython aiohttp module."
+    },
+    "aiorepl": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/aiorepl",
+        "description": "This library provides \"asyncio REPL\", a simple REPL that can be used even while your program is running, allowing you to inspect program state, create tasks, and await asynchronous functions."
+    },
+    "argparse": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/argparse",
+        "description": "MicroPython port of Python standard library module 'argparse'"
+    },
+    "base64": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/base64",
+        "description": "MicroPython port of Python standard library module 'base64'"
+    },
+    "binascii": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/binascii",
+        "description": "MicroPython port of Python standard library module 'binascii'"
+    },
+    "bisect": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/bisect",
+        "description": "MicroPython port of Python standard library module 'bisect'"
+    },
+    "bmi270": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/imu/bmi270"
+    },
+    "bmm150": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/imu/bmm150"
+    },
+    "bundle-networking": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/bundles/bundle-networking"
+    },
+    "cbor2": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-ecosys/cbor2",
+        "description": "Encoding and decoding for the Concise Binary Object Representation (CBOR, RFC 8949) serialization format"
+    },
+    "cmd": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/cmd",
+        "description": "MicroPython port of Python standard library module 'cmd'"
+    },
+    "collections": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/collections",
+        "description": "MicroPython port of Python standard library module 'collections'"
+    },
+    "collections-defaultdict": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/collections-defaultdict",
+        "description": "MicroPython port of Python standard library module 'collections-defaultdict'"
+    },
+    "collections-deque": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/collections-deque",
+        "description": "MicroPython port of Python standard library module 'collections-deque'"
+    },
+    "contextlib": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/contextlib",
+        "description": "MicroPython port of Python standard library module 'contextlib'"
+    },
+    "copy": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/copy",
+        "description": "MicroPython port of Python standard library module 'copy'"
+    },
+    "curses.ascii": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/curses.ascii",
+        "description": "MicroPython port of Python standard library module 'curses.ascii'"
+    },
+    "datetime": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/datetime",
+        "description": "MicroPython port of Python standard library module 'datetime'"
+    },
+    "dht": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/dht"
+    },
+    "ds18x20": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/ds18x20"
+    },
+    "errno": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/errno",
+        "description": "MicroPython port of Python standard library module 'errno'"
+    },
+    "espflash": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/espflash"
+    },
+    "fnmatch": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/fnmatch",
+        "description": "MicroPython port of Python standard library module 'fnmatch'"
+    },
+    "functools": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/functools",
+        "description": "MicroPython port of Python standard library module 'functools'"
+    },
+    "gzip": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/gzip",
+        "description": "MicroPython port of Python standard library module 'gzip'"
+    },
+    "hashlib": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib",
+        "description": "MicroPython port of Python standard library module 'hashlib'"
+    },
+    "hashlib-core": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib-core",
+        "description": "MicroPython port of Python standard library module 'hashlib-core'"
+    },
+    "hashlib-sha224": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib-sha224",
+        "description": "MicroPython port of Python standard library module 'hashlib-sha224'"
+    },
+    "hashlib-sha256": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib-sha256",
+        "description": "MicroPython port of Python standard library module 'hashlib-sha256'"
+    },
+    "hashlib-sha384": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib-sha384",
+        "description": "MicroPython port of Python standard library module 'hashlib-sha384'"
+    },
+    "hashlib-sha512": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hashlib-sha512",
+        "description": "MicroPython port of Python standard library module 'hashlib-sha512'"
+    },
+    "heapq": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/heapq",
+        "description": "MicroPython port of Python standard library module 'heapq'"
+    },
+    "hmac": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/hmac",
+        "description": "MicroPython port of Python standard library module 'hmac'"
+    },
+    "hs3003": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/hs3003"
+    },
+    "html": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/html",
+        "description": "MicroPython port of Python standard library module 'html'"
+    },
+    "hts221": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/hts221"
+    },
+    "inspect": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/inspect",
+        "description": "MicroPython port of Python standard library module 'inspect'"
+    },
+    "io": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/io",
+        "description": "MicroPython port of Python standard library module 'io'"
+    },
+    "iperf3": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-ecosys/iperf3",
+        "description": "Pure Python, iperf3-compatible network performance test tool"
+    },
+    "itertools": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/itertools",
+        "description": "MicroPython port of Python standard library module 'itertools'"
+    },
+    "keyword": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/keyword",
+        "description": "MicroPython port of Python standard library module 'keyword'"
+    },
+    "lcd160cr": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/display/lcd160cr"
+    },
+    "locale": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/locale",
+        "description": "MicroPython port of Python standard library module 'locale'"
+    },
+    "logging": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/logging",
+        "description": "MicroPython port of Python standard library module 'logging'"
+    },
+    "lora": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora",
+        "description": "MicroPython LoRa module"
+    },
+    "lora-async": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora-async",
+        "description": "MicroPython LoRa async modem driver"
+    },
+    "lora-stm32wl5": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora-stm32wl5",
+        "description": "MicroPython LoRa STM32WL55 embedded sub-ghz radio driver"
+    },
+    "lora-sx126x": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora-sx126x",
+        "description": "MicroPython LoRa SX126x (SX1261, SX1262) driver"
+    },
+    "lora-sx127x": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora-sx127x",
+        "description": "MicroPython LoRa SX127x driver"
+    },
+    "lora-sync": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/lora/lora-sync",
+        "description": "MicroPython LoRa synchronous modem driver"
+    },
+    "lps22h": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/lps22h"
+    },
+    "lsm6dsox": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/imu/lsm6dsox"
+    },
+    "lsm9ds1": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/imu/lsm9ds1"
+    },
+    "mhz19": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/sensor/mhz19"
+    },
+    "mip": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/mip"
+    },
+    "mip-cmdline": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/mip-cmdline"
+    },
+    "neopixel": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/led/neopixel"
+    },
+    "nrf24l01": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/radio/nrf24l01"
+    },
+    "ntptime": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/net/ntptime"
+    },
+    "onewire": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/bus/onewire"
+    },
+    "operator": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/operator",
+        "description": "MicroPython port of Python standard library module 'operator'"
+    },
+    "os": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/os",
+        "description": "MicroPython port of Python standard library module 'os'"
+    },
+    "os-path": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/os-path",
+        "description": "MicroPython port of Python standard library module 'os-path'"
+    },
+    "pathlib": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/pathlib",
+        "description": "MicroPython port of Python standard library module 'pathlib'"
+    },
+    "pickle": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/pickle",
+        "description": "MicroPython port of Python standard library module 'pickle'"
+    },
+    "pkg_resources": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/pkg_resources",
+        "description": "MicroPython port of Python standard library module 'pkg_resources'"
+    },
+    "pkgutil": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/pkgutil",
+        "description": "MicroPython port of Python standard library module 'pkgutil'"
+    },
+    "pprint": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/pprint",
+        "description": "MicroPython port of Python standard library module 'pprint'"
+    },
+    "pyjwt": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-ecosys/pyjwt",
+        "description": "MicroPython compatible implementation of RFC 7519 (JSON Web Token)"
+    },
+    "quopri": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/quopri",
+        "description": "MicroPython port of Python standard library module 'quopri'"
+    },
+    "random": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/random",
+        "description": "MicroPython port of Python standard library module 'random'"
+    },
+    "requests": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-ecosys/requests",
+        "description": "This module provides a lightweight version of the Python requests library."
+    },
+    "sdcard": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/storage/sdcard"
+    },
+    "senml": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/senml",
+        "description": "The SenML library helps you create and parse senml documents in both json and cbor format."
+    },
+    "shutil": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/shutil",
+        "description": "MicroPython port of Python standard library module 'shutil'"
+    },
+    "ssd1306": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/display/ssd1306"
+    },
+    "ssl": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/ssl",
+        "description": "MicroPython port of Python standard library module 'ssl'"
+    },
+    "stat": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/stat",
+        "description": "MicroPython port of Python standard library module 'stat'"
+    },
+    "string": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/string",
+        "description": "MicroPython port of Python standard library module 'string'"
+    },
+    "struct": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/struct",
+        "description": "MicroPython port of Python standard library module 'struct'"
+    },
+    "tarfile": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/tarfile",
+        "description": "MicroPython port of Python standard library module 'tarfile'"
+    },
+    "tarfile-write": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/tarfile-write",
+        "description": "MicroPython port of Python standard library module 'tarfile-write'"
+    },
+    "tempfile": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/tempfile",
+        "description": "MicroPython port of Python standard library module 'tempfile'"
+    },
+    "textwrap": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/textwrap",
+        "description": "MicroPython port of Python standard library module 'textwrap'"
+    },
+    "threading": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/threading",
+        "description": "MicroPython port of Python standard library module 'threading'"
+    },
+    "time": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/time",
+        "description": "This library extends the built-in MicroPython 'time' module to include 'time.strftime()'."
+    },
+    "traceback": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/traceback",
+        "description": "MicroPython port of Python standard library module 'traceback'"
+    },
+    "types": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/types",
+        "description": "MicroPython port of Python standard library module 'types'"
+    },
+    "uaiohttpclient": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/uaiohttpclient"
+    },
+    "ucontextlib": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/ucontextlib"
+    },
+    "udnspkt": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/udnspkt"
+    },
+    "umqtt.robust": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/umqtt.robust"
+    },
+    "umqtt.simple": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/umqtt.simple"
+    },
+    "unittest": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/unittest",
+        "description": "MicroPython port of Python standard library module 'unittest'"
+    },
+    "unittest-discover": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/unittest-discover",
+        "description": "MicroPython port of Python standard library module 'unittest-discover'"
+    },
+    "upysh": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/upysh"
+    },
+    "urequests": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/urequests",
+        "description": "The MicroPython version of requests was previously called 'urequests' and a lot of existing code depends on being able to still import the module by that name."
+    },
+    "urllib.urequest": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/urllib.urequest"
+    },
+    "uu": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/uu",
+        "description": "MicroPython port of Python standard library module 'uu'"
+    },
+    "venv": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/venv",
+        "description": "MicroPython port of Python standard library module 'venv'"
+    },
+    "warnings": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/warnings",
+        "description": "MicroPython port of Python standard library module 'warnings'"
+    },
+    "webrepl": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/net/webrepl"
+    },
+    "wm8960": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/drivers/codec/wm8960"
+    },
+    "xmltok": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/micropython/xmltok"
+    },
+    "zlib": {
+        "project_url": "https://github.com/micropython/micropython-lib/tree/master/python-stdlib/zlib",
+        "description": "MicroPython port of Python standard library module 'zlib'"
+    }
+}
