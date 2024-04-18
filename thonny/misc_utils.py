@@ -9,7 +9,7 @@ import sys
 import threading
 import time
 from logging import getLogger
-from typing import List, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
