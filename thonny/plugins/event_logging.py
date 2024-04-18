@@ -152,6 +152,8 @@ class EventLogger:
             logger.info("Won't log %r because we are closing", sequence)
             return
 
+        widget: Optional[tk.Widget]
+
         event_time = datetime.now()
         import json
 
@@ -169,6 +171,13 @@ class EventLogger:
             widget = getattr(event, "text_widget", None)
 
         if widget is not None:
+            if not widget.winfo_exists():
+                # Probably the widget was deleted by an earlier event handler
+                logger.warning(
+                    "Got event %r from widget %r, but the widget does not exist'", sequence, widget
+                )
+                return
+
             try:
                 if widget.winfo_toplevel() is not get_workbench():
                     # logger.debug("Skipping non-workspace event %r", event)
