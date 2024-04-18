@@ -65,10 +65,12 @@ class PipFrame(ttk.Frame, ABC):
         self._current_dist_info: Optional[DistInfo] = None
         self._version_button: Optional[CustomToolbutton] = None
         self._action_button: Optional[CustomToolbutton] = None
+        self._last_search_results: Optional[Dict[NormalizedName, DistInfo]] = None
 
         super().__init__(master)
 
         self._create_widgets(self)
+        self._update_summary()
 
     def load_content(self):
         self._show_instructions()
@@ -87,7 +89,7 @@ class PipFrame(ttk.Frame, ABC):
         header_frame.columnconfigure(0, weight=1)
         header_frame.rowconfigure(1, weight=1)
 
-        self.summary_label = ttk.Label(header_frame, text=tr("Installed packages: %d") % 12)
+        self.summary_label = ttk.Label(header_frame, text="")
         self.summary_label.grid(row=1, column=0, sticky="nsw")
 
         self.search_label = ttk.Label(header_frame, text=tr("Search PyPI") + ": ")
@@ -231,6 +233,8 @@ class PipFrame(ttk.Frame, ABC):
 
     def _set_state(self, state, force_normal_cursor=False):
         self._state = state
+        self._update_summary()
+        # TODO:
         action_buttons = [
             # self.install_button,
             # self.advanced_button,
@@ -265,6 +269,16 @@ class PipFrame(ttk.Frame, ABC):
 
     def _get_state(self):
         return self._state
+
+    def _update_summary(self):
+        if self._get_state() == "inactive":
+            text = ""
+        elif self._get_state() == "listing":
+            text = tr("Listing installed packages") + "..."
+        else:
+            text = tr("Installed packages: %d") % len(self._installed_dists)
+
+        self.summary_label.configure(text=text)
 
     def _start_update_list(self, name_to_show=None):
         raise NotImplementedError()
@@ -317,10 +331,10 @@ class PipFrame(ttk.Frame, ABC):
         self._current_dist_info = None
         self._clear_info_text()
 
-    def _clear_info_text(self):
+    def _clear_info_text(self, start_index: str = "1.0"):
         self._version_button = None
         self._action_button = None
-        self.info_text.direct_delete("1.0", "end")
+        self.info_text.direct_delete(start_index, "end")
 
     def _append_info_text(self, text, tags=()):
         self.info_text.direct_insert("end", text, tags)
@@ -436,7 +450,7 @@ class PipFrame(ttk.Frame, ABC):
 
         if is_installed:
             version_text = version + " (" + tr("installed") + ")"
-            action = (self._on_uninstall_click,)
+            action = self._on_uninstall_click
             action_text = tr("Uninstall")
         else:
             version_text = version
@@ -501,8 +515,6 @@ class PipFrame(ttk.Frame, ABC):
                         "Could not download package info or list of versions: " + str(e)
                     )
                     self._set_state("idle")
-                    assert self._version_button is not None
-                    self._version_button.configure(state="normal")
                 else:
                     self._complete_show_package_info(name, info, versions)
             else:
@@ -651,7 +663,7 @@ class PipFrame(ttk.Frame, ABC):
         self._set_state("fetching")
         self._clear()
         self._append_info_text(tr("Search results") + "\n", tags=("title",))
-        self.info_text.direct_insert("1.0", tr("Searching") + " ...")
+        self._append_info_text(tr("Searching") + " ...")
         if discard_selection:
             self._select_list_item(0)
 
@@ -664,8 +676,9 @@ class PipFrame(ttk.Frame, ABC):
             if results_future.done():
                 try:
                     results = results_future.result()
-                except OSError as e:
-                    self._show_search_results(query, str(e))
+                except Exception as e:
+                    logger.exception("Error when searching packages")
+                    self._show_search_results(query, e)
                 else:
                     self._show_search_results(query, results)
 
@@ -674,35 +687,44 @@ class PipFrame(ttk.Frame, ABC):
 
         poll_fetch_complete()
 
-    def _show_search_results(self, query, results: Union[List[Dict], str]) -> None:
+    def _show_search_results(self, query, results: Union[List[DistInfo], Exception]) -> None:
         self._set_state("idle")
-        self._clear_info_text()
+        self._clear_info_text("2.0")  # also gets rid ot the newline in the end of the first line
+        self._append_info_text("\n")
 
-        if isinstance(results, str) or not results:
+        if isinstance(results, Exception) or not results:
             if not results:
                 self._append_info_text("No results.\n\n")
+                return
             else:
+                assert isinstance(results, Exception)
                 self._append_info_text("Could not fetch search results:\n")
-                self._append_info_text(results + "\n\n")
+                self._append_info_text(str(results) + "\n\n")
+                if isinstance(results, PyPiSearchErrorWithFallback):
+                    self._append_info_text("There is an exact match, though:\n\n")
+                    results = [results.fallback_result]
+                else:
+                    self._append_info_text("Try searching for exact package name.\n")
+                    return
 
-            self._append_info_text("Try opening the package directly:\n")
-            self._append_info_text(query, ("url",))
-            return
-
-        for item in results:
+        assert isinstance(results, list)
+        self._last_search_results = {canonicalize_name(r.name): r for r in results}
+        for info in results:
             # self._append_info_text("•")
             tags = ("url",)
-            if item["name"].lower() == query.lower():
+            if canonicalize_name(info.name) == canonicalize_name(query.lower()):
                 tags = tags + ("bold",)
 
-            self._append_info_text(item["name"], tags)
-            if item.get("source"):
-                self._append_info_text(" @ " + item["source"])
+            self._append_info_text(info.name, tags)
+            if info.source is not None and self._should_show_search_result_source():
+                self._append_info_text(" @ " + info.source)
+            self._append_info_text(" - ")
+            self.info_text.direct_insert("end", (info.summary or "<No description>").strip() + "\n")
             self._append_info_text("\n")
-            self.info_text.direct_insert(
-                "end", (item.get("description") or "<No description>").strip() + "\n"
-            )
-            self._append_info_text("\n")
+
+    @abstractmethod
+    def _should_show_search_result_source(self):
+        raise NotImplementedError()
 
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
@@ -808,7 +830,9 @@ class PipFrame(ttk.Frame, ABC):
                 os.makedirs(url, exist_ok=True)
                 open_path_in_system_file_manager(url)
             else:
-                self._start_show_package_info(url)
+                assert self._last_search_results is not None
+                dist_info = self._last_search_results[canonicalize_name(url)]
+                self._start_show_package_info(dist_info.name, dist_info.version)
 
     def _get_active_version(self, name):
         dist = self._get_active_dist(name)
@@ -857,11 +881,13 @@ class PipFrame(ttk.Frame, ABC):
         ):
             return False
 
+        return True
+
     def _is_read_only_env(self):
         return self._get_target_directory() is None
 
     @abstractmethod
-    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]: ...
+    def _fetch_search_results(self, query: str) -> List[DistInfo]: ...
 
     def _advertise_pipkin(self):
         self._append_info_text("\n\n")
@@ -1002,7 +1028,7 @@ class BackendPipFrame(PipFrame):
             comment + "\n\n",
         )
 
-    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
+    def _fetch_search_results(self, query: str) -> List[DistInfo]:
         return self._get_proxy().search_packages(query)
 
     def _download_dist_info(self, name: str, version: str) -> DistInfo:
@@ -1010,6 +1036,11 @@ class BackendPipFrame(PipFrame):
 
     def _download_version_list(self, name: str) -> List[str]:
         return self._get_proxy().get_version_list_from_index(name)
+
+    def _should_show_search_result_source(self):
+        from thonny.plugins.micropython.mp_front import MicroPythonProxy
+
+        return isinstance(self._get_proxy(), MicroPythonProxy)
 
     def get_pw_padding(self):
         return 0
@@ -1031,6 +1062,7 @@ class PluginsPipFrame(PipFrame):
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle", "inactive"]
+        self._set_state("listing")
 
         self._installed_dists = export_distributions_info_as_dict()
 
@@ -1153,8 +1185,11 @@ class PluginsPipFrame(PipFrame):
     def _append_location_to_info_path(self, path):
         self.info_text.direct_insert("end", self._normalize_target_path(path), ("url",))
 
-    def _fetch_search_results(self, query: str) -> List[Dict[str, str]]:
+    def _fetch_search_results(self, query: str) -> List[DistInfo]:
         return perform_pypi_search(query)
+
+    def _should_show_search_result_source(self):
+        return True
 
 
 class PluginsPipDialog(CommonDialog):
@@ -1205,7 +1240,24 @@ class PackagesView(BackendPipFrame):
     pass
 
 
-def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[str, str]]:
+def perform_pypi_search(query: str) -> List[DistInfo]:
+    try:
+        return _perform_plain_pypi_search(query)
+    except Exception as e:
+        logger.exception("Could not search PyPI for %r", query)
+        # Let's try a fallback by treating the query as package name
+        name = canonicalize_name(query.strip().replace(" ", ""))
+        logger.info("Probing for package named %r", name)
+        try:
+            dist_info = download_dist_info_from_pypi(name, None)
+        except Exception:
+            logger.exception("No luck with %r", name)
+            raise e from None
+        else:
+            raise PyPiSearchErrorWithFallback(str(e), dist_info) from e
+
+
+def _perform_plain_pypi_search(query: str) -> List[DistInfo]:
     import urllib.parse
 
     logger.info("Performing PyPI search for %r", query)
@@ -1214,17 +1266,14 @@ def perform_pypi_search(query: str, source: Optional[str] = None) -> List[Dict[s
     data = download_bytes(url)
 
     results = _extract_pypi_search_results(data.decode("utf-8"))
-
-    for result in results:
-        if source:
-            result["source"] = source
-        result["distance"] = levenshtein_distance(query, result["name"])
-
-    logger.info("Got %r matches")
-    return results
+    logger.info("Got %r PyPI matches", len(results))
+    return [
+        DistInfo(name=r["name"], version=r["version"], summary=r["description"], source="PyPI")
+        for r in results
+    ]
 
 
-def download_dist_info_from_pypi(name: str, version: str) -> DistInfo:
+def download_dist_info_from_pypi(name: str, version: Optional[str]) -> DistInfo:
     # versioned data does not have releases, so need to make 2 downloads
     info = download_dist_data_from_pypi(name, version)["info"]
 
@@ -1238,6 +1287,7 @@ def download_dist_info_from_pypi(name: str, version: str) -> DistInfo:
         home_page=info["home_page"] or info["project_url"],
         package_url=info["package_url"],
         requires=info["requires_dist"],
+        source="PyPI",
         installed_location=None,
     )
 
@@ -1292,7 +1342,11 @@ def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
 
             if tag in ("span", "p"):
                 tag_class = get_class(attrs)
-                if tag_class in ("package-snippet__name", "package-snippet__description"):
+                if tag_class in (
+                    "package-snippet__name",
+                    "package-snippet__description",
+                    "package-snippet__version",
+                ):
                     self.active_class = tag_class
                 else:
                     self.active_class = None
@@ -1307,7 +1361,14 @@ def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
         def handle_endtag(self, tag):
             self.active_class = None
 
-    return PypiSearchResultsParser(html_data).results
+    results = PypiSearchResultsParser(html_data).results
+    if not results:
+        # this may mean either no matches or changed structure of PyPI search page
+        # Let's probe for known marker of no matches
+        if not "There were no results for" in html_data:
+            raise RuntimeError("Unexpected structure of PyPI search results")
+
+    return results
 
 
 def _extract_click_text(widget, event, tag):
@@ -1327,6 +1388,12 @@ def _extract_click_text(widget, event, tag):
 
 def export_distributions_info_as_dict() -> Dict[NormalizedName, DistInfo]:
     return {canonicalize_name(d.name): d for d in export_distributions_info()}
+
+
+class PyPiSearchErrorWithFallback(RuntimeError):
+    def __init__(self, message, fallback_result: DistInfo):
+        super().__init__(message)
+        self.fallback_result = fallback_result
 
 
 def load_plugin() -> None:

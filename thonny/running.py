@@ -978,9 +978,8 @@ class BackendProxy(ABC):
     def open_custom_system_shell(self) -> None:
         raise NotImplementedError()
 
-    def get_package_installation_confirmations(self, package_data: Dict) -> List[str]:
-        name = package_data["info"]["name"]
-        if "thonny" in name.lower():
+    def get_package_installation_confirmations(self, dist_info: DistInfo) -> List[str]:
+        if "thonny" in dist_info.name.lower():
             return [
                 tr(
                     "Looks like you are installing a Thonny-related package.\n"
@@ -989,7 +988,7 @@ class BackendProxy(ABC):
                     + "\n"
                     + "Are you sure you want to install %s for the back-end?"
                 )
-                % name
+                % dist_info.name
             ]
 
         return []
@@ -1008,7 +1007,7 @@ class BackendProxy(ABC):
     def normalize_target_path(self, path: str) -> str:
         return path
 
-    def search_packages(self, query: str) -> List[Dict[str, Any]]:
+    def search_packages(self, query: str) -> List[DistInfo]:
         from thonny.plugins.pip_gui import perform_pypi_search
 
         return perform_pypi_search(query)

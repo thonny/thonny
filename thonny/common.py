@@ -68,6 +68,7 @@ class DistInfo:
     home_page: Optional[str] = None
     package_url: Optional[str] = None
     requires: List[str] = dataclasses.field(default_factory=list)
+    source: Optional[str] = None
     installed_location: Optional[str] = None
 
 

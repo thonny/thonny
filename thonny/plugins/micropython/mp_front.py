@@ -1,8 +1,8 @@
+import dataclasses
 import os
 import shutil
 import sys
 import time
-import tkinter as tk
 from logging import getLogger
 from textwrap import dedent
 from tkinter import messagebox, ttk
@@ -13,7 +13,6 @@ from packaging.utils import canonicalize_name
 from thonny import get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import CommandToBackend, DistInfo, EOFCommand, ImmediateCommand, InlineCommand
 from thonny.config_ui import (
-    LABEL_PADDING_EMS,
     add_option_checkbox,
     add_option_combobox,
     add_option_entry,
@@ -21,10 +20,8 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
-from thonny.misc_utils import levenshtein_distance
-from thonny.misc_utils import download_and_parse_json, levenshtein_distance
+from thonny.misc_utils import download_and_parse_json
 from thonny.plugins.backend_config_page import (
-    BackendDetailsConfigPage,
     BaseSshProxyConfigPage,
     TabbedBackendDetailsConfigurationPage,
     get_ssh_password,
@@ -45,8 +42,12 @@ WEBREPL_OPTION_DESC = "< WebREPL >"
 WEBREPL_PORT_VALUE = "webrepl"
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
-MICROPYTHON_ORG_JSON = "https://micropython.org/pi/v2/index.json"
-_mp_org_index_cache = None
+MICROPYTHON_LIB_INDEX_URL = "https://micropython.org/pi/v2/index.json"
+MICROPYTHON_LIB_METADATA_URL = (
+    "https://raw.githubusercontent.com/thonny/thonny/master/data/micropython-lib-metadata.json"
+)
+_mp_lib_index_cache = None
+_mp_lib_metadata_cache = None
 
 
 class MicroPythonProxy(SubprocessProxy):
@@ -103,10 +104,10 @@ class MicroPythonProxy(SubprocessProxy):
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return True
 
-    def get_package_installation_confirmations(self, package_data: Dict) -> List[str]:
-        result = super().get_package_installation_confirmations(package_data)
+    def get_package_installation_confirmations(self, dist_info: DistInfo) -> List[str]:
+        result = super().get_package_installation_confirmations(dist_info)
 
-        if not self.looks_like_suitable_package(package_data):
+        if not self.looks_like_suitable_package(dist_info):
             result.append(
                 tr(
                     "This doesn't look like MicroPython/CircuitPython package.\n"
@@ -115,104 +116,130 @@ class MicroPythonProxy(SubprocessProxy):
             )
         return result
 
-    def looks_like_suitable_package(self, package_data: Dict) -> bool:
-        if package_data.get("mp_org", False):
+    def looks_like_suitable_package(self, dist_info: DistInfo) -> bool:
+        if dist_info.source == "micropython-lib":
             return True
 
-        name = package_data["info"]["name"]
         for token in ["micropython", "circuitpython", "pycopy"]:
-            if token in name.lower():
+            if token in dist_info.name.lower():
                 return True
 
-        classifiers = package_data["info"].get("classifiers", [])
-        logger.debug("package classifiers: %s", classifiers)
-        for mp_class in [
+        logger.debug("package classifiers: %s", dist_info.classifiers)
+        for classifier in [
             "Programming Language :: Python :: Implementation :: MicroPython",
             "Programming Language :: Python :: Implementation :: CircuitPython",
         ]:
-            if mp_class in classifiers:
+            if classifier in dist_info.classifiers:
                 return True
 
         return False
 
-    def search_packages(self, query: str) -> List[Dict[str, Any]]:
+    def search_packages(self, query: str) -> List[DistInfo]:
         from thonny.plugins.pip_gui import perform_pypi_search
 
-        mp_org_result = self._perform_micropython_org_search(query)
-        pypi_result = perform_pypi_search(query, source="PyPI")
+        def distance(item: DistInfo) -> int:
+            # add slight penalty for non-perfect PyPI matches, as most users look for mp.org results
+            if item["distance"] != 0:
+                item["distance"] += 1
+
+        mp_lib_result = self._perform_micropython_lib_search(query)
+        pypi_result = set(perform_pypi_search(query))
+        if "micropython" not in query.lower() and "circuitpython" not in query.lower():
+            pypi_result.update(set(perform_pypi_search("micropython " + query)))
+            pypi_result.update(set(perform_pypi_search("circuitpython " + query)))
 
         combined_result = []
-        mp_org_names = set()
+        mp_lib_names = set()
 
-        for item in mp_org_result:
+        for item in mp_lib_result:
             combined_result.append(item)
-            mp_org_names.add(item["name"])
+            mp_lib_names.add(canonicalize_name(item.name))
 
         for item in pypi_result:
-            # TODO: normalize?
-            if item["name"] not in mp_org_names:
-                # add slight penalty for non-perfect PyPI matches, as most users look for mp.org results
-                if item["distance"] != 0:
-                    item["distance"] += 1
+            norm_name = canonicalize_name(item.name)
+            if norm_name in mp_lib_names:
+                # will be shadowed by micropython-lib
+                continue
+
+            lower_summary = (item.summary and item.summary.lower()) or ""
+            mentions_right_tokens = any(
+                (
+                    token in norm_name or token in lower_summary
+                    for token in ["micrpython", "circuitpython"]
+                )
+            )
+            if norm_name == canonicalize_name(query) or mentions_right_tokens:
                 combined_result.append(item)
 
-        sorted_result = sorted(combined_result, key=lambda x: x["distance"])
-        filtered_result = filter(lambda x: x["distance"] < 5, sorted_result[:20])
+        sorted_result = sorted(combined_result, key=distance)
+        filtered_result = filter(lambda x: distance(x) < 5, sorted_result[:20])
 
         return list(filtered_result)
 
-    def _perform_micropython_org_search(self, query: str) -> List[Dict[str, str]]:
-        logger.info("Searching %r for %r", MICROPYTHON_ORG_JSON, query)
-        data = self._get_mp_org_index_data()
+    def _perform_micropython_lib_search(self, query: str) -> List[DistInfo]:
+        logger.info("Searching %r for %r", MICROPYTHON_LIB_INDEX_URL, query)
+        data = self._get_micropython_lib_index_data()
 
         result = []
         for package in data["packages"]:
             result.append(
-                {
-                    "name": package["name"],
-                    "description": package["description"] or None,
-                    "source": "micropython-lib",
-                    "distance": levenshtein_distance(query, package["name"]),
-                }
+                self._augment_dist_info(
+                    DistInfo(
+                        name=package["name"],
+                        version=package["version"],
+                        summary=package["description"] or None,
+                        source="micropython-lib",
+                    )
+                )
             )
 
         logger.info("Got %r items", len(result))
         return result
 
-    def _get_mp_org_index_data(self) -> Dict[str, Any]:
-        global _mp_org_index_cache
-        if not _mp_org_index_cache:
-            _mp_org_index_cache = download_and_parse_json(MICROPYTHON_ORG_JSON, timeout=10)
+    def _get_micropython_lib_index_data(self) -> Dict[str, Any]:
+        global _mp_lib_index_cache
+        if not _mp_lib_index_cache:
+            _mp_lib_index_cache = download_and_parse_json(MICROPYTHON_LIB_INDEX_URL, timeout=10)
 
-        return _mp_org_index_cache
+        return _mp_lib_index_cache
+
+    def _get_micropython_lib_metadata(self) -> Dict[str, Any]:
+        global _mp_lib_metadata_cache
+        if not _mp_lib_metadata_cache:
+            _mp_lib_metadata_cache = download_and_parse_json(
+                MICROPYTHON_LIB_METADATA_URL, timeout=10
+            )
+
+        return _mp_lib_metadata_cache
 
     def get_package_info_from_index(self, name: str, version: str) -> DistInfo:
         # Try mp.org first
-        index_data = self._get_mp_org_index_data()
+        index_data = self._get_micropython_lib_index_data()
 
         for package in index_data["packages"]:
             if canonicalize_name(package["name"]) == canonicalize_name(name):
-                info = {
-                    "name": package["name"],
-                    "version": package["version"],
-                }
-                if package.get("author"):
-                    info["author"] = package["author"]
-                if package.get("license"):
-                    info["license"] = package["license"]
-                if package.get("description"):
-                    info["summary"] = package["description"]
+                if version not in package["versions"]["py"]:
+                    raise RuntimeError(
+                        f"Could not find version {version} of {name} in micropython-lib index"
+                    )
+
+                return self._augment_dist_info(
+                    DistInfo(
+                        name=package["name"],
+                        version=version,
+                        source="micropython-lib",
+                        author=package.get("author") or None,
+                        summary=package.get("description") or None,
+                        license=package.get("license") or None,
+                    )
+                )
                 # TODO: deps?
-
-                releases = {ver: [] for ver in package["versions"]["py"]}
-
-                return {"info": info, "releases": releases, "mp_org": True}
 
         return super().get_package_info_from_index(name, version)
 
     def get_version_list_from_index(self, name: str) -> List[str]:
         # Try mp.org first
-        index_data = self._get_mp_org_index_data()
+        index_data = self._get_micropython_lib_index_data()
 
         for package in index_data["packages"]:
             if canonicalize_name(package["name"]) == canonicalize_name(name):
@@ -222,6 +249,21 @@ class MicroPythonProxy(SubprocessProxy):
 
     def get_search_button_text(self) -> str:
         return tr("Search micropython-lib and PyPI")
+
+    def _augment_dist_info(self, dist_info: DistInfo) -> DistInfo:
+        metadata = self._get_micropython_lib_metadata()
+        norm_name = canonicalize_name(dist_info.name)
+        home_page = dist_info.home_page
+        summary = dist_info.summary
+
+        if (home_page is None or summary is None) and norm_name in metadata:
+            if home_page is None:
+                home_page = metadata[norm_name].get("project_url")
+            if summary is None:
+                summary = metadata[norm_name].get("description")
+            return dataclasses.replace(dist_info, summary=summary, home_page=home_page)
+
+        return dist_info
 
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
