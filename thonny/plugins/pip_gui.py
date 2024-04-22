@@ -23,7 +23,8 @@ from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import (
     DistInfo,
     InlineCommand,
-    export_distributions_info,
+    export_distributions_info_from_dir,
+    export_installed_distributions_info,
     normpath_with_actual_case,
     path_startswith,
     running_in_virtual_environment,
@@ -34,9 +35,8 @@ from thonny.misc_utils import (
     download_and_parse_json,
     download_bytes,
     get_menu_char,
-    levenshtein_distance,
 )
-from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
+from thonny.running import BackendProxy, InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
     CommonDialog,
@@ -57,20 +57,24 @@ _EXTRA_MARKER_RE = re.compile(r"""^.*\bextra\s*==.+$""")
 
 
 class PipFrame(ttk.Frame, ABC):
-    def __init__(self, master):
+    def __init__(self, master, **kw):
         self._state = "inactive"  # possible values: "inactive", "listing", "fetching", "idle"
         self._closed = False
-        self._installed_dists: Dict[NormalizedName, DistInfo] = {}
+        self._installed_dists: Optional[Dict[NormalizedName, DistInfo]] = None
         self._version_list_cache: Dict[NormalizedName, List[str]] = {}
         self._current_dist_info: Optional[DistInfo] = None
         self._version_button: Optional[CustomToolbutton] = None
         self._action_button: Optional[CustomToolbutton] = None
         self._last_search_results: Optional[Dict[NormalizedName, DistInfo]] = None
 
-        super().__init__(master)
+        super().__init__(master, **kw)
 
         self._create_widgets(self)
         self._update_summary()
+
+    def check_load_initial_content(self):
+        if self._installed_dists is None:
+            self.load_content()
 
     def load_content(self):
         self._show_instructions()
@@ -310,12 +314,13 @@ class PipFrame(ttk.Frame, ABC):
     def _on_search(self, event=None):
         if self._get_state() != "idle":
             # Search box is not made inactive for busy-states
-            return
+            return "break"
 
         if self.search_box.get().strip() == "":
-            return
+            return "break"
 
         self._start_search(self.search_box.get().strip())
+        return "break"
 
     def _on_install_click(self):
         if self._confirm_install(self._current_dist_info):
@@ -720,7 +725,7 @@ class PipFrame(ttk.Frame, ABC):
                 self._append_info_text(" @ " + info.source)
             self._append_info_text(" - ")
             self.info_text.direct_insert("end", (info.summary or "<No description>").strip() + "\n")
-            self._append_info_text("\n")
+            # self._append_info_text("\n")
 
     @abstractmethod
     def _should_show_search_result_source(self):
@@ -1052,7 +1057,6 @@ class PluginsPipFrame(PipFrame):
         # make sure directory exists, so user can put her plug-ins there
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
-        self.load_content()
 
     def _has_remote_target(self):
         return False
@@ -1064,9 +1068,12 @@ class PluginsPipFrame(PipFrame):
         assert self._get_state() in [None, "idle", "inactive"]
         self._set_state("listing")
 
-        self._installed_dists = export_distributions_info_as_dict()
+        self._installed_dists = export_installed_distributions_info_as_dict()
+        logger.info("Got %d installed dists", len(self._installed_dists))
+        self._set_state("idle", True)
 
         self._update_list(name_to_show)
+        logger.info("After update list")
 
     def _conflicts_with_thonny_version(self, req_strings):
         try:
@@ -1189,7 +1196,7 @@ class PluginsPipFrame(PipFrame):
         return perform_pypi_search(query)
 
     def _should_show_search_result_source(self):
-        return True
+        return False
 
 
 class PluginsPipDialog(CommonDialog):
@@ -1216,20 +1223,27 @@ class PluginsPipDialog(CommonDialog):
 
         banner.grid(row=0, column=0)
 
-        pip_frame = PluginsPipFrame(self)
-        pip_frame.grid(row=1, sticky=tk.NSEW, ipadx=self.get_medium_padding())
+        self.pip_frame = PluginsPipFrame(self)
+        self.pip_frame.grid(row=1, sticky=tk.NSEW, ipadx=self.get_medium_padding())
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.close_button = ttk.Button(
-            pip_frame.info_frame, text=tr("Close"), command=self._on_close
-        )
-        self.close_button.grid(row=2, column=3, sticky="e")
+        bottom_frame = ttk.Frame(self)
+        bottom_frame.grid(row=2, sticky="nsew", ipadx=self.get_medium_padding())
+        bottom_frame.columnconfigure(0, weight=1)
+
+        self.close_button = ttk.Button(bottom_frame, text=tr("Close"), command=self._on_close)
+        self.close_button.grid(sticky="e")
 
         self.title(tr("Thonny plug-ins"))
 
         self.bind("<Escape>", self._on_close, True)
+        self.bind("<Map>", self._on_show, True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    def _on_show(self, event):
+        self.update()
+        self.pip_frame.check_load_initial_content()
 
     def _on_close(self, event=None):
         self._closed = True
@@ -1238,6 +1252,69 @@ class PluginsPipDialog(CommonDialog):
 
 class PackagesView(BackendPipFrame):
     pass
+
+
+class StubsPipFrame(PipFrame):
+    def __init__(self, master, proxy_class: type[BackendProxy], **kw):
+        self.proxy_class = proxy_class
+        super().__init__(master, **kw)
+        self.load_content()
+
+    def _has_remote_target(self):
+        return False
+
+    def _installer_runs_locally(self):
+        return True
+
+    def _start_update_list(self, name_to_show=None):
+        assert self._get_state() in [None, "idle", "inactive"]
+        self._set_state("listing")
+
+        self._installed_dists = {
+            canonicalize_name(d.name): d
+            for d in export_distributions_info_from_dir(self._get_target_directory())
+        }
+        self._set_state("idle", True)
+
+        self._update_list(name_to_show)
+
+    def _get_interpreter_description(self):
+        return self.proxy_class.backend_description
+
+    def _get_target_directory(self):
+        return self.proxy_class.get_stubs_location()
+
+    def _normalize_target_path(self, path: str) -> str:
+        return normpath_with_actual_case(path)
+
+    def _run_pip_with_dialog(self, command: str, args: Dict, title: str) -> Tuple[int, str, str]:
+        cmd = ["-m", "pipkin", "--dir", self._get_target_directory(), command]
+        if command == "uninstall":
+            cmd += ["--yes"]
+        cmd += args
+
+        proc = running.create_frontend_python_process(
+            cmd,
+            stderr=subprocess.STDOUT,
+            environment_extras={"PYTHONPATH": thonny.get_vendored_libs_dir()},
+        )
+        dlg = SubprocessDialog(
+            self, proc, title="pipkin " + command, long_description=title, autostart=True
+        )
+        ui_utils.show_dialog(dlg)
+        return dlg.returncode, dlg.stdout, dlg.stderr
+
+    def _append_location_to_info_path(self, path):
+        self.info_text.direct_insert("end", self._normalize_target_path(path), ("url",))
+
+    def _fetch_search_results(self, query: str) -> List[DistInfo]:
+        return self.proxy_class.search_packages(query)
+
+    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+        return self.proxy_class.get_package_info_from_index(name, version)
+
+    def _should_show_search_result_source(self):
+        return True
 
 
 def perform_pypi_search(query: str) -> List[DistInfo]:
@@ -1268,7 +1345,7 @@ def _perform_plain_pypi_search(query: str) -> List[DistInfo]:
     results = _extract_pypi_search_results(data.decode("utf-8"))
     logger.info("Got %r PyPI matches", len(results))
     return [
-        DistInfo(name=r["name"], version=r["version"], summary=r["description"], source="PyPI")
+        DistInfo(name=r["name"], version=r["version"], summary=r.get("description"), source="PyPI")
         for r in results
     ]
 
@@ -1386,8 +1463,8 @@ def _extract_click_text(widget, event, tag):
     return None
 
 
-def export_distributions_info_as_dict() -> Dict[NormalizedName, DistInfo]:
-    return {canonicalize_name(d.name): d for d in export_distributions_info()}
+def export_installed_distributions_info_as_dict() -> Dict[NormalizedName, DistInfo]:
+    return {canonicalize_name(d.name): d for d in export_installed_distributions_info()}
 
 
 class PyPiSearchErrorWithFallback(RuntimeError):

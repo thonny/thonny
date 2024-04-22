@@ -43,7 +43,7 @@ from thonny.common import (
     ValueInfo,
     execute_system_command,
     execute_with_frontend_sys_path,
-    export_distributions_info,
+    export_installed_distributions_info,
     get_augmented_system_path,
     get_exe_dirs,
     get_python_version_string,
@@ -564,7 +564,7 @@ class MainCPythonBackend(MainBackend):
 
     def _cmd_get_active_distributions(self, cmd):
         return dict(
-            distributions=export_distributions_info(),
+            distributions=export_installed_distributions_info(),
         )
 
     def _cmd_install_distributions(self, cmd):
@@ -673,7 +673,7 @@ class MainCPythonBackend(MainBackend):
             extra_switches.append("--proxy=" + proxy)
 
         returncode = subprocess.call([sys.executable, "-m", "pip"] + extra_switches + cmd_line)
-        return returncode, export_distributions_info()
+        return returncode, export_installed_distributions_info()
 
     def _get_sep(self) -> str:
         return os.path.sep

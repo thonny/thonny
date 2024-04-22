@@ -20,7 +20,7 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
-from thonny.misc_utils import download_and_parse_json
+from thonny.misc_utils import download_and_parse_json, levenshtein_distance
 from thonny.plugins.backend_config_page import (
     BaseSshProxyConfigPage,
     TabbedBackendDetailsConfigurationPage,
@@ -134,19 +134,46 @@ class MicroPythonProxy(SubprocessProxy):
 
         return False
 
-    def search_packages(self, query: str) -> List[DistInfo]:
+    @classmethod
+    def search_packages(cls, query: str) -> List[DistInfo]:
         from thonny.plugins.pip_gui import perform_pypi_search
 
-        def distance(item: DistInfo) -> int:
-            # add slight penalty for non-perfect PyPI matches, as most users look for mp.org results
-            if item["distance"] != 0:
-                item["distance"] += 1
+        norm_query = canonicalize_name(query.strip())
 
-        mp_lib_result = self._perform_micropython_lib_search(query)
-        pypi_result = set(perform_pypi_search(query))
+        def distance(item: DistInfo) -> int:
+            norm_name = canonicalize_name(item.name)
+            if norm_name == norm_query:
+                # don't argue with exact match
+                return 0
+
+            result = levenshtein_distance(norm_name, norm_query)
+
+            if "micropython" in norm_query and item.source == "micropython-lib":
+                # direct the user towards micropython-lib and names without "micropython"
+                new_result = levenshtein_distance(
+                    norm_name, norm_query.replace("micropython", "").strip("-")
+                )
+                if new_result < result:
+                    result = new_result
+
+            # try matching without qualifiers
+            simple_name = norm_name
+            simple_query = norm_query
+            for qualifier in ["adafruit-circuitpython", "circuitpython", "micropython"]:
+                simple_name = simple_name.replace(qualifier, "").replace("--", "-").strip("-")
+                simple_query = simple_query.replace(qualifier, "").replace("--", "-").strip("-")
+
+            new_result = levenshtein_distance(simple_name, simple_query)
+            if new_result < result:
+                result = new_result + 1
+
+            return result
+
+        mp_lib_result = cls._get_micropython_lib_dist_infos()
+        pypi_result = perform_pypi_search(query)
         if "micropython" not in query.lower() and "circuitpython" not in query.lower():
-            pypi_result.update(set(perform_pypi_search("micropython " + query)))
-            pypi_result.update(set(perform_pypi_search("circuitpython " + query)))
+            pypi_result += perform_pypi_search("micropython " + query)
+            pypi_result += perform_pypi_search("circuitpython " + query)
 
         combined_result = []
         mp_lib_names = set()
@@ -161,29 +188,33 @@ class MicroPythonProxy(SubprocessProxy):
                 # will be shadowed by micropython-lib
                 continue
 
+            if item in combined_result:
+                # avoid duplicates
+                continue
+
             lower_summary = (item.summary and item.summary.lower()) or ""
             mentions_right_tokens = any(
                 (
                     token in norm_name or token in lower_summary
-                    for token in ["micrpython", "circuitpython"]
+                    for token in ["micropython", "circuitpython"]
                 )
             )
-            if norm_name == canonicalize_name(query) or mentions_right_tokens:
+            if norm_name == norm_query or mentions_right_tokens:
                 combined_result.append(item)
 
         sorted_result = sorted(combined_result, key=distance)
-        filtered_result = filter(lambda x: distance(x) < 5, sorted_result[:20])
+        filtered_result = filter(lambda x: distance(x) < 4, sorted_result[:20])
 
         return list(filtered_result)
 
-    def _perform_micropython_lib_search(self, query: str) -> List[DistInfo]:
-        logger.info("Searching %r for %r", MICROPYTHON_LIB_INDEX_URL, query)
-        data = self._get_micropython_lib_index_data()
+    @classmethod
+    def _get_micropython_lib_dist_infos(cls) -> List[DistInfo]:
+        data = cls._get_micropython_lib_index_data()
 
         result = []
         for package in data["packages"]:
             result.append(
-                self._augment_dist_info(
+                cls._augment_dist_info(
                     DistInfo(
                         name=package["name"],
                         version=package["version"],
@@ -196,14 +227,17 @@ class MicroPythonProxy(SubprocessProxy):
         logger.info("Got %r items", len(result))
         return result
 
-    def _get_micropython_lib_index_data(self) -> Dict[str, Any]:
+    @classmethod
+    def _get_micropython_lib_index_data(cls) -> Dict[str, Any]:
         global _mp_lib_index_cache
         if not _mp_lib_index_cache:
+            logger.info("Fetching %r", MICROPYTHON_LIB_INDEX_URL)
             _mp_lib_index_cache = download_and_parse_json(MICROPYTHON_LIB_INDEX_URL, timeout=10)
 
         return _mp_lib_index_cache
 
-    def _get_micropython_lib_metadata(self) -> Dict[str, Any]:
+    @classmethod
+    def _get_micropython_lib_metadata(cls) -> Dict[str, Any]:
         global _mp_lib_metadata_cache
         if not _mp_lib_metadata_cache:
             _mp_lib_metadata_cache = download_and_parse_json(
@@ -212,9 +246,10 @@ class MicroPythonProxy(SubprocessProxy):
 
         return _mp_lib_metadata_cache
 
-    def get_package_info_from_index(self, name: str, version: str) -> DistInfo:
+    @classmethod
+    def get_package_info_from_index(cls, name: str, version: str) -> DistInfo:
         # Try mp.org first
-        index_data = self._get_micropython_lib_index_data()
+        index_data = cls._get_micropython_lib_index_data()
 
         for package in index_data["packages"]:
             if canonicalize_name(package["name"]) == canonicalize_name(name):
@@ -223,7 +258,7 @@ class MicroPythonProxy(SubprocessProxy):
                         f"Could not find version {version} of {name} in micropython-lib index"
                     )
 
-                return self._augment_dist_info(
+                return cls._augment_dist_info(
                     DistInfo(
                         name=package["name"],
                         version=version,
@@ -250,8 +285,9 @@ class MicroPythonProxy(SubprocessProxy):
     def get_search_button_text(self) -> str:
         return tr("Search micropython-lib and PyPI")
 
-    def _augment_dist_info(self, dist_info: DistInfo) -> DistInfo:
-        metadata = self._get_micropython_lib_metadata()
+    @classmethod
+    def _augment_dist_info(cls, dist_info: DistInfo) -> DistInfo:
+        metadata = cls._get_micropython_lib_metadata()
         norm_name = canonicalize_name(dist_info.name)
         home_page = dist_info.home_page
         summary = dist_info.summary
@@ -633,6 +669,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
         self.connection_page = self.create_and_add_empty_page(tr("Connection"))
         self.options_page = self.create_and_add_empty_page(tr("Options"))
+        self.stubs_page = self.create_and_add_stubs_page(proxy_class=self.proxy_class)
         self.advanced_page = self.create_and_add_empty_page(tr("Advanced"), weighty_column=5)
 
         self._init_connection_page()

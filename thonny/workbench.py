@@ -1318,6 +1318,7 @@ class Workbench(tk.Tk):
         proxy_class.backend_name = name  # type: ignore
         proxy_class.backend_description = description  # type: ignore
         config_page_constructor.backend_name = name
+        config_page_constructor.proxy_class = proxy_class
 
     def add_ui_theme(
         self,

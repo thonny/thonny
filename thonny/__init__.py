@@ -12,10 +12,15 @@ if TYPE_CHECKING:
     from thonny.shell import ShellView
     from thonny.workbench import Workbench
 
+
+def get_vendored_libs_dir() -> str:
+    return os.path.normpath(os.path.join(os.path.dirname(__file__), "vendored_libs"))
+
+
 # Required both for front- and back-end
 sys.path.insert(
     1,
-    os.path.normpath(os.path.join(os.path.dirname(__file__), "vendored_libs")),
+    get_vendored_libs_dir(),
 )
 
 

@@ -10,7 +10,7 @@ import sys
 from collections import namedtuple
 from dataclasses import dataclass
 from logging import getLogger
-from typing import Any, Callable, Dict, List, Optional, Tuple  # @UnusedImport
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -817,7 +817,16 @@ def is_local_path(s: str) -> bool:
     return not is_remote_path(s) and not s.startswith("<")
 
 
-def export_distributions_info() -> List[DistInfo]:
+def export_distributions_info_from_dir(dir_path: str) -> List[DistInfo]:
+    from importlib.metadata import DistributionFinder, MetadataPathFinder
+
+    dists = MetadataPathFinder.find_distributions(
+        context=DistributionFinder.Context(path=[dir_path])
+    )
+    return export_distributions_info(dists)
+
+
+def export_installed_distributions_info() -> List[DistInfo]:
     # If it is called after first installation to user site packages
     # this dir is not yet in sys.path
     # This would be required also when using Python 3.8 and importlib.metadata.distributions()
@@ -837,6 +846,10 @@ def export_distributions_info() -> List[DistInfo]:
 
     from importlib.metadata import distributions
 
+    return export_distributions_info(distributions())
+
+
+def export_distributions_info(dists: Iterable) -> List[DistInfo]:
     return [
         DistInfo(
             name=dist.name,
@@ -850,5 +863,5 @@ def export_distributions_info() -> List[DistInfo]:
             classifiers=[value for (key, value) in dist.metadata.items() if key == "Classifier"],
             installed_location=str(dist.locate_file("")),
         )
-        for dist in distributions()
+        for dist in dists
     ]

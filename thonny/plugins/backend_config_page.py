@@ -18,11 +18,13 @@ from thonny.misc_utils import (
     PUBLIC_KEY_NO_PASS_METHOD,
     PUBLIC_KEY_WITH_PASS_METHOD,
 )
+from thonny.running import BackendProxy
 from thonny.ui_utils import CommonDialogEx, create_string_var, ems_to_pixels
 
 
 class BackendDetailsConfigPage(ConfigurationPage):
     backend_name: Optional[str] = None  # Will be overwritten on Workbench.add_backend
+    proxy_class: Optional[type[BackendProxy]] = None  # ditto
 
     def should_restart(self, changed_options: List[str]):
         raise NotImplementedError()
@@ -41,6 +43,13 @@ class TabbedBackendDetailsConfigurationPage(BackendDetailsConfigPage):
         page = ttk.Frame(self.notebook, padding=self.get_tab_content_padding())
         page.columnconfigure(weighty_column, weight=1)
         self.notebook.add(page, text=caption)
+        return page
+
+    def create_and_add_stubs_page(self, proxy_class: type[BackendProxy]) -> ttk.Frame:
+        from thonny.plugins.pip_gui import StubsPipFrame
+
+        page = StubsPipFrame(self.notebook, proxy_class, padding=self.get_tab_content_padding())
+        self.notebook.add(page, text=tr("Type stubs"))
         return page
 
     def get_tab_content_padding(self) -> List[int]:

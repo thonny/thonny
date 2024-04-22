@@ -1007,12 +1007,14 @@ class BackendProxy(ABC):
     def normalize_target_path(self, path: str) -> str:
         return path
 
-    def search_packages(self, query: str) -> List[DistInfo]:
+    @classmethod
+    def search_packages(cls, query: str) -> List[DistInfo]:
         from thonny.plugins.pip_gui import perform_pypi_search
 
         return perform_pypi_search(query)
 
-    def get_package_info_from_index(self, name: str, version: str) -> DistInfo:
+    @classmethod
+    def get_package_info_from_index(cls, name: str, version: str) -> DistInfo:
         from thonny.plugins.pip_gui import download_dist_info_from_pypi
 
         return download_dist_info_from_pypi(name, version)
@@ -1024,6 +1026,10 @@ class BackendProxy(ABC):
 
     def get_search_button_text(self) -> str:
         return tr("Search on PyPI")
+
+    @classmethod
+    def get_stubs_location(cls):
+        return os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
 
 
 class SubprocessProxy(BackendProxy, ABC):
