@@ -647,9 +647,6 @@ class USBHubDevice(DeviceInterface):
 
 class DeviceRegistry:
     # Cached usb info.
-    # As shown in the registry, COM number is binding to the interface string.
-    # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\COM Name Arbiter\Devices
-    # So we use interface string as key to cache usb info.
     usb_info_cache_dict = {}
 
     def __init__(self, cache_usb_info=True):
@@ -659,6 +656,14 @@ class DeviceRegistry:
         # Make some preparations.
         self.all_usb_hubs = sorted(set(USBHubDevice.enumerate_device()))
         self.all_usb_host_controllers = sorted(set(USBHostControllerDevice.enumerate_device()))
+
+    @staticmethod
+    def get_cache_key(port_device, usb_device):
+        # The cache key includes the device instance identifier and its location
+        cache_key = port_device.instance_identifier.casefold()
+        if usb_device.location_paths:
+            cache_key += usb_device.location_paths[0].casefold()
+        return cache_key
 
     def get_location_string(self, usb_device, usb_host_controller, bConfigurationValue=None, bInterfaceNumber=None):
         # <bus>-<port[.port[.port]]>:<config>.<interface>
@@ -689,12 +694,6 @@ class DeviceRegistry:
         return bus_number
 
     def get_usb_info(self, port_device):
-        # Check for usb_info in cache.
-        if self.cache_usb_info:
-            cache_key = port_device.interface.casefold()
-            if cache_key in self.usb_info_cache_dict:
-                return self.usb_info_cache_dict[cache_key]
-
         # Get parent hub device, usb device and interface device recursively.
         # hub_device -> usb_device -> usb_interface_device -> port_device
         usb_device = port_device
@@ -709,14 +708,16 @@ class DeviceRegistry:
             usb_interface_device = usb_device
             usb_device = parent_device
 
-        # Get usb host controller.
-        parent_device = hub_device
-        while parent_device is not None:
-            usb_host_controller_device = find_from_iterable(self.all_usb_host_controllers, parent_device)
-            if usb_host_controller_device is not None:
-                break
-            parent_device = parent_device.parent
-        else:
+        # Check for usb_info in cache.
+        if self.cache_usb_info:
+            cache_key = self.get_cache_key(port_device, usb_device)
+            if cache_key in self.usb_info_cache_dict:
+                return self.usb_info_cache_dict[cache_key]
+
+        # Get the port number that the usb device is connected to.
+        # https://learn.microsoft.com/en-us/windows-hardware/drivers/install/devpkey-device-address
+        usb_hub_port = usb_device.address
+        if usb_hub_port is None:
             return None
 
         # Check the power status of the usb device.
@@ -725,12 +726,6 @@ class DeviceRegistry:
             if power_data.PD_MostRecentPowerState != 1:
                 # The device is in sleep state. It needs to be woken up to D0 state to get the usb description.
                 port_device.wake_up_device()
-
-        # Get the port number that the usb device is connected to.
-        # https://learn.microsoft.com/en-us/windows-hardware/drivers/install/devpkey-device-address
-        usb_hub_port = usb_device.address
-        if usb_hub_port is None:
-            return None
 
         # Open the usb hub to send device io control request.
         with USBHubDeviceIOControl(hub_device.interface) as hub_io:
@@ -821,6 +816,16 @@ class DeviceRegistry:
                             interface_description.iInterface,
                             language_id
                         )
+
+        # Get usb host controller.
+        parent_device = hub_device
+        while parent_device is not None:
+            usb_host_controller_device = find_from_iterable(self.all_usb_host_controllers, parent_device)
+            if usb_host_controller_device is not None:
+                break
+            parent_device = parent_device.parent
+        else:
+            return None
 
         # Generate location string compatible with linux usbfs.
         location = self.get_location_string(
