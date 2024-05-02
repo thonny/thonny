@@ -1537,7 +1537,7 @@
     },
     {
         "vendor": "Kevin Matocha",
-        "model": "ESP32-S3 Box",
+        "model": "ESP32-S3 HackTablet",
         "family": "esp32s3",
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r8_hacktablet/",
         "downloads": [
@@ -2129,6 +2129,19 @@
         ]
     },
     {
+        "vendor": "Maker Go",
+        "model": "Maker Go ESP32C3 Supermini",
+        "family": "esp32c3",
+        "title": "ESP32C3 Supermini",
+        "info_url": "https://circuitpython.org/board/makergo_esp32c3_supermini/",
+        "downloads": [
+            {
+                "version": "9.1.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/makergo_esp32c3_supermini/en_US/adafruit-circuitpython-makergo_esp32c3_supermini-en_US-9.1.0-beta.1.bin"
+            }
+        ]
+    },
+    {
         "vendor": "Makerfabs",
         "model": "MaTouch ESP32-S3 Parallel TFT with Touch 7\u201c",
         "family": "esp32s3",
@@ -2489,6 +2502,18 @@
             {
                 "version": "8.2.10",
                 "url": "https://downloads.circuitpython.org/bin/smartbeedesigns_bee_s3/en_US/adafruit-circuitpython-smartbeedesigns_bee_s3-en_US-8.2.10.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Squarofumi",
+        "model": "Watchy",
+        "family": "esp32",
+        "info_url": "https://circuitpython.org/board/sqfmi_watchy/",
+        "downloads": [
+            {
+                "version": "9.1.0-beta.1",
+                "url": "https://downloads.circuitpython.org/bin/sqfmi_watchy/en_US/adafruit-circuitpython-sqfmi_watchy-en_US-9.1.0-beta.1.bin"
             }
         ]
     },

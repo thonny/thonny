@@ -2459,6 +2459,10 @@
             {
                 "version": "9.1.0-beta.1",
                 "url": "https://downloads.circuitpython.org/bin/cytron_edu_pico_w/en_US/adafruit-circuitpython-cytron_edu_pico_w-en_US-9.1.0-beta.1.uf2"
+            },
+            {
+                "version": "9.0.0-beta.2",
+                "url": "https://downloads.circuitpython.org/bin/cytron_edu_pico_w/en_US/adafruit-circuitpython-cytron_edu_pico_w-en_US-9.0.0-beta.2.uf2"
             }
         ]
     },
@@ -3241,14 +3245,6 @@
         "info_url": "https://circuitpython.org/board/franzininho_wifi_wrover/",
         "downloads": [
             {
-                "version": "9.0.4",
-                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-9.0.4.uf2"
-            },
-            {
-                "version": "9.1.0-beta.1",
-                "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-9.1.0-beta.1.uf2"
-            },
-            {
                 "version": "8.2.10",
                 "url": "https://downloads.circuitpython.org/bin/franzininho_wifi_wrover/en_US/adafruit-circuitpython-franzininho_wifi_wrover-en_US-8.2.10.uf2"
             }
@@ -3854,7 +3850,7 @@
     },
     {
         "vendor": "Kevin Matocha",
-        "model": "ESP32-S3 Box",
+        "model": "ESP32-S3 HackTablet",
         "family": "esp32s3",
         "info_url": "https://circuitpython.org/board/espressif_esp32s3_devkitc_1_n8r8_hacktablet/",
         "downloads": [
@@ -5586,9 +5582,8 @@
     },
     {
         "vendor": "RF.Guru",
-        "model": "RF.Guru \u00b5Pico",
+        "model": "\u00b5Pico",
         "family": "rp2",
-        "title": "\u00b5Pico",
         "info_url": "https://circuitpython.org/board/rfguru_rp2040/",
         "downloads": [
             {

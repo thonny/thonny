@@ -112,6 +112,14 @@ print(f"Got {len(all_variants)} variants")
 for variant in cant_determine_samd:
     print("Could not determine SAMD variant for", variant)
 
+for variant in all_variants:
+    # https://github.com/thonny/thonny/discussions/3181
+    if variant["model"] == "EDU PICO for Pico W":
+        variant["downloads"].append({
+                "version": "9.0.0-beta.2",
+                "url": "https://downloads.circuitpython.org/bin/cytron_edu_pico_w/en_US/adafruit-circuitpython-cytron_edu_pico_w-en_US-9.0.0-beta.2.uf2"
+            })
+
 save_variants(
     all_variants,
     ["uf2"],
