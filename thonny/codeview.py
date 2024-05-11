@@ -34,7 +34,7 @@ logger = getLogger(__name__)
 
 
 class SyntaxText(EnhancedText):
-    def __init__(self, master, indent_width: int, tab_width: int, cnf={}, **kw):
+    def __init__(self, master, indent_width: int = 4, tab_width: int = 4, cnf={}, **kw):
         self.file_type = "python"
         self._syntax_options = {}
         super().__init__(
