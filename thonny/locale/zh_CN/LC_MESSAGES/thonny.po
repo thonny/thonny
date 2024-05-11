@@ -1686,10 +1686,6 @@ msgstr "命令不可用"
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr "如果 Thonny 通过 Flatpak 运行，则此命令不可用"
 
-#: thonny/workbench.py:700 thonny/workbench.py:799
-msgid "Support Ukraine"
-msgstr "支持乌克兰"
-
 #: thonny/plugins/backend_config_page.py:90
 msgid "Which kind of interpreter should Thonny use for running your code?"
 msgstr "Thonny 应该使用哪种解释器来运行您的代码？"

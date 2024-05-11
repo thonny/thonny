@@ -10,47 +10,12 @@ BASE_LANGUAGE_NAME = "English (US) [default]"
 # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
 LANGUAGES_DICT = {
-    "ca_ES": "Català",
-    "cs_CZ": "Čeština [BETA]",
-    "de_DE": "Deutsch",
-    "et_EE": "Eesti",
-    "en_GB": "English (UK)",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
-    "es_ES": "Español",
-    "fr_FR": "Français",
-    "it_IT": "Italiano",
-    "lt_LT": "Lietuvių",
-    "hu_HU": "Magyar [BETA]",
-    "nb_NO": "Norsk (Bokmål)",
-    "nn_NO": "Norsk (Nynorsk)",
-    "nl_NL": "Nederlands",
-    "pl_PL": "Polski",
-    "pt_PT": "Português (PT)",
-    "pt_BR": "Português (BR)",
-    "ro_RO": "Română",
-    "ru_RU": "Русский",
-    "sl_SI": "Slovenščina",
-    "sk_SK": "Slovenčina [BETA]",
-    "fi_FI": "Suomi [BETA]",
-    "sv_SE": "Svenska [BETA]",
-    "sq_AL": "Shqip [ALPHA]",
-    "vi_VN": "Tiếng Việt",
-    "tr_TR": "Türkçe [BETA]",
-    "uk_UA": "Українська",
-    "zh_TW": "繁體中文-TW",
     "zh_CN": "简体中文 ",
-    "ja_JP": "日本語  [ALPHA]",
-    "hy_AM": "Հայերէն [BETA]",
-    "fa_IR": "[BETA] فارسی",
-    "el_GR": "Ελληνικά",
-    "ko_KR": "한국어 [韓國語] [ALPHA]",
-    "ar_AR": "[BETA] عربي",
-    "ta_IN": "தமிழ் [BETA]",
-    "th_TH": "ภาษาไทย [BETA]",
 }
 
 # how many spaces to add to button caption in order to make whole text visible
-BUTTON_PADDING_SIZES = {"zh_TW": 4, "zh_CN": 4, "ja_JP": 4}
+BUTTON_PADDING_SIZES = {"zh_CN": 4}
 
 _translation = gettext.NullTranslations()
 

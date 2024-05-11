@@ -279,7 +279,6 @@ MicroPython
 
 Various
 ~~~~~~~
-* Add new toolbar button which opens the wiki page describing ways to help Ukraine survive the attack from Russia.
 * Allow running content of untitled editors without saving, #778
 * Clear Shell before starting new process (Run, Debug, Stop/Restart, ...) by default. Can be turned off in Tools => Options => Shell, #1681
 * Make stacktrace links to ``<stdin>`` and ``<input>`` pseudo-files go to the editor containing corresponding source, #778
