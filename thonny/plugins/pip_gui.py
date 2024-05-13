@@ -35,6 +35,7 @@ from thonny.misc_utils import (
     download_and_parse_json,
     download_bytes,
     get_menu_char,
+    running_on_mac_os,
 )
 from thonny.running import BackendProxy, InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
@@ -71,6 +72,9 @@ class PipFrame(ttk.Frame, ABC):
 
         self._create_widgets(self)
         self._update_summary()
+
+    def _get_toolbutton_background_override(self) -> Optional[str]:
+        return None
 
     def check_load_initial_content(self):
         if self._installed_dists is None:
@@ -112,6 +116,7 @@ class PipFrame(ttk.Frame, ABC):
             header_frame,
             text=search_button_text,
             command=self._on_search,
+            background=self._get_toolbutton_background_override(),
             # width=len(search_button_text) + 2,
         )
         self.search_button.grid(row=1, column=3, sticky="nse", padx=(self.get_small_padding(), 0))
@@ -120,6 +125,7 @@ class PipFrame(ttk.Frame, ABC):
             header_frame,
             text=get_menu_char(),
             command=self._post_general_menu,
+            background=self._get_toolbutton_background_override(),
             width=1,
         )
         self.menu_button.grid(row=1, column=4, sticky="nse", padx=(self.get_large_padding(), 0))
@@ -1315,6 +1321,13 @@ class StubsPipFrame(PipFrame):
 
     def _should_show_search_result_source(self):
         return True
+
+    def _get_toolbutton_background_override(self) -> Optional[str]:
+        if running_on_mac_os():
+            # background color is different inside two tabbed panes
+            return "systemWindowBackgroundColor2"
+
+        return None
 
 
 def perform_pypi_search(query: str) -> List[DistInfo]:
