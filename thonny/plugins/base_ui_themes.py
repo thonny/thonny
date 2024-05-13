@@ -603,6 +603,7 @@ def windows() -> CompoundUiThemeSettings:
                     "indicatorheight": 1,
                 }
             },
+            "TextPanedWindow": {"configure": {"background": "systemWindow"}},
         },
     ]
 
@@ -662,6 +663,7 @@ def enhanced_clam() -> CompoundUiThemeSettings:
                 }
             },
             "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
+            "TextPanedWindow": {"configure": {"background": "white"}},
         },
     ]
 
@@ -678,6 +680,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             },  # TODO:
             "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor1"}},
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
+            "TextPanedWindow": {"configure": {"background": "systemTextBackgroundColor"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
             "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
             "Tab": {"map": {"foreground": [("selected", "systemSelectedTabTextColor")]}},

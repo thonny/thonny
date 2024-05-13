@@ -127,7 +127,7 @@ class PipFrame(ttk.Frame, ABC):
         main_pw = tk.PanedWindow(
             parent,
             orient=tk.HORIZONTAL,
-            background="white",  # lookup_style_option("TPanedWindow", "background"),
+            background=lookup_style_option("TextPanedWindow", "background"),
             sashwidth=self.get_large_padding(),
         )
         main_pw.grid(

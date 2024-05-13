@@ -74,6 +74,7 @@ def clean(
                 "indicatorbackground": normal_detail,
             }
         },
+        "TextPanedWindow": {"configure": {"background": text_background}},
         "Treeview": {
             "configure": {"background": text_background, "borderwidth": 0, "relief": "flat"},
             "map": {
