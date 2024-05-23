@@ -1,13 +1,14 @@
 jedi==0.19.*
-pylint==3.0.*
-docutils==0.20.*
-mypy==1.7.*
-asttokens==2.2.*
+pylint==3.2.*
+docutils==0.21.*
+mypy==1.10.*
+asttokens==2.4.*
 Send2Trash==1.8.*
+packaging==24.*
 
 # esptool's and paramiko's dependencies (cryptography) are difficult to build on ARM64 Windows. Skipping paramiko for now.
-esptool==4.6.*; platform_machine != 'ARM64' or sys_platform != 'win32'
-bcrypt==3.2.*; platform_machine != 'ARM64' or sys_platform != 'win32' # 3.2 has builds available for RPi (https://www.piwheels.org/project/bcrypt/). Should be good enough for paramiko
+esptool==4.7.*; platform_machine != 'ARM64' or sys_platform != 'win32'
+bcrypt==4.1.*; platform_machine != 'ARM64' or sys_platform != 'win32'
 cryptography==38.*; platform_machine != 'ARM64' or sys_platform != 'win32'  # 38 is good fit for macoOS, see also ~/thonny_alt_packages
 paramiko==3.4.*; platform_machine != 'ARM64' or sys_platform != 'win32'
 
