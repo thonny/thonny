@@ -67,6 +67,7 @@ class DistInfo:
     classifiers: List[str] = dataclasses.field(default_factory=list)
     home_page: Optional[str] = None
     package_url: Optional[str] = None
+    project_urls: Optional[Dict[str, str]] = dataclasses.field(default_factory=dict)
     requires: List[str] = dataclasses.field(default_factory=list)
     source: Optional[str] = None
     installed_location: Optional[str] = None
@@ -850,6 +851,21 @@ def export_installed_distributions_info() -> List[DistInfo]:
 
 
 def export_distributions_info(dists: Iterable) -> List[DistInfo]:
+    def get_project_urls(dist):
+        result = {}
+        for key, value in dist.metadata.items():
+            if key == "Project-URL":
+                label, url = value.split(",", maxsplit=1)
+                label = label.strip()
+                url = url.strip()
+                result[label] = url
+        return result
+
+    def infer_package_url(dist):
+        pypi_url_name = dist.name.replace("_", "-")
+        # NB! no guarantee that this package exists at PyPI or related to installed package
+        return f"https://pypi.org/project/{dist.name}/"
+
     return [
         DistInfo(
             name=dist.name,
@@ -859,7 +875,8 @@ def export_distributions_info(dists: Iterable) -> List[DistInfo]:
             author=dist.metadata["Author"] or None,
             license=dist.metadata["License"] or None,
             home_page=dist.metadata["Home-page"] or None,
-            package_url=None,
+            project_urls=get_project_urls(dist),
+            package_url=infer_package_url(dist),
             classifiers=[value for (key, value) in dist.metadata.items() if key == "Classifier"],
             installed_location=str(dist.locate_file("")),
         )
