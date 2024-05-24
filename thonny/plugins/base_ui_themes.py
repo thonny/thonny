@@ -674,7 +674,11 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         # _paned_window_settings(),
         _menu_settings(),
         {
-            "Url.TLabel": {"configure": {"foreground": "#003399"}},
+            "Tip.TLabel": {"configure": {"background": "systemWindowBackgroundColor3", "foreground": "systemTextColor"}},
+            "Tip.TFrame": {"configure": {"background": "systemWindowBackgroundColor3"}},
+        },
+        {
+            "Url.TLabel": {"configure": {"foreground": "systemLinkColor"}},
             "ViewToolbar.TFrame": {
                 "configure": {"background": "systemWindowBackgroundColor"}
             },  # TODO:
@@ -715,7 +719,10 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             },
             "Listbox": {
                 "configure": {
-                    "background": "white",
+                    "background": "SystemTextBackgroundColor",
+                    "foreground": "SystemTextColor",
+                    "selectBackground": "SystemSelectedTextBackgroundColor",
+                    "selectForeground": "SystemSelectedTextColor",
                 }
             },
         },

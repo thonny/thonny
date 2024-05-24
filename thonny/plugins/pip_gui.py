@@ -48,7 +48,7 @@ from thonny.ui_utils import (
     get_busy_cursor,
     get_hyperlink_cursor,
     lookup_style_option,
-    open_path_in_system_file_manager,
+    open_path_in_system_file_manager, get_style_configuration,
 )
 from thonny.workdlg import SubprocessDialog
 
@@ -426,9 +426,8 @@ class PipFrame(ttk.Frame, ABC):
         self._append_location_to_info_path(self._get_target_directory())
         self._append_info_text("\n\n")
 
-    @abstractmethod
     def _show_sys_path(self):
-        raise NotImplementedError()
+        pass
 
     def _get_dist_info(self, name: str, version: str) -> DistInfo:
         installed_dist = self._installed_dists.get(canonicalize_name(name))
@@ -1262,7 +1261,9 @@ class PluginsPipDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master)
 
-        banner = ttk.Frame(self, style="Tip.TFrame")
+        # Aqua doesn't allow changing ttk.Frame background via theming
+        tip_background = get_style_configuration("Tip.TFrame")["background"]
+        banner = tk.Frame(self, background=tip_background)
         banner.grid(row=0, column=0, sticky="nsew")
 
         banner_msg = (
@@ -1277,14 +1278,14 @@ class PluginsPipDialog(CommonDialog):
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
 
-        banner_text = ttk.Label(banner, text=banner_msg, style="Tip.TLabel", justify="left")
-        banner_text.grid(pady=(self.get_large_padding(), 0), padx=self.get_large_padding())
+        banner_text = tk.Label(banner, text=banner_msg, background=tip_background, justify="left")
+        banner_text.grid(pady=self.get_large_padding(), padx=self.get_large_padding())
 
         banner.grid(row=0, column=0)
 
         self.pip_frame = PluginsPipFrame(self)
         self.pip_frame.grid(
-            row=1, sticky=tk.NSEW, padx=self.get_large_padding(), pady=self.get_large_padding()
+            row=1, sticky=tk.NSEW, padx=self.get_large_padding(), pady=(0, self.get_large_padding())
         )
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
