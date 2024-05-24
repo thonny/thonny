@@ -3,6 +3,12 @@ import tkinter as tk
 
 root = tk.Tk()
 
+bg = tk.Frame(root, background="gray")
+bg.grid(sticky="nsew", row=0, column=0)
+
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+
 wincolors = """
 system3dDarkShadow
 systemHighlight
@@ -231,7 +237,7 @@ colors = [color for color in source.splitlines() if color]
 columns = 3
 
 for i, color in enumerate(colors):
-    label = tk.Label(root, text=color, background=color, foreground="red")
+    label = tk.Label(bg, text=color, background=color, foreground="red")
     label.grid(row=i//columns, column=i%columns)
 
 root.mainloop()
