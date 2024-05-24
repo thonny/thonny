@@ -62,6 +62,7 @@ from thonny.ui_utils import (
     register_latin_shortcut,
     select_sequence,
     sequence_to_accelerator,
+    set_windows_titlebar_darkness,
     shift_is_pressed,
 )
 
@@ -1432,6 +1433,10 @@ class Workbench(tk.Tk):
                 menu.configure(get_style_configuration("Menu"))
 
         self.update_fonts()
+
+        if running_on_windows():
+            darkness_value = int(self.uses_dark_ui_theme())
+            set_windows_titlebar_darkness(self, darkness_value)
 
     def _apply_syntax_theme(self, name: str) -> None:
         def get_settings(name):
