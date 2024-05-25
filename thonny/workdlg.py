@@ -76,7 +76,9 @@ class WorkDialog(CommonDialog):
         self.instructions_frame.columnconfigure(0, weight=1)
 
         pad = self.get_large_padding()
-        self.instructions_label = tk.Label(self, background=tip_background, text=instructions, justify="left")
+        self.instructions_label = tk.Label(
+            self, background=tip_background, text=instructions, justify="left"
+        )
         self.instructions_label.grid(row=0, column=0, sticky="w", padx=pad, pady=pad)
 
     def get_instructions(self) -> Optional[str]:

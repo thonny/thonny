@@ -15,11 +15,12 @@ class CustomNotebookTabRow(tk.Frame):
     def __init__(self, master: CustomNotebook, **kw):
         self.notebook = master
         self.root = master.winfo_toplevel()
+        text_foreground = _get_style_configuration("Text")["foreground"]
         super().__init__(master, **kw)
         self.filler = tk.Frame(self, background=self.notebook.base_style_conf["background"])
         self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
         self._insertion_mark = tk.Frame(
-            self, background="black", width=_ems_to_pixels(0.3), height=_ems_to_pixels(2)
+            self, background=text_foreground, width=_ems_to_pixels(0.3), height=_ems_to_pixels(2)
         )
         self._insertion_index = None
 

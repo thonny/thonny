@@ -213,7 +213,9 @@ def clam() -> BasicUiThemeSettings:
                 "darkcolor": [("pressed", darker)],
             },
         },
-        "CustomToolbutton": {"configure": {"background": frame, "activebackground": darker}},
+        "CustomToolbutton": {
+            "configure": {"background": frame, "activebackground": darker, "foreground": defaultfg}
+        },
         "CustomNotebook": {
             "configure": {
                 "bordercolor": darker,
@@ -565,7 +567,6 @@ def windows() -> CompoundUiThemeSettings:
             },
             "ViewToolbar.TFrame": {"configure": {"background": "SystemWindow"}},
             "ViewToolbar.Toolbutton": {"configure": {"background": "SystemWindow"}},
-            "ViewToolbar.CustomToolbutton": {"configure": {"background": "SystemWindow"}},
             "ViewTab.TLabel": {
                 "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
             },
@@ -674,15 +675,28 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         # _paned_window_settings(),
         _menu_settings(),
         {
-            "Tip.TLabel": {"configure": {"background": "systemWindowBackgroundColor3", "foreground": "systemTextColor"}},
+            "Tip.TLabel": {
+                "configure": {
+                    "background": "systemWindowBackgroundColor3",
+                    "foreground": "systemTextColor",
+                }
+            },
             "Tip.TFrame": {"configure": {"background": "systemWindowBackgroundColor3"}},
         },
         {
-            "Url.TLabel": {"configure": {"foreground": "systemLinkColor"}},
+            "Text": {
+                "configure": {
+                    "background": "systemTextBackgroundColor",
+                    "foreground": "systemTextColor",
+                }
+            },
+            "Url.TLabel": {
+                "configure": {"foreground": "#003399"}
+            },  # will be overridden by enhanced_aqua_dark_overrides
             "ViewToolbar.TFrame": {
                 "configure": {"background": "systemWindowBackgroundColor"}
             },  # TODO:
-            "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor1"}},
+            "ViewToolbar.Toolbutton": {"configure": {"background": "systemWindowBackgroundColor"}},
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
             "TextPanedWindow": {"configure": {"background": "systemTextBackgroundColor"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
@@ -703,6 +717,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 "configure": {
                     "background": "systemWindowBackgroundColor",
                     "activebackground": "systemWindowBackgroundColor3",
+                    "foreground": "systemLabelColor",
                 }
             },
             "CustomNotebook": {

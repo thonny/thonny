@@ -96,7 +96,7 @@ class ObjectInspector(ttk.Frame):
             button = CustomToolbutton(
                 toolbar,
                 command=action,
-                style="ViewToolbar.CustomToolbutton",
+                style="ViewToolbar.Toolbutton",
                 image=get_workbench().get_image(image_filename),
                 state=tk.NORMAL,
                 pad=ems_to_pixels(0.2),

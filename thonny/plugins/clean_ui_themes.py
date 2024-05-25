@@ -226,11 +226,17 @@ def clean(
             "map": {"background": [("disabled", frame_background), ("active", high_detail)]},
         },
         "CustomToolbutton": {
-            "configure": {"background": frame_background, "activebackground": high_detail}
+            "configure": {
+                "background": frame_background,
+                "activebackground": high_detail,
+                "foreground": normal_foreground,
+            }
         },
         "TLabel": {"configure": {"foreground": normal_foreground}},
         "Url.TLabel": {"configure": {"foreground": normal_foreground}},
-        "Tip.TLabel": {"configure": {"foreground": normal_foreground, "background": low_detail}},
+        "Tip.TLabel": {
+            "configure": {"foreground": normal_foreground, "background": normal_foreground}
+        },
         "Tip.TFrame": {"configure": {"background": low_detail}},
         "TScale": {
             "configure": {

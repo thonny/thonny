@@ -176,7 +176,7 @@ class BaseFileBrowser(ttk.Frame):
         # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
         self.menu_button = CustomToolbutton(
             header_frame,
-            style="ViewToolbar.CustomToolbutton",
+            style="ViewToolbar.Toolbutton",
             text=f" {get_menu_char()} ",
             command=self.post_button_menu,
         )

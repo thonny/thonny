@@ -47,8 +47,9 @@ from thonny.ui_utils import (
     ems_to_pixels,
     get_busy_cursor,
     get_hyperlink_cursor,
+    get_style_configuration,
     lookup_style_option,
-    open_path_in_system_file_manager, get_style_configuration,
+    open_path_in_system_file_manager,
 )
 from thonny.workdlg import SubprocessDialog
 
@@ -73,6 +74,15 @@ class PipFrame(ttk.Frame, ABC):
         self._create_widgets(self)
         self._update_summary()
 
+    def _get_toolbar_frame_style(self) -> Optional[str]:
+        return None
+
+    def _get_toolbar_label_style(self) -> Optional[str]:
+        return None
+
+    def _get_toolbar_toolbutton_style(self) -> Optional[str]:
+        return None
+
     def _get_toolbutton_background_override(self) -> Optional[str]:
         return None
 
@@ -86,24 +96,28 @@ class PipFrame(ttk.Frame, ABC):
         self.search_box.focus_set()
 
     def _create_widgets(self, parent):
-        self.header_frame = ttk.Frame(parent)
+        header_pady = ems_to_pixels(0.5)
+        self.header_frame = ttk.Frame(parent, style=self._get_toolbar_frame_style())
         self.header_frame.grid(
             row=1,
             column=0,
             sticky="nsew",
-            pady=ems_to_pixels(0.5),
         )
         self.header_frame.columnconfigure(0, weight=1)
         self.header_frame.rowconfigure(1, weight=1)
 
-        self.summary_label = ttk.Label(self.header_frame, text="")
-        self.summary_label.grid(row=1, column=0, sticky="nsw")
+        self.summary_label = ttk.Label(
+            self.header_frame, text="", style=self._get_toolbar_label_style()
+        )
+        self.summary_label.grid(row=1, column=0, sticky="nsw", pady=header_pady)
 
-        self.search_label = ttk.Label(self.header_frame, text=tr("Search PyPI") + ": ")
-        self.search_label.grid(row=1, column=1, sticky="nsw")
+        self.search_label = ttk.Label(
+            self.header_frame, text=tr("Search PyPI") + ": ", style=self._get_toolbar_label_style()
+        )
+        self.search_label.grid(row=1, column=1, sticky="nsw", pady=header_pady)
 
         self.search_box = ttk.Entry(self.header_frame, width=15)
-        self.search_box.grid(row=1, column=2, sticky="nse")
+        self.search_box.grid(row=1, column=2, sticky="nse", pady=header_pady)
         self.search_box.bind("<Return>", self._on_search, False)
         self.search_box.bind("<KP_Enter>", self._on_search, False)
 
@@ -116,18 +130,24 @@ class PipFrame(ttk.Frame, ABC):
             text=search_button_text,
             command=self._on_search,
             background=self._get_toolbutton_background_override(),
+            style=self._get_toolbar_toolbutton_style(),
             # width=len(search_button_text) + 2,
         )
-        self.search_button.grid(row=1, column=3, sticky="nse", padx=(self.get_small_padding(), 0))
+        self.search_button.grid(
+            row=1, column=3, sticky="nse", padx=(self.get_small_padding(), 0), pady=header_pady
+        )
 
         self.menu_button = CustomToolbutton(
             self.header_frame,
             text=" " + get_menu_char() + " ",
             command=self.show_button_menu,
             background=self._get_toolbutton_background_override(),
+            style=self._get_toolbar_toolbutton_style(),
             width=1,
         )
-        self.menu_button.grid(row=1, column=4, sticky="nse", padx=(self.get_large_padding(), 0))
+        self.menu_button.grid(
+            row=1, column=4, sticky="nse", padx=(self.get_large_padding(), 0), pady=header_pady
+        )
         self.button_menu = tk.Menu(self, tearoff=False)
 
         main_pw = tk.PanedWindow(
@@ -481,13 +501,15 @@ class PipFrame(ttk.Frame, ABC):
                 assert norm_installed_version > norm_new_version
                 action_text = tr("Downgrade to this version")
 
+        text_background = get_style_configuration("Text")["background"]
+
         version_button_frame = create_custom_toolbutton_in_frame(
             #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
             self.info_text,
             text=f" {version_text}  ⏷ ",
             command=self._show_version_menu,
             state="disabled",
-            background="white",
+            background=text_background,
             borderwidth=1,
             bordercolor=bordercolor,
         )
@@ -961,7 +983,17 @@ class BackendPipFrame(PipFrame):
 
     def _create_widgets(self, parent):
         super()._create_widgets(parent)
-        self.header_frame.grid(padx=self.get_small_padding())
+        self.summary_label.grid(padx=(self.get_small_padding(), 0))
+        self.menu_button.grid(padx=(0, self.get_small_padding()))
+
+    def _get_toolbar_frame_style(self) -> Optional[str]:
+        return "ViewToolbar.TFrame"
+
+    def _get_toolbar_label_style(self) -> Optional[str]:
+        return "ViewToolbar.TLabel"
+
+    def _get_toolbar_toolbutton_style(self) -> Optional[str]:
+        return "ViewToolbar.Toolbutton"
 
     def on_toplevel_response(self, event=None):
         if self._state == "inactive":
@@ -1261,10 +1293,17 @@ class PluginsPipDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master)
 
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        main_frame = ttk.Frame(self)
+        main_frame.grid(row=0, column=0, sticky="nsew")
+
         # Aqua doesn't allow changing ttk.Frame background via theming
         tip_background = get_style_configuration("Tip.TFrame")["background"]
-        banner = tk.Frame(self, background=tip_background)
-        banner.grid(row=0, column=0, sticky="nsew")
+        tip_foreground = get_style_configuration("Tip.TLabel")["foreground"]
+        banner = tk.Frame(main_frame, background=tip_background)
+        banner.grid(row=0, column=0, sticky="nsew", pady=(0, self.get_medium_padding()))
 
         banner_msg = (
             tr(
@@ -1278,19 +1317,25 @@ class PluginsPipDialog(CommonDialog):
             "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
         )
 
-        banner_text = tk.Label(banner, text=banner_msg, background=tip_background, justify="left")
+        banner_text = tk.Label(
+            banner,
+            text=banner_msg,
+            background=tip_background,
+            justify="left",
+            foreground=tip_foreground,
+        )
         banner_text.grid(pady=self.get_large_padding(), padx=self.get_large_padding())
 
         banner.grid(row=0, column=0)
 
-        self.pip_frame = PluginsPipFrame(self)
+        self.pip_frame = PluginsPipFrame(main_frame)
         self.pip_frame.grid(
             row=1, sticky=tk.NSEW, padx=self.get_large_padding(), pady=(0, self.get_large_padding())
         )
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        bottom_frame = ttk.Frame(self)
+        bottom_frame = ttk.Frame(main_frame)
         bottom_frame.grid(
             row=2, sticky="nsew", padx=self.get_large_padding(), pady=(0, self.get_large_padding())
         )
@@ -1381,7 +1426,7 @@ class StubsPipFrame(PipFrame):
         return True
 
     def _get_toolbutton_background_override(self) -> Optional[str]:
-        if running_on_mac_os():
+        if get_workbench().is_using_aqua_based_theme():
             # background color is different inside two tabbed panes
             return "systemWindowBackgroundColor2"
 
