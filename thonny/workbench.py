@@ -774,6 +774,15 @@ class Workbench(tk.Tk):
     def _print_state_for_debugging(self, event) -> None:
         print(get_runner()._postponed_commands)
 
+    def _panes_have_visible_views(self, locations: List[str]):
+        for location in locations:
+            views_conf_key = f"layout.notebook_{location}.views"
+            for view_id in self.get_option(views_conf_key):
+                if self.get_option(f"{view_id}.visible"):
+                    return True
+
+        return False
+
     def _init_containers(self) -> None:
         margin = ems_to_pixels(0.6)
         # Main frame functions as
@@ -797,8 +806,10 @@ class Workbench(tk.Tk):
 
         self.set_default("layout.s_nb_height", ems_to_pixels(15))
         self.set_default("layout.nw_nb_height", ems_to_pixels(15))
+        self.set_default("layout.w_nb_height", ems_to_pixels(15))
         self.set_default("layout.sw_nb_height", ems_to_pixels(15))
         self.set_default("layout.ne_nb_height", ems_to_pixels(15))
+        self.set_default("layout.e_nb_height", ems_to_pixels(15))
         self.set_default("layout.se_nb_height", ems_to_pixels(15))
 
         self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
@@ -808,42 +819,73 @@ class Workbench(tk.Tk):
         main_frame.rowconfigure(1, weight=1)
 
         self._west_pw = AutomaticPanedWindow(
-            self._main_pw,
-            1,
-            orient=tk.VERTICAL,
-            preferred_size_in_pw=self.get_option("layout.west_pw_width"),
+            self._main_pw, orient=tk.VERTICAL, size_config_key="layout.west_pw_width"
         )
-        self._center_pw = AutomaticPanedWindow(self._main_pw, 2, orient=tk.VERTICAL)
+        self._center_pw = AutomaticPanedWindow(self._main_pw, orient=tk.VERTICAL)
         self._east_pw = AutomaticPanedWindow(
-            self._main_pw,
-            3,
-            orient=tk.VERTICAL,
-            preferred_size_in_pw=self.get_option("layout.east_pw_width"),
+            self._main_pw, orient=tk.VERTICAL, size_config_key="layout.east_pw_width"
         )
 
-        self._view_notebooks = {
-            "nw": AutomaticNotebook(
-                self._west_pw, "nw", 1, preferred_size_in_pw=self.get_option("layout.nw_nb_height")
-            ),
+        pane_minsize = ems_to_pixels(10)
+
+        self._main_pw.add(
+            self._west_pw,
+            width=self.get_option("layout.west_pw_width"),
+            minsize=pane_minsize,
+            hide=not self._panes_have_visible_views(["nw", "w", "sw"]),
+            sticky="nsew",
+            stretch="never",
+        )
+        self._main_pw.add(self._center_pw, minsize=pane_minsize, sticky="nsew", stretch="always")
+        self._main_pw.add(
+            self._east_pw,
+            width=self.get_option("layout.east_pw_width"),
+            hide=not self._panes_have_visible_views(["ne", "e", "se"]),
+            minsize=pane_minsize,
+            sticky="nsew",
+            stretch="never",
+        )
+
+        self._view_notebooks: Dict[str, AutomaticNotebook] = {
+            "nw": AutomaticNotebook(self._west_pw, "nw", 1),
             "w": AutomaticNotebook(self._west_pw, "w", 2),
-            "sw": AutomaticNotebook(
-                self._west_pw, "sw", 3, preferred_size_in_pw=self.get_option("layout.sw_nb_height")
-            ),
-            "s": AutomaticNotebook(
-                self._center_pw, "s", 3, preferred_size_in_pw=self.get_option("layout.s_nb_height")
-            ),
-            "ne": AutomaticNotebook(
-                self._east_pw, "ne", 1, preferred_size_in_pw=self.get_option("layout.ne_nb_height")
-            ),
+            "sw": AutomaticNotebook(self._west_pw, "sw", 3),
+            "s": AutomaticNotebook(self._center_pw, "s", 3),
+            "ne": AutomaticNotebook(self._east_pw, "ne", 1),
             "e": AutomaticNotebook(self._east_pw, "e", 2),
-            "se": AutomaticNotebook(
-                self._east_pw, "se", 3, preferred_size_in_pw=self.get_option("layout.se_nb_height")
-            ),
+            "se": AutomaticNotebook(self._east_pw, "se", 3),
         }
+
+        for pos in ["nw", "w", "sw"]:
+            self._west_pw.add(
+                self._view_notebooks[pos],
+                minsize=pane_minsize,
+                height=self.get_option(f"layout.{pos}_nb_height"),
+                hide=not self._panes_have_visible_views([pos]),
+                sticky="nsew",
+                stretch="always",
+            )
 
         self._editor_notebook = EditorNotebook(self._center_pw)
         self._editor_notebook.position_key = 1
-        self._center_pw.insert("auto", self._editor_notebook)
+        self._center_pw.add(self._editor_notebook, minsize=pane_minsize, stretch="always")
+        self._center_pw.add(
+            self._view_notebooks["s"],
+            minsize=pane_minsize,
+            height=self.get_option("layout.s_nb_height"),
+            sticky="nsew",
+            stretch="never",
+        )
+
+        for pos in ["ne", "e", "se"]:
+            self._east_pw.add(
+                self._view_notebooks[pos],
+                minsize=pane_minsize,
+                height=self.get_option(f"layout.{pos}_nb_height"),
+                hide=not self._panes_have_visible_views([pos]),
+                sticky="nsew",
+                stretch="always",
+            )
 
         self._statusbar = ttk.Frame(main_frame)
         self._statusbar.grid(column=0, row=2, sticky="nsew", padx=margin, pady=(0))
@@ -2671,12 +2713,22 @@ class Workbench(tk.Tk):
             self.set_option("layout.left", int(gparts[2]))
             self.set_option("layout.top", int(gparts[3]))
 
-        self.set_option("layout.west_pw_width", self._west_pw.preferred_size_in_pw)
-        self.set_option("layout.east_pw_width", self._east_pw.preferred_size_in_pw)
-        for key in ["nw", "sw", "s", "se", "ne"]:
-            self.set_option(
-                "layout.%s_nb_height" % key, self._view_notebooks[key].preferred_size_in_pw
-            )
+        if self._west_pw.winfo_ismapped():
+            self.set_option("layout.west_pw_width", self._west_pw.winfo_width())
+        if self._east_pw.winfo_ismapped():
+            self.set_option("layout.east_pw_width", self._east_pw.winfo_width())
+
+        for key in ["nw", "w", "sw", "s", "ne", "e", "se"]:
+            nb = self._view_notebooks[key]
+            pw = nb.master
+            assert isinstance(pw, AutomaticPanedWindow)
+            # only store current height, if it is not the only visible child
+            if nb.winfo_ismapped() and pw.has_several_visible_panes():
+                close_height = nb.winfo_height()
+                self.set_option(
+                    "layout.%s_nb_height" % key,
+                    close_height,
+                )
 
     def update_title(self, event=None) -> None:
         editor = self.get_editor_notebook().get_current_editor()
@@ -2837,7 +2889,6 @@ class Workbench(tk.Tk):
         # needs to be bound here because Notebooks don't own their contents
         widget = self.focus_get()
         while widget is not None:
-            print("Widget", widget)
             nb: CustomNotebook = getattr(widget, "containing_notebook", None)
             if nb is not None:
                 return nb.select_another_tab(event)

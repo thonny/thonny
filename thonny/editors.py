@@ -656,7 +656,6 @@ class EditorNotebook(CustomNotebook):
 
         # should be in the end, so that it can be detected when
         # constructor hasn't completed yet
-        self.preferred_size_in_pw = None
         self._checking_external_changes = False
 
         get_workbench().bind("WindowFocusIn", self.check_for_external_changes, True)
