@@ -48,9 +48,9 @@ from thonny.misc_utils import (
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
-    AutomaticNotebook,
-    AutomaticPanedWindow,
     CustomToolbutton,
+    ViewNotebook,
+    WorkbenchPanedWindow,
     caps_lock_is_on,
     create_action_label,
     create_tooltip,
@@ -812,17 +812,17 @@ class Workbench(tk.Tk):
         self.set_default("layout.e_nb_height", ems_to_pixels(15))
         self.set_default("layout.se_nb_height", ems_to_pixels(15))
 
-        self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
+        self._main_pw = WorkbenchPanedWindow(main_frame, orient=tk.HORIZONTAL)
 
         self._main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=margin, pady=(margin, 0))
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
 
-        self._west_pw = AutomaticPanedWindow(
+        self._west_pw = WorkbenchPanedWindow(
             self._main_pw, orient=tk.VERTICAL, size_config_key="layout.west_pw_width"
         )
-        self._center_pw = AutomaticPanedWindow(self._main_pw, orient=tk.VERTICAL)
-        self._east_pw = AutomaticPanedWindow(
+        self._center_pw = WorkbenchPanedWindow(self._main_pw, orient=tk.VERTICAL)
+        self._east_pw = WorkbenchPanedWindow(
             self._main_pw, orient=tk.VERTICAL, size_config_key="layout.east_pw_width"
         )
 
@@ -846,14 +846,14 @@ class Workbench(tk.Tk):
             stretch="never",
         )
 
-        self._view_notebooks: Dict[str, AutomaticNotebook] = {
-            "nw": AutomaticNotebook(self._west_pw, "nw", 1),
-            "w": AutomaticNotebook(self._west_pw, "w", 2),
-            "sw": AutomaticNotebook(self._west_pw, "sw", 3),
-            "s": AutomaticNotebook(self._center_pw, "s", 3),
-            "ne": AutomaticNotebook(self._east_pw, "ne", 1),
-            "e": AutomaticNotebook(self._east_pw, "e", 2),
-            "se": AutomaticNotebook(self._east_pw, "se", 3),
+        self._view_notebooks: Dict[str, ViewNotebook] = {
+            "nw": ViewNotebook(self._west_pw, "nw", 1),
+            "w": ViewNotebook(self._west_pw, "w", 2),
+            "sw": ViewNotebook(self._west_pw, "sw", 3),
+            "s": ViewNotebook(self._center_pw, "s", 3),
+            "ne": ViewNotebook(self._east_pw, "ne", 1),
+            "e": ViewNotebook(self._east_pw, "e", 2),
+            "se": ViewNotebook(self._east_pw, "se", 3),
         }
 
         for pos in ["nw", "w", "sw"]:
@@ -1903,7 +1903,7 @@ class Workbench(tk.Tk):
 
         return view
 
-    def _get_view_notebook_name_and_instance(self, view_id: str) -> Tuple[str, AutomaticNotebook]:
+    def _get_view_notebook_name_and_instance(self, view_id: str) -> Tuple[str, ViewNotebook]:
         for nb_name, instance in self._view_notebooks.items():
             if view_id in self.get_option("layout.notebook_" + nb_name + ".views"):
                 return nb_name, self._view_notebooks[nb_name]
@@ -1938,8 +1938,8 @@ class Workbench(tk.Tk):
             editor: Editor = page.content
             self.event_generate("MoveEditor", filename=editor.get_filename())
         else:
-            assert isinstance(new_notebook, AutomaticNotebook)
-            assert isinstance(old_notebook, AutomaticNotebook)
+            assert isinstance(new_notebook, ViewNotebook)
+            assert isinstance(old_notebook, ViewNotebook)
             view_id = getattr(page.content, "view_id", None)
             assert view_id is not None
 
@@ -2721,7 +2721,7 @@ class Workbench(tk.Tk):
         for key in ["nw", "w", "sw", "s", "ne", "e", "se"]:
             nb = self._view_notebooks[key]
             pw = nb.master
-            assert isinstance(pw, AutomaticPanedWindow)
+            assert isinstance(pw, WorkbenchPanedWindow)
             # only store current height, if it is not the only visible child
             if nb.winfo_ismapped() and pw.has_several_visible_panes():
                 close_height = nb.winfo_height()

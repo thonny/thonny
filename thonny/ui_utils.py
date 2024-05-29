@@ -383,7 +383,7 @@ class CustomMenubar(ttk.Frame):
         self._menus.append(menu)
 
 
-class AutomaticPanedWindow(tk.PanedWindow):
+class WorkbenchPanedWindow(tk.PanedWindow):
     def __init__(
         self,
         master: tk.Widget,
@@ -434,7 +434,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         return count > 1
 
 
-class AutomaticNotebook(CustomNotebook):
+class ViewNotebook(CustomNotebook):
     """
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
@@ -451,7 +451,7 @@ class AutomaticNotebook(CustomNotebook):
 
     def forget(self, child: tk.Widget) -> None:
         if (
-            isinstance(self.master, AutomaticPanedWindow)
+            isinstance(self.master, WorkbenchPanedWindow)
             and self.master.has_several_visible_panes()
         ):
             close_height = self.winfo_height()
@@ -490,7 +490,7 @@ class AutomaticNotebook(CustomNotebook):
         return self.winfo_ismapped()
 
     def _update_visibility(self):
-        if isinstance(self.master, AutomaticPanedWindow):
+        if isinstance(self.master, WorkbenchPanedWindow):
             if len(self.tabs()) == 0 and self._is_visible():
                 self.master.paneconfig(self, hide=True)
 

@@ -954,7 +954,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
         self.main_frame.grid(sticky=tk.NSEW)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.main_pw = ui_utils.AutomaticPanedWindow(self.main_frame, orient=tk.VERTICAL)
+        self.main_pw = ui_utils.WorkbenchPanedWindow(self.main_frame, orient=tk.VERTICAL)
         self.main_pw.grid(sticky=tk.NSEW, padx=10, pady=10)
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)

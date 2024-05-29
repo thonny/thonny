@@ -49,7 +49,7 @@ def clean(
             }
         },
         "ButtonNotebook.TNotebook": {"configure": {"bordercolor": frame_background}},
-        "AutomaticNotebook.TNotebook": {"configure": {"bordercolor": frame_background}},
+        "ViewNotebook.TNotebook": {"configure": {"bordercolor": frame_background}},
         "TNotebook.Tab": {
             "configure": {"background": frame_background, "bordercolor": normal_detail},
             "map": {
