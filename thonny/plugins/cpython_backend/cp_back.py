@@ -614,7 +614,7 @@ class MainCPythonBackend(MainBackend):
                 .replace("<class '", "")
                 .replace("'>", "")
                 .strip(),
-                "attributes": self.export_variables(attributes),
+                "attributes": self.export_variables(attributes, all_variables=True),
             }
 
             if isinstance(value, io.TextIOWrapper):
@@ -896,12 +896,12 @@ class MainCPythonBackend(MainBackend):
 
         return ValueInfo(id(value), rep)
 
-    def export_variables(self, variables):
+    def export_variables(self, variables, all_variables=False):
         result = {}
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for name in variables:
-                if not name.startswith("__"):
+                if not name.startswith("__") or all_variables:
                     result[name] = self.export_value(variables[name], 100)
 
         return result

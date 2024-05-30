@@ -104,19 +104,18 @@ class VariablesFrame(MemoryFrame):
                 node_id = self.tree.insert("", "end", tags=("group_title",))
                 self.tree.set(node_id, "name", group_title)
 
-            for name in sorted(variables.keys()):
-                if not name.startswith("__"):
-                    node_id = self.tree.insert("", "end", tags="item")
-                    self.tree.set(node_id, "name", name)
-                    if isinstance(variables[name], ValueInfo):
-                        description = variables[name].repr
-                        id_str = variables[name].id
-                    else:
-                        description = variables[name]
-                        id_str = None
+            for name in sorted(variables.keys(), key=lambda x: (x.startswith("_"), x)):
+                node_id = self.tree.insert("", "end", tags="item")
+                self.tree.set(node_id, "name", name)
+                if isinstance(variables[name], ValueInfo):
+                    description = variables[name].repr
+                    id_str = variables[name].id
+                else:
+                    description = variables[name]
+                    id_str = None
 
-                    self.tree.set(node_id, "id", format_object_id(id_str))
-                    self.tree.set(node_id, "value", description)
+                self.tree.set(node_id, "id", format_object_id(id_str))
+                self.tree.set(node_id, "value", description)
 
     def on_select(self, event):
         self.show_selected_object_info()

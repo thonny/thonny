@@ -235,7 +235,7 @@ class ObjectInspector(ttk.Frame):
                 back_links=self.back_links,
                 forward_links=self.forward_links,
                 include_attributes=self.active_page == self.attributes_page,
-                all_attributes=False,
+                all_attributes=True,
                 frame_width=frame_width,
                 frame_height=frame_height,
             )
