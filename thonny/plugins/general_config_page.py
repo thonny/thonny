@@ -25,8 +25,8 @@ class GeneralConfigurationPage(ConfigurationPage):
         add_option_checkbox(self, "general.event_logging", tr("Log program usage events"))
         add_option_checkbox(
             self,
-            "file.reopen_all_files",
-            tr("Reopen all files from previous session"),
+            "file.reopen_files",
+            tr("Reopen files from previous session"),
         )
         if running_on_linux():
             add_option_checkbox(

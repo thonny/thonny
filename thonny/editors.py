@@ -628,7 +628,7 @@ class EditorNotebook(CustomNotebook):
     def __init__(self, master):
         super().__init__(master)
 
-        get_workbench().set_default("file.reopen_all_files", False)
+        get_workbench().set_default("file.reopen_files", True)
         get_workbench().set_default("file.open_files", [])
         get_workbench().set_default("file.current_file", None)
         get_workbench().set_default("file.recent_files", [])
@@ -796,10 +796,8 @@ class EditorNotebook(CustomNotebook):
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
 
     def load_previous_files(self):
-        if get_workbench().get_option("file.reopen_all_files"):
+        if get_workbench().get_option("file.reopen_files"):
             filenames = get_workbench().get_option("file.open_files")
-        elif get_workbench().get_option("file.current_file"):
-            filenames = [get_workbench().get_option("file.current_file")]
         else:
             filenames = []
 
