@@ -376,14 +376,13 @@ class Workbench(tk.Tk):
         self.set_default("layout.e_width", 200)
         self.set_default("layout.s_height", 200)
 
-        # I don't actually need saved options for Full screen/maximize view,
+        # I don't actually need saved options for Full screen,
         # but it's easier to create menu items, if I use configuration manager's variables
         self.set_default("view.full_screen", False)
 
         # In order to avoid confusion set these settings to False
         # even if they were True when Thonny was last run
         self.set_option("view.full_screen", False)
-        self.set_option("view.maximize_view", False)
 
         self.geometry(
             "{0}x{1}+{2}+{3}".format(
@@ -398,7 +397,6 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        self.bind("<Configure>", self._on_configure, True)
 
     def _init_icon(self) -> None:
         # Window icons
@@ -714,19 +712,7 @@ class Workbench(tk.Tk):
         )
 
         self.add_command(
-            "toggle_maximize_view",
-            "view",
-            tr("Maximize view"),
-            self._cmd_toggle_maximize_view,
-            flag_name="view.maximize_view",
-            default_sequence=None,
-            group=80,
-        )
-        self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
-        self.bind("<Escape>", self._unmaximize_view, True)
-
-        self.add_command(
-            "toggle_maximize_view",
+            "toggle_full_screen",
             "view",
             tr("Full screen"),
             self._cmd_toggle_full_screen,
@@ -785,15 +771,12 @@ class Workbench(tk.Tk):
 
     def _init_containers(self) -> None:
         margin = ems_to_pixels(0.6)
-        # Main frame functions as
-        # - a background behind padding of main_pw, without this OS X leaves white border
-        # - a container to be hidden, when a view is maximized and restored when view is back home
+        # Main frame functions as a background behind padding of main_pw, without this OS X leaves white border
         main_frame = ttk.Frame(self)  #
         self._main_frame = main_frame
         main_frame.grid(row=1, column=0, sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
-        self._maximized_view = None  # type: Optional[tk.Widget]
 
         self._toolbar = ttk.Frame(main_frame, padding=0)
         self._toolbar.grid(
@@ -2395,12 +2378,6 @@ class Workbench(tk.Tk):
 
             self.geometry(new_geometry)
 
-    def _maximize_view(self, event=None) -> None:
-        raise NotImplementedError()
-
-    def _unmaximize_view(self, event=None) -> None:
-        raise NotImplementedError()
-
     def show_options(self, page_key=None):
         dlg = ConfigurationDialog(self, self._configuration_pages)
         if page_key:
@@ -2451,12 +2428,6 @@ class Workbench(tk.Tk):
         var = self.get_variable("view.full_screen")
         var.set(not var.get())
         self.attributes("-fullscreen", var.get())
-
-    def _cmd_toggle_maximize_view(self) -> None:
-        if self._maximized_view is not None:
-            self._unmaximize_view()
-        else:
-            self._maximize_view()
 
     def _update_menu(self, menu: tk.Menu, menu_name: str) -> None:
         if menu.index("end") is None:
@@ -2625,17 +2596,6 @@ class Workbench(tk.Tk):
 
         finally:
             super().destroy()
-
-    def _on_configure(self, event) -> None:
-        # called when window is moved or resized
-        if (
-            hasattr(self, "_maximized_view")  # configure may happen before the attribute is defined
-            and self._maximized_view  # type: ignore
-        ):
-            # grid again, otherwise it acts weird
-            self._maximized_view.grid(
-                row=1, column=0, sticky=tk.NSEW, in_=self._maximized_view.master  # type: ignore
-            )
 
     def _on_tk_exception(self, exc, val, tb) -> None:
         # copied from tkinter.Tk.report_callback_exception with modifications
