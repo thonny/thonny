@@ -7,7 +7,7 @@ from thonny import is_portable, languages, ui_utils
 
 logger = getLogger(__name__)
 
-STD_MODE_TEXT = "Regular"
+STD_MODE_TEXT = "Regular (recommended)"
 SIMPLE_MODE_TEXT = "Simplified"
 RPI_MODE_TEXT = "Simplified, with Raspberry Pi theme and line-based debugger"
 
@@ -74,7 +74,7 @@ class FirstRunWindow(tk.Tk):
             state="readonly",
             height=15,
             # Actual length of longest value creates too wide combobox
-            width=33 if ui_utils.running_on_mac_os() else 40,
+            width=40 if ui_utils.running_on_mac_os() else 45,
             values=values,
         )
         combobox.grid(
