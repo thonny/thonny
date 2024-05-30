@@ -9,7 +9,7 @@ logger = getLogger(__name__)
 
 STD_MODE_TEXT = "Regular"
 SIMPLE_MODE_TEXT = "Simplified"
-RPI_MODE_TEXT = "Simplified, with Raspberry Pi theme and defaults"
+RPI_MODE_TEXT = "Simplified, with Raspberry Pi theme and line-based debugger"
 
 
 class FirstRunWindow(tk.Tk):
