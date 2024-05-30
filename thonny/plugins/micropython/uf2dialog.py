@@ -5,6 +5,7 @@ from logging import getLogger
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from thonny.common import UserError
+from thonny.languages import tr
 from thonny.misc_utils import get_win_volume_name, list_volumes
 from thonny.plugins.micropython.base_flashing_dialog import (
     BaseFlashingDialog,
@@ -18,7 +19,7 @@ logger = getLogger(__name__)
 
 class Uf2FlashingDialog(BaseFlashingDialog):
     def get_target_label(self) -> str:
-        return "Target volume"
+        return tr("Target volume")
 
     def get_variants_url(self) -> str:
         return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-uf2.json"
@@ -122,20 +123,23 @@ class Uf2FlashingDialog(BaseFlashingDialog):
 
     def get_instructions(self) -> Optional[str]:
         return (
-            f"Here you can install or update {self.firmware_name} for devices having an UF2 bootloader\n"
-            "(this includes most boards meant for beginners).\n"
-            "\n"
-            "1. Put your device into bootloader mode: \n"
-            "     - some devices have to be plugged in while holding the BOOTSEL button,\n"
-            "     - some require double-tapping the RESET button with proper rhythm.\n"
-            "2. Wait for couple of seconds until the target volume appears.\n"
-            "3. Select desired variant and version.\n"
-            "4. Click 'Install' and wait for some seconds until done.\n"
-            "5. Close the dialog and start programming!"
+            tr(
+                "Here you can install or update %s for devices having an UF2 bootloader\n"
+                "(this includes most boards meant for beginners).\n"
+                "\n"
+                "1. Put your device into bootloader mode: \n"
+                "     - some devices have to be plugged in while holding the BOOTSEL button,\n"
+                "     - some require double-tapping the RESET button with proper rhythm.\n"
+                "2. Wait for couple of seconds until the target volume appears.\n"
+                "3. Select desired variant and version.\n"
+                "4. Click 'Install' and wait for some seconds until done.\n"
+                "5. Close the dialog and start programming!"
+            )
+            % self.firmware_name
         )
 
     def get_title(self):
-        return f"Install or update {self.firmware_name} (UF2)"
+        return tr("Install or update %s (UF2)") % self.firmware_name
 
     def perform_core_operation(
         self,

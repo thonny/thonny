@@ -82,7 +82,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         )
         self._target_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
-        self._target_info_label = ttk.Label(self.main_frame, text="model")
+        self._target_info_label = ttk.Label(self.main_frame, text=tr("model"))
         self._target_info_label.grid(row=2, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._target_info_content_label = ttk.Label(self.main_frame)
         self._target_info_content_label.grid(
@@ -112,7 +112,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         )
         self._variant_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
-        version_label = ttk.Label(self.main_frame, text="version")
+        version_label = ttk.Label(self.main_frame, text=tr("version"))
         version_label.grid(row=7, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._version_combo = MappingCombobox(
             self.main_frame, mapping={}, exportselection=False, state="disabled"
@@ -122,7 +122,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
         )
         self._version_combo.bind("<<ComboboxSelected>>", self.register_settings_changed, True)
 
-        variant_info_label = ttk.Label(self.main_frame, text="info")
+        variant_info_label = ttk.Label(self.main_frame, text=tr("info"))
         variant_info_label.grid(row=8, column=1, sticky="e", padx=(epadx, 0), pady=(ipady, 0))
         self._variant_info_content_label = AdvancedLabel(self.main_frame)
         self._variant_info_content_label.grid(
@@ -218,13 +218,13 @@ class BaseFlashingDialog(WorkDialog, ABC):
         current_variant = self._variant_combo.get_selected_value()
         if not self._downloaded_variants:
             url = None
-            text = "[downloading variants info ...]"
+            text = "[" + tr("downloading variants info") + "...]"
         elif current_variant:
             url = current_variant["info_url"]
             text = url
         elif self._variant_combo.mapping:
             url = None
-            text = f"[select one from {len(self._variant_combo.mapping)} variants]"
+            text = "[" + tr("select one from %d variants") % len(self._variant_combo.mapping)
         else:
             url = None
             text = ""
@@ -251,7 +251,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
             if variant.get("popular", False)
         }
         if populars and len(populars) < len(filtered_mapping):
-            enhanced_mapping = {"--- MOST POPULAR " + "-" * 100: {}}
+            enhanced_mapping = {"--- " + tr("MOST POPULAR") + " " + "-" * 100: {}}
             for variant in populars.values():
                 popular_variant = variant.copy()
                 # need different title to distinguish it from the same item in ALL VARIANTS
@@ -259,7 +259,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
                 popular_variant["title"] = popular_title
                 enhanced_mapping[popular_title] = popular_variant
 
-            enhanced_mapping["--- ALL VARIANTS " + "-" * 100] = {}
+            enhanced_mapping["--- " + tr("ALL VARIANTS") + " " + "-" * 100] = {}
             enhanced_mapping.update(filtered_mapping)
         else:
             enhanced_mapping = filtered_mapping
@@ -354,7 +354,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
                     msg = f"Could not download variants info from {self.get_variants_url()}"
                     logger.exception(msg)
                     self.append_text(msg + "\n")
-                    self.set_action_text("Error!")
+                    self.set_action_text(tr("Error!"))
                     self.grid_progress_widgets()
 
             if latest_prerelease_substitute:
@@ -421,7 +421,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
                 self.append_text("\n" + str(e))
             else:
                 self.append_text("\n" + "".join(traceback.format_exc()))
-            self.set_action_text("Error...")
+            self.set_action_text(tr("Error") + "...")
             self.report_done(False)
             return
         finally:
@@ -429,9 +429,9 @@ class BaseFlashingDialog(WorkDialog, ABC):
                 os.remove(temp_file)
 
         if core_result:
-            self.set_action_text("Done!")
+            self.set_action_text(tr("Done!"))
         else:
-            self.set_action_text("Error...")
+            self.set_action_text(tr("Error") + "...")
 
         self.report_done(core_result)
 
@@ -459,7 +459,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
 
         logger.debug("Downloading from %s", download_url)
 
-        self.set_action_text("Starting...")
+        self.set_action_text(tr("Starting") + "...")
         self.append_text("Downloading from %s\n" % download_url)
 
         req = urllib.request.Request(
@@ -495,7 +495,7 @@ class BaseFlashingDialog(WorkDialog, ABC):
                     bytes_copied += len(block)
                     percent_done = bytes_copied / size * 100
                     percent_str = "%.0f%%" % (percent_done)
-                    self.set_action_text("Downloading... " + percent_str)
+                    self.set_action_text(tr("Downloading") + "... " + percent_str)
 
                     # leaving left half of the progressbar for downloading
                     self.report_progress(percent_done, 200)

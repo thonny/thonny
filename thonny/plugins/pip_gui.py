@@ -951,15 +951,17 @@ class PipFrame(ttk.Frame, ABC):
 
     def _advertise_pipkin(self):
         self._append_info_text("\n\n")
-        self._append_info_text("Under the hood " + "\n", ("caption", "right"))
+        self._append_info_text(tr("Under the hood") + " \n", ("caption", "right"))
         self._append_info_text(
-            "This dialog uses `pipkin`, a new command line tool for managing "
-            "MicroPython and CircuitPython packages. ",
+            tr(
+                "This dialog uses `pipkin`, a command line tool for managing "
+                "MicroPython and CircuitPython packages."
+            )
+            + " \n",
             ("right",),
         )
-        self._append_info_text("See ", ("right",))
         self._append_info_text("https://pypi.org/project/pipkin/", ("url", "right"))
-        self._append_info_text(" for more info. \n", ("right",))
+        self._append_info_text(" \n", ("right",))
 
     def get_large_padding(self):
         return ems_to_pixels(1.5)

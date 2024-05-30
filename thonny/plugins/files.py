@@ -535,8 +535,8 @@ def pick_transfer_items(
         return []
     elif overwrites:
         if askokcancel(
-            "Overwrite?",
-            "This operation will overwrite\n\n" + format_items(overwrites),
+            tr("Overwrite?"),
+            tr("This operation will overwrite %s") % format_items(overwrites) + "\n\n",
             master=master,
         ):
             return prepared_items
