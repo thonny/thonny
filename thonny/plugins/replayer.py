@@ -258,7 +258,7 @@ class Replayer(tk.Toplevel):
         from thonny.plugins.event_logging import load_events_from_file, session_events
 
         session_path = self.session_combo.get_selected_value()
-        logger.info("User selected session %r", session_path)
+        logger.info("Selected session %r", session_path)
 
         if session_path is None:
             logger.info("No session path")
@@ -274,6 +274,7 @@ class Replayer(tk.Toplevel):
         self.session_combo.select_clear()
 
     def load_session(self, events: List[Dict]) -> None:
+        logger.info("Loading session with %d events", len(events))
         self.loading = True
         # Need a fixed copy. The source list can be appended to, and we want to tweak things.
         self.events = events.copy()
@@ -738,7 +739,8 @@ class ReplayerEditorNotebook(CustomNotebook):
                 if "previous_active_editor" not in event:
                     event["previous_active_editor"] = self.get_current_child()
                 # TODO: is it slow?
-                self.select(editor)
+                if self.has_content(self):
+                    self.select(editor)
             else:
                 self.select(event["previous_active_editor"])
 
