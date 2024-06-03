@@ -6,19 +6,19 @@
         "info_url": "https://micropython.org/download/MICROBIT",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20240222-v1.22.2.hex"
+                "version": "1.23.0",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20240602-v1.23.0.hex"
             },
             {
-                "version": "20240308-v1.23.0-preview.201.g20f85fb26",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20240308-v1.23.0-preview.201.g20f85fb26.hex"
+                "version": "20240603-v1.24.0-preview.14.g932f76c6b",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20240603-v1.24.0-preview.14.g932f76c6b.hex"
             },
             {
-                "version": "1.21.0",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20231005-v1.21.0.hex"
+                "version": "1.22.1",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20240105-v1.22.1.hex"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-v1.23.0-preview\\.\\d+\\.[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-v1.24.0-preview\\.\\d+\\.[a-z0-9]{10}"
     },
     {
         "vendor": "BBC",
