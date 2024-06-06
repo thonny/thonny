@@ -17,7 +17,7 @@ from tkinter import filedialog, messagebox, ttk
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union  # @UnusedImport
 
 from thonny import get_workbench, misc_utils, tktextext
-from thonny.common import TextRange
+from thonny.common import TextRange, normpath_with_actual_case
 from thonny.custom_notebook import CustomNotebook, CustomNotebookPage, CustomNotebookTab
 from thonny.languages import get_button_padding, tr
 from thonny.misc_utils import (
@@ -1815,7 +1815,19 @@ def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
     parent = _check_dialog_parent(options)
     try:
-        return _get_dialog_provider().asksaveasfilename(**options)
+        result = _get_dialog_provider().asksaveasfilename(**options)
+        # Different tkinter versions may return different values
+        if result in ["", (), None]:
+            return None
+
+        if running_on_windows():
+            # may have /-s instead of \-s and wrong case
+            return os.path.join(
+                normpath_with_actual_case(os.path.dirname(result)),
+                os.path.basename(result),
+            )
+        else:
+            return result
     finally:
         try_restore_focus_after_file_dialog(parent)
 

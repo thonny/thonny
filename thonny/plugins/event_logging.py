@@ -3,12 +3,13 @@ import time
 import tkinter as tk
 from datetime import datetime
 from logging import getLogger
+from tkinter import messagebox
 from typing import Dict, List, Optional, Tuple
 
 from thonny import get_shell, get_thonny_user_dir, get_workbench
 from thonny.languages import tr
+from thonny.misc_utils import get_menu_char
 from thonny.shell import ShellView
-from thonny.ui_utils import asksaveasfilename
 from thonny.workbench import WorkbenchEvent
 
 logger = getLogger(__name__)
@@ -263,25 +264,11 @@ def get_log_dir():
 
 
 def export():
-    import zipfile
-
-    filename = asksaveasfilename(
-        filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
-        defaultextension=".zip",
-        initialdir=get_workbench().get_local_cwd(),
-        initialfile=time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip"),
-        parent=get_workbench(),
+    messagebox.showinfo(
+        "Info",
+        "For exporting usage logs, please select 'Tools => Open Replayer...'\n"
+        "and click on the " + get_menu_char() + " button in the upper-right corner of the window",
     )
-
-    if not filename:
-        return
-
-    log_dir = get_log_dir()
-
-    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
-        for item in os.listdir(log_dir):
-            if item.endswith(".txt") or item.endswith(".zip"):
-                zipf.write(os.path.join(log_dir, item), arcname=item)
 
 
 def format_time_range(
@@ -312,23 +299,61 @@ def parse_file_name(name: str) -> Tuple[time.struct_time, Optional[time.struct_t
     return parse_time_range(parts[0])
 
 
+def save_events_to_file(events: List[Dict], path: str) -> None:
+    import json
+
+    data = json.dumps(events, indent=4)
+    if path.lower().endswith(".zip"):
+        import zipfile
+
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+            zipf.writestr(os.path.basename(path)[:-4] + ".txt", data=data)
+    elif path.lower().endswith(".txt") or path.lower().endswith(".json"):
+        # import/export Json format
+        with open(path, mode="wt", encoding="utf-8") as fp:
+            fp.write(data)
+    else:
+        raise EventsInputOutputFileError("Unsupported output format")
+
+
 def load_events_from_file(path: str) -> List[Dict]:
     import json
 
-    if path.endswith(".txt"):
-        # old Json format before Thonny 5.0
+    if path.lower().endswith(".zip"):
+        import zipfile
+
+        with zipfile.ZipFile(path, "r") as zipf:
+            names = zipf.namelist()
+            if len(names) > 1:
+                raise EventsInputOutputFileError(
+                    "The zip contains several files.\nPlease extract the files and load one of them!"
+                )
+            name = names[0]
+            data = zipf.read(name)
+
+            if name.lower().endswith(".jsonl"):
+                return [json.loads(line) for line in data.decode("utf-8").splitlines()]
+            elif name.lower().endswith(".json") or name.lower().endswith(".txt"):
+                return json.loads(data.decode("utf-8"))
+            else:
+                raise EventsInputOutputFileError(f"Don't know how to open {name}")
+
+    elif path.lower().endswith(".txt") or path.lower().endswith(".json"):
+        # import/export JSON format
         with open(path, encoding="utf-8") as fp:
             return json.load(fp)
-
     else:
-        # new JSON lines format, compressed or not
-        if path.endswith(".jsonl.gz"):
+        # internal, JSON lines format
+        if path.lower().endswith(".jsonl.gz"):
             import gzip
 
             open_fun = gzip.open
-        else:
-            assert path.endswith(".jsonl")
+        elif path.lower().endswith(".jsonl"):
+            # internal format may remain uncompressed in case of crashes
             open_fun = open
+
+        else:
+            raise EventsInputOutputFileError("Can't determine file format")
 
         result = []
         with open_fun(path, mode="rt", encoding="utf-8") as fp:
@@ -336,6 +361,10 @@ def load_events_from_file(path: str) -> List[Dict]:
                 result.append(json.loads(line))
 
         return result
+
+
+class EventsInputOutputFileError(ValueError):
+    pass
 
 
 def load_plugin() -> None:
@@ -346,7 +375,7 @@ def load_plugin() -> None:
 
     if get_workbench().get_option("general.event_logging"):
         get_workbench().add_command(
-            "export_usage_logs", "tools", tr("Export usage logs..."), export, group=110
+            "export_usage_logs", "tools", tr("Export usage logs..."), export, group=105
         )
 
         # create logger

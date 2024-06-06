@@ -9,20 +9,22 @@ import tkinter as tk
 from dataclasses import dataclass
 from logging import getLogger
 from pprint import pformat
-from tkinter import ttk
-from typing import Callable, Dict, List, Optional, cast
+from tkinter import messagebox, ttk
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from thonny import codeview, get_workbench, ui_utils
 from thonny.custom_notebook import CustomNotebook
 from thonny.editors import BaseEditor
 from thonny.languages import tr
 from thonny.misc_utils import get_menu_char, running_on_mac_os
+from thonny.plugins.event_logging import EventsInputOutputFileError, format_time_range
 from thonny.shell import BaseShellText
 from thonny.tktextext import TextFrame, TweakableText
 from thonny.ui_utils import (
     CustomToolbutton,
     MappingCombobox,
     askopenfilename,
+    asksaveasfilename,
     ems_to_pixels,
     lookup_style_option,
     select_sequence,
@@ -36,14 +38,15 @@ FILE_TOKEN = "file://"
 logger = getLogger(__name__)
 instance: Optional[Replayer] = None
 
-CURRENT_SESSION_VALUE = "__CURRENT_SESSION__"
-
-_dialog_filetypes = [(tr("Event logs"), ".jsonl .gz .txt"), (tr("all files"), ".*")]
+CURRENT_SESSION_MARKER = "__CURRENT_SESSION__"
 
 
 class Replayer(tk.Toplevel):
     def __init__(self, master):
+        self.current_session_events = None
         self.events = None
+        self.session_start_time: Optional[time.struct_time] = None
+        self.session_end_time: Optional[time.struct_time] = None
         self.last_event_index = -1
         self.loading = False
         self.commands: List[ReplayerCommand] = []
@@ -64,11 +67,19 @@ class Replayer(tk.Toplevel):
         self.menu = tk.Menu(self)
         load_from_file_sequence = select_sequence("<Control-o>", "<Command-o>")
         self.menu.add_command(
-            label=tr("Load events from file"),
+            label=tr("Load events from file") + "...",
             command=self.cmd_open,
             accelerator=sequence_to_accelerator(load_from_file_sequence),
         )
         self.bind(load_from_file_sequence, self.cmd_open, True)
+
+        self.menu.add_command(
+            label=tr("Export events to file") + "...",
+            command=self.cmd_export,
+        )
+
+        self.menu.add_separator()
+
         self.menu.add_checkbutton(
             label=tr("Show event details"),
             command=self.update_event_frame_visibility,
@@ -152,7 +163,8 @@ class Replayer(tk.Toplevel):
         self.after_idle(self._after_ready)
 
     def _after_ready(self):
-        self.session_combo.select_value(CURRENT_SESSION_VALUE)
+        current_session_desc = next(iter(self.session_combo.mapping))
+        self.session_combo.set(current_session_desc)
         self.select_session_from_combobox(None)
 
     def _add_command(self, label: str, command: Callable, tester: Callable, tooltip: str) -> None:
@@ -185,15 +197,64 @@ class Replayer(tk.Toplevel):
         post_y = self.menu_button.winfo_rooty() + self.menu_button.winfo_height()
         self.menu.tk_popup(post_x, post_y)
 
+    def cmd_export(self, event=None):
+        from thonny.plugins.event_logging import save_events_to_file
+
+        if not self.events:
+            logger.warning("Attempting to export without events")
+            return
+
+        COMPRESSED = tr("compressed event logs")
+        UNCOMPRESSED = tr("uncompressed event logs")
+
+        filetypes = [(COMPRESSED, ".zip"), (UNCOMPRESSED, ".json"), (tr("all files"), ".*")]
+
+        assert self.session_start_time is not None and self.session_end_time is not None
+        time_range = format_time_range(self.session_start_time, self.session_end_time)
+        initialdir = get_workbench().get_local_cwd()
+        initialfile = f"{time_range}.zip"
+        type_var = tk.StringVar(value="")
+        path = asksaveasfilename(
+            filetypes=filetypes,
+            defaultextension=None,
+            initialdir=initialdir,
+            initialfile=initialfile,
+            parent=get_workbench(),
+            typevariable=type_var,
+        )
+        logger.info("Save dialog returned %r with typevariable %r", path, type_var.get())
+
+        if (
+            not path.lower().endswith(".zip")
+            and not path.lower().endswith(".json")
+            and not path.lower().endswith(".txt")
+        ):
+            if type_var.get() == COMPRESSED:
+                path += ".zip"
+            elif type_var.get() == UNCOMPRESSED:
+                path += ".json"
+            else:
+                messagebox.showerror(
+                    tr("Error"), "Filename should have .zip, .json or .txt extension", parent=self
+                )
+                return
+
+        prepared_events = [self._export_event(e) for e in self.events if e is not None]
+        save_events_to_file(prepared_events, path)
+
     def cmd_open(self, event=None):
         try:
+            filetypes = [(tr("Event logs"), ".zip .json .txt"), (tr("all files"), ".*")]
             initialdir = get_workbench().get_option("tools.replayer_last_browser_folder")
             if not os.path.isdir(initialdir):
                 initialdir = os.path.normpath(os.path.expanduser("./"))
 
-            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir, parent=self)
+            path = askopenfilename(filetypes=filetypes, initialdir=initialdir, parent=self)
             if path:
-                self.open_file(path)
+                try:
+                    self.open_file(path)
+                except EventsInputOutputFileError as e:
+                    messagebox.showerror(tr("Error"), str(e), parent=self)
         finally:
             return "break"
 
@@ -203,19 +264,29 @@ class Replayer(tk.Toplevel):
         self.select_session_from_combobox()
         get_workbench().set_option("tools.replayer_last_browser_folder", os.path.dirname(path))
 
-    def create_sessions_mapping(self):
+    def _export_event(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        if event.get("fictional"):
+            return None
+
+        return {key: value for (key, value) in event.items() if not key.startswith("_")}
+
+    def create_sessions_mapping(self) -> Dict[str, Tuple[str, time.struct_time, time.struct_time]]:
         from thonny.plugins import event_logging
         from thonny.plugins.event_logging import get_log_dir, parse_file_name
 
         mapping = {}
 
         if event_logging.session_start_time is not None:
-            current_session_label = (
-                tr("Current session")
-                + f" • {_custom_time_format(event_logging.session_start_time, without_seconds=True)} - ???"
-            )
+            start_time = event_logging.session_start_time
+            end_time = time.localtime(time.time())
+            # As I'm fixing the end time, I need to also fix the events
+            self.current_session_events = event_logging.session_events.copy()
 
-            mapping[current_session_label] = CURRENT_SESSION_VALUE
+            start_time_str = _custom_time_format(start_time, without_seconds=True)
+            end_time_str = _custom_time_format(end_time, without_seconds=True)
+            current_session_label = tr("Current session") + f" • {start_time_str} - {end_time_str}"
+
+            mapping[current_session_label] = (CURRENT_SESSION_MARKER, start_time, end_time)
 
         log_dir = get_log_dir()
 
@@ -255,21 +326,26 @@ class Replayer(tk.Toplevel):
         return mapping
 
     def select_session_from_combobox(self, event: Optional[tk.Event] = None) -> None:
-        from thonny.plugins.event_logging import load_events_from_file, session_events
+        from thonny.plugins.event_logging import load_events_from_file
 
-        session_path = self.session_combo.get_selected_value()
+        session_path, start_time, end_time = self.session_combo.get_selected_value()
         logger.info("Selected session %r", session_path)
 
         if session_path is None:
             logger.info("No session path")
+            self.events = []
+            self.session_start_time = None
+            self.session_end_time = None
             return
-        elif session_path == CURRENT_SESSION_VALUE:
-            events = session_events.copy()
+        elif session_path == CURRENT_SESSION_MARKER:
+            events = self.current_session_events
         elif os.path.isfile(session_path):
             events = load_events_from_file(session_path)
         else:
             raise RuntimeError("File does not exist: " + str(session_path))
 
+        self.session_start_time = start_time
+        self.session_end_time = end_time
         self.load_session(events)
         self.session_combo.select_clear()
 
@@ -295,6 +371,7 @@ class Replayer(tk.Toplevel):
                             "time": event["time"],
                             "editor_id": event["editor_id"],
                             "text_widget_id": event["text_widget_id"],
+                            "fictional": True,
                         },
                     )
 
@@ -316,6 +393,7 @@ class Replayer(tk.Toplevel):
                             "event_type": "ToplevelResponse",
                             "sequence": "ToplevelResponse",
                             "time": event["time"],
+                            "fictional": True,
                         },
                     )
 
@@ -327,14 +405,14 @@ class Replayer(tk.Toplevel):
                     event_time_str += ".0"
                 event_time = datetime.datetime.strptime(event_time_str, "%Y-%m-%dT%H:%M:%S.%f")
                 # yes, I'm modifying the argument. I'll live with this hack.
-                event["epoch_time"] = event_time.timestamp()
+                event["_epoch_time"] = event_time.timestamp()
             self.reset_session()
             self.scrubber.config(state="normal")
             for cmd in self.commands:
                 cmd.button.configure(state="normal")
 
             self.scrubber.config(
-                from_=self.events[0]["epoch_time"], to=self.events[-1]["epoch_time"]
+                from_=self.events[0]["_epoch_time"], to=self.events[-1]["_epoch_time"]
             )
             # need to apply all events in order to record reversion information
             self.select_event(len(self.events) - 1)
@@ -384,15 +462,15 @@ class Replayer(tk.Toplevel):
             return start_index
 
         if end_index - start_index == 1:
-            start_timestamp = self.events[start_index]["epoch_time"]
-            end_timestamp = self.events[end_index]["epoch_time"]
+            start_timestamp = self.events[start_index]["_epoch_time"]
+            end_timestamp = self.events[end_index]["_epoch_time"]
             if abs(start_timestamp - target_timestamp) < abs(end_timestamp - target_timestamp):
                 return start_index
             else:
                 return end_index
 
         middle_index = (start_index + end_index) // 2
-        middle_timestamp = self.events[middle_index]["epoch_time"]
+        middle_timestamp = self.events[middle_index]["_epoch_time"]
         if target_timestamp < middle_timestamp:
             return self.find_closest_index(target_timestamp, start_index, middle_index)
         else:
@@ -406,7 +484,7 @@ class Replayer(tk.Toplevel):
             assert self.last_event_index == index
             event = self.events[self.last_event_index]
             if not from_scrubber:
-                self.scrubber.set(event["epoch_time"])
+                self.scrubber.set(event["_epoch_time"])
 
             # process_event did the minimal amount of UI changes, because the intermediate
             # states were not visible.
@@ -629,14 +707,14 @@ class ReplayerEditor(BaseEditor):
             self.revert_event(event)
 
     def apply_event(self, event):
-        if "previous_modified" not in event and event["sequence"] in [
+        if "_previous_modified" not in event and event["sequence"] in [
             "TextInsert",
             "TextDelete",
             "Opened",
             "Saved",
         ]:
             # Mark the state change
-            event["previous_modified"] = self.is_modified()
+            event["_previous_modified"] = self.is_modified()
 
         if event["sequence"] in ["TextInsert", "TextDelete"]:
             _apply_event_on_text(event, self._code_view.text)
@@ -646,19 +724,19 @@ class ReplayerEditor(BaseEditor):
             self._code_view.text.edit_modified(False)
 
         if "filename" in event:
-            if "previous_filename" not in event:
+            if "_previous_filename" not in event:
                 # store information for reverting this event
-                event["previous_filename"] = self._filename
+                event["_previous_filename"] = self._filename
 
             self._filename = event["filename"]
 
     def revert_event(self, event):
         _revert_event_on_text(event, self._code_view.text)
-        if "previous_modified" in event:
-            self._code_view.text.edit_modified(event["previous_modified"])
+        if "_previous_modified" in event:
+            self._code_view.text.edit_modified(event["_previous_modified"])
 
-        if "previous_filename" in event:
-            self._filename = event["previous_filename"]
+        if "_previous_filename" in event:
+            self._filename = event["_previous_filename"]
 
     def shorten_filename_for_title(self, path: str) -> str:
         # the path can be saved in Posix and replayed in Windows and vice versa
@@ -736,13 +814,13 @@ class ReplayerEditorNotebook(CustomNotebook):
 
         elif event["sequence"] in ["TextInsert", "TextDelete"]:
             if not reverse:
-                if "previous_active_editor" not in event:
-                    event["previous_active_editor"] = self.get_current_child()
+                if "_previous_active_editor" not in event:
+                    event["_previous_active_editor"] = self.get_current_child()
                 # TODO: is it slow?
                 if self.has_content(self):
                     self.select(editor)
             else:
-                self.select(event["previous_active_editor"])
+                self.select(event["_previous_active_editor"])
 
     def on_tab_changed(self, event):
         editor: Optional[ReplayerEditor] = self.get_current_child()
@@ -856,10 +934,10 @@ def _apply_event_on_text(event: Dict, text: TweakableText) -> None:
         assert index1
         assert index2
 
-        if "chunks" not in event:
+        if "_chunks" not in event:
             # remember the information required for reverting the event
-            event["chunks"] = _export_text_range_with_tags(text, index1, index2)
-            # logger.trace("Deletion from %r to %r chunks %r", index1, index2, event["chunks"])
+            event["_chunks"] = _export_text_range_with_tags(text, index1, index2)
+            # logger.trace("Deletion from %r to %r chunks %r", index1, index2, event["_chunks"])
 
         text.direct_delete(index1, index2)
         text.last_event_indices = [index1]
@@ -872,15 +950,15 @@ def _revert_event_on_text(event: Dict, text: TweakableText) -> None:
         text.direct_delete(index1, f"{index1}+{text_len}c")
         text.last_change_indices = [index1]
     elif event["sequence"] == "TextDelete":
-        assert "chunks" in event
+        assert "_chunks" in event
         char_count = 0
-        for chunk in event["chunks"]:
+        for chunk in event["_chunks"]:
             text.direct_insert(chunk["start_index"], chunk["chars"], chunk["tags"])
             char_count += len(chunk["chars"])
-        if event["chunks"]:  # yes, there can be deletions of 0 chars. Beats me.
+        if event["_chunks"]:  # yes, there can be deletions of 0 chars. Beats me.
             text.last_change_indices = [
-                event["chunks"][0]["start_index"],
-                "%s+%dc" % (event["chunks"][-1]["start_index"], char_count),
+                event["_chunks"][0]["start_index"],
+                "%s+%dc" % (event["_chunks"][-1]["start_index"], char_count),
             ]
         else:
             text.last_change_indices = []
@@ -971,7 +1049,8 @@ def load_plugin() -> None:
         "tools",
         tr("Open replayer..."),
         open_replayer,
-        include_in_toolbar=False,
+        include_in_toolbar=not get_workbench().in_simple_mode(),
+        image="clock",
         caption="Replayer",
-        group=110,
+        group=105,
     )
