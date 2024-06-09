@@ -5,6 +5,8 @@ import time
 from logging import getLogger
 from typing import TYPE_CHECKING, List, Optional, cast
 
+SUPPORTED_VERSIONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
 if TYPE_CHECKING:
     # Following imports are required for MyPy
     # http://mypy.readthedocs.io/en/stable/common_issues.html#import-cycles

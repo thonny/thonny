@@ -411,27 +411,73 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 
     def should_restart(self, changed_options: List[str]):
         return self._configuration_variable.modified
+def get_default_cpython_executable_for_backend() -> str:
+    if is_private_python(sys.executable) and running_in_virtual_environment():
+        # Private venv. Make an exception and use base Python for default backend.
+        default_path = get_base_executable()
+    else:
+        default_path = sys.executable.replace("pythonw.exe", "python.exe")
+
+    # In macOS bundle the path may have ..-s
+    default_path = os.path.normpath(default_path)
+
+    """ # Too confusing:
+    if running_on_mac_os():
+        # try to generalize so that the path can survive Python upgrade
+        ver = "{}.{}".format(*sys.version_info)
+        ver_fragment = f"/Versions/{ver}/bin/"
+        if ver_fragment in default_path:
+            generalized = default_path.replace(ver_fragment, "/Versions/Current/bin/")
+            if os.path.exists(generalized):
+                return generalized
+    """
+    return default_path
 
 
-def _get_interpreters():
+def _get_interpreters_from_windows_registry():
+    # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
+    # https://www.python.org/dev/peps/pep-0514/#installpath
+    import winreg
+
+    result = set()
+    for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
+        for version in thonny.SUPPORTED_VERSIONS:
+            for suffix in ["", "-32", "-64"]:
+                variant = version + suffix
+                for subkey in [
+                    "SOFTWARE\\Python\\PythonCore\\" + variant + "\\InstallPath",
+                    "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + variant + "\\InstallPath",
+                ]:
+                    try:
+                        dir_ = winreg.QueryValue(key, subkey)
+                        if dir_:
+                            path = os.path.join(dir_, WINDOWS_EXE)
+                            if os.path.exists(path):
+                                result.add(path)
+                    except Exception:
+                        pass
+
+    return result
+
+
+def find_local_cpython_executables():
     result = set()
 
     if running_on_windows():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
-        for minor in [8, 9, 10, 11, 12]:
             for dir_ in [
-                "C:\\Python3%d" % minor,
-                "C:\\Python3%d-32" % minor,
-                "C:\\Python3%d-64" % minor,
-                "C:\\Program Files\\Python 3.%d" % minor,
-                "C:\\Program Files\\Python 3.%d-64" % minor,
-                "C:\\Program Files (x86)\\Python 3.%d" % minor,
-                "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
-                "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
-                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d" % minor),
-                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python3%d-32" % minor),
+                "C:\\Python%s" % no_dot,
+                "C:\\Python%s-32" % no_dot,
+                "C:\\Python%s-64" % no_dot,
+                "C:\\Program Files\\Python %s" % version,
+                "C:\\Program Files\\Python %s-64" % version,
+                "C:\\Program Files (x86)\\Python %s" % version,
+                "C:\\Program Files (x86)\\Python %s-32" % version,
+                "C:\\Program Files (x86)\\Python %s-32" % version,
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%d" % no_dot),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%d-32" % no_dot),
             ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
@@ -471,29 +517,25 @@ def _get_interpreters():
             apath = normpath_with_actual_case(dir_)
             if apath != dir_ and apath in dirs:
                 continue
-            for name in [
-                "python3",
-                "python3.8",
-                "python3.9",
-                "python3.10",
-                "python3.11",
-                "python3.12",
-            ]:
+            for version in ["3"] + thonny.SUPPORTED_VERSIONS:
+                name = "python" + version
                 path = os.path.join(dir_, name)
                 if os.path.exists(path):
                     result.add(path)
 
     if running_on_mac_os():
-        for version in ["3.8", "3.9", "3.10", "3.11", "3.12"]:
-            dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
-            path = os.path.join(dir_, "python3")
+        for version in thonny.SUPPORTED_VERSIONS:
+            path = os.path.join(
+                "/Library/Frameworks/Python.framework/Versions", version, "bin", "python" + version
+            )
 
             if os.path.exists(path):
                 result.add(path)
 
     from shutil import which
 
-    for command in ["python3", "python3.8", "python3.9", "python3.10", "python3.11", "python3.12"]:
+    for version in thonny.SUPPORTED_VERSIONS:
+        command = "python" + version
         path = which(command)
         if path is not None and os.path.isabs(path):
             result.add(path)
@@ -513,64 +555,6 @@ def _get_interpreters():
         sorted_result.insert(0, default_path)
 
     return sorted_result
-
-
-def get_default_cpython_executable_for_backend() -> str:
-    if is_private_python(sys.executable) and running_in_virtual_environment():
-        # Private venv. Make an exception and use base Python for default backend.
-        default_path = get_base_executable()
-    else:
-        default_path = sys.executable.replace("pythonw.exe", "python.exe")
-
-    # In macOS bundle the path may have ..-s
-    default_path = os.path.normpath(default_path)
-
-    """ # Too confusing:
-    if running_on_mac_os():
-        # try to generalize so that the path can survive Python upgrade
-        ver = "{}.{}".format(*sys.version_info)
-        ver_fragment = f"/Versions/{ver}/bin/"
-        if ver_fragment in default_path:
-            generalized = default_path.replace(ver_fragment, "/Versions/Current/bin/")
-            if os.path.exists(generalized):
-                return generalized
-    """
-    return default_path
-
-
-def _get_interpreters_from_windows_registry():
-    # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
-    # https://www.python.org/dev/peps/pep-0514/#installpath
-    import winreg
-
-    result = set()
-    for key in [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]:
-        for version in [
-            "3.8",
-            "3.8-32",
-            "3.8-64",
-            "3.9",
-            "3.9-32",
-            "3.9-64",
-            "3.10",
-            "3.10-32",
-            "3.10-64",
-        ]:
-            for subkey in [
-                "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
-                "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
-            ]:
-                try:
-                    dir_ = winreg.QueryValue(key, subkey)
-                    if dir_:
-                        path = os.path.join(dir_, WINDOWS_EXE)
-                        if os.path.exists(path):
-                            result.add(path)
-                except Exception:
-                    pass
-
-    return result
-
 
 def _check_venv_installed(parent):
     try:
