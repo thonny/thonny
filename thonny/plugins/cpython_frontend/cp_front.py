@@ -1,16 +1,14 @@
 import glob
 import os.path
-import subprocess
 import sys
 import textwrap
 import tkinter as tk
-import traceback
 from logging import getLogger
-from tkinter import messagebox, ttk
+from tkinter import ttk
 from typing import Any, Dict, List
 
 import thonny
-from thonny import get_runner, get_shell, get_workbench, running, ui_utils
+from thonny import get_runner, get_shell, get_workbench, ui_utils
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -21,14 +19,11 @@ from thonny.common import (
     running_in_virtual_environment,
 )
 from thonny.languages import tr
-from thonny.misc_utils import inside_flatpak, running_on_mac_os, running_on_windows
-from thonny.plugins.backend_config_page import (
-    BackendDetailsConfigPage,
-    TabbedBackendDetailsConfigurationPage,
-)
-from thonny.running import WINDOWS_EXE, SubprocessProxy, get_front_interpreter_for_subprocess
+from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.plugins.backend_config_page import TabbedBackendDetailsConfigurationPage
+from thonny.running import WINDOWS_EXE, SubprocessProxy
 from thonny.terminal import run_in_terminal
-from thonny.ui_utils import askdirectory, askopenfilename, create_string_var
+from thonny.ui_utils import askopenfilename, create_string_var
 
 logger = getLogger(__name__)
 
@@ -89,6 +84,12 @@ class LocalCPythonProxy(SubprocessProxy):
 
     def get_target_executable(self):
         return self._mgmt_executable
+
+    def get_executable(self):
+        return self._reported_executable
+
+    def get_base_executable(self):
+        return self._reported_base_executable
 
     def _update_gui_updating(self, msg):
         """Enables running Tkinter or Qt programs which doesn't call mainloop.
@@ -257,22 +258,20 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 
         self.executable_page = self.create_and_add_empty_page(tr("Executable"))
 
-        self._configuration_variable = create_string_var(
-            get_workbench().get_option("LocalCPython.executable")
-        )
+        self._exe_variable = get_workbench().get_variable("LocalCPython.executable")
 
         entry_label = ttk.Label(self.executable_page, text=tr("Python executable"))
         entry_label.grid(row=0, column=1, columnspan=2, sticky=tk.W)
 
-        self._entry = ttk.Combobox(
+        self._exe_combo = ttk.Combobox(
             self.executable_page,
             exportselection=False,
-            textvariable=self._configuration_variable,
-            values=_get_interpreters(),
+            textvariable=self._exe_variable,
+            values=find_local_cpython_executables(),
         )
-        self._entry.state(["!disabled", "readonly"])
+        self._exe_combo.state(["!disabled", "readonly"])
 
-        self._entry.grid(row=1, column=1, sticky=tk.NSEW)
+        self._exe_combo.grid(row=1, column=1, sticky=tk.NSEW)
 
         self._select_button = ttk.Button(
             self.executable_page,
@@ -283,7 +282,7 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.executable_page.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python %s and later") % "3.8"
+        extra_text = tr("NB! Thonny only supports Python %s and later") % "3.9"
         if running_on_mac_os():
             extra_text += "\n\n" + tr(
                 "NB! File selection button may not work properly when selecting executables\n"
@@ -293,16 +292,14 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         extra_label = ttk.Label(self.executable_page, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
 
-        venv_text = tr(
-            "You can activate an existing virtual environment also"
-            + " via the right-click context menu in the file navagation"
-            + " when selecting a virtual environment folder,"
-            + " or the 'pyvenv.cfg' file inside."
+        file_browser_hint = ttk.Label(
+            self.executable_page,
+            text=tr(
+                "Note that you can select an existing virtual environment also via "
+                "right-click menu in Thonny's file browser."
+            ),
         )
-        venv_text = "\n".join(textwrap.wrap(venv_text, 80))
-
-        venv_label = ttk.Label(self.executable_page, text=venv_text)
-        venv_label.grid(row=3, column=1, columnspan=2, pady=10, sticky="w")
+        file_browser_hint.grid(row=3, column=1, columnspan=2, pady=10, sticky="w")
 
         last_row = ttk.Frame(self.executable_page)
         last_row.grid(row=100, sticky="swe", column=1, columnspan=2)
@@ -334,83 +331,21 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
             filename = filename[: -len("activate")] + "python3"
 
         if filename:
-            self._configuration_variable.set(filename)
+            self._exe_variable.set(filename)
 
     def _create_venv(self, event=None):
-        if not _check_venv_installed(self):
-            return
+        from thonny.venv_dialog import create_new_virtual_environment
 
-        messagebox.showinfo(
-            tr("Creating new virtual environment"),
-            tr(
-                "After clicking 'OK' you need to choose an empty directory, "
-                "which will be the root of your new virtual environment."
-            ),
-            parent=self,
-        )
-        path = None
-        while True:
-            path = askdirectory(
-                parent=self.winfo_toplevel(),
-                initialdir=path,
-                title=tr("Select empty directory for new virtual environment"),
-            )
-            if not path:
-                return
-
-            if os.listdir(path):
-                messagebox.showerror(
-                    tr("Bad directory"),
-                    tr("Selected directory is not empty.\nSelect another or cancel."),
-                    master=self,
-                )
-            else:
-                break
-        assert os.path.isdir(path)
-        path = normpath_with_actual_case(path)
-
-        args = [running.get_front_interpreter_for_subprocess(), "-m", "venv"]
-        if inside_flatpak():
-            args.append("--without-pip")
-        args.append(path)
-
-        proc = subprocess.Popen(
-            args,
-            stdin=None,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-        )
-        from thonny.workdlg import SubprocessDialog
-
-        dlg = SubprocessDialog(self, proc, tr("Creating virtual environment"), autostart=True)
-        ui_utils.show_dialog(dlg)
-
-        if running_on_windows():
-            exe_path = normpath_with_actual_case(os.path.join(path, "Scripts", "python.exe"))
-        else:
-            exe_path = os.path.join(path, "bin", "python3")
-
-        if os.path.exists(exe_path):
-            self._configuration_variable.set(exe_path)
-
-            if inside_flatpak():
-                proc = subprocess.Popen(
-                    [exe_path, "-m", "ensurepip", "--default-pip", "--upgrade"],
-                    stdin=None,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True,
-                )
-                from thonny.workdlg import SubprocessDialog
-
-                dlg = SubprocessDialog(
-                    self, proc, tr("Initializing virtual environment"), autostart=True
-                )
-                ui_utils.show_dialog(dlg)
+        created_exe = create_new_virtual_environment(self)
+        logger.info("created_exe=%r", created_exe)
+        if created_exe is not None:
+            self._exe_combo.configure(values=[created_exe] + find_local_cpython_executables())
+            self._exe_variable.set(created_exe)
 
     def should_restart(self, changed_options: List[str]):
-        return self._configuration_variable.modified
+        return "LocalCPython.executable" in changed_options
+
+
 def get_default_cpython_executable_for_backend() -> str:
     if is_private_python(sys.executable) and running_in_virtual_environment():
         # Private venv. Make an exception and use base Python for default backend.
@@ -467,6 +402,8 @@ def find_local_cpython_executables():
         # registry
         result.update(_get_interpreters_from_windows_registry())
 
+        for version in thonny.SUPPORTED_VERSIONS:
+            no_dot = version.replace(".", "")
             for dir_ in [
                 "C:\\Python%s" % no_dot,
                 "C:\\Python%s-32" % no_dot,
@@ -555,12 +492,3 @@ def find_local_cpython_executables():
         sorted_result.insert(0, default_path)
 
     return sorted_result
-
-def _check_venv_installed(parent):
-    try:
-        import venv
-
-        return True
-    except ImportError:
-        messagebox.showerror("Error", "Package 'venv' is not available.", parent=parent)
-        return False

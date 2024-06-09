@@ -390,8 +390,11 @@ class SubprocessDialog(WorkDialog):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
 
-    def __init__(self, master, proc, title, long_description=None, autostart=True):
-        self._proc = proc
+    def __init__(
+        self, master, prepared_proc=None, title="Subprocess", long_description=None, autostart=True
+    ):
+        self._proc = None
+        self._prepared_proc = prepared_proc
         self.stdout = ""
         self.stderr = ""
         self._stdout_thread = None
@@ -411,7 +414,14 @@ class SubprocessDialog(WorkDialog):
     def get_instructions(self) -> Optional[str]:
         return self._long_description
 
+    def start_subprocess(self):
+        if self._prepared_proc:
+            return self._prepared_proc
+        else:
+            raise RuntimeError("No process provided")
+
     def start_work(self):
+        self._proc = self.start_subprocess()
         if hasattr(self._proc, "cmd"):
             try:
                 self.append_text(subprocess.list2cmdline(self._proc.cmd) + "\n")

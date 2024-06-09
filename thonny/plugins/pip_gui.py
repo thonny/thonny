@@ -1276,7 +1276,7 @@ class PluginsPipFrame(PipFrame):
             environment_extras={"PYTHONUSERBASE": thonny.get_user_base_directory_for_plugins()},
         )
         dlg = SubprocessDialog(
-            self, proc, title="pip " + command, long_description=title, autostart=True
+            self, prepared_proc=proc, title="pip " + command, long_description=title, autostart=True
         )
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr
@@ -1410,7 +1410,11 @@ class StubsPipFrame(PipFrame):
             environment_extras={"PYTHONPATH": thonny.get_vendored_libs_dir()},
         )
         dlg = SubprocessDialog(
-            self, proc, title="pipkin " + command, long_description=title, autostart=True
+            self,
+            prepared_proc=proc,
+            title="pipkin " + command,
+            long_description=title,
+            autostart=True,
         )
         ui_utils.show_dialog(dlg)
         return dlg.returncode, dlg.stdout, dlg.stderr

@@ -963,6 +963,11 @@ class Workbench(tk.Tk):
             self._backend_menu.add_separator()
 
         self._backend_menu.add_command(
+            label=tr("Create new virtual environment") + "...",
+            command=self._create_new_virtual_environment,
+        )
+
+        self._backend_menu.add_command(
             label=tr("Configure interpreter..."),
             command=lambda: self.show_options("interpreter"),
         )
@@ -2858,6 +2863,15 @@ class Workbench(tk.Tk):
                     widget = widget.nametowidget(widget_name)
 
         return None
+
+    def _create_new_virtual_environment(self):
+        from thonny.venv_dialog import create_new_virtual_environment
+
+        created_exe = create_new_virtual_environment(self)
+        if created_exe is not None:
+            self.set_option("run.backend_name", "LocalCPython")
+            self.set_option("LocalCPython.executable", created_exe)
+            get_runner().restart_backend(False)
 
 
 class WorkbenchEvent(Record):

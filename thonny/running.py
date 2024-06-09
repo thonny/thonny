@@ -1355,6 +1355,9 @@ class SubprocessProxy(BackendProxy, ABC):
         if msg.get("executable"):
             self._reported_executable = msg["executable"]
 
+        if msg.get("base_executable"):
+            self._reported_base_executable = msg["base_executable"]
+
     def _publish_cwd(self, cwd):
         if self.uses_local_filesystem():
             get_workbench().set_local_cwd(cwd)
