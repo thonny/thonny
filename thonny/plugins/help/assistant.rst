@@ -18,4 +18,4 @@ that most users let it skip many checks they don't find relevant. Thonny has pic
 Pylint checks, which are most likely releavant for beginners. If you want more checks, then you
 could run Pylint on your code via command line. If you want to omit certain checks picked by Thonny,
 then go to "Tools => Options => Assistant" and enter the name of the check. The list of all Pylint
-checks can be seen at https://pylint.pycqa.org/en/latest/messages/messages_list.html
+checks can be seen at https://pylint.pycqa.org/en/latest/user_guide/messages/messages_overview.html

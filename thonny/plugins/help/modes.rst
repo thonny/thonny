@@ -1,6 +1,6 @@
 Different modes
 ===============
-*Tools → Options → General* allows switching Thonny's user interface to one of three different modes.
+*Tools → Options → General* allows switching Thonny's user interface to one of two different modes.
 
 Regular mode
 ------------
