@@ -1978,6 +1978,34 @@ def _options_to_zenity_filename(options):
     return None
 
 
+class _CustomDialogProvider:
+    @classmethod
+    def askopenfilename(cls, **options):
+        return cls._call("open", **options)
+
+    @classmethod
+    def askopenfilenames(cls, **options):
+        raise NotImplementedError()
+
+    @classmethod
+    def asksaveasfilename(cls, **options):
+        return cls._call("save", **options)
+
+    @classmethod
+    def askdirectory(cls, **options):
+        return cls._call("dir", **options)
+
+    @classmethod
+    def _call(cls, kind: Literal["save", "open", "dir"], **options):
+        from thonny.base_file_browser import LocalFileDialog
+
+        master = options.get("parent") or options.get("master") or get_workbench()
+        initial_dir = options.get("initialdir") or get_workbench().get_local_cwd()
+        dlg = LocalFileDialog(master, kind=kind, initial_dir=initial_dir)
+        show_dialog(dlg, master)
+        return dlg.result
+
+
 def register_latin_shortcut(
     registry, sequence: str, handler: Callable, tester: Optional[Callable]
 ) -> None:

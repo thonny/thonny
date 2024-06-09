@@ -1,8 +1,5 @@
-import datetime
 import os.path
 import shutil
-import stat
-import subprocess
 import time
 import tkinter as tk
 from logging import getLogger
@@ -12,7 +9,7 @@ from typing import Optional
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import get_menu_char, running_on_mac_os, running_on_windows, sizeof_fmt
+from thonny.misc_utils import get_menu_char, running_on_windows, sizeof_fmt
 from thonny.ui_utils import (
     CommonDialog,
     CustomToolbutton,
@@ -22,6 +19,7 @@ from thonny.ui_utils import (
     create_string_var,
     ems_to_pixels,
     get_hyperlink_cursor,
+    get_style_configuration,
     lookup_style_option,
     open_with_default_app,
     show_dialog,
@@ -1302,25 +1300,8 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         raise NotImplementedError()
 
 
-class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
-    def __init__(self, master, dialog):
-        super().__init__(master, show_expand_buttons=False)
-
-        self.dialog = dialog
-        self.tree["show"] = ("tree", "headings")
-        self.tree.configure(displaycolumns=(5,))
-        self.tree.configure(height=10)
-
-    def open_file(self, path):
-        self.dialog.double_click_file(path)
-
-    def should_open_name_in_thonny(self, name):
-        # In dialog, all file types are to be opened in Thonny
-        return True
-
-
-class BackendFileDialog(CommonDialog):
-    def __init__(self, master, kind, initial_dir):
+class FileDialog(CommonDialog):
+    def __init__(self, master, browser_class, kind, initial_dir):
         super().__init__(master=master)
         self.result = None
 
@@ -1338,17 +1319,28 @@ class BackendFileDialog(CommonDialog):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.browser = DialogRemoteFileBrowser(background, self)
-        self.browser.grid(
+        bordercolor = lookup_style_option("CustomNotebook", "bordercolor")
+
+        self.border = tk.Frame(background, background=bordercolor)
+        self.border.columnconfigure(0, weight=1)
+        self.border.rowconfigure(0, weight=1)
+        self.border.grid(
             row=0,
             column=0,
-            columnspan=4,
             sticky="nsew",
+            columnspan=4,
             pady=self.get_large_padding(),
             padx=self.get_large_padding(),
         )
-        self.browser.configure(borderwidth=1, relief="groove")
+
+        self.browser = browser_class(master=self.border, show_expand_buttons=False)
+        self.browser.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
         self.browser.tree.configure(selectmode="browse")
+        # self.browser.tree["show"] = ("tree", "headings")
+        self.browser.tree.configure(displaycolumns=(5,))
+        self.browser.tree.configure(height=10)
+        self.browser.open_file = self.double_click_file
+        self.browser.should_open_name_in_thonny = lambda name: True
 
         self.name_label = ttk.Label(background, text=tr("File name:"))
         self.name_label.grid(
@@ -1360,9 +1352,7 @@ class BackendFileDialog(CommonDialog):
         )
 
         self.name_var = create_string_var("")
-        self.name_entry = ttk.Entry(
-            background, textvariable=self.name_var, state="normal" if kind == "save" else "disabled"
-        )
+        self.name_entry = ttk.Entry(background, textvariable=self.name_var, state="normal")
         self.name_entry.grid(
             row=1,
             column=1,
@@ -1475,6 +1465,20 @@ class BackendFileDialog(CommonDialog):
     def set_initial_focus(self, node=None) -> bool:
         self.name_entry.focus_set()
         return True
+
+
+class BackendFileDialog(FileDialog):
+    def __init__(self, master, kind, initial_dir):
+        super().__init__(
+            master=master, browser_class=BaseRemoteFileBrowser, kind=kind, initial_dir=initial_dir
+        )
+
+
+class LocalFileDialog(FileDialog):
+    def __init__(self, master, kind, initial_dir):
+        super().__init__(
+            master=master, browser_class=BaseLocalFileBrowser, kind=kind, initial_dir=initial_dir
+        )
 
 
 class NodeChoiceDialog(CommonDialog):
