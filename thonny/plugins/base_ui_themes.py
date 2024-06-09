@@ -740,6 +740,11 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                     "selectForeground": "SystemSelectedTextColor",
                 }
             },
+            "TEntry": {
+                "map": {
+                    "background": [("readonly", "systemWindowBackgroundColor")],
+                },
+            },
         },
     ]
 
