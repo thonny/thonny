@@ -100,24 +100,26 @@ class ConfigurationDialog(CommonDialog):
 
     def _ok(self, event=None):
         changed_options = self.get_changed_options()
-        for _, title, page in self._page_records:
-            try:
-                logger.info("Applying changed options: %r", changed_options)
+        logger.info("Config OK button press with changed options %r", changed_options)
+        if changed_options:
+            for _, title, page in self._page_records:
+                try:
+                    logger.info("Applying changed options for %r", title)
 
-                # Before 5.0, method apply did not have changed_options parameter
-                from inspect import signature
+                    # Before 5.0, method apply did not have changed_options parameter
+                    from inspect import signature
 
-                if len(signature(page.apply).parameters) > 0:
-                    result = page.apply(changed_options)
-                else:
-                    result = page.apply()
+                    if len(signature(page.apply).parameters) > 0:
+                        result = page.apply(changed_options)
+                    else:
+                        result = page.apply()
 
-                # note that it matters whether the result *is* False, or is convertible to False
-                if result is False:
-                    logger.info("%s refused apply", title)
-                    return
-            except Exception:
-                get_workbench().report_exception("Error when applying options in " + title)
+                    # note that it matters whether the result *is* False, or is convertible to False
+                    if result is False:
+                        logger.info("%s refused apply", title)
+                        return
+                except Exception:
+                    get_workbench().report_exception("Error when applying options in " + title)
 
         self.destroy()
 

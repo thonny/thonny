@@ -1,3 +1,4 @@
+import logging
 import os.path
 import tkinter as tk
 from tkinter import ttk
@@ -20,6 +21,8 @@ from thonny.misc_utils import (
 )
 from thonny.running import BackendProxy
 from thonny.ui_utils import CommonDialogEx, create_string_var, ems_to_pixels
+
+logger = logging.getLogger(__name__)
 
 
 class BackendDetailsConfigPage(ConfigurationPage):
@@ -151,6 +154,7 @@ class BackendConfigurationPage(ConfigurationPage):
 
     def apply(self, changed_options: List[str]):
         if self._current_page is None:
+            logger.warning("No current page")
             return None
 
         result = self._current_page.apply(changed_options)
@@ -171,7 +175,10 @@ class BackendConfigurationPage(ConfigurationPage):
             should_restart = self._current_page.should_restart()
 
         if getattr(self._combo_variable, "modified") or should_restart:
+            logger.info("Should restart")
             self.dialog.backend_restart_required = True
+        else:
+            logger.info("Should not restart")
 
         return None
 
