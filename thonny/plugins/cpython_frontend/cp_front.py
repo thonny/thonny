@@ -413,8 +413,8 @@ def find_local_cpython_executables():
                 "C:\\Program Files (x86)\\Python %s" % version,
                 "C:\\Program Files (x86)\\Python %s-32" % version,
                 "C:\\Program Files (x86)\\Python %s-32" % version,
-                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%d" % no_dot),
-                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%d-32" % no_dot),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%s" % no_dot),
+                os.path.expanduser(r"~\AppData\Local\Programs\Python\Python%s-32" % no_dot),
             ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
