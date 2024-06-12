@@ -69,6 +69,7 @@ class WorkDialog(CommonDialog):
         instructions = self.get_instructions()
         # Aqua doesn't allow changing ttk.Frame background via theming
         tip_background = get_style_configuration("Tip.TFrame")["background"]
+        tip_foreground = get_style_configuration("Tip.TLabel")["foreground"]
 
         self.instructions_frame = tk.Frame(self, background=tip_background)
         self.instructions_frame.grid(row=0, column=0, sticky="nsew")
@@ -77,7 +78,8 @@ class WorkDialog(CommonDialog):
 
         pad = self.get_large_padding()
         self.instructions_label = tk.Label(
-            self, background=tip_background, text=instructions, justify="left"
+            self, background=tip_background, text=instructions, justify="left",
+            foreground=tip_foreground
         )
         self.instructions_label.grid(row=0, column=0, sticky="w", padx=pad, pady=pad)
 
