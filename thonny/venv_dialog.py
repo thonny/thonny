@@ -44,6 +44,8 @@ class VenvDialog(SubprocessDialog):
         if current_base_cpython is not None and current_base_cpython not in exes:
             exes.insert(0, current_base_cpython)
 
+        browse_button_width = 2 if get_workbench().is_using_aqua_based_theme() else 3
+
         base_label = ttk.Label(self.main_frame, text=tr("Base interpreter"))
         base_label.grid(row=1, column=1, columnspan=2, sticky="w", padx=epadx, pady=(epady, 0))
         self._base_combo = MappingCombobox(
@@ -55,7 +57,7 @@ class VenvDialog(SubprocessDialog):
             row=2, column=1, columnspan=2, sticky="we", padx=(epadx, ipadx), pady=(0, ipady)
         )
         self._base_browse_button = ttk.Button(
-            self.main_frame, text="...", command=self._browse_base_interpreter
+            self.main_frame, text="...", command=self._browse_base_interpreter, width=browse_button_width
         )
         self._base_browse_button.grid(row=2, column=3, padx=(0, epadx), pady=(0, ipady))
 
@@ -70,7 +72,7 @@ class VenvDialog(SubprocessDialog):
             row=4, column=1, columnspan=2, sticky="we", padx=(epadx, ipadx), pady=(0, ipady)
         )
         self._parent_browse_button = ttk.Button(
-            self.main_frame, text="...", command=self._browse_parent_folder
+            self.main_frame, text="...", command=self._browse_parent_folder, width=browse_button_width
         )
         self._parent_browse_button.grid(row=4, column=3, padx=(0, epadx), pady=(0, ipady))
         self._parent_combo.set(get_workbench().get_local_cwd())
