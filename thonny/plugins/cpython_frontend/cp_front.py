@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 import thonny
 from thonny import get_runner, get_shell, get_workbench, ui_utils
+from thonny.base_file_browser import LocalFileDialog
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -283,12 +284,6 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         self.executable_page.columnconfigure(1, weight=1)
 
         extra_text = tr("NB! Thonny only supports Python %s and later") % "3.9"
-        if running_on_mac_os():
-            extra_text += "\n\n" + tr(
-                "NB! File selection button may not work properly when selecting executables\n"
-                + "from a virtual environment. In this case choose the 'activate' script instead\n"
-                + "of the interpreter (or enter the path directly to the box)!"
-            )
         extra_label = ttk.Label(self.executable_page, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
 
@@ -315,6 +310,7 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         # self.columnconfigure(1, weight=1)
 
     def _select_executable(self):
+        initialdir = get_workbench().get_local_cwd()
         # TODO: get dir of current interpreter
         options = {"parent": self.winfo_toplevel()}
         if running_on_windows():
@@ -323,7 +319,13 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
                 (tr("all files"), ".*"),
             ]
 
-        filename = askopenfilename(**options)
+        if running_on_mac_os():
+            dlg = MacOsInterpreterDialog(self, "open", initialdir)
+            ui_utils.show_dialog(dlg, self)
+            filename = dlg.result
+        else:
+            filename = askopenfilename(**options)
+
         if not filename:
             return
 
@@ -393,6 +395,23 @@ def _get_interpreters_from_windows_registry():
                         pass
 
     return result
+
+
+class MacOsInterpreterDialog(LocalFileDialog):
+    def get_title(self):
+        return tr("Select Python executable")
+
+    def get_favorites(self) -> List[str]:
+        result = super().get_favorites()
+        for extra in [
+            "/Library/Frameworks/Python.framework/Versions",
+            "/usr/bin",
+            "/opt/homebrew/bin",
+        ]:
+            if os.path.isdir(extra) and extra not in result:
+                result.append(extra)
+
+        return result
 
 
 def find_local_cpython_executables():
