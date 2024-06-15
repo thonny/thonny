@@ -186,7 +186,6 @@ class Replayer(tk.Toplevel):
 
     def refresh(self):
         self.session_combo.set_mapping(self.create_sessions_mapping())
-        self.session_combo.select_clear()
 
     def post_menu(self) -> None:
         post_x = (
@@ -347,7 +346,6 @@ class Replayer(tk.Toplevel):
         self.session_start_time = start_time
         self.session_end_time = end_time
         self.load_session(events)
-        self.session_combo.select_clear()
 
     def load_session(self, events: List[Dict]) -> None:
         logger.info("Loading session with %d events", len(events))

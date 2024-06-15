@@ -323,9 +323,6 @@ def add_option_combobox(
         padx=combobox_padx,
     )
 
-    combobox.select_clear()
-    combobox.bind("<<ComboboxSelected>>", lambda _: combobox.select_clear(), True)
-
     return combobox
 
 

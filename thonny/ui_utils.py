@@ -2362,6 +2362,7 @@ class MappingCombobox(ttk.Combobox):
     def set_mapping(self, mapping: Dict[str, Any]):
         self.mapping = mapping
         self["values"] = list(mapping)
+        self.select_clear()
 
     def add_pair(self, label, value):
         self.mapping[label] = value
@@ -2370,6 +2371,7 @@ class MappingCombobox(ttk.Combobox):
     def on_select_value(self, *event):
         if self.value_variable is not None:
             self.value_variable.set(self.get_selected_value())
+        self.select_clear()
 
     def get_selected_value(self) -> Any:
         desc = self.mapping_desc_variable.get()
