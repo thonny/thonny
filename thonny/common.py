@@ -861,14 +861,21 @@ def export_distributions_info(dists: Iterable) -> List[DistInfo]:
                 result[label] = url
         return result
 
+    def get_dist_name(dist):
+        if hasattr(dist, "name"):
+            return dist.name
+        else:
+            # I met this case with Python 3.9
+            return dist.metadata["Name"]
+
     def infer_package_url(dist):
-        pypi_url_name = dist.name.replace("_", "-")
+        pypi_url_name = get_dist_name(dist).replace("_", "-")
         # NB! no guarantee that this package exists at PyPI or related to installed package
-        return f"https://pypi.org/project/{dist.name}/"
+        return f"https://pypi.org/project/{pypi_url_name}/"
 
     return [
         DistInfo(
-            name=dist.name,
+            name=get_dist_name(dist),
             version=dist.version,
             requires=dist.requires or [],
             summary=dist.metadata["Summary"] or None,
