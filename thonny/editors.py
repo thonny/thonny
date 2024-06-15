@@ -486,6 +486,17 @@ class Editor(BaseEditor):
         )
         logger.info("Save dialog returned %r with typevariable %r", new_filename, type_var.get())
 
+        # Different tkinter versions may return different values
+        if new_filename in ["", (), None]:
+            return None
+
+        if running_on_windows():
+            # may have /-s instead of \-s and wrong case
+            new_filename = os.path.join(
+                normpath_with_actual_case(os.path.dirname(new_filename)),
+                os.path.basename(new_filename),
+            )
+
         if type_var.get() == PYTHON_FILES_STR or type_var.get() == "":
             new_filename = self._check_add_py_extension(
                 new_filename, without_asking=type_var.get() == PYTHON_FILES_STR
