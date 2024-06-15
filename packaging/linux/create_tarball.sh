@@ -47,7 +47,6 @@ $TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny
 VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
-XXL_VERSION_NAME=thonny-xxl-$VERSION-$ARCHITECTURE 
 
 
 # clean up unnecessary stuff
@@ -127,19 +126,7 @@ cp ../../*LICENSE.txt $TARGET_DIR
 mkdir -p dist
 tar -cvzf dist/${VERSION_NAME}.tar.gz -C build thonny
 
-# XXL ###########################################################
-
-# $TARGET_DIR/bin/python3.10 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
-#
-# find $TARGET_DIR -type f -name "*.pyo" -delete
-# find $TARGET_DIR -type f -name "*.pyc" -delete
-#
-# mkdir -p dist
-# tar -cvzf dist/$XXL_VERSION_NAME.tar.gz -C build thonny
-#
-#
 # create download + install script
-# normal
 DOWNINSTALL_FILENAME=thonny-${VERSION}.bash
 DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
 cp downinstall_template.sh $DOWNINSTALL_TARGET
@@ -147,12 +134,4 @@ sed -i "s/_VERSION_/${VERSION}/g" $DOWNINSTALL_TARGET
 sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
 #sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-regular-bundle.txt)/g" $DOWNINSTALL_TARGET
 ./insert_deps.py ../requirements-regular-bundle.txt $DOWNINSTALL_TARGET
-
-# xxl
-#XXL_DOWNINSTALL_FILENAME=thonny-xxl-$VERSION.bash
-#XXL_DOWNINSTALL_TARGET=dist/$XXL_DOWNINSTALL_FILENAME
-#cp downinstall_template.sh $XXL_DOWNINSTALL_TARGET
-#sed -i "s/_VERSION_/$VERSION/g" $XXL_DOWNINSTALL_TARGET
-#sed -i "s/_VARIANT_/thonny-xxl/g" $XXL_DOWNINSTALL_TARGET
-#sed -i "s/_DEPS_/$(tr '\n' ' ' < ../requirements-xxl-bundle.txt)/g" $XXL_DOWNINSTALL_TARGET
 

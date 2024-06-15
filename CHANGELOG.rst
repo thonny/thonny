@@ -2,6 +2,16 @@
 Version history
 ===============
 
+5.0.0b1 (2024-06-??)
+====================
+Breaking changes
+----------------
+* Minimal supported Python version is now 3.9
+* Drop support for Windows 7 and 8.
+* Stop publishing binaries for Linux, #3210. The Linux installation script now creates a private venv (based on system python3) for Thonny even in x84_64.
+* Stop publishing XXL bundle as it is not trivial to prepare bundles for all popular architectures while making sure there are no version conflicts between the large number of packages. For teachers who relied on the XXL bundle, the work-around is to prepare a suitable requirements.txt, which can be used as input in Thonny's package manager.
+
+
 4.1.4 (2023-11-19)
 ==================
 * Fix regression in MicroPython package installation, #2979

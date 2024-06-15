@@ -64,7 +64,7 @@ Clone the [Flatpak Builder Tools](https://github.com/flatpak/flatpak-builder-too
     git clone https://github.com/flatpak/flatpak-builder-tools.git
 
 Now run the Flatpak Pip Generator script for the necessary packages.
-The necessary packages are listed in the files `packaging/requirements-regular-bundle.txt` and `packaging/requirements-xxl-bundle.txt` in Thonny's repository.
+The necessary packages are listed in the files `packaging/requirements-regular-bundle.txt` in Thonny's repository.
 The following command shows how to retrieve packages from Thonny's `requirements.txt` file by producing a `python3-modules.json` file.
 I usually convert these to YAML and place them directly in the Flatpak manifest for readability.
 
