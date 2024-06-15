@@ -588,7 +588,7 @@ def windows() -> CompoundUiThemeSettings:
                 "configure": {
                     "background": "systemButtonFace",
                     "activebackground": "#dadada",
-                    "foreground": "SystemWindowText"
+                    "foreground": "SystemWindowText",
                 }
             },
             "CustomNotebook": {

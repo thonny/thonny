@@ -78,8 +78,11 @@ class WorkDialog(CommonDialog):
 
         pad = self.get_large_padding()
         self.instructions_label = tk.Label(
-            self, background=tip_background, text=instructions, justify="left",
-            foreground=tip_foreground
+            self,
+            background=tip_background,
+            text=instructions,
+            justify="left",
+            foreground=tip_foreground,
         )
         self.instructions_label.grid(row=0, column=0, sticky="w", padx=pad, pady=pad)
 

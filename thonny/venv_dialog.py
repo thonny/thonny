@@ -57,7 +57,10 @@ class VenvDialog(SubprocessDialog):
             row=2, column=1, columnspan=2, sticky="we", padx=(epadx, ipadx), pady=(0, ipady)
         )
         self._base_browse_button = ttk.Button(
-            self.main_frame, text="...", command=self._browse_base_interpreter, width=browse_button_width
+            self.main_frame,
+            text="...",
+            command=self._browse_base_interpreter,
+            width=browse_button_width,
         )
         self._base_browse_button.grid(row=2, column=3, padx=(0, epadx), pady=(0, ipady))
 
@@ -72,7 +75,10 @@ class VenvDialog(SubprocessDialog):
             row=4, column=1, columnspan=2, sticky="we", padx=(epadx, ipadx), pady=(0, ipady)
         )
         self._parent_browse_button = ttk.Button(
-            self.main_frame, text="...", command=self._browse_parent_folder, width=browse_button_width
+            self.main_frame,
+            text="...",
+            command=self._browse_parent_folder,
+            width=browse_button_width,
         )
         self._parent_browse_button.grid(row=4, column=3, padx=(0, epadx), pady=(0, ipady))
         self._parent_combo.set(get_workbench().get_local_cwd())
