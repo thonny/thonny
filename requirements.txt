@@ -1,5 +1,4 @@
 jedi>=0.18.1
-setuptools>=45.2
 pylint>=2.4
 docutils>=0.16
 mypy>=0.761
