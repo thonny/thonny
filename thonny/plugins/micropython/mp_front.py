@@ -1254,7 +1254,7 @@ class LocalMicroPythonProxy(MicroPythonProxy):
         self.destroy()
 
     def get_node_label(self):
-        return "Local"
+        return tr("This computer")
 
     def get_full_label(self):
         return self._target_executable
