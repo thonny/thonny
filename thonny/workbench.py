@@ -856,6 +856,7 @@ class Workbench(tk.Tk):
             self._view_notebooks["s"],
             minsize=pane_minsize,
             height=self.get_option("layout.s_nb_height"),
+            hide=not self._panes_have_visible_views(["s"]),
             sticky="nsew",
             stretch="never",
         )
