@@ -601,8 +601,8 @@ def get_os_level_favorite_folders() -> List[str]:
         raise NotImplementedError()
 
     result = []
-    for name in ["Desktop", "Documents", "Downloads"]:
-        path = os.path.expanduser(f"~/{name}")
+    for name in [".", "Desktop", "Documents", "Downloads"]:
+        path = os.path.realpath(os.path.expanduser(f"~/{name}"))
         if os.path.isdir(path):
             result.append(path)
 
