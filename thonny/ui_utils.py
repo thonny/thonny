@@ -1779,12 +1779,9 @@ def open_path_in_system_file_manager(path):
 
 
 def _get_dialog_provider():
-    if platform.system() != "Linux" or get_workbench().get_option("file.avoid_zenity"):
-        return filedialog
+    return _CustomDialogProvider
 
-    import shutil
-
-    if shutil.which("zenity"):
+    if platform.system() == "Linux" and get_workbench().get_option("file.use_zenity"):
         return _ZenityDialogProvider
 
     # fallback
@@ -1901,16 +1898,25 @@ class _ZenityDialogProvider:
 
     @classmethod
     def askopenfilename(cls, **options):
+        if not cls._check_zenity_exists(options["parent"]):
+            return None
+
         args = cls._convert_common_options("Open file", **options)
         return cls._call(args)
 
     @classmethod
     def askopenfilenames(cls, **options):
+        if not cls._check_zenity_exists(options["parent"]):
+            return None
+
         args = cls._convert_common_options("Open files", **options)
         return cls._call(args + ["--multiple"]).split("|")
 
     @classmethod
     def asksaveasfilename(cls, **options):
+        if not cls._check_zenity_exists(options["parent"]):
+            return None
+
         args = cls._convert_common_options("Save as", **options)
         args.append("--save")
 
@@ -1922,6 +1928,9 @@ class _ZenityDialogProvider:
 
     @classmethod
     def askdirectory(cls, **options):
+        if not cls._check_zenity_exists(options["parent"]):
+            return None
+
         args = cls._convert_common_options("Select directory", **options)
         args.append("--directory")
         return cls._call(args)
@@ -1952,6 +1961,20 @@ class _ZenityDialogProvider:
             args.append("--file-filter=%s | %s" % (desc, pattern))
 
         return args
+
+    @classmethod
+    def _check_zenity_exists(cls, parent) -> bool:
+        import shutil
+
+        if shutil.which("zenity"):
+            return True
+        else:
+            messagebox.showerror(
+                tr("Error"),
+                "Could not find 'zenity'. Is it installed?\n"
+                "Please install it or turn off Zenity file dialogs?",
+            )
+            return False
 
     @classmethod
     def _call(cls, args):
@@ -2001,7 +2024,13 @@ class _CustomDialogProvider:
 
         master = options.get("parent") or options.get("master") or get_workbench()
         initial_dir = options.get("initialdir") or get_workbench().get_local_cwd()
-        dlg = LocalFileDialog(master, kind=kind, initial_dir=initial_dir)
+        dlg = LocalFileDialog(
+            master,
+            kind=kind,
+            initial_dir=initial_dir,
+            filetypes=options.get("filetypes"),
+            typevariable=options.get("typevariable"),
+        )
         show_dialog(dlg, master)
         return dlg.result
 
@@ -2376,6 +2405,9 @@ class MappingCombobox(ttk.Combobox):
     def get_selected_value(self) -> Any:
         desc = self.mapping_desc_variable.get()
         return self.mapping.get(desc, None)
+
+    def select_first_value(self) -> None:
+        self.select_value(next(iter(self.mapping.values())))
 
     def select_value(self, value) -> None:
         for desc in self.mapping:

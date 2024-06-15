@@ -2,20 +2,28 @@ import os.path
 import shutil
 import time
 import tkinter as tk
+from abc import ABC, abstractmethod
 from logging import getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
-from thonny.misc_utils import get_menu_char, running_on_windows, sizeof_fmt
+from thonny.misc_utils import (
+    get_menu_char,
+    get_os_level_favorite_folders,
+    running_on_windows,
+    sizeof_fmt,
+)
 from thonny.ui_utils import (
     CommonDialog,
     CustomToolbutton,
+    MappingCombobox,
     ask_one_from_choices,
     ask_string,
     check_create_aqua_scrollbar_stripe,
+    create_action_label,
     create_string_var,
     ems_to_pixels,
     get_hyperlink_cursor,
@@ -1036,6 +1044,7 @@ class CopyPaste(object):
 
 class BaseLocalFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_expand_buttons=True):
+        self.dir_separator = os.sep
         super().__init__(master, show_expand_buttons=show_expand_buttons)
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
@@ -1300,24 +1309,44 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         raise NotImplementedError()
 
 
-class FileDialog(CommonDialog):
-    def __init__(self, master, browser_class, kind, initial_dir):
+class FileDialog(CommonDialog, ABC):
+    def __init__(
+        self,
+        master,
+        browser_class,
+        kind,
+        initial_dir,
+        filetypes: Optional[List[Tuple[str, str]]] = None,
+        typevariable: Optional[tk.Variable] = None,
+    ):
         super().__init__(master=master)
         self.result = None
+
+        if filetypes is None:
+            filetypes = [(tr("all files"), "*")]
+        self._extensions_by_desc = {desc: ext.split() for (desc, ext) in filetypes}
+        self._typevariable = typevariable
 
         self.updating_selection = False
 
         self.kind = kind
-        if kind == "open":
-            self.title(tr("Open from %s") % get_runner().get_node_label())
-        else:
-            assert kind == "save"
-            self.title(tr("Save to %s") % get_runner().get_node_label())
+        self.title(self.get_title())
 
         background = ttk.Frame(self)
         background.grid(row=0, column=0, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+
+        if self.get_favorites():
+            fav_panel = ttk.Frame(background)
+            fav_panel.grid(
+                row=0,
+                column=0,
+                sticky="nwe",
+                pady=self.get_large_padding(),
+                padx=(self.get_large_padding(), 0),
+            )
+            self._add_favorites(fav_panel)
 
         bordercolor = lookup_style_option("CustomNotebook", "bordercolor")
 
@@ -1326,7 +1355,7 @@ class FileDialog(CommonDialog):
         self.border.rowconfigure(0, weight=1)
         self.border.grid(
             row=0,
-            column=0,
+            column=1,
             sticky="nsew",
             columnspan=4,
             pady=self.get_large_padding(),
@@ -1334,7 +1363,7 @@ class FileDialog(CommonDialog):
         )
 
         self.browser = browser_class(master=self.border, show_expand_buttons=False)
-        self.browser.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
+        self.browser.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
         self.browser.tree.configure(selectmode="browse")
         # self.browser.tree["show"] = ("tree", "headings")
         self.browser.tree.configure(displaycolumns=(5,))
@@ -1345,9 +1374,9 @@ class FileDialog(CommonDialog):
         self.name_label = ttk.Label(background, text=tr("File name:"))
         self.name_label.grid(
             row=1,
-            column=0,
-            pady=(0, self.get_large_padding()),
-            padx=self.get_large_padding(),
+            column=1,
+            pady=(0, self.get_small_padding()),
+            padx=(self.get_large_padding(), self.get_small_padding()),
             sticky="w",
         )
 
@@ -1355,33 +1384,47 @@ class FileDialog(CommonDialog):
         self.name_entry = ttk.Entry(background, textvariable=self.name_var, state="normal")
         self.name_entry.grid(
             row=1,
-            column=1,
-            pady=(0, self.get_large_padding()),
-            padx=(0, self.get_large_padding()),
+            column=2,
+            pady=(0, self.get_small_padding()),
+            padx=(0, self.get_small_padding()),
             sticky="we",
         )
         self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
 
-        self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok)
-        self.ok_button.grid(
+        types_mapping = {f"{desc} ({pattern})": desc for (desc, pattern) in filetypes}
+
+        self.filter_combo = MappingCombobox(master=background, mapping=types_mapping, width=20)
+
+        self.filter_combo.grid(
             row=1,
-            column=2,
-            pady=(0, self.get_large_padding()),
+            column=3,
+            columnspan=2,
+            pady=(0, self.get_small_padding()),
             padx=(0, self.get_large_padding()),
+            sticky="we",
+        )
+        self.filter_combo.select_first_value()
+
+        self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok, default="active")
+        self.ok_button.grid(
+            row=2,
+            column=3,
+            pady=(0, self.get_large_padding()),
+            padx=(0, 0),
             sticky="e",
         )
 
         self.cancel_button = ttk.Button(background, text=tr("Cancel"), command=self.on_cancel)
         self.cancel_button.grid(
-            row=1,
-            column=3,
+            row=2,
+            column=4,
             pady=(0, self.get_large_padding()),
             padx=(0, self.get_large_padding()),
             sticky="e",
         )
 
         background.rowconfigure(0, weight=1)
-        background.columnconfigure(1, weight=1)
+        background.columnconfigure(2, weight=1)
 
         self.bind("<Escape>", self.on_cancel, True)
         self.bind("<Return>", self.on_ok, True)
@@ -1395,15 +1438,57 @@ class FileDialog(CommonDialog):
 
         self.name_entry.focus_set()
 
+    def get_title(self):
+        if self.kind == "open":
+            return tr("Open")
+        elif self.kind == "save":
+            return tr("Save")
+        elif self.kind == "dir":
+            return tr("Select folder")
+        else:
+            raise ValueError("Unexpected kind " + self.kind)
+
+    def get_favorites(self) -> List[str]:
+        return get_os_level_favorite_folders()
+
+    def _add_favorites(self, parent: ttk.Frame):
+
+        for i, path in enumerate(self.get_favorites()):
+            name = os.path.basename(path)
+
+            def open_favorite(event=None, path=path):
+                logger.info("Opening favorite %r", path)
+                self.browser.request_focus_into(path)
+
+            label = create_action_label(parent, name, open_favorite)
+            label.grid(sticky="w", pady=(0, ems_to_pixels(0.5)))
+
     def on_ok(self, event=None):
         tree = self.browser.tree
-        name = self.name_var.get()
+        name = self.name_var.get().strip()
 
         if not name:
             messagebox.showerror(tr("Error"), tr("You need to select a file!"), master=self)
             return
 
-        for node_id in tree.get_children(""):
+        if self.kind == "save":
+            # Mimicking a Windows trick
+            # https://www.winhelponline.com/blog/double-extensions-files-save-as-dialog-programs-avoid/
+            if name.endswith('"') and name.startswith('"'):
+                name = name[1:-1]
+            else:
+                proposed_extensions = self._extensions_by_desc[
+                    self.filter_combo.get_selected_value()
+                ]
+                for ext in proposed_extensions:
+                    if name.endswith(ext) or ext in [".*", "*"]:
+                        break
+                else:
+                    name += proposed_extensions[0]
+
+        # In the back-end case I can't ask local OS whether the file exists
+        # Need to consult the tree instead
+        for node_id in tree.get_children(""):  # NB! only works without expanders
             if name and name == tree.set(node_id, "name"):
                 break
         else:
@@ -1411,20 +1496,23 @@ class FileDialog(CommonDialog):
 
         if node_id is not None:
             node_kind = tree.set(node_id, "kind")
-            if node_kind != "file":
+            if self.kind in ["open", "save"] and node_kind != "file":
                 messagebox.showerror(tr("Error"), tr("You need to select a file!"), master=self)
                 return
-            elif self.kind == "save":
+            if self.kind == "save":
                 if not messagebox.askyesno(
                     tr("Overwrite?"), tr("Do you want to overwrite '%s' ?") % name, master=self
                 ):
                     return
 
         parent_path = tree.set("", "path")
-        if parent_path == "" or parent_path.endswith("/"):
+        if parent_path == "" or parent_path.endswith(self.browser.dir_separator):
             self.result = parent_path + name
         else:
-            self.result = parent_path + "/" + name
+            self.result = parent_path + self.browser.dir_separator + name
+
+        if self._typevariable is not None:
+            self._typevariable.set(self.filter_combo.get_selected_value())
 
         self.destroy()
 
@@ -1468,16 +1556,43 @@ class FileDialog(CommonDialog):
 
 
 class BackendFileDialog(FileDialog):
-    def __init__(self, master, kind, initial_dir):
+    def __init__(
+        self,
+        master,
+        kind,
+        initial_dir,
+        filetypes: Optional[List[Tuple[str, str]]] = None,
+        typevariable: Optional[tk.Variable] = None,
+    ):
         super().__init__(
-            master=master, browser_class=BaseRemoteFileBrowser, kind=kind, initial_dir=initial_dir
+            master=master,
+            browser_class=BaseRemoteFileBrowser,
+            kind=kind,
+            initial_dir=initial_dir,
+            filetypes=filetypes,
+            typevariable=typevariable,
         )
+
+    def get_favorites(self) -> List[str]:
+        return []
 
 
 class LocalFileDialog(FileDialog):
-    def __init__(self, master, kind, initial_dir):
+    def __init__(
+        self,
+        master,
+        kind,
+        initial_dir,
+        filetypes: Optional[List[Tuple[str, str]]] = None,
+        typevariable: Optional[tk.Variable] = None,
+    ):
         super().__init__(
-            master=master, browser_class=BaseLocalFileBrowser, kind=kind, initial_dir=initial_dir
+            master=master,
+            browser_class=BaseLocalFileBrowser,
+            kind=kind,
+            initial_dir=initial_dir,
+            filetypes=filetypes,
+            typevariable=typevariable,
         )
 
 

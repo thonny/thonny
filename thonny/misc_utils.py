@@ -9,7 +9,7 @@ import sys
 import threading
 import time
 from logging import getLogger
-from typing import Any, Optional, Sequence
+from typing import Any, List, Optional, Sequence
 
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 
 def get_known_folder(ID):
     # http://stackoverflow.com/a/3859336/261181
-    # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
+    # https://tarma.com/support/im9/using/symbols/functions/csidls.htm
     import ctypes.wintypes
 
     SHGFP_TYPE_CURRENT = 0
@@ -594,3 +594,25 @@ def download_and_parse_json(url: str, timeout: int = 10) -> Any:
     import json
 
     return json.loads(download_bytes(url, timeout=timeout))
+
+
+def get_os_level_favorite_folders() -> List[str]:
+    if running_on_windows():
+        raise NotImplementedError()
+
+    result = []
+    for name in ["Desktop", "Documents", "Downloads"]:
+        path = os.path.expanduser(f"~/{name}")
+        if os.path.isdir(path):
+            result.append(path)
+
+    gtk_favorites_path = os.path.expanduser("~/.config/gtk3.0/bookmarks")
+    if running_on_linux() and os.path.isfile(gtk_favorites_path):
+        with open(gtk_favorites_path, "rt", encoding="utf-8") as fp:
+            for line in fp:
+                if line.startswith("file:///"):
+                    path = line[7:].strip()
+                    if os.path.isdir(path) and path not in result:
+                        result.append(path)
+
+    return result

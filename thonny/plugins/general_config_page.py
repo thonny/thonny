@@ -29,12 +29,14 @@ class GeneralConfigurationPage(ConfigurationPage):
             tr("Reopen files from previous session"),
         )
         if running_on_linux():
-            add_option_checkbox(
-                self,
-                "file.avoid_zenity",
-                tr("Use Tk file dialogs instead of Zenity"),
-                tooltip=tr("Select if the file dialogs end up behind the main window"),
-            )
+            import shutil
+
+            if shutil.which("zenity"):
+                add_option_checkbox(
+                    self,
+                    "file.use_zenity",
+                    tr("Use Zenity file dialogs"),
+                )
 
         add_option_checkbox(
             self,
