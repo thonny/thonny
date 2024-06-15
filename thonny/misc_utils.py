@@ -606,7 +606,7 @@ def get_os_level_favorite_folders() -> List[str]:
         if os.path.isdir(path):
             result.append(path)
 
-    gtk_favorites_path = os.path.expanduser("~/.config/gtk3.0/bookmarks")
+    gtk_favorites_path = os.path.expanduser("~/.config/gtk-3.0/bookmarks")
     if running_on_linux() and os.path.isfile(gtk_favorites_path):
         with open(gtk_favorites_path, "rt", encoding="utf-8") as fp:
             for line in fp:
