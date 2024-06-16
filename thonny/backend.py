@@ -602,7 +602,7 @@ class UploadDownloadMixin(ABC):
         total_cost = 0
         for item in items:
             if item["kind"] == "file":
-                total_cost += item["size"] + self._get_file_fixed_cost()
+                total_cost += item["size_bytes"] + self._get_file_fixed_cost()
             else:
                 total_cost += self._get_dir_transfer_cost()
 
@@ -633,9 +633,9 @@ class UploadDownloadMixin(ABC):
                 else:
                     if self._supports_directories():
                         ensure_dir(self._get_parent_directory(item["target_path"]))
-                    print("%s (%d bytes)" % (item["source_path"], item["size"]))
+                    print("%s (%d bytes)" % (item["source_path"], item["size_bytes"]))
                     transfer_file_fun(item["source_path"], item["target_path"], copy_bytes_notifier)
-                    completed_cost += self._get_file_fixed_cost() + item["size"]
+                    completed_cost += self._get_file_fixed_cost() + item["size_bytes"]
             except OSError as e:
                 logger.exception("OSError during upload")
                 errors.append(

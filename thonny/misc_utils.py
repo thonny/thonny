@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import os.path
 import platform
@@ -10,6 +11,8 @@ import threading
 import time
 from logging import getLogger
 from typing import Any, List, Optional, Sequence
+
+from thonny.languages import tr
 
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
@@ -616,3 +619,45 @@ def get_os_level_favorite_folders() -> List[str]:
                         result.append(path)
 
     return result
+
+
+def format_date_and_time_compact(timestamp: time.struct_time, without_seconds: bool):
+    return (
+        format_date_compact(timestamp)
+        + " "
+        + format_time_compact(timestamp, without_seconds=without_seconds)
+    )
+
+
+def format_time_compact(timestamp: time.struct_time, without_seconds: bool):
+
+    # Useful with locale specific formats, which would be a hassle to construct from parts
+    s = time.strftime("%X", timestamp)
+    if without_seconds:
+        seconds_part = ":%02d" % (timestamp.tm_sec,)
+        seconds_index = s.rfind(seconds_part)
+        if seconds_index == -1:
+            return s
+
+        return s[:seconds_index] + s[seconds_index + len(seconds_part) :]
+    else:
+        return s
+
+
+def format_date_compact(timestamp: time.struct_time):
+    # Useful with locale specific formats, which would be a hassle to construct from parts
+    now = time.localtime()
+    if (
+        timestamp.tm_year == now.tm_year
+        and timestamp.tm_mon == now.tm_mon
+        and timestamp.tm_mday == now.tm_mday
+    ):
+        return tr("Today")
+
+    s = time.strftime("%x", timestamp)
+    for sep in [" ", "-", ".", "/"]:
+        year_part = sep + str(now.tm_year)
+        if year_part in s:
+            return s.replace(year_part, "").strip()
+
+    return s

@@ -16,7 +16,12 @@ from thonny import codeview, get_workbench, ui_utils
 from thonny.custom_notebook import CustomNotebook
 from thonny.editors import BaseEditor
 from thonny.languages import tr
-from thonny.misc_utils import get_menu_char, running_on_mac_os
+from thonny.misc_utils import (
+    format_date_compact,
+    format_time_compact,
+    get_menu_char,
+    running_on_mac_os,
+)
 from thonny.plugins.event_logging import EventsInputOutputFileError, format_time_range
 from thonny.shell import BaseShellText
 from thonny.tktextext import TextFrame, TweakableText
@@ -281,8 +286,8 @@ class Replayer(tk.Toplevel):
             # As I'm fixing the end time, I need to also fix the events
             self.current_session_events = event_logging.session_events.copy()
 
-            start_time_str = _custom_time_format(start_time, without_seconds=True)
-            end_time_str = _custom_time_format(end_time, without_seconds=True)
+            start_time_str = format_time_compact(start_time, without_seconds=True)
+            end_time_str = format_time_compact(end_time, without_seconds=True)
             current_session_label = tr("Current session") + f" • {start_time_str} - {end_time_str}"
 
             mapping[current_session_label] = (CURRENT_SESSION_MARKER, start_time, end_time)
@@ -310,12 +315,12 @@ class Replayer(tk.Toplevel):
                 ) == time.mktime(event_logging.session_start_time):
                     # Don't read current session from file
                     continue
-                date_s = _custom_date_format(start_time)
-                time_s = _custom_time_format(start_time, without_seconds) + " - "
+                date_s = format_date_compact(start_time)
+                time_s = format_time_compact(start_time, without_seconds) + " - "
                 if end_time is None:
                     time_s += "???"
                 else:
-                    time_s += _custom_time_format(end_time, without_seconds)
+                    time_s += format_time_compact(end_time, without_seconds)
                 label = f"{date_s} • {time_s}"
             except Exception:
                 logger.exception(f"Could not parse filename {name}")
@@ -1004,39 +1009,6 @@ def open_replayer(session_filename: Optional[str] = None):
     if session_filename:
         instance.update_idletasks()
         instance.open_file(session_filename)
-
-
-def _custom_date_format(timestamp: time.struct_time):
-    # Useful with locale specific formats, which would be a hassle to construct from parts
-    now = time.localtime()
-    if (
-        timestamp.tm_year == now.tm_year
-        and timestamp.tm_mon == now.tm_mon
-        and timestamp.tm_mday == now.tm_mday
-    ):
-        return tr("Today")
-
-    s = time.strftime("%x", timestamp)
-    for sep in [" ", "-", ".", "/"]:
-        year_part = sep + str(now.tm_year)
-        if year_part in s:
-            return s.replace(year_part, "").strip()
-
-    return s
-
-
-def _custom_time_format(timestamp: time.struct_time, without_seconds: bool):
-    # Useful with locale specific formats, which would be a hassle to construct from parts
-    s = time.strftime("%X", timestamp)
-    if without_seconds:
-        seconds_part = ":%02d" % (timestamp.tm_sec,)
-        seconds_index = s.rfind(seconds_part)
-        if seconds_index == -1:
-            return s
-
-        return s[:seconds_index] + s[seconds_index + len(seconds_part) :]
-    else:
-        return s
 
 
 def load_plugin() -> None:

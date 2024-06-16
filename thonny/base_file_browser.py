@@ -11,6 +11,7 @@ from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
 from thonny.languages import tr
 from thonny.misc_utils import (
+    format_date_and_time_compact,
     get_menu_char,
     get_os_level_favorite_folders,
     running_on_windows,
@@ -66,7 +67,16 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree = ttk.Treeview(
             self,
-            columns=["#0", "kind", "path", "name", "modified", "size"],
+            columns=[
+                "#0",
+                "kind",
+                "path",
+                "name",
+                "modified_fmt",
+                "size_fmt",
+                "modified_epoch",
+                "size_bytes",
+            ],
             displaycolumns=(
                 # 4,
                 # 5
@@ -99,11 +109,13 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree.column("#0", width=200, anchor=tk.W)
         self.tree.heading("#0", text=tr("Name"), anchor=tk.W)
-        self.tree.column("modified", width=60, anchor=tk.W)
-        self.tree.heading("modified", text=tr("Modified"), anchor=tk.W)
-        self.tree.column("size", width=40, anchor=tk.E)
-        self.tree.heading("size", text=tr("Size (bytes)"), anchor=tk.E)
-        self.tree.column("kind", width=30, anchor=tk.W)
+        self.tree.column("modified_fmt", width=60, anchor=tk.E)
+        self.tree.heading("modified_fmt", text=tr("Modified"), anchor=tk.E)
+        self.tree.column("size_fmt", width=40, anchor=tk.E)
+        self.tree.heading("size_fmt", text=tr("Size"), anchor=tk.E)
+        # self.tree.column("kind", width=30, anchor=tk.W)
+        # self.tree.column("size_bytes")
+        # self.tree.column("modified_epoch")
         #         self.tree.heading("kind", text="Kind")
         #         self.tree.column("path", width=300, anchor=tk.W)
         #         self.tree.heading("path", text="path")
@@ -379,7 +391,7 @@ class BaseFileBrowser(ttk.Frame):
                         child_data["label"] = child_name
 
                     if "isdir" not in child_data:
-                        child_data["isdir"] = child_data.get("size", 0) is None
+                        child_data["isdir"] = child_data.get("size_bytes", 0) is None
             else:
                 assert children_data is None
 
@@ -523,20 +535,25 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.tree.set(node_id, "path")
 
-        if data.get("modified"):
+        if data.get("modified_epoch"):
             try:
                 # modification time is Unix epoch
-                time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(data["modified"])))
+                time_str = format_date_and_time_compact(
+                    time.localtime(int(data["modified_epoch"])), without_seconds=True
+                )
             except Exception:
+                logger.exception("Could not format modified (%r)", data.get("modified_epoch"))
                 time_str = ""
         else:
             time_str = ""
 
-        self.tree.set(node_id, "modified", time_str)
+        self.tree.set(node_id, "modified_fmt", time_str)
+        self.tree.set(node_id, "modified_epoch", data.get("modified_epoch", ""))
 
         if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
-            self.tree.set(node_id, "size", "")
+            self.tree.set(node_id, "size_fmt", "")
+            self.tree.set(node_id, "size_bytes", "")
 
             # Ensure that expand button is visible
             # unless we know it doesn't have children
@@ -554,7 +571,8 @@ class BaseFileBrowser(ttk.Frame):
                 img = self.folder_icon
         else:
             self.tree.set(node_id, "kind", "file")
-            self.tree.set(node_id, "size", data["size"])
+            self.tree.set(node_id, "size_bytes", data["size_bytes"])
+            self.tree.set(node_id, "size_fmt", sizeof_fmt(data["size_bytes"]))
 
             # Make sure it doesn't have children
             self.tree.set_children(node_id)
@@ -771,8 +789,8 @@ class BaseFileBrowser(ttk.Frame):
             title = tr("Directory properties")
         else:
             title = tr("File properties")
-            size_fmt_str = sizeof_fmt(int(values["size"]))
-            bytes_str = str(values["size"]) + " " + tr("bytes")
+            size_fmt_str = values["size_fmt"]
+            bytes_str = str(values["size_bytes"]) + " " + tr("bytes")
 
             text += (
                 tr("Size")
@@ -785,8 +803,8 @@ class BaseFileBrowser(ttk.Frame):
                 + "\n\n"
             )
 
-        if values["modified"].strip():
-            text += tr("Modified") + ":\n    " + values["modified"] + "\n\n"
+        if values["modified_fmt"].strip():
+            text += tr("Modified") + ":\n    " + values["modified_fmt"] + "\n\n"
 
         messagebox.showinfo(title, text.strip(), master=self)
 
@@ -1365,8 +1383,13 @@ class FileDialog(CommonDialog, ABC):
         self.browser = browser_class(master=self.border, show_expand_buttons=False)
         self.browser.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
         self.browser.tree.configure(selectmode="browse")
-        # self.browser.tree["show"] = ("tree", "headings")
-        self.browser.tree.configure(displaycolumns=(5,))
+        self.browser.tree["show"] = ("tree", "headings")
+        self.browser.tree.configure(
+            displaycolumns=(
+                4,
+                5,
+            )
+        )
         self.browser.tree.configure(height=10)
         self.browser.open_file = self.double_click_file
         self.browser.should_open_name_in_thonny = lambda name: True

@@ -3,6 +3,8 @@
 """
 Classes used both by front-end and back-end
 """
+from __future__ import annotations
+
 import dataclasses
 import os.path
 import site
@@ -516,15 +518,15 @@ def get_single_dir_child_data(path: str, include_hidden: bool = False) -> Option
                     name = os.path.basename(full_child_path)
                     st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
                     result[name] = {
-                        "size": None if os.path.isdir(full_child_path) else st.st_size,
-                        "modified": st.st_mtime,
+                        "size_bytes": None if os.path.isdir(full_child_path) else st.st_size,
+                        "modified_epoch": st.st_mtime,
                         "hidden": hidden,
                     }
         except PermissionError:
             result["<not accessible>"] = {
                 "kind": "error",
-                "size": -1,
-                "modified": None,
+                "size_bytes": -1,
+                "modified_epoch": None,
                 "hidden": None,
             }
 
@@ -584,8 +586,8 @@ def get_windows_volumes_info():
                     label = volume_name + " (" + drive + ")"
                     result[path] = {
                         "label": label,
-                        "size": None,
-                        "modified": max(st.st_mtime, st.st_ctime),
+                        "size_bytes": None,
+                        "modified_epoch": max(st.st_mtime, st.st_ctime),
                     }
                 except OSError as e:
                     logger.warning("Could not get information for %s", path, exc_info=e)
@@ -644,8 +646,8 @@ def get_windows_network_locations():
                 target = get_windows_lnk_target(lnk_path)
                 result[target] = {
                     "label": entry.name + " (" + target + ")",
-                    "size": None,
-                    "modified": None,
+                    "size_bytes": None,
+                    "modified_epoch": None,
                 }
             except Exception:
                 logger.error("Can't get target from %s", lnk_path, exc_info=True)

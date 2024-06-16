@@ -1381,8 +1381,8 @@ class MicroPythonBackend(MainBackend, ABC):
 
         result = {
             "kind": kind,
-            "size": size,
-            "modified": modified,
+            "size_bytes": size,
+            "modified_epoch": modified,
             "hidden": basename.startswith("."),
         }
         if error:

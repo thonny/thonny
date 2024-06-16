@@ -697,16 +697,16 @@ class MainCPythonBackend(MainBackend):
             return {
                 "path": path,
                 "kind": kind,
-                "size": None if kind == "dir" else os.path.getsize(path),
-                "modified": os.path.getmtime(path),
+                "size_bytes": None if kind == "dir" else os.path.getsize(path),
+                "modified_epoch": os.path.getmtime(path),
                 "error": None,
             }
         except OSError as e:
             return {
                 "path": path,
                 "kind": None,
-                "size": None,
-                "modified": None,
+                "size_bytes": None,
+                "modified_epoch": None,
                 "error": str(e),
             }
 

@@ -437,7 +437,7 @@ class DownloadDialog(TransferDialog):
             result.append(
                 {
                     "kind": source_item["kind"],
-                    "size": source_item["size"],
+                    "size_bytes": source_item["size_bytes"],
                     "source_path": source_path,
                     "target_path": transpose_path(
                         source_path, source_context_dir, target_dir, PurePosixPath, pathlib.Path
@@ -461,7 +461,7 @@ class DownloadDialog(TransferDialog):
 
                 result[target_path] = {
                     "kind": kind,
-                    "size": size,
+                    "size_bytes": size,
                 }
         return result
 
@@ -514,19 +514,19 @@ def pick_transfer_items(
                     % (item["target_path"], item["source_path"], target_info["kind"], item["kind"])
                 )
             elif item["kind"] == "file":
-                size_diff = item["size"] - target_info["size"]
+                size_diff = item["size_bytes"] - target_info["size_bytes"]
                 if size_diff > 0:
                     replacement = "a larger file (%s + %s)" % (
-                        sizeof_fmt(target_info["size"]),
+                        sizeof_fmt(target_info["size_bytes"]),
                         sizeof_fmt(size_diff),
                     )
                 elif size_diff < 0:
                     replacement = "a smaller file (%s - %s)" % (
-                        sizeof_fmt(target_info["size"]),
+                        sizeof_fmt(target_info["size_bytes"]),
                         sizeof_fmt(-size_diff),
                     )
                 else:
-                    replacement = "a file of same size (%s)" % sizeof_fmt(target_info["size"])
+                    replacement = "a file of same size (%s)" % sizeof_fmt(target_info["size_bytes"])
 
                 overwrites.append("'%s' with %s" % (item["target_path"], replacement))
 
@@ -577,7 +577,7 @@ def prepare_upload_items(
     result = [
         {
             "kind": kind,
-            "size": size,
+            "size_bytes": size,
             "source_path": source_path,
             "target_path": transpose_path(
                 source_path, source_context_dir, target_dir, pathlib.Path, PurePosixPath
