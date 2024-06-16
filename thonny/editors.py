@@ -88,12 +88,18 @@ class BaseEditor(ttk.Frame):
         self._code_view.text.event_generate("<<UpdateAppearance>>")
         self._code_view.grid_main_widgets()
 
-    def update_file_type(self):
+    def update_file_type(self, has_python_shebang=False):
         if self._filename is None:
             self._code_view.set_file_type(None)
         else:
+            # Include backup files: *.py.bak, *.py.orig, etc
+            get_dots = len(re.findall(r'\.', self._filename))
             ext = self._filename.split(".")[-1].lower()
-            if ext in PYTHON_EXTENSIONS:
+
+            if ext != 'py' and get_dots > 1:
+                ext = self._filename.split(".")[-2].lower()
+
+            if ext in PYTHON_EXTENSIONS or has_python_shebang:
                 file_type = "python"
             elif ext in PYTHONLIKE_EXTENSIONS:
                 file_type = "pythonlike"
@@ -263,8 +269,16 @@ class Editor(BaseEditor):
             )
             return False
 
+        # Check for python in shebang
+        content_bytes = self._code_view.get_content_as_bytes()
+        if self._has_env_in_shebang(content_bytes):
+            self._code_view.set_file_type('python')
+
         self.update_appearance()
         return True
+
+    def _has_env_in_shebang(self, content_bytes, env='python'):
+        return env in content_bytes.splitlines()[0].decode("utf-8")
 
     def _load_local_file(self, filename, keep_undo=False):
         if os.path.exists(filename):
@@ -360,7 +374,10 @@ class Editor(BaseEditor):
 
         if not save_copy:
             self._filename = save_filename
-            self.update_file_type()
+            if self._has_env_in_shebang(content_bytes):
+                self.update_file_type(True)
+            else:
+                self.update_file_type()
 
         if not save_copy or self._filename == save_filename:
             self.update_title()
