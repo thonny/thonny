@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import datetime
 import os.path
 import platform
 import queue
@@ -621,10 +622,12 @@ def get_os_level_favorite_folders() -> List[str]:
     return result
 
 
-def format_date_and_time_compact(timestamp: time.struct_time, without_seconds: bool):
+def format_date_and_time_compact(
+    timestamp: time.struct_time, without_seconds: bool, optimize_year: bool = False
+):
     return (
-        format_date_compact(timestamp)
-        + " "
+        format_date_compact(timestamp, optimize_year=optimize_year)
+        + " • "
         + format_time_compact(timestamp, without_seconds=without_seconds)
     )
 
@@ -644,7 +647,7 @@ def format_time_compact(timestamp: time.struct_time, without_seconds: bool):
         return s
 
 
-def format_date_compact(timestamp: time.struct_time):
+def format_date_compact(timestamp: time.struct_time, optimize_year: bool = False):
     # Useful with locale specific formats, which would be a hassle to construct from parts
     now = time.localtime()
     if (
@@ -654,10 +657,73 @@ def format_date_compact(timestamp: time.struct_time):
     ):
         return tr("Today")
 
-    s = time.strftime("%x", timestamp)
-    for sep in [" ", "-", ".", "/"]:
-        year_part = sep + str(now.tm_year)
-        if year_part in s:
-            return s.replace(year_part, "").strip()
+    result = time.strftime(get_date_format_with_month_abbrev(), timestamp)
+    age_in_days = (time.time() - time.mktime(timestamp)) / 60 / 60 / 24
+    if (
+        age_in_days < 0
+        or (now.tm_year != timestamp.tm_year and age_in_days > 10)
+        or age_in_days > 10
+    ):
+        result += " " + str(timestamp.tm_year)
 
-    return s
+    return result
+
+
+_date_format_with_month_abbrev = None
+
+
+def get_date_format_with_month_abbrev() -> str:
+    global _date_format_with_month_abbrev
+    if _date_format_with_month_abbrev is None:
+        _date_format_with_month_abbrev = _compute_date_format_with_month_abbrev()
+    return _date_format_with_month_abbrev
+
+
+def _compute_date_format_with_month_abbrev():
+    # %x does not use month abbreviation, i.e. it may be confusing
+    # %c has too many fields
+    # Need to find out, whether current locale uses
+    #  - day before or after month
+    #  - with period or without
+    #  - with leading zero or without
+
+    fallback_format = "%d %b"
+    ref_year = 2021
+    ref_month = 12
+    ref_day = 3
+    ref_timestamp = (ref_year, ref_month, ref_day, 0, 0, 0, 0, 0, 0)
+    month_abbrev: str = time.strftime("%b", ref_timestamp)
+    parts = time.strftime("%c", ref_timestamp).split()
+
+    for i, part in enumerate(parts):
+        if str(ref_day) in part:
+            day_index = i
+            if part.startswith("0"):
+                day_fmt = "%d"
+            elif running_on_windows():
+                day_fmt = "%#d"  # without leading zero
+            else:
+                day_fmt = "%-d"  # without leading zero
+
+            if part.endswith("."):
+                day_fmt += "."
+            break
+    else:
+        return fallback_format
+
+    for i, part in enumerate(parts):
+        if month_abbrev.lower() in part.lower():
+            month_index = i
+            if part.endswith("/"):
+                # ja_JP and ko_KR
+                month_fmt = "%b/"
+            else:
+                month_fmt = "%b"
+            break
+    else:
+        return fallback_format
+
+    if month_index < day_index:
+        return f"{month_fmt} {day_fmt}"
+    else:
+        return f"{day_fmt} {month_fmt}"

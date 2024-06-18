@@ -539,7 +539,9 @@ class BaseFileBrowser(ttk.Frame):
             try:
                 # modification time is Unix epoch
                 time_str = format_date_and_time_compact(
-                    time.localtime(int(data["modified_epoch"])), without_seconds=True
+                    time.localtime(int(data["modified_epoch"])),
+                    without_seconds=True,
+                    optimize_year=True,
                 )
             except Exception:
                 logger.exception("Could not format modified (%r)", data.get("modified_epoch"))
@@ -1386,8 +1388,8 @@ class FileDialog(CommonDialog, ABC):
         self.browser.tree["show"] = ("tree", "headings")
         self.browser.tree.configure(
             displaycolumns=(
-                4,
                 5,
+                4,
             )
         )
         self.browser.tree.configure(height=10)
