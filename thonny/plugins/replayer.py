@@ -325,7 +325,10 @@ class Replayer(tk.Toplevel):
             except Exception:
                 logger.exception(f"Could not parse filename {name}")
                 label = name
-            mapping[label] = full_path
+                start_time = time.localtime(0)
+                end_time = time.localtime()
+
+            mapping[label] = (full_path, start_time, end_time)
 
         return mapping
 
