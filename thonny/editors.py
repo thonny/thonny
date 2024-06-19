@@ -416,8 +416,6 @@ class Editor(BaseEditor):
 
         if not save_copy or save_filename == self._filename:
             self.master.remember_recent_file(save_filename)
-
-        if not save_copy or save_filename == self._filename:
             self._code_view.text.edit_modified(False)
 
         return True
