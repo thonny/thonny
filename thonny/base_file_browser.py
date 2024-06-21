@@ -5,7 +5,7 @@ import tkinter as tk
 from abc import ABC, abstractmethod
 from logging import getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, UserError, get_dirs_children_info
@@ -51,10 +51,11 @@ class BaseFileBrowser(ttk.Frame):
         self, master, show_expand_buttons=True, order_by: str = "name", reverse_order: bool = False
     ):
         self.show_expand_buttons = show_expand_buttons
-        self._cached_child_data = {}
+        self._cached_child_data: Dict[str, Dict[str, Any]] = {}
         self.path_to_highlight = None
         self.order_by = order_by
         self.reverse_order = reverse_order
+        self.filter: Optional[List[str]] = "None"
 
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
@@ -484,6 +485,11 @@ class BaseFileBrowser(ttk.Frame):
         elif children_data is None:
             raise RuntimeError("None data for %s" % path)
         else:
+            children_data = {
+                name: atts
+                for (name, atts) in children_data.items()
+                if self.item_matches_filter(name, atts)
+            }
             fs_children_names = children_data.keys()
             tree_children_ids = self.tree.get_children(node_id)
 
@@ -1018,6 +1024,19 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_tree()
         self._update_heading_labels()
 
+    def item_matches_filter(self, name: str, atts: Dict[str, Any]) -> bool:
+        if self.filter is None:
+            return True
+
+        if atts.get("isdir", False):
+            return True
+
+        for suffix in self.filter:
+            if name.lower().endswith(suffix.lower()):
+                return True
+
+        return False
+
     def _update_heading_labels(self):
         column_specs = {
             "name": ("#0", tr("Name")),
@@ -1503,6 +1522,8 @@ class FileDialog(CommonDialog, ABC):
             sticky="we",
         )
         self.filter_combo.select_first_value()
+        self.filter_changed()
+        self.filter_combo.bind("<<ComboboxSelected>>", self.filter_changed, True)
 
         self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok, default="active")
         self.ok_button.grid(
@@ -1654,6 +1675,15 @@ class FileDialog(CommonDialog, ABC):
     def set_initial_focus(self, node=None) -> bool:
         self.name_entry.focus_set()
         return True
+
+    def filter_changed(self, event=None):
+        filter_desc = self.filter_combo.get_selected_value()
+        filter = self._extensions_by_desc[filter_desc]
+        if filter == [".*"]:
+            filter = None
+
+        self.browser.filter = filter
+        self.browser.refresh_tree()
 
     def save_order(self):
         get_workbench().set_option(FILE_DIALOG_ORDER_BY_OPTION, self.browser.order_by)
