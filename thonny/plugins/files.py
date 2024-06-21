@@ -11,6 +11,8 @@ from typing import Dict, Iterable, List, Optional, Type
 
 from thonny import get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
+    FILE_DIALOG_ORDER_BY_OPTION,
+    FILE_DIALOG_REVERSE_ORDER_OPTION,
     HIDDEN_FILES_OPTION,
     BaseLocalFileBrowser,
     BaseRemoteFileBrowser,
@@ -611,6 +613,8 @@ def load_plugin() -> None:
     )
 
     get_workbench().set_default(HIDDEN_FILES_OPTION, False)
+    get_workbench().set_default(FILE_DIALOG_ORDER_BY_OPTION, "name")
+    get_workbench().set_default(FILE_DIALOG_REVERSE_ORDER_OPTION, False)
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 

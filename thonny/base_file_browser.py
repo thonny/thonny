@@ -40,15 +40,21 @@ _LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
 ROOT_NODE_ID = ""
 
 HIDDEN_FILES_OPTION = "file.show_hidden_files"
+FILE_DIALOG_ORDER_BY_OPTION = "file.dialog_order_by"
+FILE_DIALOG_REVERSE_ORDER_OPTION = "file.dialog_reverse_order"
 
 logger = getLogger(__name__)
 
 
 class BaseFileBrowser(ttk.Frame):
-    def __init__(self, master, show_expand_buttons=True):
+    def __init__(
+        self, master, show_expand_buttons=True, order_by: str = "name", reverse_order: bool = False
+    ):
         self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
         self.path_to_highlight = None
+        self.order_by = order_by
+        self.reverse_order = reverse_order
 
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
@@ -108,19 +114,21 @@ class BaseFileBrowser(ttk.Frame):
         self.hard_drive_icon = wb.get_image("hard-drive")
 
         self.tree.column("#0", width=200, anchor=tk.W)
-        self.tree.heading("#0", text=tr("Name"), anchor=tk.W)
+        self.tree.heading(
+            "#0", text=tr("Name"), anchor=tk.W, command=lambda: self.on_heading_click("name")
+        )
         self.tree.column("modified_fmt", width=60, anchor=tk.E)
-        self.tree.heading("modified_fmt", text=tr("Modified"), anchor=tk.E)
+        self.tree.heading(
+            "modified_fmt",
+            text=tr("Modified"),
+            anchor=tk.E,
+            command=lambda: self.on_heading_click("modified"),
+        )
         self.tree.column("size_fmt", width=40, anchor=tk.E)
-        self.tree.heading("size_fmt", text=tr("Size"), anchor=tk.E)
-        # self.tree.column("kind", width=30, anchor=tk.W)
-        # self.tree.column("size_bytes")
-        # self.tree.column("modified_epoch")
-        #         self.tree.heading("kind", text="Kind")
-        #         self.tree.column("path", width=300, anchor=tk.W)
-        #         self.tree.heading("path", text="path")
-        #         self.tree.column("name", width=60, anchor=tk.W)
-        #         self.tree.heading("name", text="name")
+        self.tree.heading(
+            "size_fmt", text=tr("Size"), anchor=tk.E, command=lambda: self.on_heading_click("size")
+        )
+        self._update_heading_labels()
 
         # set-up root node
         self.tree.set(ROOT_NODE_ID, "kind", "root")
@@ -500,16 +508,34 @@ class BaseFileBrowser(ttk.Frame):
             def file_order(name):
                 # items in a folder should be ordered so that
                 # folders come first and names are ordered case insensitively
-                return (
-                    not children_data[name]["isdir"],  # prefer directories
-                    not ":" in name,  # prefer drives
-                    name.upper(),
-                    name,
-                )
+                if self.order_by == "size":
+                    return (
+                        not children_data[name]["isdir"],  # prefer directories
+                        not ":" in name,  # prefer drives
+                        children_data[name]["size_bytes"],
+                        name.upper(),
+                        name,
+                    )
+                elif self.order_by == "modified":
+                    return (
+                        -children_data[name]["modified_epoch"],  # prefer newer files
+                        name.upper(),
+                        name,
+                    )
+                else:
+                    return (
+                        not children_data[name]["isdir"],  # prefer directories
+                        not ":" in name,  # prefer drives
+                        name.upper(),
+                        name,
+                    )
 
             # update tree
             ids_sorted_by_name = list(
-                map(lambda key: children[key], sorted(children.keys(), key=file_order))
+                map(
+                    lambda key: children[key],
+                    sorted(children.keys(), key=file_order, reverse=self.reverse_order),
+                )
             )
             self.tree.set_children(node_id, *ids_sorted_by_name)
 
@@ -981,6 +1007,35 @@ class BaseFileBrowser(ttk.Frame):
             target = os.path.dirname(target)
         self.copypaste.paste(target)
 
+    def on_heading_click(self, column_name: str):
+        logger.info("Click on column %r", column_name)
+        if column_name == self.order_by:
+            self.reverse_order = not self.reverse_order
+        else:
+            self.order_by = column_name
+            self.reverse_order = False
+
+        self.refresh_tree()
+        self._update_heading_labels()
+
+    def _update_heading_labels(self):
+        column_specs = {
+            "name": ("#0", tr("Name")),
+            "modified": ("modified_fmt", tr("Modified")),
+            "size": ("size_fmt", tr("Size")),
+        }
+
+        for name, (tree_col_name, plain_label) in column_specs.items():
+            if name == self.order_by:
+                if self.reverse_order:
+                    full_label = f"{plain_label} ⌄"
+                else:
+                    full_label = f"{plain_label} ∧"
+            else:
+                full_label = plain_label
+
+            self.tree.heading(tree_col_name, text=full_label)
+
 
 class CopyPaste(object):
     def __init__(self, filebrowser):
@@ -1063,9 +1118,16 @@ class CopyPaste(object):
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
-    def __init__(self, master, show_expand_buttons=True):
+    def __init__(
+        self, master, show_expand_buttons=True, order_by: str = "name", reverse_order: bool = False
+    ):
         self.dir_separator = os.sep
-        super().__init__(master, show_expand_buttons=show_expand_buttons)
+        super().__init__(
+            master,
+            show_expand_buttons=show_expand_buttons,
+            order_by=order_by,
+            reverse_order=reverse_order,
+        )
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
         self.copypaste = CopyPaste(self)
@@ -1176,8 +1238,15 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
-    def __init__(self, master, show_expand_buttons=True):
-        super().__init__(master, show_expand_buttons=show_expand_buttons)
+    def __init__(
+        self, master, show_expand_buttons=True, order_by: str = "name", reverse_order: bool = False
+    ):
+        super().__init__(
+            master,
+            show_expand_buttons=show_expand_buttons,
+            order_by=order_by,
+            reverse_order=reverse_order,
+        )
         self.dir_separator = "/"
 
         get_workbench().bind("get_dirs_children_info_response", self.update_dir_data, True)
@@ -1382,7 +1451,12 @@ class FileDialog(CommonDialog, ABC):
             padx=self.get_large_padding(),
         )
 
-        self.browser = browser_class(master=self.border, show_expand_buttons=False)
+        self.browser = browser_class(
+            master=self.border,
+            show_expand_buttons=False,
+            order_by=get_workbench().get_option(FILE_DIALOG_ORDER_BY_OPTION),
+            reverse_order=get_workbench().get_option(FILE_DIALOG_REVERSE_ORDER_OPTION),
+        )
         self.browser.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
         self.browser.tree.configure(selectmode="browse")
         self.browser.tree["show"] = ("tree", "headings")
@@ -1489,6 +1563,7 @@ class FileDialog(CommonDialog, ABC):
             label.grid(sticky="w", pady=(0, ems_to_pixels(0.5)))
 
     def on_ok(self, event=None):
+        self.save_order()
         tree = self.browser.tree
         name = self.name_var.get().strip()
 
@@ -1542,6 +1617,7 @@ class FileDialog(CommonDialog, ABC):
         self.destroy()
 
     def on_cancel(self, event=None):
+        self.save_order()
         self.result = None
         self.destroy()
 
@@ -1578,6 +1654,10 @@ class FileDialog(CommonDialog, ABC):
     def set_initial_focus(self, node=None) -> bool:
         self.name_entry.focus_set()
         return True
+
+    def save_order(self):
+        get_workbench().set_option(FILE_DIALOG_ORDER_BY_OPTION, self.browser.order_by)
+        get_workbench().set_option(FILE_DIALOG_REVERSE_ORDER_OPTION, self.browser.reverse_order)
 
 
 class BackendFileDialog(FileDialog):
