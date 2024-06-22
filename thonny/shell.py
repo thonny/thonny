@@ -20,6 +20,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
 )
+from thonny.editors import make_remote_path
 from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line
@@ -1479,17 +1480,24 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             if len(matches) == 1:
                 filename = os.path.expanduser(matches[0].group("file"))
                 lineno = int(matches[0].group("line"))
+
                 if (
                     filename in (STRING_PSEUDO_FILENAME, REPL_PSEUDO_FILENAME)
                     and self._last_main_file
                 ):
                     filename = self._last_main_file
 
+                elif runner := get_runner():
+                    if proxy := runner.get_backend_proxy():
+                        from thonny.plugins.cpython_frontend import LocalCPythonProxy
+                        if proxy.is_connected() and not isinstance(proxy, LocalCPythonProxy):
+                            filename = make_remote_path('/') + filename
+                            print(f'{filename=}')
+
+                get_workbench().get_editor_notebook().show_file(filename, lineno, set_focus=False)
                 # NB! Don't attempt to check the existence of the file as it may be remote file
                 # or editor id (of untitled editor)
-                # TODO: handle remote files
                 # TODO: better use events instead direct referencing
-                get_workbench().get_editor_notebook().show_file(filename, lineno, set_focus=False)
 
             else:
                 r = self.tag_prevrange("io_hyperlink", "@%d,%d" % (event.x, event.y))
