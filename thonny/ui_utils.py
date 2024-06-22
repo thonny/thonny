@@ -169,11 +169,12 @@ class CommonDialog(tk.Toplevel):
             # https://bugs.python.org/issue43655
             if self._windowingsystem == "aqua":
                 self.tk.call(
-                    "::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", ""
+                    "::tk::unsupported::MacWindowStyle", "style", self, "moveableModal", "closeBox"
                 )
             elif self._windowingsystem == "x11":
                 self.wm_attributes("-type", "dialog")
 
+        self.resizable(True, True)
         self.parent = master
 
     def _unlock_on_focus_in(self, event):
