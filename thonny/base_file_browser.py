@@ -55,7 +55,7 @@ class BaseFileBrowser(ttk.Frame):
         self.path_to_highlight = None
         self.order_by = order_by
         self.reverse_order = reverse_order
-        self.filter: Optional[List[str]] = "None"
+        self.filter: Optional[List[str]] = None
 
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
