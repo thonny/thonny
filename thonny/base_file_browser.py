@@ -1479,7 +1479,7 @@ class FileDialog(CommonDialog, ABC):
             order_by=get_workbench().get_option(FILE_DIALOG_ORDER_BY_OPTION),
             reverse_order=get_workbench().get_option(FILE_DIALOG_REVERSE_ORDER_OPTION),
         )
-        self.browser.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
+        self.browser.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
         self.browser.tree.configure(selectmode="browse")
         self.browser.tree["show"] = ("tree", "headings")
         self.browser.tree.configure(
@@ -1528,19 +1528,24 @@ class FileDialog(CommonDialog, ABC):
         self.filter_changed()
         self.filter_combo.bind("<<ComboboxSelected>>", self.filter_changed, True)
 
-        self.ok_button = ttk.Button(background, text=tr("OK"), command=self.on_ok, default="active")
+        button_panel = ttk.Frame(background)
+        button_panel.grid(row=2, column=1, columnspan=4, sticky="nse")
+
+        self.ok_button = ttk.Button(
+            button_panel, text=tr("OK"), command=self.on_ok, default="active", width=5
+        )
         self.ok_button.grid(
-            row=2,
-            column=3,
+            row=1,
+            column=1,
             pady=(0, self.get_large_padding()),
-            padx=(0, 0),
+            padx=(0, self.get_medium_padding()),
             sticky="e",
         )
 
-        self.cancel_button = ttk.Button(background, text=tr("Cancel"), command=self.on_cancel)
+        self.cancel_button = ttk.Button(button_panel, text=tr("Cancel"), command=self.on_cancel)
         self.cancel_button.grid(
-            row=2,
-            column=4,
+            row=1,
+            column=2,
             pady=(0, self.get_large_padding()),
             padx=(0, self.get_large_padding()),
             sticky="e",
