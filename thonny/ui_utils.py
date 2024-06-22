@@ -2021,7 +2021,11 @@ class _CustomDialogProvider:
 
     @classmethod
     def _call(cls, kind: Literal["save", "open", "dir"], **options):
-        from thonny.base_file_browser import LocalFileDialog
+        from thonny.base_file_browser import (
+            FILE_DIALOG_HEIGHT_EMS_OPTION,
+            FILE_DIALOG_WIDTH_EMS_OPTION,
+            LocalFileDialog,
+        )
 
         master = options.get("parent") or options.get("master") or get_workbench()
         initial_dir = options.get("initialdir") or get_workbench().get_local_cwd()
@@ -2032,7 +2036,12 @@ class _CustomDialogProvider:
             filetypes=options.get("filetypes"),
             typevariable=options.get("typevariable"),
         )
-        show_dialog(dlg, master)
+        show_dialog(
+            dlg,
+            master,
+            width=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_WIDTH_EMS_OPTION)),
+            height=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_HEIGHT_EMS_OPTION)),
+        )
         return dlg.result
 
 
@@ -2297,6 +2306,13 @@ def ems_to_pixels(x: float) -> int:
     if EM_WIDTH is None:
         EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")
     return int(EM_WIDTH * x)
+
+
+def pixels_to_ems(x: int) -> float:
+    global EM_WIDTH
+    if EM_WIDTH is None:
+        EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")
+    return x / EM_WIDTH
 
 
 _btn_padding = None

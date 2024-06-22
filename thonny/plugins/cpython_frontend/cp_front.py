@@ -9,7 +9,11 @@ from typing import Any, Dict, List
 
 import thonny
 from thonny import get_runner, get_shell, get_workbench, ui_utils
-from thonny.base_file_browser import LocalFileDialog
+from thonny.base_file_browser import (
+    FILE_DIALOG_HEIGHT_EMS_OPTION,
+    FILE_DIALOG_WIDTH_EMS_OPTION,
+    LocalFileDialog,
+)
 from thonny.common import (
     InlineCommand,
     InlineResponse,
@@ -24,7 +28,7 @@ from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import TabbedBackendDetailsConfigurationPage
 from thonny.running import WINDOWS_EXE, SubprocessProxy
 from thonny.terminal import run_in_terminal
-from thonny.ui_utils import askopenfilename, create_string_var
+from thonny.ui_utils import askopenfilename, create_string_var, ems_to_pixels
 
 logger = getLogger(__name__)
 
@@ -321,7 +325,12 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 
         if running_on_mac_os():
             dlg = MacOsInterpreterDialog(self, "open", initialdir)
-            ui_utils.show_dialog(dlg, self)
+            ui_utils.show_dialog(
+                dlg,
+                self,
+                width=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_WIDTH_EMS_OPTION)),
+                height=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_HEIGHT_EMS_OPTION)),
+            )
             filename = dlg.result
         else:
             filename = askopenfilename(**options)

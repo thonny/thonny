@@ -31,6 +31,7 @@ from thonny.ui_utils import (
     get_style_configuration,
     lookup_style_option,
     open_with_default_app,
+    pixels_to_ems,
     show_dialog,
 )
 
@@ -42,6 +43,8 @@ ROOT_NODE_ID = ""
 HIDDEN_FILES_OPTION = "file.show_hidden_files"
 FILE_DIALOG_ORDER_BY_OPTION = "file.dialog_order_by"
 FILE_DIALOG_REVERSE_ORDER_OPTION = "file.dialog_reverse_order"
+FILE_DIALOG_WIDTH_EMS_OPTION = "file.dialog_width_ems"
+FILE_DIALOG_HEIGHT_EMS_OPTION = "file.dialog_height_ems"
 
 logger = getLogger(__name__)
 
@@ -1584,7 +1587,7 @@ class FileDialog(CommonDialog, ABC):
             label.grid(sticky="w", pady=(0, ems_to_pixels(0.5)))
 
     def on_ok(self, event=None):
-        self.save_order()
+        self.save_settings()
         tree = self.browser.tree
         name = self.name_var.get().strip()
 
@@ -1638,7 +1641,7 @@ class FileDialog(CommonDialog, ABC):
         self.destroy()
 
     def on_cancel(self, event=None):
-        self.save_order()
+        self.save_settings()
         self.result = None
         self.destroy()
 
@@ -1685,9 +1688,15 @@ class FileDialog(CommonDialog, ABC):
         self.browser.filter = filter
         self.browser.refresh_tree()
 
-    def save_order(self):
+    def save_settings(self):
         get_workbench().set_option(FILE_DIALOG_ORDER_BY_OPTION, self.browser.order_by)
         get_workbench().set_option(FILE_DIALOG_REVERSE_ORDER_OPTION, self.browser.reverse_order)
+        get_workbench().set_option(
+            FILE_DIALOG_WIDTH_EMS_OPTION, round(pixels_to_ems(self.winfo_width()))
+        )
+        get_workbench().set_option(
+            FILE_DIALOG_HEIGHT_EMS_OPTION, round(pixels_to_ems(self.winfo_height()))
+        )
 
 
 class BackendFileDialog(FileDialog):
