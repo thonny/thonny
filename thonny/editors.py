@@ -459,7 +459,7 @@ class Editor(BaseEditor):
             return self.ask_new_remote_path()
 
     def ask_new_remote_path(self):
-        target_path = ask_backend_path(self.winfo_toplevel(), "save")
+        target_path = ask_backend_path(self.winfo_toplevel(), "save", filetypes=_dialog_filetypes)
         if target_path:
             target_path = self._check_add_py_extension(target_path)
             return make_remote_path(target_path)
@@ -894,7 +894,9 @@ class EditorNotebook(CustomNotebook):
             )
         else:
             assert node == "remote"
-            target_path = ask_backend_path(self.winfo_toplevel(), "open")
+            target_path = ask_backend_path(
+                self.winfo_toplevel(), "open", filetypes=_dialog_filetypes
+            )
             if not target_path:
                 return
 

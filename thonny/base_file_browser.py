@@ -1799,15 +1799,20 @@ class NodeChoiceDialog(CommonDialog):
         self.destroy()
 
 
-def ask_backend_path(master, dialog_kind):
+def ask_backend_path(master, dialog_kind, filetypes):
     proxy = get_runner().get_backend_proxy()
     if not proxy:
         return None
 
     assert proxy.supports_remote_files()
 
-    dlg = BackendFileDialog(master, dialog_kind, proxy.get_cwd())
-    show_dialog(dlg, master)
+    dlg = BackendFileDialog(master, dialog_kind, proxy.get_cwd(), filetypes=filetypes)
+    show_dialog(
+        dlg,
+        master,
+        width=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_WIDTH_EMS_OPTION)),
+        height=ems_to_pixels(get_workbench().get_option(FILE_DIALOG_HEIGHT_EMS_OPTION)),
+    )
     return dlg.result
 
 
