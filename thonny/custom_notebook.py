@@ -18,7 +18,13 @@ class CustomNotebookTabRow(tk.Frame):
         text_foreground = _get_style_configuration("Text")["foreground"]
         super().__init__(master, **kw)
         self.filler = tk.Frame(self, background=self.notebook.base_style_conf["background"])
-        self.filler.grid(row=0, column=999, sticky="nsew", padx=(1, 0), pady=(0, 1))
+        self.filler.grid(
+            row=0,
+            column=999,
+            sticky="nsew",
+            padx=(0 if master.dynamic_border else 1, 0),
+            pady=(0, 1),
+        )
         self._insertion_mark = tk.Frame(
             self, background=text_foreground, width=_ems_to_pixels(0.3), height=_ems_to_pixels(2)
         )
@@ -84,6 +90,7 @@ class CustomNotebookTabRow(tk.Frame):
 
 class CustomNotebook(tk.Frame):
     def __init__(self, master: Union[tk.Widget, tk.Toplevel, tk.Tk], closable: bool = True):
+        self.dynamic_border = True
         self.base_style_conf = _get_style_configuration(".")
         self.style_conf = _get_style_configuration("CustomNotebook")
         super().__init__(master, background=self.style_conf["bordercolor"])
@@ -149,7 +156,18 @@ class CustomNotebook(tk.Frame):
             self.current_page = None
 
         for i, page in enumerate(self.pages):
-            page.tab.grid(row=0, column=i, sticky="nsew", padx=(1, 0), pady=(1, 0))
+            if self.dynamic_border:
+                if page == self.current_page:
+                    padx = 1
+                    pady = (1, 0)
+                else:
+                    padx = 0
+                    pady = 0
+            else:
+                padx = (1, 0)
+                pady = (1, 0)
+
+            page.tab.grid(row=0, column=i, sticky="nsew", padx=padx, pady=pady)
 
     def enable_traversal(self) -> None:
         # TODO:
@@ -432,10 +450,14 @@ class CustomNotebookTab(tk.Frame):
 
             indicator_background = self.tab_style["indicatorbackground"]
             indicator_height = self.tab_style.get("indicatorheight", _ems_to_pixels(0.2))
+            if self.notebook.dynamic_border:
+                self.grid(padx=1, pady=(1, 0))
         else:
             main_background = self.tab_style["background"]
             indicator_background = self.notebook_style_conf["bordercolor"]
             indicator_height = 1
+            if self.notebook.dynamic_border:
+                self.grid(padx=0, pady=0)
 
         self.configure(background=main_background)
         self.label.configure(background=main_background)
