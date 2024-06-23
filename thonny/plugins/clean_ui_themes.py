@@ -290,7 +290,7 @@ def clean(
                 "disabledforeground": low_foreground,
                 "highlightbackground": normal_detail,
                 "highlightcolor": high_detail,
-                "highlightthickness": 1,
+                "highlightthickness": 0,
             }
         },
         "Menubar": {

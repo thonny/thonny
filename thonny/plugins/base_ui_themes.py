@@ -557,7 +557,7 @@ def windows() -> CompoundUiThemeSettings:
                     "disabledforeground": "SystemGrayText",
                     "highlightbackground": "SystemActiveBorder",
                     "highlightcolor": "SystemActiveBorder",
-                    "highlightthickness": scale(1),
+                    "highlightthickness": 0,
                 }
             },
             "ViewBody.TFrame": {
@@ -653,7 +653,7 @@ def enhanced_clam() -> CompoundUiThemeSettings:
                     "disabledforeground": "#999999",
                     "highlightbackground": "#4a6984",
                     "highlightcolor": "#4a6984",
-                    "highlightthickness": scale(1),
+                    "highlightthickness": 0,
                 }
             },
             "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
