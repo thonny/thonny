@@ -93,7 +93,7 @@ def pix():
             },
             "map": {"background": [], "darkcolor": [], "lightcolor": []},
         },
-        # Padding allows twaking thumb width
+        # Padding allows tweaking thumb width
         "Vertical.TScrollbar": {
             "layout": [
                 (
