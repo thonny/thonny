@@ -363,7 +363,7 @@ class CustomNotebookTab(tk.Frame):
         self.label.grid(
             row=0,
             column=0,
-            padx=(_ems_to_pixels(0.3), _ems_to_pixels(0.1)),
+            padx=(_ems_to_pixels(0.3), 0 if self.notebook.closable else _ems_to_pixels(0)),
             sticky="nsw",
             pady=(0, _ems_to_pixels(0.1)),
         )
@@ -374,8 +374,8 @@ class CustomNotebookTab(tk.Frame):
             if not CustomNotebookTab.close_image:
                 CustomNotebookTab.close_image = _get_image("tab-close")
                 CustomNotebookTab.active_close_image = _get_image("tab-close-active")
-            self.button = tk.Label(self, image=CustomNotebookTab.close_image)
-            self.button.grid(row=0, column=1, padx=(0, _ems_to_pixels(0.1)))
+            self.button = tk.Label(self, image=CustomNotebookTab.close_image, anchor="center")
+            self.button.grid(row=0, column=1, padx=(_ems_to_pixels(0.1), _ems_to_pixels(0.48)))
             self.button.bind("<1>", self.on_button_click, True)
             self.button.bind("<Enter>", self.on_button_enter, True)
             self.button.bind("<Leave>", self.on_button_leave, True)

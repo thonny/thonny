@@ -356,7 +356,7 @@ def tidy(
 
 
 def load_plugin() -> None:
-    dark_images = {"tab-close-active": "tab-close-active-clam-dark"}
+    dark_images = {"tab-close-active": "tab-close-active-dark"}
 
     get_workbench().add_ui_theme(
         "Tidy Dark",
