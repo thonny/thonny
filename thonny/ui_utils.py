@@ -538,7 +538,7 @@ class TreeFrame(ttk.Frame):
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
-        header_stripe = check_create_aqua_header_stripe(self)
+        header_stripe = check_create_heading_stripe(self)
         if header_stripe is not None:
             header_stripe.grid(row=0, column=0, sticky="new")
             header_stripe.tkraise()
@@ -2498,10 +2498,12 @@ def check_create_aqua_scrollbar_stripe(master) -> Optional[tk.Frame]:
         return None
 
 
-def check_create_aqua_header_stripe(master) -> Optional[tk.Frame]:
-    if get_workbench().is_using_aqua_based_theme():
-        # Want to cover a gray 2px stripe on the top edge of the Treeview header.
-        return tk.Frame(master, height=2, background="systemWindowBackgroundColor")
+def check_create_heading_stripe(master) -> Optional[tk.Frame]:
+    opts = get_style_configuration("Heading")
+    px_to_hide = opts.get("topmost_pixels_to_hide", 0)
+    background = opts.get("background")
+    if px_to_hide > 0 and background is not None:
+        return tk.Frame(master, height=px_to_hide, background=background)
     else:
         return None
 

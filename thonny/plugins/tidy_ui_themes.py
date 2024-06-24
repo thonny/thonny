@@ -57,9 +57,9 @@ def tidy(
             "configure": {"background": frame_background, "bordercolor": low_detail},
             "map": {
                 "background": [
-                    ("selected", frame_background),
-                    ("!selected", "!active", normal_detail),
-                    ("active", "!selected", normal_detail),
+                    ("selected", normal_detail),
+                    ("!selected", "!active", frame_background),
+                    ("active", "!selected", frame_background),
                 ],
                 "bordercolor": [("selected", frame_background), ("!selected", low_detail)],
                 "lightcolor": [("selected", normal_detail), ("!selected", frame_background)],
@@ -91,13 +91,14 @@ def tidy(
                 ],
             },
         },
-        "Treeview.Heading": {
+        "Heading": {
             # https://stackoverflow.com/questions/32051780/how-to-edit-the-style-of-a-heading-in-treeview-python-ttk
             "configure": {
                 "background": normal_detail,
                 "lightcolor": normal_detail,
                 "darkcolor": normal_detail,
                 "borderwidth": 1,
+                "topmost_pixels_to_hide": 2,
             },
             "map": {"background": [("!active", normal_detail), ("active", normal_detail)]},
         },
@@ -364,8 +365,8 @@ def load_plugin() -> None:
         tidy(
             frame_background="#252525",
             text_background="#2d2d2d",
-            normal_detail="#464646",
-            high_detail="#6E6E6E",
+            normal_detail="#404040",
+            high_detail="#585858",
             low_detail="#404040",
             scrollbar_background="#2d2d2d",
             trough_background="#3D3D3D",
@@ -385,8 +386,8 @@ def load_plugin() -> None:
         tidy(
             frame_background="#1D291A",
             text_background="#273627",
-            normal_detail="#2D452F",
-            high_detail="#3C6E40",
+            normal_detail="#263E28",
+            high_detail="#264d26",
             low_detail="#33402F",
             scrollbar_background="#273627",
             trough_background="#2D452F",

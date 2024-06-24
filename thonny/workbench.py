@@ -2815,6 +2815,9 @@ class Workbench(tk.Tk):
     def is_using_aqua_based_theme(self) -> bool:
         return "aqua" in self._current_theme_name.lower()
 
+    def is_using_tidy_theme(self) -> bool:
+        return "aqua" in self._current_theme_name.lower()
+
     def show_notebook_drop_targets(self):
         from thonny.custom_notebook import NotebookTabDropTarget
 

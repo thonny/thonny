@@ -746,6 +746,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                     "background": [("readonly", "systemWindowBackgroundColor")],
                 },
             },
+            "Heading": {"configure": {"topmost_pixels_to_hide": 2}},
         },
     ]
 
@@ -779,7 +780,6 @@ def load_plugin() -> None:
         "Enhanced Clam",
         "clam",
         enhanced_clam,
-        images={"tab-close": "tab-close-clam", "tab-close-active": "tab-close-active-clam"},
     )
 
     if "vista" in original_themes:
