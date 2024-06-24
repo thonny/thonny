@@ -436,3 +436,22 @@ def load_plugin() -> None:
             link_foreground="#325aa8",
         ),
     )
+
+    get_workbench().add_ui_theme(
+        "Tidy Light",
+        "Enhanced Clam",
+        tidy(
+            frame_background="#EBEBEB",
+            text_background="#ffffff",
+            normal_detail="#DFDFDF",
+            high_detail="#c6c3bf",
+            low_detail="#c6c3bf",
+            scrollbar_background="#c6c3bf",
+            trough_background="#E9E9E9",
+            normal_foreground="#222222",
+            high_foreground="#000000",
+            low_foreground="#999999",
+            custom_menubar=0,
+            link_foreground="#32478d",
+        ),
+    )
