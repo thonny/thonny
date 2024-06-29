@@ -14,6 +14,7 @@ def tidy(
     low_detail: str,
     scrollbar_background: str,
     trough_background: str,
+    active_tab_background: str,
     normal_foreground: str,
     high_foreground: str,
     low_foreground: str,
@@ -25,6 +26,11 @@ def tidy(
     # https://wiki.tcl.tk/37973 (Changing colors)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
+
+    if active_tab_background == "normal_detail":
+        active_tab_background = normal_detail
+    elif active_tab_background == "frame_background":
+        active_tab_background = frame_background
 
     return {
         ".": {
@@ -57,12 +63,15 @@ def tidy(
             "configure": {"background": frame_background, "bordercolor": low_detail},
             "map": {
                 "background": [
-                    ("selected", normal_detail),
+                    ("selected", active_tab_background),
                     ("!selected", "!active", frame_background),
                     ("active", "!selected", frame_background),
                 ],
-                "bordercolor": [("selected", frame_background), ("!selected", low_detail)],
-                "lightcolor": [("selected", normal_detail), ("!selected", frame_background)],
+                "bordercolor": [("selected", low_detail), ("!selected", low_detail)],
+                "lightcolor": [
+                    ("selected", active_tab_background),
+                    ("!selected", frame_background),
+                ],
             },
         },
         "CustomNotebook": {
@@ -73,8 +82,8 @@ def tidy(
         "CustomNotebook.Tab": {
             "configure": {
                 "background": frame_background,
-                "activebackground": normal_detail,
-                "indicatorbackground": normal_detail,
+                "activebackground": active_tab_background,
+                "indicatorbackground": active_tab_background,
             }
         },
         "TextPanedWindow": {"configure": {"background": text_background}},
@@ -94,13 +103,18 @@ def tidy(
         "Heading": {
             # https://stackoverflow.com/questions/32051780/how-to-edit-the-style-of-a-heading-in-treeview-python-ttk
             "configure": {
-                "background": normal_detail,
-                "lightcolor": normal_detail,
-                "darkcolor": normal_detail,
+                "background": active_tab_background,
+                "lightcolor": active_tab_background,
+                "darkcolor": active_tab_background,
                 "borderwidth": 1,
                 "topmost_pixels_to_hide": 2,
             },
-            "map": {"background": [("!active", normal_detail), ("active", normal_detail)]},
+            "map": {
+                "background": [
+                    ("!active", active_tab_background),
+                    ("active", active_tab_background),
+                ]
+            },
         },
         "TEntry": {
             "configure": {
@@ -122,14 +136,14 @@ def tidy(
                 "selectbackground": text_background,
                 "lightcolor": text_background,
                 "darkcolor": text_background,
-                "bordercolor": text_background,
+                "bordercolor": high_detail,
                 "arrowcolor": normal_foreground,
                 "foreground": normal_foreground,
-                "seleftforeground": normal_foreground,
+                "selectforeground": normal_foreground,
                 # "padding" : [12,2,12,2],
             },
             "map": {
-                "background": [("active", text_background)],
+                "background": [("active", frame_background), ("readonly", frame_background)],
                 "fieldbackground": [],
                 "selectbackground": [],
                 "selectforeground": [],
@@ -219,11 +233,18 @@ def tidy(
             },
         },
         "TButton": {
-            "configure": {"background": normal_detail, "foreground": normal_foreground},
+            "configure": {
+                "background": normal_detail,
+                "foreground": normal_foreground,
+                "lightcolor": normal_detail,
+                "darkcolor": normal_detail,
+            },
             "map": {
                 "foreground": [("disabled", low_foreground), ("alternate", high_foreground)],
                 "background": [("pressed", low_detail), ("active", high_detail)],
                 "bordercolor": [("alternate", high_detail)],
+                "lightcolor": [("active", normal_detail), ("alternate", normal_detail)],
+                "darkcolor": [("active", normal_detail), ("alternate", normal_detail)],
             },
         },
         "TCheckbutton": {
@@ -267,9 +288,7 @@ def tidy(
         },
         "TLabel": {"configure": {"foreground": normal_foreground}},
         "Url.TLabel": {"configure": {"foreground": link_foreground}},
-        "Tip.TLabel": {
-            "configure": {"foreground": normal_foreground, "background": normal_foreground}
-        },
+        "Tip.TLabel": {"configure": {"foreground": normal_foreground, "background": normal_detail}},
         "Tip.TFrame": {"configure": {"background": low_detail}},
         "TScale": {
             "configure": {
@@ -295,17 +314,17 @@ def tidy(
             }
         },
         "ViewBody.TFrame": {"configure": {"background": text_background}},
-        "ViewToolbar.TFrame": {"configure": {"background": normal_detail}},
-        "ViewToolbar.Toolbutton": {"configure": {"background": normal_detail}},
-        "ViewTab.TLabel": {"configure": {"background": normal_detail, "padding": [5, 0]}},
+        "ViewToolbar.TFrame": {"configure": {"background": active_tab_background}},
+        "ViewToolbar.Toolbutton": {"configure": {"background": active_tab_background}},
+        "ViewTab.TLabel": {"configure": {"background": active_tab_background, "padding": [5, 0]}},
         "ViewToolbar.TLabel": {
-            "configure": {"background": normal_detail, "padding": [scale(4), 0]}
+            "configure": {"background": active_tab_background, "padding": [scale(4), 0]}
         },
         "Active.ViewTab.TLabel": {
             "configure": {
-                "foreground": high_foreground,
+                "foreground": normal_foreground,
                 # "font" : "BoldTkDefaultFont",
-                "background": text_background,
+                "background": active_tab_background,
             }
         },
         "Inactive.ViewTab.TLabel": {
@@ -359,99 +378,103 @@ def tidy(
 def load_plugin() -> None:
     dark_images = {"tab-close-active": "tab-close-active-dark"}
 
-    get_workbench().add_ui_theme(
-        "Tidy Dark",
-        "Enhanced Clam",
-        tidy(
-            frame_background="#252525",
-            text_background="#2d2d2d",
-            normal_detail="#404040",
-            high_detail="#585858",
-            low_detail="#404040",
-            scrollbar_background="#2d2d2d",
-            trough_background="#3D3D3D",
-            normal_foreground="#9f9f9f",
-            high_foreground="#eeeeee",
-            low_foreground="#666666",
-            link_foreground="#2293e5",
-        ),
-        images=dark_images,
-    )
+    for active_tab_background, variant in [("normal_detail", "A"), ("frame_background", "B")]:
+        get_workbench().add_ui_theme(
+            f"Tidy Dark {variant}",
+            "Enhanced Clam",
+            tidy(
+                frame_background="#252525",
+                text_background="#2d2d2d",
+                normal_detail="#404040",
+                high_detail="#585858",
+                low_detail="#404040",
+                scrollbar_background="#2d2d2d",
+                trough_background="#3D3D3D",
+                active_tab_background=active_tab_background,
+                normal_foreground="#9f9f9f",
+                high_foreground="#eeeeee",
+                low_foreground="#666666",
+                link_foreground="#2293e5",
+            ),
+            images=dark_images,
+        )
 
-    dark_tip_background = ("#b8c28d",)
+        get_workbench().add_ui_theme(
+            f"Tidy Dark Green {variant}",
+            "Enhanced Clam",
+            tidy(
+                frame_background="#1D291A",
+                text_background="#273627",
+                normal_detail="#263E28",
+                high_detail="#264d26",
+                low_detail="#33402F",
+                scrollbar_background="#273627",
+                trough_background="#2D452F",
+                active_tab_background=active_tab_background,
+                normal_foreground="#9E9E9E",
+                high_foreground="#eeeeee",
+                low_foreground="#5a725b",
+                link_foreground="#2293e5",
+            ),
+            images=dark_images,
+        )
 
-    get_workbench().add_ui_theme(
-        "Tidy Dark Green",
-        "Enhanced Clam",
-        tidy(
-            frame_background="#1D291A",
-            text_background="#273627",
-            normal_detail="#263E28",
-            high_detail="#264d26",
-            low_detail="#33402F",
-            scrollbar_background="#273627",
-            trough_background="#2D452F",
-            normal_foreground="#9E9E9E",
-            high_foreground="#eeeeee",
-            low_foreground="#5a725b",
-            link_foreground="#2293e5",
-        ),
-        images=dark_images,
-    )
+        get_workbench().add_ui_theme(
+            f"Tidy Dark Blue {variant}",
+            "Enhanced Clam",
+            tidy(
+                frame_background="#1A1C29",
+                text_background="#272936",
+                normal_detail="#2D3345",
+                high_detail="#3C436E",
+                low_detail="#2F3640",
+                scrollbar_background="#4F5162",
+                trough_background="#30313D",
+                active_tab_background=active_tab_background,
+                normal_foreground="#9E9E9E",
+                high_foreground="#eeeeee",
+                low_foreground="#5a5c72",
+                link_foreground="#567cc4",
+            ),
+            images=dark_images,
+        )
 
-    get_workbench().add_ui_theme(
-        "Tidy Dark Blue",
-        "Enhanced Clam",
-        tidy(
-            frame_background="#1A1C29",
-            text_background="#272936",
-            normal_detail="#2D3345",
-            high_detail="#3C436E",
-            low_detail="#2F3640",
-            scrollbar_background="#4F5162",
-            trough_background="#30313D",
-            normal_foreground="#9E9E9E",
-            high_foreground="#eeeeee",
-            low_foreground="#5a5c72",
-            link_foreground="#567cc4",
-        ),
-        images=dark_images,
-    )
+        get_workbench().add_ui_theme(
+            f"Tidy Sepia {variant}",
+            "Enhanced Clam",
+            tidy(
+                frame_background="#E8E7DC",
+                text_background="#F7F6F0",
+                normal_detail="#DEDCC8",
+                high_detail="#c6c3bf",
+                low_detail="#D4D0B8",
+                scrollbar_background="#cdcbb7",
+                trough_background="#DEDCC8",
+                active_tab_background=active_tab_background,
+                normal_foreground="#222222",
+                high_foreground="#000000",
+                low_foreground="#999999",
+                custom_menubar=0,
+                link_foreground="#325aa8",
+            ),
+        )
 
-    get_workbench().add_ui_theme(
-        "Tidy Sepia",
-        "Enhanced Clam",
-        tidy(
-            frame_background="#E8E7DC",
-            text_background="#F7F6F0",
-            normal_detail="#DEDCC8",
-            high_detail="#c6c3bf",
-            low_detail="#D4D0B8",
-            scrollbar_background="#cdcbb7",
-            trough_background="#DEDCC8",
-            normal_foreground="#222222",
-            high_foreground="#000000",
-            low_foreground="#999999",
-            custom_menubar=0,
-            link_foreground="#325aa8",
-        ),
-    )
-
-    get_workbench().add_ui_theme(
-        "Tidy Light",
-        "Enhanced Clam",
-        tidy(
-            frame_background="#EBEBEB",
-            text_background="#ffffff",
-            normal_detail="#DFDFDF",
-            high_detail="#c6c3bf",
-            low_detail="#c6c3bf",
-            scrollbar_background="#c6c3bf",
-            trough_background="#E9E9E9",
-            normal_foreground="#222222",
-            high_foreground="#000000",
-            low_foreground="#999999",
-            custom_menubar=0,
-            link_foreground="#32478d",
-        ),
-    )
+        get_workbench().add_ui_theme(
+            f"Tidy Light {variant}",
+            "Enhanced Clam",
+            tidy(
+                frame_background="#EBEBEB",
+                text_background="#ffffff",
+                normal_detail="#DFDFDF",
+                high_detail="#c6c3bf",
+                low_detail="#c6c3bf",
+                scrollbar_background="#c6c3bf",
+                trough_background="#E9E9E9",
+                active_tab_background=active_tab_background,
+                normal_foreground="#222222",
+                high_foreground="#000000",
+                low_foreground="#999999",
+                custom_menubar=0,
+                link_foreground="#32478d",
+            ),
+        )
