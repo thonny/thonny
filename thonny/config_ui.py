@@ -225,7 +225,7 @@ def _check_bundle_with_tooltip_icon(widget: tk.Widget, tooltip: Optional[str]) -
 
 def _ensure_pady(pady: Union[int, str, Tuple, None]) -> Union[int, str, Tuple]:
     if pady is None:
-        return (0, ems_to_pixels(0.1))
+        return (0, ems_to_pixels(0.25))
     else:
         return pady
 
