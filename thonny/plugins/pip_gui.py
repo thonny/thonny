@@ -15,6 +15,7 @@ from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror, showwarning
 from typing import Dict, List, Optional, Tuple, Union
 
+import packaging.version
 from packaging.requirements import Requirement
 from packaging.utils import NormalizedName, canonicalize_name, canonicalize_version
 
@@ -35,7 +36,6 @@ from thonny.misc_utils import (
     download_and_parse_json,
     download_bytes,
     get_menu_char,
-    running_on_mac_os,
 )
 from thonny.running import BackendProxy, InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
@@ -550,7 +550,7 @@ class PipFrame(ttk.Frame, ABC):
             if dist_info_future.done() and version_list_future.done():
                 try:
                     info = dist_info_future.result()
-                    versions = version_list_future.result()
+                    version_list_future.result()  # will be cached
                 except Exception as e:
                     logger.exception("Error downloading")
                     self._append_info_text(
@@ -558,13 +558,13 @@ class PipFrame(ttk.Frame, ABC):
                     )
                     self._set_state("idle")
                 else:
-                    self._complete_show_package_info(name, info, versions)
+                    self._complete_show_package_info(info)
             else:
                 get_workbench().after(200, poll_fetch_complete)
 
         poll_fetch_complete()
 
-    def _complete_show_package_info(self, name, dist_info: DistInfo, version_list: List[str]):
+    def _complete_show_package_info(self, dist_info: DistInfo):
         self._set_state("idle")
         assert self._version_button is not None
         self._version_button.configure(state="normal")
@@ -649,7 +649,15 @@ class PipFrame(ttk.Frame, ABC):
         variable = tk.StringVar(self, value=self._current_dist_info.version)
         installed_version_is_in_list = False
 
-        for version in reversed(versions):
+        def parse_version(ver_str):
+            try:
+                ver = packaging.version.Version(ver_str)
+            except packaging.version.InvalidVersion:
+                ver = packaging.version.Version("0.0.1")
+
+            return ver, ver_str
+
+        for version in sorted(versions, key=parse_version, reverse=True):
             if canonicalize_version(version) == installed_version:
                 installed_version_is_in_list = True
 
