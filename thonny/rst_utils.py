@@ -5,7 +5,7 @@ from logging import getLogger
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.tktextext import TweakableText
-from thonny.ui_utils import get_hyperlink_cursor
+from thonny.ui_utils import get_hyperlink_cursor, lookup_style_option
 
 logger = getLogger(__name__)
 
@@ -471,6 +471,14 @@ class RstText(TweakableText):
 
     def _hyperlink_leave(self, event):
         self.config(cursor="")
+
+    def on_theme_changed(self):
+        self.configure_tags()
+        text_bg = lookup_style_option("Text", "background")
+        for name in self.window_names():
+            w = self.nametowidget(name)
+            if isinstance(w, tk.Label):
+                w.configure(background=text_bg)
 
 
 def escape(s):

@@ -28,7 +28,6 @@ from thonny.ui_utils import (
     create_string_var,
     ems_to_pixels,
     get_hyperlink_cursor,
-    get_style_configuration,
     lookup_style_option,
     open_with_default_app,
     pixels_to_ems,
@@ -139,6 +138,8 @@ class BaseFileBrowser(ttk.Frame):
         self.menu = tk.Menu(self.tree, tearoff=False)
         self.current_focus = None
 
+        self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
+
     def init_header(self, row, column):
         header_frame = ttk.Frame(self, style="ViewToolbar.TFrame")
         header_frame.grid(row=row, column=column, sticky="nsew")
@@ -155,14 +156,14 @@ class BaseFileBrowser(ttk.Frame):
             pady=ems_to_pixels(0.5),
             insertwidth=0,
             highlightthickness=0,
-            background=lookup_style_option("ViewToolbar.TFrame", "background"),
+            background=self.get_path_bar_background(),
+            foreground=self.get_label_foreground(),
         )
 
         self.path_bar.grid(row=0, column=0, sticky="nsew")
         self.path_bar.set_read_only(True)
         self.path_bar.bind("<Configure>", self.resize_path_bar, True)
-        link_foreground = lookup_style_option("Url.TLabel", "foreground")
-        self.path_bar.tag_configure("dir", foreground=link_foreground)
+        self.path_bar.tag_configure("dir", foreground=self.get_url_foreground())
         self.path_bar.tag_configure("underline", underline=True)
 
         def get_dir_range(event):
@@ -1057,6 +1058,23 @@ class BaseFileBrowser(ttk.Frame):
                 full_label = plain_label
 
             self.tree.heading(tree_col_name, text=full_label)
+
+    def get_path_bar_background(self) -> str:
+        return lookup_style_option("ViewToolbar.TFrame", "background")
+
+    def get_url_foreground(self) -> str:
+        return lookup_style_option("Url.TLabel", "foreground")
+
+    def get_label_foreground(self) -> str:
+        return lookup_style_option("TLabel", "foreground")
+
+    def on_theme_changed(self, event):
+        self.path_bar.configure(background=self.get_path_bar_background())
+        self.path_bar.tag_configure("dir", foreground=self.get_url_foreground())
+
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
+        super().destroy()
 
 
 class CopyPaste(object):

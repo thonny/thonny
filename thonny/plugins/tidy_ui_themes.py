@@ -119,8 +119,9 @@ def tidy(
         "TEntry": {
             "configure": {
                 "fieldbackground": text_background,
-                "lightcolor": normal_detail,
+                "lightcolor": text_background,
                 "insertcolor": normal_foreground,
+                "borderwidth": 1,
             },
             "map": {
                 "background": [("readonly", text_background)],
@@ -318,14 +319,34 @@ def tidy(
         "ViewToolbar.Toolbutton": {"configure": {"background": active_tab_background}},
         "ViewTab.TLabel": {"configure": {"background": active_tab_background, "padding": [5, 0]}},
         "ViewToolbar.TLabel": {
-            "configure": {"background": active_tab_background, "padding": [scale(4), 0]}
+            "configure": {
+                "background": active_tab_background,
+                "lightcolor": active_tab_background,
+                "darkcolor": active_tab_background,
+                "bordercolor": active_tab_background,
+                "borderwidth": 1,
+                "padding": [scale(4), 0],
+            }
         },
         "Active.ViewTab.TLabel": {
             "configure": {
                 "foreground": normal_foreground,
                 # "font" : "BoldTkDefaultFont",
                 "background": active_tab_background,
-            }
+                "lightcolor": active_tab_background,
+                "darkcolor": active_tab_background,
+                "relief": "sunken",
+                "bordercolor": high_detail,
+                "borderwidth": 1,
+            },
+            "map": {
+                "lightcolor": [("hover", active_tab_background)],
+                "bordercolor": [("hover", high_detail)],
+                "background": [("hover", active_tab_background)],
+                "darkcolor": [("hover", active_tab_background)],
+                "relief": [("hover", "sunken")],
+                "borderwidth": [("hover", 1)],
+            },
         },
         "Inactive.ViewTab.TLabel": {
             "configure": {"foreground": normal_foreground},

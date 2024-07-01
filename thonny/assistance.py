@@ -26,7 +26,7 @@ from thonny.common import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import CommonDialog, get_hyperlink_cursor
+from thonny.ui_utils import CommonDialog, get_hyperlink_cursor, lookup_style_option
 
 logger = getLogger(__name__)
 
@@ -64,7 +64,6 @@ class AssistantView(tktextext.TextFrame):
             "section_title",
             spacing3=5,
             font="BoldTkDefaultFont",
-            # foreground=get_syntax_options_for_tag("stderr")["foreground"]
         )
         self.text.tag_configure(
             "intro",
@@ -95,6 +94,8 @@ class AssistantView(tktextext.TextFrame):
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
 
         add_error_helper("*", GenericErrorHelper)
+
+        self.bind("<<ThemeChanged>>", self._on_theme_changed, True)
 
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         # Can be called by event system or by Workbench
@@ -407,6 +408,15 @@ class AssistantView(tktextext.TextFrame):
 
     def _get_rst_prelude(self):
         return ".. default-role:: code\n\n" + ".. role:: light\n\n" + ".. role:: remark\n\n"
+
+    def _on_theme_changed(self, event):
+        self.text.configure(
+            background=lookup_style_option("Text", "background"),
+            foreground=lookup_style_option("Text", "foreground"),
+        )
+
+        if isinstance(self.text, rst_utils.RstText):
+            self.text.on_theme_changed()
 
 
 class AssistantRstText(rst_utils.RstText):

@@ -33,6 +33,7 @@ PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 logger = getLogger(__name__)
 
 
+# Using tk.Frame instead of ttk.Frame, because Aqua theme doesn't allow changing Frame background
 class CustomToolbutton(tk.Frame):
     def __init__(
         self,
@@ -59,12 +60,9 @@ class CustomToolbutton(tk.Frame):
 
         self.state = state
         self.style = style
-        style_conf = get_style_configuration("CustomToolbutton")
-        if self.style:
-            style_conf |= get_style_configuration(self.style)
-        self.normal_background = background or style_conf["background"]
-        self.normal_foreground = foreground or style_conf["foreground"]
-        self.hover_background = style_conf["activebackground"]
+        self.background = background
+        self.foreground = foreground
+        self.prepare_style_options()
 
         if state == "disabled":
             self.current_image = self.disabled_image
@@ -114,6 +112,8 @@ class CustomToolbutton(tk.Frame):
         self.bind("<Enter>", self.on_enter, True)
         self.bind("<Leave>", self.on_leave, True)
 
+        self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
+
     def cget(self, key: str) -> Any:
         if key in ["text", "image"]:
             return self.label.cget(key)
@@ -133,7 +133,7 @@ class CustomToolbutton(tk.Frame):
         super().configure(background=self.normal_background)
         self.label.configure(background=self.normal_background)
 
-    def configure(self, cnf={}, state=None, image=None, command=None, **kw):
+    def configure(self, cnf={}, state=None, image=None, command=None, background=None, **kw):
         if command:
             self.command = command
 
@@ -150,9 +150,28 @@ class CustomToolbutton(tk.Frame):
         else:
             self.current_image = self.normal_image
 
+        super().configure(background=background)
         # tkinter.Frame should be always state=normal as it won't display the image if "disabled"
         # at least on mac with Tk 8.6.13
-        self.label.configure(cnf, image=self.current_image, state="normal", **kw)
+        self.label.configure(
+            cnf, image=self.current_image, state="normal", background=background, **kw
+        )
+
+    def on_theme_changed(self, event):
+        self.prepare_style_options()
+        self.configure(background=self.normal_background, foreground=self.normal_foreground)
+
+    def prepare_style_options(self):
+        style_conf = get_style_configuration("CustomToolbutton")
+        if self.style:
+            style_conf |= get_style_configuration(self.style)
+        self.normal_background = self.background or style_conf["background"]
+        self.normal_foreground = self.foreground or style_conf["foreground"]
+        self.hover_background = style_conf["activebackground"]
+
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
+        super().destroy()
 
 
 class CommonDialog(tk.Toplevel):
@@ -514,6 +533,7 @@ class TreeFrame(ttk.Frame):
         show_statusbar=False,
         borderwidth=0,
         relief="flat",
+        consider_heading_stripe=True,
         **tree_kw,
     ):
         ttk.Frame.__init__(self, master, borderwidth=borderwidth, relief=relief)
@@ -538,10 +558,11 @@ class TreeFrame(ttk.Frame):
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
-        header_stripe = check_create_heading_stripe(self)
-        if header_stripe is not None:
-            header_stripe.grid(row=0, column=0, sticky="new")
-            header_stripe.tkraise()
+        if consider_heading_stripe:
+            heading_stripe = check_create_heading_stripe(self)
+            if heading_stripe is not None:
+                heading_stripe.grid(row=0, column=0, sticky="new")
+                heading_stripe.tkraise()
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -1253,6 +1274,50 @@ class EnhancedBooleanVar(EnhancedVar, tk.BooleanVar):
 
 class EnhancedDoubleVar(EnhancedVar, tk.DoubleVar):
     pass
+
+
+class HeadingStripe(tk.Frame):
+    def __init__(self, master, height, background):
+        super().__init__(master, height=height, background=background)
+        self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
+
+    def on_theme_changed(self, event=None):
+        opts = get_style_configuration("Heading")
+        px_to_hide = opts.get("topmost_pixels_to_hide", 0)
+        background = opts.get("background")
+        self.configure(height=px_to_hide, background=background)
+
+    def destroy(self):
+        self.unbind(self._on_theme_changed_binding)
+        super().destroy()
+
+
+class ScrollbarStripe(tk.Frame):
+    def __init__(self, master, stripe_width):
+        # Want to cover a gray stripe on the right edge of the scrollbar.
+
+        super().__init__(master, width=stripe_width, background=self.get_background())
+        self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
+
+    def get_background(self):
+        # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
+        # Best dynamic alternative is probably systemTextBackgroundColor
+        if os_is_in_dark_mode():
+            return "#2d2e31"
+        else:
+            return "#fafafa"
+
+    def on_theme_changed(self, event=None):
+        px_to_hide = lookup_style_option("Vertical.TScrollbar", "rightmost_pixels_to_hide", 0)
+        if px_to_hide == 0:
+            self.grid_remove()
+        else:
+            self.grid()
+            self.configure(background=self.get_background())
+
+    def destroy(self):
+        self.unbind(self._on_theme_changed_binding)
+        super().destroy()
 
 
 def create_string_var(value, modification_listener=None) -> EnhancedStringVar:
@@ -2485,15 +2550,9 @@ def os_is_in_dark_mode() -> Optional[bool]:
 
 
 def check_create_aqua_scrollbar_stripe(master) -> Optional[tk.Frame]:
-    if get_workbench().is_using_aqua_based_theme():
-        # Want to cover a gray stripe on the right edge of the scrollbar.
-        # Not sure if it is good idea to use fixed colors, but no named (light-dark aware) color matches.
-        # Best dynamic alternative is probably systemTextBackgroundColor
-        if os_is_in_dark_mode():
-            stripe_color = "#2d2e31"
-        else:
-            stripe_color = "#fafafa"
-        return tk.Frame(master, width=1, background=stripe_color)
+    stripe_width = lookup_style_option("Vertical.TScrollbar", "rightmost_pixels_to_hide", 0)
+    if stripe_width > 0:
+        return ScrollbarStripe(master, stripe_width)
     else:
         return None
 
@@ -2503,7 +2562,7 @@ def check_create_heading_stripe(master) -> Optional[tk.Frame]:
     px_to_hide = opts.get("topmost_pixels_to_hide", 0)
     background = opts.get("background")
     if px_to_hide > 0 and background is not None:
-        return tk.Frame(master, height=px_to_hide, background=background)
+        return HeadingStripe(master, height=px_to_hide, background=background)
     else:
         return None
 

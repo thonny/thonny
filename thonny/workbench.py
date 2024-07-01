@@ -161,7 +161,7 @@ class Workbench(tk.Tk):
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = []  # type: List[Type]
         self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
-
+        self._os_dark_mode = os_is_in_dark_mode()
         self._init_language()
 
         self._active_ui_mode = os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
@@ -2550,6 +2550,11 @@ class Workbench(tk.Tk):
         if self._lost_focus:
             self._lost_focus = False
             self.event_generate("WindowFocusIn")
+            os_dark_mode = os_is_in_dark_mode()
+            if self._os_dark_mode is not os_dark_mode:
+                self._os_dark_mode = os_dark_mode
+                if self.ready:
+                    self.reload_themes()
 
     def _on_focus_out(self, event):
         if self.focus_get() is None:

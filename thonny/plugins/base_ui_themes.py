@@ -747,6 +747,11 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 },
             },
             "Heading": {"configure": {"topmost_pixels_to_hide": 2}},
+            "Vertical.TScrollbar": {
+                "configure": {
+                    "rightmost_pixels_to_hide": 1,
+                }
+            },
         },
     ]
 

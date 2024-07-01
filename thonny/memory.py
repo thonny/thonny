@@ -24,8 +24,14 @@ def parse_object_id(object_id_repr):
 
 
 class MemoryFrame(TreeFrame):
-    def __init__(self, master, columns, show_statusbar=False):
-        TreeFrame.__init__(self, master, columns, show_statusbar=show_statusbar)
+    def __init__(self, master, columns, show_statusbar=False, consider_heading_stripe=True):
+        TreeFrame.__init__(
+            self,
+            master,
+            columns,
+            show_statusbar=show_statusbar,
+            consider_heading_stripe=consider_heading_stripe,
+        )
 
         font = tk_font.nametofont("TkDefaultFont").copy()
         font.configure(underline=True)
@@ -53,8 +59,10 @@ class MemoryFrame(TreeFrame):
 
 
 class VariablesFrame(MemoryFrame):
-    def __init__(self, master):
-        MemoryFrame.__init__(self, master, ("name", "id", "value"))
+    def __init__(self, master, consider_heading_stripe=True):
+        MemoryFrame.__init__(
+            self, master, ("name", "id", "value"), consider_heading_stripe=consider_heading_stripe
+        )
 
         self.tree.column("name", width=120, anchor=tk.W, stretch=False)
         self.tree.column("id", width=450, anchor=tk.W, stretch=True)

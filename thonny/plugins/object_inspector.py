@@ -30,7 +30,7 @@ class ObjectInspector(ttk.Frame):
         self.active_page.grid(row=1, column=0, sticky="nsew")
 
         toolbar = self._create_toolbar()
-        toolbar.grid(row=0, column=0, sticky="nsew", pady=(0, 1))
+        toolbar.grid(row=0, column=0, sticky="nsew", pady=(0, 0))
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -695,7 +695,7 @@ class ImageInspector(ContentInspector, tk.Frame):
 
 class AttributesFrame(thonny.memory.VariablesFrame):
     def __init__(self, master):
-        thonny.memory.VariablesFrame.__init__(self, master)
+        thonny.memory.VariablesFrame.__init__(self, master, consider_heading_stripe=False)
         self.configure(border=0)
 
     def on_select(self, event):

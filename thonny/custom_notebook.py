@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import tkinter as tk
 from logging import getLogger
-from typing import Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
 
 from thonny import dnd  # inspired by and very similar to tkinter.dnd
 from thonny.languages import tr
@@ -15,9 +15,8 @@ class CustomNotebookTabRow(tk.Frame):
     def __init__(self, master: CustomNotebook, **kw):
         self.notebook = master
         self.root = master.winfo_toplevel()
-        text_foreground = _get_style_configuration("Text")["foreground"]
         super().__init__(master, **kw)
-        self.filler = tk.Frame(self, background=self.notebook.base_style_conf["background"])
+        self.filler = tk.Frame(self, background=self.notebook.get_frame_background())
         self.filler.grid(
             row=0,
             column=999,
@@ -26,7 +25,10 @@ class CustomNotebookTabRow(tk.Frame):
             pady=(0, 1),
         )
         self._insertion_mark = tk.Frame(
-            self, background=text_foreground, width=_ems_to_pixels(0.3), height=_ems_to_pixels(2)
+            self,
+            background=self.notebook.get_label_foreground(),
+            width=_ems_to_pixels(0.3),
+            height=_ems_to_pixels(2),
         )
         self._insertion_index = None
 
@@ -76,6 +78,10 @@ class CustomNotebookTabRow(tk.Frame):
 
         return closest_left_edge_index, closest_left_edge_widget
 
+    def on_theme_changed(self):
+        self.configure(background=self.notebook.get_bordercolor())
+        self.filler.configure(background=self.notebook.get_frame_background())
+
     def _show_insertion_mark(self, insertion_index: int, right_neigbour: tk.Widget) -> None:
         self._insertion_mark.place_configure(
             x=right_neigbour.winfo_x(), y=0, height=self.winfo_height()
@@ -91,20 +97,20 @@ class CustomNotebookTabRow(tk.Frame):
 class CustomNotebook(tk.Frame):
     def __init__(self, master: Union[tk.Widget, tk.Toplevel, tk.Tk], closable: bool = True):
         self.dynamic_border = True
-        self.base_style_conf = _get_style_configuration(".")
-        self.style_conf = _get_style_configuration("CustomNotebook")
-        super().__init__(master, background=self.style_conf["bordercolor"])
+        super().__init__(master, background=self.get_bordercolor())
         self.closable = closable
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
         # Can't use ttk.Frame, because can't change its color in aqua
-        self.tab_row = CustomNotebookTabRow(self, background=self.style_conf["bordercolor"])
+        self.tab_row = CustomNotebookTabRow(self, background=self.get_bordercolor())
         self.tab_row.grid(row=0, column=0, sticky="new")
         self.tab_row.columnconfigure(999, weight=1)
 
         self.current_page: Optional[CustomNotebookPage] = None
         self.pages: List[CustomNotebookPage] = []
+
+        self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
 
     def add(self, child: tk.Widget, text: str) -> None:
         self._insert("end", child, text=text)
@@ -172,6 +178,21 @@ class CustomNotebook(tk.Frame):
     def enable_traversal(self) -> None:
         # TODO:
         pass
+
+    def get_bordercolor(self) -> str:
+        return _lookup_style_option("CustomNotebook", "bordercolor")
+
+    def get_frame_background(self) -> str:
+        return _lookup_style_option(".", "background")
+
+    def get_label_foreground(self) -> str:
+        return _lookup_style_option("TLabel", "foreground")
+
+    def on_theme_changed(self, event):
+        self.configure(background=self.get_bordercolor())
+        self.tab_row.on_theme_changed()
+        for page in self.pages:
+            page.tab.on_theme_changed()
 
     def select(self, tab_id: Union[str, tk.Widget, None] = None) -> Optional[str]:
         if tab_id is None:
@@ -340,6 +361,10 @@ class CustomNotebook(tk.Frame):
     def allows_dragging_to_another_notebook(self) -> bool:
         return False
 
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
+        super().destroy()
+
 
 class CustomNotebookTab(tk.Frame):
     close_image = None
@@ -347,10 +372,7 @@ class CustomNotebookTab(tk.Frame):
 
     def __init__(self, notebook: CustomNotebook, title: str, closable: bool):
         super().__init__(notebook.tab_row, borderwidth=0)
-
-        self.base_style = _get_style_configuration(".")
-        self.tab_style = _get_style_configuration("CustomNotebook.Tab")
-        self.notebook_style_conf = _get_style_configuration("CustomNotebook")
+        self._active = False
 
         self.notebook = notebook
         self.title = title
@@ -359,11 +381,11 @@ class CustomNotebookTab(tk.Frame):
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.label = tk.Label(self, text=title, foreground=self.base_style["foreground"])
+        self.label = tk.Label(self, text=title, foreground=self.notebook.get_label_foreground())
         self.label.grid(
             row=0,
             column=0,
-            padx=(_ems_to_pixels(0.3), 0 if self.notebook.closable else _ems_to_pixels(0)),
+            padx=(_ems_to_pixels(0.3), 0 if self.notebook.closable else _ems_to_pixels(0.3)),
             sticky="nsw",
             pady=(0, _ems_to_pixels(0.1)),
         )
@@ -391,9 +413,7 @@ class CustomNotebookTab(tk.Frame):
         else:
             self.button = None
 
-        self.indicator = tk.Frame(
-            self, height=1, background=self.notebook_style_conf["bordercolor"]
-        )
+        self.indicator = tk.Frame(self, height=1, background=self.notebook.get_bordercolor())
         self.indicator.grid(row=1, column=0, columnspan=2, sticky="sew")
 
         self.menu = tk.Menu(
@@ -424,6 +444,33 @@ class CustomNotebookTab(tk.Frame):
     def _close_other_tabs(self) -> None:
         self.notebook.close_tabs(except_tab=self)
 
+    def on_theme_changed(self):
+        self.label.configure(foreground=self.notebook.get_label_foreground())
+
+        if self._active:
+            main_background = self._get_tab_style_option("activebackground")
+            indicator_background = self._get_tab_style_option("indicatorbackground")
+            indicator_height = self._get_tab_style_option("indicatorheight", _ems_to_pixels(0.2))
+            if self.notebook.dynamic_border:
+                self.grid(padx=1, pady=(1, 0))
+        else:
+            main_background = self._get_tab_style_option("background")
+            indicator_background = self.notebook.get_bordercolor()
+            indicator_height = 1
+            if self.notebook.dynamic_border:
+                self.grid(padx=0, pady=0)
+
+        self.configure(background=main_background)
+        self.label.configure(background=main_background)
+        if self.button:
+            self.button.configure(background=main_background)
+        self.indicator.configure(background=indicator_background, height=indicator_height)
+
+        self.menu.configure(**_get_style_configuration("Menu"))
+
+    def _get_tab_style_option(self, option_name, default=None) -> Any:
+        return _lookup_style_option("CustomNotebook.Tab", option_name, default)
+
     def on_click(self, event: tk.Event):
         self.notebook.select_tab(self)
         self.drag_start_x_root = event.x_root
@@ -440,30 +487,8 @@ class CustomNotebookTab(tk.Frame):
         self.button.configure(image=CustomNotebookTab.close_image)
 
     def update_state(self, active: bool) -> None:
-        if active:
-            main_background = self.tab_style["activebackground"]
-            # indicator_background = "systemTextBackgroundColor"
-            # indicator_height = 1
-
-            # indicator_background = border_color
-            # indicator_height = 1
-
-            indicator_background = self.tab_style["indicatorbackground"]
-            indicator_height = self.tab_style.get("indicatorheight", _ems_to_pixels(0.2))
-            if self.notebook.dynamic_border:
-                self.grid(padx=1, pady=(1, 0))
-        else:
-            main_background = self.tab_style["background"]
-            indicator_background = self.notebook_style_conf["bordercolor"]
-            indicator_height = 1
-            if self.notebook.dynamic_border:
-                self.grid(padx=0, pady=0)
-
-        self.configure(background=main_background)
-        self.label.configure(background=main_background)
-        if self.button:
-            self.button.configure(background=main_background)
-        self.indicator.configure(background=indicator_background, height=indicator_height)
+        self._active = active
+        self.on_theme_changed()
 
     def dnd_motion_anywhere(self, source: CustomNotebookTab, event: tk.Event):
         toplevel = self.winfo_toplevel()
@@ -565,6 +590,12 @@ def _get_style_configuration(name: str) -> Dict:
     from thonny.ui_utils import get_style_configuration
 
     return get_style_configuration(name)
+
+
+def _lookup_style_option(style_name, option_name, default=None) -> Any:
+    from thonny.ui_utils import lookup_style_option
+
+    return lookup_style_option(style_name, option_name, default)
 
 
 """
