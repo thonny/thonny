@@ -1522,7 +1522,7 @@ class Workbench(tk.Tk):
         elif "Kind of Aqua" in available_themes:
             return "Kind of Aqua"
         else:
-            return "Enhanced Clam"
+            return "Tidy Light A"
 
     def get_default_syntax_theme(self) -> str:
         if self.uses_dark_ui_theme():
