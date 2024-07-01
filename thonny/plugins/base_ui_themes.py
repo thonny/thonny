@@ -410,6 +410,7 @@ def aqua() -> BasicUiThemeSettings:
                 "selectborderwidth": 0,
                 "insertwidth": 1,
                 "stipple": "",
+                "aqua_based": 1
             },
             "map": {
                 "foreground": [
