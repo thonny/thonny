@@ -170,7 +170,11 @@ class CustomToolbutton(tk.Frame):
         self.hover_background = style_conf["activebackground"]
 
     def destroy(self):
-        self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
+        if not get_workbench().is_closing():
+            try:
+                self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
+            except Exception:
+                logger.exception("Could not unbind")
         super().destroy()
 
 

@@ -2569,6 +2569,9 @@ class Workbench(tk.Tk):
             # This may give error in Ubuntu
             return None
 
+    def is_closing(self):
+        return self._closing
+
     def destroy(self) -> None:
         try:
             if self._event_polling_id is not None:
@@ -2606,7 +2609,11 @@ class Workbench(tk.Tk):
             logger.exception("Error while destroying workbench")
 
         finally:
-            super().destroy()
+            try:
+                super().destroy()
+            except:
+                logger.exception("Problem during close")
+                sys.exit(1)
 
     def _on_tk_exception(self, exc, val, tb) -> None:
         # copied from tkinter.Tk.report_callback_exception with modifications
