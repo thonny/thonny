@@ -96,7 +96,9 @@ class CustomNotebookTabRow(tk.Frame):
 
 class CustomNotebook(tk.Frame):
     def __init__(self, master: Union[tk.Widget, tk.Toplevel, tk.Tk], closable: bool = True):
-        self.dynamic_border = True
+        self.dynamic_border = bool(
+            _lookup_style_option("CustomNotebook.Tab", "dynamic_border", False)
+        )
         super().__init__(master, background=self.get_bordercolor())
         self.closable = closable
         self.rowconfigure(1, weight=1)
@@ -189,10 +191,13 @@ class CustomNotebook(tk.Frame):
         return _lookup_style_option("TLabel", "foreground")
 
     def on_theme_changed(self, event):
+        self.dynamic_border = bool(
+            _lookup_style_option("CustomNotebook.Tab", "dynamic_border", False)
+        )
         self.configure(background=self.get_bordercolor())
         self.tab_row.on_theme_changed()
         for page in self.pages:
-            page.tab.on_theme_changed()
+            page.tab.update_style()
 
     def select(self, tab_id: Union[str, tk.Widget, None] = None) -> Optional[str]:
         if tab_id is None:
@@ -373,6 +378,7 @@ class CustomNotebookTab(tk.Frame):
     def __init__(self, notebook: CustomNotebook, title: str, closable: bool):
         super().__init__(notebook.tab_row, borderwidth=0)
         self._active = False
+        self._hover = False
 
         self.notebook = notebook
         self.title = title
@@ -391,6 +397,9 @@ class CustomNotebookTab(tk.Frame):
         )
         self.bind("<1>", self.on_click, True)
         self.label.bind("<1>", self.on_click, True)
+
+        self.bind("<Enter>", self.on_enter, True)
+        self.bind("<Leave>", self.on_leave, True)
 
         if closable:
             if not CustomNotebookTab.close_image:
@@ -444,26 +453,35 @@ class CustomNotebookTab(tk.Frame):
     def _close_other_tabs(self) -> None:
         self.notebook.close_tabs(except_tab=self)
 
-    def on_theme_changed(self):
+    def update_style(self, only_background=False):
         self.label.configure(foreground=self.notebook.get_label_foreground())
 
         if self._active:
             main_background = self._get_tab_style_option("activebackground")
-            indicator_background = self._get_tab_style_option("indicatorbackground")
-            indicator_height = self._get_tab_style_option("indicatorheight", _ems_to_pixels(0.2))
-            if self.notebook.dynamic_border:
-                self.grid(padx=1, pady=(1, 0))
+        elif self._hover:
+            main_background = self._get_tab_style_option("hoverbackground")
         else:
             main_background = self._get_tab_style_option("background")
-            indicator_background = self.notebook.get_bordercolor()
-            indicator_height = 1
-            if self.notebook.dynamic_border:
-                self.grid(padx=0, pady=0)
 
         self.configure(background=main_background)
         self.label.configure(background=main_background)
         if self.button:
             self.button.configure(background=main_background)
+
+        if only_background:
+            return
+
+        if self._active:
+            indicator_background = self._get_tab_style_option("indicatorbackground")
+            indicator_height = self._get_tab_style_option("indicatorheight", _ems_to_pixels(0.2))
+            if self.notebook.dynamic_border:
+                self.grid(padx=1, pady=(1, 0))
+        else:
+            indicator_background = self.notebook.get_bordercolor()
+            indicator_height = 1
+            if self.notebook.dynamic_border:
+                self.grid(padx=0, pady=0)
+
         self.indicator.configure(background=indicator_background, height=indicator_height)
 
         self.menu.configure(**_get_style_configuration("Menu"))
@@ -480,6 +498,14 @@ class CustomNotebookTab(tk.Frame):
     def on_button_click(self, event):
         self.notebook.close_tab(self)
 
+    def on_enter(self, event):
+        self._hover = True
+        self.update_style(only_background=True)
+
+    def on_leave(self, event):
+        self._hover = False
+        self.update_style(only_background=True)
+
     def on_button_enter(self, event):
         self.button.configure(image=CustomNotebookTab.active_close_image)
 
@@ -488,7 +514,7 @@ class CustomNotebookTab(tk.Frame):
 
     def update_state(self, active: bool) -> None:
         self._active = active
-        self.on_theme_changed()
+        self.update_style()
 
     def dnd_motion_anywhere(self, source: CustomNotebookTab, event: tk.Event):
         toplevel = self.winfo_toplevel()

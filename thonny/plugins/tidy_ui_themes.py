@@ -83,7 +83,9 @@ def tidy(
             "configure": {
                 "background": frame_background,
                 "activebackground": active_tab_background,
+                "hoverbackground": normal_detail,
                 "indicatorbackground": active_tab_background,
+                "dynamic_border": 1,
             }
         },
         "TextPanedWindow": {"configure": {"background": text_background}},

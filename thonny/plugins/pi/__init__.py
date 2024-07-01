@@ -196,6 +196,7 @@ def pix():
             "configure": {
                 "background": detail_bg,
                 "activebackground": MAIN_BACKGROUND,
+                "hoverbackground": MAIN_BACKGROUND,
                 "indicatorbackground": MAIN_BACKGROUND,
             }
         },

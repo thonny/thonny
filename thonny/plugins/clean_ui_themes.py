@@ -71,6 +71,7 @@ def clean(
             "configure": {
                 "background": frame_background,
                 "activebackground": normal_detail,
+                "hoverbackground": normal_detail,
                 "indicatorbackground": normal_detail,
             }
         },

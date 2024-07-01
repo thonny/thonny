@@ -225,6 +225,7 @@ def clam() -> BasicUiThemeSettings:
             "configure": {
                 "background": darker,
                 "activebackground": frame,
+                "hoverbackground": frame,
                 "indicatorbackground": frame,
             }
         },
@@ -600,6 +601,7 @@ def windows() -> CompoundUiThemeSettings:
                 "configure": {
                     "background": "systemButtonFace",
                     "activebackground": "systemWindow",
+                    "hoverbackground": "systemWindow",
                     #                    "indicatorbackground": "systemHighlight",
                     "indicatorbackground": "system3dLight",
                     "indicatorheight": 1,
@@ -728,9 +730,11 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             },
             "CustomNotebook.Tab": {
                 "configure": {
-                    "background": "systemWindowBackgroundColor2",
+                    "background": "systemWindowBackgroundColor",
                     "activebackground": "systemWindowBackgroundColor",
+                    "hoverbackground": "systemWindowBackgroundColor",
                     "indicatorbackground": "systemWindowBackgroundColor",
+                    "dynamic_border": 1,
                 }
             },
             "Listbox": {
