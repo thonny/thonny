@@ -1028,7 +1028,7 @@ class BackendProxy(ABC):
         return tr("Search on PyPI")
 
     @classmethod
-    def get_stubs_location(cls):
+    def get_user_stubs_location(cls):
         return os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
 
 

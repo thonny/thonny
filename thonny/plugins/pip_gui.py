@@ -1410,7 +1410,7 @@ class StubsPipFrame(PipFrame):
         return self.proxy_class.backend_description
 
     def _get_target_directory(self):
-        return self.proxy_class.get_stubs_location()
+        return self.proxy_class.get_user_stubs_location()
 
     def _normalize_target_path(self, path: str) -> str:
         return normpath_with_actual_case(path)

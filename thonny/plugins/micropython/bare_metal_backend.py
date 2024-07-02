@@ -1716,7 +1716,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        from thonny.plugins.micropython import GenericBareMetalMicroPythonProxy
+
         return [
+            GenericBareMetalMicroPythonProxy.get_user_stubs_location(),
             os.path.join(os.path.dirname(__file__), "generic_api_stubs"),
         ] + super()._get_sys_path_for_analysis()
 

@@ -18,16 +18,16 @@ class ESPProxy(BareMetalMicroPythonProxy):
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS
 
-    def _get_backend_launcher_path(self) -> str:
-        import thonny.plugins.esp.esp_back
-
-        return thonny.plugins.esp.esp_back.__file__
-
 
 class ESP8266Proxy(ESPProxy):
     @classmethod
     def get_known_usb_vids_pids(cls):
         return get_uart_adapter_vids_pids()
+
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.esp.esp8266_back
+
+        return thonny.plugins.esp.esp8266_back.__file__
 
 
 class ESP32Proxy(ESPProxy):
@@ -42,6 +42,11 @@ class ESP32Proxy(ESPProxy):
         return (
             super()._is_potential_port(p) or "m5stack" in lower_desc or "esp32" in lower_desc
         ) and "circuitpython" not in lower_desc
+
+    def _get_backend_launcher_path(self) -> str:
+        import thonny.plugins.esp.esp32_back
+
+        return thonny.plugins.esp.esp32_back.__file__
 
 
 class ESPConfigPage(BareMetalMicroPythonConfigPage):

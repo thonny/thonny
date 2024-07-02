@@ -17,7 +17,10 @@ logger = getLogger("thonny.plugins.calliope.calliope_back")
 
 class CalliopeMiniMicroPythonBackend(SimplifiedMicroPythonBackend):
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
+        from thonny.plugins.calliope import CalliopeMiniProxy
+
         return [
+            CalliopeMiniProxy.get_user_stubs_location(),
             os.path.join(os.path.dirname(__file__), "api_stubs"),
         ] + super()._get_sys_path_for_analysis()
 
