@@ -1288,6 +1288,10 @@ class HeadingStripe(tk.Frame):
     def on_theme_changed(self, event=None):
         opts = get_style_configuration("Heading")
         px_to_hide = opts.get("topmost_pixels_to_hide", 0)
+        if isinstance(px_to_hide, list):
+            # don't know why it happens sometimes
+            assert len(px_to_hide) == 1
+            px_to_hide = px_to_hide[0]
         background = opts.get("background")
         self.configure(height=px_to_hide, background=background)
 
@@ -2564,6 +2568,10 @@ def check_create_aqua_scrollbar_stripe(master) -> Optional[tk.Frame]:
 def check_create_heading_stripe(master) -> Optional[tk.Frame]:
     opts = get_style_configuration("Heading")
     px_to_hide = opts.get("topmost_pixels_to_hide", 0)
+    if isinstance(px_to_hide, list):
+        # don't know why it happens sometimes
+        assert len(px_to_hide) == 1
+        px_to_hide = px_to_hide[0]
     background = opts.get("background")
     if px_to_hide > 0 and background is not None:
         return HeadingStripe(master, height=px_to_hide, background=background)
