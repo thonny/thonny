@@ -174,7 +174,7 @@ class CustomToolbutton(tk.Frame):
             try:
                 self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
             except Exception:
-                logger.exception("Could not unbind")
+                pass
         super().destroy()
 
 
