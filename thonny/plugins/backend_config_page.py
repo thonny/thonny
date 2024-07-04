@@ -101,16 +101,14 @@ class BackendConfigurationPage(ConfigurationPage):
             self._backend_specs_by_desc.values(), key=lambda x: x.sort_key
         )
 
-        self._combo = ttk.Combobox(
+        self._combo = ui_utils.MappingCombobox(
             self,
             exportselection=False,
-            textvariable=self._combo_variable,
-            values=[spec.description for spec in sorted_backend_specs],
+            value_variable=self._combo_variable,
+            mapping={spec.description : spec.description for spec in sorted_backend_specs},
             height=25,
         )
-
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
-        self._combo.state(["!disabled", "readonly"])
 
         self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=2, column=0, sticky="nsew")
@@ -139,6 +137,8 @@ class BackendConfigurationPage(ConfigurationPage):
 
             page.grid(sticky="nsew", row=0, column=0, padx=0, pady=0)
             self._current_page = page
+            backend_name = self._backend_specs_by_desc[backend_desc].name
+            get_workbench().set_option("run.backend_name", backend_name)
 
     def _get_conf_page(self, backend_desc):
         if backend_desc not in self._conf_pages:
@@ -160,11 +160,9 @@ class BackendConfigurationPage(ConfigurationPage):
         result = self._current_page.apply(changed_options)
 
         if result is False:
+            logger.info("Backend page %r responded False to apply")
             return False
 
-        backend_desc = self._combo_variable.get()
-        backend_name = self._backend_specs_by_desc[backend_desc].name
-        get_workbench().set_option("run.backend_name", backend_name)
 
         # should_restart did not accept changed_options parameter before 5.0
         from inspect import signature
