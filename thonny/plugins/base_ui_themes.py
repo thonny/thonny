@@ -733,7 +733,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 "configure": {
                     "background": "systemWindowBackgroundColor",
                     "activebackground": "systemWindowBackgroundColor",
-                    "hoverbackground": "systemWindowBackgroundColor",
+                    "hoverbackground": "systemWindowBackgroundColor3",
                     "indicatorbackground": "systemWindowBackgroundColor",
                     "dynamic_border": 1,
                 }
@@ -796,6 +796,4 @@ def load_plugin() -> None:
         get_workbench().add_ui_theme("Windows", "vista", windows)
 
     if "aqua" in original_themes:
-        get_workbench().add_ui_theme(
-            "Kind of Aqua", "aqua", enhanced_aqua, enhanced_aqua_dark_overrides
-        )
+        get_workbench().add_ui_theme("macOS", "aqua", enhanced_aqua, enhanced_aqua_dark_overrides)

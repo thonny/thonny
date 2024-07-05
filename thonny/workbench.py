@@ -1008,6 +1008,10 @@ class Workbench(tk.Tk):
         self._backend_button.configure(text=desc + "  " + get_menu_char())
 
     def _init_theming(self) -> None:
+        if self.get_option("view.ui_theme") == "Kind of Aqua":
+            # replace pre-Thonny 5 theme with new theme
+            self.set_option("view.ui_theme", "macOS")
+
         self._style = ttk.Style()
         # value is (parent, settings, overrides, images)
         self._ui_themes: Dict[
@@ -1519,8 +1523,8 @@ class Workbench(tk.Tk):
             return "Windows"
         elif running_on_rpi() and "Raspberry Pi" in available_themes:
             return "Raspberry Pi"
-        elif "Kind of Aqua" in available_themes:
-            return "Kind of Aqua"
+        elif "macOS" in available_themes:
+            return "macOS"
         else:
             return "Tidy Light A"
 
