@@ -826,7 +826,7 @@ def export_distributions_info_from_dir(dir_path: str) -> List[DistInfo]:
     dists = MetadataPathFinder.find_distributions(
         context=DistributionFinder.Context(path=[dir_path])
     )
-    return export_distributions_info(dists)
+    return export_distributions_info(dists, assume_pypi=False)
 
 
 def export_installed_distributions_info() -> List[DistInfo]:
@@ -849,10 +849,10 @@ def export_installed_distributions_info() -> List[DistInfo]:
 
     from importlib.metadata import distributions
 
-    return export_distributions_info(distributions())
+    return export_distributions_info(distributions(), assume_pypi=True)
 
 
-def export_distributions_info(dists: Iterable) -> List[DistInfo]:
+def export_distributions_info(dists: Iterable, assume_pypi: bool) -> List[DistInfo]:
     def get_project_urls(dist):
         result = {}
         for key, value in dist.metadata.items():
@@ -871,8 +871,18 @@ def export_distributions_info(dists: Iterable) -> List[DistInfo]:
             return dist.metadata["Name"]
 
     def infer_package_url(dist):
-        pypi_url_name = get_dist_name(dist).replace("_", "-")
-        # NB! no guarantee that this package exists at PyPI or related to installed package
+        name = get_dist_name(dist)
+
+        if (
+            not assume_pypi
+            and "micropython" not in name.lower()
+            and "circuitpython" not in name.lower()
+        ):
+            # probably a micropython-lib package
+            return None
+
+        pypi_url_name = name.replace("_", "-")
+        # NB! no guarantee that this package exists at PyPI or is related to installed package
         return f"https://pypi.org/project/{pypi_url_name}/"
 
     return [

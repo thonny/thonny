@@ -1739,9 +1739,8 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
 
     try:
         if args["port"] is None:
-            # remain busy
-            while True:
-                time.sleep(1000)
+            print("\nPort not defined", file=sys.stderr)
+            sys.exit(1)
         elif args["port"] == "webrepl":
             connection = WebReplConnection(args["url"], args["password"])
         else:

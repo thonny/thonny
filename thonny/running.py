@@ -671,6 +671,7 @@ class Runner:
 
                 msg_count += 1
             except BackendTerminatedError as exc:
+                logger.info("Backend terminated with code: %r", exc.returncode)
                 self._handle_backend_termination(exc.returncode)
                 return False
 
@@ -729,6 +730,9 @@ class Runner:
 
     def restart_backend(self, clean: bool, first: bool = False, automatic: bool = False) -> None:
         """Recreate (or replace) backend proxy / backend process."""
+        logger.info(
+            "Restarting back-end, clean: %r, first: %r, automatic: %r", clean, first, automatic
+        )
         was_running = self.is_running()
         self.destroy_backend()
         self._last_accepted_backend_command = None
@@ -741,9 +745,8 @@ class Runner:
         backend_class = get_workbench().get_backends()[backend_name].proxy_class
         self._set_state("running")
         self._proxy = None
+        logger.info("Starting backend %r", backend_class)
         self._proxy = backend_class(clean)
-
-        self._poll_backend_messages()
 
         if not first:
             get_shell().restart(automatic=automatic, was_running=was_running)
@@ -751,7 +754,11 @@ class Runner:
 
         get_workbench().event_generate("BackendRestart", full=True)
 
+        self._poll_backend_messages()
+
     def destroy_backend(self, for_restart: bool = False) -> None:
+        logger.info("Destroying backend")
+
         if self._polling_after_id is not None:
             get_workbench().after_cancel(self._polling_after_id)
             self._polling_after_id = None
@@ -1123,6 +1130,7 @@ class SubprocessProxy(BackendProxy, ABC):
 
     def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
+        logger.info("Starting background process, clean: %r, extra_args: %r", clean, extra_args)
         self._response_queue = collections.deque()
 
         if not os.path.exists(self._mgmt_executable):

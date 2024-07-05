@@ -305,8 +305,10 @@ class MicroPythonProxy(SubprocessProxy):
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._port = get_workbench().get_option(self.backend_name + ".port")
+        if self._port == "auto":
+            # may come from pre-Thonny 5 configuration file
+            self._port = None
         self._clean_start = clean
-        self._fix_port()
 
         super().__init__(clean)
 
@@ -319,33 +321,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             # let the OS release the port
             time.sleep(0.1)
 
-    def _fix_port(self):
-        if self._port == WEBREPL_PORT_VALUE:
-            return
-
-        elif self._port == "auto":
-            potential = self._detect_potential_ports()
-            if len(potential) == 1:
-                self._port = potential[0][0]
-            else:
-                self._port = None
-                message = dedent(
-                    """\
-                    Couldn't find the device automatically. 
-                    Check the connection (making sure the device is not in bootloader mode) or choose
-                    "Configure interpreter" in the interpreter menu (bottom-right corner of the window)
-                    to select specific port or another interpreter."""
-                )
-
-                if len(potential) > 1:
-                    _, descriptions = zip(*potential)
-                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
-
-                self._show_error(message)
-
     def _start_background_process(self, clean=None, extra_args=[]):
-        if self._port is None:
-            return
+        logger.info(
+            "Starting background process (BareMetal), clean: %r, extra_args: %r", clean, extra_args
+        )
+        # if self._port is None:
+        #    return
 
         # refresh the ports cache, so that the next uncached request (in BackendRestart handler)
         # is less likely to race with the back-end process trying to open a port and getting a
@@ -557,7 +538,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         return bool(configuration.get(f"{self.backend_name}.webrepl_url", False))
 
     def get_current_switcher_configuration(self) -> Dict[str, Any]:
-        # NB! using current port value, not the configured one (which may be "auto")
         conf = {
             "run.backend_name": self.backend_name,
             f"{self.backend_name}.port": self._port,
@@ -572,7 +552,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     @classmethod
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
         port = conf[f"{cls.backend_name}.port"]
-        if port == WEBREPL_PORT_VALUE:
+        if port is None:
+            return f"{cls.backend_description}  •  <no port>"
+        elif port == WEBREPL_PORT_VALUE:
             url = conf[f"{cls.backend_name}.webrepl_url"]
             return f"{cls.backend_description}  •  {url}"
         else:
@@ -591,11 +573,12 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
     def get_switcher_entries(cls):
         def should_show(conf):
             port = conf[f"{cls.backend_name}.port"]
+            if port == "auto":
+                # may come from pre-Thonny 5 conf
+                port = None
+
             if port == WEBREPL_PORT_VALUE:
                 return True
-            elif port == "auto":
-                potential_ports = cls._detect_potential_ports()
-                return len(potential_ports) > 0
             else:
                 for p in list_serial_ports():
                     if p.device == port:
@@ -938,7 +921,6 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
         ports = list_serial_ports(max_cache_age=0, skip_logging=True)
         self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
         self._port_names_by_desc = {get_serial_port_label(p): p.device for p in ports}
-        self._port_names_by_desc["< " + tr("Try to detect port automatically") + " >"] = "auto"
 
         if self.allow_webrepl:
             self._port_names_by_desc[WEBREPL_OPTION_DESC] = WEBREPL_PORT_VALUE
