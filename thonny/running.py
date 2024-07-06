@@ -1026,7 +1026,8 @@ class BackendProxy(ABC):
 
         return download_dist_info_from_pypi(name, version)
 
-    def get_version_list_from_index(self, name: str) -> List[str]:
+    @classmethod
+    def get_version_list_from_index(cls, name: str) -> List[str]:
         from thonny.plugins.pip_gui import try_download_version_list_from_pypi
 
         return try_download_version_list_from_pypi(name)

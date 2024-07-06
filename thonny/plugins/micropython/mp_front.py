@@ -4,7 +4,6 @@ import shutil
 import sys
 import time
 from logging import getLogger
-from textwrap import dedent
 from tkinter import messagebox, ttk
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -270,9 +269,10 @@ class MicroPythonProxy(SubprocessProxy):
 
         return super().get_package_info_from_index(name, version)
 
-    def get_version_list_from_index(self, name: str) -> List[str]:
+    @classmethod
+    def get_version_list_from_index(cls, name: str) -> List[str]:
         # Try mp.org first
-        index_data = self._get_micropython_lib_index_data()
+        index_data = cls._get_micropython_lib_index_data()
 
         for package in index_data["packages"]:
             if canonicalize_name(package["name"]) == canonicalize_name(name):

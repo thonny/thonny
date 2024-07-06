@@ -301,10 +301,10 @@ class PipFrame(ttk.Frame, ABC):
     def _update_summary(self):
         if self._get_state() == "inactive":
             text = ""
-        elif self._get_state() == "listing":
-            text = tr("Installed packages") + "..."
         else:
             text = tr("Installed packages")
+            if self._get_state() == "listing":
+                text += "..."
 
         self.summary_label.configure(text=text)
 
@@ -458,7 +458,7 @@ class PipFrame(ttk.Frame, ABC):
         ) == canonicalize_version(version):
             return installed_dist
 
-        return download_dist_info_from_pypi(name, version)
+        return self._download_dist_info(name, version)
 
     def _get_version_list(self, name: str) -> List[str]:
         norm_name = canonicalize_name(name)
@@ -1002,7 +1002,7 @@ class BackendPipFrame(PipFrame):
 
     def _create_widgets(self, parent):
         super()._create_widgets(parent)
-        self.summary_label.grid(padx=(self.get_small_padding(), 0))
+        self.summary_label.grid(padx=(ems_to_pixels(0.4), 0))
         self.menu_button.grid(padx=(0, self.get_small_padding()))
 
     def _get_toolbar_frame_style(self) -> Optional[str]:
@@ -1444,6 +1444,9 @@ class StubsPipFrame(PipFrame):
 
     def _download_dist_info(self, name: str, version: str) -> DistInfo:
         return self.proxy_class.get_package_info_from_index(name, version)
+
+    def _download_version_list(self, name: str) -> List[str]:
+        return self.proxy_class.get_version_list_from_index(name)
 
     def _should_show_search_result_source(self):
         return True

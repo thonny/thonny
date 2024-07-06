@@ -105,7 +105,7 @@ class BackendConfigurationPage(ConfigurationPage):
             self,
             exportselection=False,
             value_variable=self._combo_variable,
-            mapping={spec.description : spec.description for spec in sorted_backend_specs},
+            mapping={spec.description: spec.description for spec in sorted_backend_specs},
             height=25,
         )
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
@@ -162,7 +162,6 @@ class BackendConfigurationPage(ConfigurationPage):
         if result is False:
             logger.info("Backend page %r responded False to apply")
             return False
-
 
         # should_restart did not accept changed_options parameter before 5.0
         from inspect import signature
