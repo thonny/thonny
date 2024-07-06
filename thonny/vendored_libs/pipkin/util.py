@@ -4,7 +4,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from logging import getLogger
-from typing import List, Optional, Set, Tuple
+from typing import Any, List, Optional, Set, Tuple
 
 import packaging.version
 
@@ -231,3 +231,29 @@ def safe_version(version):
     except packaging.version.InvalidVersion:
         version = version.replace(" ", ".")
         return re.sub("[^A-Za-z0-9.]+", "-", version)
+
+
+def download_and_parse_json(url: str, timeout: int = 10) -> Any:
+    import json
+
+    return json.loads(download_bytes(url, timeout=timeout))
+
+
+def download_bytes(url: str, timeout: int = 10) -> bytes:
+    from urllib.request import Request, urlopen
+
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Accept-Encoding": "gzip, deflate",
+            "Cache-Control": "no-cache",
+        },
+    )
+    with urlopen(req, timeout=timeout) as fp:
+        if fp.info().get("Content-Encoding") == "gzip":
+            import gzip
+
+            return gzip.decompress(fp.read())
+        else:
+            return fp.read()

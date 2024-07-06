@@ -29,14 +29,6 @@ from pipkin import main
 
 logger = logging.getLogger(__name__)
 
-MP_ORG_INDEX = "https://micropython.org/pi"
-PYPI_INDEX = "https://pypi.org/pypi"
-PYPI_SIMPLE_INDEX = "https://pypi.org/simple"
-DEFAULT_INDEX_URLS = [MP_ORG_INDEX, PYPI_INDEX]
-SERVER_ENCODING = "utf-8"
-
-__version__ = "0.2b1"
-
 """
 steps:
     - infer target if no explicit connection parameters are given

@@ -43,9 +43,7 @@ WEBREPL_PORT_VALUE = "webrepl"
 VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND = set()
 
 MICROPYTHON_LIB_INDEX_URL = "https://micropython.org/pi/v2/index.json"
-MICROPYTHON_LIB_METADATA_URL = (
-    "https://raw.githubusercontent.com/thonny/thonny/master/data/micropython-lib-metadata.json"
-)
+MICROPYTHON_LIB_METADATA_URL = "https://raw.githubusercontent.com/aivarannamaa/pipkin/master/data/micropython-lib-extra-metadata.json"
 _mp_lib_index_cache = None
 _mp_lib_metadata_cache = None
 
@@ -287,17 +285,19 @@ class MicroPythonProxy(SubprocessProxy):
 
     @classmethod
     def _augment_dist_info(cls, dist_info: DistInfo) -> DistInfo:
-        metadata = cls._get_micropython_lib_metadata()
         norm_name = canonicalize_name(dist_info.name)
-        home_page = dist_info.home_page
-        summary = dist_info.summary
+        extra_metadata = cls._get_micropython_lib_metadata().get(norm_name, {})
 
-        if (home_page is None or summary is None) and norm_name in metadata:
-            if home_page is None:
-                home_page = metadata[norm_name].get("project_url")
-            if summary is None:
-                summary = metadata[norm_name].get("description")
-            return dataclasses.replace(dist_info, summary=summary, home_page=home_page)
+        if dist_info.home_page is None and "home_page" in extra_metadata:
+            dist_info = dataclasses.replace(dist_info, home_page=extra_metadata["home_page"])
+
+        if dist_info.summary is None and "description" in extra_metadata:
+            dist_info = dataclasses.replace(dist_info, summary=extra_metadata["description"])
+
+        project_urls = dict(dist_info.project_urls) or {}
+        if "source_url" in extra_metadata:
+            project_urls["Source"] = extra_metadata["source_url"]
+            dist_info = dataclasses.replace(dist_info, project_urls=project_urls)
 
         return dist_info
 
