@@ -742,8 +742,8 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                 "configure": {
                     "background": "SystemTextBackgroundColor",
                     "foreground": "SystemTextColor",
-                    "selectBackground": "SystemSelectedTextBackgroundColor",
-                    "selectForeground": "SystemSelectedTextColor",
+                    "selectbackground": "SystemSelectedTextBackgroundColor",
+                    "selectforeground": "SystemSelectedTextColor",
                 }
             },
             "TEntry": {

@@ -303,6 +303,17 @@ def default_dark_blue() -> SyntaxThemeSettings:
     }
 
 
+def default_sepia() -> SyntaxThemeSettings:
+    from copy import deepcopy
+
+    result = deepcopy(default_light())
+    result["TEXT"]["background"] = "#F7F6F0"
+    result["GUTTER"]["background"] = "#E9E8DC"
+    result["current_line"]["background"] = "#efeee8"
+    result["unclosed_expression"]["background"] = "#d6d5cf"
+    return result
+
+
 def idle_classic() -> SyntaxThemeSettings:
     string_fg = "#00aa00"
     return {
@@ -416,6 +427,7 @@ def zenburn() -> SyntaxThemeSettings:
 
 def load_plugin() -> None:
     get_workbench().add_syntax_theme("Default Light", None, default_light)
+    get_workbench().add_syntax_theme("Default Sepia", None, default_sepia)
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
     get_workbench().add_syntax_theme("Default Dark Green", "Default Dark", default_dark_green)
     get_workbench().add_syntax_theme("Default Dark Blue", "Default Dark", default_dark_blue)

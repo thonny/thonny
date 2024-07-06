@@ -1451,7 +1451,7 @@ class Workbench(tk.Tk):
         self._style.theme_use(name)
 
         # https://wiki.tcl.tk/37973#pagetocfe8b22ab
-        for setting in ["background", "foreground", "selectBackground", "selectForeground"]:
+        for setting in ["background", "foreground", "selectbackground", "selectforeground"]:
             value = self._style.lookup("Listbox", setting)
             if value:
                 self.option_add("*TCombobox*Listbox." + setting, value)
