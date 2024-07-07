@@ -347,6 +347,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 self.backend_name + ".interrupt_on_connect"
             ),
             "proxy_class": self.__class__.__name__,
+            "user_stubs_location": self.get_user_stubs_location(),
         }
         if self._port == WEBREPL_PORT_VALUE:
             args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
@@ -1191,6 +1192,7 @@ class LocalMicroPythonProxy(MicroPythonProxy):
                 {
                     "interpreter": self._target_executable,
                     "cwd": self.get_cwd(),
+                    "user_stubs_location": self.get_user_stubs_location(),
                 }
             ),
         ]
@@ -1315,6 +1317,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "interpreter": self._target_executable,
             "host": self._host,
             "user": self._user,
+            "user_stubs_location": self.get_user_stubs_location(),
         }
 
         args.update(self._get_time_args())

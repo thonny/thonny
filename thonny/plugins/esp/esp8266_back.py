@@ -19,10 +19,8 @@ logger = getLogger("thonny.plugins.micropython.esp_backend")
 
 class Esp8266MicroPythonBackend(BareMetalMicroPythonBackend):
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
-        from thonny.plugins.esp import ESP8266Proxy
-
         return [
-            ESP8266Proxy.get_user_stubs_location(),
+            self.get_user_stubs_location(),
             os.path.join(os.path.dirname(__file__), "esp_common_api_stubs"),
         ] + super()._get_sys_path_for_analysis()
 

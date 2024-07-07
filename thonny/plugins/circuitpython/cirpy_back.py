@@ -75,10 +75,8 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
         return False
 
     def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
-        from thonny.plugins.circuitpython import CircuitPythonProxy
-
         return [
-            CircuitPythonProxy.get_user_stubs_location(),
+            self.get_user_stubs_location(),
             os.path.join(os.path.dirname(__file__), "api_stubs"),
         ]
 

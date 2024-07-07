@@ -45,6 +45,7 @@ class SshCPythonProxy(SubprocessProxy):
                             "run.warn_module_shadowing"
                         )
                     },
+                    "user_stubs_location": self.get_user_stubs_location(),
                 }
             ),
         ]
