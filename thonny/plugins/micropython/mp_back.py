@@ -1054,6 +1054,7 @@ class MicroPythonBackend(MainBackend, ABC):
                     name=di.project_name,
                     version=di.version,
                     meta_dir_path=self._join_remote_path_parts(di.location, di.meta_dir_name),
+                    installed_location=di.location,
                     complete=False,
                 )
                 for di in dists

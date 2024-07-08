@@ -550,6 +550,12 @@ class PipFrame(ttk.Frame, ABC):
             )
             self._action_button = action_button_frame.button
             self.info_text.window_create("end", window=action_button_frame)
+        else:
+            logger.debug(
+                "Not creating action button - read only env: %r, read only dist: %r",
+                self._is_read_only_env(),
+                self._is_read_only_dist(name, version),
+            )
 
         self._append_info_text("\n")
 
@@ -585,6 +591,7 @@ class PipFrame(ttk.Frame, ABC):
         poll_fetch_complete()
 
     def _complete_show_package_info(self, dist_info: DistInfo):
+        logger.info("complete_show_package_info %r", dist_info)
         self._set_state("idle")
         assert self._version_button is not None
         self._version_button.configure(state="normal")
@@ -739,9 +746,17 @@ class PipFrame(ttk.Frame, ABC):
         if info is None or canonicalize_version(info.version) != canonicalize_version(version):
             return False
 
-        return self._normalize_target_path(info.installed_location) != self._normalize_target_path(
+        if self._normalize_target_path(info.installed_location) != self._normalize_target_path(
             self._get_target_directory()
-        )
+        ):
+            logger.debug(
+                "Read only dist because %r vs %r",
+                info.installed_location,
+                self._get_target_directory(),
+            )
+            return True
+
+        return False
 
     @abstractmethod
     def _normalize_target_path(self, path: str) -> str:
