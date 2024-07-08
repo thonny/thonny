@@ -1701,6 +1701,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             **kwargs,
         )
 
+    def _get_installed_distribution_metadata_bytes(self, meta_dir_path: str) -> bytes:
+        metadata_path = self._join_remote_path_parts(meta_dir_path, "METADATA")
+        return self._read_file_return_bytes(metadata_path)
+
     def _report_internal_exception(self, msg: str) -> None:
         super()._report_internal_exception(msg)
 

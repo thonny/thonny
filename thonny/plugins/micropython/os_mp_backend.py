@@ -340,6 +340,11 @@ class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
     def _create_pipkin_adapter(self):
         raise NotImplementedError()
 
+    def _get_installed_distribution_metadata_bytes(self, meta_dir_path: str) -> bytes:
+        metadata_path = os.path.join(meta_dir_path, "METADATA")
+        with open(metadata_path, "ba") as fp:
+            return fp.read()
+
 
 class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args):
@@ -383,6 +388,10 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
 
     def _create_pipkin_adapter(self):
         raise NotImplementedError()
+
+    def _get_installed_distribution_metadata_bytes(self, meta_dir_path: str) -> bytes:
+        metadata_path = self._join_remote_path_parts(meta_dir_path, "METADATA")
+        return self._read_file_return_bytes(metadata_path)
 
 
 if __name__ == "__main__":

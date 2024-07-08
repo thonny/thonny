@@ -37,6 +37,7 @@ import ast
 import datetime
 import io
 import os
+import pathlib
 import re
 import sys
 import textwrap
@@ -927,7 +928,33 @@ class MicroPythonBackend(MainBackend, ABC):
             return dict(error=str(e))
 
         return dict(
-            distributions={dist.key: dist for dist in current_state},
+            distributions=current_state,
+        )
+
+    @abstractmethod
+    def _get_installed_distribution_metadata_bytes(self, meta_dir_path: str) -> bytes:
+        raise NotImplementedError()
+
+    def _cmd_get_installed_distribution_metadata(self, cmd):
+        from packaging.metadata import Metadata
+
+        meta_dir_path: str = cmd["meta_dir_path"]
+        metadata_bytes = self._get_installed_distribution_metadata_bytes(meta_dir_path)
+        meta = Metadata.from_email(metadata_bytes)
+        return dict(
+            dist_info=DistInfo(
+                name=meta.name,
+                version=str(meta.version),
+                requires=[str(req) for req in meta.requires_dist] if meta.requires_dist else [],
+                summary=meta.summary or None,
+                author=meta.author or None,
+                license=meta.license or None,
+                home_page=meta.home_page or None,
+                project_urls=meta.project_urls,
+                package_url=None,
+                classifiers=meta.classifiers,
+                installed_location=str(pathlib.PurePosixPath(meta_dir_path).parent),
+            )
         )
 
     def _cmd_install_distributions(self, cmd):
@@ -1006,7 +1033,9 @@ class MicroPythonBackend(MainBackend, ABC):
     @abstractmethod
     def _create_pipkin_adapter(self): ...
 
-    def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
+    def _perform_pipkin_operation_and_list(
+        self, command: Optional[str], **kwargs
+    ) -> List[DistInfo]:
         import pipkin.common
         from pipkin.session import Session
 
@@ -1018,15 +1047,17 @@ class MicroPythonBackend(MainBackend, ABC):
                 assert hasattr(session, command)
                 logger.info("Calling method %r in pipkin session with args %r", command, kwargs)
                 getattr(session, command)(**kwargs)
-            return {
+            dists = session.basic_list()
+            logger.info("Pikin returned %r", dists)
+            return [
                 DistInfo(
-                    key=di.key,
-                    project_name=di.project_name,
+                    name=di.project_name,
                     version=di.version,
-                    location=di.location,
+                    meta_dir_path=self._join_remote_path_parts(di.location, di.meta_dir_name),
+                    complete=False,
                 )
-                for di in session.basic_list()
-            }
+                for di in dists
+            ]
         except pipkin.common.ManagementError as e:
             if e.script:
                 logger.error("ManagementError.script: %s", e.script)

@@ -73,6 +73,8 @@ class DistInfo:
     requires: List[str] = dataclasses.field(default_factory=list)
     source: Optional[str] = None
     installed_location: Optional[str] = None
+    meta_dir_path: Optional[str] = None
+    complete: bool = True
 
 
 class Record:

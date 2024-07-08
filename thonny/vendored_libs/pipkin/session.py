@@ -41,6 +41,7 @@ class DistInfo:
     project_name: str
     version: str
     location: str
+    meta_dir_name: str
 
 
 class Session:
@@ -249,7 +250,15 @@ class Session:
         for name in dists_by_name:
             meta_dir_name, location = dists_by_name[name]
             name, version = parse_meta_dir_name(meta_dir_name)
-            result.add(DistInfo(key=name, project_name=name, version=version, location=location))
+            result.add(
+                DistInfo(
+                    key=name,
+                    project_name=name,
+                    version=version,
+                    location=location,
+                    meta_dir_name=meta_dir_name,
+                )
+            )
 
         return result
 

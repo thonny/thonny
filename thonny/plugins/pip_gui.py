@@ -452,13 +452,33 @@ class PipFrame(ttk.Frame, ABC):
         pass
 
     def _get_dist_info(self, name: str, version: str) -> DistInfo:
+        # NB! Runs in a background thread
         installed_dist = self._installed_dists.get(canonicalize_name(name))
         if installed_dist is not None and canonicalize_version(
             installed_dist.version
         ) == canonicalize_version(version):
-            return installed_dist
+            if installed_dist.complete:
+                return installed_dist
+            else:
+                assert installed_dist.meta_dir_path is not None
+                result = self._fetch_complete_installed_dist_info(installed_dist.meta_dir_path)
+                self._installed_dists[canonicalize_name(name)] = result
+                return result
 
         return self._download_dist_info(name, version)
+
+    def _fetch_complete_installed_dist_info(self, meta_dir_path: str) -> DistInfo:
+        # NB! Runs in a background thread
+        msg = get_runner().send_command_and_wait_in_thread(
+            InlineCommand("get_installed_distribution_metadata", meta_dir_path=meta_dir_path),
+            timeout=8,
+        )
+
+        error = msg.get("error")
+        if error:
+            raise RuntimeError("Could not query package info: " + error)
+
+        return msg["dist_info"]
 
     def _get_version_list(self, name: str) -> List[str]:
         norm_name = canonicalize_name(name)

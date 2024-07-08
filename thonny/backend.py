@@ -459,6 +459,9 @@ class MainBackend(BaseBackend, ABC):
     def _cmd_get_active_distributions(self, cmd):
         raise NotImplementedError()
 
+    def _cmd_get_installed_distribution_metadata(self, cmd):
+        raise NotImplementedError()
+
     def _cmd_install_distributions(self, cmd):
         raise NotImplementedError()
 
@@ -713,6 +716,15 @@ class UploadDownloadMixin(ABC):
         self, cmd, description: Optional[str], value: float, maximum: float
     ) -> None:
         raise NotImplementedError()
+
+    def _read_file_return_bytes(self, source_path: str) -> bytes:
+        def callback(x, y):
+            pass
+
+        with io.BytesIO() as fp:
+            self._read_file(source_path, fp, callback)
+            fp.seek(0)
+            return fp.read()
 
 
 class RemoteProcess:
