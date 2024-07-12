@@ -124,12 +124,8 @@ def get_ipc_file_path():
     if not base_dir or not os.path.exists(base_dir):
         base_dir = get_thonny_user_dir()
 
-    for name in ("LOGNAME", "USER", "LNAME", "USERNAME"):
-        if name in os.environ:
-            username = os.environ.get(name)
-            break
-    else:
-        username = os.path.basename(os.path.expanduser("~"))
+    import getpass
+    username = getpass.getuser()
 
     ipc_dir = os.path.join(base_dir, "thonny-%s" % username)
     os.makedirs(ipc_dir, exist_ok=True)
