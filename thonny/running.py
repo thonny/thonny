@@ -1201,7 +1201,7 @@ class SubprocessProxy(BackendProxy, ABC):
 
         creationflags = 0
         if running_on_windows():
-            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
 
         logger.info("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
 
@@ -1540,7 +1540,7 @@ def _create_python_process(
     cmd = [python_exe] + args
 
     if running_on_windows():
-        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     else:
