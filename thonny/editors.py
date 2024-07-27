@@ -801,18 +801,20 @@ class EditorNotebook(CustomNotebook):
         else:
             filenames = []
 
+        shown_files_count = 0
         if len(filenames) > 0:
             for filename in filenames:
                 if os.path.exists(filename):
                     self.show_file(filename)
+                    shown_files_count += 1
 
             cur_file = get_workbench().get_option("file.current_file")
             # choose correct active file
             if cur_file and os.path.exists(cur_file):
                 self.show_file(cur_file)
-            else:
-                self._cmd_new_file()
-        else:
+                shown_files_count += 1
+
+        if shown_files_count == 0:
             self._cmd_new_file()
 
     def save_all_named_editors(self):
