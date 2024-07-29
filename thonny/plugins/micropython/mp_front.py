@@ -307,6 +307,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._port = get_workbench().get_option(self.backend_name + ".port")
         if self._port == "auto":
             # may come from pre-Thonny 5 configuration file
+            logger.warning("Ignoring 'auto' port")
             self._port = None
         self._clean_start = clean
 
@@ -1502,14 +1503,6 @@ def _list_serial_ports_uncached(skip_logging: bool = False):
         os.path.islink = old_islink
         if not skip_logging:
             logger.info("Done listing serial ports")
-
-
-def port_exists(device):
-    for port in list_serial_ports():
-        if port.device == device:
-            return True
-
-    return False
 
 
 def get_uart_adapter_vids_pids():

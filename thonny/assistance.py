@@ -483,16 +483,7 @@ class GenericErrorHelper(ErrorHelper):
 
         self.intro_text = "No specific suggestions for this error (yet)."
         self.intro_confidence = 1
-        self.suggestions = [
-            Suggestion(
-                "ask-for-specific-support",
-                "Let Thonny developers know",
-                "Click on the feedback link at the bottom of this panel to let Thonny developers know "
-                + "about your problem. They may add support for "
-                + "such cases in future Thonny versions.",
-                1,
-            )
-        ]
+        self.suggestions = []
 
         if error_info["message"].lower() != "invalid syntax":
             self.suggestions.append(

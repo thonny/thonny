@@ -298,7 +298,7 @@ class NameErrorHelper(ErrorHelper):
         else:
             body = (
                 "Compare the name with corresponding definition / assignment / documentation."
-                + " Don't forget that case of the letters matters!"
+                + " Don't forget that case of the letters matters (`foo` is not the same as `Foo`)!"
             )
 
         return Suggestion("bad-spelling-name", "Did you misspell it (somewhere)?", body, relevance)
@@ -433,7 +433,7 @@ class NameErrorHelper(ErrorHelper):
             "not-defined-yet",
             "Has Python executed the definition?",
             (
-                "Don't forget that name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
+                "Don't forget that a name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
                 + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
                 + "\n\n"
                 + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, "
