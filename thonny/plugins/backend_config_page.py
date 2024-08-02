@@ -152,10 +152,10 @@ class BackendConfigurationPage(ConfigurationPage):
 
         return self._conf_pages[backend_desc]
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         if self._current_page is None:
             logger.warning("No current page")
-            return None
+            return True
 
         result = self._current_page.apply(changed_options)
 
@@ -177,7 +177,7 @@ class BackendConfigurationPage(ConfigurationPage):
         else:
             logger.info("Should not restart")
 
-        return None
+        return True
 
 
 class BaseSshProxyConfigPage(TabbedBackendDetailsConfigurationPage):
@@ -228,11 +228,13 @@ class BaseSshProxyConfigPage(TabbedBackendDetailsConfigurationPage):
     def has_editable_interpreter(self) -> bool:
         return True
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         if self.should_restart(changed_options):
             delete_stored_ssh_password()
             # reset cwd setting to default
             get_workbench().set_option(self.backend_name + ".cwd", "")
+
+        return True
 
     def should_restart(self, changed_options: List[str]):
         for option in [

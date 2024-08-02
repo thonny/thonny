@@ -102,11 +102,13 @@ class EditorConfigurationPage(ConfigurationPage):
 
         self.columnconfigure(1, weight=1)
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         get_workbench().get_editor_notebook().update_appearance()
         shell = get_shell(create=False)
         if shell is not None:
             shell.update_appearance()
+
+        return True
 
 
 def load_plugin() -> None:

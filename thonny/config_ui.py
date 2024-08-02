@@ -198,10 +198,10 @@ class ConfigurationPage(ttk.Frame):
         entry = ttk.Entry(self, textvariable=variable, **kw)
         entry.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan, padx=padx)
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         """Apply method should return False, when page contains invalid
         input and configuration dialog should not be closed."""
-        pass
+        return True
 
     def cancel(self):
         """Called when dialog gets cancelled"""

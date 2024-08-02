@@ -1093,9 +1093,9 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
     def should_restart(self, changed_options: List[str]):
         return self._connection_is_modified() or self._has_opened_python_flasher
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         if not self._connection_is_modified():
-            return
+            return True
 
         else:
             port_name = self.get_selected_port_name()
@@ -1113,6 +1113,8 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
                 get_workbench().set_option(
                     self.backend_name + ".webrepl_password", self._webrepl_password_var.get()
                 )
+
+        return True
 
     def destroy(self):
         if self._port_polling_after_id is not None:

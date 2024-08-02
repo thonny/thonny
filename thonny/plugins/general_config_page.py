@@ -1,5 +1,5 @@
 from tkinter import messagebox
-from typing import List
+from typing import List, Optional
 
 from thonny import get_workbench, languages
 from thonny.config_ui import (
@@ -97,7 +97,7 @@ class GeneralConfigurationPage(ConfigurationPage):
             font="BoldTkDefaultFont",
         )
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         get_workbench().update_debug_mode()
 
         env = []
@@ -117,6 +117,7 @@ class GeneralConfigurationPage(ConfigurationPage):
                 return False
 
         get_workbench().set_option("general.environment", env)
+        return True
 
 
 def load_plugin() -> None:

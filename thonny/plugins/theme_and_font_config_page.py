@@ -2,7 +2,7 @@ import textwrap
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import List
+from typing import List, Optional
 
 from thonny import get_workbench, tktextext, ui_utils
 from thonny.codeview import CodeView
@@ -181,9 +181,9 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             font="BoldTkDefaultFont",
         ).grid(row=40, column=1, columnspan=5, sticky="w", pady=(5, 0))
 
-    def apply(self, changed_options: List[str]):
+    def apply(self, changed_options: List[str]) -> bool:
         # don't do anything, as preview already did the thing
-        return
+        return True
 
     def cancel(self):
         if (
