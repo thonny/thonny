@@ -74,6 +74,7 @@ class BaseEditor(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._filename = None
+        self._file_source = None
 
     def update_appearance(self):
         self._code_view.set_gutter_visibility(
@@ -171,6 +172,9 @@ class Editor(BaseEditor):
         else:
             return str(self.winfo_id())
 
+    def get_file_source(self):
+        return self._file_source
+
     def check_for_external_changes(self):
         if self._filename is None:
             return
@@ -264,6 +268,7 @@ class Editor(BaseEditor):
             return False
 
         self.update_appearance()
+        self._update_file_source()
         return True
 
     def _load_local_file(self, filename, keep_undo=False):
@@ -366,6 +371,7 @@ class Editor(BaseEditor):
             self.update_title()
             get_workbench().event_generate("Saved", editor=self, filename=self._filename)
 
+        self._update_file_source()
         return save_filename
 
     def write_local_file(self, save_filename, content_bytes, save_copy):
@@ -618,6 +624,16 @@ class Editor(BaseEditor):
                 return path
 
         return path
+
+    def _update_file_source(self):
+        if is_remote_path(self._filename):
+            proxy = get_runner().get_backend_proxy()
+            if proxy is not None:
+                self._file_source = get_runner().get_backend_proxy().get_machine_id()
+            else:
+                logger.warning("update_file_source: no proxy, leaving as is")
+        else:
+            self._file_source = "-"  # should not match any machine id
 
 
 class EditorNotebook(CustomNotebook):
@@ -1220,6 +1236,46 @@ class EditorNotebook(CustomNotebook):
         get_workbench().event_generate(
             "RemoveEditorFromNotebook", pos=pos, editor=editor, text_widget=editor.get_text_widget()
         )
+
+    def try_close_remote_files_from_another_machine(
+        self, dialog_parent, new_machine_id: str
+    ) -> bool:
+        all_remote_editors_to_be_closed = []
+        modified_remote_editors_to_be_closed = []
+        modified_remote_files_to_be_closed = []
+        for editor in self.get_all_editors():
+            if editor.get_file_source() == new_machine_id:
+                continue
+
+            filename = editor.get_filename()
+            if filename is not None and is_remote_path(filename):
+                all_remote_editors_to_be_closed.append(editor)
+                if editor.is_modified():
+                    modified_remote_editors_to_be_closed.append(editor)
+                    modified_remote_files_to_be_closed.append(extract_target_path(filename))
+
+        if len(modified_remote_files_to_be_closed) > 0:
+            message = (
+                tr("All files from %s will be closed before switching the interpreter.")
+                % get_runner().get_node_label()
+            ) + "\n\n"
+            message += tr("Unsaved changes to the following files will be lost:") + "\n"
+            message += "\n • " + "\n • ".join(modified_remote_files_to_be_closed)
+            message += "\n\n" + tr("Do you still want to continue?")
+
+            confirm = messagebox.askyesno(
+                title=tr("Discard unsaved changes?"),
+                message=message,
+                default=messagebox.NO,
+                master=dialog_parent,
+            )
+            if not confirm:
+                return False
+
+        for editor in all_remote_editors_to_be_closed:
+            self.close_editor(editor, force=True)
+
+        return True
 
 
 def get_current_breakpoints():

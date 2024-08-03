@@ -1,7 +1,7 @@
 import os.path
 import shutil
 from tkinter import messagebox
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from thonny import get_runner, get_shell, get_workbench
 from thonny.common import ImmediateCommand, ToplevelCommand
@@ -141,9 +141,12 @@ class SshCPythonProxy(SubprocessProxy):
         return f"{cls.backend_description}  •  {user} @ {host} : {executable}"
 
     @classmethod
-    def get_switcher_entries(cls):
+    def get_switcher_entries(cls) -> List[Tuple[Dict[str, Any], str, str]]:
         confs = sorted(cls.get_last_configurations(), key=cls.get_switcher_configuration_label)
-        return [(conf, cls.get_switcher_configuration_label(conf)) for conf in confs]
+        return [
+            (conf, cls.get_switcher_configuration_label(conf), conf[cls.backend_name + ".host"])
+            for conf in confs
+        ]
 
     def has_custom_system_shell(self):
         return True
@@ -171,6 +174,9 @@ class SshCPythonProxy(SubprocessProxy):
 
     def can_install_packages_from_files(self) -> bool:
         return False
+
+    def get_machine_id(self) -> str:
+        return self._host
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):

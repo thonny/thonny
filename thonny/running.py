@@ -1013,7 +1013,7 @@ class BackendProxy(ABC):
 
     @classmethod
     @abstractmethod
-    def get_switcher_entries(cls):
+    def get_switcher_entries(cls) -> List[Tuple[Dict[str, Any], str, str]]:
         """
         Each returned entry creates one item in the backend switcher menu.
         """
@@ -1083,6 +1083,9 @@ class BackendProxy(ABC):
     @classmethod
     def get_user_stubs_location(cls):
         return os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
+
+    def get_machine_id(self) -> str:
+        return "localhost"
 
 
 class SubprocessProxy(BackendProxy, ABC):

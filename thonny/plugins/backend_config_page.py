@@ -1,6 +1,7 @@
 import logging
 import os.path
 import tkinter as tk
+from abc import ABC, abstractmethod
 from tkinter import ttk
 from typing import List, Optional
 
@@ -25,12 +26,17 @@ from thonny.ui_utils import CommonDialogEx, create_string_var, ems_to_pixels
 logger = logging.getLogger(__name__)
 
 
-class BackendDetailsConfigPage(ConfigurationPage):
+class BackendDetailsConfigPage(ConfigurationPage, ABC):
     backend_name: Optional[str] = None  # Will be overwritten on Workbench.add_backend
     proxy_class: Optional[type[BackendProxy]] = None  # ditto
 
+    @abstractmethod
     def should_restart(self, changed_options: List[str]):
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_new_machine_id(self) -> str:
+        raise NotImplementedError
 
 
 class TabbedBackendDetailsConfigurationPage(BackendDetailsConfigPage):
@@ -152,12 +158,25 @@ class BackendConfigurationPage(ConfigurationPage):
         from inspect import signature
 
         if len(signature(self._current_page.should_restart).parameters) > 0:
-            should_restart = self._current_page.should_restart(changed_options)
+            should_restart_same_backend = self._current_page.should_restart(changed_options)
         else:
-            should_restart = self._current_page.should_restart()
+            should_restart_same_backend = self._current_page.should_restart()
 
-        if getattr(self._combo_variable, "modified") or should_restart:
+        if getattr(self._combo_variable, "modified") or should_restart_same_backend:
             logger.info("Should restart")
+
+            could_close = (
+                get_workbench()
+                .get_editor_notebook()
+                .try_close_remote_files_from_another_machine(
+                    self.winfo_toplevel(), self._current_page.get_new_machine_id()
+                )
+            )
+
+            if not could_close:
+                logger.info("Can't apply because of open remote files of wrong machine")
+                return False
+
             self.dialog.backend_restart_required = True
         else:
             logger.info("Should not restart")
@@ -231,6 +250,9 @@ class BaseSshProxyConfigPage(TabbedBackendDetailsConfigurationPage):
             if option in changed_options:
                 return True
         return False
+
+    def get_new_machine_id(self) -> str:
+        return get_workbench().get_option(self.backend_name + ".host")
 
 
 class PasswordDialog(CommonDialogEx):

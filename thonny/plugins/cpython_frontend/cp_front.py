@@ -5,7 +5,7 @@ import textwrap
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import thonny
 from thonny import get_runner, get_shell, get_workbench, ui_utils
@@ -205,7 +205,7 @@ class LocalCPythonProxy(SubprocessProxy):
         return cls.backend_description + "  •  " + exe_label
 
     @classmethod
-    def get_switcher_entries(cls):
+    def get_switcher_entries(cls) -> List[Tuple[Dict[str, Any], str, str]]:
         confs = sorted(
             cls.get_last_configurations(), key=lambda conf: conf[f"{cls.backend_name}.executable"]
         )
@@ -215,7 +215,7 @@ class LocalCPythonProxy(SubprocessProxy):
             confs.insert(0, default_conf)
 
         return [
-            (conf, cls.get_switcher_configuration_label(conf))
+            (conf, cls.get_switcher_configuration_label(conf), "localhost")
             for conf in confs
             if os.path.exists(conf[f"{cls.backend_name}.executable"])
         ]
@@ -355,6 +355,9 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 
     def should_restart(self, changed_options: List[str]):
         return "LocalCPython.executable" in changed_options
+
+    def get_new_machine_id(self) -> str:
+        return "localhost"
 
 
 def get_default_cpython_executable_for_backend() -> str:

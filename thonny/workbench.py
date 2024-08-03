@@ -896,6 +896,7 @@ class Workbench(tk.Tk):
     def _init_backend_switcher(self):
         # Set up the menu
         self._backend_conf_variable = tk.StringVar(value="{}")
+        self._last_active_backend_conf_variable_value = None
 
         if running_on_mac_os():
             menu_conf = {}
@@ -917,8 +918,16 @@ class Workbench(tk.Tk):
 
         menu_font = tk_font.nametofont("TkMenuFont")
 
-        def choose_backend():
-            backend_conf = ast.literal_eval(self._backend_conf_variable.get())
+        def try_choose_backend():
+            backend_conf, machine_id = ast.literal_eval(self._backend_conf_variable.get())
+            could_close = self.get_editor_notebook().try_close_remote_files_from_another_machine(
+                dialog_parent=self, new_machine_id=machine_id
+            )
+            if not could_close:
+                # the variable has been changed. Need to revert it
+                self._backend_conf_variable.set(value=self._last_active_backend_conf_variable_value)
+                return
+
             assert isinstance(backend_conf, dict), "backend conf is %r" % backend_conf
             for name, value in backend_conf.items():
                 self.set_option(name, value)
@@ -933,16 +942,16 @@ class Workbench(tk.Tk):
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
             entries = backend.proxy_class.get_switcher_entries()
 
-            for conf, label in entries:
+            for conf, label, machine_id in entries:
                 if not added_micropython_separator and "MicroPython" in label:
                     self._backend_menu.add_separator()
                     added_micropython_separator = True
 
                 self._backend_menu.add_radiobutton(
                     label=label,
-                    command=choose_backend,
+                    command=try_choose_backend,
                     variable=self._backend_conf_variable,
-                    value=repr(conf),
+                    value=repr((conf, machine_id)),
                 )
 
                 max_description_width = max(menu_font.measure(label), max_description_width)
@@ -999,12 +1008,13 @@ class Workbench(tk.Tk):
         if proxy:
             conf = proxy.get_current_switcher_configuration()
             desc = proxy.get_switcher_configuration_label(conf)
-            value = repr(conf)
+            switcher_value = repr((conf, proxy.get_machine_id()))
         else:
             desc = "<no backend>"
-            value = "n/a"
+            switcher_value = "n/a"
 
-        self._backend_conf_variable.set(value=value)
+        self._backend_conf_variable.set(value=switcher_value)
+        self._last_active_backend_conf_variable_value = switcher_value
         self._backend_button.configure(text=desc + "  " + get_menu_char())
 
     def _init_theming(self) -> None:
