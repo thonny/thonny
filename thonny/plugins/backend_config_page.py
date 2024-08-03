@@ -64,16 +64,6 @@ class TabbedBackendDetailsConfigurationPage(BackendDetailsConfigPage):
         ]
 
 
-class OnlyTextConfigurationPage(BackendDetailsConfigPage):
-    def __init__(self, master, text):
-        super().__init__(master)
-        label = ttk.Label(self, text=text)
-        label.grid()
-
-    def should_restart(self, changed_options: List[str]):
-        return False
-
-
 class BackendConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
@@ -143,12 +133,7 @@ class BackendConfigurationPage(ConfigurationPage):
     def _get_conf_page(self, backend_desc):
         if backend_desc not in self._conf_pages:
             cp_constructor = self._backend_specs_by_desc[backend_desc].config_page_constructor
-            if isinstance(cp_constructor, str):
-                self._conf_pages[backend_desc] = OnlyTextConfigurationPage(
-                    self.content_frame, cp_constructor
-                )
-            else:
-                self._conf_pages[backend_desc] = cp_constructor(self.content_frame)
+            self._conf_pages[backend_desc] = cp_constructor(self.content_frame)
 
         return self._conf_pages[backend_desc]
 
