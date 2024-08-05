@@ -17,6 +17,7 @@ from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tupl
 import thonny
 from thonny import report_time
 from thonny.common import (  # TODO: try to get rid of this
+    ALL_EXPLAINED_STATUS_CODE,
     IGNORED_FILES_AND_DIRS,
     PROCESS_ACK,
     BackendEvent,
@@ -103,9 +104,15 @@ class BaseBackend(ABC):
         message = "Connection lost"
         if error:
             message += " -- " + str(error)
+        self._send_output(
+            "\n", "stderr"
+        )  # in case we were at prompt or another line without newline
         self._send_output("\n" + message + "\n", "stderr")
-        self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
-        sys.exit(1)
+        self._send_output(
+            "\n" + "Click ☐ at the bottom of the window or use Stop/Restart to reconnect." + "\n",
+            "stderr",
+        )
+        sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _current_command_is_interrupted(self):
         return getattr(self._current_command, "interrupted", False)
@@ -300,7 +307,7 @@ class MainBackend(BaseBackend, ABC):
             except Exception as e:
                 logger.exception("Exception while handling %r", cmd.name)
                 self._report_internal_exception("Exception while handling %r" % cmd.name)
-                sys.exit(1)
+                sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
         if response is False:
             # Command doesn't want to send any response
@@ -785,7 +792,7 @@ class SshMixin(UploadDownloadMixin):
                 " Install it from 'Tools => Manage plug-ins' or via your system package manager.",
                 file=sys.stderr,
             )
-            sys.exit(1)
+            sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _connect(self):
         from paramiko import SSHException
@@ -805,7 +812,7 @@ class SshMixin(UploadDownloadMixin):
             print("Re-check your host, authentication method, password or keys.", file=sys.stderr)
             delete_stored_ssh_password()
 
-            sys.exit(1)
+            sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _create_remote_process(self, cmd_items: List[str], cwd: str, env: Dict) -> RemoteProcess:
         import shlex

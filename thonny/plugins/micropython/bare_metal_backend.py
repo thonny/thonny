@@ -19,6 +19,7 @@ import thonny
 from thonny import report_time
 from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
+    ALL_EXPLAINED_STATUS_CODE,
     PROCESS_ACK,
     BackendEvent,
     EOFCommand,
@@ -1742,7 +1743,7 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
     try:
         if args["port"] is None:
             print("\nPort not defined", file=sys.stderr)
-            sys.exit(1)
+            sys.exit(ALL_EXPLAINED_STATUS_CODE)
         elif args["port"] == "webrepl":
             connection = WebReplConnection(args["url"], args["password"])
         else:
@@ -1763,7 +1764,7 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
-        sys.exit(1)
+        sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
 
 if __name__ == "__main__":

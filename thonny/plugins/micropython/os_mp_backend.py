@@ -18,7 +18,7 @@ if thonny_container not in sys.path:
 import thonny
 from thonny import report_time
 from thonny.backend import SshMixin
-from thonny.common import PROCESS_ACK, BackendEvent, serialize_message
+from thonny.common import ALL_EXPLAINED_STATUS_CODE, PROCESS_ACK, BackendEvent, serialize_message
 from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from thonny.plugins.micropython.mp_back import (
@@ -75,7 +75,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
             msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
             sys.stdout.write(serialize_message(msg) + "\n")
             sys.stdout.flush()
-            sys.exit(1)
+            sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
         MicroPythonBackend.__init__(self, None, args)
 

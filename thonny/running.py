@@ -46,6 +46,7 @@ from thonny import (
     report_time,
 )
 from thonny.common import (
+    ALL_EXPLAINED_STATUS_CODE,
     PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
@@ -657,7 +658,8 @@ class Runner:
         proxy.disconnect()
 
     def disconnect_enabled(self):
-        return hasattr(self.get_backend_proxy(), "disconnect")
+        proxy = self.get_backend_proxy()
+        return proxy is not None and proxy.needs_disconnect_button()
 
     def ctrld(self):
         proxy = self.get_backend_proxy()
@@ -749,8 +751,11 @@ class Runner:
         self._send_thread_commands()
         self._send_postponed_commands()
 
-    def _handle_backend_termination(self, returncode: int) -> None:
-        err = f"Process ended with exit code {returncode}."
+    def _handle_backend_termination(self, returncode: Optional[int]) -> None:
+        if returncode is None or returncode == ALL_EXPLAINED_STATUS_CODE:
+            err = ""
+        else:
+            err = f"Process ended with exit code {returncode}."
 
         try:
             faults_file = os.path.join(get_thonny_user_dir(), "backend_faults.log")
@@ -896,6 +901,12 @@ class Runner:
             isinstance(self._proxy, (LocalCPythonProxy, SshCPythonProxy)) and self._proxy._in_venv
         )
 
+    def is_connected(self):
+        if self._proxy is None:
+            return False
+        else:
+            return self._proxy.is_connected()
+
 
 class BackendProxy(ABC):
     """Communicates with backend process.
@@ -949,7 +960,24 @@ class BackendProxy(ABC):
         ...
 
     @abstractmethod
-    def is_connected(self): ...
+    def is_connected(self) -> bool:
+        """Returns True if the backend is operational.
+        Returns False if the connection is lost (or not created yet)
+        or the remote process has died (or not created yet).
+        """
+        ...
+
+    def disconnect(self):
+        """
+        Means different things for different backends.
+        For local CPython it does nothing (???).
+        For BareMetalMicroPython it means simply closing the serial connection.
+        For SSH back-ends it means closing the SSH connection.
+        """
+        pass
+
+    def needs_disconnect_button(self):
+        return False
 
     @abstractmethod
     def has_local_interpreter(self): ...

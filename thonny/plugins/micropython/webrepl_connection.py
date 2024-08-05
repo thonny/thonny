@@ -3,7 +3,7 @@ import threading
 from logging import DEBUG, getLogger
 from queue import Queue
 
-from ...common import execute_with_frontend_sys_path
+from ...common import ALL_EXPLAINED_STATUS_CODE, execute_with_frontend_sys_path
 from .connection import MicroPythonConnection
 
 logger = getLogger(__name__)
@@ -47,7 +47,7 @@ class WebReplConnection(MicroPythonConnection):
                 "Can't import `websockets`. You can install it via 'Tools => Manage plug-ins'.",
                 file=sys.stderr,
             )
-            sys.exit(1)
+            sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _wrap_ws_main(self):
         import asyncio

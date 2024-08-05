@@ -301,6 +301,9 @@ class MicroPythonProxy(SubprocessProxy):
 
         return dist_info
 
+    def needs_disconnect_button(self):
+        return True
+
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -505,6 +508,9 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def disconnect(self):
         self.destroy()
+        self._show_error(
+            "\nDisconnected.\n\nClick ☐ at the bottom of the window or use Stop/Restart to reconnect."
+        )
 
     def get_node_label(self):
         if "CircuitPython" in self._welcome_text:

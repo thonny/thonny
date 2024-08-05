@@ -23,6 +23,7 @@ OBJECT_LINK_START = "[object_link_for_thonny=%d]"
 OBJECT_LINK_END = "[/object_link_for_thonny]"
 REMOTE_PATH_MARKER = " :: "
 PROCESS_ACK = "OK"
+ALL_EXPLAINED_STATUS_CODE = 193
 
 IGNORED_FILES_AND_DIRS = [
     "System Volume Information",

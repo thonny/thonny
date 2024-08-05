@@ -223,6 +223,7 @@ class Workbench(tk.Tk):
         self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
         self.bind("BackendRestart", self._on_backend_restart, True)
+        self.bind("BackendTerminated", self._on_backend_terminated, True)
 
         self._publish_commands()
         self.initializing = False
@@ -904,11 +905,38 @@ class Workbench(tk.Tk):
             menu_conf = get_style_configuration("Menu")
         self._backend_menu = tk.Menu(self._statusbar, tearoff=False, **menu_conf)
 
-        # Set up the button.
-        self._backend_button = CustomToolbutton(self._statusbar, text=get_menu_char())
+        # Set up the buttons
+        self._connection_button = CustomToolbutton(
+            self._statusbar, text="", command=self._toggle_connection
+        )
+        self._connection_button.grid(row=1, column=8, sticky="nes")
 
-        self._backend_button.grid(row=1, column=3, sticky="nes")
-        self._backend_button.configure(command=self._post_backend_menu)
+        self._backend_button = CustomToolbutton(
+            self._statusbar, text=get_menu_char(), command=self._post_backend_menu
+        )
+
+        self._backend_button.grid(row=1, column=9, sticky="nes")
+
+    def _update_connection_button(self):
+        if get_runner().is_connected():
+            # ▣☑☐🔲🔳☑️☹️🟢🔴🔵🟠🟡🟣🟤🟦🟧🟥🟨🟩🟪🟫🟬🟭🟮
+            self._connection_button.configure(text=" ☑ ")
+            should_be_visible = get_runner().disconnect_enabled()
+        else:
+            self._connection_button.configure(text=" ☐ ")
+            should_be_visible = True
+
+        if should_be_visible and not self._connection_button.winfo_ismapped():
+            self._connection_button.grid()
+        elif not should_be_visible and self._connection_button.winfo_ismapped():
+            self._connection_button.grid_remove()
+
+    def _toggle_connection(self):
+        if get_runner().is_connected():
+            get_runner().get_backend_proxy().disconnect()
+        else:
+            get_runner().restart_backend(clean=False, first=False, automatic=False)
+        self._update_connection_button()
 
     def _post_backend_menu(self):
         from thonny.plugins.micropython.uf2dialog import (
@@ -1016,6 +1044,10 @@ class Workbench(tk.Tk):
         self._backend_conf_variable.set(value=switcher_value)
         self._last_active_backend_conf_variable_value = switcher_value
         self._backend_button.configure(text=desc + "  " + get_menu_char())
+        self._update_connection_button()
+
+    def _on_backend_terminated(self, event):
+        self._update_connection_button()
 
     def _init_theming(self) -> None:
         if self.get_option("view.ui_theme") == "Kind of Aqua":
