@@ -125,6 +125,7 @@ def get_ipc_file_path():
         base_dir = get_thonny_user_dir()
 
     import getpass
+
     username = getpass.getuser()
 
     ipc_dir = os.path.join(base_dir, "thonny-%s" % username)

@@ -252,9 +252,6 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     if fnam == CFGFILE:
                         return os.path.dirname(path)
         except Exception:
-            import traceback
-
-            traceback.print_stack()
             logger.exception("_get_venv_path")
 
     def check_for_venv(self):
