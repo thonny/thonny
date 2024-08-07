@@ -1853,8 +1853,6 @@ def open_path_in_system_file_manager(path):
 
 
 def _get_dialog_provider():
-    return _CustomDialogProvider
-
     if platform.system() == "Linux" and get_workbench().get_option("file.use_zenity"):
         return _ZenityDialogProvider
 
