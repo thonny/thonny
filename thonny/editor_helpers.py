@@ -89,7 +89,7 @@ class EditorInfoBox(tk.Toplevel):
         #    return
 
         # Need to close when another app or a Thonny's dialog appears
-        # (othewise the box will float above this, at least in Linux).
+        # (otherwise the box will float above this, at least in Linux).
         # Don't do anything if another EditorInfoBox appears
         for box in all_boxes:
             try:
