@@ -51,7 +51,7 @@ class IndexParser(HTMLParser):
 all_variants = []
 
 # mcu_list = "RA4M1, RA4W1, RA6M1, RA6M2, RP2040, STM32H747, cc3200, esp32, esp32c3, esp32s2, esp32s3, esp8266, mimxrt, nRF52840, nrf51, nrf52, nrf91, rp2040, samd21, samd51, stm32, stm32f0, stm32f4, stm32f7, stm32g0, stm32g4, stm32h7, stm32l0, stm32l4, stm32wb, stm32wl"
-mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c3, rp2040, samd21, samd51, nrf51"
+mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c3, rp2040, rp2350, samd21, samd51, nrf51"
 
 for mcu in map(str.strip, mcu_list.split(",")):
     print("Fetching mcu", mcu, end="... ")
@@ -65,7 +65,7 @@ for mcu in map(str.strip, mcu_list.split(",")):
             board_family = "nrf51"
         elif mcu.lower().startswith("nrf52"):
             board_family = "nrf52"
-        elif mcu.lower() == "rp2040":
+        elif mcu.lower() in ["rp2040", "rp2350"]:
             board_family = "rp2"
         else:
             board_family = mcu
