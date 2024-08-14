@@ -480,7 +480,11 @@ class Workbench(tk.Tk):
 
         for m in sorted(modules, key=module_sort_key):
             logger.debug("Loading plugin %r from file %r", m.__name__, m.__file__)
-            getattr(m, load_function_name)()
+            try:
+                getattr(m, load_function_name)()
+            except Exception:
+                logger.exception("Could not load plugin")
+                self.report_exception("Coult not load plugin " + m.__name__)
 
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
