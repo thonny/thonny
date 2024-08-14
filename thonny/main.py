@@ -208,6 +208,13 @@ def _parse_arguments_to_dict(raw_args: List[str]) -> Dict[str, Any]:
     )
 
     parser.add_argument(
+        "--profile",
+        help="The profile to create or open. If not specified, the default profile is used. Profile name must be a valid directory name.",
+        default="default",
+        metavar="<profile_name>",
+    )
+
+    parser.add_argument(
         "files",
         help="",
         nargs="*",

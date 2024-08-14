@@ -280,6 +280,9 @@ class Workbench(tk.Tk):
 
         self._event_polling_id = self.after(20, self.poll_events)
 
+    def get_profile(self) -> str:
+        return self._initial_args.get("profile", "default")
+
     def _load_stuff_from_command_line(self, parsed_args: Dict[str, Any]) -> None:
         logger.info("Processing arguments %r", parsed_args)
         try:
@@ -2764,6 +2767,11 @@ class Workbench(tk.Tk):
             title_text = "Portable Thonny"
         else:
             title_text = "Thonny"
+
+        profile = self.get_profile()
+        if profile != "default":
+            title_text += f"〈 {profile} 〉"
+
         if editor is not None:
             title_text += "  -  " + editor.get_long_description()
 
