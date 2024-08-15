@@ -2,6 +2,7 @@
 import ast
 import collections
 import importlib
+import json
 import os.path
 import pkgutil
 import platform
@@ -136,7 +137,10 @@ class Workbench(tk.Tk):
         self._event_polling_id = None
         self.initializing = True
 
+        self._secrets: Dict[str, str] = {}
+
         self._init_configuration()
+        self._load_secrets()
         self._tweak_environment()
         self._check_init_server_loop()
 
@@ -155,6 +159,7 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
+        self._ai_providers = {}  # type: Dict[str, BackendSpec]
         self._commands = []  # type: List[Dict[str, Any]]
         self._notebook_drop_targets: List[tk.Widget] = []
         self._toolbar_buttons = {}
@@ -347,6 +352,20 @@ class Workbench(tk.Tk):
             self.set_default("layout.notebook_" + nb_name + "_selected_view", None)
 
         self.update_debug_mode()
+
+    def _get_secrets_path(self) -> str:
+        return os.path.join(get_thonny_user_dir(), "secrets.json")
+
+    def _load_secrets(self):
+        if os.path.isfile(self._get_secrets_path()):
+            with open(self._get_secrets_path(), "r") as f:
+                self._secrets = json.load(f)
+        else:
+            self._secrets = {}
+
+    def _save_secrets(self):
+        with open(self._get_secrets_path(), "wt") as f:
+            json.dump(self._secrets, f)
 
     def _tweak_environment(self):
         for entry in self.get_option("general.environment"):
@@ -1732,6 +1751,13 @@ class Workbench(tk.Tk):
     def set_option(self, name: str, value: Any) -> None:
         self._configuration_manager.set_option(name, value)
 
+    def get_secret(self, name: str, default: Optional[str] = None) -> Optional[str]:
+        return self._secrets.get(name, default)
+
+    def set_secret(self, name: str, value: str) -> None:
+        self._secrets[name] = value
+        self._save_secrets()
+
     def get_local_cwd(self) -> str:
         cwd = self.get_option("run.working_directory")
         if os.path.exists(cwd):
@@ -2084,8 +2110,11 @@ class Workbench(tk.Tk):
             if sequence in self._event_handlers:
                 if event is None:
                     event = WorkbenchEvent(sequence, **kwargs)
-                else:
-                    event.update(kwargs)
+                elif kwargs:
+                    if isinstance(event, (Record, Dict)):
+                        event.update(kwargs)
+                    else:
+                        raise ValueError(f"Can't update {type(event)} with kwargs")
 
                 # make a copy of handlers, so that event handler can remove itself
                 # from the registry during iteration
