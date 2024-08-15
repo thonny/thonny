@@ -4,29 +4,39 @@ import os.path
 import subprocess
 import sys
 import textwrap
+import threading
 import tkinter as tk
+from abc import ABC, abstractmethod
 from collections import namedtuple
+from dataclasses import dataclass, replace
 from logging import getLogger
 from tkinter import messagebox, ttk
-from typing import Dict  # pylint disable=unused-import
 from typing import List  # pylint disable=unused-import
 from typing import Optional  # pylint disable=unused-import
 from typing import Tuple  # pylint disable=unused-import
 from typing import Type  # pylint disable=unused-import
 from typing import Union  # pylint disable=unused-import
-from typing import Iterable
+from typing import Dict, Iterable, Iterator  # pylint disable=unused-import
 
 import thonny
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import (
     REPL_PSEUDO_FILENAME,
     STRING_PSEUDO_FILENAME,
+    Record,
     ToplevelResponse,
     read_source,
 )
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import CommonDialog, get_hyperlink_cursor, lookup_style_option
+from thonny.tktextext import EnhancedText
+from thonny.ui_utils import (
+    CommonDialog,
+    CustomToolbutton,
+    ems_to_pixels,
+    get_hyperlink_cursor,
+    lookup_style_option,
+)
 
 logger = getLogger(__name__)
 
@@ -37,6 +47,35 @@ _last_feedback_timestamps = {}  # type: Dict[str, str]
 _error_helper_classes = {}  # type: Dict[str, List[Type[ErrorHelper]]]
 
 
+@dataclass
+class AiChatMessage:
+    role: str
+    content: str
+
+
+@dataclass
+class AiChatResponseFragment:
+    content: str
+    is_final: bool
+
+
+class AiProvider(ABC):
+    @abstractmethod
+    def get_ready(self) -> bool:
+        """Called in the UI thread before each request"""
+        ...
+
+    @abstractmethod
+    def complete_chat(self, messages: List[AiChatMessage]) -> Iterator[AiChatResponseFragment]:
+        """Called in a background thread"""
+        ...
+
+    @abstractmethod
+    def cancel_completion(self) -> None:
+        """Called in the UI thread"""
+        ...
+
+
 class AssistantView(tktextext.TextFrame):
     def __init__(self, master):
         tktextext.TextFrame.__init__(
@@ -44,6 +83,7 @@ class AssistantView(tktextext.TextFrame):
             master,
             text_class=AssistantRstText,
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
+            vertical_scrollbar_rowspan=2,
             read_only=True,
             wrap="word",
             font="TkDefaultFont",
@@ -51,9 +91,11 @@ class AssistantView(tktextext.TextFrame):
             padx=10,
             pady=0,
             insertwidth=0,
+            background="white",
         )
 
         self._analyzer_instances = []
+        self._chat_messages: List[AiChatMessage] = []
 
         self._snapshots_per_main_file = {}
         self._current_snapshot = None
@@ -91,11 +133,62 @@ class AssistantView(tktextext.TextFrame):
             True,
         )
 
+        self.query_box = self.create_query_panel()
+        self.query_box.grid(
+            row=1, column=1, sticky="nsew", padx=ems_to_pixels(1), pady=ems_to_pixels(1)
+        )
+
+        from thonny.plugins.github_copilot import GitHubCopilotAiProvider
+
+        self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
+
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
+        get_workbench().bind("AiChatResponse", self.handle_ai_chat_response, True)
 
         add_error_helper("*", GenericErrorHelper)
 
         self.bind("<<ThemeChanged>>", self._on_theme_changed, True)
+
+    def create_query_panel(self) -> tk.Frame:
+        border_frame = tk.Frame(self, background="#cccccc")
+
+        inside_frame = tk.Frame(border_frame, background="white")
+        inside_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
+        inside_frame.rowconfigure(0, weight=1)
+        inside_frame.columnconfigure(0, weight=1)
+
+        self.query_text = tk.Text(
+            inside_frame,
+            height=2,
+            font="TkDefaultFont",
+            borderwidth=0,
+            highlightthickness=0,
+            relief="groove",
+            wrap="word",
+        )
+        self.query_text.bind(
+            "<Return>", lambda e: self.submit_user_chat_message(self.query_text.get("1.0", "end"))
+        )
+        self.query_text.grid(row=0, column=0, sticky="nsew", padx=3, pady=3)
+
+        border_frame.rowconfigure(0, weight=1)
+        border_frame.columnconfigure(0, weight=1)
+
+        return border_frame
+
+    def handle_ai_chat_response(self, fragment: AiChatResponseFragment) -> None:
+        self._append_text(fragment.content)
+        last_msg = self._chat_messages.pop()
+        if last_msg.role == "user":
+            self._chat_messages.append(last_msg)
+            current_msg = AiChatMessage("assistant", "")
+        else:
+            current_msg = last_msg
+
+        current_msg = replace(current_msg, content=current_msg.content + fragment.content)
+        self._chat_messages.append(current_msg)
+        if fragment.is_final:
+            self._append_text("\n------------\n")
 
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         # Can be called by event system or by Workbench
@@ -417,6 +510,24 @@ class AssistantView(tktextext.TextFrame):
 
         if isinstance(self.text, rst_utils.RstText):
             self.text.on_theme_changed()
+
+    def submit_user_chat_message(self, message: str):
+        if not self._ai_provider.get_ready():
+            return "break"
+
+        self.text.direct_insert("end", "\nYOU: " + message)
+        self._chat_messages.append(AiChatMessage("user", message))
+        self.query_text.delete("1.0", "end")
+
+        threading.Thread(target=self._complete_chat_in_thread, daemon=True).start()
+
+        return "break"
+
+    def _complete_chat_in_thread(self):
+        for response in self._ai_provider.complete_chat(self._chat_messages):
+            get_workbench().queue_event("AiChatResponse", response)
+            if response.is_final:
+                break
 
 
 class AssistantRstText(rst_utils.RstText):
