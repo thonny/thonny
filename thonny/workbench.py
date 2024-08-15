@@ -2092,13 +2092,13 @@ class Workbench(tk.Tk):
 
             view.containing_notebook.forget(view)
 
-    def queue_event(self, sequence: str, event: Optional[Record] = None) -> None:
+    def queue_event(self, sequence: str, event: Any = None) -> None:
         """
         Asynchronous variant of event_generate. Safe to use from a background thread.
         """
         self._event_queue.put((sequence, event))
 
-    def event_generate(self, sequence: str, event: Optional[Record] = None, **kwargs) -> None:
+    def event_generate(self, sequence: str, event: Any = None, **kwargs) -> None:
         """Uses custom event handling when sequence doesn't start with <.
         In this case arbitrary attributes can be added to the event.
         Otherwise forwards the call to Tk's event_generate"""
