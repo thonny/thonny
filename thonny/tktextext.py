@@ -801,7 +801,7 @@ class EnhancedText(TweakableText):
         super().direct_insert(index, chars, tags, **kw)
 
 
-class TextFrame(ttk.Frame):
+class TextFrame(tk.Frame):
     "Decorates text with scrollbars, listens for theme changes"
 
     def __init__(
@@ -813,12 +813,16 @@ class TextFrame(ttk.Frame):
         horizontal_scrollbar=True,
         vertical_scrollbar=True,
         vertical_scrollbar_class=ttk.Scrollbar,
+        vertical_scrollbar_rowspan=1,
         horizontal_scrollbar_class=ttk.Scrollbar,
         borderwidth=0,
+        background=None,
         relief="sunken",
         **text_options,
     ):
-        ttk.Frame.__init__(self, master=master, borderwidth=borderwidth, relief=relief)
+        tk.Frame.__init__(
+            self, master=master, borderwidth=borderwidth, relief=relief, background=background
+        )
 
         final_text_options = {
             "borderwidth": 0,
@@ -851,7 +855,7 @@ class TextFrame(ttk.Frame):
         else:
             self._hbar = None
 
-        self.grid_main_widgets()
+        self.grid_main_widgets(vertical_scrollbar_rowspan=vertical_scrollbar_rowspan)
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
@@ -863,15 +867,15 @@ class TextFrame(ttk.Frame):
 
         self._reload_theme_options(None)
 
-    def grid_main_widgets(self):
+    def grid_main_widgets(self, vertical_scrollbar_rowspan=1):
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         if self._vbar:
-            self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+            self._vbar.grid(row=0, column=2, sticky=tk.NSEW, rowspan=vertical_scrollbar_rowspan)
             if self._vbar_stripe:
                 self._vbar_stripe.grid(row=0, column=2, sticky="nse")
                 self._vbar_stripe.tkraise()
         if self._hbar:
-            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=3)
+            self._hbar.grid(row=vertical_scrollbar_rowspan, column=0, sticky=tk.NSEW, columnspan=3)
 
     def focus_set(self):
         self.text.focus_set()
