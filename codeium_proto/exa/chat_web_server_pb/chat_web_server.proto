@@ -1,0 +1,178 @@
+// Copyright Exafunction, Inc.
+
+syntax = "proto3";
+
+package exa.chat_web_server_pb;
+
+import "exa/chat_pb/chat.proto";
+import "exa/codeium_common_pb/codeium_common.proto";
+import "exa/diff_action_pb/diff_action.proto";
+import "exa/language_server_pb/language_server.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/chat_web_server_pb";
+
+// The type of client that is connecting to the web server.
+enum ClientConnectionType {
+  CLIENT_CONNECTION_TYPE_UNSPECIFIED = 0;
+  CLIENT_CONNECTION_TYPE_CHAT = 1;
+  CLIENT_CONNECTION_TYPE_IDE = 2;
+}
+
+message ChatMessageWithFeedback {
+  chat_pb.ChatMessage message = 1;
+
+  // Store the feedback from the user about the chat message (e.g. "Like" or "Dislike")
+  chat_pb.ChatFeedbackType feedback = 2;
+
+  // Stream ID so that the user can cancel the message.
+  string stream_id = 3;
+}
+
+// Internal state that will be shared between the client and the web server.
+message ChatMessageState {
+  repeated ChatMessageWithFeedback messages = 1;
+  bool is_receiving_message = 2;
+  codeium_common_pb.UserSettings user_settings = 3;
+}
+
+message ClearConversation {
+  // Clears an single conversation. If empty, clears the entire history across all conversations.
+  string conversation_id = 1;
+}
+
+message OpenFilePointer {
+  string file_path = 1;
+  int32 start_line = 2;
+  int32 start_col = 3;
+  int32 end_line = 4;
+  int32 end_col = 5;
+}
+
+enum ActiveEditorType {
+  ACTIVE_EDITOR_TYPE_UNSPECIFIED = 0;
+  ACTIVE_EDITOR_TYPE_TEXT_EDITOR = 1;
+  ACTIVE_EDITOR_TYPE_TERMINAL = 2;
+}
+
+message InsertCodeAtCursor {
+  string text = 1;
+  ActiveEditorType editor_type = 2;
+}
+
+message ApplyDiff {
+  string message_id = 1;
+  string file_path = 2;
+  diff_action_pb.DiffBlock diff = 3;
+}
+
+message HandshakeRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  string user_id = 9; // Optional UserId to identify clients in multi-user server.
+}
+
+message ErrorResponse {
+  string error = 1;
+}
+
+// Hydrate the initial state of the client.
+message HandshakeResponse {
+  codeium_common_pb.UserStatus user_status = 1;
+  ChatMessageState initial_state = 2;
+  string language_server_address = 3;
+}
+
+// Update the state of the client.
+message StateUpdate {
+  // The array of messages can be a partial history based on `is_partial_update`. If a partial
+  // update, the messages that are included will be updated.
+  ChatMessageState state = 1;
+
+  // Whether the state is a partial update (ie. update only part of the history) or a full update (ie. replace entire history).
+  bool is_partial_update = 2;
+}
+
+// Cancel the inflight message.
+message CancelInfightMessage {
+  string stream_id = 1;
+}
+
+// Heartbeat to keep the connection alive.
+message Heartbeat {}
+
+// Update user settings.
+message UpdateUserSettingsRequest {
+  codeium_common_pb.UserSettings user_settings = 1;
+}
+
+// Messages from the Chat Client or IDE to the Web Server.
+message WebServerRequest {
+  oneof payload {
+    // Request an initial handshake from the chat server.
+    HandshakeRequest handshake_request = 1;
+
+    // Send a message to the chat server to get a chat response from the assistant.
+    language_server_pb.GetChatMessageRequest get_chat_message_request = 2;
+
+    // Record feedback from the user about the chat message.
+    language_server_pb.RecordChatFeedbackRequest record_chat_feedback_request = 3;
+
+    // Clear the conversation history.
+    ClearConversation clear_conversation = 4;
+
+    // Focus on a specific file and code block in the IDE.
+    OpenFilePointer open_file_pointer = 5;
+
+    // Cancel inflight message.
+    CancelInfightMessage cancel_infight_message = 6;
+
+    // Insert text at the cursor position.
+    InsertCodeAtCursor insert_at_cursor = 7;
+
+    // Apply a diff.
+    ApplyDiff apply_diff = 8;
+
+    // Heartbeat to keep the connection alive.
+    Heartbeat heartbeat = 9;
+
+    // Update user settings.
+    UpdateUserSettingsRequest update_user_settings = 10;
+  }
+}
+
+// Messages from the Web Server to the Chat Client or IDE.
+message WebServerResponse {
+  oneof payload {
+    HandshakeResponse handshake_response = 1;
+    StateUpdate state_update = 2;
+    OpenFilePointer open_file_pointer = 3;
+    InsertCodeAtCursor insert_at_cursor = 4;
+    ApplyDiff apply_diff = 5;
+    ErrorResponse error_response = 6;
+  }
+}
+
+message GetMatchingIndexedReposRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  string query = 2;
+  int32 max_items = 3;
+}
+
+message GetMatchingIndexedReposResponse {
+  repeated exa.codeium_common_pb.GitRepoInfo matched_repositories = 1;
+}
+
+message GetMatchingCodeContextRequest {
+  string query = 1;
+  // Filters on the type of code context items to search over.
+  repeated codeium_common_pb.CodeContextType allowed_types = 3;
+  int32 max_items = 4;
+}
+
+message GetMatchingCodeContextResponse {
+  repeated codeium_common_pb.CodeContextItem matched_items = 1;
+}
+
+service ChatWebServerService {
+  rpc GetMatchingIndexedRepos(GetMatchingIndexedReposRequest) returns (GetMatchingIndexedReposResponse) {}
+  rpc GetMatchingCodeContext(GetMatchingCodeContextRequest) returns (GetMatchingCodeContextResponse) {}
+}

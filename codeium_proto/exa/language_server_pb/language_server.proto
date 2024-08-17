@@ -1,0 +1,450 @@
+// Copyright Exafunction, Inc.
+
+syntax = "proto3";
+
+package exa.language_server_pb;
+
+import "exa/chat_pb/chat.proto";
+import "exa/codeium_common_pb/codeium_common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/language_server_pb";
+
+service LanguageServerService {
+  rpc GetCompletions(GetCompletionsRequest) returns (GetCompletionsResponse) {}
+  rpc AcceptCompletion(AcceptCompletionRequest) returns (AcceptCompletionResponse) {}
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
+  rpc GetAuthToken(GetAuthTokenRequest) returns (GetAuthTokenResponse) {}
+  rpc RecordEvent(RecordEventRequest) returns (RecordEventResponse) {}
+  rpc CancelRequest(CancelRequestRequest) returns (CancelRequestResponse) {}
+  rpc Exit(ExitRequest) returns (ExitResponse) {}
+  rpc GetProcesses(GetProcessesRequest) returns (GetProcessesResponse) {}
+
+  // Chat RPCs.
+  rpc GetChatMessage(GetChatMessageRequest) returns (stream GetChatMessageResponse) {}
+  rpc RecordChatFeedback(RecordChatFeedbackRequest) returns (RecordChatFeedbackResponse) {}
+  rpc RecordChatPanelSession(RecordChatPanelSessionRequest) returns (RecordChatPanelSessionResponse) {}
+
+  // Search RPCs.
+  rpc ClusteredSearch(ClusteredSearchRequest) returns (ClusteredSearchResponse) {}
+  rpc ExactSearch(ExactSearchRequest) returns (ExactSearchResponse) {}
+  rpc AddTrackedWorkspace(AddTrackedWorkspaceRequest) returns (AddTrackedWorkspaceResponse) {}
+  rpc RemoveTrackedWorkspace(RemoveTrackedWorkspaceRequest) returns (RemoveTrackedWorkspaceResponse) {}
+
+  // Refresh context with editor state on IDE events happening.
+  rpc RefreshContextForIdeAction(RefreshContextForIdeActionRequest) returns (RefreshContextForIdeActionResponse) {}
+
+  rpc GetFunctions(GetFunctionsRequest) returns (GetFunctionsResponse) {}
+  rpc GetUserStatus(GetUserStatusRequest) returns (GetUserStatusResponse) {}
+
+}
+
+// Next ID: 9, Previous field: disable_cache.
+message GetCompletionsRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  Document document = 2;
+  codeium_common_pb.EditorOptions editor_options = 3;
+  repeated Document other_documents = 5;
+
+  // Name of custom model to use, if any.
+  string model_name = 10;
+}
+
+// Next ID: 5, Previous field: latency_info.
+message GetCompletionsResponse {
+  State state = 1;
+  repeated CompletionItem completion_items = 2;
+}
+
+// Next ID: 3, Previous field: completion_id.
+message AcceptCompletionRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  string completion_id = 2;
+}
+
+// Next ID: 1, Previous field: N/A.
+message AcceptCompletionResponse {}
+
+message HeartbeatRequest {
+  codeium_common_pb.Metadata metadata = 1;
+}
+message HeartbeatResponse {}
+
+// Next ID: 1, Previous field: N/A.
+message GetAuthTokenRequest {}
+
+// Next ID: 3, Previous field: uuid.
+message GetAuthTokenResponse {
+  string auth_token = 1;
+  string uuid = 2;
+}
+
+// Next ID: 3, Previous field: event.
+message RecordEventRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  codeium_common_pb.Event event = 2;
+}
+
+message RecordEventResponse {}
+
+// Next ID: 3, Previous field: request_id.
+message CancelRequestRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  uint64 request_id = 2;
+}
+
+message CancelRequestResponse {}
+
+message ExitRequest {}
+message ExitResponse {}
+
+message GetProcessesRequest {}
+
+message GetProcessesResponse {
+  uint32 lsp_port = 1;
+  uint32 chat_web_server_port = 2;
+  uint32 chat_client_port = 3;
+}
+
+message GetChatMessageRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  string prompt = 2;
+
+  // Chat messages in ascending order of timestamp.
+  repeated chat_pb.ChatMessage chat_messages = 3;
+  ExperimentConfig experiment_config = 4;
+
+  // Context
+  Document active_document = 5;
+  repeated string open_document_paths = 6;
+  repeated string workspace_paths = 7;
+
+  codeium_common_pb.ContextInclusionType context_inclusion_type = 8;
+}
+
+message GetChatMessageResponse {
+  chat_pb.ChatMessage chat_message = 1;
+}
+
+message RecordChatFeedbackRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  string message_id = 2;
+  chat_pb.ChatFeedbackType feedback = 3;
+  string reason = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message RecordChatFeedbackResponse {}
+
+message RecordChatPanelSessionRequest {
+  codeium_common_pb.Metadata metadata = 1;
+  google.protobuf.Timestamp start_timestamp = 2;
+  google.protobuf.Timestamp end_timestamp = 3;
+}
+
+message RecordChatPanelSessionResponse {}
+
+// Next ID: 4, Previous field: num_clusters.
+message ClusteredSearchRequest {
+  codeium_common_pb.Metadata metadata = 4;
+  string query = 1;
+  // Number of search results to query for.
+  uint32 num_results = 2;
+  // Number of clusters to group search results into. Note that the response may container fewer
+  // clusters than requested if suitable clusters are not found.
+  uint32 num_clusters = 3;
+}
+
+// Next ID: 2, Previous field: clusters.
+message ClusteredSearchResponse {
+  // Clustered search results ordered by descending mean similarity score.
+  repeated SearchResultCluster clusters = 1;
+  string search_id = 2;
+}
+
+// Next ID: 4, Previous field: metadata.
+message ExactSearchRequest {
+  codeium_common_pb.Metadata metadata = 3;
+  ExactSearchQuery query = 1;
+  ExactSearchOptions options = 2;
+}
+
+// Next ID: 3, Previous field: hit_limit.
+message ExactSearchResponse {
+  repeated ExactSearchResult results = 1;
+  // True if max_results was reached.
+  bool hit_limit = 2;
+  string search_id = 3;
+}
+
+
+message AddTrackedWorkspaceRequest {
+  string workspace = 1;
+}
+
+message AddTrackedWorkspaceResponse {}
+
+message RemoveTrackedWorkspaceRequest {
+  string workspace = 1;
+}
+
+message RemoveTrackedWorkspaceResponse {}
+
+message RefreshContextForIdeActionRequest {
+  Document active_document = 1;
+  repeated string open_document_filepaths = 2;
+  repeated string workspace_paths = 3;
+  bool blocking = 4;
+}
+
+message RefreshContextForIdeActionResponse {}
+
+message GetFunctionsRequest {
+  Document document = 1;
+}
+
+message GetFunctionsResponse {
+  repeated codeium_common_pb.FunctionInfo function_captures = 1;
+}
+
+message GetUserStatusRequest {
+  codeium_common_pb.Metadata metadata = 1;
+}
+
+message GetUserStatusResponse {
+  codeium_common_pb.UserStatus user_status = 1;
+}
+
+/*****************************************************************************/
+/* Helper Messages                                                           */
+/*****************************************************************************/
+
+message DocumentPosition {
+  // 0-indexed. Measured in UTF-8 bytes.
+  uint64 row = 1;
+  // 0-indexed. Measured in UTF-8 bytes.
+  uint64 col = 2;
+}
+
+// Next ID: 9, Previous field: cursor_position.
+message Document {
+  string absolute_path = 1;
+  // Path relative to the root of the workspace.
+  string relative_path = 2;
+  string text = 3;
+  // Language ID provided by the editor.
+  string editor_language = 4;
+  // Language enum standardized across editors.
+  codeium_common_pb.Language language = 5;
+  // Measured in number of UTF-8 bytes.
+  uint64 cursor_offset = 6;
+  // May be present instead of cursor_offset.
+  DocumentPosition cursor_position = 8;
+  // \n or \r\n, if known.
+  string line_ending = 7;
+  // Portion of document visible in IDE;
+  Range visible_range = 9;
+}
+
+// Next ID: 3, Previous field: insert_spaces.
+message EditorOptions {
+  uint64 tab_size = 1;
+  bool insert_spaces = 2;
+}
+
+enum CodeiumState {
+  CODEIUM_STATE_UNSPECIFIED = 0;
+  CODEIUM_STATE_INACTIVE = 1;
+  CODEIUM_STATE_PROCESSING = 2;
+  CODEIUM_STATE_SUCCESS = 3;
+  CODEIUM_STATE_WARNING = 4;
+  CODEIUM_STATE_ERROR = 5;
+}
+
+// Next ID: 3, Previous field: message.
+message State {
+  CodeiumState state = 1;
+  string message = 2;
+}
+
+enum LineType {
+  LINE_TYPE_UNSPECIFIED = 0;
+  LINE_TYPE_SINGLE = 1;
+  LINE_TYPE_MULTI = 2;
+}
+
+// Next ID: 5, Previous field: end_position.
+message Range {
+  uint64 start_offset = 1;
+  uint64 end_offset = 2;
+  DocumentPosition start_position = 3;
+  DocumentPosition end_position = 4;
+}
+
+message Suffix {
+  // Text to insert after the cursor when accepting the completion.
+  string text = 1;
+  // Cursor position delta (as signed offset) from the end of the inserted
+  // completion (including the suffix).
+  int64 delta_cursor_offset = 2;
+}
+
+enum CompletionPartType {
+  COMPLETION_PART_TYPE_UNSPECIFIED = 0;
+  // Single-line completion parts that appear within an existing line of text.
+  COMPLETION_PART_TYPE_INLINE = 1;
+  // Possibly multi-line completion parts that appear below an existing line of text.
+  COMPLETION_PART_TYPE_BLOCK = 2;
+  // Like COMPLETION_PART_TYPE_INLINE, but overwrites the existing text.
+  COMPLETION_PART_TYPE_INLINE_MASK = 3;
+}
+
+// Represents a contiguous part of the completion text that is not
+// already in the document.
+// Next ID: 4, Previous field: prefix.
+message CompletionPart {
+  string text = 1;
+  // Offset in the original document where the part starts. For block
+  // parts, this is always the end of the line before the block.
+  uint64 offset = 2;
+  CompletionPartType type = 3;
+  // The section of the original line that came before this part. Only valid for
+  // COMPLETION_PART_TYPE_INLINE.
+  string prefix = 4;
+  // In the case of COMPLETION_PART_TYPE_BLOCK, represents the line it is below.
+  uint64 line = 5;
+}
+
+// Next ID: 9, Previous field: completion_parts.
+message CompletionItem {
+  codeium_common_pb.Completion completion = 1;
+  Suffix suffix = 5;
+  Range range = 2;
+  codeium_common_pb.CompletionSource source = 3;
+  repeated CompletionPart completion_parts = 8;
+}
+
+// Next ID: 3, Previous field: force_disable_experiments.
+message ExperimentConfig {
+  repeated codeium_common_pb.ExperimentKey force_enable_experiments = 1;
+  repeated codeium_common_pb.ExperimentKey force_disable_experiments = 2;
+}
+
+// Next ID: 7, Previous field: repo_info.
+message SearchResult {
+  // The ID of the embedding (value in faiss index).
+  int64 embedding_id = 1;
+  // Absolute path for the search result file.
+  string absolute_path = 2;
+  // WorkspacePath for each workspace containing this search result.
+  repeated codeium_common_pb.WorkspacePath workspace_paths = 3;
+  // The embedding metadata for the search result.
+  codeium_common_pb.EmbeddingMetadata embedding_metadata = 4;
+  // Similarity score between the search result embedding and the query
+  // embedding. Smaller is better.
+  float similarity_score = 5;
+  codeium_common_pb.CodeContextItem code_context_item = 6;
+}
+
+// Next ID: 5, Previous field: mean_similarity_score.
+message SearchResultCluster {
+  // List of search results.
+  repeated SearchResult search_results = 1;
+  // Path for the directory most representative of the cluster. Generally this
+  // is a directory containing most of the results in the cluster.
+  string representative_path = 2;
+  // Natural language description / summary of clustered search results.
+  string description = 3;
+  // Mean similarity score between clustered search result embeddings and query
+  // embedding.
+  float mean_similarity_score = 4;
+  // UUID for the search
+  string search_id = 5;
+  // UUID for the cluster result
+  string result_id = 6;
+}
+
+message ProgressBar {
+  float progress = 1;
+  string text = 2;
+  bool hidden = 3;
+}
+
+// References https://github.com/microsoft/vscode/blob/9b8114e6b9e7fe6217def08b60e240172b12489a/src/vs/workbench/services/search/common/searchExtTypes.ts#L91-L119
+// Next ID: 6, Previous field: is_word_match.
+message ExactSearchQuery {
+  // The text pattern to search for.
+  string pattern = 1;
+  // Whether or not `pattern` should match multiple lines of text.
+  bool is_multiline = 2;
+  // Whether or not `pattern` should be interpreted as a regular expression.
+  bool is_reg_exp = 3; // unsupported
+  // Whether or not the search should be case-sensitive.
+  bool is_case_sensitive = 4;
+  // Whether or not to search for whole word matches only.
+  bool is_word_match = 5; // unsupported
+}
+
+// References https://github.com/microsoft/vscode/blob/9b8114e6b9e7fe6217def08b60e240172b12489a/src/vs/workbench/services/search/common/searchExtTypes.ts#L128-L223
+// Next ID: 14, Previous field: preview_options.
+message ExactSearchOptions {
+  // The root folder to search within.
+  string folder = 1;
+
+  // Files that match an `includes` glob pattern should be included in the search.
+  repeated string includes = 2; // unsupported
+  // Files that match an `excludes` glob pattern should be excluded from the search.
+  repeated string excludes = 3; // unsupported
+  // Whether external files that exclude files, like .gitignore, should be disregarded.
+  bool disregard_ignore_files = 4;
+  // Whether symlinks should be followed while searching.
+  bool follow_symlinks = 5;
+  // Whether global files that exclude files, like .gitignore, should be disregarded.
+  bool disregard_global_ignore_files = 6;
+  // Whether files in parent directories that exclude files, like .gitignore, should be disregarded.
+  bool disregard_parent_ignore_files = 7;
+  // Exclude files larger than `maxFileSize` in bytes.
+  uint32 max_file_size = 8;
+  // Interpret files using this encoding.
+  string encoding = 9;
+  // Number of lines of context to include before each match.
+  uint32 before_context_lines = 10; // unsupported
+  // Number of lines of context to include after each match.
+  uint32 after_context_lines = 11; // unsupported
+
+  // The maximum number of results to be returned. If not specified, all results are returned.
+  uint32 max_results = 12;
+  // Options to specify the size of the result text preview.
+  ExactSearchPreviewOptions preview_options = 13; // unsupported
+}
+
+// Next ID: 3, Previous field: chars_per_line.
+message ExactSearchPreviewOptions {
+  // The maximum number of lines in the preview.
+  uint32 match_lines = 1;
+  // The maximum number of characters included per line.
+  uint32 chars_per_line = 2;
+}
+
+// References: https://github.com/microsoft/vscode/blob/9b8114e6b9e7fe6217def08b60e240172b12489a/src/vs/workbench/services/search/common/searchExtTypes.ts#L300-L357
+// Next ID: 6, Previous field: result_id.
+message ExactSearchResult {
+  // The absolute path for the matching document.
+  string absolute_path = 1;
+  // The relative path for the matching document.
+  string relative_path = 4;
+  // The ranges of the match within the document.
+  repeated Range ranges = 2;
+  // A preview of the text match.
+  ExactSearchMatchPreview preview = 3;
+  // UUID for the search result
+  string result_id = 5;
+}
+
+message ExactSearchMatchPreview {
+  // The matching lines of text, or a portion of the matching line that contains the match.
+  string text = 1;
+  // The Range within `text` corresponding to the text of the match.
+  // The number of matches must match the ExactSearchResult's ranges property.
+  repeated Range ranges = 2;
+}

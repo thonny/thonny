@@ -16,4 +16,5 @@ websockets==12.0.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
 dbus-next==0.2.*; sys_platform == "linux"
 
-
+grpcio==1.65.5
+protobuf==5.27.3

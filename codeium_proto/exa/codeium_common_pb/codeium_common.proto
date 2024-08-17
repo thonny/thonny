@@ -1,0 +1,363 @@
+// Copyright Exafunction, Inc.
+
+syntax = "proto3";
+
+package exa.codeium_common_pb;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/codeium_common_pb";
+
+// Next ID: 12, Previous field: entropy.
+message Completion {
+  string completion_id = 1;
+  string text = 2;
+  string prefix = 3;
+  string stop = 4;
+  double score = 5;
+  repeated uint64 tokens = 6;
+  repeated string decoded_tokens = 7;
+  repeated double probabilities = 8;
+  repeated double adjusted_probabilities = 9;
+  uint64 generated_length = 10;
+}
+
+// Next ID: 15, Previous field: url.
+message Metadata {
+  string ide_name = 1;
+  string ide_version = 7;
+  string extension_name = 12;
+  string extension_version = 2;
+  string api_key = 3;
+  string locale = 4;
+  // UID identifying a single session for the given user.
+  string session_id = 10;
+
+  // Used purely in language server to cancel in flight requests.
+  // If request_id is 0, then the request is not cancelable.
+  // This should be a strictly monotonically increasing number
+  // for the duration of a session.
+  uint64 request_id = 9;
+}
+
+message Event {
+  EventType event_type = 1;
+  string event_json = 2;
+  int64 timestamp_unix_ms = 3;
+}
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_ENABLE_CODEIUM = 1;
+  EVENT_TYPE_DISABLE_CODEIUM = 2;
+  EVENT_TYPE_SHOW_PREVIOUS_COMPLETION = 3;
+  EVENT_TYPE_SHOW_NEXT_COMPLETION = 4;
+}
+
+enum CompletionSource {
+  COMPLETION_SOURCE_UNSPECIFIED = 0;
+  COMPLETION_SOURCE_TYPING_AS_SUGGESTED = 1;
+  COMPLETION_SOURCE_CACHE = 2;
+  COMPLETION_SOURCE_NETWORK = 3;
+}
+
+// Every time this list is updated, we should be redeploying the API server
+// since it uses the string representation for BQ.
+enum Language {
+  LANGUAGE_UNSPECIFIED = 0;
+  LANGUAGE_C = 1;
+  LANGUAGE_CLOJURE = 2;
+  LANGUAGE_COFFEESCRIPT = 3;
+  LANGUAGE_CPP = 4;
+  LANGUAGE_CSHARP = 5;
+  LANGUAGE_CSS = 6;
+  LANGUAGE_CUDACPP = 7;
+  LANGUAGE_DOCKERFILE = 8;
+  LANGUAGE_GO = 9;
+  LANGUAGE_GROOVY = 10;
+  LANGUAGE_HANDLEBARS = 11;
+  LANGUAGE_HASKELL = 12;
+  LANGUAGE_HCL = 13;
+  LANGUAGE_HTML = 14;
+  LANGUAGE_INI = 15;
+  LANGUAGE_JAVA = 16;
+  LANGUAGE_JAVASCRIPT = 17;
+  LANGUAGE_JSON = 18;
+  LANGUAGE_JULIA = 19;
+  LANGUAGE_KOTLIN = 20;
+  LANGUAGE_LATEX = 21;
+  LANGUAGE_LESS = 22;
+  LANGUAGE_LUA = 23;
+  LANGUAGE_MAKEFILE = 24;
+  LANGUAGE_MARKDOWN = 25;
+  LANGUAGE_OBJECTIVEC = 26;
+  LANGUAGE_OBJECTIVECPP = 27;
+  LANGUAGE_PERL = 28;
+  LANGUAGE_PHP = 29;
+  LANGUAGE_PLAINTEXT = 30;
+  LANGUAGE_PROTOBUF = 31;
+  LANGUAGE_PBTXT = 32;
+  LANGUAGE_PYTHON = 33;
+  LANGUAGE_R = 34;
+  LANGUAGE_RUBY = 35;
+  LANGUAGE_RUST = 36;
+  LANGUAGE_SASS = 37;
+  LANGUAGE_SCALA = 38;
+  LANGUAGE_SCSS = 39;
+  LANGUAGE_SHELL = 40;
+  LANGUAGE_SQL = 41;
+  LANGUAGE_STARLARK = 42;
+  LANGUAGE_SWIFT = 43;
+  LANGUAGE_TSX = 44;
+  LANGUAGE_TYPESCRIPT = 45;
+  LANGUAGE_VISUALBASIC = 46;
+  LANGUAGE_VUE = 47;
+  LANGUAGE_XML = 48;
+  LANGUAGE_XSL = 49;
+  LANGUAGE_YAML = 50;
+  LANGUAGE_SVELTE = 51;
+  LANGUAGE_TOML = 52;
+  LANGUAGE_DART = 53;
+  LANGUAGE_RST = 54;
+  LANGUAGE_OCAML = 55;
+  LANGUAGE_CMAKE = 56;
+  LANGUAGE_PASCAL = 57;
+  LANGUAGE_ELIXIR = 58;
+  LANGUAGE_FSHARP = 59;
+  LANGUAGE_LISP = 60;
+  LANGUAGE_MATLAB = 61;
+  LANGUAGE_POWERSHELL = 62;
+  LANGUAGE_SOLIDITY = 63;
+  LANGUAGE_ADA = 64;
+  LANGUAGE_OCAML_INTERFACE = 65;
+  LANGUAGE_TREE_SITTER_QUERY = 66;
+  LANGUAGE_APL = 67;
+  LANGUAGE_ASSEMBLY = 68;
+  LANGUAGE_COBOL = 69;
+  LANGUAGE_CRYSTAL = 70;
+  LANGUAGE_EMACS_LISP = 71;
+  LANGUAGE_ERLANG = 72;
+  LANGUAGE_FORTRAN = 73;
+  LANGUAGE_FREEFORM = 74;
+  LANGUAGE_GRADLE = 75;
+  LANGUAGE_HACK = 76;
+  LANGUAGE_MAVEN = 77;
+  LANGUAGE_M68KASSEMBLY = 78;
+  LANGUAGE_SAS = 79;
+  LANGUAGE_UNIXASSEMBLY = 80;
+  LANGUAGE_VBA = 81;
+  LANGUAGE_VIMSCRIPT = 82;
+  LANGUAGE_WEBASSEMBLY = 83;
+  LANGUAGE_BLADE = 84;
+  LANGUAGE_ASTRO = 85;
+  LANGUAGE_MUMPS = 86;
+  LANGUAGE_GDSCRIPT = 87;
+  LANGUAGE_NIM = 88;
+  LANGUAGE_PROLOG = 89;
+  LANGUAGE_MARKDOWN_INLINE = 90;
+}
+
+enum ChatMessageSource {
+  CHAT_MESSAGE_SOURCE_UNSPECIFIED = 0;
+  CHAT_MESSAGE_SOURCE_USER = 1;
+  CHAT_MESSAGE_SOURCE_SYSTEM = 2;
+  CHAT_MESSAGE_SOURCE_UNKNOWN = 3;
+}
+
+// Proto representation for a FunctionInfo
+message FunctionInfo {
+  string raw_source = 1;
+  string clean_function = 2;
+  string docstring = 3;
+  string node_name = 4;
+  string params = 5;
+  int32 definition_line = 6;
+  int32 start_line = 7;
+  int32 end_line = 8;
+  int32 start_col = 9;
+  int32 end_col = 10;
+  string leading_whitespace = 11;
+  Language language = 12;
+}
+
+// Next ID: 14, Previous field: end_col.
+message CodeContextItem {
+  // Absolute path to file this CodeContextItem belongs to.
+  string absolute_path = 1;
+  // Path relative to workspace roots. CodeContextItem may not always be within a workspace.
+  repeated WorkspacePath workspace_paths = 2;
+  // Name of node in the file.
+  string node_name = 3;
+  // List of parent nodes in descending order.
+  repeated string node_lineage = 4;
+  // Line in the file where the CodeContextItem starts. Inclusive.
+  uint32 start_line = 5;
+  // Col in the file where the CodeContextItem starts. Inclusive.
+  uint32 start_col = 12;
+  // Line in the file where the CodeContextItem ends. Inclusive.
+  uint32 end_line = 6;
+  // Col in the file where the CodeContextItem ends. Inclusive.
+  uint32 end_col = 13;
+  // What kind of code snippet it is.
+  CodeContextType context_type = 7;
+  // Language.
+  Language language = 10;
+
+  // A map for each ContextSnippetType representation of this CodeContextItem to a SnippetWithWordcount item.
+  map<string, SnippetWithWordCount> snippet_by_type = 11;
+
+  reserved "code_snippet", "code_signature";
+  reserved 8, 9;
+}
+
+// CodeContextType is what kind of code this piece of context represents.
+enum CodeContextType {
+  CODE_CONTEXT_TYPE_UNSPECIFIED = 0;
+  CODE_CONTEXT_TYPE_FUNCTION = 1; // Function or Method
+  CODE_CONTEXT_TYPE_CLASS = 2; // Class definition
+  CODE_CONTEXT_TYPE_IMPORT = 3; // Import statement
+  CODE_CONTEXT_TYPE_NAIVE_LINECHUNK = 4; // Naive span of lines
+  CODE_CONTEXT_TYPE_REFERENCE_FUNCTION = 5; // Function call
+  CODE_CONTEXT_TYPE_REFERENCE_CLASS = 6; // Class construction
+  CODE_CONTEXT_TYPE_FILE = 7; // An entire file
+}
+
+// Represents different ways of summarizing a given CodeContextItem as a string.
+enum ContextSnippetType {
+  CONTEXT_SNIPPET_TYPE_UNSPECIFIED = 0;
+  // Raw source corresponding to the snippet line range.
+  CONTEXT_SNIPPET_TYPE_RAW_SOURCE = 1;
+  // The summarized "signature" of this CodeContextItem. eg. Class def with fields & methods, or function signature.
+  CONTEXT_SNIPPET_TYPE_SIGNATURE = 2;
+  // The summarized "nodepath" of this CodeContextItem.
+  CONTEXT_SNIPPET_TYPE_NODEPATH = 3;
+}
+
+// A string representation of the CodeContextItem, together with the word counts of that representation.
+message SnippetWithWordCount {
+  string snippet = 1;
+  // There is one word count per Word Splitter type, where a Word Splitter is a particular algorithm for breaking a string into "words".
+  map<string, WordCount> word_count_by_splitter = 2;
+}
+
+// A map for each word for the number of times each word appears in the snippet.
+message WordCount {
+  map<string, int64> word_count_map = 1;
+}
+
+// Context Inclusion Type
+enum ContextInclusionType {
+  CONTEXT_INCLUSION_TYPE_UNSPECIFIED = 0; //Default option which asks LLM to include or exclude the context
+  CONTEXT_INCLUSION_TYPE_INCLUDE = 1; // Force LLM to think context is relevant and search for context
+  CONTEXT_INCLUSION_TYPE_EXCLUDE = 2; // Excluse any context
+}
+
+// Next ID: 2, Previous field: relative_path.
+message WorkspacePath {
+  // Absolute path to root of the workspace.
+  string workspace = 1;
+  // Relative path to the search result file.
+  string relative_path = 2;
+}
+
+// buf:lint:ignore ENUM_VALUE_PREFIX
+enum ExperimentKey {
+  // buf:lint:ignore ENUM_ZERO_VALUE_SUFFIX
+  UNSPECIFIED = 0;
+}
+
+enum UserTeamStatus {
+  USER_TEAM_STATUS_UNSPECIFIED = 0;
+  USER_TEAM_STATUS_PENDING = 1;
+  USER_TEAM_STATUS_APPROVED = 2;
+  USER_TEAM_STATUS_REJECTED = 3;
+}
+
+message UserStatus {
+  bool pro = 1;
+  bool disable_telemetry = 2;
+  string name = 3;
+  bool ignore_chat_telemetry_setting = 4;
+  string team_id = 5;
+  UserTeamStatus team_status = 6;
+}
+
+// Next ID: 5, Previous field: embed_type.
+message EmbeddingMetadata {
+  // Name of search result node in the file.
+  string node_name = 1;
+  // Line in the file where the search result starts. Inclusive.
+  uint32 start_line = 2;
+  // Line in the file where the search result ends. Inclusive.
+  uint32 end_line = 3;
+  // Embed type of the search result.
+  EmbedType embed_type = 4;
+}
+
+// EmbedType defines what combination of components we encode embeddings for.
+enum EmbedType {
+  EMBED_TYPE_UNSPECIFIED = 0;
+  EMBED_TYPE_RAW_SOURCE = 1; // Raw source code of function.
+  EMBED_TYPE_DOCSTRING = 2; // Docstring of function (if it exists).
+  EMBED_TYPE_FUNCTION = 3; // Function without docstring.
+  EMBED_TYPE_NODEPATH = 4; // Filepath + nodename of function.
+  EMBED_TYPE_DECLARATION = 5; // Declaration of function including function name and args.
+  EMBED_TYPE_NAIVE_CHUNK = 6; // Chunk of lines parsed with whitespace. Not guaranteed to be semantically complete
+  EMBED_TYPE_SIGNATURE = 7; // "Signature" of a class or a function.
+}
+
+// User settings for the extension that are stored on the user's local machine
+message UserSettings {
+  // Whether or not to start a new conversation or open to the most recent one when opening
+  // the chat panel in Codeium.
+  bool open_most_recent_chat_conversation = 1;
+
+  // Last selected chat model ID. Used to make the model preference sticky between panel sessions.
+  Model last_selected_model = 2;
+}
+
+enum ScmProvider {
+  SCM_PROVIDER_UNSPECIFIED = 0;
+  SCM_PROVIDER_GITHUB = 1;
+  SCM_PROVIDER_GITLAB = 2;
+  SCM_PROVIDER_BITBUCKET = 3;
+}
+
+message GitRepoInfo {
+  // Prefer using repo_name.
+  string name = 1;
+  string owner = 2;
+
+  // Unique name of the repository, commonly owner/name.
+  string repo_name = 5;
+  string commit = 3;
+  // Optional name to identify the version of this repo.
+  string version_alias = 4;
+
+  ScmProvider scm_provider = 6;
+  // e.g https://github.com/ or https://gitent.exafunction.com/
+  string base_git_url = 7;
+}
+
+enum Model {
+  MODEL_UNSPECIFIED = 0;
+
+  // OpenAI Models.
+  // Corresponds to "gpt-3.5-turbo".
+  // See https://platform.openai.com/docs/models/gpt-3-5
+  MODEL_CHAT_3_5_TURBO = 28;
+  // Corresponds to "gpt-3.5-turbo-1106".
+  MODEL_CHAT_GPT_3_5_TURBO_1106 = 36;
+  // Corresponds to "gpt-4".
+  // See https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
+  MODEL_CHAT_GPT_4 = 30;
+  // Corresponds to "gpt-4-1106-preview".
+  MODEL_CHAT_GPT_4_1106_PREVIEW = 37;
+}
+
+message EditorOptions {
+  uint64 tab_size = 1;
+  bool insert_spaces = 2;
+  bool disable_autocomplete_in_comments = 3;
+}

@@ -1,0 +1,33 @@
+// Copyright Exafunction, Inc.
+
+syntax = "proto3";
+
+package exa.diff_action_pb;
+
+import "exa/codeium_common_pb/codeium_common.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/diff_action_pb";
+
+enum UnifiedDiffLineType {
+  UNIFIED_DIFF_LINE_TYPE_UNSPECIFIED = 0;
+  UNIFIED_DIFF_LINE_TYPE_INSERT = 1;
+  UNIFIED_DIFF_LINE_TYPE_DELETE = 2;
+  UNIFIED_DIFF_LINE_TYPE_UNCHANGED = 3;
+}
+
+message UnifiedDiff {
+  message UnifiedDiffLine {
+    string text = 1;
+    UnifiedDiffLineType type = 2;
+  }
+  repeated UnifiedDiffLine lines = 3;
+}
+
+// Proto representation of a code block.
+message DiffBlock {
+  int32 start_line = 1;
+  int32 end_line = 2;
+  UnifiedDiff unified_diff = 3;
+  codeium_common_pb.Language from_language = 4;
+  codeium_common_pb.Language to_language = 5;
+}

@@ -138,9 +138,11 @@ class AssistantView(tktextext.TextFrame):
             row=1, column=1, sticky="nsew", padx=ems_to_pixels(1), pady=ems_to_pixels(1)
         )
 
+        from thonny.plugins.codeium import CodeiumAiProvider
         from thonny.plugins.github_copilot import GitHubCopilotAiProvider
 
-        self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
+        # self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
+        self._ai_provider: AiProvider = CodeiumAiProvider()  # TODO
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         get_workbench().bind("AiChatResponse", self.handle_ai_chat_response, True)

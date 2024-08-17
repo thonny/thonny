@@ -1,0 +1,205 @@
+// Copyright Exafunction, Inc.
+
+syntax = "proto3";
+
+package exa.chat_pb;
+
+import "exa/codeium_common_pb/codeium_common.proto";
+import "exa/diff_action_pb/diff_action.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/chat_pb";
+
+// buf:lint:ignore ENUM_VALUE_PREFIX
+enum ChatFeedbackType {
+  FEEDBACK_TYPE_UNSPECIFIED = 0;
+  FEEDBACK_TYPE_ACCEPT = 1;
+  FEEDBACK_TYPE_REJECT = 2;
+
+  // Not explicit accept/reject, but the user copied some piece of Codeium-generated content.
+  FEEDBACK_TYPE_COPIED = 3;
+
+  // Diff block actions.
+  FEEDBACK_TYPE_ACCEPT_DIFF = 4;
+  FEEDBACK_TYPE_REJECT_DIFF = 5;
+  FEEDBACK_TYPE_APPLY_DIFF = 6;
+
+  FEEDBACK_TYPE_INSERT_AT_CURSOR = 7;
+}
+
+// Proto representation of a code block.
+message CodeBlockInfo {
+  string raw_source = 1;
+
+  // Start position of the code block.
+  int32 start_line = 2;
+  int32 start_col = 3;
+
+  // End position of the code block.
+  int32 end_line = 4;
+  int32 end_col = 5;
+}
+
+// A generic text message with no structured data from the user to the bot.
+message IntentGeneric {
+  string text = 1;
+}
+
+// Ask for an explanation for a function.
+message IntentFunctionExplain {
+  codeium_common_pb.FunctionInfo function_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+}
+
+// Ask to refactor a function.
+message IntentFunctionRefactor {
+  codeium_common_pb.FunctionInfo function_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+  string refactor_description = 4;
+}
+
+// Ask to generate unit tests for a function.
+message IntentFunctionUnitTests {
+  codeium_common_pb.FunctionInfo function_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+
+  // Optional additional instructions to inform what tests to generate.
+  string instructions = 4;
+}
+
+// Ask for a docstring for a function.
+message IntentFunctionDocstring {
+  codeium_common_pb.FunctionInfo function_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+}
+
+// Ask to explain a generic piece of code.
+message IntentCodeBlockExplain {
+  CodeBlockInfo code_block_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+}
+
+// Ask to refactor a generic piece of code.
+message IntentCodeBlockRefactor {
+  CodeBlockInfo code_block_info = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+  string refactor_description = 4;
+}
+
+// Ask to explain a problem.
+message IntentProblemExplain {
+  string diagnostic_message = 1;
+  CodeBlockInfo problematic_code = 2; //entire code block with error
+  string surrounding_code_snippet = 3;
+  codeium_common_pb.Language language = 4;
+  string file_path = 5;
+  int32 line_number = 6;
+}
+
+// Ask to generate a piece of code.
+message IntentGenerateCode {
+  string instruction = 1;
+  codeium_common_pb.Language language = 2;
+  string file_path = 3;
+  // Line to insert the generated code into.
+  int32 line_number = 4;
+}
+
+// Intents are messages from the user to a bot. They can be a naive text message (ie. generic),
+// a more structured intented action (ie. explain), or a response to an ChatMessageAction.
+message ChatMessageIntent {
+  oneof intent {
+    IntentGeneric generic = 1;
+    IntentFunctionExplain explain_function = 2;
+    IntentFunctionDocstring function_docstring = 3;
+    IntentFunctionRefactor function_refactor = 4;
+    IntentCodeBlockExplain explain_code_block = 5;
+    IntentCodeBlockRefactor code_block_refactor = 6;
+    IntentFunctionUnitTests function_unit_tests = 7;
+    IntentProblemExplain problem_explain = 8;
+    IntentGenerateCode generate_code = 9;
+  }
+}
+
+// An edit action that the bot will apply to a code block.
+message ChatMessageActionEdit {
+  // Metadata to inform where the edit should be applied.
+  string file_path = 1;
+
+  // The diff that should be applied on the file.
+  diff_action_pb.DiffBlock diff = 2;
+
+  // Additional metadata about the edit action.
+  codeium_common_pb.Language language = 3; // TODO: Deprecate this in favor of diff-level language.
+
+  // Generic text to pass along with the edit (ie. an explanation). Text can be either before or
+  // after the diff. This primarily impacts rendering.
+  string text_pre = 4;
+  string text_post = 5;
+}
+
+// A generic text response from the bot to the user with no structured data.
+message ChatMessageActionGeneric {
+  string text = 1;
+}
+
+message ChatMessageStatusContextRelevancy {
+  bool is_loading = 1;
+  bool is_relevant = 2;
+  repeated string query_suggestions = 3;
+}
+
+// A status response from the bot to the user. These are transient messages that do not contain
+// information that will be persisted.
+message ChatMessageStatus {
+  oneof status {
+    ChatMessageStatusContextRelevancy context_relevancy = 1;
+  }
+}
+
+// A generic error response from the bot to the user.
+message ChatMessageError {
+  string text = 1;
+}
+
+// Actions are responses by the bot to the user.
+message ChatMessageAction {
+  oneof action {
+    ChatMessageActionGeneric generic = 1;
+    ChatMessageActionEdit edit = 3;
+  }
+  uint32 num_tokens = 2;
+  repeated codeium_common_pb.CodeContextItem context_items = 4;
+}
+
+// Main ChatMessage proto that will house all important information about a message.
+message ChatMessage {
+  // UID for each chat message.
+  string message_id = 1;
+
+  // Where the message came from (ie. user, bot, system, etc.)
+  codeium_common_pb.ChatMessageSource source = 2;
+
+  google.protobuf.Timestamp timestamp = 3;
+
+  // UID for the conversation the message came from. This indiciates
+  // the history that was sent to the server.
+  string conversation_id = 4;
+
+  oneof content {
+    ChatMessageIntent intent = 5;
+    ChatMessageAction action = 6;
+    ChatMessageError error = 7;
+    ChatMessageStatus status = 8;
+  }
+
+  // Whether or not the message is still being streamed out.
+  bool in_progress = 9;
+}
+
