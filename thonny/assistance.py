@@ -140,11 +140,13 @@ class AssistantView(tktextext.TextFrame):
 
         from thonny.plugins.codeium import CodeiumAiProvider
         from thonny.plugins.github_copilot import GitHubCopilotAiProvider
+        from thonny.plugins.ollama import OllamaAiProvider
         from thonny.plugins.openai import OpenAIAiProvider
 
         # self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
         # self._ai_provider: AiProvider = CodeiumAiProvider()  # TODO
-        self._ai_provider: AiProvider = OpenAIAiProvider()  # TODO
+        # self._ai_provider: AiProvider = OpenAIAiProvider()  # TODO
+        self._ai_provider: AiProvider = OllamaAiProvider()  # TODO
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         get_workbench().bind("AiChatResponse", self.handle_ai_chat_response, True)
