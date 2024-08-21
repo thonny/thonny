@@ -6,6 +6,7 @@ import sys
 import textwrap
 import threading
 import tkinter as tk
+import uuid
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, replace
@@ -59,6 +60,12 @@ class AiChatResponseFragment:
     is_final: bool
 
 
+@dataclass
+class AiChatResponseFragmentWithRequestId:
+    fragment: AiChatResponseFragment
+    request_id: str
+
+
 class AiProvider(ABC):
     @abstractmethod
     def get_ready(self) -> bool:
@@ -95,7 +102,9 @@ class AssistantView(tktextext.TextFrame):
         )
 
         self._analyzer_instances = []
+
         self._chat_messages: List[AiChatMessage] = []
+        self._active_chat_request_id: Optional[str] = None
 
         self._snapshots_per_main_file = {}
         self._current_snapshot = None
@@ -116,6 +125,9 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("suggestion_title", lmargin2=16, spacing1=5, spacing3=5)
         self.text.tag_configure("suggestion_body", lmargin1=16, lmargin2=16)
         self.text.tag_configure("body", font="ItalicTkDefaultFont")
+
+        self._last_analysis_start_index = "1.0"
+        self._last_analysis_end_index = "1.0"
 
         main_font = tk.font.nametofont("TkDefaultFont")
 
@@ -145,11 +157,11 @@ class AssistantView(tktextext.TextFrame):
 
         # self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
         # self._ai_provider: AiProvider = CodeiumAiProvider()  # TODO
-        # self._ai_provider: AiProvider = OpenAIAiProvider()  # TODO
-        self._ai_provider: AiProvider = OllamaAiProvider()  # TODO
+        self._ai_provider: AiProvider = OpenAIAiProvider()  # TODO
+        # self._ai_provider: AiProvider = OllamaAiProvider()  # TODO
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
-        get_workbench().bind("AiChatResponse", self.handle_ai_chat_response, True)
+        get_workbench().bind("AiChatResponseFragment", self.handle_ai_chat_response_fragment, True)
 
         add_error_helper("*", GenericErrorHelper)
 
@@ -182,8 +194,15 @@ class AssistantView(tktextext.TextFrame):
 
         return border_frame
 
-    def handle_ai_chat_response(self, fragment: AiChatResponseFragment) -> None:
-        self._append_text(fragment.content)
+    def handle_ai_chat_response_fragment(
+        self, fragment_with_request_id: AiChatResponseFragmentWithRequestId
+    ) -> None:
+        if fragment_with_request_id.request_id != self._active_chat_request_id:
+            logger.info("Skipping chat fragment, because request has been cancelled")
+            return
+
+        fragment = fragment_with_request_id.fragment
+        self._append_text(fragment.content, source="chat")
         last_msg = self._chat_messages.pop()
         if last_msg.role == "user":
             self._chat_messages.append(last_msg)
@@ -194,9 +213,16 @@ class AssistantView(tktextext.TextFrame):
         current_msg = replace(current_msg, content=current_msg.content + fragment.content)
         self._chat_messages.append(current_msg)
         if fragment.is_final:
-            self._append_text("\n------------\n")
+            self._append_text("\n------------\n", source="chat")
+            self._active_chat_request_id = None
 
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
+        from thonny.plugins.cpython_frontend import LocalCPythonProxy
+
+        if not isinstance(get_runner().get_backend_proxy(), LocalCPythonProxy):
+            # TODO: add some support for MicroPython as well
+            return
+
         # Can be called by event system or by Workbench
         # (if Assistant wasn't created yet but an error came)
         if not msg.get("user_exception") and msg.get("command_name") in [
@@ -206,13 +232,7 @@ class AssistantView(tktextext.TextFrame):
             # Shell commands may be used to investigate the problem, don't clear assistance
             return
 
-        self._clear()
-
-        from thonny.plugins.cpython_frontend import LocalCPythonProxy
-
-        if not isinstance(get_runner().get_backend_proxy(), LocalCPythonProxy):
-            # TODO: add some support for MicroPython as well
-            return
+        self._prepare_new_analysis()
 
         # prepare for snapshot
         # TODO: should distinguish between <string> and <stdin> ?
@@ -342,15 +362,51 @@ class AssistantView(tktextext.TextFrame):
             + "\n\n"
         )
 
-    def _append_text(self, chars, tags=()):
+    def _append_text(self, chars, tags=(), source="analysis"):
         self.text.direct_insert("end", chars, tags=tags)
 
-    def _clear(self):
-        self._accepted_warning_sets.clear()
-        for wp in self._analyzer_instances:
-            wp.cancel_analysis()
-        self._analyzer_instances = []
-        self.text.clear()
+        if source == "analysis":
+            self._last_analysis_end_index = self.text.index("end")
+
+    def _prepare_new_analysis(self):
+        self._cancel_analysis()
+        self._cancel_completion()
+
+        text_after_last_analysis = self.text.get(self._last_analysis_end_index, "end")
+        logger.info("TALA %r", text_after_last_analysis)
+        if not text_after_last_analysis.strip():
+            # No question was asked after the last analysis, let's forget that analysis.
+            self.text.direct_delete(self._last_analysis_start_index, "end-1c")
+
+        self._last_analysis_start_index = self.text.index("end-1c")
+        self._last_analysis_end_index = self.text.index("end-1c")
+
+    def _prepare_new_completion(self):
+        self._cancel_analysis()
+        self._cancel_completion()
+
+    def _cancel_analysis(self):
+        if self._analysis_in_progress():
+            self._accepted_warning_sets.clear()
+            for wp in self._analyzer_instances:
+                wp.cancel_analysis()
+            self._analyzer_instances = []
+
+    def _cancel_completion(self):
+        if self._ai_provider is None:
+            return
+
+        if self._chat_completion_in_progress():
+            self._active_chat_request_id = None
+            self._append_text("... [cancelled]", source="chat")
+
+            self._ai_provider.cancel_completion()
+
+    def _analysis_in_progress(self) -> bool:
+        return len(self._analyzer_instances) > 0
+
+    def _chat_completion_in_progress(self) -> bool:
+        return self._active_chat_request_id is not None
 
     def _start_program_analyses(self, main_file_path, main_file_source, imported_file_paths):
         for cls in _program_analyzer_classes:
@@ -408,6 +464,8 @@ class AssistantView(tktextext.TextFrame):
             self._append_text(
                 "General advice on dealing with errors.\n", ("a", "python_errors_link")
             )
+
+        self._last_analysis_end_index = self.text.index("end")
 
     def _present_warnings(self):
         warnings = [w for ws in self._accepted_warning_sets for w in ws]
@@ -521,19 +579,43 @@ class AssistantView(tktextext.TextFrame):
         if not self._ai_provider.get_ready():
             return "break"
 
-        self.text.direct_insert("end", "\nYOU: " + message)
+        self._prepare_new_completion()
+
+        self._active_chat_request_id = str(uuid.uuid4())
+        self._append_text("\nYOU: " + message)
         self._chat_messages.append(AiChatMessage("user", message))
         self.query_text.delete("1.0", "end")
 
-        threading.Thread(target=self._complete_chat_in_thread, daemon=True).start()
+        threading.Thread(
+            target=self._complete_chat_in_thread, daemon=True, args=(self._active_chat_request_id,)
+        ).start()
 
         return "break"
 
-    def _complete_chat_in_thread(self):
-        for response in self._ai_provider.complete_chat(self._chat_messages):
-            get_workbench().queue_event("AiChatResponse", response)
-            if response.is_final:
-                break
+    def _complete_chat_in_thread(self, request_id: str):
+        try:
+            for fragment in self._ai_provider.complete_chat(self._chat_messages):
+                get_workbench().queue_event(
+                    "AiChatResponseFragment",
+                    AiChatResponseFragmentWithRequestId(fragment, request_id=request_id),
+                )
+
+                if fragment.is_final:
+                    logger.debug("Finishing chat completion thread after final fragment")
+                    break
+        except Exception as e:
+            logger.exception("Error when completig chat in thread")
+
+            get_workbench().queue_event(
+                "AiChatResponseFragment",
+                AiChatResponseFragmentWithRequestId(
+                    AiChatResponseFragment(
+                        content=f"INTERNAL ERROR: {e}. See frontend.log for more details.",
+                        is_final=True,
+                    ),
+                    request_id=request_id,
+                ),
+            )
 
 
 class AssistantRstText(rst_utils.RstText):
