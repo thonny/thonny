@@ -15,7 +15,7 @@ from exa.language_server_pb.language_server_pb2_grpc import LanguageServerServic
 from google.protobuf import timestamp_pb2
 
 from thonny import get_workbench
-from thonny.assistance import AiChatMessage, AiChatResponseFragment, AiProvider
+from thonny.assistance import Assistant, ChatContext, ChatMessage, ChatResponseChunk
 from thonny.misc_utils import post_and_parse_json
 from thonny.ui_utils import create_url_label, show_dialog
 from thonny.workdlg import WorkDialog
@@ -80,7 +80,7 @@ class CodeiumApiKeyDialog(WorkDialog):
         self.report_done(True)
 
 
-class CodeiumAiProvider(AiProvider):
+class CodeiumAssistant(Assistant):
     def __init__(self):
         self._ls_proc = None
         self._ls_port = None
@@ -134,12 +134,12 @@ class CodeiumAiProvider(AiProvider):
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         return "".join([random.choice(alphabet) for _ in range(32)])
 
-    def complete_chat(self, messages: List[AiChatMessage]) -> Iterator[AiChatResponseFragment]:
+    def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
         self._prepare_for_ls_call()
 
         proto_msgs = []
 
-        for message in messages:
+        for message in context.messages:
 
             if message.role == "user":
                 source = ChatMessageSource.CHAT_MESSAGE_SOURCE_USER
@@ -171,12 +171,12 @@ class CodeiumAiProvider(AiProvider):
             if resp_msg.action and resp_msg.action.generic:
                 text = resp_msg.action.generic.text
                 assert text.startswith(last_prefix)
-                yield AiChatResponseFragment(text[len(last_prefix) :], False)
+                yield ChatResponseChunk(text[len(last_prefix) :], False)
                 last_prefix = text
             else:
                 logger.info("Got unexpected ChatMessage: %s", resp_msg)
 
-        yield AiChatResponseFragment("", True)
+        yield ChatResponseChunk("", True)
 
     def cancel_completion(self) -> None:
         pass

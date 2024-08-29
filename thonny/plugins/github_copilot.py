@@ -11,7 +11,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from thonny import get_workbench
-from thonny.assistance import AiChatMessage, AiChatResponseFragment, AiProvider
+from thonny.assistance import Assistant, ChatContext, ChatMessage, ChatResponseChunk
 from thonny.languages import tr
 from thonny.misc_utils import get_and_parse_json, post_and_parse_json, post_and_return_stream
 from thonny.ui_utils import create_url_label, show_dialog
@@ -128,7 +128,7 @@ class GithubAccessTokenDialog(WorkDialog):
             # TODO: show something about login_spec["expires_in"] ?
 
 
-class GitHubCopilotAiProvider(AiProvider):
+class GitHubCopilotAssistant(Assistant):
     def cancel_completion(self) -> None:
         # TODO:
         pass
@@ -198,10 +198,10 @@ class GitHubCopilotAiProvider(AiProvider):
     def _save_access_token(self, value: Optional[str]):
         get_workbench().set_secret(ACCESS_TOKEN_SECRET_KEY, value)
 
-    def complete_chat(self, messages: List[AiChatMessage]) -> Iterator[AiChatResponseFragment]:
+    def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
         self._prepare_for_api_call()
 
-        api_messages = [{"role": msg.role, "content": msg.content} for msg in messages]
+        api_messages = [{"role": msg.role, "content": msg.content} for msg in context.messages]
         body = {
             "intent": True,
             "model": "gpt-4",
@@ -256,9 +256,9 @@ class GitHubCopilotAiProvider(AiProvider):
             if delta_content is None:
                 continue
 
-            yield AiChatResponseFragment(delta_content, False)
+            yield ChatResponseChunk(delta_content, False)
 
-        yield AiChatResponseFragment("", True)
+        yield ChatResponseChunk("", True)
 
     def _get_api_headers(self) -> Dict[str, Any]:
         return {

@@ -1,4 +1,5 @@
 import ast
+import dataclasses
 import datetime
 import os.path
 import subprocess
@@ -10,14 +11,14 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, replace
+from enum import Enum
 from logging import getLogger
 from tkinter import messagebox, ttk
-from typing import List  # pylint disable=unused-import
 from typing import Optional  # pylint disable=unused-import
 from typing import Tuple  # pylint disable=unused-import
 from typing import Type  # pylint disable=unused-import
 from typing import Union  # pylint disable=unused-import
-from typing import Dict, Iterable, Iterator  # pylint disable=unused-import
+from typing import Dict, Iterable, Iterator, List, cast  # pylint disable=unused-import
 
 import thonny
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
@@ -26,6 +27,7 @@ from thonny.common import (
     STRING_PSEUDO_FILENAME,
     Record,
     ToplevelResponse,
+    is_remote_path,
     read_source,
 )
 from thonny.languages import tr
@@ -37,6 +39,7 @@ from thonny.ui_utils import (
     ems_to_pixels,
     get_hyperlink_cursor,
     lookup_style_option,
+    shift_is_pressed,
 )
 
 logger = getLogger(__name__)
@@ -49,31 +52,58 @@ _error_helper_classes = {}  # type: Dict[str, List[Type[ErrorHelper]]]
 
 
 @dataclass
-class AiChatMessage:
+class ChatMessage:
     role: str
     content: str
 
 
 @dataclass
-class AiChatResponseFragment:
+class ChatResponseChunk:
     content: str
     is_final: bool
+    is_interal_error: bool = False
 
 
 @dataclass
-class AiChatResponseFragmentWithRequestId:
-    fragment: AiChatResponseFragment
+class ChatResponseFragmentWithRequestId:
+    fragment: ChatResponseChunk
     request_id: str
 
 
-class AiProvider(ABC):
+@dataclass
+class ChatContext:
+    messages: List[ChatMessage]
+    main_file_path: Optional[str] = None
+    imported_file_paths: List[str] = dataclasses.field(default_factory=list)
+    active_file_path: Optional[str] = None
+    active_file_selection: Optional[str] = None
+    file_contents_by_path: Dict[str, str] = dataclasses.field(default=dict)
+    execution_io: Optional[str] = None
+
+
+class ProgramAnalyzerResponseItemType(Enum):
+    ERROR = "error"
+    WARNING = "warning"
+    # SUMMARY = "summary"
+
+
+@dataclass
+class ProgramAnalyzerResponseItem:
+    message: str
+    type: ProgramAnalyzerResponseItemType
+    file: Optional[str]
+    line: Optional[int]
+    column: Optional[int]
+
+
+class Assistant(ABC):
     @abstractmethod
     def get_ready(self) -> bool:
         """Called in the UI thread before each request"""
         ...
 
     @abstractmethod
-    def complete_chat(self, messages: List[AiChatMessage]) -> Iterator[AiChatResponseFragment]:
+    def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
         """Called in a background thread"""
         ...
 
@@ -103,7 +133,7 @@ class AssistantView(tktextext.TextFrame):
 
         self._analyzer_instances = []
 
-        self._chat_messages: List[AiChatMessage] = []
+        self._chat_messages: List[ChatMessage] = []
         self._active_chat_request_id: Optional[str] = None
 
         self._snapshots_per_main_file = {}
@@ -150,14 +180,14 @@ class AssistantView(tktextext.TextFrame):
             row=1, column=1, sticky="nsew", padx=ems_to_pixels(1), pady=ems_to_pixels(1)
         )
 
-        from thonny.plugins.codeium import CodeiumAiProvider
-        from thonny.plugins.github_copilot import GitHubCopilotAiProvider
-        from thonny.plugins.ollama import OllamaAiProvider
-        from thonny.plugins.openai import OpenAIAiProvider
+        from thonny.plugins.codeium import CodeiumAssistant
+        from thonny.plugins.github_copilot import GitHubCopilotAssistant
+        from thonny.plugins.ollama import OllamaAssistant
+        from thonny.plugins.openai import OpenAIAssistant
 
         # self._ai_provider: AiProvider = GitHubCopilotAiProvider()  # TODO
         # self._ai_provider: AiProvider = CodeiumAiProvider()  # TODO
-        self._ai_provider: AiProvider = OpenAIAiProvider()  # TODO
+        self._ai_provider: Assistant = OpenAIAssistant()  # TODO
         # self._ai_provider: AiProvider = OllamaAiProvider()  # TODO
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
@@ -184,9 +214,7 @@ class AssistantView(tktextext.TextFrame):
             relief="groove",
             wrap="word",
         )
-        self.query_text.bind(
-            "<Return>", lambda e: self.submit_user_chat_message(self.query_text.get("1.0", "end"))
-        )
+        self.query_text.bind("<Return>", self._on_press_enter_in_chat_entry, True)
         self.query_text.grid(row=0, column=0, sticky="nsew", padx=3, pady=3)
 
         border_frame.rowconfigure(0, weight=1)
@@ -195,7 +223,7 @@ class AssistantView(tktextext.TextFrame):
         return border_frame
 
     def handle_ai_chat_response_fragment(
-        self, fragment_with_request_id: AiChatResponseFragmentWithRequestId
+        self, fragment_with_request_id: ChatResponseFragmentWithRequestId
     ) -> None:
         if fragment_with_request_id.request_id != self._active_chat_request_id:
             logger.info("Skipping chat fragment, because request has been cancelled")
@@ -206,7 +234,7 @@ class AssistantView(tktextext.TextFrame):
         last_msg = self._chat_messages.pop()
         if last_msg.role == "user":
             self._chat_messages.append(last_msg)
-            current_msg = AiChatMessage("assistant", "")
+            current_msg = ChatMessage("assistant", "")
         else:
             current_msg = last_msg
 
@@ -575,15 +603,21 @@ class AssistantView(tktextext.TextFrame):
         if isinstance(self.text, rst_utils.RstText):
             self.text.on_theme_changed()
 
-    def submit_user_chat_message(self, message: str):
-        if not self._ai_provider.get_ready():
-            return "break"
+    def _on_press_enter_in_chat_entry(self, event: tk.Event):
+        if shift_is_pressed(event):
+            return None
 
+        if self._ai_provider.get_ready():
+            self.submit_user_chat_message(self.query_text.get("1.0", "end"))
+
+        return "break"
+
+    def submit_user_chat_message(self, message: str):
         self._prepare_new_completion()
 
         self._active_chat_request_id = str(uuid.uuid4())
         self._append_text("\nYOU: " + message)
-        self._chat_messages.append(AiChatMessage("user", message))
+        self._chat_messages.append(ChatMessage("user", message))
         self.query_text.delete("1.0", "end")
 
         threading.Thread(
@@ -594,10 +628,17 @@ class AssistantView(tktextext.TextFrame):
 
     def _complete_chat_in_thread(self, request_id: str):
         try:
-            for fragment in self._ai_provider.complete_chat(self._chat_messages):
+            # TODO: pass editor contents from UI thread
+            main_file_path = _get_main_file()
+            context = ChatContext(
+                messages=self._chat_messages,
+                main_file_path=main_file_path,
+                imported_file_paths=_get_imported_user_files(main_file=main_file_path),
+            )
+            for fragment in self._ai_provider.complete_chat(context):
                 get_workbench().queue_event(
                     "AiChatResponseFragment",
-                    AiChatResponseFragmentWithRequestId(fragment, request_id=request_id),
+                    ChatResponseFragmentWithRequestId(fragment, request_id=request_id),
                 )
 
                 if fragment.is_final:
@@ -608,8 +649,8 @@ class AssistantView(tktextext.TextFrame):
 
             get_workbench().queue_event(
                 "AiChatResponseFragment",
-                AiChatResponseFragmentWithRequestId(
-                    AiChatResponseFragment(
+                ChatResponseFragmentWithRequestId(
+                    ChatResponseChunk(
                         content=f"INTERNAL ERROR: {e}. See frontend.log for more details.",
                         is_final=True,
                     ),
@@ -699,30 +740,61 @@ class GenericErrorHelper(ErrorHelper):
             )
 
 
-class ProgramAnalyzer:
-    def __init__(self, on_completion):
-        self.completion_handler = on_completion
-        self.cancelled = False
+class SubprocessProgramAnalyzer(Assistant, ABC):
+    """
+    Non-AI assistant, which can analyze program code
+    """
 
-    def is_enabled(self):
+    def __init__(self):
+        self._proc: Optional[subprocess.Popen] = None
+
+    def get_ready(self) -> bool:
         return True
 
-    def start_analysis(self, main_file_path, imported_file_paths):
-        raise NotImplementedError()
+    def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
+        main_file = _get_main_file()
+        if main_file is None:
+            yield ChatResponseChunk(content="I can only work with saved local files", is_final=True)
+            return
 
-    def cancel_analysis(self):
-        pass
+        self.start_subprocess(context)
+        for line in self._proc.stdout:
+            item = self.parse_output_line(line, context)
+            if item is not None:
+                formatted_item = self.format_item(item)
+                yield ChatResponseChunk(content=formatted_item + "\n", is_final=False)
 
+        err: str = cast(self._proc.stderr.read().strip(), str)
+        if err:
+            yield ChatResponseChunk(content=err, is_final=False, is_interal_error=False)
+        yield ChatResponseChunk(content="", is_final=True)
 
-class SubprocessProgramAnalyzer(ProgramAnalyzer):
-    def __init__(self, on_completion):
-        super().__init__(on_completion)
-        self._proc = None
+    def format_item(self, item: ProgramAnalyzerResponseItem) -> str: ...
 
-    def cancel_analysis(self):
-        self.cancelled = True
-        if self._proc is not None:
-            self._proc.kill()
+    @abstractmethod
+    def parse_output_line(
+        self, line: str, context: ChatContext
+    ) -> Optional[ProgramAnalyzerResponseItem]: ...
+
+    def start_subprocess(self, context: ChatContext):
+        cmd = self.get_command_line(context)
+        logger.info("Starting subprocess %r", cmd)
+        self._proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+
+    def cancel_completion(self) -> None:
+        if self._proc is not None and self._proc.poll() is None:
+            try:
+                self._proc.kill()
+            except Exception:
+                logger.warning("Could not kill subprocess in %r", type(self))
+
+    @abstractmethod
+    def get_command_line(self, context: ChatContext) -> List[str]: ...
+
+    def get_env(self) -> Dict[str, str]:
+        return {}
 
 
 class LibraryErrorHelper(ErrorHelper):
@@ -1115,7 +1187,19 @@ def name_similarity(a, b):
         return max(10 - distance * 2, 0)
 
 
-def _get_imported_user_files(main_file, source=None):
+def _get_main_file() -> Optional[str]:
+    editor = get_workbench().get_editor_notebook().get_current_editor()
+    if editor is None:
+        return None
+
+    filename = editor.get_filename()
+    if filename is None or is_remote_path(filename):
+        return None
+
+    return filename
+
+
+def _get_imported_user_files(main_file, source=None) -> List[str]:
     assert os.path.isabs(main_file)
 
     if source is None:
@@ -1124,7 +1208,7 @@ def _get_imported_user_files(main_file, source=None):
     try:
         root = ast.parse(source, main_file)
     except SyntaxError:
-        return set()
+        return []
 
     main_dir = os.path.dirname(main_file)
     module_names = set()
@@ -1136,14 +1220,14 @@ def _get_imported_user_files(main_file, source=None):
         elif isinstance(node, ast.ImportFrom):
             module_names.add(node.module)
 
-    imported_files = set()
+    imported_files = []
 
     for file in {
         name + ext for ext in [".py", ".pyw"] for name in module_names if name is not None
     }:
         possible_path = os.path.join(main_dir, file)
         if os.path.exists(possible_path):
-            imported_files.add(possible_path)
+            imported_files.append(possible_path)
 
     return imported_files
     # TODO: add recursion

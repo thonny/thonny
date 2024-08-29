@@ -1,24 +1,54 @@
-import os.path
 import re
-import subprocess
 from logging import getLogger
-from typing import Iterable
+from typing import Dict, List, Optional
 
-from thonny import get_runner, get_workbench, ui_utils
-from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny import get_runner, get_workbench
+from thonny.assistance import (
+    ChatContext,
+    ProgramAnalyzerResponseItem,
+    ProgramAnalyzerResponseItemType,
+    SubprocessProgramAnalyzer,
+    add_program_analyzer,
+)
 from thonny.running import get_front_interpreter_for_subprocess
 
 logger = getLogger(__name__)
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
-    def is_enabled(self):
-        return get_workbench().get_option("assistance.use_mypy")
+    def parse_output_line(
+        self, line: str, context: ChatContext
+    ) -> Optional[ProgramAnalyzerResponseItem]:
+        m = re.match(r"(.*?):(\d+)(:(\d+))?:(.*?):(.*)", line.strip())
+        if m is not None:
+            message = m.group(6).strip()
+            if message == "invalid syntax":
+                return None
 
-    def start_analysis(self, main_file_path, imported_file_paths: Iterable[str]) -> None:
-        self.interesting_files = [main_file_path] + list(imported_file_paths)
+            filename = m.group(1)
+            if filename not in [context.main_file_path] + context.imported_file_paths:
+                logger.warning("MyPy: " + line)
+                return None
 
-        args = [
+            line_num = int(m.group(2))
+            kind = (m.group(5).strip(),)  # always "error" ?
+
+            if m.group(3):
+                # https://github.com/thonny/thonny/issues/598
+                column = max(int(m.group(4)) - 1, 0)
+            else:
+                column = None
+
+            # TODO: find the way to link to the explanation at https://mypy.readthedocs.io/en/stable/error_code_list.html
+            return ProgramAnalyzerResponseItem(
+                message, ProgramAnalyzerResponseItemType.WARNING, filename, line_num, column
+            )
+        else:
+            logger.error("Can't parse MyPy line: " + line.strip())
+            return None
+
+    def get_command_line(self, context: ChatContext) -> List[str]:
+        return [
             get_front_interpreter_for_subprocess(),
             "-m",
             "mypy",
@@ -27,88 +57,24 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             "--warn-redundant-casts",
             "--warn-unused-ignores",
             "--show-column-numbers",
-            main_file_path,
-        ] + list(imported_file_paths)
+            "--no-implicit-optional",
+            "--python-executable",
+            get_runner().get_backend_proxy().get_target_executable(),
+            "--warn-unreachable",
+            "--allow-redefinition",
+            "--strict-equality",
+            "--no-color-output",
+            "--no-error-summary",
+            context.main_file_path,
+        ] + context.imported_file_paths
 
-        logger.debug("Running mypy: %s", " ".join(args))
-
-        # TODO: ignore "... need type annotation" messages
-
-        from mypy.version import __version__
-
-        try:
-            ver = tuple(map(int, __version__.split(".")))
-        except Exception:
-            ver = (0, 470)  # minimum required version
-
-        if ver >= (0, 520):
-            args.insert(3, "--no-implicit-optional")
-
-        if ver >= (0, 590):
-            args.insert(3, "--python-executable")
-            args.insert(4, get_runner().get_backend_proxy().get_target_executable())
-
-        if ver >= (0, 730):
-            args.insert(3, "--warn-unreachable")
-            args.insert(3, "--allow-redefinition")
-            args.insert(3, "--strict-equality")
-            args.insert(3, "--no-color-output")
-            args.insert(3, "--no-error-summary")
-
-        env = os.environ.copy()
+    def get_env(self) -> Dict[str, str]:
+        env = super().get_env()
         mypypath = get_workbench().get_option("assistance.mypypath")
         if mypypath:
-            env["MYPYPATH"] = mypypath
+            return env | {"MYPYPATH": mypypath}
 
-        self._proc = ui_utils.popen_with_ui_thread_callback(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            env=env,
-            on_completion=self._parse_and_output_warnings,
-            # Specify a cwd which is not ancestor of user files.
-            # This gives absolute filenames in the output.
-            # Note that mypy doesn't accept when cwd is sys.prefix
-            # or dirname(sys.executable)
-            cwd=os.path.dirname(__file__),
-        )
-
-    def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
-        if err_lines:
-            logger.warning("MyPy: " + "".join(err_lines))
-
-        warnings = []
-        for line in out_lines:
-            m = re.match(r"(.*?):(\d+)(:(\d+))?:(.*?):(.*)", line.strip())
-            if m is not None:
-                message = m.group(6).strip()
-                if message == "invalid syntax":
-                    continue  # user will see this as Python error
-
-                filename = m.group(1)
-                if filename not in self.interesting_files:
-                    logger.warning("MyPy: " + line)
-                    continue
-
-                atts = {
-                    "filename": filename,
-                    "lineno": int(m.group(2)),
-                    "kind": m.group(5).strip(),  # always "error" ?
-                    "msg": message,
-                    "group": "warnings",
-                }
-                if m.group(3):
-                    # https://github.com/thonny/thonny/issues/598
-                    atts["col_offset"] = max(int(m.group(4)) - 1, 0)
-
-                # TODO: add better categorization and explanation
-                atts["symbol"] = "mypy-" + atts["kind"]
-                warnings.append(atts)
-            else:
-                logger.error("Can't parse MyPy line: " + line.strip())
-
-        self.completion_handler(self, warnings)
+        return env
 
 
 def load_plugin():

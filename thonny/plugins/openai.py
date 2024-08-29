@@ -2,7 +2,7 @@ from tkinter import ttk
 from typing import Iterator, List, Optional
 
 from thonny import get_workbench
-from thonny.assistance import AiChatMessage, AiChatResponseFragment, AiProvider
+from thonny.assistance import Assistant, ChatContext, ChatMessage, ChatResponseChunk
 from thonny.ui_utils import create_url_label, show_dialog
 from thonny.workdlg import WorkDialog
 
@@ -44,7 +44,7 @@ class OpenAIApiKeyDialog(WorkDialog):
             self.close()
 
 
-class OpenAIAiProvider(AiProvider):
+class OpenAIAssistant(Assistant):
 
     def _get_saved_api_key(self) -> Optional[str]:
         return get_workbench().get_secret(API_KEY_SECRET_KEY, None)
@@ -60,14 +60,14 @@ class OpenAIAiProvider(AiProvider):
 
         return self._get_saved_api_key() is not None
 
-    def complete_chat(self, messages: List[AiChatMessage]) -> Iterator[AiChatResponseFragment]:
+    def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
         from openai import OpenAI
 
         client = OpenAI(api_key=self._get_saved_api_key())
 
         out_msgs = [
             {"role": "system", "content": "You are a helpful assistant."},
-        ] + [{"role": msg.role, "content": msg.content} for msg in messages]
+        ] + [{"role": msg.role, "content": msg.content} for msg in context.messages]
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -77,9 +77,9 @@ class OpenAIAiProvider(AiProvider):
 
         for chunk in response:
             chunk_message = chunk.choices[0].delta.content or ""
-            yield AiChatResponseFragment(chunk_message, is_final=False)
+            yield ChatResponseChunk(chunk_message, is_final=False)
 
-        yield AiChatResponseFragment("", is_final=True)
+        yield ChatResponseChunk("", is_final=True)
 
     def cancel_completion(self) -> None:
         pass
