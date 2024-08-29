@@ -570,6 +570,8 @@ class PipDialog(CommonDialog, ABC):
             self._append_info_text(s, tags)
 
         def write_att(caption, value, value_tag=None):
+            if value is None:
+                return
             write(caption + ": ", "caption")
             write(value, value_tag)
             write("\n")
