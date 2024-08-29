@@ -605,6 +605,9 @@ class PipFrame(ttk.Frame, ABC):
         self._current_dist_info = dist_info
 
         def write_att(caption, value, value_tags=()):
+            if value is None:
+                return
+
             self._append_info_text(caption + ": ", "caption")
             self._append_info_text(value, tags=value_tags)
             self._append_info_text("\n")
