@@ -76,7 +76,7 @@ class EditorConfigurationPage(ConfigurationPage):
             self,
             "view.recommended_line_length",
             tr("Line length guide (use 0 to turn off)"),
-            choices=[0, 60, 70, 80, 88, 90, 100, 110, 120],
+            choices=[0, 60, 70, 72, 79, 80, 88, 90, 100, 110, 120],
             width=4,
         )
 
