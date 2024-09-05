@@ -151,7 +151,7 @@ class Tracer(Executor):
             self._get_breakpoints_in_file(path)
             or self._main_module_path is not None
             and is_same_path(path, self._main_module_path)
-            or extension in (".py", ".pyw")
+            or extension in (".py", ".pyw", ".pyde")
             and (
                 self._current_command.get("allow_stepping_into_libraries", False)
                 or (

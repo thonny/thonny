@@ -190,7 +190,7 @@ class MainCPythonBackend(MainBackend):
             user_dir = os.getcwd()
 
         # rough test to see if it's worth invoking the finder
-        for ext in ["", ".py", ".pyw"]:
+        for ext in ["", ".py", ".pyw", ".pyde"]:
             pot_path = os.path.join(user_dir, root_module_name + ext)
             if os.path.exists(pot_path):
                 logger.debug("Found import candidate: %r", pot_path)
