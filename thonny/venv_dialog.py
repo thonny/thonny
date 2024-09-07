@@ -41,7 +41,9 @@ class VenvDialog(SubprocessDialog):
 
         logger.info("Current base executable: %r", current_base_cpython)
 
-        if current_base_cpython is not None and current_base_cpython not in exes:
+        if current_base_cpython is not None:
+            if current_base_cpython in exes:
+                exes.remove(current_base_cpython)
             exes.insert(0, current_base_cpython)
 
         browse_button_width = 2 if get_workbench().is_using_aqua_based_theme() else 3

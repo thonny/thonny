@@ -391,21 +391,6 @@ def get_site_dir(symbolic_name, executable=None):
     return result if result else None
 
 
-def get_base_executable():
-    if sys.exec_prefix == sys.base_exec_prefix:
-        return sys.executable
-
-    if sys.platform == "win32":
-        guess = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
-        if os.path.isfile(guess):
-            return normpath_with_actual_case(guess)
-
-    if os.path.islink(sys.executable):
-        return os.path.realpath(sys.executable)
-
-    raise RuntimeError("Don't know how to locate base executable")
-
-
 def get_augmented_system_path(extra_dirs):
     path_items = os.environ.get("PATH", "").split(os.pathsep)
 
@@ -807,12 +792,7 @@ def is_private_python(executable):
 
 
 def running_in_virtual_environment() -> bool:
-    return (
-        hasattr(sys, "base_prefix")
-        and sys.base_prefix != sys.prefix
-        or hasattr(sys, "real_prefix")
-        and getattr(sys, "real_prefix") != sys.prefix
-    )
+    return sys.base_prefix != sys.prefix
 
 
 def is_remote_path(s: str) -> bool:
@@ -904,3 +884,46 @@ def export_distributions_info(dists: Iterable, assume_pypi: bool) -> List[DistIn
         )
         for dist in dists
     ]
+
+
+def try_get_base_executable(executable: str) -> Optional[str]:
+    if os.path.islink(executable):
+        # a venv executable may link to another venv executable
+        return try_get_base_executable(os.path.realpath(executable))
+
+    may_be_venv_exe = False
+    for location in ["..", "."]:
+        cfg_path = os.path.join(os.path.dirname(executable), location, "pyvenv.cfg")
+
+        if not os.path.isfile(cfg_path):
+            continue
+
+        may_be_venv_exe = True
+
+        atts = {}
+        with open(cfg_path) as fp:
+            for line in fp:
+                if "=" not in line:
+                    continue
+                key, value = line.split("=", maxsplit=1)
+                atts[key.strip()] = value.strip()
+
+        if "home" not in atts:
+            logger.warning("No home in %s", cfg_path)
+            continue
+
+        if "executable" in atts:
+            return atts["executable"]
+
+    # pyvenv.cfg may be present also in non-virtual envs.
+    # I can check for this in certain case
+    if may_be_venv_exe and os.path.samefile(sys.executable, executable) and sys.prefix == sys.base_prefix:
+        may_be_venv_exe = False
+
+    if may_be_venv_exe:
+        # should only happen with venv-s before Python 3.11
+        # as Python 3.11 started recording executable in pyvenv.cfg
+        logger.warning("Could not find base executable of %s", executable)
+        return None
+    else:
+        return executable

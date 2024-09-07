@@ -45,13 +45,13 @@ from thonny.common import (
     execute_with_frontend_sys_path,
     export_installed_distributions_info,
     get_augmented_system_path,
-    get_base_executable,
     get_exe_dirs,
     get_python_version_string,
     get_single_dir_child_data,
     path_startswith,
     running_in_virtual_environment,
     serialize_message,
+    try_get_base_executable,
     update_system_path,
 )
 
@@ -425,7 +425,7 @@ class MainCPythonBackend(MainBackend):
             prefix=sys.prefix,
             welcome_text=f"Python {get_python_version_string()} ({sys.executable})",
             executable=sys.executable,
-            base_executable=get_base_executable(),
+            base_executable=try_get_base_executable(sys.executable),
             exe_dirs=get_exe_dirs(),
             in_venv=running_in_virtual_environment(),
             python_version=get_python_version_string(),
@@ -1429,10 +1429,7 @@ def _is_library_file(filename):
     return (
         filename is None
         or path_startswith(filename, sys.prefix)
-        or hasattr(sys, "base_prefix")
-        and path_startswith(filename, sys.base_prefix)
-        or hasattr(sys, "real_prefix")
-        and path_startswith(filename, getattr(sys, "real_prefix"))
+        or path_startswith(filename, sys.base_prefix)
         or site.ENABLE_USER_SITE
         and path_startswith(filename, site.getusersitepackages())
     )

@@ -66,6 +66,7 @@ from thonny.common import (
     path_startswith,
     read_one_incoming_message_str,
     serialize_message,
+    try_get_base_executable,
     universal_relpath,
     update_system_path,
 )
@@ -1601,22 +1602,7 @@ class BackendTerminatedError(Exception):
 
 
 def is_venv_interpreter_of_current_interpreter(executable):
-    for location in ["..", "."]:
-        cfg_path = os.path.join(os.path.dirname(executable), location, "pyvenv.cfg")
-        if os.path.isfile(cfg_path):
-            with open(cfg_path) as fp:
-                content = fp.read()
-            for line in content.splitlines():
-                if line.replace(" ", "").startswith("home="):
-                    _, home = line.split("=", maxsplit=1)
-                    home = home.strip()
-                    if os.path.isdir(home) and (
-                        is_same_path(home, sys.prefix)
-                        or is_same_path(home, os.path.join(sys.prefix, "bin"))
-                        or is_same_path(home, os.path.join(sys.prefix, "Scripts"))
-                    ):
-                        return True
-    return False
+    return try_get_base_executable(executable) == sys.executable
 
 
 def get_environment_for_python_subprocess(target_executable) -> Dict[str, str]:

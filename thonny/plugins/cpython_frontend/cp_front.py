@@ -5,7 +5,7 @@ import textwrap
 import tkinter as tk
 from logging import getLogger
 from tkinter import ttk
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import thonny
 from thonny import get_runner, get_shell, get_workbench, ui_utils
@@ -18,10 +18,10 @@ from thonny.common import (
     InlineCommand,
     InlineResponse,
     ToplevelCommand,
-    get_base_executable,
     is_private_python,
     normpath_with_actual_case,
     running_in_virtual_environment,
+    try_get_base_executable,
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows
@@ -93,7 +93,7 @@ class LocalCPythonProxy(SubprocessProxy):
     def get_executable(self):
         return self._reported_executable
 
-    def get_base_executable(self):
+    def get_base_executable(self) -> Optional[str]:
         return self._reported_base_executable
 
     def _update_gui_updating(self, msg):
@@ -363,7 +363,10 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
 def get_default_cpython_executable_for_backend() -> str:
     if is_private_python(sys.executable) and running_in_virtual_environment():
         # Private venv. Make an exception and use base Python for default backend.
-        default_path = get_base_executable()
+        default_path = try_get_base_executable(sys.executable)
+        if default_path is None:
+            logger.warning("Could not find base executable of %s", sys.executable)
+            default_path = sys.executable
     else:
         default_path = sys.executable.replace("pythonw.exe", "python.exe")
 
