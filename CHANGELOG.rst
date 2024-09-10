@@ -2,6 +2,15 @@
 Version history
 ===============
 
+4.1.5 (2024-09-10)
+==================
+* Make macOS installer work in Sequoia
+* Fix handling nulls in PyPI metadata (fixes installing some PyPI packages)
+* Work around dialogs getting stuck after minimizing windows, #3068
+* Fix too eager instrumentation of MicroPython code, #3043
+* Fix installing package from local file
+* Add more entitlements for macOS app bundle (may fix problems with programs using camera or microphone)
+
 4.1.4 (2023-11-19)
 ==================
 * Fix regression in MicroPython package installation, #2979
