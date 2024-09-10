@@ -16,6 +16,9 @@ mkdir -p build
 # copy template #################################################
 cp -R -H $PREFIX/Thonny.app build
 
+chmod 644  build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/lib/libtcl8.6.dylib
+chmod 644 build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/lib/libtk8.6.dylib
+
 # update template (might have changed after last create_base_bundle.sh) #####################
 cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/* \
     build/Thonny.app/Contents/MacOS
