@@ -24,10 +24,10 @@ pkgbuild \
  	--root build \
 	--component-plist Component.plist \
 	--install-location /Applications\
-	--scripts scripts \
 	--identifier "org.thonny.Thonny.component" \
 	--version $VERSION \
-	--filter readme.txt \
+  --sign "$INSTALLER_SIGN_ID" \
+	--keychain ~/Library/Keychains/login.keychain-db \
 	$COMPONENT_PACKAGE
 	
 echo "Creating product archive"

@@ -9,6 +9,10 @@ CHAIN="~/Library/Keychains/login.keychain-db"
 # Also, it looks like any problem within the framework is also reported as problem
 # with main lib (Python.framework/Versions/3.10/Python)
 
+rm -r build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/_CodeSignature
+rm -r build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.10/Resources/Python.app/Contents/_CodeSignature
+find build -name ".DS_Store" -delete
+
 #echo "1 - libs"
 codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	$(find build/Thonny.app -type f -name "*.so") \

@@ -6,7 +6,6 @@ set -e
 # LOCAL_FRAMEWORKS=$HOME/thonny_template_build_310/Thonny.app/Contents/Frameworks
 
 VERSION=3.10
-OTHER_VERSION=3.8
 ORIGINAL_FRAMEWORK_PATH=/Library/Frameworks/Python.framework
 NEW_FRAMEWORK_PATH=$LOCAL_FRAMEWORKS/Python.framework
 
@@ -14,7 +13,9 @@ rm -rf $NEW_FRAMEWORK_PATH
 mkdir -p $NEW_FRAMEWORK_PATH
 
 cp -R $ORIGINAL_FRAMEWORK_PATH/* $NEW_FRAMEWORK_PATH
-rm -rf $NEW_FRAMEWORK_PATH/Versions/$OTHER_VERSION
+rm -rf $NEW_FRAMEWORK_PATH/Versions/3.9
+rm -rf $NEW_FRAMEWORK_PATH/Versions/3.12
+rm -rf $NEW_FRAMEWORK_PATH/Versions/3.13
 
 BIN_EXE=$NEW_FRAMEWORK_PATH/Versions/$VERSION/bin/python$VERSION
 
