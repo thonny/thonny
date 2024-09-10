@@ -903,7 +903,7 @@ class PipDialog(CommonDialog, ABC):
         self._start_update_list(name)
 
     def _get_install_file_command(self, filename, is_requirements_file):
-        args = ["install"]
+        args = []
         if self._use_user_install():
             args.append("--user")
         if is_requirements_file:
