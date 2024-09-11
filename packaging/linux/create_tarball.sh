@@ -40,7 +40,7 @@ $TARGET_DIR/bin/python3.10 -s -m pip install --no-binary mypy -r ../requirements
 $TARGET_DIR/bin/python3.10 -s -m pip install distro
 $TARGET_DIR/bin/python3.10 -s -m pip install certifi
 
-VERSION=$(<$TARGET_DIR/lib/python3.10/site-packages/thonny/VERSION)
+VERSION=$(<../../thonny/VERSION)
 
 # INSTALL THONNY ###################################
 $TARGET_DIR/bin/python3.10 -s -m pip install --pre --no-cache-dir thonny==$VERSION
