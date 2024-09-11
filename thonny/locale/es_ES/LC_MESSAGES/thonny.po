@@ -1880,83 +1880,91 @@ msgstr "Para depurar se debe guardar primero el programa."
 
 #: thonny/editors.py:213
 msgid "%s doesn't look like a text file"
-msgstr ""
+msgstr "%s no se parece a un archivo de texto"
 
 #: thonny/editors.py:219
 msgid "Problem loading file"
-msgstr ""
+msgstr "Problema al cargar el archivo"
 
 #: thonny/editors.py:220
+#, fuzzy
 msgid "This file seems to have problems with encoding.\n"
 "\n"
 "Make sure it is in UTF-8 or contains proper encoding hint."
-msgstr ""
+msgstr "Este archivo parece tener problemas con la codificación.\n"
+"\n"
+"Asegúrese de que se encuentra en UTF-8 o contiene la pista de codificación adecuada."
 
 #: thonny/editors.py:295
 msgid "File is open"
-msgstr ""
+msgstr "El archivo esta abierto"
 
 #: thonny/editors.py:296
 msgid "This file is already open in Thonny.\n"
 "\n"
 "If you want to save with this name,\n"
 "close the existing editor first!"
-msgstr ""
+msgstr "Este archivo ya está abierto en Thonny.\n"
+"\n"
+"Si desea guardar con este nombre,\n"
+"¡cierre primero el editor existente!"
 
 #: thonny/editors.py:349
 msgid "Permission Error"
-msgstr ""
+msgstr "Error de permisos"
 
 #: thonny/editors.py:350
 msgid "Looks like this file or folder is not writable."
-msgstr ""
+msgstr "Parece que el archivo o carpeta no tiene permisos de escritura."
 
 #: thonny/editors.py:414
+#, fuzzy
 msgid "Back-end is not ready"
-msgstr ""
+msgstr "La infraestructura no esta lista"
 
 #: thonny/editors.py:419
 msgid "Where to save to?"
-msgstr ""
+msgstr "¿Dónde guardar?"
 
 #: thonny/editors.py:490
 msgid "Potential problem"
-msgstr ""
+msgstr "Problema potencial"
 
 #: thonny/editors.py:491
 msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
-msgstr ""
+msgstr "Si nombras tu script '%s', no podrás importar el módulo de biblioteca llamado '%s'"
 
 #: thonny/editors.py:497
 msgid "Do you still want to use this name for your script?"
-msgstr ""
+msgstr "¿Sigue queriendo utilizar este nombre para su script?"
 
 #: thonny/editors.py:1053
 msgid "Got permission error when trying to load\n"
 "%s"
-msgstr ""
+msgstr "Se ha producido un error de permiso al intentar cargar\n"
+"%s"
 
 #: thonny/editors.py:1055
 msgid "Try opening it with File => Open."
-msgstr ""
+msgstr "Intente abrirlo con Archivo => Abrir."
 
 #: thonny/editors.py:1057
 msgid "Permission error"
-msgstr ""
+msgstr "Error de permisos"
 
 #: thonny/plugins/run_debug_config_page.py:14
 msgid "Allow running unnamed programs"
-msgstr ""
+msgstr "Permitir la ejecución de programas sin nombre"
 
 #: thonny/plugins/pip_gui.py:600
 msgid "License"
-msgstr ""
+msgstr "Licencia"
 
 #: thonny/plugins/run_debug_config_page.py:27
 msgid "Warn if a user module shadows a library module"
-msgstr ""
+msgstr "Advertir si un módulo de usuario oculta un módulo de biblioteca"
 
 #: thonny/plugins/micropython/pip_gui.py:65
 msgid "Search micropython-lib and PyPI"
-msgstr ""
+msgstr "Buscar en micropython-lib y PyPI"
 
