@@ -438,10 +438,11 @@ msgid "Back to\n"
 msgstr "回到\n"
 "当前 frame"
 
+#. Change this to global Variables to better reflect it.
 #: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
 #: thonny/plugins/variables.py:145
 msgid "Variables"
-msgstr "变量"
+msgstr "全局变量"
 
 #: thonny/base_file_browser.py:1576
 msgid "This computer"
@@ -1522,7 +1523,7 @@ msgstr "在 %s 函数调用"
 
 #: thonny/plugins/debugger.py:1006
 msgid "Local variables"
-msgstr "本地变量"
+msgstr "局部变量"
 
 #: thonny/plugins/debugger.py:1038
 msgid "Function"
@@ -1812,7 +1813,7 @@ msgstr "警告"
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
 msgstr "如果您引用环境变量的值，则引号将成为该值的一部分。\n"
-"你是故意的吗？"
+"你确定要这么做吗？"
 
 #: thonny/workbench.py:870
 msgid "Install MicroPython"

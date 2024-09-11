@@ -70,7 +70,7 @@ msgid "Made in\n"
 "open-source community,\n"
 "Raspberry Pi Foundation\n"
 "and Cybernetica AS"
-msgstr "在 Cybernetica AS、樹莓派基金會及開源社區的協助下，由愛沙尼亞，塔爾圖大學製作"
+msgstr "由愛沙尼亞‧塔爾圖大學在 Cybernetica AS、樹莓派基金會及開源社群的協助下製作"
 
 #: thonny/plugins/about.py:101
 msgid "This program comes with\n"
@@ -1865,7 +1865,7 @@ msgstr "本地端的 Python 3"
 
 #: thonny/plugins/cpython_frontend/cp_front.py:266
 msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
-msgstr "你也可以透過檔案窗格, 在虛擬環境資料夾或是其中的 'pyveng.cfg' 檔案上按滑鼠右鍵顯示的功能表啟用既有的虛擬環境"
+msgstr "你也可以透過檔案窗格, 在虛擬環境資料夾或是其中的 'pyvenv.cfg' 檔案上按滑鼠右鍵顯示的功能表啟用既有的虛擬環境"
 
 #: thonny/plugins/ev3/__init__.py:72
 msgid "Preparations (skip the VS Code part)"
