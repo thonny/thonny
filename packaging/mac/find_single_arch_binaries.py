@@ -11,6 +11,9 @@ def is_universal_binary_or_non_binary(file_path):
         if 'fat binary' in output:
             return True
 
+        if "Mach-O universal binary with 2 architectures" in output:
+            return True
+
         if "Mach-O" not in output:
             return True
 
