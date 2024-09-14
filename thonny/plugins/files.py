@@ -633,6 +633,8 @@ def load_plugin() -> None:
         ".toml",
         ".gitignore",
         ".env",
+        ".cfg",
+        ".lock",
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
