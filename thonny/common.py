@@ -917,7 +917,11 @@ def try_get_base_executable(executable: str) -> Optional[str]:
 
     # pyvenv.cfg may be present also in non-virtual envs.
     # I can check for this in certain case
-    if may_be_venv_exe and os.path.samefile(sys.executable, executable) and sys.prefix == sys.base_prefix:
+    if (
+        may_be_venv_exe
+        and os.path.samefile(sys.executable, executable)
+        and sys.prefix == sys.base_prefix
+    ):
         may_be_venv_exe = False
 
     if may_be_venv_exe:

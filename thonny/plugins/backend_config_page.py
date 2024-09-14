@@ -31,7 +31,7 @@ class BackendDetailsConfigPage(ConfigurationPage, ABC):
     proxy_class: Optional[type[BackendProxy]] = None  # ditto
 
     @abstractmethod
-    def should_restart(self, changed_options: List[str]):
+    def should_restart(self, changed_options: List[str]) -> bool:
         raise NotImplementedError()
 
     @abstractmethod

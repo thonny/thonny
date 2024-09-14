@@ -36,13 +36,19 @@ logger = getLogger(__name__)
 class LocalCPythonProxy(SubprocessProxy):
     def __init__(self, clean: bool) -> None:
         logger.info("Creating LocalCPythonProxy")
-        executable = get_workbench().get_option("LocalCPython.executable")
         self._expecting_response_for_gui_update = False
-        super().__init__(clean, executable)
+        super().__init__(clean)
         try:
             self._send_msg(ToplevelCommand("get_environment_info"))
         except Exception:
             get_shell().report_exception()
+
+    def compute_mgmt_executable(self):
+        get_workbench().get_option("LocalCPython.executable")
+
+    def get_mgmt_executable_validation_error(self) -> Optional[str]:
+        if not os.path.isfile(self._mgmt_executable):
+            return f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
 
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
@@ -150,7 +156,7 @@ class LocalCPythonProxy(SubprocessProxy):
                 self._proc.send_signal(signal.SIGINT)
 
     def run_script_in_terminal(self, script_path, args, interactive, keep_open):
-        cmd = [self._mgmt_executable]
+        cmd = [self._mgmt_executable] + self.get_mgmt_executable_special_switches()
         if interactive:
             cmd.append("-i")
         cmd.append(os.path.basename(script_path))

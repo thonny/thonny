@@ -50,7 +50,7 @@ _mp_lib_metadata_cache = None
 class MicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._lib_dirs = []
-        super().__init__(clean, running.get_front_interpreter_for_subprocess())
+        super().__init__(clean)
 
     def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
         lib_dirs = self.get_lib_dirs()

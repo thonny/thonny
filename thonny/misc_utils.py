@@ -11,7 +11,7 @@ import sys
 import threading
 import time
 from logging import getLogger
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from thonny.languages import tr
 
@@ -765,3 +765,8 @@ def _compute_date_format_with_month_abbrev():
         return f"{month_fmt} {day_fmt}"
     else:
         return f"{day_fmt} {month_fmt}"
+
+
+def version_str_to_tuple_of_ints(s: str) -> Tuple[int]:
+    parts = s.split(".")
+    return tuple([int(part) for part in parts if part.isnumeric()])

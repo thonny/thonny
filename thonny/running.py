@@ -1118,13 +1118,10 @@ class BackendProxy(ABC):
 
 
 class SubprocessProxy(BackendProxy, ABC):
-    def __init__(self, clean: bool, mgmt_executable: Optional[str] = None) -> None:
+    def __init__(self, clean: bool) -> None:
         super().__init__(clean)
 
-        if mgmt_executable:
-            self._mgmt_executable = mgmt_executable
-        else:
-            self._mgmt_executable = get_front_interpreter_for_subprocess()
+        self._mgmt_executable = self.compute_mgmt_executable()
 
         if ".." in self._mgmt_executable:
             self._mgmt_executable = os.path.normpath(self._mgmt_executable)
@@ -1142,6 +1139,9 @@ class SubprocessProxy(BackendProxy, ABC):
         self._cwd = self._get_initial_cwd()  # pylint: disable=assignment-from-none
         self._start_background_process(clean=clean)
         self._have_check_remembered_current_configuration = False
+
+    def compute_mgmt_executable(self) -> str:
+        return get_front_interpreter_for_subprocess()
 
     def _check_remember_current_configuration(self) -> None:
         current_configuration = self.get_current_switcher_configuration()
@@ -1206,24 +1206,30 @@ class SubprocessProxy(BackendProxy, ABC):
             del env["THONNY_DEBUG"]
         return env
 
+    def get_mgmt_executable_special_switches(self) -> List[str]:
+        return []
+
+    def get_mgmt_executable_python_switches(self) -> List[str]:
+        return [
+            "-u",  # unbuffered IO
+            "-B",  # don't write pyo/pyc files
+            # (to avoid problems when using different Python versions without write permissions)
+        ]
+
     def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
         logger.info("Starting background process, clean: %r, extra_args: %r", clean, extra_args)
         self._response_queue = collections.deque()
 
-        if not os.path.exists(self._mgmt_executable):
-            get_shell().print_error(
-                f"Interpreter {self._mgmt_executable!r} not found.\nPlease select another!"
-            )
+        exe_validation_error = self.get_mgmt_executable_validation_error()
+        if exe_validation_error:
+            get_shell().print_error(exe_validation_error)
             return
 
         cmd_line = (
-            [
-                self._mgmt_executable,
-                "-u",  # unbuffered IO
-                "-B",  # don't write pyo/pyc files
-                # (to avoid problems when using different Python versions without write permissions)
-            ]
+            [self._mgmt_executable]
+            + self.get_mgmt_executable_special_switches()
+            + self.get_mgmt_executable_python_switches()
             + self._get_launcher_with_args()
             + extra_args
         )
@@ -1266,6 +1272,10 @@ class SubprocessProxy(BackendProxy, ABC):
             get_shell().print_error(
                 f"INTERNAL ERROR, got {ack!r} instead of {PROCESS_ACK!r}\n---\n"
             )
+
+    def get_mgmt_executable_validation_error(self) -> Optional[str]:
+        if not os.path.isfile(self._mgmt_executable):
+            return f"INTERNAL ERROR: interpreter {self._mgmt_executable!r} not found."
 
     def _send_initial_input(self) -> None:
         # Used for sending data sending for startup, which can't be send by other means
@@ -1625,8 +1635,8 @@ def get_environment_with_overrides(overrides):
 
 
 def get_environment_overrides_for_python_subprocess(target_executable):
-    """Take care of not not confusing different interpreter
-    with variables meant for bundled interpreter"""
+    """Take care of not confusing different interpreter
+    with variables meant for frontend interpreter"""
 
     # At the moment I'm tweaking the environment only if current
     # exe is bundled for Thonny.
@@ -1682,6 +1692,7 @@ def get_environment_overrides_for_python_subprocess(target_executable):
         "PYTHONDEBUG",
         "PYTHONNOUSERSITE",
         "PYTHONASYNCIODEBUG",
+        "VIRTUAL_ENV",
     ]:
         if key in os.environ:
             result[key] = None
