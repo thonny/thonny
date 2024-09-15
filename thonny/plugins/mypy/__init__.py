@@ -8,7 +8,6 @@ from thonny.assistance import (
     ProgramAnalyzerResponseItem,
     ProgramAnalyzerResponseItemType,
     SubprocessProgramAnalyzer,
-    add_program_analyzer,
 )
 from thonny.running import get_front_interpreter_for_subprocess
 
@@ -78,6 +77,6 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
 
 def load_plugin():
-    add_program_analyzer(MyPyAnalyzer)
+    get_workbench().add_assistant("mypy", MyPyAnalyzer())
     get_workbench().set_default("assistance.use_mypy", True)
     get_workbench().set_default("assistance.mypypath", None)

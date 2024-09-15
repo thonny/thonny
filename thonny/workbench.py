@@ -159,7 +159,7 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
-        self._ai_providers = {}  # type: Dict[str, BackendSpec]
+        self.assistants: Dict[str, assistance.Assistant] = {}
         self._commands = []  # type: List[Dict[str, Any]]
         self._notebook_drop_targets: List[tk.Widget] = []
         self._toolbar_buttons = {}
@@ -1399,6 +1399,9 @@ class Workbench(tk.Tk):
 
     def add_content_inspector(self, inspector_class: Type) -> None:
         self.content_inspector_classes.append(inspector_class)
+
+    def add_assistant(self, name: str, assistant: assistance.Assistant):
+        self.assistants[name.lower()] = assistant
 
     def add_backend(
         self,

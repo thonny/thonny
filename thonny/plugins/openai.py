@@ -83,3 +83,6 @@ class OpenAIAssistant(Assistant):
 
     def cancel_completion(self) -> None:
         pass
+
+def load_plugin():
+    get_workbench().add_assistant("OpenAI", OpenAIAssistant())

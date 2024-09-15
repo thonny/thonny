@@ -7,7 +7,6 @@ from thonny.assistance import (
     ProgramAnalyzerResponseItem,
     ProgramAnalyzerResponseItemType,
     SubprocessProgramAnalyzer,
-    add_program_analyzer,
 )
 from thonny.plugins.pylint.messages import checks_by_id
 from thonny.running import get_front_interpreter_for_subprocess
@@ -129,5 +128,5 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
 
 def load_plugin():
-    add_program_analyzer(PylintAnalyzer)
+    get_workbench().add_assistant("Pylint", PylintAnalyzer())
     get_workbench().set_default("assistance.use_pylint", True)
