@@ -172,7 +172,11 @@ class Runner:
             logger.exception("Problem allocating console")
             _console_allocated = False
 
-        self.restart_backend(False, True)
+        try:
+            self.restart_backend(False, True)
+        except Exception as e:
+            logger.exception("Could not start backend when starting Runner")
+            get_shell().print_error(f"\nStarting the back-end failed with following error: {e}\n")
 
     def _init_commands(self) -> None:
         global RUN_COMMAND_CAPTION, RUN_COMMAND_LABEL
@@ -288,13 +292,17 @@ class Runner:
         return self._proxy.get_sys_path()
 
     def send_command(self, cmd: CommandToBackend) -> None:
+        logger.info("Runner.send_command %r", cmd)
+        self._send_initial_or_queued_command(cmd)
+
+    def _send_initial_or_queued_command(self, cmd: CommandToBackend) -> None:
         if self._proxy is None:
             return
 
         if self._publishing_events:
             # allow all event handlers to complete before sending the commands
             # issued by first event handlers
-            self._postpone_command(cmd)
+            self._postpone_command(cmd, "there are events to be published")
             return
 
         # First sanity check
@@ -319,17 +327,24 @@ class Runner:
         cmd["local_cwd"] = get_workbench().get_local_cwd()
 
         if self._proxy.running_inline_command and isinstance(cmd, InlineCommand):
-            self._postpone_command(cmd)
+            self._postpone_command(cmd, "running another inline command")
             return
 
         # Offer the command
-        logger.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
-        response = self._proxy.send_command(cmd)
+        logger.debug("Runner: sending command %r to proxy: %s", cmd.name, cmd)
+        try:
+            response = self._proxy.send_command(cmd)
+        except Exception as e:
+            logger.exception("proxy raised exception for command")
+            get_shell().print_error(f"\nCommand {cmd.name} failed with following error: {e}\n")
+            return None
+        logger.debug("send_command response from proxy: %r", response)
 
         if response == "discard":
+            logger.info("back-end discarded the command")
             return None
         elif response == "postpone":
-            self._postpone_command(cmd)
+            self._postpone_command(cmd, "back-end requested postpone")
             return
         else:
             assert response is None
@@ -353,6 +368,7 @@ class Runner:
     def send_command_and_wait_in_thread(
         self, cmd: InlineCommand, timeout: int
     ) -> MessageFromBackend:
+        logger.info("Runner.send_command_and_wait_in_thread %r", cmd)
         # should not send directly, as we're in thread
         cmd_id = cmd.get("id")
         if cmd_id is None:
@@ -376,11 +392,14 @@ class Runner:
         else:
             raise TimeoutError(f"Could not receive response to {cmd} in {timeout} seconds")
 
-    def _postpone_command(self, cmd: CommandToBackend) -> None:
+    def _postpone_command(self, cmd: CommandToBackend, reason: str) -> None:
+        logger.info("Postponing command. Reason: %s", reason)
+
         # in case of InlineCommands, discard older same type command
         if isinstance(cmd, InlineCommand):
             for older_cmd in self._postponed_commands:
                 if older_cmd.name == cmd.name:
+                    logger.info("Discarding older command of same type")
                     self._postponed_commands.remove(older_cmd)
 
         if len(self._postponed_commands) > 10:
@@ -393,14 +412,15 @@ class Runner:
         self._postponed_commands = []
 
         for cmd in todo:
-            # logger.debug("Sending postponed command: %s", cmd) # too much spam
-            self.send_command(cmd)
+            logger.info("Sending postponed command: %s", cmd)
+            self._send_initial_or_queued_command(cmd)
 
     def _send_thread_commands(self) -> None:
         while not self._thread_commands.empty():
             cmd = self._thread_commands.get()
             self._running_thread_command_ids.add(cmd["id"])
-            self.send_command(cmd)
+            logger.info("Sending thread command: %s", cmd)
+            self._send_initial_or_queued_command(cmd)
 
     def send_program_input(self, data: str) -> None:
         assert self.is_running()
@@ -705,9 +725,7 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
-                logger.debug(
-                    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
-                )
+                logger.debug("RUNNER GOT: %s in state: %s", msg.event_type, self.get_state())
 
                 msg_count += 1
             except BackendTerminatedError as exc:
@@ -1223,8 +1241,7 @@ class SubprocessProxy(BackendProxy, ABC):
 
         exe_validation_error = self.get_mgmt_executable_validation_error()
         if exe_validation_error:
-            get_shell().print_error(exe_validation_error)
-            return
+            raise RuntimeError(exe_validation_error)
 
         cmd_line = (
             [self._mgmt_executable]
@@ -1258,19 +1275,26 @@ class SubprocessProxy(BackendProxy, ABC):
         )
 
         # read success acknowledgement
-        ack = self._proc.stdout.readline()
-
-        # setup asynchronous output listeners
-        Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
-        Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
+        stdout_line = self._proc.stdout.readline().strip("\r\n")
 
         # only attempt initial input if process started nicely,
         # otherwise can't read the error from stderr
-        if ack.strip() == PROCESS_ACK:
+        if stdout_line == PROCESS_ACK:
+            # setup asynchronous output listeners
+            Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
+            Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
+
             self._send_initial_input()
         else:
-            get_shell().print_error(
-                f"INTERNAL ERROR, got {ack!r} instead of {PROCESS_ACK!r}\n---\n"
+
+            return_code = self._proc.poll()
+            if return_code is not None:
+                err = self._proc.stderr.read()
+                if err:
+                    get_shell().print_error(err)
+
+            raise RuntimeError(
+                f"Could not start back-end process, got {stdout_line!r} instead of {PROCESS_ACK!r}"
             )
 
     def get_mgmt_executable_validation_error(self) -> Optional[str]:
@@ -1311,8 +1335,15 @@ class SubprocessProxy(BackendProxy, ABC):
             logger.warning("Ignoring command without active backend process")
             return
 
-        self._proc.stdin.write(serialize_message(msg) + "\n")
-        self._proc.stdin.flush()
+        try:
+            self._proc.stdin.write(serialize_message(msg) + "\n")
+            self._proc.stdin.flush()
+        except BrokenPipeError:
+            import traceback
+
+            traceback.print_stack()
+            logger.exception("Could not write message or flush")
+            get_shell().print_error(f"Could not perform {type(msg).__name__}")
 
     def _prepare_clean_launch(self):
         pass
