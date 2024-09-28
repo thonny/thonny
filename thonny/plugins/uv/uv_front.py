@@ -19,16 +19,13 @@ class LocalCPythonUvProxy(LocalCPythonProxy):
         # TODO
         return os.path.expanduser("~/.cargo/bin/uv")
 
-    def _get_launch_cwd(self):
-        # TODO: change to empty dir when https://github.com/astral-sh/uv/issues/5613 gets resolved
-        return get_workbench().get_local_cwd()
-
     def get_target_executable(self):
         # TODO: should give python exe?
         return self._mgmt_executable
 
     def get_mgmt_executable_special_switches(self) -> List[str]:
-        cmd = ["run"]
+        cmd = ["run", "--project", self.get_cwd()]
+
         python = get_workbench().get_option(f"{self.backend_name}.python")
         if python != "auto":
             cmd += ["--python", python]
