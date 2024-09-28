@@ -7,6 +7,7 @@ from tkinter import messagebox
 from typing import Dict, List, Optional, Tuple
 
 from thonny import get_shell, get_thonny_user_dir, get_workbench
+from thonny.common import InlineResponse, MessageFromBackend, ToplevelResponse
 from thonny.languages import tr
 from thonny.misc_utils import get_menu_char
 from thonny.shell import ShellView
@@ -158,7 +159,7 @@ class EventLogger:
         event_time = datetime.now()
         import json
 
-        widget_str = getattr(event, "widget", None)
+        widget_str = getattr(event, "widget", None) or getattr(event, "editor", None)
         try:
             widget = get_workbench().nametowidget(widget_str) if widget_str is not None else None
         except Exception as e:
@@ -186,7 +187,7 @@ class EventLogger:
             except tk.TclError:
                 logger.error("Could not get winfo_toplevel", exc_info=True)
                 return
-        else:
+        elif not isinstance(event, (WorkbenchEvent, MessageFromBackend)):
             logger.warning("Event without widget: %r", event)
 
         data = self._extract_interesting_data(event, sequence)
