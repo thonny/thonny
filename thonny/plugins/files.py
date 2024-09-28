@@ -626,15 +626,25 @@ def load_plugin() -> None:
         ".txt",
         ".log",
         ".json",
+        ".jsonl",
         ".yml",
         ".yaml",
         ".md",
         ".rst",
         ".toml",
+        ".tex",
         ".gitignore",
         ".env",
         ".cfg",
         ".lock",
+        ".python-version",
+        ".html",
+        ".htm",
+        ".js",
+        ".ts",
+        ".sh",
+        ".bat",
+        ".csv"
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
