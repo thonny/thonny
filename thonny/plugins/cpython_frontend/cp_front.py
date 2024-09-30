@@ -44,7 +44,7 @@ class LocalCPythonProxy(SubprocessProxy):
             get_shell().report_exception()
 
     def compute_mgmt_executable(self):
-        get_workbench().get_option("LocalCPython.executable")
+        return get_workbench().get_option("LocalCPython.executable")
 
     def get_mgmt_executable_validation_error(self) -> Optional[str]:
         if not os.path.isfile(self._mgmt_executable):
