@@ -115,6 +115,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * jharris1993
 * Juan Falgueras
 * Juhan Oskar Hennoste (@FeldrinH)
+* Jon Peterson
 * Jonathan Campbell
 * Jordan Williams
 * jose1711
