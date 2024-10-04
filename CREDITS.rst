@@ -149,6 +149,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Radim
 * Ralf Michael Metzing
 * @rauferd
+* @razzius
 * Rene Lehtma
 * Richard Kanehl
 * Rune Langøy
