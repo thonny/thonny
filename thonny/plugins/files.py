@@ -644,7 +644,7 @@ def load_plugin() -> None:
         ".ts",
         ".sh",
         ".bat",
-        ".csv"
+        ".csv",
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
