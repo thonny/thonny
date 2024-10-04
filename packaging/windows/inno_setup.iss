@@ -111,6 +111,7 @@ Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe";                  
 Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyde";             ValueData: "";        Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
 
@@ -128,10 +129,11 @@ Root: HKA; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; Valu
 
 Root: HKA; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
-; Relate this ProgID with *.py and *.pyw extensions
+; Relate this ProgID with *.pyde, *.py and *.pyw extensions
 ; https://docs.microsoft.com/en-us/windows/desktop/shell/how-to-include-an-application-on-the-open-with-dialog-box
 Root: HKA; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\.pyde\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 
 ; Add "Python file" to Explorer's "New" context menu (don't remove on uninstallation)
 Root: HKA; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  

@@ -33,6 +33,7 @@
 			<array>
 				<string>py</string>
 				<string>pyw</string>
+				<string>pyde</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>PythonSource.icns</string>

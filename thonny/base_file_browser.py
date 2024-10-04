@@ -619,6 +619,7 @@ class BaseFileBrowser(ttk.Frame):
                 path.lower().endswith(".py")
                 or path.lower().endswith(".pyw")
                 or path.lower().endswith(".pyi")
+                or path.lower().endswith(".pyde")
             ):
                 img = self.python_file_icon
             elif self.should_open_name_in_thonny(name):
