@@ -66,8 +66,8 @@ class OpenAIAssistant(Assistant):
         client = OpenAI(api_key=self._get_saved_api_key())
 
         out_msgs = [
-            {"role": "system", "content": "You are a helpful assistant."},
-        ] + [{"role": msg.role, "content": msg.content} for msg in context.messages]
+            {"role": "system", "content": "You are a helpful programming coach."},
+        ] + [{"role": msg.role, "content": self.format_message(msg)} for msg in context.messages]
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -83,6 +83,7 @@ class OpenAIAssistant(Assistant):
 
     def cancel_completion(self) -> None:
         pass
+
 
 def load_plugin():
     get_workbench().add_assistant("OpenAI", OpenAIAssistant())

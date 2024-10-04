@@ -5,9 +5,10 @@ import re
 import tkinter as tk
 import traceback
 from _tkinter import TclError
+from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 from thonny import get_runner, get_shell, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return
@@ -75,6 +76,13 @@ ANSI_COLOR_NAMES = {
     "7": "white",
     "9": "default",
 }
+
+
+@dataclass
+class ExecutionInfo:
+    command_line: str
+    io_start_index: str
+    io_end_index: str
 
 
 class ShellView(tk.PanedWindow):
@@ -1619,6 +1627,47 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def is_scrolled_to_end(self):
         return bool(self.bbox("end-1c"))
+
+    def extract_last_execution_info(self, command_pattern: str) -> Optional[ExecutionInfo]:
+        search_start = "end"
+        while True:
+            command_index = self.search(
+                command_pattern, index=search_start, backwards=True, regexp=True
+            )
+            if not command_index:
+                return None
+
+            if "magic" in self.tag_names(command_index):
+                # yep, that's the command
+                break
+            else:
+                # false alarm, keep looking
+                search_start = command_index
+
+        command_line = self.get(command_index, f"{command_index} lineend")
+        line_number = int(float(command_index))
+
+        # assuming there is next line
+        io_start_index = f"{line_number + 1}.0"
+        if not "io" in self.tag_names(io_start_index):
+            logger.info("No IO on the next line after %r", command_line)
+            return None
+
+        io_start_index2, io_end_index = self.tag_nextrange("io", io_start_index)
+        if io_start_index2 != io_start_index:
+            logger.warning(
+                "IO start index %r vs %r. IO end index: %r",
+                io_start_index,
+                io_start_index2,
+                io_end_index,
+            )
+            return None
+
+        if io_start_index == io_end_index:
+            logger.warning("IO start index == IO end index (%r)", io_end_index)
+            return None
+
+        return ExecutionInfo(command_line, io_start_index, io_end_index)
 
 
 class ShellText(BaseShellText):
