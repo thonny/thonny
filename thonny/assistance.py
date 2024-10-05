@@ -21,6 +21,7 @@ from docutils.nodes import description
 
 from thonny import get_runner, get_shell, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import (
+    NBSP,
     STRING_PSEUDO_FILENAME,
     ToplevelResponse,
     is_local_path,
@@ -28,15 +29,18 @@ from thonny.common import (
     read_source,
 )
 from thonny.languages import tr
-from thonny.tktextext import EnhancedText
+from thonny.tktextext import EnhancedText, TweakableText
 from thonny.ui_utils import (
     LongTextDialog,
+    create_custom_toolbutton_in_frame,
     ems_to_pixels,
     get_beam_cursor,
     get_hyperlink_cursor,
+    get_style_configuration,
     lookup_style_option,
     shift_is_pressed,
     show_dialog,
+    update_text_height,
 )
 
 logger = getLogger(__name__)
@@ -148,6 +152,16 @@ class EchoAssistant(Assistant):
 
     def complete_chat(self, context: ChatContext) -> Iterator[ChatResponseChunk]:
         yield ChatResponseChunk(
+            """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+""",
+            is_final=False,
+            is_interal_error=False,
+        )
+
+        yield ChatResponseChunk(
             self.format_message(context.messages[-1]), is_final=True, is_interal_error=False
         )
 
@@ -171,6 +185,7 @@ class AssistantView(tktextext.TextFrame):
             pady=0,
             insertwidth=0,
             background="white",
+            suppress_events=True,
         )
 
         self._analyzer_instances = []
@@ -182,8 +197,21 @@ class AssistantView(tktextext.TextFrame):
 
         self._snapshots_per_main_file = {}
         self._current_snapshot = None
+        self._current_suggestions: List[str] = []
 
         self._accepted_warning_sets = []
+
+        main_font = tk.font.nametofont("TkDefaultFont")
+
+        italic_font = main_font.copy()
+        italic_font.configure(slant="italic", size=main_font.cget("size"))
+
+        # Underline on font looks better than underline on tag
+        underline_font = main_font.copy()
+        underline_font.configure(size=main_font.cget("size"), underline=True)
+
+        italic_underline_font = main_font.copy()
+        italic_underline_font.configure(slant="italic", size=main_font.cget("size"), underline=True)
 
         self.text.tag_configure(
             "section_title",
@@ -200,17 +228,10 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("suggestion_body", lmargin1=16, lmargin2=16)
         self.text.tag_configure("body", font="ItalicTkDefaultFont")
 
+        self.text.tag_configure("suggestions_block", justify="right")
+
         self._last_analysis_start_index = "1.0"
         self._last_analysis_end_index = "1.0"
-
-        main_font = tk.font.nametofont("TkDefaultFont")
-
-        italic_font = main_font.copy()
-        italic_font.configure(slant="italic", size=main_font.cget("size"))
-
-        # Underline on font looks better than underline on tag
-        italic_underline_font = main_font.copy()
-        italic_underline_font.configure(slant="italic", size=main_font.cget("size"), underline=True)
 
         user_margin = ems_to_pixels(8)
         self.text.tag_configure(
@@ -244,9 +265,7 @@ class AssistantView(tktextext.TextFrame):
         )
 
         self.query_box = self.create_query_panel()
-        self.query_box.grid(
-            row=1, column=1, sticky="nsew", padx=ems_to_pixels(1), pady=ems_to_pixels(1)
-        )
+        self.query_box.grid(row=1, column=1, sticky="nsew")
 
         from thonny.plugins.openai import OpenAIAssistant
 
@@ -258,9 +277,78 @@ class AssistantView(tktextext.TextFrame):
         )
 
         self.bind("<<ThemeChanged>>", self._on_theme_changed, True)
+        self.bind("<Configure>", self._on_configure, True)
+
+        self._update_suggestions()
 
     def create_query_panel(self) -> tk.Frame:
-        border_frame = tk.Frame(self, background="#cccccc")
+
+        background = lookup_style_option(".", "background")
+        bordercolor = "#aaaaaa"  # TODO
+
+        panel = tk.Frame(self, background=background)
+        panel.rowconfigure(2, weight=1)
+        panel.columnconfigure(1, weight=1)
+
+        pad = ems_to_pixels(1)
+
+        self.suggestions_text = TweakableText(
+            panel,
+            read_only=True,
+            suppress_events=True,
+            height=1,
+            background=background,
+            borderwidth=0,
+            highlightthickness=0,
+            font="TkDefaultFont",
+            cursor="arrow",
+            insertwidth=0,
+        )
+        self.suggestions_text.grid(
+            row=1, column=1, columnspan=2, sticky="nsew", padx=pad, pady=(pad, 0)
+        )
+
+        suggestion_pad = ems_to_pixels(0.2)
+        self.suggestions_text.tag_configure(
+            "suggestion",
+            foreground="navy",
+            # spacing1=suggestion_pad,
+            # spacing3=suggestion_pad,
+        )
+
+        self.suggestions_text.tag_configure(
+            "active",
+            # borderwidth=2,
+            # relief="raised",
+            underline=True,
+            # background="gray"
+        )
+
+        def get_active_range(event):
+            mouse_index = self.suggestions_text.index("@%d,%d" % (event.x, event.y))
+            return self.suggestions_text.tag_prevrange("suggestion", mouse_index + "+1c")
+
+        def dir_tag_motion(event):
+            self.suggestions_text.tag_remove("active", "1.0", "end")
+            active_range = get_active_range(event)
+            if active_range:
+                range_start, range_end = active_range
+                self.suggestions_text.tag_add("active", range_start, range_end)
+
+        def dir_tag_leave(event):
+            self.suggestions_text.tag_remove("active", "1.0", "end")
+
+        def dir_tag_click(event):
+            active_range = get_active_range(event)
+            suggestion = self.suggestions_text.get(active_range[0], active_range[1])
+            self.submit_user_chat_message(suggestion)
+
+        self.suggestions_text.tag_bind("suggestion", "<1>", dir_tag_click)
+        self.suggestions_text.tag_bind("suggestion", "<Leave>", dir_tag_leave)
+        self.suggestions_text.tag_bind("suggestion", "<Motion>", dir_tag_motion)
+
+        border_frame = tk.Frame(panel, background="#cccccc")
+        border_frame.grid(row=2, column=1, sticky="nsew", padx=pad, pady=(pad, pad))
 
         inside_frame = tk.Frame(border_frame, background="white")
         inside_frame.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
@@ -269,7 +357,7 @@ class AssistantView(tktextext.TextFrame):
 
         self.query_text = tk.Text(
             inside_frame,
-            height=2,
+            height=1,
             font="TkDefaultFont",
             borderwidth=0,
             highlightthickness=0,
@@ -279,10 +367,20 @@ class AssistantView(tktextext.TextFrame):
         self.query_text.bind("<Return>", self._on_press_enter_in_chat_entry, True)
         self.query_text.grid(row=0, column=0, sticky="nsew", padx=3, pady=3)
 
+        submit_button_frame = create_custom_toolbutton_in_frame(
+            panel,
+            text=" ⏎ ",
+            command=self._on_click_submit,
+            background=background,
+            borderwidth=1,
+            bordercolor=bordercolor,
+        )
+        submit_button_frame.grid(row=2, column=2, sticky="nsew", padx=(0, pad), pady=pad)
+
         border_frame.rowconfigure(0, weight=1)
         border_frame.columnconfigure(0, weight=1)
 
-        return border_frame
+        return panel
 
     def handle_assistant_chat_response_fragment(
         self, fragment_with_request_id: ChatResponseFragmentWithRequestId
@@ -305,6 +403,7 @@ class AssistantView(tktextext.TextFrame):
         if fragment.is_final:
             self._append_text("\n", source="chat")
             self._active_chat_request_id = None
+            self._update_suggestions()
 
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         from thonny.plugins.cpython_frontend import LocalCPythonProxy
@@ -350,6 +449,9 @@ class AssistantView(tktextext.TextFrame):
             # self.submit_user_chat_message("@pylint\n")
         else:
             self.main_file_path = None
+
+    def _on_configure(self, event: tk.Event) -> None:
+        update_text_height(self.suggestions_text, min_lines=1, max_lines=5)
 
     def _explain_exception(self, error_info):
         rst = (
@@ -433,6 +535,10 @@ class AssistantView(tktextext.TextFrame):
         if isinstance(self.text, rst_utils.RstText):
             self.text.on_theme_changed()
 
+    def _on_click_submit(self) -> None:
+        if self._current_assistant.get_ready():
+            self.submit_user_chat_message(self.query_text.get("1.0", "end"))
+
     def _on_press_enter_in_chat_entry(self, event: tk.Event):
         if shift_is_pressed(event):
             return None
@@ -443,6 +549,7 @@ class AssistantView(tktextext.TextFrame):
         return "break"
 
     def submit_user_chat_message(self, message: str):
+        self._remove_suggestions()
         message = message.rstrip()
         attachments, warnings = self.compile_attachments(message)
         self._prepare_new_completion()
@@ -658,6 +765,37 @@ class AssistantView(tktextext.TextFrame):
                     title=tr("Attachments"), text_content=formatted_attachments, parent=self
                 )
                 show_dialog(dlg, master=get_workbench())
+
+    def _remove_suggestions(self) -> None:
+        self.suggestions_text.direct_delete("1.0", "end")
+        self._current_suggestions = []
+
+    def _update_suggestions(self) -> None:
+        new_suggestions = []
+        last_run_info = get_shell().text.extract_last_execution_info("%Run")
+
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+
+        if editor is not None and editor.get_content():
+            new_suggestions.append("What do you think of #currentFile?")
+
+        if get_shell().text.has_selection() and last_run_info is not None:
+            new_suggestions.append("Explain #selectedOutput in #lastRun")
+
+        if last_run_info is not None or True:
+            new_suggestions.append("Explain #lastRun")
+
+        if new_suggestions != self._current_suggestions:
+            self._remove_suggestions()
+            for i, suggestion in enumerate(new_suggestions):
+                self._append_suggestion(suggestion, first=i == 0)
+            self._current_suggestions = new_suggestions
+            update_text_height(self.suggestions_text, min_lines=1, max_lines=5)
+
+    def _append_suggestion(self, text: str, first: bool) -> None:
+        if not first:
+            self.suggestions_text.direct_insert("end", "  •  ")
+        self.suggestions_text.direct_insert("end", text, tags=("suggestion",))
 
 
 class AssistantRstText(rst_utils.RstText):

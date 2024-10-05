@@ -25,6 +25,8 @@ REMOTE_PATH_MARKER = " :: "
 PROCESS_ACK = "OK"
 ALL_EXPLAINED_STATUS_CODE = 193
 
+NBSP = "\u00A0"
+
 IGNORED_FILES_AND_DIRS = [
     "System Volume Information",
     "._.Trashes",
