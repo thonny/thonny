@@ -123,6 +123,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Karolina Surma (@befeleme)
 * Kaspar Papli
 * Kauri Raba
+* @kemelzaidan
 * kr-g
 * Laszlo Kocsis
 * Louis Lenchant
