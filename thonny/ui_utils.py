@@ -2570,6 +2570,8 @@ def check_create_heading_stripe(master) -> Optional[tk.Frame]:
         # don't know why it happens sometimes
         assert len(px_to_hide) == 1
         px_to_hide = px_to_hide[0]
+    elif isinstance(px_to_hide, str):
+        px_to_hide = int(px_to_hide)
     background = opts.get("background")
     if px_to_hide > 0 and background is not None:
         return HeadingStripe(master, height=px_to_hide, background=background)
