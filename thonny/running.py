@@ -327,7 +327,11 @@ class Runner:
         cmd["local_cwd"] = get_workbench().get_local_cwd()
 
         if self._proxy.running_inline_command and isinstance(cmd, InlineCommand):
-            self._postpone_command(cmd, "running another inline command")
+            reason = "running another inline command"
+            cur_cmd_name = getattr(self._last_accepted_backend_command, "name", None)
+            if cur_cmd_name:
+                reason += f" ({cur_cmd_name})"
+            self._postpone_command(cmd, reason)
             return
 
         # Offer the command
