@@ -11,8 +11,8 @@
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -32,8 +32,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -52,8 +52,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -72,8 +72,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -92,8 +92,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -112,8 +112,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -133,8 +133,8 @@
                 "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -154,12 +154,37 @@
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20240105-v1.22.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5 Stack",
+        "model": "AtomS3 Lite",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/M5STACK_ATOMS3_LITE",
+        "downloads": [
+            {
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20241010-v1.24.0-preview.409.g82e69df33.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "OLIMEX",
+        "model": "Olimex ESP32 EVB",
+        "family": "esp32",
+        "title": "ESP32 EVB",
+        "info_url": "https://micropython.org/download/OLIMEX_ESP32_EVB",
+        "downloads": [
+            {
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20241010-v1.24.0-preview.409.g82e69df33.bin"
             }
         ]
     },
@@ -175,8 +200,8 @@
                 "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -195,8 +220,8 @@
                 "url": "https://micropython.org/resources/firmware/SIL_WESP32-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -215,8 +240,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -235,8 +260,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -255,12 +280,24 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20240105-v1.22.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "FeatherS3 Neo",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/UM_FEATHERS3NEO",
+        "downloads": [
+            {
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20241010-v1.24.0-preview.409.g82e69df33.bin"
             }
         ]
     },
@@ -275,12 +312,24 @@
                 "url": "https://micropython.org/resources/firmware/nanos3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/nanos3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/nanos3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
                 "url": "https://micropython.org/resources/firmware/nanos3-20240105-v1.22.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "OMGS3",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/omgs3",
+        "downloads": [
+            {
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/omgs3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             }
         ]
     },
@@ -295,12 +344,24 @@
                 "url": "https://micropython.org/resources/firmware/UM_PROS3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
                 "url": "https://micropython.org/resources/firmware/UM_PROS3-20240105-v1.22.1.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Unexpected Maker",
+        "model": "RGB Touch Mini",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/UM_RGBTOUCH_MINI",
+        "downloads": [
+            {
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20241010-v1.24.0-preview.409.g82e69df33.bin"
             }
         ]
     },
@@ -315,8 +376,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS2-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -335,8 +396,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -355,8 +416,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -375,8 +436,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -395,8 +456,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -415,8 +476,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
@@ -435,8 +496,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20240602-v1.23.0.bin"
             },
             {
-                "version": "20240808-v1.24.0-preview.181.g91f4a6b9e",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20240808-v1.24.0-preview.181.g91f4a6b9e.bin"
+                "version": "20241010-v1.24.0-preview.409.g82e69df33",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20241010-v1.24.0-preview.409.g82e69df33.bin"
             },
             {
                 "version": "1.22.1",
