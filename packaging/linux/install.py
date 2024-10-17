@@ -79,7 +79,7 @@ def create_launcher(source_filename, target_filename, replacements={}):
 
 
 def try_to_refresh_desktop_and_menus(menu_dir):
-    """In KDE, the .destop files are not taken into account immediately"""
+    """In KDE, the .desktop files are not taken into account immediately"""
     for cmd in ["kbuildsycoca5", "kbuildsycoca4", "kbuildsycoca"]:
         if which(cmd):
             subprocess.call([cmd])
