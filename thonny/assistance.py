@@ -12,16 +12,11 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, replace
 from enum import Enum
-from fileinput import filename
-from lib2to3.fixes.fix_input import context
 from logging import getLogger
 from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union, cast
 
-from docutils.nodes import description
-
 from thonny import get_runner, get_shell, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import (
-    NBSP,
     STRING_PSEUDO_FILENAME,
     ToplevelResponse,
     is_local_path,
@@ -278,8 +273,7 @@ class AssistantView(tktextext.TextFrame):
 
         self.bind("<<ThemeChanged>>", self._on_theme_changed, True)
         self.bind("<Configure>", self._on_configure, True)
-
-        self._update_suggestions()
+        get_workbench().bind("WorkbenchReady", self._workspace_ready, True)
 
     def create_query_panel(self) -> tk.Frame:
 
@@ -303,6 +297,7 @@ class AssistantView(tktextext.TextFrame):
             font="TkDefaultFont",
             cursor="arrow",
             insertwidth=0,
+            wrap="word",
         )
         self.suggestions_text.grid(
             row=1, column=1, columnspan=2, sticky="nsew", padx=pad, pady=(pad, 0)
@@ -365,6 +360,8 @@ class AssistantView(tktextext.TextFrame):
             wrap="word",
         )
         self.query_text.bind("<Return>", self._on_press_enter_in_chat_entry, True)
+        self.query_text.bind("<Key>", self._on_change_query_text, True)
+
         self.query_text.grid(row=0, column=0, sticky="nsew", padx=3, pady=3)
 
         submit_button_frame = create_custom_toolbutton_in_frame(
@@ -375,7 +372,7 @@ class AssistantView(tktextext.TextFrame):
             borderwidth=1,
             bordercolor=bordercolor,
         )
-        submit_button_frame.grid(row=2, column=2, sticky="nsew", padx=(0, pad), pady=pad)
+        submit_button_frame.grid(row=2, column=2, sticky="e", padx=(0, pad), pady=pad)
 
         border_frame.rowconfigure(0, weight=1)
         border_frame.columnconfigure(0, weight=1)
@@ -451,7 +448,10 @@ class AssistantView(tktextext.TextFrame):
             self.main_file_path = None
 
     def _on_configure(self, event: tk.Event) -> None:
-        update_text_height(self.suggestions_text, min_lines=1, max_lines=5)
+        self._update_suggestions_box()
+
+    def _workspace_ready(self, event: tk.Event) -> None:
+        self._update_suggestions()
 
     def _explain_exception(self, error_info):
         rst = (
@@ -538,6 +538,9 @@ class AssistantView(tktextext.TextFrame):
     def _on_click_submit(self) -> None:
         if self._current_assistant.get_ready():
             self.submit_user_chat_message(self.query_text.get("1.0", "end"))
+
+    def _on_change_query_text(self, event: tk.Event):
+        update_text_height(self.query_text, 1, max_lines=10)
 
     def _on_press_enter_in_chat_entry(self, event: tk.Event):
         if shift_is_pressed(event):
@@ -771,13 +774,14 @@ class AssistantView(tktextext.TextFrame):
         self._current_suggestions = []
 
     def _update_suggestions(self) -> None:
+        logger.debug("Updating suggestions")
         new_suggestions = []
         last_run_info = get_shell().text.extract_last_execution_info("%Run")
 
         editor = get_workbench().get_editor_notebook().get_current_editor()
 
         if editor is not None and editor.get_content():
-            new_suggestions.append("What do you think of #currentFile?")
+            new_suggestions.append("Check #currentFile")
 
         if get_shell().text.has_selection() and last_run_info is not None:
             new_suggestions.append("Explain #selectedOutput in #lastRun")
@@ -785,17 +789,23 @@ class AssistantView(tktextext.TextFrame):
         if last_run_info is not None or True:
             new_suggestions.append("Explain #lastRun")
 
+        if editor is not None and editor.get_content():
+            new_suggestions.append("@Pylint, @mypy")
+
         if new_suggestions != self._current_suggestions:
             self._remove_suggestions()
             for i, suggestion in enumerate(new_suggestions):
                 self._append_suggestion(suggestion, first=i == 0)
             self._current_suggestions = new_suggestions
-            update_text_height(self.suggestions_text, min_lines=1, max_lines=5)
+            self._update_suggestions_box()
 
     def _append_suggestion(self, text: str, first: bool) -> None:
         if not first:
             self.suggestions_text.direct_insert("end", "  •  ")
         self.suggestions_text.direct_insert("end", text, tags=("suggestion",))
+
+    def _update_suggestions_box(self):
+        update_text_height(self.suggestions_text, min_lines=1, max_lines=5)
 
 
 class AssistantRstText(rst_utils.RstText):
@@ -921,9 +931,13 @@ class SubprocessProgramAnalyzer(Assistant, ABC):
 
     def start_subprocess(self, context: ChatContext):
         cmd = self.get_command_line(context)
-        logger.info("Starting subprocess %r", cmd)
+        logger.info("Starting subprocess %r in %r", cmd, get_workbench().get_local_cwd())
         self._proc = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=get_workbench().get_local_cwd(),
         )
 
     def cancel_completion(self) -> None:

@@ -2645,7 +2645,7 @@ def update_text_height(text: tk.Text, min_lines: int, max_lines: int) -> None:
     if text.winfo_width() < 10:
         logger.info("Skipping text height update because width is %s", text.winfo_width())
         return
-    required_height = text.tk.call((text, "count", "-update", "-displaylines", "1.0", "end-3c"))
+    required_height = text.tk.call((text, "count", "-update", "-displaylines", "1.0", "end"))
     text.configure(height=min(max(required_height, min_lines), max_lines))
 
 

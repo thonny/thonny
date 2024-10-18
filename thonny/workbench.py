@@ -259,7 +259,6 @@ class Workbench(tk.Tk):
     def finalize_startup(self):
         logger.info("Finalizing startup")
         self.ready = True
-        self.event_generate("WorkbenchReady")
         self._editor_notebook.update_appearance()
         if self._configuration_manager.error_reading_existing_file:
             messagebox.showerror(
@@ -272,6 +271,7 @@ class Workbench(tk.Tk):
         self._editor_notebook.load_previous_files()
         self._load_stuff_from_command_line(self._initial_args)
         self._editor_notebook.focus_set()
+        self.event_generate("WorkbenchReady")
         self.poll_events()
 
     def poll_events(self) -> None:

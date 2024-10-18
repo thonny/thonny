@@ -64,6 +64,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             "--strict-equality",
             "--no-color-output",
             "--no-error-summary",
+            "--show-absolute-path",
             context.main_file_path,
         ] + context.imported_file_paths
 
