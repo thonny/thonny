@@ -3,8 +3,7 @@ from logging import getLogger
 from typing import Dict, List, Optional
 
 from thonny import get_runner, get_workbench
-from thonny.assistance import (
-    ChatContext,
+from thonny.program_analysis import (
     ProgramAnalyzerResponseItem,
     ProgramAnalyzerResponseItemType,
     SubprocessProgramAnalyzer,
@@ -15,9 +14,8 @@ logger = getLogger(__name__)
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
-    def parse_output_line(
-        self, line: str, context: ChatContext
-    ) -> Optional[ProgramAnalyzerResponseItem]:
+    def parse_output_line(self, line: str) -> Optional[ProgramAnalyzerResponseItem]:
+        print("MP PARSONG", line)
         m = re.match(r"(.*?):(\d+)(:(\d+))?:(.*?):(.*)", line.strip())
         if m is not None:
             message = m.group(6).strip()
@@ -25,9 +23,6 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                 return None
 
             filename = m.group(1)
-            if filename not in [context.main_file_path] + context.imported_file_paths:
-                logger.warning("MyPy: " + line)
-                return None
 
             line_num = int(m.group(2))
             kind = (m.group(5).strip(),)  # always "error" ?
@@ -46,7 +41,8 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             logger.error("Can't parse MyPy line: " + line.strip())
             return None
 
-    def get_command_line(self, context: ChatContext) -> List[str]:
+    def get_command_line(self, main_file_path: str) -> List[str]:
+        print("GETTTTING")
         return [
             get_front_interpreter_for_subprocess(),
             "-m",
@@ -65,8 +61,8 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             "--no-color-output",
             "--no-error-summary",
             "--show-absolute-path",
-            context.main_file_path,
-        ] + context.imported_file_paths
+            main_file_path,
+        ]
 
     def get_env(self) -> Dict[str, str]:
         env = super().get_env()
@@ -78,6 +74,4 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
 
 def load_plugin():
-    get_workbench().add_assistant("mypy", MyPyAnalyzer())
-    get_workbench().set_default("assistance.use_mypy", True)
-    get_workbench().set_default("assistance.mypypath", None)
+    get_workbench().add_program_analyzer("mypy", MyPyAnalyzer())

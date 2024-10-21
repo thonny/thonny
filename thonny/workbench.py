@@ -46,6 +46,7 @@ from thonny.misc_utils import (
     running_on_rpi,
     running_on_windows,
 )
+from thonny.program_analysis import ProgramAnalyzer
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -165,6 +166,7 @@ class Workbench(tk.Tk):
         self._toolbar_buttons = {}
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = []  # type: List[Type]
+        self.program_analyzers: Dict[str, ProgramAnalyzer] = {}
         self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
         self._os_dark_mode = os_is_in_dark_mode()
         self._init_language()
@@ -246,8 +248,8 @@ class Workbench(tk.Tk):
             ):
                 print(name)
         """
-
         self.bind("<Visibility>", self._on_visibility, True)
+        self.become_active_window()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
 
     def _on_visibility(self, event):
@@ -1447,6 +1449,12 @@ class Workbench(tk.Tk):
             warn(tr("Overwriting theme '%s'") % name)
 
         self._syntax_themes[name] = (parent, settings)
+
+    def add_program_analyzer(
+        self, name: str, analyzer: ProgramAnalyzer, enabled_by_default: bool = True
+    ):
+        self.set_default(f"analysis.{name}.enabled", enabled_by_default)
+        self.program_analyzers[name] = analyzer
 
     def get_usable_ui_theme_names(self) -> List[str]:
         return sorted([name for name in self._ui_themes if self._ui_themes[name][0] is not None])

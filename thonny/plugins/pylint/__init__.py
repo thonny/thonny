@@ -2,13 +2,12 @@ from logging import getLogger
 from typing import List, Optional
 
 from thonny import get_workbench
-from thonny.assistance import (
-    ChatContext,
+from thonny.plugins.pylint.messages import checks_by_id
+from thonny.program_analysis import (
     ProgramAnalyzerResponseItem,
     ProgramAnalyzerResponseItemType,
     SubprocessProgramAnalyzer,
 )
-from thonny.plugins.pylint.messages import checks_by_id
 from thonny.running import get_front_interpreter_for_subprocess
 
 logger = getLogger(__name__)
@@ -18,9 +17,7 @@ RESULT_MARKER = "ForThonny: "
 
 class PylintAnalyzer(SubprocessProgramAnalyzer):
 
-    def get_command_line(self, context: ChatContext) -> List[str]:
-        pass
-
+    def get_command_line(self, main_file_path: str) -> List[str]:
         relevant_symbols = {
             checks_by_id[key]["msg_sym"]
             for key in checks_by_id
@@ -56,16 +53,9 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             + "{abspath},,{line},,{column},,{symbol},,{msg},,{msg_id},,{C}",
         ]
 
-        return (
-            [get_front_interpreter_for_subprocess(), "-m", "pylint"]
-            + options
-            + [context.main_file_path]
-            + context.imported_file_paths
-        )
+        return [get_front_interpreter_for_subprocess(), "-m", "pylint"] + options + [main_file_path]
 
-    def parse_output_line(
-        self, line: str, context: ChatContext
-    ) -> Optional[ProgramAnalyzerResponseItem]:
+    def parse_output_line(self, line: str) -> Optional[ProgramAnalyzerResponseItem]:
         # TODO: get rid of non-error
         """
         err = (
@@ -128,5 +118,4 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
 
 def load_plugin():
-    get_workbench().add_assistant("Pylint", PylintAnalyzer())
-    get_workbench().set_default("assistance.use_pylint", True)
+    get_workbench().add_program_analyzer("Pylint", PylintAnalyzer())
