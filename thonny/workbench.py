@@ -2760,13 +2760,6 @@ class Workbench(tk.Tk):
         # and will show empty table on open
         self.get_view("VariablesView")
 
-        # also, make sure AssistantView is loaded so that it can handle
-        if (
-            self.get_option("assistance.open_assistant_on_errors")
-            or self.get_option("assistance.open_assistant_on_warnings")
-        ) and (self.get_ui_mode() != "simple" or "AssistantView" in SIMPLE_MODE_VIEWS):
-            self.get_view("AssistantView")
-
     def _save_layout(self) -> None:
         self.update_idletasks()
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self))
