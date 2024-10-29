@@ -12,9 +12,9 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = r"\d{8}-v1.24.0-preview\.\d+\.[a-z0-9]{10}"
-PREV_RELEVANT_VERSION = "1.22.1"
-PREV_RELEVANT_VERSION_IN_URL = "20240105-v1.22.1"
+UNSTABLE_VERSION = r"\d{8}-v1.25.0-preview\.\d+\.[a-z0-9]{10}"
+PREV_RELEVANT_VERSION = "1.23.0"
+PREV_RELEVANT_VERSION_IN_URL = "20240602-v1.23.0"
 
 
 class IndexParser(HTMLParser):
@@ -50,8 +50,7 @@ class IndexParser(HTMLParser):
 
 all_variants = []
 
-# mcu_list = "RA4M1, RA4W1, RA6M1, RA6M2, RP2040, STM32H747, cc3200, esp32, esp32c3, esp32s2, esp32s3, esp8266, mimxrt, nRF52840, nrf51, nrf52, nrf91, rp2040, samd21, samd51, stm32, stm32f0, stm32f4, stm32f7, stm32g0, stm32g4, stm32h7, stm32l0, stm32l4, stm32wb, stm32wl"
-mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c3, rp2040, rp2350, samd21, samd51, nrf51"
+mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c3, esp32c6, rp2040, rp2350, samd21, samd51, nrf51, nrf52"
 
 for mcu in map(str.strip, mcu_list.split(",")):
     print("Fetching mcu", mcu, end="... ")
@@ -139,7 +138,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
-    ["0.0.4", "0.0.3"],
+    ["0.0.5", "0.0.4"],
     badger_variants,
 )
 
@@ -151,51 +150,97 @@ for variant in badger_variants:
 all_variants += badger_variants
 
 ########################################################
+pimo2350_variants = [
+    {
+        "_id": "pico2_rp2350",
+        "vendor": "Raspberry Pi",
+        "model": "Pico 2",
+    },
+    {
+        "_id": "pico2b_rp2350",
+        "vendor": "Raspberry Pi",
+        "model": "Pico 2 (b)",
+    },
+    {
+        "_id": "pico_plus2_rp2350",
+        "model": "Pico Plus 2",
+    },
+    {
+        "_id": "plasma2350",
+        "model": "Plasma 2350",
+    },
+    {
+        "_id": "tiny2350",
+        "model": "Tiny 2350",
+    },
+]
+
+print(f"Updating {len(pimo2350_variants)} Pimoroni 2350")
+
+add_defaults_and_downloads_to_variants(
+    {
+        "vendor": "Pimoroni",
+        "family": "rp2",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
+    },
+    ["0.0.7"],
+    pimo2350_variants,
+)
+
+for variant in pimo2350_variants:
+    if "title" not in variant:
+        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
+
+
+all_variants += pimo2350_variants
+
+########################################################
 pimoroni_variants = [
     {
-        "_id": "pimoroni-pico",
+        "_id": "pico",
         "vendor": "Raspberry Pi",
         "model": "Pico",
     },
     {
-        "_id": "pimoroni-picolipo_16mb",
+        "_id": "picolipo_16mb",
         "model": "Pimoroni Pico LiPo (16MB)",
     },
     {
-        "_id": "pimoroni-picolipo_4mb",
+        "_id": "picolipo_4mb",
         "model": "Pimoroni Pico LiPo (4MB)",
     },
     {
-        "_id": "pimoroni-picow",
+        "_id": "picow",
         "vendor": "Raspberry Pi",
         "model": "Pico W",
     },
     {
-        "_id": "pimoroni-cosmic_unicorn",
+        "_id": "cosmic_unicorn",
         "model": "Cosmic Unicorn",
     },
     {
-        "_id": "pimoroni-enviro",
+        "_id": "enviro",
         "model": "Enviro",
     },
     {
-        "_id": "pimoroni-galactic_unicorn",
+        "_id": "galactic_unicorn",
         "model": "Galactic Unicorn",
     },
     {
-        "_id": "pimoroni-inky_frame",
+        "_id": "inky_frame",
         "model": "Inky Frame",
     },
     {
-        "_id": "pimoroni-stellar_unicorn",
+        "_id": "stellar_unicorn",
         "model": "Stellar Unicorn",
     },
     {
-        "_id": "pimoroni-tiny2040",
+        "_id": "tiny2040_8mb",
         "model": "Tiny 2040",
     },
     {
-        "_id": "pimoroni-tufty2040",
+        "_id": "tufty2040",
         "model": "Tufty 2040",
     },
 ]
@@ -207,9 +252,9 @@ add_defaults_and_downloads_to_variants(
         "vendor": "Pimoroni",
         "family": "rp2",
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
-        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-micropython.uf2",
+        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
     },
-    ["1.22.2", "1.20.6"],
+    ["1.23.0-1"],
     pimoroni_variants,
 )
 
@@ -347,7 +392,7 @@ save_variants(
 save_variants(
     all_variants,
     ["bin"],
-    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c3"},
+    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c6"},
     "micropython-variants-esptool.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
 )

@@ -6,19 +6,15 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_FEATHER_M0_EXPRESS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M0_EXPRESS-20240105-v1.22.1.uf2"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-v1.24.0-preview\\.\\d+\\.[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-v1.25.0-preview\\.\\d+\\.[a-z0-9]{10}"
     },
     {
         "vendor": "Adafruit",
@@ -27,16 +23,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_FEATHER_M4_EXPRESS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_M4_EXPRESS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -47,16 +39,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_FEATHER_RP2040",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -67,16 +55,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_M0_EXPRESS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M0_EXPRESS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -87,16 +71,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_M4_EXPRESS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_M4_EXPRESS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -107,16 +87,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_ITSYBITSY_RP2040",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_ITSYBITSY_RP2040-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -127,16 +103,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_METRO_M4_EXPRESS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_METRO_M4_EXPRESS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_METRO_M4_EXPRESS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_METRO_M4_EXPRESS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_METRO_M4_EXPRESS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -147,16 +119,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_QTPY_RP2040",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_QTPY_RP2040-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -167,16 +135,12 @@
         "info_url": "https://micropython.org/download/ADAFRUIT_TRINKET_M0",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ADAFRUIT_TRINKET_M0-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -188,16 +152,12 @@
         "info_url": "https://micropython.org/download/ARDUINO_NANO_ESP32",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -209,16 +169,12 @@
         "info_url": "https://micropython.org/download/ARDUINO_NANO_RP2040_CONNECT",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_RP2040_CONNECT-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -229,16 +185,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_S2",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -249,16 +201,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_S3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -269,8 +217,8 @@
         "info_url": "https://micropython.org/download/M5STACK_ATOMS3_LITE",
         "downloads": [
             {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20241010-v1.24.0-preview.409.g82e69df33.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20241025-v1.24.0.uf2"
             }
         ]
     },
@@ -281,16 +229,12 @@
         "info_url": "https://micropython.org/download/GARATRONIC_PYBSTICK26_RP2040",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_RP2040-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -301,16 +245,12 @@
         "info_url": "https://micropython.org/download/SAMD21_XPLAINED_PRO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SAMD21_XPLAINED_PRO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -321,16 +261,12 @@
         "info_url": "https://micropython.org/download/MINISAM_M4",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/MINISAM_M4-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/MINISAM_M4-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/MINISAM_M4-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/MINISAM_M4-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -341,16 +277,12 @@
         "info_url": "https://micropython.org/download/NULLBITS_BIT_C_PRO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/NULLBITS_BIT_C_PRO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/NULLBITS_BIT_C_PRO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/NULLBITS_BIT_C_PRO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/NULLBITS_BIT_C_PRO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -362,12 +294,12 @@
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython-with-badger-os.uf2"
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040-v0.0.5-micropython-with-badger-os.uf2"
             },
             {
-                "version": "0.0.3",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.3/pimoroni-badger2040-v0.0.3-micropython-with-badger-os.uf2"
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -379,12 +311,12 @@
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython.uf2"
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040-v0.0.5-micropython.uf2"
             },
             {
-                "version": "0.0.3",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.3/pimoroni-badger2040-v0.0.3-micropython.uf2"
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython.uf2"
             }
         ]
     },
@@ -396,12 +328,12 @@
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython-with-badger-os.uf2"
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040w-v0.0.5-micropython-with-badger-os.uf2"
             },
             {
-                "version": "0.0.3",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.3/pimoroni-badger2040w-v0.0.3-micropython-with-badger-os.uf2"
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -413,12 +345,12 @@
         "info_url": "https://github.com/pimoroni/badger2040/releases",
         "downloads": [
             {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython.uf2"
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040w-v0.0.5-micropython.uf2"
             },
             {
-                "version": "0.0.3",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.3/pimoroni-badger2040w-v0.0.3-micropython.uf2"
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython.uf2"
             }
         ]
     },
@@ -430,12 +362,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-cosmic_unicorn-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-cosmic_unicorn-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/cosmic_unicorn-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -447,12 +375,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-enviro-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-enviro-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/enviro-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -464,12 +388,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-galactic_unicorn-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-galactic_unicorn-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/galactic_unicorn-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -481,12 +401,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-inky_frame-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-inky_frame-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/inky_frame-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -497,8 +413,8 @@
         "info_url": "https://micropython.org/download/PIMORONI_PICOLIPO",
         "downloads": [
             {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/PIMORONI_PICOLIPO-20241025-v1.24.0.uf2"
             }
         ]
     },
@@ -510,12 +426,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picolipo_16mb-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picolipo_16mb-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/picolipo_16mb-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -527,12 +439,34 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picolipo_4mb-v1.22.2-micropython.uf2"
-            },
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/picolipo_4mb-v1.23.0-1-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico Plus 2",
+        "family": "rp2",
+        "title": "Pico Plus 2 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "downloads": [
             {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picolipo_4mb-v1.20.6-micropython.uf2"
+                "version": "0.0.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v0.0.7/pico_plus2_rp2350-v0.0.7-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma 2350",
+        "family": "rp2",
+        "title": "Plasma 2350 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "downloads": [
+            {
+                "version": "0.0.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v0.0.7/plasma2350-v0.0.7-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -544,12 +478,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-stellar_unicorn-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-stellar_unicorn-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/stellar_unicorn-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -561,12 +491,21 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-tiny2040-v1.22.2-micropython.uf2"
-            },
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/tiny2040_8mb-v1.23.0-1-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Tiny 2350",
+        "family": "rp2",
+        "title": "Tiny 2350 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "downloads": [
             {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-tiny2040-v1.20.6-micropython.uf2"
+                "version": "0.0.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v0.0.7/tiny2350-v0.0.7-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -577,16 +516,12 @@
         "info_url": "https://micropython.org/download/PIMORONI_TINY2040",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/PIMORONI_TINY2040-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -598,12 +533,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-tufty2040-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-tufty2040-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/tufty2040-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -615,16 +546,12 @@
         "info_url": "https://micropython.org/download/POLOLU_3PI_2040_ROBOT",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/POLOLU_3PI_2040_ROBOT-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/POLOLU_3PI_2040_ROBOT-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/POLOLU_3PI_2040_ROBOT-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/POLOLU_3PI_2040_ROBOT-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -664,16 +591,12 @@
         "info_url": "https://micropython.org/download/POLOLU_ZUMO_2040_ROBOT",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/POLOLU_ZUMO_2040_ROBOT-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/POLOLU_ZUMO_2040_ROBOT-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/POLOLU_ZUMO_2040_ROBOT-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/POLOLU_ZUMO_2040_ROBOT-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -701,16 +624,12 @@
         "info_url": "https://micropython.org/download/RPI_PICO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/RPI_PICO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/RPI_PICO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/RPI_PICO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/RPI_PICO-20240105-v1.22.1.uf2"
             }
         ],
         "popular": true
@@ -723,12 +642,47 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-pico-v1.22.2-micropython.uf2"
-            },
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/pico-v1.23.0-1-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Raspberry Pi",
+        "model": "Pico 2",
+        "family": "rp2",
+        "info_url": "https://micropython.org/download/RPI_PICO2",
+        "downloads": [
             {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-pico-v1.20.6-micropython.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/RPI_PICO2-20241025-v1.24.0.uf2"
+            }
+        ],
+        "popular": true
+    },
+    {
+        "vendor": "Raspberry Pi",
+        "model": "Pico 2 (b)",
+        "family": "rp2",
+        "title": "Pico 2 (b) (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "downloads": [
+            {
+                "version": "0.0.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v0.0.7/pico2b_rp2350-v0.0.7-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Raspberry Pi",
+        "model": "Pico 2",
+        "family": "rp2",
+        "title": "Pico 2 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
+        "downloads": [
+            {
+                "version": "0.0.7",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v0.0.7/pico2_rp2350-v0.0.7-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -740,16 +694,12 @@
         "info_url": "https://micropython.org/download/RPI_PICO_W",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/RPI_PICO_W-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/RPI_PICO_W-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/RPI_PICO_W-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/RPI_PICO_W-20240105-v1.22.1.uf2"
             }
         ],
         "popular": true
@@ -762,27 +712,26 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.22.2",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2"
-            },
-            {
-                "version": "1.20.6",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.20.6/pimoroni-picow-v1.20.6-micropython.uf2"
+                "version": "1.23.0-1",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.23.0-1/picow-v1.23.0-1-pimoroni-micropython.uf2"
             }
         ]
     },
     {
-        "vendor": "Raspberry Pi",
-        "model": "Pico2",
-        "family": "rp2",
-        "info_url": "https://micropython.org/download/RPI_PICO2",
+        "vendor": "Seeed Studio",
+        "model": "SEEED XIAO nRF52840 Sense",
+        "family": "nrf52",
+        "info_url": "https://micropython.org/download/SEEED_XIAO_NRF52",
         "downloads": [
             {
-                "version": "20240923-v1.24.0-preview.321.g0ff782975",
-                "url": "https://micropython.org/resources/firmware/RPI_PICO2-20240923-v1.24.0-preview.321.g0ff782975.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_NRF52-20241025-v1.24.0.uf2"
+            },
+            {
+                "version": "1.23.0",
+                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_NRF52-20240602-v1.23.0.uf2"
             }
-        ],
-        "popular": true
+        ]
     },
     {
         "vendor": "Seeed Studio",
@@ -791,16 +740,12 @@
         "info_url": "https://micropython.org/download/SEEED_XIAO_SAMD21",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_SAMD21-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SEEED_XIAO_SAMD21-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_SAMD21-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SEEED_XIAO_SAMD21-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -811,16 +756,12 @@
         "info_url": "https://micropython.org/download/SEEED_WIO_TERMINAL",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SEEED_WIO_TERMINAL-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -831,16 +772,12 @@
         "info_url": "https://micropython.org/download/SIL_RP2040_SHIM",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SIL_RP2040_SHIM-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SIL_RP2040_SHIM-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SIL_RP2040_SHIM-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SIL_RP2040_SHIM-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -851,16 +788,12 @@
         "info_url": "https://micropython.org/download/SPARKFUN_PROMICRO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_PROMICRO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -872,16 +805,12 @@
         "info_url": "https://micropython.org/download/SPARKFUN_SAMD51_THING_PLUS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_SAMD51_THING_PLUS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -892,16 +821,12 @@
         "info_url": "https://micropython.org/download/SPARKFUN_THINGPLUS",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/SPARKFUN_THINGPLUS-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -912,16 +837,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS2",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -932,16 +853,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS2NEO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -952,16 +869,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -972,8 +885,8 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS3NEO",
         "downloads": [
             {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20241025-v1.24.0.uf2"
             }
         ]
     },
@@ -984,16 +897,12 @@
         "info_url": "https://micropython.org/download/nanos3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/nanos3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/nanos3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/nanos3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/nanos3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1004,8 +913,8 @@
         "info_url": "https://micropython.org/download/omgs3",
         "downloads": [
             {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/omgs3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/omgs3-20241025-v1.24.0.uf2"
             }
         ]
     },
@@ -1016,16 +925,12 @@
         "info_url": "https://micropython.org/download/UM_PROS3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_PROS3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1036,8 +941,8 @@
         "info_url": "https://micropython.org/download/UM_RGBTOUCH_MINI",
         "downloads": [
             {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20241010-v1.24.0-preview.409.g82e69df33.uf2"
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20241025-v1.24.0.uf2"
             }
         ]
     },
@@ -1048,16 +953,12 @@
         "info_url": "https://micropython.org/download/UM_TINYS2",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_TINYS2-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1068,16 +969,12 @@
         "info_url": "https://micropython.org/download/UM_TINYS3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_TINYS3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1088,16 +985,12 @@
         "info_url": "https://micropython.org/download/UM_TINYWATCHS3",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1109,16 +1002,12 @@
         "info_url": "https://micropython.org/download/WEACTSTUDIO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/WEACTSTUDIO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1129,16 +1018,12 @@
         "info_url": "https://micropython.org/download/LOLIN_S2_MINI",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1149,16 +1034,12 @@
         "info_url": "https://micropython.org/download/LOLIN_S2_PICO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1170,16 +1051,12 @@
         "info_url": "https://micropython.org/download/W5100S_EVB_PICO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/W5100S_EVB_PICO-20240105-v1.22.1.uf2"
             }
         ]
     },
@@ -1191,16 +1068,12 @@
         "info_url": "https://micropython.org/download/W5500_EVB_PICO",
         "downloads": [
             {
+                "version": "1.24.0",
+                "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20241025-v1.24.0.uf2"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20240602-v1.23.0.uf2"
-            },
-            {
-                "version": "20241010-v1.24.0-preview.409.g82e69df33",
-                "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20241010-v1.24.0-preview.409.g82e69df33.uf2"
-            },
-            {
-                "version": "1.22.1",
-                "url": "https://micropython.org/resources/firmware/W5500_EVB_PICO-20240105-v1.22.1.uf2"
             }
         ]
     }
