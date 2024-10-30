@@ -38,6 +38,8 @@ from thonny.config_ui import ConfigurationDialog
 from thonny.custom_notebook import CustomNotebook, CustomNotebookPage
 from thonny.editors import Editor, EditorNotebook, is_local_path
 from thonny.languages import tr
+from thonny.lsp_proxy import LanguageServerProxy
+from thonny.lsp_types import InitializeParams, LspResponse
 from thonny.misc_utils import (
     copy_to_clipboard,
     get_menu_char,
@@ -136,6 +138,7 @@ class Workbench(tk.Tk):
         self._is_portable = is_portable()
         self._event_queue = queue.Queue()  # Can be appended to by threads
         self._event_polling_id = None
+        self._active_language_server_proxy: Optional[LanguageServerProxy] = None
         self.initializing = True
 
         self._secrets: Dict[str, str] = {}
@@ -160,6 +163,7 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
+        self._language_server_proxy_classes = {}  # type: Dict[str, Type[LanguageServerProxy]]
         self.assistants: Dict[str, assistance.Assistant] = {}
         self._commands = []  # type: List[Dict[str, Any]]
         self._notebook_drop_targets: List[tk.Widget] = []
@@ -275,6 +279,7 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         self.event_generate("WorkbenchReady")
         self.poll_events()
+        self.start_or_restart_language_server()
 
     def poll_events(self) -> None:
         if self._event_queue is None or self._closing:
@@ -380,6 +385,22 @@ class Workbench(tk.Tk):
     def update_debug_mode(self):
         os.environ["THONNY_DEBUG"] = str(self.get_option("general.debug_mode", False))
         thonny.set_logging_level()
+
+    def start_or_restart_language_server(self) -> None:
+        if self._active_language_server_proxy is not None:
+            self._active_language_server_proxy.request_shutdown(self.on_language_server_shutdown)
+
+        # TODO: make it configurable
+        for name in self._language_server_proxy_classes:
+            class_ = self._language_server_proxy_classes[name]
+            self._active_language_server_proxy = class_()
+            break
+
+    def on_language_server_shutdown(self, response: LspResponse[None]) -> None:
+        if response.get_error() is None:
+            logger.info("Language server has been shut down")
+        else:
+            logger.error("Language server shutdown error: %r", response.get_error())
 
     def _init_language(self) -> None:
         """Initialize language."""
@@ -1404,6 +1425,9 @@ class Workbench(tk.Tk):
 
     def add_assistant(self, name: str, assistant: assistance.Assistant):
         self.assistants[name.lower()] = assistant
+
+    def add_language_server_proxy(self, name: str, proxy_class: Type[LanguageServerProxy]):
+        self._language_server_proxy_classes[name] = proxy_class
 
     def add_backend(
         self,

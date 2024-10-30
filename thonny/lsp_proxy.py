@@ -1,14 +1,17 @@
 # Adapted from https://github.com/predragnikolic/OLSP/
 
 import json
+import os
 import subprocess
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from logging import getLogger
 from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from thonny import get_workbench, lsp_types
-from thonny.lsp_types import ErrorCodes, LspResponse, ResponseError
+from thonny.lsp_types import ErrorCodes, InitializeResult, LspResponse, ResponseError
+from thonny.running import create_frontend_python_process
 
 JSON_RPC_LEN_HEADER_PREFIX = b"Content-Length: "
 JSON_RPC_TYPE_HEADER_PREFIX = b"Content-Type: "
@@ -39,14 +42,48 @@ class JsonRpcError(RuntimeError):
     pass
 
 
-class LanguageServerProxy:
-    def __init__(self):
+class LanguageServerProxy(ABC):
+    def __init__(self, initialize_params: lsp_types.InitializeParams):
         self._proc: Optional[subprocess.Popen] = None
         self._last_request_id: int = 0
         self._pending_callbacks: Dict[int, Callable] = {}
         self._request_handlers: Dict[str, Callable] = {}
         self._notification_handlers: Dict[str, List[Callable]] = {}
         self._unprocessed_messages_from_server: Queue[Dict] = Queue()
+
+        self.server_capabilities: Optional[lsp_types.ServerCapabilities] = None
+        self.server_info: Optional[lsp_types.ServerCapabilities] = None
+
+        logger.info("Starting language server")
+        self._start_server()
+        logger.info("Initializing language server")
+        self._request_initialize(initialize_params, self._handle_initialize_response)
+
+    @abstractmethod
+    def _start_server(self) -> None: ...
+
+    def _handle_initialize_response(self, response: LspResponse[InitializeResult]):
+        result = response.get_result_or_raise()
+        self.server_capabilities = result["capabilities"]
+        self.server_info = result["serverInfo"]
+
+        logger.info("Server initialized. Server info: %s", self.server_info)
+        logger.info("Server capabilities: %s", self.server_capabilities)
+
+    def is_initialized(self) -> bool:
+        return self.server_capabilities is not None
+
+    def _request_initialize(
+        self,
+        params: lsp_types.InitializeParams,
+        callback: Callable[[LspResponse[lsp_types.InitializeResult]], None],
+    ) -> None:
+        """The initialize request is sent from the client to the server.
+        It is sent once as the request after starting up the server.
+        The requests parameter is of type {@link InitializeParams}
+        the response if of type {@link InitializeResult} of a Thenable that
+        resolves to such."""
+        return self._send_request("initialize", params, callback)
 
     def request_implementation(
         self,
@@ -333,18 +370,6 @@ class LanguageServerProxy:
 
         @since 3.17.0"""
         return self._send_request("workspace/diagnostic", params, callback)
-
-    def request_initialize(
-        self,
-        params: lsp_types.InitializeParams,
-        callback: Callable[[LspResponse[lsp_types.InitializeResult]], None],
-    ) -> None:
-        """The initialize request is sent from the client to the server.
-        It is sent once as the request after starting up the server.
-        The requests parameter is of type {@link InitializeParams}
-        the response if of type {@link InitializeResult} of a Thenable that
-        resolves to such."""
-        return self._send_request("initialize", params, callback)
 
     def request_shutdown(self, callback: Callable[[LspResponse[None]], None]) -> None:
         """A shutdown request is sent from the client to the server.
