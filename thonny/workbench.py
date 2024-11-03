@@ -4,6 +4,7 @@ import collections
 import importlib
 import json
 import os.path
+import pathlib
 import pkgutil
 import platform
 import queue
@@ -39,7 +40,21 @@ from thonny.custom_notebook import CustomNotebook, CustomNotebookPage
 from thonny.editors import Editor, EditorNotebook, is_local_path
 from thonny.languages import tr
 from thonny.lsp_proxy import LanguageServerProxy
-from thonny.lsp_types import InitializeParams, LspResponse
+from thonny.lsp_types import (
+    ClientCapabilities,
+    ClientInfo,
+    DiagnosticWorkspaceClientCapabilities,
+    GeneralClientCapabilities,
+    InitializeParams,
+    LspResponse,
+    PositionEncodingKind,
+    PublishDiagnosticsClientCapabilities,
+    TextDocumentClientCapabilities,
+    TextDocumentSyncClientCapabilities,
+    WindowClientCapabilities,
+    WorkspaceClientCapabilities,
+    WorkspaceFolder,
+)
 from thonny.misc_utils import (
     copy_to_clipboard,
     get_menu_char,
@@ -138,7 +153,7 @@ class Workbench(tk.Tk):
         self._is_portable = is_portable()
         self._event_queue = queue.Queue()  # Can be appended to by threads
         self._event_polling_id = None
-        self._active_language_server_proxy: Optional[LanguageServerProxy] = None
+        self._active_lsp: Optional[LanguageServerProxy] = None
         self.initializing = True
 
         self._secrets: Dict[str, str] = {}
@@ -279,7 +294,11 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         self.event_generate("WorkbenchReady")
         self.poll_events()
-        self.start_or_restart_language_server()
+        try:
+            self.start_or_restart_language_server()
+        except Exception:
+            logger.exception("Could not start language server")
+            # self.report_exception() # would hang, at least on macOS TODO
 
     def poll_events(self) -> None:
         if self._event_queue is None or self._closing:
@@ -386,21 +405,60 @@ class Workbench(tk.Tk):
         os.environ["THONNY_DEBUG"] = str(self.get_option("general.debug_mode", False))
         thonny.set_logging_level()
 
+    def get_language_server_proxy(self) -> Optional[LanguageServerProxy]:
+        return self._active_lsp
+
     def start_or_restart_language_server(self) -> None:
-        if self._active_language_server_proxy is not None:
-            self._active_language_server_proxy.request_shutdown(self.on_language_server_shutdown)
+        if self._active_lsp is not None:
+            self.shut_down_language_server()
 
         # TODO: make it configurable
-        for name in self._language_server_proxy_classes:
-            class_ = self._language_server_proxy_classes[name]
-            self._active_language_server_proxy = class_()
-            break
+        from thonny.plugins.pyright import PyrightProxy
 
-    def on_language_server_shutdown(self, response: LspResponse[None]) -> None:
-        if response.get_error() is None:
-            logger.info("Language server has been shut down")
-        else:
-            logger.error("Language server shutdown error: %r", response.get_error())
+        # from thonny.plugins.ruff import RuffProxy
+        self._active_lsp = PyrightProxy(
+            InitializeParams(
+                capabilities=ClientCapabilities(
+                    workspace=WorkspaceClientCapabilities(
+                        applyEdit=None,
+                        codeLens=None,
+                        fileOperations=None,
+                        inlineValue=None,
+                        inlayHint=None,
+                        diagnostics=None,
+                    ),
+                    textDocument=TextDocumentClientCapabilities(
+                        publishDiagnostics=PublishDiagnosticsClientCapabilities(
+                            relatedInformation=True
+                        ),
+                        synchronization=TextDocumentSyncClientCapabilities(),
+                    ),
+                    notebookDocument=None,
+                    window=WindowClientCapabilities(
+                        workDoneProgress=None,
+                        showMessage=None,
+                        showDocument=None,
+                    ),
+                    general=GeneralClientCapabilities(
+                        staleRequestSupport=None,
+                        regularExpressions=None,
+                        markdown=None,
+                        positionEncodings=[PositionEncodingKind.UTF16],
+                    ),
+                ),
+                processId=os.getpid(),
+                clientInfo=ClientInfo(name="Thonny", version=thonny.get_version()),
+                locale=self.get_option("general.language"),
+                # workspaceFolders=[WorkspaceFolder(
+                #    uri=pathlib.Path(self.get_local_cwd()).as_uri(),
+                #    name="workspacename"
+                # )],
+            )
+        )
+
+    def shut_down_language_server(self):
+        if self._active_lsp is not None:
+            self._active_lsp.shut_down()
 
     def _init_language(self) -> None:
         """Initialize language."""
@@ -2638,6 +2696,7 @@ class Workbench(tk.Tk):
             return
 
         self._closing = True
+        self.shut_down_language_server()
         try:
             from thonny.plugins import replayer
 

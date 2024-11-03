@@ -4,11 +4,15 @@ import dataclasses
 import inspect
 import json
 import subprocess
+import threading
+import time
 import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, is_dataclass
+from enum import Enum, StrEnum
 from logging import getLogger
 from queue import Queue
+from turtledemo.penrose import start
 from types import NoneType, UnionType
 from typing import (
     Any,
@@ -24,7 +28,13 @@ from typing import (
 )
 
 from thonny import get_workbench, lsp_types
-from thonny.lsp_types import ErrorCodes, InitializeResult, LspResponse, ResponseError
+from thonny.lsp_types import (
+    ErrorCodes,
+    InitializedParams,
+    InitializeResult,
+    LspResponse,
+    ResponseError,
+)
 
 JSON_RPC_LEN_HEADER_PREFIX = b"Content-Length: "
 JSON_RPC_TYPE_HEADER_PREFIX = b"Content-Type: "
@@ -58,6 +68,8 @@ class JsonRpcError(RuntimeError):
 class LanguageServerProxy(ABC):
     def __init__(self, initialize_params: lsp_types.InitializeParams):
         self._proc: Optional[subprocess.Popen] = None
+        self._invalidated: bool = False
+        self._shutdown_accepted: bool = False
         self._last_request_id: int = 0
         self._pending_handlers: Dict[int, Callable] = {}
         self._request_handlers: Dict[str, Callable] = {}
@@ -68,12 +80,15 @@ class LanguageServerProxy(ABC):
         self.server_info: Optional[lsp_types.ServerCapabilities] = None
 
         logger.info("Starting language server")
-        self._start_server()
+        self._proc = self._create_server_process()
+        self._keep_processing_messages_from_server()
+        threading.Thread(target=self._listen_stdout, daemon=True).start()
+        threading.Thread(target=self._listen_stderr, daemon=True).start()
         logger.info("Initializing language server")
         self._request_initialize(initialize_params, self._handle_initialize_response)
 
     @abstractmethod
-    def _start_server(self) -> None: ...
+    def _create_server_process(self) -> subprocess.Popen[bytes]: ...
 
     def _handle_initialize_response(self, response: LspResponse[InitializeResult]):
         result = response.get_result_or_raise()
@@ -83,8 +98,79 @@ class LanguageServerProxy(ABC):
         logger.info("Server initialized. Server info: %s", self.server_info)
         logger.info("Server capabilities: %s", self.server_capabilities)
 
-    def is_initialized(self) -> bool:
-        return self.server_capabilities is not None
+        self.notify_initialized(InitializedParams())
+
+        get_workbench().event_generate("LanguageServerInitialized", self)
+
+    def is_ready(self) -> bool:
+        return self._server_process_alive() and self.server_capabilities is not None
+
+    def _check_ready(self) -> None:
+        if not self.is_ready():
+            if not self._server_process_alive():
+                raise RuntimeError("Server has been closed")
+
+            if self.server_capabilities is None:
+                raise RuntimeError("Server hasn't been initialized yet")
+
+    def _invalidate(self):
+        if not self._invalidated:
+            self._invalidated = True
+            get_workbench().event_generate("LanguageServerInvalidated", self)
+
+    def shut_down(self):
+        self._invalidate()
+        if not self._server_process_alive():
+            logger.warning("Language server already closed")
+            return
+        """
+        basedpyright does not exit after successful shutdown
+        timeout_for_shutdown = 2
+        self.request_shutdown(self._on_shut_down_response)
+        start_time = time.time()
+        while time.time() - start_time < timeout_for_shutdown:
+            time.sleep(0.1)
+
+            if not self._server_process_alive():
+                logger.info("Shutdown completed normally")
+                return
+
+            if self._shutdown_accepted:
+                # basedpyright server does not close after shutdown
+                time.sleep(0.1)
+                if self._server_process_alive():
+                    logger.warning("Shutdown accepted but not completed. Will terminate")
+                    break
+        else:
+            logger.warning(f"Shutdown not accepted in {timeout_for_shutdown} seconds. Will terminate.")
+        """
+
+        try:
+            self._proc.terminate()
+        except Exception:
+            logger.exception("Problem when terminating language server process")
+            return
+
+        termination_timeout = 1
+        start_time = time.time()
+        while time.time() - start_time < termination_timeout:
+            time.sleep(0.1)
+            if not self._server_process_alive():
+                logger.info("Termination completed normally")
+                return
+
+        logger.warning(f"Termination not completed in {termination_timeout} seconds. Using kill.")
+        try:
+            self._proc.kill()
+        except Exception:
+            logger.exception("Problem when killing language server process")
+
+    def _on_shut_down_response(self, response: LspResponse[None]):
+        if response.get_error() is None:
+            self._shutdown_accepted = True
+            logger.info("Language server has been shut down")
+        else:
+            logger.error("Language server shutdown error: %r", response.get_error())
 
     def _request_initialize(
         self,
@@ -901,18 +987,29 @@ class LanguageServerProxy(ABC):
 
         self._request_handlers[method] = handler
 
+    def _keep_processing_messages_from_server(self, arg=None) -> None:
+        if self._server_process_alive():
+            self._process_messages_from_server()
+            get_workbench().after(100, self._keep_processing_messages_from_server)
+        else:
+            logger.info("Stopping message processing")
+
     def _process_messages_from_server(self) -> None:
         while not self._unprocessed_messages_from_server.empty():
             msg = self._unprocessed_messages_from_server.get()
             try:
                 self._handle_message_from_server(msg)
             except Exception:
+                logger.exception("Failed processing message %r", msg)
                 # TODO: make it less invasive?
                 get_workbench().report_exception()
 
     def _send_request(
         self, method: str, params: Any, handler: Callable[[LspResponse[Any]], None]
     ) -> None:
+        if method != "initialize":
+            self._check_ready()
+
         request_id = self._last_request_id + 1
         self._last_request_id = request_id
         self._pending_handlers[request_id] = handler
@@ -926,6 +1023,8 @@ class LanguageServerProxy(ABC):
         )
 
     def _send_notification(self, method: str, params: Any) -> None:
+        self._check_ready()
+
         self._send_json_rpc_message(
             {"jsonrpc": "2.0", "method": method, "params": _convert_to_json_value(params)}
         )
@@ -933,6 +1032,8 @@ class LanguageServerProxy(ABC):
     def _send_response(
         self, request_id: Union[str, int], result: Any, error: Optional[ResponseError] = None
     ) -> None:
+        self._check_ready()
+
         msg = {
             "jsonrpc": "2.0",
             "id": request_id,
@@ -945,6 +1046,7 @@ class LanguageServerProxy(ABC):
 
     def _send_json_rpc_message(self, msg: Dict) -> None:
         json_bytes = json.dumps(msg).encode("utf-8")
+        print("SEnding", json_bytes)
         self._proc.stdin.write(JSON_RPC_LEN_HEADER_PREFIX)
         self._proc.stdin.write(str(len(json_bytes)).encode("utf-8"))
         self._proc.stdin.write(b"\r\n\r\n")
@@ -956,11 +1058,26 @@ class LanguageServerProxy(ABC):
 
     def _listen_stdout(self) -> None:
         """Runs in a background thread"""
-        while self._server_process_alive():
-            msg = _read_json_rpc_message(self._proc)
-            self._unprocessed_messages_from_server.put(msg)
+        try:
+            while self._server_process_alive():
+                msg = _read_json_rpc_message(self._proc)
+                self._unprocessed_messages_from_server.put(msg)
+        except Exception:
+            logger.exception("_listen_stdout failed")
+        logger.info("_listen_stdout done")
+
+    def _listen_stderr(self) -> None:
+        """Runs in a background thread"""
+        try:
+            while self._server_process_alive():
+                line = self._proc.stderr.readline()
+                logger.error("Language server STDERR: %s", line.decode("utf-8"))
+        except Exception:
+            logger.exception("_listen_stderr failed")
+        logger.info("_listen_stderr done")
 
     def _handle_message_from_server(self, msg: Dict) -> None:
+        logger.debug("Handling message from server: %r", msg)
         method = msg.get("method")
         result = msg.get("result")
         error = msg.get("error")
@@ -990,7 +1107,7 @@ class LanguageServerProxy(ABC):
                 LspResponse(
                     request_id=request_id,
                     result=_convert_from_json_value(result, expected_result_type),
-                    error=_convert_from_json_value(error, Optional[LspResponse]),
+                    error=_convert_from_json_value(error, Optional[lsp_types.ResponseError]),
                 )
             )
         else:
@@ -1044,22 +1161,23 @@ def _read_json_rpc_message(proc: subprocess.Popen) -> Optional[Dict]:
 
         if line == b"":
             # separator of headers and content
-            break
+            pass
         elif line.startswith(JSON_RPC_LEN_HEADER_PREFIX):
             line = line[len(JSON_RPC_LEN_HEADER_PREFIX) :]
             if not line.isdigit():
                 raise JsonRpcError("Bad header: size is not int")
             message_size = int(line)
+            continue
         elif line.startswith(JSON_RPC_TYPE_HEADER_PREFIX):
-            pass
+            continue
         else:
             raise JsonRpcError(f"Unknown header {line!r}")
 
         if not message_size:
             raise JsonRpcError("Bad header: missing size")
 
-        jsonrpc_res = proc.stdout.read(message_size)
-        return json.loads(jsonrpc_res)
+        jsonrpc_payload = proc.stdout.read(message_size)
+        return json.loads(jsonrpc_payload)
 
 
 def _get_function_arg_type(function: Callable, index: int = 0) -> Type:
@@ -1153,6 +1271,8 @@ def _convert_from_json_value(value: Any, target_type: Type):
                 )
 
         return target_type(**converted_fields)
+    elif issubclass(target_type, Enum):
+        return target_type(value)
     else:
         raise RuntimeError(f"Unexpected type {target_type}")
 
@@ -1162,48 +1282,24 @@ def _omit_nulls_dict(value):
     return {key: value for (key, value) in result.items() if value is not None}
 
 
-def _convert_to_json_value(value) -> Any:
+def _convert_to_json_value(value, omit_nones_in_dataclasses: bool = True) -> Any:
     if isinstance(value, (str, int, float, bool, type(None))):
         return value
     elif isinstance(value, dict):
         # assuming it is already json-compatible
         return value
     elif isinstance(value, list):
-        return [_convert_to_json_value(el) for el in value]
+        return [_convert_to_json_value(el, omit_nones_in_dataclasses) for el in value]
+    elif isinstance(value, Enum):
+        return value.value
     elif is_dataclass(value):
-        return dataclasses.asdict(value, dict_factory=_omit_nulls_dict)
+        # dataclasses.as_dict is tempting, but it wouldn't convert enums
+        result = {}
+        for field in dataclasses.fields(value):
+            field_name = field.name
+            field_value = getattr(value, field_name)
+            if not omit_nones_in_dataclasses or field_value is not None:
+                result[field_name] = _convert_to_json_value(field_value, omit_nones_in_dataclasses)
+        return result
     else:
         raise TypeError(f"Unexpected type {type(value)}")
-
-
-if __name__ == "__main__":
-
-    pos = lsp_types.Position(**{"line": 1, "character": 1})
-    print(pos)
-
-    res = _convert_from_json_value({"line": 1, "character": 1}, lsp_types.Position)
-    print(res)
-
-    _result = _convert_from_json_value(
-        {
-            "start": {"line": 1, "character": 1},
-            "end": {"line": 2, "character": 2},
-        },
-        lsp_types.Range,
-    )
-    print(_result)
-
-    _result = _convert_from_json_value(
-        {
-            "range": {
-                "start": {"line": 1, "character": 1},
-                "end": {"line": 2, "character": 2},
-            },
-            "variableName": "plaahh",
-            "caseSensitiveLookup": False,
-        },
-        lsp_types.InlineValue,
-    )
-    print(_result)
-    _result.range.end.character = None
-    print(_convert_to_json_value(_result))

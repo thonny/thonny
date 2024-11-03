@@ -431,6 +431,11 @@ class CodeActionKind(Enum):
 
     @since 3.15.0 """
 
+    SourceFixAllRuff = "source.fixAll.ruff"
+    NotebookSourceFixAllRuff = "notebook.source.fixAll.ruff"
+    SourceOrganizeImportsRuff = "source.organizeImports.ruff"
+    NotebookSourceOrganizeImportsRuff = "notebook.source.organizeImports.ruff"
+
 
 class TraceValues(Enum):
     Off = "off"
@@ -703,7 +708,7 @@ WorkspaceDocumentDiagnosticReport = Union[
 @since 3.17.0 """
 
 TextDocumentContentChangeEvent = Union[
-    "__TextDocumentContentChangeEvent_Type_1", "__TextDocumentContentChangeEvent_Type_2"
+    "RangedTextDocumentContentChangeEvent", "WholeTextDocumentContentChangeEvent"
 ]
 """ An event describing a change to a text document. If only a text is provided
 it is considered to be the full content of the document. """
@@ -1828,7 +1833,7 @@ class InitializeParams:
 
     Is `null` if the process has not been started by another process.
     If the parent process is not alive then the server should exit. """
-    clientInfo: Optional["___InitializeParams_clientInfo_Type_1"] = None
+    clientInfo: Optional["ClientInfo"] = None
     """ Information about the client
 
     @since 3.15.0 """
@@ -6141,7 +6146,7 @@ class __SignatureHelpClientCapabilities_signatureInformation_parameterInformatio
 
 
 @dataclass
-class __TextDocumentContentChangeEvent_Type_1:
+class RangedTextDocumentContentChangeEvent:
     range: "Range"
     """ The range of the document that changed. """
     text: str
@@ -6153,7 +6158,7 @@ class __TextDocumentContentChangeEvent_Type_1:
 
 
 @dataclass
-class __TextDocumentContentChangeEvent_Type_2:
+class WholeTextDocumentContentChangeEvent:
     text: str
     """ The new text of the whole document. """
 
@@ -6228,7 +6233,7 @@ class __WorkspaceSymbol_location_Type_1:
 
 
 @dataclass
-class ___InitializeParams_clientInfo_Type_1:
+class ClientInfo:
     name: str
     """ The name of the client as defined by the client. """
     version: Optional[str] = None

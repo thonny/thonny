@@ -8,12 +8,13 @@ from thonny.running import create_frontend_python_process
 
 class PyrightProxy(LanguageServerProxy):
 
-    def _start_server(self) -> None:
-        self._proc = create_frontend_python_process(
-            ["-m", "basedpyright-langserver", "--stdio"],
+    def _create_server_process(self) -> subprocess.Popen[bytes]:
+        return create_frontend_python_process(
+            ["-c", "from basedpyright import langserver; langserver.main()", "--stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            universal_newlines=False,
         )
 
 

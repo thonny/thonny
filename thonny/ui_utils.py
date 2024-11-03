@@ -735,7 +735,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             if index2 is not None:
                 concrete_index2 = self.index(index2)
             else:
-                concrete_index2 = None
+                concrete_index2 = self.index(index1 + " +1c")
 
             chars = self.get(index1, index2)
             self._last_event_changed_line_count = "\n" in chars

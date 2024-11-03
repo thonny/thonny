@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 import os.path
+import pathlib
 import re
 import sys
+import time
 import tkinter as tk
 import traceback
 from _tkinter import TclError
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Tuple, Union
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
@@ -25,6 +27,17 @@ from thonny.common import (
 )
 from thonny.custom_notebook import CustomNotebook, CustomNotebookPage, CustomNotebookTab
 from thonny.languages import tr
+from thonny.lsp_proxy import LanguageServerProxy
+from thonny.lsp_types import (
+    DidChangeTextDocumentParams,
+    DidOpenNotebookDocumentParams,
+    DidOpenTextDocumentParams,
+    Position,
+    Range,
+    RangedTextDocumentContentChangeEvent,
+    TextDocumentItem,
+    VersionedTextDocumentIdentifier,
+)
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import (
@@ -40,6 +53,7 @@ _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde"), (tr("all files")
 
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
 PYTHONLIKE_EXTENSIONS = set()
+DEBOUNCE_SECONDS = 1
 
 logger = getLogger(__name__)
 
@@ -137,25 +151,36 @@ class BaseEditor(ttk.Frame):
 class Editor(BaseEditor):
     def __init__(self, master):
         assert isinstance(master, EditorNotebook)
+        self._ls_proxy: Optional[LanguageServerProxy] = None
         self.containing_notebook = master  # type: EditorNotebook
         super().__init__(master, propose_remove_line_numbers=True)
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
         )
 
+        self._last_change_time: float = 0
+        self._unpublished_incremental_changes = []
+        self._content_at_server: Optional[str] = None  # for validating incremental updates
+
+        self._last_published_version: Optional[int] = None
+
         self._last_known_mtime = None
 
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
+        get_workbench().bind("TextInsert", self._register_text_change, True)
+        get_workbench().bind("TextDelete", self._register_text_change, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
+        get_workbench().bind("LanguageServerInitialized", self._language_server_initialized, True)
+        get_workbench().bind("LanguageServerInvalidated", self._language_server_invalidated, True)
 
         self.update_appearance()
 
-    def get_content(self) -> str:
-        return self._code_view.get_content()
+    def get_content(self, up_to_end=False) -> str:
+        return self._code_view.get_content(up_to_end=up_to_end)
 
     def set_filename(self, path):
         self._filename = path
@@ -267,6 +292,7 @@ class Editor(BaseEditor):
             )
             return False
 
+        self._try_connect_to_language_server()
         self.update_appearance()
         self._update_file_source()
         return True
@@ -599,6 +625,18 @@ class Editor(BaseEditor):
         if self.containing_notebook.has_content(self):
             self.update_title()
 
+    def _register_text_change(self, event):
+        if self._code_view.text is not event["text_widget"]:
+            return
+
+        self._last_change_time = time.time()
+
+        if self._last_published_version is not None:
+            # meaning the changes should be collected
+            self._unpublished_incremental_changes.append(event)
+
+            self.after(DEBOUNCE_SECONDS * 1000, self._consider_sending_changes_to_server)
+
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
@@ -634,6 +672,138 @@ class Editor(BaseEditor):
                 logger.warning("update_file_source: no proxy, leaving as is")
         else:
             self._file_source = "-"  # should not match any machine id
+
+    def _language_server_initialized(self, lsp: LanguageServerProxy) -> None:
+        self._try_connect_to_language_server()
+
+    def _language_server_invalidated(self, lsp: LanguageServerProxy) -> None:
+        self._ls_proxy = None
+
+    def _try_connect_to_language_server(self):
+        if not is_local_path(self._filename):
+            # TODO
+            return
+
+        current_ls_proxy = get_workbench().get_language_server_proxy()
+        if self._ls_proxy == current_ls_proxy:
+            return
+
+        if current_ls_proxy is None:
+            logger.warning("Missed earlier language server invalidation, doing it now")
+            self._ls_proxy = None
+            return
+
+        logger.info(f"Connecting {self._filename} to language server")
+        version = 1
+        current_content = self.get_content(up_to_end=True)
+        current_ls_proxy.notify_did_open_text_document(
+            DidOpenTextDocumentParams(
+                textDocument=TextDocumentItem(
+                    version=version,
+                    uri=self.get_uri(),
+                    text=current_content,
+                    languageId=self.get_language_id(),
+                )
+            )
+        )
+        self._last_published_version = version
+        self._ls_proxy = current_ls_proxy
+        self._unpublished_incremental_changes = []
+        self._content_at_server = current_content
+
+    def _consider_sending_changes_to_server(self, event=None):
+        time_since_last_change = time.time() - self._last_change_time
+
+        if time_since_last_change >= DEBOUNCE_SECONDS:
+            self._send_incremental_changes_to_language_server()
+        else:
+            wait_time = DEBOUNCE_SECONDS - time_since_last_change
+            self.after(int(wait_time * 1000), self._consider_sending_changes_to_server)
+
+    def _send_incremental_changes_to_language_server(self) -> None:
+        if not self._unpublished_incremental_changes:
+            return
+
+        logger.debug("Merging changes from %s events", len(self._unpublished_incremental_changes))
+        clean_prefix_end_line = 9999999999  # lines before this line have not been modified
+        clean_suffix_start_line = -1  # this line and lines after this have not been modified
+        line_count_delta = 0
+
+        for change in self._unpublished_incremental_changes:
+            if change["sequence"] == "TextInsert":
+                insertion_line = int(float(change["index"]))
+                num_lines_added = change["text"].count("\n")
+
+                clean_prefix_end_line = min(clean_prefix_end_line, insertion_line)
+                clean_suffix_start_line = (
+                    max(clean_suffix_start_line, insertion_line + 1) + num_lines_added
+                )
+
+                line_count_delta += num_lines_added
+            else:
+                assert change["sequence"] == "TextDelete"
+                del_start_line = int(float(change["index1"]))
+                del_end_line = int(float(change["index2"]))
+                num_lines_deleted = del_end_line - del_start_line
+
+                clean_prefix_end_line = min(clean_prefix_end_line, del_start_line)
+                clean_suffix_start_line = (
+                    max(clean_suffix_start_line, del_start_line + 1) - num_lines_deleted
+                )
+
+                line_count_delta -= num_lines_deleted
+
+        # LSP uses 0-based line numbers, hence -1
+        orig_zero_based_range_start_line = clean_prefix_end_line - 1
+        orig_zero_based_range_end_line = clean_suffix_start_line - line_count_delta - 1
+        replacement_text = self.get_text_widget().get(
+            f"{clean_prefix_end_line}.0", f"{clean_suffix_start_line}.0"
+        )
+
+        # validate
+        lines_at_server = self._content_at_server.splitlines(keepends=True)
+        unmodified_prefix = "".join(lines_at_server[:orig_zero_based_range_start_line])
+        unmodified_suffix = "".join(lines_at_server[orig_zero_based_range_end_line:])
+        assembled_content = unmodified_prefix + replacement_text + unmodified_suffix
+
+        current_content = self.get_content(up_to_end=True)
+        if assembled_content != current_content:
+            raise RuntimeError(
+                f"Assembled content doesn't match actual content:"
+                f" {assembled_content!r} vs {current_content!r}"
+            )
+
+        version = self._last_published_version + 1
+        self._ls_proxy.notify_did_change_text_document(
+            DidChangeTextDocumentParams(
+                textDocument=VersionedTextDocumentIdentifier(version=version, uri=self.get_uri()),
+                contentChanges=[
+                    RangedTextDocumentContentChangeEvent(
+                        range=Range(
+                            start=Position(line=orig_zero_based_range_start_line, character=0),
+                            end=Position(line=orig_zero_based_range_end_line, character=0),
+                        ),
+                        text=replacement_text,
+                    )
+                ],
+            )
+        )
+        self._last_published_version = version
+        self._unpublished_incremental_changes = []
+        self._content_at_server = assembled_content
+
+    def get_language_id(self) -> str:
+        return "python"  # TODO
+
+    def get_uri(self) -> Optional[str]:
+        if self._filename is None:
+            return None
+
+        elif is_local_path(self._filename):
+            return pathlib.Path(self._filename).as_uri()
+
+        # TODO
+        raise NotImplementedError("Remote paths not supported yet")
 
 
 class EditorNotebook(CustomNotebook):

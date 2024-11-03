@@ -186,8 +186,11 @@ class CodeView(tktextext.EnhancedTextFrame):
         self._gutter.tag_configure("active", font="BoldEditorFont")
         self._gutter.tag_raise("spacer")
 
-    def get_content(self):
-        return self.text.get("1.0", "end-1c")  # -1c because Text always adds a newline itself
+    def get_content(self, up_to_end=False):
+        if not up_to_end:
+            return self.text.get("1.0", "end-1c")  # -1c because Text always adds a newline itself
+        else:
+            return self.text.get("1.0", "end")
 
     def detect_encoding(self, data):
         enc = self.detect_encoding_without_check(data)
