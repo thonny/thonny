@@ -9,10 +9,14 @@ import dataclasses
 import os.path
 import site
 import sys
+import urllib.parse
 from collections import namedtuple
 from dataclasses import dataclass
 from logging import getLogger
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple  # @UnusedImport
+
+REMOTE_URI_PREFIX = "vscode-remote://"
+LOCAL_URI_PREFIX = "file://"
 
 logger = getLogger(__name__)
 
@@ -805,6 +809,38 @@ def is_local_path(s: str) -> bool:
     return not is_remote_path(s) and not s.startswith("<")
 
 
+def editor_path_matches_uri(path: Optional[str], uri: str) -> bool:
+    if path is None:
+        return False
+
+    if is_remote_path(path):
+        if not uri.startswith(REMOTE_URI_PREFIX):
+            return False
+
+        path_target = extract_target_path(path).rstrip("/")
+        uri_target = file_uri_to_path(uri).rstrip("/")
+        return path_target == uri_target
+    else:
+        assert uri.startswith(LOCAL_URI_PREFIX)
+        return is_same_path(path, file_uri_to_path(uri))
+
+
+def file_uri_to_path(uri: str) -> str:
+    if uri.startswith(LOCAL_URI_PREFIX):
+        path = uri[len(LOCAL_URI_PREFIX) :]
+    elif uri.startswith(REMOTE_URI_PREFIX):
+        path = uri[len(REMOTE_URI_PREFIX) :]
+    else:
+        raise ValueError(f"Unknown URI scheme {uri}")
+
+    if path.startswith("/") and uri[1:2].isalpha() and uri[2:3] == ":":
+        # Windows path
+        path = path[1:]  # remove leading slash
+        path = path.replace("/", "\\")
+
+    return urllib.parse.unquote(path)
+
+
 def export_distributions_info_from_dir(dir_path: str) -> List[DistInfo]:
     from importlib.metadata import DistributionFinder, MetadataPathFinder
 
@@ -933,3 +969,8 @@ def try_get_base_executable(executable: str) -> Optional[str]:
         return None
     else:
         return executable
+
+
+def extract_target_path(s) -> str:
+    assert is_remote_path(s)
+    return s[s.find(REMOTE_PATH_MARKER) + len(REMOTE_PATH_MARKER) :]

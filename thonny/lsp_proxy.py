@@ -33,6 +33,7 @@ from thonny.lsp_types import (
     InitializedParams,
     InitializeResult,
     LspResponse,
+    PublishDiagnosticsParams,
     ResponseError,
 )
 
@@ -72,8 +73,9 @@ class LanguageServerProxy(ABC):
         self._shutdown_accepted: bool = False
         self._last_request_id: int = 0
         self._pending_handlers: Dict[int, Callable] = {}
-        self._request_handlers: Dict[str, Callable] = {}
+        self._request_handlers: Dict[str, Optional[Callable]] = {}
         self._notification_handlers: Dict[str, List[Callable]] = {}
+        self._diagnostics: Dict[str, PublishDiagnosticsParams] = {}
         self._unprocessed_messages_from_server: Queue[Dict] = Queue()
 
         self.server_capabilities: Optional[lsp_types.ServerCapabilities] = None
@@ -86,6 +88,9 @@ class LanguageServerProxy(ABC):
         threading.Thread(target=self._listen_stderr, daemon=True).start()
         logger.info("Initializing language server")
         self._request_initialize(initialize_params, self._handle_initialize_response)
+
+        # keep the cache of latest diagnostics TODO: do I need it?
+        self.bind_publish_diagnostics(self._collect_diagnostics)
 
     @abstractmethod
     def _create_server_process(self) -> subprocess.Popen[bytes]: ...
@@ -171,6 +176,9 @@ class LanguageServerProxy(ABC):
             logger.info("Language server has been shut down")
         else:
             logger.error("Language server shutdown error: %r", response.get_error())
+
+    def _collect_diagnostics(self, result: PublishDiagnosticsParams):
+        self._diagnostics[result.uri] = result
 
     def _request_initialize(
         self,
@@ -980,6 +988,16 @@ class LanguageServerProxy(ABC):
             self._notification_handlers[method] = []
 
         self._notification_handlers[method].append(handler)
+
+    def unbind_notification_handler(self, handler) -> None:
+        for method, handlers in self._notification_handlers.items():
+            if handler in handlers:
+                handlers.remove(handler)
+
+    def unbind_request_handler(self, handler) -> None:
+        for method in self._request_handlers:
+            if self._request_handlers[method] == handler:
+                self._request_handlers[method] = None
 
     def _bind_request_handler(self, method: str, handler: Callable[[Any], Any]) -> None:
         if method in self._request_handlers:

@@ -429,7 +429,7 @@ class Workbench(tk.Tk):
                     ),
                     textDocument=TextDocumentClientCapabilities(
                         publishDiagnostics=PublishDiagnosticsClientCapabilities(
-                            relatedInformation=True
+                            relatedInformation=False
                         ),
                         synchronization=TextDocumentSyncClientCapabilities(),
                     ),
@@ -623,6 +623,12 @@ class Workbench(tk.Tk):
 
         small_link_ratio = 0.8 if running_on_windows() else 0.7
         self._fonts = [
+            tk_font.Font(
+                name="LinkFont",
+                family=default_font.cget("family"),
+                size=int(default_font.cget("size")),
+                underline=True,
+            ),
             tk_font.Font(
                 name="SmallLinkFont",
                 family=default_font.cget("family"),

@@ -2,16 +2,14 @@
 import os.path
 import pathlib
 import re
-import sys
 import time
 import tkinter as tk
-import traceback
 from _tkinter import TclError
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
-from thonny import get_runner, get_workbench, ui_utils
+from thonny import get_runner, get_workbench
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
 from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
@@ -19,6 +17,7 @@ from thonny.common import (
     InlineCommand,
     TextRange,
     ToplevelResponse,
+    extract_target_path,
     is_local_path,
     is_remote_path,
     is_same_path,
@@ -30,30 +29,25 @@ from thonny.languages import tr
 from thonny.lsp_proxy import LanguageServerProxy
 from thonny.lsp_types import (
     DidChangeTextDocumentParams,
-    DidOpenNotebookDocumentParams,
+    DidCloseTextDocumentParams,
     DidOpenTextDocumentParams,
     Position,
     Range,
     RangedTextDocumentContentChangeEvent,
+    TextDocumentIdentifier,
     TextDocumentItem,
     VersionedTextDocumentIdentifier,
 )
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
-from thonny.ui_utils import (
-    askopenfilename,
-    asksaveasfilename,
-    get_beam_cursor,
-    select_sequence,
-    windows_known_extensions_are_hidden,
-)
+from thonny.ui_utils import askopenfilename, asksaveasfilename, get_beam_cursor, select_sequence
 
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde"), (tr("all files"), ".*")]
 
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
 PYTHONLIKE_EXTENSIONS = set()
-DEBOUNCE_SECONDS = 1
+DEBOUNCE_SECONDS = 0.5
 
 logger = getLogger(__name__)
 
@@ -568,6 +562,13 @@ class Editor(BaseEditor):
     def show(self):
         self.master.select(self)
 
+    def close(self):
+        if self._ls_proxy is not None:
+            self._ls_proxy.notify_did_close_text_document(
+                DidCloseTextDocumentParams(TextDocumentIdentifier(uri=self.get_uri()))
+            )
+        self.destroy()
+
     def _listen_debugger_progress(self, event):
         # Go read-only
         # TODO: check whether this module is active?
@@ -635,7 +636,7 @@ class Editor(BaseEditor):
             # meaning the changes should be collected
             self._unpublished_incremental_changes.append(event)
 
-            self.after(DEBOUNCE_SECONDS * 1000, self._consider_sending_changes_to_server)
+            self.after(int(DEBOUNCE_SECONDS * 1000), self._consider_sending_changes_to_server)
 
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
@@ -1123,7 +1124,7 @@ class EditorNotebook(CustomNotebook):
         if not force and not self.check_allow_closing(editor):
             return
         self.forget(editor)
-        editor.destroy()
+        editor.close()
 
     def _cmd_save_file(self):
         if self.get_current_editor():
@@ -1481,11 +1482,6 @@ def get_target_dirname_from_editor_filename(s):
         return os.path.dirname(s)
     else:
         return universal_dirname(extract_target_path(s))
-
-
-def extract_target_path(s):
-    assert is_remote_path(s)
-    return s[s.find(REMOTE_PATH_MARKER) + len(REMOTE_PATH_MARKER) :]
 
 
 def make_remote_path(target_path):

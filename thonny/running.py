@@ -61,6 +61,7 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
+    extract_target_path,
     is_same_path,
     parse_message,
     path_startswith,
@@ -71,7 +72,6 @@ from thonny.common import (
     update_system_path,
 )
 from thonny.editors import (
-    extract_target_path,
     get_current_breakpoints,
     get_saved_current_script_filename,
     get_target_dirname_from_editor_filename,
