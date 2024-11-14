@@ -5299,7 +5299,7 @@ class DocumentSymbolClientCapabilities:
 
     dynamicRegistration: Optional[bool] = None
     """ Whether document symbol supports dynamic registration. """
-    symbolKind: Optional["__DocumentSymbolClientCapabilities_symbolKind_Type_1"] = None
+    symbolKind: Optional["SymbolKinds"] = None
     """ Specific capabilities for the `SymbolKind` in the
     `textDocument/documentSymbol` request. """
     hierarchicalDocumentSymbolSupport: Optional[bool] = None
@@ -5869,7 +5869,7 @@ class __CompletionOptions_completionItem_Type_2:
 
 
 @dataclass
-class __DocumentSymbolClientCapabilities_symbolKind_Type_1:
+class SymbolKinds:
     valueSet: Optional[List["SymbolKind"]] = None
     """ The symbol kind values the client supports. When this
     property exists the client also guarantees that it will

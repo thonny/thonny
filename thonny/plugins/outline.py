@@ -1,36 +1,41 @@
-import re
 import tkinter as tk
 from tkinter import ttk
+from typing import Dict, List, Optional, Union
 
-from thonny import get_workbench
+from thonny import get_workbench, logger, lsp_types
+from thonny.editors import Editor
 from thonny.languages import tr
-from thonny.ui_utils import SafeScrollbar
+from thonny.lsp_types import DocumentSymbolParams, LspResponse, SymbolKind, TextDocumentIdentifier
+from thonny.ui_utils import (
+    SafeScrollbar,
+    TreeviewLayout,
+    export_treeview_layout,
+    restore_treeview_layout,
+)
 
 
 class OutlineView(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
         self._init_widgets()
+        self._editor: Optional[Editor] = None
+
+        self._last_layouts_by_editor_id: Dict[str, TreeviewLayout] = {}
 
         self._tab_changed_binding = (
             get_workbench()
             .get_editor_notebook()
-            .bind("<<NotebookTabChanged>>", self._update_frame_contents, True)
+            .bind("<<NotebookTabChanged>>", self._request_document_symbols, True)
         )
-        get_workbench().bind("Save", self._update_frame_contents, True)
-        get_workbench().bind("SaveAs", self._update_frame_contents, True)
-        get_workbench().bind_class("Text", "<<NewLine>>", self._update_frame_contents, True)
+        get_workbench().bind("AfterSendingDocumentUpdates", self._request_document_symbols, True)
 
-        self._update_frame_contents()
+        self._request_document_symbols()
 
     def destroy(self):
-        try:
-            # Not sure if editor notebook is still living
+        if get_workbench().get_editor_notebook().winfo_exists():
             get_workbench().get_editor_notebook().unbind(
                 "<<NotebookTabChanged>>", self._tab_changed_binding
             )
-        except Exception:
-            pass
         self.vert_scrollbar["command"] = None
         ttk.Frame.destroy(self)
 
@@ -50,7 +55,7 @@ class OutlineView(ttk.Frame):
 
         # init tree events
         self.tree.bind("<<TreeviewSelect>>", self._on_select, True)
-        self.tree.bind("<Map>", self._update_frame_contents, True)
+        self.tree.bind("<Map>", self._request_document_symbols, True)
 
         # configure the only tree column
         self.tree.column("#0", anchor=tk.W, stretch=True)
@@ -60,80 +65,101 @@ class OutlineView(ttk.Frame):
         self._class_img = get_workbench().get_image("outline-class")
         self._method_img = get_workbench().get_image("outline-method")
 
-    def _update_frame_contents(self, event=None):
+    def _request_document_symbols(self, event=None):
+        current_editor = get_workbench().get_editor_notebook().get_current_editor()
+        if current_editor is None:
+            return
+
+        if current_editor.get_filename() is None:
+            # TODO
+            return
+
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is None:
+            return
+
+        # ignore the pending results for last request
+        ls_proxy.unbind_request_handler(self._handle_document_symbols_response)
+
+        ls_proxy.request_document_symbol(
+            DocumentSymbolParams(textDocument=TextDocumentIdentifier(uri=current_editor.get_uri())),
+            self._handle_document_symbols_response,
+        )
+
+    def _handle_document_symbols_response(
+        self,
+        response: LspResponse[
+            Union[List[lsp_types.SymbolInformation], List[lsp_types.DocumentSymbol], None]
+        ],
+    ):
         if not self.winfo_ismapped():
             return
 
-        self._clear_tree()
+        self._save_and_clear()
 
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor is None:
+        result = response._result
+        # TODO: check whether the result is for this editor
+        self._editor = get_workbench().get_editor_notebook().get_current_editor()
+        if self._editor is None:
             return
 
-        root = self._parse_source(editor.get_code_view().get_content())
-        for child in root[2]:
-            self._add_item_to_tree("", child)
+        if result is None:
+            logger.warning("Got None document/symbol response")
+            return
 
-    def _parse_source(self, source):
-        # all nodes in format (parent, node_indent, node_children, name, type, linenumber)
-        root_node = (None, 0, [], None, None, None)  # name, type and linenumber not needed for root
-        active_node = root_node
+        for item in result:
+            if isinstance(item, lsp_types.SymbolInformation):
+                logger.warning("Not handling SymbolInformation, %r", item)
+                return
+            assert isinstance(item, lsp_types.DocumentSymbol)
 
-        lineno = 0
-        in_multiline_string = False
-        for line in source.split("\n"):
-            lineno += 1
-            if len(re.findall(r"\"\"\"", line)) % 2 == 1:  # an odd number of """s to toggle
-                in_multiline_string = (
-                    not in_multiline_string
-                )  # multi-line string environment on/off
-                continue
-            if in_multiline_string:
-                continue
-            m = re.match(r"[ ]*[\w]{1}", line)
-            if m:
-                indent = len(m.group(0))
-                while indent <= active_node[1]:
-                    active_node = active_node[0]
+            self._add_document_symbol_to_tree("", item)
 
-                t = re.match(
-                    r"[ \t]*(async[ \t]+)?(?P<type>(def|class){1})[ ]+(?P<name>[\w]+)", line
-                )
-                if t:
-                    current = (active_node, indent, [], t.group("name"), t.group("type"), lineno)
-                    active_node[2].append(current)
-                    active_node = current
-
-        return root_node
+        prev_layout = self._last_layouts_by_editor_id.get(str(self._editor.winfo_id()), None)
+        if prev_layout is not None:
+            restore_treeview_layout(self.tree, prev_layout)
 
     # adds a single item to the tree, recursively calls itself to add any child nodes
-    def _add_item_to_tree(self, parent, item):
-        # create the text to be played for this item
-        item_type = item[4]
-        item_text = " " + item[3]
+    def _add_document_symbol_to_tree(self, parent_iid: str, symbol: lsp_types.DocumentSymbol):
 
-        if item_type == "class":
+        iid = f"{parent_iid}.{symbol.name}".strip(".")
+        while self.tree.exists(iid):
+            # shouldn't happen, but just in case ...
+            iid += "_"
+
+        item_text = " " + symbol.name
+
+        if symbol.kind == SymbolKind.Class:
             image = self._class_img
-        elif item_type == "def":
+        elif symbol.kind == SymbolKind.Method:
+            image = self._method_img
+        elif symbol.kind == SymbolKind.Function:
             image = self._method_img
         else:
-            image = None
+            return
 
-        # insert the item, set lineno as a 'hidden' value
-        current = self.tree.insert(parent, "end", text=item_text, values=item[5], image=image)
+        lineno = symbol.range.start.line + 1
 
-        for child in item[2]:
-            self._add_item_to_tree(current, child)
+        # insert the symbol, set lineno as a 'hidden' value
+        current = self.tree.insert(
+            parent_iid, index="end", iid=iid, text=item_text, values=[lineno], image=image
+        )
+
+        for child in symbol.children:
+            self._add_document_symbol_to_tree(current, child)
 
     # clears the tree by deleting all items
-    def _clear_tree(self):
+    def _save_and_clear(self):
+        if self._editor is not None and self._editor.winfo_exists():
+            editor_id = str(self._editor.winfo_id())
+            self._last_layouts_by_editor_id[editor_id] = export_treeview_layout(self.tree)
+
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
 
     def _on_select(self, event):
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor:
-            code_view = editor.get_code_view()
+        if self._editor:
+            code_view = self._editor.get_code_view()
             focus = self.tree.focus()
             if not focus:
                 return

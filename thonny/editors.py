@@ -707,6 +707,7 @@ class Editor(BaseEditor):
                 )
             )
         )
+        get_workbench().event_generate("AfterSendingDocumentUpdates", path=self.get_filename())
         self._last_published_version = version
         self._ls_proxy = current_ls_proxy
         self._unpublished_incremental_changes = []
@@ -789,6 +790,7 @@ class Editor(BaseEditor):
                 ],
             )
         )
+        get_workbench().event_generate("AfterSendingDocumentUpdates", path=self.get_filename())
         self._last_published_version = version
         self._unpublished_incremental_changes = []
         self._content_at_server = assembled_content

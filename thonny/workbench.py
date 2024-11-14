@@ -44,11 +44,14 @@ from thonny.lsp_types import (
     ClientCapabilities,
     ClientInfo,
     DiagnosticWorkspaceClientCapabilities,
+    DocumentSymbolClientCapabilities,
     GeneralClientCapabilities,
     InitializeParams,
     LspResponse,
     PositionEncodingKind,
     PublishDiagnosticsClientCapabilities,
+    SymbolKind,
+    SymbolKinds,
     TextDocumentClientCapabilities,
     TextDocumentSyncClientCapabilities,
     WindowClientCapabilities,
@@ -432,6 +435,18 @@ class Workbench(tk.Tk):
                             relatedInformation=False
                         ),
                         synchronization=TextDocumentSyncClientCapabilities(),
+                        documentSymbol=DocumentSymbolClientCapabilities(
+                            symbolKind=SymbolKinds(
+                                [
+                                    SymbolKind.Enum,
+                                    SymbolKind.Class,
+                                    SymbolKind.Method,
+                                    SymbolKind.Property,
+                                    SymbolKind.Function,
+                                ]
+                            ),
+                            hierarchicalDocumentSymbolSupport=True,
+                        ),
                     ),
                     notebookDocument=None,
                     window=WindowClientCapabilities(

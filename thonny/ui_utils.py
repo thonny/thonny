@@ -12,9 +12,20 @@ import tkinter.font
 import traceback
 from _tkinter import TclError
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union  # @UnusedImport
+from typing import (  # @UnusedImport
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange, normpath_with_actual_case
@@ -2647,6 +2658,48 @@ def update_text_height(text: tk.Text, min_lines: int, max_lines: int) -> None:
         return
     required_height = text.tk.call((text, "count", "-update", "-displaylines", "1.0", "end"))
     text.configure(height=min(max(required_height, min_lines), max_lines))
+
+
+@dataclass
+class TreeviewLayout:
+    open_ids: List[str]
+    first_visible_iid: str
+    selection: Tuple[str]
+
+
+def export_treeview_layout(tree: ttk.Treeview) -> TreeviewLayout:
+    first_visible_iid = tree.identify_row(0)
+
+    return TreeviewLayout(
+        open_ids=get_treeview_open_item_ids(tree),
+        first_visible_iid=first_visible_iid,
+        selection=tree.selection(),
+    )
+
+
+def restore_treeview_layout(tree: ttk.Treeview, state: TreeviewLayout) -> None:
+    def open_close_nodes(iid):
+        tree.item(iid, open=iid in state.open_ids)
+        for child_iid in tree.get_children(iid):
+            open_close_nodes(child_iid)
+
+    open_close_nodes("")
+
+    selection = [iid for iid in state.selection if tree.exists(iid)]
+    tree.selection_set(selection)
+
+    if tree.exists(state.first_visible_iid):
+        tree.see(state.first_visible_iid)
+
+
+def get_treeview_open_item_ids(tree: ttk.Treeview, parent: str = "") -> List[str]:
+    result = []
+    for child in tree.get_children(parent):
+        if tree.item(child, "open"):
+            result.append(child)
+            result.extend(get_treeview_open_item_ids(tree, child))
+
+    return result
 
 
 if __name__ == "__main__":
