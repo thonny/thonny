@@ -157,6 +157,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Saishen, Inc.
 * Sam Warmuth
 * Sami Almuhammady
+* S Jonkers
 * sailslack
 * Scott Blackledge
 * @scottfp
