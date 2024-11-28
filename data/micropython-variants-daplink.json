@@ -10,6 +10,10 @@
                 "url": "https://micropython.org/resources/firmware/MICROBIT-20241025-v1.24.0.hex"
             },
             {
+                "version": "20241030-v1.25.0-preview.6.g548babf8a",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20241030-v1.25.0-preview.6.g548babf8a.hex"
+            },
+            {
                 "version": "1.23.0",
                 "url": "https://micropython.org/resources/firmware/MICROBIT-20240602-v1.23.0.hex"
             }
