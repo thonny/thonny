@@ -3,7 +3,7 @@ import traceback
 from logging import getLogger
 from typing import List, Optional, Tuple
 
-from thonny import get_workbench
+from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.common import SignatureInfo, SignatureParameter
 from thonny.editors import Editor
@@ -360,6 +360,13 @@ def get_text_filename(text: SyntaxText) -> Optional[str]:
             return editor.get_filename()
 
     return None
+
+
+def get_cursor_ls_position(text: SyntaxText) -> lsp_types.Position:
+    row, col = get_cursor_position(text)
+    # TODO: convert char position to UFT-16 items
+    logger.warning("NB! convert to UTF-16 points")
+    return lsp_types.Position(line=row - 1, character=col)
 
 
 def get_relevant_source_and_cursor_position(text: SyntaxText) -> Tuple[str, int, int]:

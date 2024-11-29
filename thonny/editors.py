@@ -717,12 +717,12 @@ class Editor(BaseEditor):
         time_since_last_change = time.time() - self._last_change_time
 
         if time_since_last_change >= DEBOUNCE_SECONDS:
-            self._send_incremental_changes_to_language_server()
+            self.send_changes_to_language_server()
         else:
             wait_time = DEBOUNCE_SECONDS - time_since_last_change
             self.after(int(wait_time * 1000), self._consider_sending_changes_to_server)
 
-    def _send_incremental_changes_to_language_server(self) -> None:
+    def send_changes_to_language_server(self) -> None:
         if not self._unpublished_incremental_changes:
             return
 

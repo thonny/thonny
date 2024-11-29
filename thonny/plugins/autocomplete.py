@@ -1,13 +1,15 @@
 import tkinter as tk
 from logging import getLogger
+from readline import insert_text
 from tkinter import messagebox
-from typing import List, Optional, cast
+from typing import List, Optional, Union, cast
 
-from thonny import editor_helpers, get_runner, get_workbench
+from thonny import editor_helpers, get_runner, get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
-from thonny.common import CompletionInfo, InlineCommand
+from thonny.common import InlineCommand
 from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
+from thonny.lsp_types import CompletionItem, CompletionParams, LspResponse, TextDocumentIdentifier
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.ui_utils import (
@@ -50,7 +52,7 @@ class CompletionsBox(EditorInfoBox):
         self._listbox.grid()
         self._tweaking_listbox_selection = False
         self._details_box: Optional[CompletionsDetailsBox] = None
-        self._completions: List[CompletionInfo] = []
+        self._completions: List[lsp_types.CompletionItem] = []
 
         self._listbox.bind("<<ListboxSelect>>", self._on_select_item_via_event, True)
 
@@ -63,8 +65,12 @@ class CompletionsBox(EditorInfoBox):
 
         self._update_theme()
 
-    def present_completions(self, text: SyntaxText, completions: List[CompletionInfo]) -> None:
+    def present_completions(
+        self, text: SyntaxText, completions: List[lsp_types.CompletionItem]
+    ) -> None:
         # Next events need to know this
+        for comp in completions:
+            print("COMP", comp)
         assert completions
         self._target_text_widget = text
         self._check_bind_for_keypress(text)
@@ -106,7 +112,7 @@ class CompletionsBox(EditorInfoBox):
             return
 
         self._listbox.delete(0, self._listbox.size())
-        self._listbox.insert(0, *[c.name_with_symbols for c in completions])
+        self._listbox.insert(0, *[c.label for c in completions])
         self._listbox.activate(0)
         self._listbox.selection_set(0)
 
@@ -119,7 +125,9 @@ class CompletionsBox(EditorInfoBox):
         # Actual placement will be managed otherwise
         approx_box_height = round(list_row_height * (self._listbox["height"] + 0.5))
 
-        name_start_index = "insert-%dc" % completions[0].prefix_length
+        # TODO: try to align with the start of the word
+        # name_start_index = "insert-%dc" % completions[0].prefix_length
+        name_start_index = "insert"
 
         self._show_on_target_text(name_start_index, approx_box_height, "below")
 
@@ -220,31 +228,42 @@ class CompletionsBox(EditorInfoBox):
     def _insert_current_selection_replace_suffix(self, event=None):
         self._insert_completion(self._get_current_completion(), replace_suffix=True)
 
-    def _get_current_completion(self) -> Optional[CompletionInfo]:
+    def _get_current_completion(self) -> Optional[CompletionItem]:
         sel = self._listbox.curselection()
         if len(sel) != 1:
             return None
 
         return self._completions[sel[0]]
 
-    def _insert_completion(self, completion: CompletionInfo, replace_suffix: bool) -> None:
-        prefix_start_index = f"insert-{completion.prefix_length}c"
-        typed_prefix = self._target_text_widget.get(prefix_start_index, "insert")
+    def _insert_completion(self, completion: CompletionItem, replace_suffix: bool) -> None:
+        if completion.textEdit is not None:
+            raise RuntimeError("TODO: handle textEdit")
 
-        completion_name = completion.name_with_symbols
+        if completion.insertText is not None:
+            if completion.insertTextFormat == lsp_types.InsertTextFormat.Snippet:
+                raise RuntimeError("TODO support snippets")
+            if completion.insertTextMode == lsp_types.InsertTextMode.AdjustIndentation:
+                raise RuntimeError("TODO support adjust indentation")
+            insert_text = completion.insertText
+        else:
+            assert completion.label is not None
+            insert_text = completion.label
+
+        prefix_start_index = self._find_completion_insertion_index()
+        typed_prefix = self._target_text_widget.get(prefix_start_index, "insert")
 
         get_workbench().event_generate(
             "AutocompleteInsertion",
             text_widget=self._target_text_widget,
             typed_prefix=typed_prefix,
             replace_suffix=replace_suffix,
-            completed_name=completion_name,
+            completed_name=insert_text,
         )
 
         # Before insertion need to delete prefix, because it may not be name's prefix
         # (eg. with different case or even more different with fuzzy completions)
         self._target_text_widget.direct_delete(prefix_start_index, "insert")
-        self._target_text_widget.insert("insert", completion_name)
+        self._target_text_widget.insert("insert", insert_text)
 
         if replace_suffix:
             did_replace_suffix = False
@@ -265,10 +284,20 @@ class CompletionsBox(EditorInfoBox):
             text_widget=self._target_text_widget,
             typed_prefix=typed_prefix,
             replace_suffix=replace_suffix,
-            completed_name=completion_name,
+            completed_name=insert_text,
         )
 
         self.hide()
+
+    def _find_completion_insertion_index(self):
+        line, col = map(int, self._target_text_widget.index("insert").split("."))
+        while col > 0:
+            char_at_left: str = self._target_text_widget.get(f"{line}.{col-1}")
+            if not char_at_left.isidentifier():
+                break
+            col -= 1
+
+        return f"{line}.{col}"
 
     def request_details(self) -> None:
         completion = self._get_current_completion()
@@ -322,7 +351,7 @@ class CompletionsBox(EditorInfoBox):
 
         self._show_next_to_completions()
 
-    def _update_completion(self, details: CompletionInfo) -> None:
+    def _update_completion(self, details: CompletionItem) -> None:
         # logger.debug("Handling completion details %r", details)
         for i, comp in enumerate(self._completions):
             if comp.full_name == details.full_name:
@@ -354,10 +383,8 @@ class Completer:
         logger.debug("Creating Completer")
         self._completions_box: Optional[CompletionsBox] = None
 
-        get_workbench().bind_class(
-            "EditorCodeViewText", "<Key>", self._check_trigger_keypress, True
-        )
-        get_workbench().bind_class("ShellText", "<Key>", self._check_trigger_keypress, True)
+        get_workbench().bind_class("EditorCodeViewText", "<Key>", self._on_keypress, True)
+        get_workbench().bind_class("ShellText", "<Key>", self._on_keypress, True)
         get_workbench().bind(
             "editor_autocomplete_response", self._handle_completions_response, True
         )
@@ -402,7 +429,8 @@ class Completer:
         if self._completions_box:
             self._completions_box.hide()
 
-    def _check_trigger_keypress(self, event: tk.Event) -> None:
+    def _on_keypress(self, event: tk.Event) -> None:
+        self.cancel_active_request()
         runner = get_runner()
         if not runner or runner.is_running():
             return
@@ -456,42 +484,83 @@ class Completer:
 
         return True
 
+    def cancel_active_request(self) -> None:
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is not None:
+            # TODO: actually cancel
+            ls_proxy.unbind_request_handler(self._handle_completions_response)
+
     def request_completions_for_text(self, text: SyntaxText) -> None:
-        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
-        get_runner().send_command(
-            InlineCommand(
-                "shell_autocomplete" if isinstance(text, ShellText) else "editor_autocomplete",
-                source=source,
-                row=row,
-                column=column,
-                filename=editor_helpers.get_text_filename(text),
-            )
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is None:
+            return
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor.get_text_widget() is not text:
+            # TODO: handle shell completions
+            return
+
+        ls_proxy.unbind_request_handler(self._handle_completions_response)
+        # TODO: cancel last unhandled request?
+
+        editor_uri = editor.get_uri()
+        if editor_uri is None:
+            # TODO:
+            return
+
+        editor.send_changes_to_language_server()
+
+        position = editor_helpers.get_cursor_ls_position(text)
+
+        ls_proxy.request_completion(
+            CompletionParams(
+                textDocument=TextDocumentIdentifier(uri=editor_uri), position=position
+            ),
+            self._handle_completions_response,
         )
 
-    def _handle_completions_response(self, msg) -> None:
+    def _handle_completions_response(
+        self,
+        response: LspResponse[
+            Union[List[lsp_types.CompletionItem], lsp_types.CompletionList, None]
+        ],
+    ) -> None:
+        error = response.get_error()
+        if error is not None:
+            self._close_box()
+            messagebox.showerror("Autocomplete error", error.message, master=get_workbench())
+            return
+
+        result = response.get_result_or_raise()
+        completions: List[lsp_types.CompletionItem]
+        if isinstance(result, list):
+            completions = result
+            is_incomplete = False
+            item_defaults = None
+        else:
+            completions = result.items
+            is_incomplete = result.isIncomplete
+            item_defaults = result.itemDefaults
+
+        assert not item_defaults
+
         text = editor_helpers.get_active_text_widget()
         if not text:
             return
 
         source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
 
-        if msg.get("error"):
-            self._close_box()
-            messagebox.showerror("Autocomplete error", msg.error, master=get_workbench())
-        elif msg.source != source or msg.row != row or msg.column != column:
-            # situation has changed, information is obsolete
-            # ignore this event
-            return
-        elif not msg.completions:
+        if len(completions) == 0:
             # the user typed something which is not completable
             self._close_box()
             return
         else:
             if not self._completions_box:
                 self._completions_box = CompletionsBox(self)
-            self._completions_box.present_completions(text, msg.completions)
+            self._completions_box.present_completions(text, completions)
 
     def patched_perform_midline_tab(self, event):
+        self.cancel_active_request()
+
         if not event or not isinstance(event.widget, SyntaxText):
             return
         text = event.widget

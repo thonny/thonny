@@ -2226,7 +2226,7 @@ class CompletionList:
     incomplete completion sessions. """
     items: List["CompletionItem"]
     """ The completion items. """
-    itemDefaults: Optional["__CompletionList_itemDefaults_Type_1"] = None
+    itemDefaults: Optional["CompletionListItemDefaults"] = None
     """ In many cases the items of an actual completion result share the same
     value for properties like `commitCharacters` or the range of a text
     edit. A completion list can therefore define item defaults which will
@@ -2270,7 +2270,7 @@ class CompletionRegistrationOptions:
     resolveProvider: Optional[bool] = None
     """ The server provides support to resolve additional
     information for a completion item. """
-    completionItem: Optional["__CompletionOptions_completionItem_Type_1"] = None
+    completionItem: Optional["CompletionOptionsCompletionItem"] = None
     """ The server supports the following `CompletionItem` specific
     capabilities.
 
@@ -4069,7 +4069,7 @@ class CompletionOptions:
     resolveProvider: Optional[bool] = None
     """ The server provides support to resolve additional
     information for a completion item. """
-    completionItem: Optional["__CompletionOptions_completionItem_Type_2"] = None
+    completionItem: Optional["CompletionOptionsCompletionItem"] = None
     """ The server supports the following `CompletionItem` specific
     capabilities.
 
@@ -5176,10 +5176,10 @@ class CompletionClientCapabilities:
 
     dynamicRegistration: Optional[bool] = None
     """ Whether completion supports dynamic registration. """
-    completionItem: Optional["__CompletionClientCapabilities_completionItem_Type_1"] = None
+    completionItem: Optional["CompletionClientCapabilitiesCompletionItem"] = None
     """ The client supports the following `CompletionItem` specific
     capabilities. """
-    completionItemKind: Optional["__CompletionClientCapabilities_completionItemKind_Type_1"] = None
+    completionItemKind: Optional["CompletionClientCapabilitiesCompletionItemKind"] = None
     insertTextMode: Optional["InsertTextMode"] = None
     """ Defines how the client handles whitespace and indentation
     when accepting a completion item that uses multi line
@@ -5189,7 +5189,7 @@ class CompletionClientCapabilities:
     contextSupport: Optional[bool] = None
     """ The client supports to send additional context information for a
     `textDocument/completion` request. """
-    completionList: Optional["__CompletionClientCapabilities_completionList_Type_1"] = None
+    completionList: Optional["CompletionClientCapabilitiesCompletionList"] = None
     """ The client supports the following `CompletionList` specific
     capabilities.
 
@@ -5723,7 +5723,7 @@ class __CodeAction_disabled_Type_1:
 
 
 @dataclass
-class __CompletionClientCapabilities_completionItemKind_Type_1:
+class CompletionClientCapabilitiesCompletionItemKind:
     valueSet: Optional[List["CompletionItemKind"]] = None
     """ The completion item kind values the client supports. When this
     property exists the client also guarantees that it will
@@ -5736,7 +5736,7 @@ class __CompletionClientCapabilities_completionItemKind_Type_1:
 
 
 @dataclass
-class __CompletionClientCapabilities_completionItem_Type_1:
+class CompletionClientCapabilitiesCompletionItem:
     snippetSupport: Optional[bool] = None
     """ Client supports snippets as insert text.
 
@@ -5753,7 +5753,7 @@ class __CompletionClientCapabilities_completionItem_Type_1:
     """ Client supports the deprecated property on a completion item. """
     preselectSupport: Optional[bool] = None
     """ Client supports the preselect property on a completion item. """
-    tagSupport: Optional["__CompletionClientCapabilities_completionItem_tagSupport_Type_1"] = None
+    tagSupport: Optional["CompletionClientCapabilitiesCompletionItemTagSupport"] = None
     """ Client supports the tag property on a completion item. Clients supporting
     tags have to handle unknown tags gracefully. Clients especially need to
     preserve unknown tags when sending a completion item back to the server in
@@ -5765,16 +5765,14 @@ class __CompletionClientCapabilities_completionItem_Type_1:
     completion item is inserted in the text or should replace text.
 
     @since 3.16.0 """
-    resolveSupport: Optional[
-        "__CompletionClientCapabilities_completionItem_resolveSupport_Type_1"
-    ] = None
+    resolveSupport: Optional["CompletionClientCapabilitiesCompletionItemResolveSupport"] = None
     """ Indicates which properties a client can resolve lazily on a completion
     item. Before version 3.16.0 only the predefined properties `documentation`
     and `details` could be resolved lazily.
 
     @since 3.16.0 """
     insertTextModeSupport: Optional[
-        "__CompletionClientCapabilities_completionItem_insertTextModeSupport_Type_1"
+        "CompletionClientCapabilitiesCompletionItemInsertTextModeSupport"
     ] = None
     """ The client supports the `insertTextMode` property on
     a completion item to override the whitespace handling mode
@@ -5789,24 +5787,24 @@ class __CompletionClientCapabilities_completionItem_Type_1:
 
 
 @dataclass
-class __CompletionClientCapabilities_completionItem_insertTextModeSupport_Type_1:
+class CompletionClientCapabilitiesCompletionItemInsertTextModeSupport:
     valueSet: List["InsertTextMode"]
 
 
 @dataclass
-class __CompletionClientCapabilities_completionItem_resolveSupport_Type_1:
+class CompletionClientCapabilitiesCompletionItemResolveSupport:
     properties: List[str]
     """ The properties that a client can resolve lazily. """
 
 
 @dataclass
-class __CompletionClientCapabilities_completionItem_tagSupport_Type_1:
+class CompletionClientCapabilitiesCompletionItemTagSupport:
     valueSet: List["CompletionItemTag"]
     """ The tags supported by the client. """
 
 
 @dataclass
-class __CompletionClientCapabilities_completionList_Type_1:
+class CompletionClientCapabilitiesCompletionList:
     itemDefaults: Optional[List[str]] = None
     """ The client supports the following itemDefaults on
     a completion list.
@@ -5819,12 +5817,12 @@ class __CompletionClientCapabilities_completionList_Type_1:
 
 
 @dataclass
-class __CompletionList_itemDefaults_Type_1:
+class CompletionListItemDefaults:
     commitCharacters: Optional[List[str]] = None
     """ A default commit character set.
 
     @since 3.17.0 """
-    editRange: Optional[Union["Range", "__CompletionList_itemDefaults_editRange_Type_1"]] = None
+    editRange: Optional[Union["Range", "CompletionListItemDefaultsEditRange"]] = None
     """ A default edit range.
 
     @since 3.17.0 """
@@ -5843,23 +5841,13 @@ class __CompletionList_itemDefaults_Type_1:
 
 
 @dataclass
-class __CompletionList_itemDefaults_editRange_Type_1:
+class CompletionListItemDefaultsEditRange:
     insert: "Range"
     replace: "Range"
 
 
 @dataclass
-class __CompletionOptions_completionItem_Type_1:
-    labelDetailsSupport: Optional[bool] = None
-    """ The server has support for completion item label
-    details (see also `CompletionItemLabelDetails`) when
-    receiving a completion item in a resolve call.
-
-    @since 3.17.0 """
-
-
-@dataclass
-class __CompletionOptions_completionItem_Type_2:
+class CompletionOptionsCompletionItem:
     labelDetailsSupport: Optional[bool] = None
     """ The server has support for completion item label
     details (see also `CompletionItemLabelDetails`) when

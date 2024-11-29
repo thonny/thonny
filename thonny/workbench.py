@@ -43,6 +43,9 @@ from thonny.lsp_proxy import LanguageServerProxy
 from thonny.lsp_types import (
     ClientCapabilities,
     ClientInfo,
+    CompletionClientCapabilities,
+    CompletionClientCapabilitiesCompletionItem,
+    CompletionClientCapabilitiesCompletionList,
     DiagnosticWorkspaceClientCapabilities,
     DocumentSymbolClientCapabilities,
     GeneralClientCapabilities,
@@ -446,6 +449,23 @@ class Workbench(tk.Tk):
                                 ]
                             ),
                             hierarchicalDocumentSymbolSupport=True,
+                        ),
+                        completion=CompletionClientCapabilities(
+                            completionItem=CompletionClientCapabilitiesCompletionItem(
+                                snippetSupport=False,
+                                commitCharactersSupport=True,
+                                documentationFormat=None,  # TODO
+                                deprecatedSupport=False,  # TODO
+                                preselectSupport=True,
+                                insertReplaceSupport=True,
+                                labelDetailsSupport=False,
+                            ),
+                            completionItemKind=None,  # TODO
+                            insertTextMode=None,
+                            contextSupport=False,
+                            completionList=CompletionClientCapabilitiesCompletionList(
+                                itemDefaults=["commitCharacters"]
+                            ),
                         ),
                     ),
                     notebookDocument=None,
