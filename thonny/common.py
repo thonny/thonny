@@ -951,7 +951,12 @@ def try_get_base_executable(executable: str) -> Optional[str]:
             continue
 
         if "executable" in atts:
+            # venv-s starting with Python 3.11
             return atts["executable"]
+
+        if "base-executable" in atts:
+            # virtualenv-s starting with ???
+            return atts["base-executable"]
 
     # pyvenv.cfg may be present also in non-virtual envs.
     # I can check for this in certain case
@@ -963,7 +968,7 @@ def try_get_base_executable(executable: str) -> Optional[str]:
         may_be_venv_exe = False
 
     if may_be_venv_exe:
-        # should only happen with venv-s before Python 3.11
+        # should only happen with venv-s before Python 3.11 or with uv
         # as Python 3.11 started recording executable in pyvenv.cfg
         logger.warning("Could not find base executable of %s", executable)
         return None
