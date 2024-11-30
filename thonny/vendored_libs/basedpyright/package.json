@@ -1,0 +1,46 @@
+{
+    "name": "basedpyright",
+    "displayName": "basedpyright",
+    "description": "a pyright fork with various type checking improvements, improved vscode support and pylance features built into the language server",
+    "version": "1.1.389",
+    "license": "MIT",
+    "author": {
+        "name": "detachhead"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/detachhead/basedpyright",
+        "directory": "packages/pyright"
+    },
+    "scripts": {
+        "build": "webpack --mode production --progress",
+        "clean": "shx rm -rf ./dist ./out LICENSE.txt",
+        "prepack": "npm run clean && shx cp ../../LICENSE.txt . && npm run build",
+        "webpack": "webpack --mode development --progress"
+    },
+    "optionalDependencies": {
+        "fsevents": "~2.3.3"
+    },
+    "devDependencies": {
+        "@types/node": "^22.7.0",
+        "copy-webpack-plugin": "^11.0.0",
+        "esbuild-loader": "^3.2.0",
+        "shx": "^0.3.4",
+        "ts-loader": "^9.5.1",
+        "typescript": "~5.5.4",
+        "webpack": "^5.94.0",
+        "webpack-cli": "^5.1.4"
+    },
+    "files": [
+        "/dist",
+        "LICENSE.txt"
+    ],
+    "main": "index.js",
+    "bin": {
+        "pyright": "index.js",
+        "pyright-langserver": "langserver.index.js"
+    }
+}

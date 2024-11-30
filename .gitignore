@@ -19,7 +19,7 @@
 .mypy_cache
 .DS_Store
 __pycache__
-dist
+packaging/**/dist
 venv
 venv*
 packaging/linux/build

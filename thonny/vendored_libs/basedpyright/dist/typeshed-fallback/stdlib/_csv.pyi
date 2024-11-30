@@ -1,0 +1,172 @@
+"""CSV parsing and writing."""
+
+import csv
+import sys
+from _typeshed import SupportsWrite
+from collections.abc import Iterable, Iterator
+from typing import Any, Final
+from typing_extensions import TypeAlias
+
+__version__: Final[str]
+
+QUOTE_ALL: Final = 1
+QUOTE_MINIMAL: Final = 0
+QUOTE_NONE: Final = 3
+QUOTE_NONNUMERIC: Final = 2
+if sys.version_info >= (3, 12):
+    QUOTE_STRINGS: Final = 4
+    QUOTE_NOTNULL: Final = 5
+
+# Ideally this would be `QUOTE_ALL | QUOTE_MINIMAL | QUOTE_NONE | QUOTE_NONNUMERIC`
+# However, using literals in situations like these can cause false-positives (see #7258)
+_QuotingType: TypeAlias = int
+
+class Error(Exception): ...
+
+_DialectLike: TypeAlias = str | Dialect | csv.Dialect | type[Dialect | csv.Dialect]
+
+class Dialect:
+    """
+    CSV dialect
+
+    The Dialect type records CSV parsing and generation options.
+    """
+    delimiter: str
+    quotechar: str | None
+    escapechar: str | None
+    doublequote: bool
+    skipinitialspace: bool
+    lineterminator: str
+    quoting: _QuotingType
+    strict: bool
+    def __init__(
+        self,
+        dialect: _DialectLike | None = ...,
+        delimiter: str = ",",
+        doublequote: bool = True,
+        escapechar: str | None = None,
+        lineterminator: str = "\r\n",
+        quotechar: str | None = '"',
+        quoting: _QuotingType = 0,
+        skipinitialspace: bool = False,
+        strict: bool = False,
+    ) -> None: ...
+
+class _reader(Iterator[list[str]]):
+    @property
+    def dialect(self) -> Dialect: ...
+    line_num: int
+    def __next__(self) -> list[str]: ...
+
+class _writer:
+    @property
+    def dialect(self) -> Dialect: ...
+    def writerow(self, row: Iterable[Any]) -> Any: ...
+    def writerows(self, rows: Iterable[Iterable[Any]]) -> None: ...
+
+def writer(
+    csvfile: SupportsWrite[str],
+    dialect: _DialectLike = "excel",
+    *,
+    delimiter: str = ",",
+    quotechar: str | None = '"',
+    escapechar: str | None = None,
+    doublequote: bool = True,
+    skipinitialspace: bool = False,
+    lineterminator: str = "\r\n",
+    quoting: _QuotingType = 0,
+    strict: bool = False,
+) -> _writer:
+    """
+    csv_writer = csv.writer(fileobj [, dialect='excel']
+                                [optional keyword args])
+        for row in sequence:
+            csv_writer.writerow(row)
+
+        [or]
+
+        csv_writer = csv.writer(fileobj [, dialect='excel']
+                                [optional keyword args])
+        csv_writer.writerows(rows)
+
+    The "fileobj" argument can be any object that supports the file API.
+    """
+    ...
+def reader(
+    csvfile: Iterable[str],
+    dialect: _DialectLike = "excel",
+    *,
+    delimiter: str = ",",
+    quotechar: str | None = '"',
+    escapechar: str | None = None,
+    doublequote: bool = True,
+    skipinitialspace: bool = False,
+    lineterminator: str = "\r\n",
+    quoting: _QuotingType = 0,
+    strict: bool = False,
+) -> _reader:
+    """
+    csv_reader = reader(iterable [, dialect='excel']
+                            [optional keyword args])
+        for row in csv_reader:
+            process(row)
+
+    The "iterable" argument can be any object that returns a line
+    of input for each iteration, such as a file object or a list.  The
+    optional "dialect" parameter is discussed below.  The function
+    also accepts optional keyword arguments which override settings
+    provided by the dialect.
+
+    The returned object is an iterator.  Each iteration returns a row
+    of the CSV file (which can span multiple input lines).
+    """
+    ...
+def register_dialect(
+    name: str,
+    dialect: type[Dialect] = ...,
+    *,
+    delimiter: str = ",",
+    quotechar: str | None = '"',
+    escapechar: str | None = None,
+    doublequote: bool = True,
+    skipinitialspace: bool = False,
+    lineterminator: str = "\r\n",
+    quoting: _QuotingType = 0,
+    strict: bool = False,
+) -> None:
+    """
+    Create a mapping from a string name to a dialect class.
+    dialect = csv.register_dialect(name[, dialect[, **fmtparams]])
+    """
+    ...
+def unregister_dialect(name: str) -> None:
+    """
+    Delete the name/dialect mapping associated with a string name.
+
+    csv.unregister_dialect(name)
+    """
+    ...
+def get_dialect(name: str) -> Dialect:
+    """
+    Return the dialect instance associated with name.
+
+    dialect = csv.get_dialect(name)
+    """
+    ...
+def list_dialects() -> list[str]:
+    """
+    Return a list of all known dialect names.
+
+    names = csv.list_dialects()
+    """
+    ...
+def field_size_limit(new_limit: int = ...) -> int:
+    """
+    Sets an upper limit on parsed fields.
+
+        csv.field_size_limit([limit])
+
+    Returns old limit. If limit is not given, no new limit is set and
+    the old limit is returned
+    """
+    ...
