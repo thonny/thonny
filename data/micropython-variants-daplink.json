@@ -6,12 +6,12 @@
         "info_url": "https://micropython.org/download/MICROBIT",
         "downloads": [
             {
-                "version": "1.24.0",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20241025-v1.24.0.hex"
+                "version": "1.24.1",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20241129-v1.24.1.hex"
             },
             {
-                "version": "20241030-v1.25.0-preview.6.g548babf8a",
-                "url": "https://micropython.org/resources/firmware/MICROBIT-20241030-v1.25.0-preview.6.g548babf8a.hex"
+                "version": "20241130-v1.25.0-preview.72.g2e796d6c3",
+                "url": "https://micropython.org/resources/firmware/MICROBIT-20241130-v1.25.0-preview.72.g2e796d6c3.hex"
             },
             {
                 "version": "1.23.0",
