@@ -1,12 +1,13 @@
 import tkinter as tk
 import traceback
 from logging import getLogger
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.common import SignatureInfo, SignatureParameter
 from thonny.editors import Editor
+from thonny.lsp_types import CompletionItem, CompletionItemKind, MarkupContent, MarkupKind
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.tktextext import TextFrame
@@ -323,19 +324,28 @@ class DocuBox(DocuBoxBase):
     def __init__(self):
         super().__init__(show_vertical_scrollbar=True)
 
-    def set_content(self, name, item_type, signatures, docstring):
+    def set_content(self, completion: CompletionItem):
         self.text.direct_delete("1.0", "end")
 
         # self._append_chars(item_type + "\n")
 
-        if signatures:
-            self.render_signatures(signatures)
+        # TODO:
+        # if signatures:
+        #    self.render_signatures(signatures)
 
-        if signatures and docstring:
-            self._append_chars("\n\n")
+        # if signatures and docstring:
+        #    self._append_chars("\n\n")
 
-        if docstring:
-            self._append_chars(docstring, ["prose"])
+        if completion.documentation is not None:
+            if isinstance(completion.documentation, MarkupContent):
+                if completion.documentation.kind == MarkupKind.Markdown:
+                    logger.warning("TODO: support Markdown")
+                text = completion.documentation.value
+            else:
+                assert isinstance(completion.documentation, str)
+                text = completion.documentation
+
+            self._append_chars(text, ["prose"])
 
 
 def get_active_text_widget() -> Optional[SyntaxText]:

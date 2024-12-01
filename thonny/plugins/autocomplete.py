@@ -1,12 +1,10 @@
 import tkinter as tk
 from logging import getLogger
-from readline import insert_text
 from tkinter import messagebox
 from typing import List, Optional, Union, cast
 
 from thonny import editor_helpers, get_runner, get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
-from thonny.common import InlineCommand
 from thonny.editor_helpers import DocuBox, EditorInfoBox
 from thonny.languages import tr
 from thonny.lsp_types import CompletionItem, CompletionParams, LspResponse, TextDocumentIdentifier
@@ -60,8 +58,6 @@ class CompletionsBox(EditorInfoBox):
         self.bind("<Return>", self._insert_current_selection)
         self.bind("<Tab>", self._insert_current_selection_replace_suffix)
         self.bind("<Double-Button-1>", self._insert_current_selection)
-
-        get_workbench().bind("get_completion_details_response", self._handle_details_response, True)
 
         self._update_theme()
 
@@ -305,16 +301,13 @@ class CompletionsBox(EditorInfoBox):
         if not self._details_box:
             self._details_box = CompletionsDetailsBox(self)
 
-        self._details_box.set_content(
-            completion.name,
-            completion.type,
-            completion.signatures,
-            completion.docstring,
-        )
+        self._details_box.set_content(completion)
 
-        get_runner().send_command(
-            InlineCommand("get_completion_details", full_name=completion.full_name)
-        )
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is not None:
+            # TODO: cancel previous request
+            ls_proxy.unbind_request_handler(self._handle_details_response)
+            ls_proxy.request_resolve_completion_item(completion, self._handle_details_response)
 
         self._show_next_to_completions()
 
@@ -323,48 +316,41 @@ class CompletionsBox(EditorInfoBox):
             self.winfo_rootx() + self.winfo_width() + ems_to_pixels(0.5), self.winfo_rooty()
         )
 
-    def _handle_details_response(self, msg) -> None:
+    def _handle_details_response(self, response: LspResponse[CompletionItem]) -> None:
         if not self.is_visible():
             return
 
-        error = getattr(msg, "error", None)
-        if error:
-            messagebox.showerror(tr("Error"), str(error), master=get_workbench())
+        basic_completion = self._get_current_completion()
+        detailed_completion = response.get_result_or_raise()
+        logger.debug("Got completion details: %r", detailed_completion)
+        if detailed_completion.data != basic_completion.data:
             return
 
-        completion = self._get_current_completion()
-        if completion.full_name != msg.full_name:
-            return
-        if not msg.details:
-            logger.debug("Could not get details for %s", completion.full_name)
-            return
-
-        assert isinstance(msg.details, CompletionInfo)
-        self._update_completion(details=msg.details)
+        self._update_completion(details=detailed_completion)
 
         if not self._details_box:
             self._details_box = CompletionsDetailsBox(self)
 
-        self._details_box.set_content(
-            msg.details.name, msg.details.type, msg.details.signatures, msg.details.docstring
-        )
+        self._details_box.set_content(detailed_completion)
 
         self._show_next_to_completions()
 
     def _update_completion(self, details: CompletionItem) -> None:
         # logger.debug("Handling completion details %r", details)
         for i, comp in enumerate(self._completions):
-            if comp.full_name == details.full_name:
-                comp.name_with_symbols = details.name_with_symbols
-                comp.signatures = details.signatures
-                comp.docstring = details.docstring
+            assert isinstance(comp, CompletionItem)
+            if comp.data == details.data:
+                comp.label = details.label
+                comp.detail = details.detail
+                comp.labelDetails = details.labelDetails
+                comp.documentation = details.documentation
 
                 sel = self._listbox.curselection()
                 old_flag = self._tweaking_listbox_selection
                 self._tweaking_listbox_selection = True
                 try:
                     self._listbox.delete(i)
-                    self._listbox.insert(i, comp.name_with_symbols)
+                    self._listbox.insert(i, comp.label)
                     if len(sel) == 1:
                         self._listbox.selection_set(sel[0])
                         self._listbox.activate(sel[0])
