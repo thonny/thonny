@@ -68,6 +68,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Austin Bart
 * Avag. sayan
 * badukaire
+* BBTF GmbH (bbtf.de)
 * @bletvaska
 * @bmcage
 * Bui Huy Quang
