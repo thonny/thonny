@@ -513,7 +513,7 @@
   containing a raise statement. As such, it will warn when it encounters an else
   following a chain of ifs, all of them containing a raise statement.
 :unnecessary-comprehension (R1721): *Unnecessary use of a comprehension*
-  Instead of using an identitiy comprehension, consider using the list, dict or
+  Instead of using an identity comprehension, consider using the list, dict or
   set constructor. It is faster and simpler.
 :consider-using-sys-exit (R1722): *Consider using sys.exit()*
   Instead of using exit() or quit(), consider using the sys.exit().
