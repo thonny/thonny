@@ -51,8 +51,12 @@ from thonny.lsp_types import (
     GeneralClientCapabilities,
     InitializeParams,
     LspResponse,
+    MarkupKind,
     PositionEncodingKind,
     PublishDiagnosticsClientCapabilities,
+    SignatureHelpClientCapabilities,
+    SignatureHelpClientCapabilitiesParameterInformation,
+    SignatureHelpClientCapabilitiesSignatureInformation,
     SymbolKind,
     SymbolKinds,
     TextDocumentClientCapabilities,
@@ -466,6 +470,15 @@ class Workbench(tk.Tk):
                             completionList=CompletionClientCapabilitiesCompletionList(
                                 itemDefaults=["commitCharacters"]
                             ),
+                        ),
+                        signatureHelp=SignatureHelpClientCapabilities(
+                            signatureInformation=SignatureHelpClientCapabilitiesSignatureInformation(
+                                documentationFormat=[MarkupKind.PlainText, MarkupKind.Markdown],
+                                parameterInformation=SignatureHelpClientCapabilitiesParameterInformation(
+                                    labelOffsetSupport=True
+                                ),
+                                activeParameterSupport=True,
+                            )
                         ),
                     ),
                     notebookDocument=None,

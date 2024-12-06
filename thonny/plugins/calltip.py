@@ -4,11 +4,23 @@ from logging import getLogger
 from tkinter import messagebox
 from typing import List, Optional
 
-from thonny import editor_helpers, get_runner, get_workbench
-from thonny.codeview import SyntaxText
-from thonny.common import InlineCommand, SignatureInfo
-from thonny.editor_helpers import DocuBoxBase, get_active_text_widget, get_text_filename
+from thonny import editor_helpers, get_workbench
+from thonny.codeview import CodeViewText, SyntaxText
+from thonny.editor_helpers import (
+    DocuBoxBase,
+    get_active_text_widget,
+    get_cursor_position,
+    get_text_filename,
+)
+from thonny.editors import Editor
 from thonny.languages import tr
+from thonny.lsp_types import (
+    LspResponse,
+    SignatureHelp,
+    SignatureHelpParams,
+    SignatureInformation,
+    TextDocumentIdentifier,
+)
 from thonny.shell import ShellText
 from thonny.ui_utils import ems_to_pixels
 
@@ -21,11 +33,11 @@ class CalltipBox(DocuBoxBase):
         self._calltipper = calltipper
         self._max_width = 40
 
-    def present_signatures(self, text: SyntaxText, signatures: List[SignatureInfo]):
+    def present_signatures(self, text: SyntaxText, signature_help: SignatureHelp):
         self._target_text_widget = text
         self._check_bind_for_keypress(text)
         self.text.direct_delete("1.0", "end")
-        self.render_signatures(signatures, only_params=True)
+        self.render_signature_help(signature_help)
 
         char_count = self.text.count("1.0", "end", "chars")[0]
         extra_width_factor = 1.0
@@ -39,7 +51,8 @@ class CalltipBox(DocuBoxBase):
         self.text["height"] = 3
 
         expected_height = 10  # TODO
-        pos = signatures[0].call_bracket_start
+        # call_bracket_start = ... # TODO
+        pos = get_cursor_position(text)
         if pos:
             self._show_on_target_text(
                 "%d.%d" % pos,
@@ -72,9 +85,37 @@ class CalltipBox(DocuBoxBase):
         ]:
             self.after_idle(self._calltipper.request_calltip)
 
+    def render_signature_help(self, signature_help: SignatureHelp) -> None:
+        for i, sig in enumerate(signature_help.signatures):
+            if i > 0:
+                self._append_chars("\n")
+            self.render_signature(
+                sig,
+                is_active=i == signature_help.activeSignature,
+                global_active_parameter=signature_help.activeParameter,
+            )
+
+    def render_signature(
+        self, sig: SignatureInformation, is_active: bool, global_active_parameter: Optional[int]
+    ) -> None:
+        active_parameter = sig.activeParameter
+        if active_parameter is None:
+            active_parameter = global_active_parameter
+
+        print("APA", active_parameter)
+        if active_parameter is None or len(sig.parameters) <= active_parameter:
+            self._append_chars(sig.label)
+        else:
+            active_start, active_end = sig.parameters[active_parameter].label
+            self._append_chars(sig.label[:active_start])
+            self._append_chars(sig.label[active_start:active_end], tags=("active",))
+            self._append_chars(sig.label[active_end:])
+
 
 class Calltipper:
     def __init__(self):
+        self._last_request_uri = None
+        self._last_request_position = None
         self._calltip_box: Optional[CalltipBox] = None
         get_workbench().bind("get_editor_calltip_response", self.handle_response, True)
         get_workbench().bind("get_shell_calltip_response", self.handle_response, True)
@@ -89,37 +130,71 @@ class Calltipper:
         self.request_calltip_for_text(text)
 
     def request_calltip_for_text(self, text: SyntaxText) -> None:
-        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
-        get_runner().send_command(
-            InlineCommand(
-                "get_shell_calltip" if isinstance(text, ShellText) else "get_editor_calltip",
-                row=row,
-                column=column,
-                source=source,
-                filename=get_text_filename(text),
-            )
-        )
+        if not isinstance(text, CodeViewText):
+            # TODO: Shell?
+            return
 
-    def handle_response(self, msg) -> None:
+        editor = text.master.master
+        assert isinstance(editor, Editor)
+
+        uri = editor.get_uri()
+        if uri is None:
+            # TODO:
+            return
+
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is None:
+            return
+
+        ls_proxy.unbind_request_handler(self.handle_response)
+
+        position = editor_helpers.get_cursor_ls_position(text)
+        ls_proxy.request_signature_help(
+            SignatureHelpParams(
+                textDocument=TextDocumentIdentifier(uri), position=position, context=None
+            ),
+            self.handle_response,
+        )
+        self._last_request_uri = uri
+        self._last_request_position = position
+
+    def handle_response(self, response: LspResponse[Optional[SignatureHelp]]) -> None:
         text = get_active_text_widget()
         if not text:
             return
 
-        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
+        if not isinstance(text, CodeViewText):
+            # TODO: Shell?
+            return
 
-        if msg.get("error"):
-            self._hide_box()
-            messagebox.showerror("Calltip error", msg.error, master=get_workbench())
-        elif msg.source != source or msg.row != row or msg.column != column:
+        editor = text.master.master
+        assert isinstance(editor, Editor)
+
+        position = editor_helpers.get_cursor_ls_position(text)
+        uri = editor.get_uri()
+
+        if uri != self._last_request_uri or position != self._last_request_position:
             # situation has changed, information is obsolete
             return
-        elif not msg.signatures:
-            logger.debug("Back-end gave 0 signatures")
+
+        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
+
+        if response.get_error():
+            self._hide_box()
+            messagebox.showerror(
+                "Calltip error", response.get_error().message, master=get_workbench()
+            )
+            return
+
+        result = response.get_result_or_raise()
+
+        if not result or not result.signatures:
+            logger.debug("Server gave 0 signatures")
             self._hide_box()
         else:
             if not self._calltip_box:
                 self._calltip_box = CalltipBox(self)
-            self._calltip_box.present_signatures(text, msg.signatures)
+            self._calltip_box.present_signatures(text, result)
 
     def _on_autocomplete_insertion(self, event=None):
         text = get_active_text_widget()

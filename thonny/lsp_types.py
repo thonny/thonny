@@ -5211,9 +5211,7 @@ class SignatureHelpClientCapabilities:
 
     dynamicRegistration: Optional[bool] = None
     """ Whether signature help supports dynamic registration. """
-    signatureInformation: Optional[
-        "__SignatureHelpClientCapabilities_signatureInformation_Type_1"
-    ] = None
+    signatureInformation: Optional["SignatureHelpClientCapabilitiesSignatureInformation"] = None
     """ The client supports the following `SignatureInformation`
     specific properties. """
     contextSupport: Optional[bool] = None
@@ -6109,13 +6107,11 @@ class __ShowMessageRequestClientCapabilities_messageActionItem_Type_1:
 
 
 @dataclass
-class __SignatureHelpClientCapabilities_signatureInformation_Type_1:
+class SignatureHelpClientCapabilitiesSignatureInformation:
     documentationFormat: Optional[List["MarkupKind"]] = None
     """ Client supports the following content formats for the documentation
     property. The order describes the preferred format of the client. """
-    parameterInformation: Optional[
-        "__SignatureHelpClientCapabilities_signatureInformation_parameterInformation_Type_1"
-    ] = None
+    parameterInformation: Optional["SignatureHelpClientCapabilitiesParameterInformation"] = None
     """ Client capabilities specific to parameter information. """
     activeParameterSupport: Optional[bool] = None
     """ The client supports the `activeParameter` property on `SignatureInformation`
@@ -6125,7 +6121,7 @@ class __SignatureHelpClientCapabilities_signatureInformation_Type_1:
 
 
 @dataclass
-class __SignatureHelpClientCapabilities_signatureInformation_parameterInformation_Type_1:
+class SignatureHelpClientCapabilitiesParameterInformation:
     labelOffsetSupport: Optional[bool] = None
     """ The client supports processing label offsets instead of a
     simple label string.

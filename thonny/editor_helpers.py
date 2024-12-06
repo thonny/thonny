@@ -7,7 +7,13 @@ from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.common import SignatureInfo, SignatureParameter
 from thonny.editors import Editor
-from thonny.lsp_types import CompletionItem, CompletionItemKind, MarkupContent, MarkupKind
+from thonny.lsp_types import (
+    CompletionItem,
+    CompletionItemKind,
+    MarkupContent,
+    MarkupKind,
+    SignatureInformation,
+)
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.tktextext import TextFrame
@@ -236,89 +242,6 @@ class DocuBoxBase(EditorInfoBox):
     def _append_chars(self, chars, tags=()):
         self.text.direct_insert("end", chars, tags=tuple(tags))
 
-    def render_signatures(self, signatures: List[SignatureInfo], only_params=False) -> None:
-        for i, sig in enumerate(signatures):
-            if i > 0:
-                self._append_chars("\n")
-            self.render_signature(sig, only_params)
-
-    def render_signature(self, sig: SignatureInfo, only_params) -> None:
-        if not only_params:
-            self._append_chars(sig.name)
-
-        self._append_chars("(")
-
-        is_positional = False
-        is_kw_only = False
-
-        for i, param in enumerate(sig.params):
-            if i > 0:
-                self._append_chars(", ")
-            if len(sig.params) > 20:
-                self._append_chars("\n    ")
-
-            is_positional |= param.kind == "POSITIONAL_ONLY"
-            if is_positional and param.kind != "POSITIONAL_ONLY":
-                self._append_chars("/, ", ["marker"])
-                is_positional = False
-
-            if param.kind == "VAR_POSITIONAL":
-                is_kw_only = True
-            elif param.kind == "KEYWORD_ONLY" and not is_kw_only:
-                self._append_chars("*, ", ["marker"])
-                is_kw_only = True
-
-            is_active_parameter = sig.current_param_index == i
-            self.render_parameter(param, is_active_parameter)
-
-        if is_positional:
-            self._append_chars(", /", ["marker"])
-
-        self._append_chars(")")
-
-        if sig.return_type and not only_params:
-            self._append_chars(" -> ", ["marker"])
-            self._append_chars(sig.return_type, ["annotation"])
-
-    def render_parameter(self, param: SignatureParameter, active: bool) -> None:
-        if active:
-            base_tags = ["active"]
-        else:
-            base_tags = []
-
-        if param.kind == "VAR_POSITIONAL":
-            self._append_chars("*", base_tags)
-        elif param.kind == "VAR_KEYWORD":
-            self._append_chars("**", base_tags)
-
-        self._append_chars(param.name, base_tags)
-
-        if param.annotation:
-            self._append_chars(":\u00A0" + param.annotation, base_tags + ["annotation"])
-
-        if param.default:
-            self._append_chars("=" + param.default, base_tags + ["default"])
-
-    def format_signature(self, s: str) -> str:
-        s = s.replace(": ", ":\u00A0")
-        if len(s) > self.text["width"] * 1.8 and s.count("(") and s.count(")"):
-            args_index = s.index("(") + 1
-            suffix_index = s.rindex(")")
-            prefix = s[:args_index]
-            args = s[args_index:suffix_index].split(", ")
-            suffix = s[suffix_index:]
-            s = prefix + "\n  " + ",\n  ".join(args) + "\n" + suffix
-            # don't keep / and * alone on a line
-            s = (
-                s.replace("\n  /,", " /,")
-                .replace("\n  *,", " *,")
-                .replace("\n  /\n)", " /\n)")
-                .replace("\n  *\n)", " *\n)")
-            )
-            return s
-        else:
-            return s
-
 
 class DocuBox(DocuBoxBase):
     def __init__(self):
@@ -326,16 +249,6 @@ class DocuBox(DocuBoxBase):
 
     def set_content(self, completion: CompletionItem):
         self.text.direct_delete("1.0", "end")
-
-        # self._append_chars(item_type + "\n")
-
-        # TODO:
-        # if signatures:
-        #    self.render_signatures(signatures)
-
-        # if signatures and docstring:
-        #    self._append_chars("\n\n")
-
         if completion.documentation is not None:
             if isinstance(completion.documentation, MarkupContent):
                 if completion.documentation.kind == MarkupKind.Markdown:
