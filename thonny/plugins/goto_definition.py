@@ -2,13 +2,15 @@ import os.path
 import tkinter as tk
 from logging import getLogger
 from tkinter import messagebox
-from typing import Set, cast
+from typing import List, Set, Union, cast
 
-from thonny import get_runner, get_workbench
+from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText
-from thonny.common import InlineCommand
-from thonny.editor_helpers import get_relevant_source_and_cursor_position, get_text_filename
+from thonny.common import file_uri_to_path
+from thonny.editor_helpers import get_cursor_ls_position
+from thonny.editors import Editor
 from thonny.languages import tr
+from thonny.lsp_types import DefinitionParams, LspResponse, TextDocumentIdentifier
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import command_is_pressed, control_is_pressed, get_hyperlink_cursor
 
@@ -34,15 +36,22 @@ class GotoHandler:
         assert isinstance(event.widget, CodeViewText)
         text = event.widget
 
-        source, row, column = get_relevant_source_and_cursor_position(text)
-        filename = get_text_filename(text)
-        if not get_runner() or not get_runner().get_backend_proxy():
+        editor = text.master.master
+        assert isinstance(editor, Editor)
+        uri = editor.get_uri()
+        if uri is None:
+            return  # TODO
+        pos = get_cursor_ls_position(text)
+
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is None:
             return
 
-        get_runner().send_command(
-            InlineCommand(
-                "get_definitions", source=source, row=row, column=column, filename=filename
-            )
+        ls_proxy.unbind_request_handler(self.handle_definitions_response)
+
+        ls_proxy.request_definition(
+            DefinitionParams(TextDocumentIdentifier(uri=uri), position=pos),
+            self.handle_definitions_response,
         )
 
     def proper_modifier_is_pressed(self, event: tk.Event) -> bool:
@@ -51,27 +60,44 @@ class GotoHandler:
         else:
             return control_is_pressed(event)
 
-    def handle_definitions_response(self, msg):
-        defs = msg.definitions
-        if len(defs) != 1:
+    def handle_definitions_response(
+        self, response: LspResponse[Union[lsp_types.Definition, List[lsp_types.LocationLink], None]]
+    ) -> None:
+
+        result = response.get_result_or_raise()
+        if not result:
             messagebox.showerror(
                 tr("Problem"), tr("Could not find definition"), master=get_workbench()
             )
             return
 
-        # TODO: handle multiple results like PyCharm
+        if isinstance(result, list):
+            # TODO: handle multiple results like PyCharm
+            first_def = result[0]
+        else:
+            first_def = cast(lsp_types.Location, result)
 
-        module_path = str(defs[0].module_path)
+        if isinstance(first_def, lsp_types.LocationLink):
+            uri = first_def.targetUri
+            range = first_def.targetRange
+        else:
+            assert isinstance(first_def, lsp_types.Location)
+            uri = first_def.uri
+            range = first_def.range
+
+        module_path = file_uri_to_path(uri)
         if not os.path.isfile(module_path):
             logger.warning("%s is not a file", module_path)
             return
 
-        module_name = defs[0].module_name
-        row = defs[0].row
-        if module_path and row is not None:
-            get_workbench().get_editor_notebook().show_file(module_path, row)
-        elif module_name == "" and row is not None:  # current editor
-            get_workbench().get_editor_notebook().get_current_editor().select_range(row)
+        if module_path and range is not None:
+            # TODO: Select range instead?
+            line = range.start.line + 1
+        else:
+            line = None
+
+        logger.info("Going to %s, line %s", module_path, line)
+        get_workbench().get_editor_notebook().show_file(module_path, line)
 
     def on_motion(self, event):
         text = cast(SyntaxText, event.widget)
