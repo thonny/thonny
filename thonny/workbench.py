@@ -48,6 +48,7 @@ from thonny.lsp_types import (
     CompletionClientCapabilitiesCompletionList,
     DefinitionClientCapabilities,
     DiagnosticWorkspaceClientCapabilities,
+    DocumentHighlightClientCapabilities,
     DocumentSymbolClientCapabilities,
     GeneralClientCapabilities,
     InitializeParams,
@@ -482,6 +483,7 @@ class Workbench(tk.Tk):
                             )
                         ),
                         definition=DefinitionClientCapabilities(linkSupport=True),
+                        documentHighlight=DocumentHighlightClientCapabilities(),
                     ),
                     notebookDocument=None,
                     window=WindowClientCapabilities(

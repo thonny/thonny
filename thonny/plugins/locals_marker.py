@@ -6,6 +6,16 @@ from thonny import get_workbench
 logger = getLogger(__name__)
 
 
+def is_scope(node):
+    """Copied from jedi"""
+    t = node.type
+    if t == "comp_for":
+        # Starting with Python 3.8, async is outside of the statement.
+        return node.children[1].type != "sync_comp_for"
+
+    return t in ("file_input", "classdef", "funcdef", "lambdef", "sync_comp_for")
+
+
 class LocalsHighlighter:
     def __init__(self, text):
         self.text = text
@@ -14,7 +24,6 @@ class LocalsHighlighter:
 
     def get_positions(self):
         import parso
-        from jedi import parser_utils
         from parso.python import tree
 
         locs = []
@@ -50,7 +59,7 @@ class LocalsHighlighter:
                     locs.append(node)
 
             elif isinstance(node, tree.BaseNode):
-                # ref: jedi/parser/grammar*.txt
+                # ref: parso/python/grammar*.txt
                 if node.type == "trailer" and node.children[0].value == ".":
                     # this is attribute
                     return
@@ -64,7 +73,7 @@ class LocalsHighlighter:
         source = self.text.get("1.0", "end")
         module = parso.parse(source)
         for child in module.children:
-            if isinstance(child, tree.BaseNode) and parser_utils.is_scope(child):
+            if isinstance(child, tree.BaseNode) and is_scope(child):
                 process_scope(child)
 
         loc_pos = set(
@@ -106,7 +115,7 @@ class LocalsHighlighter:
 
 def update_highlighting(event):
     if not get_workbench().ready:
-        # don't slow down initial loading process by importing parso and jedi
+        # don't slow down initial loading process by importing parso
         return
 
     assert isinstance(event.widget, tk.Text)
