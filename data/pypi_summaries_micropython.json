@@ -1,0 +1,2478 @@
+[
+    {
+        "name": "Adafruit-Micropython-Blinka",
+        "summary": "A selection of packages for mirroring the CircuitPython API on hosts running micropython."
+    },
+    {
+        "name": "DIYables-MicroPython-Button",
+        "summary": "MicroPython Library for Button, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-DS18X20",
+        "summary": "MicroPython Library for DS18X20, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-Joystick",
+        "summary": "MicroPython Library for Joystick, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-Keypad",
+        "summary": "Servo Motor Library for Keypad, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-LCD-I2C",
+        "summary": "MicroPython Library for LCD I2C display, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-LED",
+        "summary": "MicroPython Library for blinking and fading LED, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-LED-Matrix",
+        "summary": "MicroPython Library for LED Matrix display, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-OLED",
+        "summary": "MicroPython Library for OLED display, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-Servo",
+        "summary": "MicroPython Library for Servo Motor, created by DIYables"
+    },
+    {
+        "name": "DIYables-MicroPython-Ultrasonic-Sensor",
+        "summary": "MicroPython Library for Ultrasonic Sensor, created by DIYables"
+    },
+    {
+        "name": "MicroPython-Dashboard-carlsonrocco",
+        "summary": "A modular dashboard made using WS2812b individually addressable LEDs and an ESP8266 microcontroller running MicroPython"
+    },
+    {
+        "name": "adafruit-micropython-register",
+        "summary": "MicroPython data descriptor classes to represent hardware registers on I2C and SPI devices."
+    },
+    {
+        "name": "as7343-micropython",
+        "summary": "MicroPython device library for the AS7343 14-channel spectral sensor"
+    },
+    {
+        "name": "be-micropython-nextion",
+        "summary": "MicroPython Nextion serial displays library"
+    },
+    {
+        "name": "bts7960-micropython",
+        "summary": "Project to manage H-Brigde model BTS7960 with micropython"
+    },
+    {
+        "name": "cloudmanager-micropython-esp8266",
+        "summary": "Cloudmanager esp8266 flash image"
+    },
+    {
+        "name": "eiscp-micropython",
+        "summary": "Micropython packages for the Onkyo EISCP protocol."
+    },
+    {
+        "name": "esp32-micropython-i2cLCD",
+        "summary": "uma biblioteca para utiliza\u00e7\u00e3o de um display i2c no esp32 micropython"
+    },
+    {
+        "name": "huas-micropython",
+        "summary": "Micropython stub files and dependencies"
+    },
+    {
+        "name": "hx711-micropython-impementation",
+        "summary": "Based on SergeyPiskunov's implementation. More functionalities."
+    },
+    {
+        "name": "jupyter-micropython-remote",
+        "summary": "Jupyter notebook kernel for remote execution on a Micropython system."
+    },
+    {
+        "name": "jupyter-micropython-upydevice",
+        "summary": "Jupyter kernel based on upydevice for operating MicroPython"
+    },
+    {
+        "name": "jupyter_micropython_kernel",
+        "summary": "Jupyter kernel to interact with a MicroPython ESP8266 or ESP32 over its serial REPL."
+    },
+    {
+        "name": "lsm6ds3-micropython",
+        "summary": "MicroPython device library for the LSM6DS3TR-C IMU"
+    },
+    {
+        "name": "micropython-OTAUpdateManager",
+        "summary": "Implementation of OTA for remote monitoring and controlling of IoT devices"
+    },
+    {
+        "name": "micropython-Turtle",
+        "summary": "A Turtle for micropython and add a little game"
+    },
+    {
+        "name": "micropython-ZJB",
+        "summary": "A test for ZJB"
+    },
+    {
+        "name": "micropython-_ctypes",
+        "summary": "Dummy ctypes module for MicroPython"
+    },
+    {
+        "name": "micropython-_markupbase",
+        "summary": "CPython _markupbase module ported to MicroPython"
+    },
+    {
+        "name": "micropython-abc",
+        "summary": "Dummy abc module for MicroPython"
+    },
+    {
+        "name": "micropython-adt7410",
+        "summary": "MicroPython Driver for the Analog Devices ADT7410 Temperature Sensor"
+    },
+    {
+        "name": "micropython-adxl343",
+        "summary": "MicroPython Driver for the Analog Devices ADXL343 Accelerometer"
+    },
+    {
+        "name": "micropython-agps",
+        "summary": "Assisted location services for MicroPython"
+    },
+    {
+        "name": "micropython-ags02ma",
+        "summary": "MicroPython Driver for the AGS02MA TVOC sensor"
+    },
+    {
+        "name": "micropython-ahtx0",
+        "summary": "MicroPython driver for the AHT10 and AHT20 temperature and humidity sensors."
+    },
+    {
+        "name": "micropython-aifc",
+        "summary": "Dummy aifc module for MicroPython"
+    },
+    {
+        "name": "micropython-aiobutton",
+        "summary": "A MicroPython module for asyncio button."
+    },
+    {
+        "name": "micropython-am2320",
+        "summary": "MicroPython library for the AM2320 temperature and humidity sensor."
+    },
+    {
+        "name": "micropython-am7020",
+        "summary": "AT Command library dedicated to am7020 http mqtt"
+    },
+    {
+        "name": "micropython-appengine",
+        "summary": "A MicroPython app engine."
+    },
+    {
+        "name": "micropython-argparse",
+        "summary": "argparse module for MicroPython"
+    },
+    {
+        "name": "micropython-array",
+        "summary": "Dummy array module for MicroPython"
+    },
+    {
+        "name": "micropython-artecrobo2.0",
+        "summary": "MicroPython library for ArtecRobo2.0"
+    },
+    {
+        "name": "micropython-as6212",
+        "summary": "MicroPython Library for the ASM AS6212 Temperature Sensor"
+    },
+    {
+        "name": "micropython-ast",
+        "summary": "Dummy ast module for MicroPython"
+    },
+    {
+        "name": "micropython-async-websocket-client",
+        "summary": "Asynchronous websocket client for ESP32 controller."
+    },
+    {
+        "name": "micropython-asynchat",
+        "summary": "Dummy asynchat module for MicroPython"
+    },
+    {
+        "name": "micropython-asyncio",
+        "summary": "Dummy asyncio module for MicroPython"
+    },
+    {
+        "name": "micropython-asyncio_micro",
+        "summary": "asyncio_micro module for MicroPython"
+    },
+    {
+        "name": "micropython-asyncore",
+        "summary": "Dummy asyncore module for MicroPython"
+    },
+    {
+        "name": "micropython-atexit",
+        "summary": "Dummy atexit module for MicroPython"
+    },
+    {
+        "name": "micropython-audio-remote",
+        "summary": "WiFi Audio Remote with MicroPython"
+    },
+    {
+        "name": "micropython-audioop",
+        "summary": "Dummy audioop module for MicroPython"
+    },
+    {
+        "name": "micropython-base64",
+        "summary": "CPython base64 module ported to MicroPython"
+    },
+    {
+        "name": "micropython-basicdweet",
+        "summary": "A python module for very basic APIs of the free dweet service."
+    },
+    {
+        "name": "micropython-bdb",
+        "summary": "Dummy bdb module for MicroPython"
+    },
+    {
+        "name": "micropython-bech32",
+        "summary": "Bech32 library for micropython"
+    },
+    {
+        "name": "micropython-binascii",
+        "summary": "PyPy binascii module ported to MicroPython"
+    },
+    {
+        "name": "micropython-binhex",
+        "summary": "Dummy binhex module for MicroPython"
+    },
+    {
+        "name": "micropython-bisect",
+        "summary": "CPython bisect module ported to MicroPython"
+    },
+    {
+        "name": "micropython-bitstring",
+        "summary": "Very stripped down version of Scott Griffith's Bitstring package."
+    },
+    {
+        "name": "micropython-bma220",
+        "summary": "MicroPython Driver for the Bosch BMA220 Accelerometer"
+    },
+    {
+        "name": "micropython-bma400",
+        "summary": "MicroPython Driver for the Bosch BMA400 Accelerometer"
+    },
+    {
+        "name": "micropython-bme280",
+        "summary": "bme280 module for MicroPython ESP8266/ESP32"
+    },
+    {
+        "name": "micropython-bmi160",
+        "summary": "MicroPython Driver for the Bosch BMI160 Acc/Gyro Sensor"
+    },
+    {
+        "name": "micropython-bmi270",
+        "summary": "MicroPython Driver for the Bosch BMI270 Accelerometer/Gyro Sensor"
+    },
+    {
+        "name": "micropython-bmm150",
+        "summary": "MicroPython Driver for the Bosch BMM150 Magnetometer"
+    },
+    {
+        "name": "micropython-bmp581",
+        "summary": "MicroPython Driver for the Bosch BMP581 pressure sensor"
+    },
+    {
+        "name": "micropython-bootconfig",
+        "summary": "Service to allow configuring a micropython board"
+    },
+    {
+        "name": "micropython-bootstrap",
+        "summary": "Simplified way to build and deploy apps to IoT devices that use micropython"
+    },
+    {
+        "name": "micropython-brainelectronics-helpers",
+        "summary": "MicroPython brainelectronics helpers library"
+    },
+    {
+        "name": "micropython-btree",
+        "summary": "Dummy btree module for MicroPython"
+    },
+    {
+        "name": "micropython-btreedb",
+        "summary": "Very simple ORM (Object-Relational Mapper) for MicroPython's 'btree' module.\n"
+    },
+    {
+        "name": "micropython-buzzer",
+        "summary": "Buzzer implemetion for MicroPython"
+    },
+    {
+        "name": "micropython-bz2",
+        "summary": "Dummy bz2 module for MicroPython"
+    },
+    {
+        "name": "micropython-cProfile",
+        "summary": "Dummy cProfile module for MicroPython"
+    },
+    {
+        "name": "micropython-calendar",
+        "summary": "Dummy calendar module for MicroPython"
+    },
+    {
+        "name": "micropython-captive-dhcp-server",
+        "summary": "Micropython asyncio simplistic dhcp server for use with captive portals"
+    },
+    {
+        "name": "micropython-captive-dns-server",
+        "summary": "Micropython asyncio simplistic dns server for use with captive portals"
+    },
+    {
+        "name": "micropython-ccrighton-phew",
+        "summary": "A small webserver and templating library specifically designed for MicroPython on the Pico W."
+    },
+    {
+        "name": "micropython-cgi",
+        "summary": "CPython cgi module ported to MicroPython"
+    },
+    {
+        "name": "micropython-cgitb",
+        "summary": "Dummy cgitb module for MicroPython"
+    },
+    {
+        "name": "micropython-chunk",
+        "summary": "Dummy chunk module for MicroPython"
+    },
+    {
+        "name": "micropython-cloudmanager",
+        "summary": "Micropython client that allows network attached boards to be controlled from a central redis server"
+    },
+    {
+        "name": "micropython-cmath",
+        "summary": "Dummy cmath module for MicroPython"
+    },
+    {
+        "name": "micropython-cmd",
+        "summary": "CPython cmd module ported to MicroPython"
+    },
+    {
+        "name": "micropython-code",
+        "summary": "Dummy code module for MicroPython"
+    },
+    {
+        "name": "micropython-codecs",
+        "summary": "Dummy codecs module for MicroPython"
+    },
+    {
+        "name": "micropython-codeop",
+        "summary": "Dummy codeop module for MicroPython"
+    },
+    {
+        "name": "micropython-collections",
+        "summary": "collections module for MicroPython"
+    },
+    {
+        "name": "micropython-collections.abc",
+        "summary": "Dummy collections.abc module for MicroPython"
+    },
+    {
+        "name": "micropython-collections.defaultdict",
+        "summary": "collections.defaultdict module for MicroPython"
+    },
+    {
+        "name": "micropython-collections.deque",
+        "summary": "collections.deque module for MicroPython"
+    },
+    {
+        "name": "micropython-colorsys",
+        "summary": "Dummy colorsys module for MicroPython"
+    },
+    {
+        "name": "micropython-compileall",
+        "summary": "Dummy compileall module for MicroPython"
+    },
+    {
+        "name": "micropython-concurrent.futures",
+        "summary": "Dummy concurrent.futures module for MicroPython"
+    },
+    {
+        "name": "micropython-configparser",
+        "summary": "Dummy configparser module for MicroPython"
+    },
+    {
+        "name": "micropython-consentiumthings",
+        "summary": "A micropython package for IoT"
+    },
+    {
+        "name": "micropython-contextlib",
+        "summary": "CPython contextlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-contextvars",
+        "summary": "Dummy contextvars module for MicroPython"
+    },
+    {
+        "name": "micropython-copy",
+        "summary": "CPython copy module ported to MicroPython"
+    },
+    {
+        "name": "micropython-copyreg",
+        "summary": "Dummy copyreg module for MicroPython"
+    },
+    {
+        "name": "micropython-cozir",
+        "summary": "COZIR CO2 Sensor Library"
+    },
+    {
+        "name": "micropython-cpython-array",
+        "summary": "MicroPython module array ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-btree",
+        "summary": "MicroPython module btree ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-builtins",
+        "summary": "MicroPython module builtins ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ffi",
+        "summary": "MicroPython module ffi ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-framebuf",
+        "summary": "MicroPython module framebuf ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-gc",
+        "summary": "MicroPython module gc ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-machine",
+        "summary": "MicroPython module machine ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-micropython",
+        "summary": "MicroPython module micropython ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-network",
+        "summary": "MicroPython module network ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-sys",
+        "summary": "MicroPython module sys ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uasyncio",
+        "summary": "MicroPython module uasyncio ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ubinascii",
+        "summary": "MicroPython module ubinascii ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ucollections",
+        "summary": "MicroPython module ucollections ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ucryptolib",
+        "summary": "MicroPython module ucryptolib ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uctypes",
+        "summary": "MicroPython module uctypes ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uerrno",
+        "summary": "MicroPython module uerrno ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uhashlib",
+        "summary": "MicroPython module uhashlib ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uheapq",
+        "summary": "MicroPython module uheapq ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uio",
+        "summary": "MicroPython module uio ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ujson",
+        "summary": "MicroPython module ujson ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ulogging",
+        "summary": "MicroPython module ulogging ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uos",
+        "summary": "MicroPython module uos ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-upip",
+        "summary": "MicroPython module upip ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ure",
+        "summary": "MicroPython module ure ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uselect",
+        "summary": "MicroPython module uselect ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-usocket",
+        "summary": "MicroPython module usocket ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ussl",
+        "summary": "MicroPython module ussl ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-ustruct",
+        "summary": "MicroPython module ustruct ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-utarfile",
+        "summary": "MicroPython module utarfile ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-utime",
+        "summary": "MicroPython module utime ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-utimeq",
+        "summary": "MicroPython module utimeq ported to CPython"
+    },
+    {
+        "name": "micropython-cpython-uzlib",
+        "summary": "MicroPython module uzlib ported to CPython"
+    },
+    {
+        "name": "micropython-crypt",
+        "summary": "Dummy crypt module for MicroPython"
+    },
+    {
+        "name": "micropython-cryptocfb",
+        "summary": "A Python module to encrypt and decrypt data with AES-128 CFB mode."
+    },
+    {
+        "name": "micropython-cryptodweet",
+        "summary": "A python module for very basic APIs of the free dweet service with encryption."
+    },
+    {
+        "name": "micropython-cryptomsg",
+        "summary": "A MicroPython module to encrypt and decrypt messages with AES CBC mode."
+    },
+    {
+        "name": "micropython-csv",
+        "summary": "Dummy csv module for MicroPython"
+    },
+    {
+        "name": "micropython-curses",
+        "summary": "Dummy curses module for MicroPython"
+    },
+    {
+        "name": "micropython-curses.ascii",
+        "summary": "CPython curses.ascii module ported to MicroPython"
+    },
+    {
+        "name": "micropython-dataclasses",
+        "summary": "Dummy dataclasses module for MicroPython"
+    },
+    {
+        "name": "micropython-datetime",
+        "summary": "Dummy datetime module for MicroPython"
+    },
+    {
+        "name": "micropython-dbm",
+        "summary": "Dummy dbm module for MicroPython"
+    },
+    {
+        "name": "micropython-dcompy",
+        "summary": "dcom micropython package"
+    },
+    {
+        "name": "micropython-decimal",
+        "summary": "Dummy decimal module for MicroPython"
+    },
+    {
+        "name": "micropython-dfplayer",
+        "summary": "Library to use the DFPlayer mini mp3 player module with micropython"
+    },
+    {
+        "name": "micropython-dftds",
+        "summary": "MicroPython library for the TDS meter sensor"
+    },
+    {
+        "name": "micropython-dgus",
+        "summary": "DGUS library for micropython"
+    },
+    {
+        "name": "micropython-dht12",
+        "summary": "MicroPython library for the DHT12 temperature and humidity sensor."
+    },
+    {
+        "name": "micropython-difflib",
+        "summary": "Dummy difflib module for MicroPython"
+    },
+    {
+        "name": "micropython-dis",
+        "summary": "Dummy dis module for MicroPython"
+    },
+    {
+        "name": "micropython-display",
+        "summary": "Micropython scripts for use displays."
+    },
+    {
+        "name": "micropython-doctest",
+        "summary": "Dummy doctest module for MicroPython"
+    },
+    {
+        "name": "micropython-dps310",
+        "summary": "MicroPython Driver for the DPS310 sensor"
+    },
+    {
+        "name": "micropython-ds1307",
+        "summary": "MicroPython driver for DS1307 RTC"
+    },
+    {
+        "name": "micropython-ds1631",
+        "summary": "MicroPython i2c driver for Maxim-Dallas DS1621 DS1631 DS1631A DS1721 DS1731 digital thermometer and thermostat."
+    },
+    {
+        "name": "micropython-ds1841",
+        "summary": "MicroPython Driver for the DS1841 Potentiometer"
+    },
+    {
+        "name": "micropython-ds3502",
+        "summary": "MicroPython Driver for the DS3502 Potentiometer"
+    },
+    {
+        "name": "micropython-dummy_threading",
+        "summary": "Dummy dummy_threading module for MicroPython"
+    },
+    {
+        "name": "micropython-dweeter",
+        "summary": "A python module for messaging through the free dweet service."
+    },
+    {
+        "name": "micropython-eduponics",
+        "summary": "STEMinds Eduponics Mini MicroPython library"
+    },
+    {
+        "name": "micropython-eeprom",
+        "summary": "MicroPython driver for AT24Cxx EEPROM"
+    },
+    {
+        "name": "micropython-eliza",
+        "summary": "ELIZA chatbot for MicroPython. Based on 'ELIZA' by Joseph Weizenbaum, 1966."
+    },
+    {
+        "name": "micropython-email.charset",
+        "summary": "CPython email.charset module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.encoders",
+        "summary": "CPython email.encoders module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.errors",
+        "summary": "CPython email.errors module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.feedparser",
+        "summary": "CPython email.feedparser module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.header",
+        "summary": "CPython email.header module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.internal",
+        "summary": "CPython email.internal module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.message",
+        "summary": "CPython email.message module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.parser",
+        "summary": "CPython email.parser module ported to MicroPython"
+    },
+    {
+        "name": "micropython-email.utils",
+        "summary": "CPython email.utils module ported to MicroPython"
+    },
+    {
+        "name": "micropython-ensurepip",
+        "summary": "Dummy ensurepip module for MicroPython"
+    },
+    {
+        "name": "micropython-enum",
+        "summary": "Dummy enum module for MicroPython"
+    },
+    {
+        "name": "micropython-env-sense",
+        "summary": "Importers for various institutions for Beancount"
+    },
+    {
+        "name": "micropython-errno",
+        "summary": "errno module for MicroPython"
+    },
+    {
+        "name": "micropython-esp-wifi-manager",
+        "summary": "MicroPython WiFi Manager to configure and connect to networks"
+    },
+    {
+        "name": "micropython-esp32-esp32_generic-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-esp32_generic_c3-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-esp32_generic_s3-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-generic_ota-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-generic_s3-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-generic_spiram-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-ota-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-s3-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-ulp",
+        "summary": "Assembler toolchain for the ESP32 ULP co-processor, written in MicroPython"
+    },
+    {
+        "name": "micropython-esp32-um_tinypico-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp8266-esp8266_generic-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp8266-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-espFOTA",
+        "summary": "\"espFOTA: An OTA (Over-the-Air) update library for ESP8266, ESP32, and other devices supporting MicroPython."
+    },
+    {
+        "name": "micropython-espresso",
+        "summary": "Micropython scripts for Espresso IDE."
+    },
+    {
+        "name": "micropython-europi",
+        "summary": "EuroPi module for MicroPython"
+    },
+    {
+        "name": "micropython-europi-contrib",
+        "summary": "Community Contributions to EuroPi module for MicroPython"
+    },
+    {
+        "name": "micropython-event-bus",
+        "summary": "Micropython compatible producer/subscriber event bus system with optional threading."
+    },
+    {
+        "name": "micropython-eydam-prototyping-config",
+        "summary": "Some wifi functions for MicroPython"
+    },
+    {
+        "name": "micropython-eydam-prototyping-ep-http",
+        "summary": "Some wifi functions for MicroPython"
+    },
+    {
+        "name": "micropython-eydam-prototyping-lcd-menu",
+        "summary": "Some LCD Menu functionality for Micropython"
+    },
+    {
+        "name": "micropython-eydam-prototyping-logging",
+        "summary": "Some logging functions for MicroPython in combination with syslog-server"
+    },
+    {
+        "name": "micropython-eydam-prototyping-statemachine",
+        "summary": "Some statemachine functions for MicroPython"
+    },
+    {
+        "name": "micropython-eydam-prototyping-wifi",
+        "summary": "Some wifi functions for MicroPython"
+    },
+    {
+        "name": "micropython-faulthandler",
+        "summary": "Dummy faulthandler module for MicroPython"
+    },
+    {
+        "name": "micropython-fcntl",
+        "summary": "fcntl module for MicroPython"
+    },
+    {
+        "name": "micropython-ffilib",
+        "summary": "MicroPython FFI helper module"
+    },
+    {
+        "name": "micropython-filecmp",
+        "summary": "Dummy filecmp module for MicroPython"
+    },
+    {
+        "name": "micropython-filedb",
+        "summary": "Very simple, filesystem-based ORM (Object-Relational\nMapper) for MicroPython."
+    },
+    {
+        "name": "micropython-fileinput",
+        "summary": "Dummy fileinput module for MicroPython"
+    },
+    {
+        "name": "micropython-firebase-auth",
+        "summary": "Firebase Auth implementation for Micropython optimized for ESP32."
+    },
+    {
+        "name": "micropython-firebase-firestore",
+        "summary": "Firebase Firestore implementation for Micropython optimized for ESP32."
+    },
+    {
+        "name": "micropython-firebase-realtime",
+        "summary": "Firebase realtime implementation for Micropython"
+    },
+    {
+        "name": "micropython-fnmatch",
+        "summary": "CPython fnmatch module ported to MicroPython"
+    },
+    {
+        "name": "micropython-formatter",
+        "summary": "Dummy formatter module for MicroPython"
+    },
+    {
+        "name": "micropython-fractions",
+        "summary": "Dummy fractions module for MicroPython"
+    },
+    {
+        "name": "micropython-framebuf",
+        "summary": "Implementation of \"framebuf\" module (using SDL2) for the \"unix\" port of MicroPython. (Experimental)"
+    },
+    {
+        "name": "micropython-ft6x36",
+        "summary": "Driver for the FT6x36"
+    },
+    {
+        "name": "micropython-ftplib",
+        "summary": "Dummy ftplib module for MicroPython"
+    },
+    {
+        "name": "micropython-functools",
+        "summary": "functools module for MicroPython"
+    },
+    {
+        "name": "micropython-future",
+        "summary": "Dummy __future__ module for MicroPython"
+    },
+    {
+        "name": "micropython-gc",
+        "summary": "Dummy gc module for MicroPython"
+    },
+    {
+        "name": "micropython-genpy",
+        "summary": "A package done in order to generate ros message classes."
+    },
+    {
+        "name": "micropython-getopt",
+        "summary": "CPython getopt module ported to MicroPython"
+    },
+    {
+        "name": "micropython-getpass",
+        "summary": "Dummy getpass module for MicroPython"
+    },
+    {
+        "name": "micropython-gettext",
+        "summary": "gettext module for MicroPython"
+    },
+    {
+        "name": "micropython-glob",
+        "summary": "CPython glob module ported to MicroPython"
+    },
+    {
+        "name": "micropython-gnssl76l",
+        "summary": "MicroPython I2C driver for the Quectel GNSS L76-L (GPS) receiver"
+    },
+    {
+        "name": "micropython-googlesheet",
+        "summary": "Update or append the data to Google Sheet, or get the data on Google Sheet. by using HTTP to execute the Google Apps Script API compatible with ESP32."
+    },
+    {
+        "name": "micropython-grp",
+        "summary": "Dummy grp module for MicroPython"
+    },
+    {
+        "name": "micropython-gzip",
+        "summary": "gzip module for MicroPython"
+    },
+    {
+        "name": "micropython-h3lis200dl",
+        "summary": "Micropython Driver for the ST H3LIS200DL Accelerometer"
+    },
+    {
+        "name": "micropython-hashlib",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hashlib-safe",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hashlib15",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hashlib3",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hashlib5",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hashlib9",
+        "summary": "PyPy hashlib module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hdc1080",
+        "summary": "MicroPython driver for the TI HDC1080 Temperature and Humidity sensor"
+    },
+    {
+        "name": "micropython-heapq",
+        "summary": "CPython heapq module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hellojdh99",
+        "summary": "test micropython pack"
+    },
+    {
+        "name": "micropython-hints",
+        "summary": "MicroPython type hints"
+    },
+    {
+        "name": "micropython-hmac",
+        "summary": "CPython hmac module ported to MicroPython"
+    },
+    {
+        "name": "micropython-home-assistant",
+        "summary": "Home Assistant MQTT integration for MicroPython"
+    },
+    {
+        "name": "micropython-hs3003",
+        "summary": "MicroPython Driver for the Renesas HS3003 Temperature and Humidity Sensor"
+    },
+    {
+        "name": "micropython-html",
+        "summary": "CPython html module ported to MicroPython"
+    },
+    {
+        "name": "micropython-html.entities",
+        "summary": "CPython html.entities module ported to MicroPython"
+    },
+    {
+        "name": "micropython-html.parser",
+        "summary": "CPython html.parser module ported to MicroPython"
+    },
+    {
+        "name": "micropython-hts221",
+        "summary": "MicroPython Driver for the HTS221 Humidity Sensor"
+    },
+    {
+        "name": "micropython-http.client",
+        "summary": "CPython http.client module ported to MicroPython"
+    },
+    {
+        "name": "micropython-http.cookiejar",
+        "summary": "Dummy http.cookiejar module for MicroPython"
+    },
+    {
+        "name": "micropython-http.cookies",
+        "summary": "Dummy http.cookies module for MicroPython"
+    },
+    {
+        "name": "micropython-httpota",
+        "summary": "MicroPython library for OTA updates using HTTP"
+    },
+    {
+        "name": "micropython-htu21df",
+        "summary": "MicroPython HTU21D-F Temperature & Humidity"
+    },
+    {
+        "name": "micropython-htu31d",
+        "summary": "MicroPython library for TE HTU31D temperature and humidity sensors"
+    },
+    {
+        "name": "micropython-hx711",
+        "summary": "Micropython driver for the HX711"
+    },
+    {
+        "name": "micropython-i2c-lcd",
+        "summary": "MicroPython package to control HD44780 LCD displays 1602 and 2004"
+    },
+    {
+        "name": "micropython-icg20660",
+        "summary": "MicroPython Driver for the TDK ICG20660 Accelerometer/Gyro sensor"
+    },
+    {
+        "name": "micropython-icm20948",
+        "summary": "MicroPython Driver for the Accelerometer and Gyro ICM20948 Sensor"
+    },
+    {
+        "name": "micropython-icp10111",
+        "summary": "MicroPython Driver for the TDK Barometric Pressure"
+    },
+    {
+        "name": "micropython-ili934x",
+        "summary": "MicroPython SPI driver for ILI934X based displays"
+    },
+    {
+        "name": "micropython-imaplib",
+        "summary": "Dummy imaplib module for MicroPython"
+    },
+    {
+        "name": "micropython-imghdr",
+        "summary": "Dummy imghdr module for MicroPython"
+    },
+    {
+        "name": "micropython-imp",
+        "summary": "Dummy imp module for MicroPython"
+    },
+    {
+        "name": "micropython-importlib",
+        "summary": "Dummy importlib module for MicroPython"
+    },
+    {
+        "name": "micropython-importlib.resources",
+        "summary": "Dummy importlib.resources module for MicroPython"
+    },
+    {
+        "name": "micropython-inspect",
+        "summary": "inspect module for MicroPython"
+    },
+    {
+        "name": "micropython-io",
+        "summary": "Dummy io module for MicroPython"
+    },
+    {
+        "name": "micropython-iot",
+        "summary": "Micropython IoT libraries and tools"
+    },
+    {
+        "name": "micropython-iot-utils",
+        "summary": "micropython-iot-utils"
+    },
+    {
+        "name": "micropython-iotPervasiveServiceSDK",
+        "summary": "\u8bbe\u5907\u7aef\u76f4\u8fde\u6846\u67b6python"
+    },
+    {
+        "name": "micropython-iotc",
+        "summary": "Azure IoT Central client for MicroPython (mqtt protocol)"
+    },
+    {
+        "name": "micropython-ipaddress",
+        "summary": "Dummy ipaddress module for MicroPython"
+    },
+    {
+        "name": "micropython-isl29125",
+        "summary": "MicroPython Driver for the Intersil ISL29125 Color Sensor"
+    },
+    {
+        "name": "micropython-itertools",
+        "summary": "itertools module for MicroPython"
+    },
+    {
+        "name": "micropython-json",
+        "summary": "CPython json module ported to MicroPython"
+    },
+    {
+        "name": "micropython-keypad",
+        "summary": "Keypad library generic matrix keypads"
+    },
+    {
+        "name": "micropython-keyword",
+        "summary": "CPython keyword module ported to MicroPython"
+    },
+    {
+        "name": "micropython-kx132",
+        "summary": "MicroPython Driver for the Kionix KX132 Accelerometer"
+    },
+    {
+        "name": "micropython-lagan",
+        "summary": "log system"
+    },
+    {
+        "name": "micropython-lcd",
+        "summary": "Dummy lcd module for MicroPython"
+    },
+    {
+        "name": "micropython-lib2to3",
+        "summary": "Dummy lib2to3 module for MicroPython"
+    },
+    {
+        "name": "micropython-libc",
+        "summary": "MicroPython FFI helper module (deprecated)"
+    },
+    {
+        "name": "micropython-linecache",
+        "summary": "Dummy linecache module for MicroPython"
+    },
+    {
+        "name": "micropython-linenotify",
+        "summary": "Line Notify with MicroPython on ESP32/ESP8266"
+    },
+    {
+        "name": "micropython-lis2hh12",
+        "summary": "MicroPython I2C driver for LIS2HH12 3-axis accelerometer"
+    },
+    {
+        "name": "micropython-lis2mdl",
+        "summary": "MicroPython Driver for the ST LIS2MDL Magnetometer sensor"
+    },
+    {
+        "name": "micropython-lis3dh",
+        "summary": "LIS3DH MicroPython Driver"
+    },
+    {
+        "name": "micropython-lis3mdl",
+        "summary": "MicroPython Driver for the ST LIS3MDL magnetometer"
+    },
+    {
+        "name": "micropython-ljus",
+        "summary": "A MicroPython package for LEDs."
+    },
+    {
+        "name": "micropython-lnurl",
+        "summary": "LNURL library for micropython"
+    },
+    {
+        "name": "micropython-locale",
+        "summary": "Dummy locale module for MicroPython"
+    },
+    {
+        "name": "micropython-logging",
+        "summary": "logging module for MicroPython"
+    },
+    {
+        "name": "micropython-loki",
+        "summary": "Micropython library for sending logs to Loki"
+    },
+    {
+        "name": "micropython-lsm6dsox",
+        "summary": "MicroPython Library for the ST LSM6DSOX accelerometer/gyro Sensor"
+    },
+    {
+        "name": "micropython-lzma",
+        "summary": "Dummy lzma module for MicroPython"
+    },
+    {
+        "name": "micropython-machine",
+        "summary": "machine module for MicroPython"
+    },
+    {
+        "name": "micropython-magic",
+        "summary": "MicroPython Magic commands for use with Jupyter notebooks and Jupyter Labs"
+    },
+    {
+        "name": "micropython-mailbox",
+        "summary": "Dummy mailbox module for MicroPython"
+    },
+    {
+        "name": "micropython-mailcap",
+        "summary": "Dummy mailcap module for MicroPython"
+    },
+    {
+        "name": "micropython-makerpack",
+        "summary": "Package for maker kit and every other makers."
+    },
+    {
+        "name": "micropython-marshal",
+        "summary": "Dummy marshal module for MicroPython"
+    },
+    {
+        "name": "micropython-math",
+        "summary": "Dummy math module for MicroPython"
+    },
+    {
+        "name": "micropython-max30102",
+        "summary": "MAX30102 driver for micropython."
+    },
+    {
+        "name": "micropython-max7219",
+        "summary": "A MicroPython library for the Max7219 8x8 LED matrix driver"
+    },
+    {
+        "name": "micropython-mc3479",
+        "summary": "MicroPython Driver for the MC3479 Accelerometer"
+    },
+    {
+        "name": "micropython-mcp9808",
+        "summary": "MicroPython Driver for the Microchip MCP9808 Temperature Sensor"
+    },
+    {
+        "name": "micropython-mcron",
+        "summary": "MicroCRON for MicroPython."
+    },
+    {
+        "name": "micropython-md5",
+        "summary": "Dummy md5 module for MicroPython"
+    },
+    {
+        "name": "micropython-mdns",
+        "summary": "MDNS for micropython with service discovery support"
+    },
+    {
+        "name": "micropython-mesmerize",
+        "summary": "mesmerize module for MicroPython"
+    },
+    {
+        "name": "micropython-microbmp",
+        "summary": "A small Python module for BMP image processing."
+    },
+    {
+        "name": "micropython-micronet",
+        "summary": "MicroPython library for networking"
+    },
+    {
+        "name": "micropython-microqueue",
+        "summary": "Simple redis queue for MicroPython"
+    },
+    {
+        "name": "micropython-mimetypes",
+        "summary": "Dummy mimetypes module for MicroPython"
+    },
+    {
+        "name": "micropython-mlx90393",
+        "summary": "MicroPython Driver for the MLX90393 Sensor"
+    },
+    {
+        "name": "micropython-mlx90614",
+        "summary": "MicroPython library for the MLX90614 IR temperature sensor."
+    },
+    {
+        "name": "micropython-mlx90615",
+        "summary": "Micropython scripts for use MLX90615 temperatures sensors."
+    },
+    {
+        "name": "micropython-mma8451",
+        "summary": "MicroPython module for the MMA8451 3 axis accelerometer"
+    },
+    {
+        "name": "micropython-mma8452q",
+        "summary": "MicroPython Drtiver for the NXP MMA8452Q Accelerometer"
+    },
+    {
+        "name": "micropython-mmap",
+        "summary": "Dummy mmap module for MicroPython"
+    },
+    {
+        "name": "micropython-mmc5603",
+        "summary": "MicroPython driver for the Memsic MMC5603 Magnetometer"
+    },
+    {
+        "name": "micropython-mmc5983",
+        "summary": "MicroPython Library for the Memsic MMC5983 Magnetometer"
+    },
+    {
+        "name": "micropython-mmr902",
+        "summary": "MicroPython Driver fro the Mitsumi MMR902 Micro Pressure Sensor"
+    },
+    {
+        "name": "micropython-modbus",
+        "summary": "MicroPython ModBus TCP and RTU library supporting client and host mode"
+    },
+    {
+        "name": "micropython-modulefinder",
+        "summary": "Dummy modulefinder module for MicroPython"
+    },
+    {
+        "name": "micropython-mojogzip",
+        "summary": "gzip module for MicroPython"
+    },
+    {
+        "name": "micropython-motor",
+        "summary": "MicroPython Helpers for controlling PWM based motors and servos"
+    },
+    {
+        "name": "micropython-mpl3115a2",
+        "summary": "MicroPython driver for the NXP MPL3115A2 Pressure and Temperature sensor"
+    },
+    {
+        "name": "micropython-mpu6886",
+        "summary": "MicroPython I2C driver for MPU6886 6-axis motion tracking device"
+    },
+    {
+        "name": "micropython-mpu9250",
+        "summary": "MicroPython I2C driver for MPU9250 9-axis motion tracking device"
+    },
+    {
+        "name": "micropython-mpy-env",
+        "summary": "Simple environment variable loader for MicroPython board."
+    },
+    {
+        "name": "micropython-mpylib",
+        "summary": "Module to deal with MicroPython compiled bytecode files (.mpy)"
+    },
+    {
+        "name": "micropython-mqtt",
+        "summary": "Reliable MQTT client for MicroPython using asyncio"
+    },
+    {
+        "name": "micropython-mqtt-async",
+        "summary": "Reliable MQTT client for MicroPython using asyncio"
+    },
+    {
+        "name": "micropython-mqttse",
+        "summary": "Lightweight mqttse library for MicroPython, nonblocking Mqtt for ESP8266."
+    },
+    {
+        "name": "micropython-ms5611",
+        "summary": "MicroPython Driver for the TE MS5611 Pressure and Temperature Sensor"
+    },
+    {
+        "name": "micropython-msilib",
+        "summary": "Dummy msilib module for MicroPython"
+    },
+    {
+        "name": "micropython-mtx",
+        "summary": "Extra-fast Matrix Multiplication and Linear System Solver on MicroPython"
+    },
+    {
+        "name": "micropython-multiprocessing",
+        "summary": "multiprocessing module for MicroPython"
+    },
+    {
+        "name": "micropython-ndefcdf",
+        "summary": "NDEF Crypto Data Format"
+    },
+    {
+        "name": "micropython-ndeflib",
+        "summary": "NDEF library for MicroPython based on NDEF library"
+    },
+    {
+        "name": "micropython-netpie",
+        "summary": "MicroPython Library for Interfacing with the NETPIE IoT Platform"
+    },
+    {
+        "name": "micropython-netrc",
+        "summary": "Dummy netrc module for MicroPython"
+    },
+    {
+        "name": "micropython-nextion",
+        "summary": "MicroPython Nextion serial displays library"
+    },
+    {
+        "name": "micropython-nis",
+        "summary": "Dummy nis module for MicroPython"
+    },
+    {
+        "name": "micropython-nntplib",
+        "summary": "Dummy nntplib module for MicroPython"
+    },
+    {
+        "name": "micropython-nodewire",
+        "summary": "NodeWire"
+    },
+    {
+        "name": "micropython-numbers",
+        "summary": "Dummy numbers module for MicroPython"
+    },
+    {
+        "name": "micropython-octopuslab-installer",
+        "summary": "OctopusLab installer for MicroPython"
+    },
+    {
+        "name": "micropython-oled",
+        "summary": "Micropython scripts for use OLED displays."
+    },
+    {
+        "name": "micropython-opcode",
+        "summary": "opcode module for MicroPython"
+    },
+    {
+        "name": "micropython-operator",
+        "summary": "operator module for MicroPython"
+    },
+    {
+        "name": "micropython-optparse",
+        "summary": "Dummy optparse module for MicroPython"
+    },
+    {
+        "name": "micropython-os",
+        "summary": "os module for MicroPython"
+    },
+    {
+        "name": "micropython-os.path",
+        "summary": "os.path module for MicroPython"
+    },
+    {
+        "name": "micropython-ossaudiodev",
+        "summary": "Dummy ossaudiodev module for MicroPython"
+    },
+    {
+        "name": "micropython-ota",
+        "summary": "Micropython library for upgrading code over-the-air (OTA)"
+    },
+    {
+        "name": "micropython-p9813",
+        "summary": "MicroPython library for the P9813 RGB LED driver."
+    },
+    {
+        "name": "micropython-package-template",
+        "summary": "MicroPython PyPi package template project with auto deploy"
+    },
+    {
+        "name": "micropython-parser",
+        "summary": "Dummy parser module for MicroPython"
+    },
+    {
+        "name": "micropython-pathlib",
+        "summary": "Dummy pathlib module for MicroPython"
+    },
+    {
+        "name": "micropython-pathlib-full",
+        "summary": "Micropython port of pathlib"
+    },
+    {
+        "name": "micropython-pca9685",
+        "summary": "MicroPython Driver for the PCA9685"
+    },
+    {
+        "name": "micropython-pcd8544",
+        "summary": "MicroPython library for the PCD8544 LCD, used by Nokia 5110 displays."
+    },
+    {
+        "name": "micropython-pcf8591",
+        "summary": "A pcf8591 driver for micropython"
+    },
+    {
+        "name": "micropython-pct2075",
+        "summary": "MciroPython Driver for the NXP Semiconductors Temperature Sensor"
+    },
+    {
+        "name": "micropython-pdb",
+        "summary": "Dummy pdb module for MicroPython"
+    },
+    {
+        "name": "micropython-phew",
+        "summary": "A small webserver and templating library specifically designed for MicroPython on the Pico W."
+    },
+    {
+        "name": "micropython-pickle",
+        "summary": "Dummy pickle module for MicroPython"
+    },
+    {
+        "name": "micropython-pickletools",
+        "summary": "Dummy pickletools module for MicroPython"
+    },
+    {
+        "name": "micropython-picoconnection",
+        "summary": "Pi Pico AP and Wifi Connection helper"
+    },
+    {
+        "name": "micropython-picowebrouter",
+        "summary": "Pi Pico webserver"
+    },
+    {
+        "name": "micropython-pipes",
+        "summary": "Dummy pipes module for MicroPython"
+    },
+    {
+        "name": "micropython-pkg_resources",
+        "summary": "pkg_resources module for MicroPython"
+    },
+    {
+        "name": "micropython-pkgutil",
+        "summary": "pkgutil module for MicroPython"
+    },
+    {
+        "name": "micropython-platform",
+        "summary": "Dummy platform module for MicroPython"
+    },
+    {
+        "name": "micropython-plc",
+        "summary": "PLC library for micropython"
+    },
+    {
+        "name": "micropython-plistlib",
+        "summary": "Dummy plistlib module for MicroPython"
+    },
+    {
+        "name": "micropython-poplib",
+        "summary": "Dummy poplib module for MicroPython"
+    },
+    {
+        "name": "micropython-posix",
+        "summary": "Dummy posix module for MicroPython"
+    },
+    {
+        "name": "micropython-posixpath",
+        "summary": "Dummy posixpath module for MicroPython"
+    },
+    {
+        "name": "micropython-ppm-reader",
+        "summary": "Decodes PPM signals from RC receivers"
+    },
+    {
+        "name": "micropython-pprint",
+        "summary": "Dummy pprint module for MicroPython"
+    },
+    {
+        "name": "micropython-profile",
+        "summary": "Dummy profile module for MicroPython"
+    },
+    {
+        "name": "micropython-pstats",
+        "summary": "Dummy pstats module for MicroPython"
+    },
+    {
+        "name": "micropython-pty",
+        "summary": "Dummy pty module for MicroPython"
+    },
+    {
+        "name": "micropython-pwd",
+        "summary": "pwd module for MicroPython"
+    },
+    {
+        "name": "micropython-py-esp32-ulp",
+        "summary": "Assembler toolchain for the ESP32 ULP co-processor, written in MicroPython"
+    },
+    {
+        "name": "micropython-py_compile",
+        "summary": "py_compile module for MicroPython"
+    },
+    {
+        "name": "micropython-pycayennelpp",
+        "summary": "Encoder and Decoder for CayenneLLP"
+    },
+    {
+        "name": "micropython-pyclbr",
+        "summary": "Dummy pyclbr module for MicroPython"
+    },
+    {
+        "name": "micropython-pystone",
+        "summary": "CPython pystone module ported to MicroPython"
+    },
+    {
+        "name": "micropython-pystone_lowmem",
+        "summary": "CPython pystone_lowmem module ported to MicroPython"
+    },
+    {
+        "name": "micropython-pystubit2",
+        "summary": "MicroPython library for StuduinoBit&ArtecRobo2.0"
+    },
+    {
+        "name": "micropython-qmc5883l",
+        "summary": "MicroPython Driver for the QMC5883L Accelerometer"
+    },
+    {
+        "name": "micropython-qr",
+        "summary": "Uploaded micro python qrcode library"
+    },
+    {
+        "name": "micropython-queue",
+        "summary": "Dummy queue module for MicroPython"
+    },
+    {
+        "name": "micropython-quopri",
+        "summary": "CPython quopri module ported to MicroPython"
+    },
+    {
+        "name": "micropython-random",
+        "summary": "Dummy random module for MicroPython"
+    },
+    {
+        "name": "micropython-re",
+        "summary": "Dummy re module for MicroPython"
+    },
+    {
+        "name": "micropython-re-pcre",
+        "summary": "re-pcre module for MicroPython"
+    },
+    {
+        "name": "micropython-readline",
+        "summary": "Dummy readline module for MicroPython"
+    },
+    {
+        "name": "micropython-redis",
+        "summary": "redis module for MicroPython"
+    },
+    {
+        "name": "micropython-redis-cloudclient",
+        "summary": "Micropython client that allows network attached boards to be controlled from a central redis server"
+    },
+    {
+        "name": "micropython-redis-modular",
+        "summary": "redis module for MicroPython that allows importing only a subset of the redis functionality for low memory environments"
+    },
+    {
+        "name": "micropython-redis.client",
+        "summary": "redis client module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.connection",
+        "summary": "redis connection module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.geo",
+        "summary": "redis geo module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.hash",
+        "summary": "redis hash module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.key",
+        "summary": "redis key module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.list",
+        "summary": "redis client module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.pubsub",
+        "summary": "redis pubsub module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.set",
+        "summary": "redis set module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.sortedset",
+        "summary": "redis set module for MicroPython"
+    },
+    {
+        "name": "micropython-redis.string",
+        "summary": "redis set module for MicroPython"
+    },
+    {
+        "name": "micropython-reprlib",
+        "summary": "Dummy reprlib module for MicroPython"
+    },
+    {
+        "name": "micropython-requests",
+        "summary": "Dummy requests module for MicroPython"
+    },
+    {
+        "name": "micropython-requests.auth",
+        "summary": "Dummy requests.auth module for MicroPython"
+    },
+    {
+        "name": "micropython-resource",
+        "summary": "Dummy resource module for MicroPython"
+    },
+    {
+        "name": "micropython-rfsocket",
+        "summary": "rfsocket module for MicroPython"
+    },
+    {
+        "name": "micropython-rlcompleter",
+        "summary": "Dummy rlcompleter module for MicroPython"
+    },
+    {
+        "name": "micropython-rockwren",
+        "summary": "Device framework (MQTT, Web) for MicroPython on the ESP8266 and Pico W."
+    },
+    {
+        "name": "micropython-rosserial",
+        "summary": "A package done in order to use rosserial with micropython."
+    },
+    {
+        "name": "micropython-rosserial-msgs",
+        "summary": "A package with rosserial_msgs uPy classes."
+    },
+    {
+        "name": "micropython-rotary-encoder",
+        "summary": "This is a micropython raspberry pi pico encoder library."
+    },
+    {
+        "name": "micropython-rp2-arduino_nano_rp2040_connect-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-pico-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-pico_w-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-pimoroni_picolipo_16mb-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-rpi_pico-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-rpi_pico_w-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-runpy",
+        "summary": "Dummy runpy module for MicroPython"
+    },
+    {
+        "name": "micropython-ruuvitag",
+        "summary": "RuuviTag BLE Sensor Beacon scanner."
+    },
+    {
+        "name": "micropython-samd-adafruit_feather_m4_express-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-samd-adafruit_itsybitsy_m4_express-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-samd-minisam_m4-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-samd-seeed_wio_terminal-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-samd-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-sc16is7xx",
+        "summary": "Library for sc16is7xx"
+    },
+    {
+        "name": "micropython-scd30",
+        "summary": "MicroPython I2C driver for SCD30 CO2 sensor module"
+    },
+    {
+        "name": "micropython-sched",
+        "summary": "Dummy sched module for MicroPython"
+    },
+    {
+        "name": "micropython-schedule",
+        "summary": "Job scheduling for humans."
+    },
+    {
+        "name": "micropython-scron",
+        "summary": "Simple CRON for MicroPython."
+    },
+    {
+        "name": "micropython-secrets",
+        "summary": "Dummy secrets module for MicroPython"
+    },
+    {
+        "name": "micropython-select",
+        "summary": "select module for MicroPython"
+    },
+    {
+        "name": "micropython-selectors",
+        "summary": "Dummy selectors module for MicroPython"
+    },
+    {
+        "name": "micropython-senko",
+        "summary": "Simplest OTA update solution for your Micropython projects."
+    },
+    {
+        "name": "micropython-senml",
+        "summary": "SenML serialisation for MicroPython."
+    },
+    {
+        "name": "micropython-serial",
+        "summary": "pySerial-like module for MicroPython (unix port)."
+    },
+    {
+        "name": "micropython-servo",
+        "summary": "Use rc servos with PWM in micropython in a tidy way"
+    },
+    {
+        "name": "micropython-servo-pdm",
+        "summary": "This is a micropython library for control continuous servo by PDM (PWM)."
+    },
+    {
+        "name": "micropython-servo-pdm-360",
+        "summary": "This is a micropython library for control continuous servo by PDM (PWM)."
+    },
+    {
+        "name": "micropython-servomt",
+        "summary": "uma biblioteca para controle de servo motor com micropython"
+    },
+    {
+        "name": "micropython-sgp40",
+        "summary": "MicroPython I2C driver for Sensirion SGP40 VOC sensor"
+    },
+    {
+        "name": "micropython-shelve",
+        "summary": "Dummy shelve module for MicroPython"
+    },
+    {
+        "name": "micropython-shlex",
+        "summary": "Dummy shlex module for MicroPython"
+    },
+    {
+        "name": "micropython-sht20",
+        "summary": "MicroPython Driver for the Sensirion SHT20 Temperature Sensor"
+    },
+    {
+        "name": "micropython-sht30",
+        "summary": "SHT30 sensor driver for micropython: IC2 bus"
+    },
+    {
+        "name": "micropython-sht4x",
+        "summary": "MicroPython Driver fot the Sensirion Temperature and Humidity SHT40 and SHT45 Sensor"
+    },
+    {
+        "name": "micropython-shtc3",
+        "summary": "MicroPython Driver for the Sensirion SHTC3 Temperature and Humidity Sensor"
+    },
+    {
+        "name": "micropython-shutil",
+        "summary": "shutil module for MicroPython"
+    },
+    {
+        "name": "micropython-si7021",
+        "summary": "MicroPython Library for the the Temperature and Humidity SI7021 Sensor"
+    },
+    {
+        "name": "micropython-signal",
+        "summary": "signal module for MicroPython"
+    },
+    {
+        "name": "micropython-simple-keypad",
+        "summary": "MicroPython library for interfacing with a keypad matrix"
+    },
+    {
+        "name": "micropython-site",
+        "summary": "\"site\" module for MicroPython, containing implementation of help()."
+    },
+    {
+        "name": "micropython-sitecustomize",
+        "summary": "Dummy sitecustomize module for MicroPython"
+    },
+    {
+        "name": "micropython-smtplib",
+        "summary": "Dummy smtplib module for MicroPython"
+    },
+    {
+        "name": "micropython-sndhdr",
+        "summary": "Dummy sndhdr module for MicroPython"
+    },
+    {
+        "name": "micropython-socket",
+        "summary": "socket module for MicroPython"
+    },
+    {
+        "name": "micropython-socketserver",
+        "summary": "Dummy socketserver module for MicroPython"
+    },
+    {
+        "name": "micropython-socks",
+        "summary": "MicroPython library implementing SOCKS server."
+    },
+    {
+        "name": "micropython-spotify-web-api",
+        "summary": "Spotify Web API client for MicroPython"
+    },
+    {
+        "name": "micropython-spwd",
+        "summary": "Dummy spwd module for MicroPython"
+    },
+    {
+        "name": "micropython-sqlite3",
+        "summary": "sqlite3 module for MicroPython"
+    },
+    {
+        "name": "micropython-sram",
+        "summary": "Library for SRAM and EERAM memories for micropython"
+    },
+    {
+        "name": "micropython-ssd1306",
+        "summary": "ssd1306 module for MicroPython"
+    },
+    {
+        "name": "micropython-ssd1306py",
+        "summary": "ssd1306 driver"
+    },
+    {
+        "name": "micropython-ssd1327",
+        "summary": "MicroPython library for SSD1327 based OLED displays."
+    },
+    {
+        "name": "micropython-ssl",
+        "summary": "Dummy ssl module for MicroPython"
+    },
+    {
+        "name": "micropython-stat",
+        "summary": "CPython stat module ported to MicroPython"
+    },
+    {
+        "name": "micropython-statistics",
+        "summary": "Dummy statistics module for MicroPython"
+    },
+    {
+        "name": "micropython-stdlib-stubs",
+        "summary": "Micropython stdlib is a reduced and augmented copy of typeshed's stdlib for use by MicroPython stub packages"
+    },
+    {
+        "name": "micropython-stepmaker",
+        "summary": "Stepmaker Package For Stepmaker Kit Users and Rpi Pico Users."
+    },
+    {
+        "name": "micropython-stepper",
+        "summary": "Library to use stepper drivers in micropython in a tidy way"
+    },
+    {
+        "name": "micropython-stm32-pybv11-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-stm32-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-string",
+        "summary": "string module for MicroPython"
+    },
+    {
+        "name": "micropython-stringprep",
+        "summary": "Dummy stringprep module for MicroPython"
+    },
+    {
+        "name": "micropython-struct",
+        "summary": "struct module for MicroPython"
+    },
+    {
+        "name": "micropython-structured-config",
+        "summary": "Configuration file support for micropython where the config structure is solely defined in python."
+    },
+    {
+        "name": "micropython-stts22h",
+        "summary": "MicroPython Driver for the STTS22H Temperature Sensor"
+    },
+    {
+        "name": "micropython-stubber",
+        "summary": "Tooling to create and maintain stubs for MicroPython"
+    },
+    {
+        "name": "micropython-studuinobit-iot",
+        "summary": "Studuino_MicroPython library for IoT"
+    },
+    {
+        "name": "micropython-subprocess",
+        "summary": "Dummy subprocess module for MicroPython"
+    },
+    {
+        "name": "micropython-sunau",
+        "summary": "Dummy sunau module for MicroPython"
+    },
+    {
+        "name": "micropython-symbol",
+        "summary": "Dummy symbol module for MicroPython"
+    },
+    {
+        "name": "micropython-symtable",
+        "summary": "Dummy symtable module for MicroPython"
+    },
+    {
+        "name": "micropython-sys",
+        "summary": "Dummy sys module for MicroPython"
+    },
+    {
+        "name": "micropython-sysconfig",
+        "summary": "Dummy sysconfig module for MicroPython"
+    },
+    {
+        "name": "micropython-syslog",
+        "summary": "Dummy syslog module for MicroPython"
+    },
+    {
+        "name": "micropython-tarfile",
+        "summary": "Dummy tarfile module for MicroPython"
+    },
+    {
+        "name": "micropython-tcs3430",
+        "summary": "MicroPython driver for the AMS TCS3430 Color and ALS sensor"
+    },
+    {
+        "name": "micropython-telnetlib",
+        "summary": "Dummy telnetlib module for MicroPython"
+    },
+    {
+        "name": "micropython-tempfile",
+        "summary": "Dummy tempfile module for MicroPython"
+    },
+    {
+        "name": "micropython-termios",
+        "summary": "Dummy termios module for MicroPython"
+    },
+    {
+        "name": "micropython-test.pystone",
+        "summary": "CPython test.pystone module ported to MicroPython"
+    },
+    {
+        "name": "micropython-test.support",
+        "summary": "test.support module for MicroPython"
+    },
+    {
+        "name": "micropython-testbase64",
+        "summary": "CPython base64 module ported to MicroPython"
+    },
+    {
+        "name": "micropython-teststubs-sebastian-stigler",
+        "summary": "Stub files for some micropython modules"
+    },
+    {
+        "name": "micropython-textwrap",
+        "summary": "CPython textwrap module ported to MicroPython"
+    },
+    {
+        "name": "micropython-the-pad",
+        "summary": "Modules and demos for the pad"
+    },
+    {
+        "name": "micropython-threading",
+        "summary": "threading module for MicroPython"
+    },
+    {
+        "name": "micropython-time",
+        "summary": "time module for MicroPython"
+    },
+    {
+        "name": "micropython-timeit",
+        "summary": "CPython timeit module ported to MicroPython"
+    },
+    {
+        "name": "micropython-tinydb",
+        "summary": "TinyDB"
+    },
+    {
+        "name": "micropython-tm1637",
+        "summary": "MicroPython library for TM1637 LED driver."
+    },
+    {
+        "name": "micropython-tm1640",
+        "summary": "MicroPython library for TM1640 LED driver."
+    },
+    {
+        "name": "micropython-tmp117",
+        "summary": "MicroPython Driver for the TMP117 temperature sensor"
+    },
+    {
+        "name": "micropython-token",
+        "summary": "CPython token module ported to MicroPython"
+    },
+    {
+        "name": "micropython-tokenize",
+        "summary": "Dummy tokenize module for MicroPython"
+    },
+    {
+        "name": "micropython-trace",
+        "summary": "Dummy trace module for MicroPython"
+    },
+    {
+        "name": "micropython-traceback",
+        "summary": "traceback module for MicroPython"
+    },
+    {
+        "name": "micropython-tracemalloc",
+        "summary": "Dummy tracemalloc module for MicroPython"
+    },
+    {
+        "name": "micropython-tty",
+        "summary": "tty module for MicroPython"
+    },
+    {
+        "name": "micropython-turtledemo",
+        "summary": "Dummy turtledemo module for MicroPython"
+    },
+    {
+        "name": "micropython-types",
+        "summary": "CPython types module ported to MicroPython"
+    },
+    {
+        "name": "micropython-typesheds",
+        "summary": "Typesheds (a.k.a.: interface stubs, `pyi` files, and type hints) for MicroPython."
+    },
+    {
+        "name": "micropython-typing",
+        "summary": "Dummy typing module for MicroPython"
+    },
+    {
+        "name": "micropython-tziot",
+        "summary": "tziot sdk for micropython"
+    },
+    {
+        "name": "micropython-uAPI",
+        "summary": "A very lightweight API framework"
+    },
+    {
+        "name": "micropython-uPIL",
+        "summary": "Dummy uPIL module for MicroPython"
+    },
+    {
+        "name": "micropython-uaioftp",
+        "summary": "Lightweight ftp asyncio library for MicroPython."
+    },
+    {
+        "name": "micropython-uaiohttpclient",
+        "summary": "HTTP client module for MicroPython uasyncio module"
+    },
+    {
+        "name": "micropython-uaioweb",
+        "summary": "Minimal asyncio web server for HTTP and Websocket."
+    },
+    {
+        "name": "micropython-uargparse",
+        "summary": "uargparse module for MicroPython"
+    },
+    {
+        "name": "micropython-uasyncio",
+        "summary": "Lightweight asyncio-like library for MicroPython, built around native Python coroutines."
+    },
+    {
+        "name": "micropython-uasyncio.core",
+        "summary": "Lightweight asyncio-like library for MicroPython, built around native Python coroutines. (Core event loop)."
+    },
+    {
+        "name": "micropython-uasyncio.queues",
+        "summary": "uasyncio.queues module for MicroPython"
+    },
+    {
+        "name": "micropython-uasyncio.synchro",
+        "summary": "Synchronization primitives for uasyncio."
+    },
+    {
+        "name": "micropython-uasyncio.udp",
+        "summary": "UDP support for MicroPython's uasyncio"
+    },
+    {
+        "name": "micropython-uasyncio.websocket.server",
+        "summary": "uasyncio.websocket.server module for MicroPython"
+    },
+    {
+        "name": "micropython-ucontextlib",
+        "summary": "ucontextlib module for MicroPython"
+    },
+    {
+        "name": "micropython-uctypes",
+        "summary": "Dummy uctypes module for MicroPython"
+    },
+    {
+        "name": "micropython-uctypeslib",
+        "summary": "Experimental module with helpers for 'uctypes' module."
+    },
+    {
+        "name": "micropython-uctypeslib2",
+        "summary": "uctypeslib2 module for MicroPython"
+    },
+    {
+        "name": "micropython-ucurses",
+        "summary": "ucurses module for MicroPython"
+    },
+    {
+        "name": "micropython-uffmpeg",
+        "summary": "(deprecated)"
+    },
+    {
+        "name": "micropython-ulogger",
+        "summary": "Log module customized for micropython."
+    },
+    {
+        "name": "micropython-ulogging",
+        "summary": "ulogging module for MicroPython"
+    },
+    {
+        "name": "micropython-umqtt.robust",
+        "summary": "Lightweight MQTT client for MicroPython (\"robust\" version)."
+    },
+    {
+        "name": "micropython-umqtt.robust2",
+        "summary": "MQTT client for MicroPython (\"robust\" version)."
+    },
+    {
+        "name": "micropython-umqtt.simple",
+        "summary": "Lightweight MQTT client for MicroPython."
+    },
+    {
+        "name": "micropython-umqtt.simple2",
+        "summary": "MQTT client for MicroPython."
+    },
+    {
+        "name": "micropython-uncrustify",
+        "summary": null
+    },
+    {
+        "name": "micropython-unicodedata",
+        "summary": "Dummy unicodedata module for MicroPython"
+    },
+    {
+        "name": "micropython-unittest",
+        "summary": "unittest module for MicroPython"
+    },
+    {
+        "name": "micropython-unittest-junit",
+        "summary": "Extended unittest for MicroPython with junit xml output"
+    },
+    {
+        "name": "micropython-unix-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-upip",
+        "summary": "Simple package manager for MicroPython."
+    },
+    {
+        "name": "micropython-uploader",
+        "summary": ""
+    },
+    {
+        "name": "micropython-uplot",
+        "summary": "MicroPython Graphics Library"
+    },
+    {
+        "name": "micropython-upysh",
+        "summary": "Minimalistic file shell using native Python syntax."
+    },
+    {
+        "name": "micropython-urequests",
+        "summary": "urequests module for MicroPython"
+    },
+    {
+        "name": "micropython-urequests.auth",
+        "summary": "Dummy urequests.auth module for MicroPython"
+    },
+    {
+        "name": "micropython-url-encode",
+        "summary": "This is a micropython library aimed at encoding and decoding URLs."
+    },
+    {
+        "name": "micropython-urllib",
+        "summary": "Dummy urllib module to MicroPython"
+    },
+    {
+        "name": "micropython-urllib.parse",
+        "summary": "CPython urllib.parse module ported to MicroPython"
+    },
+    {
+        "name": "micropython-urllib.urequest",
+        "summary": "urllib.urequest module for MicroPython"
+    },
+    {
+        "name": "micropython-usdl2",
+        "summary": "Lightweight SDL2 bindings for \"unix\" port of MicroPython."
+    },
+    {
+        "name": "micropython-usercustomize",
+        "summary": "Dummy usercustomize module for MicroPython"
+    },
+    {
+        "name": "micropython-ustruct",
+        "summary": "Dummy ustruct module for MicroPython"
+    },
+    {
+        "name": "micropython-utarfile",
+        "summary": "utarfile module for MicroPython"
+    },
+    {
+        "name": "micropython-utokenize",
+        "summary": "utokenize module for MicroPython"
+    },
+    {
+        "name": "micropython-uu",
+        "summary": "CPython uu module ported to MicroPython"
+    },
+    {
+        "name": "micropython-uuid",
+        "summary": "uuid module for MicroPython"
+    },
+    {
+        "name": "micropython-uulogging",
+        "summary": "uulogging module for MicroPython"
+    },
+    {
+        "name": "micropython-uurequests",
+        "summary": "uurequests module for MicroPython"
+    },
+    {
+        "name": "micropython-vcnl4010",
+        "summary": "MicroPython Driver for the Vishay VCNL4010 Proximity and Ambient Light Sensor"
+    },
+    {
+        "name": "micropython-vec",
+        "summary": "Vector Operations on MicroPython"
+    },
+    {
+        "name": "micropython-venv",
+        "summary": "venv module for MicroPython"
+    },
+    {
+        "name": "micropython-warnings",
+        "summary": "warnings module for MicroPython"
+    },
+    {
+        "name": "micropython-watson-iot",
+        "summary": "Unofficial IBM Watson IoT Platform SDK for Devices Running Micropython"
+    },
+    {
+        "name": "micropython-wave",
+        "summary": "Dummy wave module for MicroPython"
+    },
+    {
+        "name": "micropython-weakref",
+        "summary": "Dummy weakref module for MicroPython"
+    },
+    {
+        "name": "micropython-webassembly-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-wiegand",
+        "summary": "MicroPython class to read from a Wiegand card reader"
+    },
+    {
+        "name": "micropython-wifi-communication",
+        "summary": "um substituto para em vez de uma comunica\u00e7\u00e3o RF utilizar wifi"
+    },
+    {
+        "name": "micropython-wifi-setup",
+        "summary": ""
+    },
+    {
+        "name": "micropython-wifi-tool",
+        "summary": "A wifi tool for micropython"
+    },
+    {
+        "name": "micropython-wifimanager",
+        "summary": "A simple network configuration utility for MicroPython on the ESP-8266 and ESP-32 boards"
+    },
+    {
+        "name": "micropython-winbond",
+        "summary": "Simple MicroPython Winbond library"
+    },
+    {
+        "name": "micropython-windows-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-ws2801",
+        "summary": "MicroPython library for WS2801."
+    },
+    {
+        "name": "micropython-wsentids",
+        "summary": "MicroPython library for the WSEN WSEN-TIDS temperautre Sensor"
+    },
+    {
+        "name": "micropython-wsgiref",
+        "summary": "Dummy wsgiref module for MicroPython"
+    },
+    {
+        "name": "micropython-xdrlib",
+        "summary": "Dummy xdrlib module for MicroPython"
+    },
+    {
+        "name": "micropython-xml",
+        "summary": "Dummy xml module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.dom",
+        "summary": "Dummy xml.dom module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.dom.minidom",
+        "summary": "Dummy xml.dom.minidom module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.dom.pulldom",
+        "summary": "Dummy xml.dom.pulldom module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.etree.ElementTree",
+        "summary": "xml.etree.ElementTree module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.parsers.expat",
+        "summary": "Dummy xml.parsers.expat module for MicroPython"
+    },
+    {
+        "name": "micropython-xml.sax",
+        "summary": "Dummy xml.sax module for MicroPython"
+    },
+    {
+        "name": "micropython-xmlrpc",
+        "summary": "Dummy xmlrpc module for MicroPython"
+    },
+    {
+        "name": "micropython-xmlrpc.server",
+        "summary": "Dummy xmlrpc.server module for MicroPython"
+    },
+    {
+        "name": "micropython-xmltok",
+        "summary": "xmltok module for MicroPython"
+    },
+    {
+        "name": "micropython-xmltok2",
+        "summary": "xmltok2 module for MicroPython"
+    },
+    {
+        "name": "micropython-zipapp",
+        "summary": "Dummy zipapp module for MicroPython"
+    },
+    {
+        "name": "micropython-zipfile",
+        "summary": "Dummy zipfile module for MicroPython"
+    },
+    {
+        "name": "micropython-zipimport",
+        "summary": "Dummy zipimport module for MicroPython"
+    },
+    {
+        "name": "micropython-zlib",
+        "summary": "Dummy zlib module for MicroPython"
+    },
+    {
+        "name": "pms5003-micropython",
+        "summary": "MicroPython library for the Plantower PMS5003 Particulate Matter Sensor."
+    },
+    {
+        "name": "pycopy-cpython-micropython",
+        "summary": "Pycopy module micropython ported to CPython"
+    },
+    {
+        "name": "qwstpad-micropython",
+        "summary": "Micropython library for the Pimoroni QwSTPad"
+    },
+    {
+        "name": "terkin-micropython-libraries",
+        "summary": "Terkin MicroPython runtime libraries"
+    },
+    {
+        "name": "thingsboard-micropython",
+        "summary": "ThingsBoard MQTT MicroPython client"
+    },
+    {
+        "name": "thonny-etboard-micropython-firmware",
+        "summary": "\uc774\ud2f0\ubcf4\ub4dc \ub9c8\uc774\ud06c\ub85c\ud30c\uc774\uc36c \ud38c\uc6e8\uc5b4 - Thonny V4 \uc9c0\uc6d0"
+    }
+]
