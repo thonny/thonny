@@ -1,0 +1,1942 @@
+[
+    {
+        "name": "adafruit-circuitpython-24lc32",
+        "summary": "CircuitPython driver for Adafruit 24LC32 I2C EEPROM Breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-74hc595",
+        "summary": "CircuitPython driver for 74HC595 shift register."
+    },
+    {
+        "name": "adafruit-circuitpython-HTU21D",
+        "summary": "CircuitPython library for HTU21D-F Temperature and     Humidity Sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-PYOA",
+        "summary": "Python your own Adventure - card & button game"
+    },
+    {
+        "name": "adafruit-circuitpython-acep7in",
+        "summary": "Driver for 7.3\" 7-color (aka ACeP) epaper display"
+    },
+    {
+        "name": "adafruit-circuitpython-ad569x",
+        "summary": "CircuitPython driver for the AD569x DAC"
+    },
+    {
+        "name": "adafruit-circuitpython-adafruitio",
+        "summary": "Adafruit IO for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-adg72x",
+        "summary": "CircuitPython driver for the ADG728 and ADG729 analog matrix switches."
+    },
+    {
+        "name": "adafruit-circuitpython-ads1x15",
+        "summary": "CircuitPython library for controlling an ADS1x15 ADC."
+    },
+    {
+        "name": "adafruit-circuitpython-ads7830",
+        "summary": "CircuitPython driver for the ADS7830 analog to digital converter"
+    },
+    {
+        "name": "adafruit-circuitpython-adt7410",
+        "summary": "CircuitPython driver for reading temperature from the Analog Devices ADT7410 precision temperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-adxl34x",
+        "summary": "A CircuitPython driver for the ADXL34x family of accelerometers."
+    },
+    {
+        "name": "adafruit-circuitpython-adxl37x",
+        "summary": "A CircuitPython driver for the ADXL37x family of accelerometers"
+    },
+    {
+        "name": "adafruit-circuitpython-ags02ma",
+        "summary": "CircuitPython / Python library for AGS02MA gas sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-ahtx0",
+        "summary": "CircuitPython driver for the Adafruit AHT10 Humidity and Temperature Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-airlift",
+        "summary": "Manage AirLift coprocessors for use with Wifi and Bluetooth"
+    },
+    {
+        "name": "adafruit-circuitpython-am2320",
+        "summary": "CircuitPython driver for the AM2320 temperature and humidity sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-amg88xx",
+        "summary": "CircuitPython library for AMG88xx thermal camera."
+    },
+    {
+        "name": "adafruit-circuitpython-anchored-tilegrid",
+        "summary": "TileGrid subclass that can be placed relative to an arbitrary anchor point."
+    },
+    {
+        "name": "adafruit-circuitpython-apds9960",
+        "summary": "CircuitPython driver for APSD9960 Gesture breakout board"
+    },
+    {
+        "name": "adafruit-circuitpython-as726x",
+        "summary": "CircuitPython driver for AS726x spectral sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-as7341",
+        "summary": "CircuitPython library for use with the Adafruit AS7341 breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-asyncio",
+        "summary": "Cooperative multitasking and asynchronous I/O"
+    },
+    {
+        "name": "adafruit-circuitpython-atecc",
+        "summary": "Driver for Microchip's ATECCx08 cryptographic co-processors with secure hardware-based key storage"
+    },
+    {
+        "name": "adafruit-circuitpython-avrprog",
+        "summary": "CircuitPython helper library for programming AVR chips."
+    },
+    {
+        "name": "adafruit-circuitpython-aw9523",
+        "summary": "Python library for AW9523 GPIO expander and LED driver"
+    },
+    {
+        "name": "adafruit-circuitpython-aws-iot",
+        "summary": "Amazon AWS IoT MQTT Client for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-azureiot",
+        "summary": "Access to Microsoft Azure IoT from CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-bd3491fs",
+        "summary": "CircuitPython library for the Rohm BD3491FS Audio Processor"
+    },
+    {
+        "name": "adafruit-circuitpython-bh1750",
+        "summary": "CircuitPython library for use with the Adafruit BH1750 breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-binascii",
+        "summary": "Helpers for conversions between binary and ASCII"
+    },
+    {
+        "name": "adafruit-circuitpython-bitbangio",
+        "summary": "A library for adding bitbang I2C and SPI to CircuitPython without the built-in bitbangio module"
+    },
+    {
+        "name": "adafruit-circuitpython-bitmap-font",
+        "summary": "Loads bitmap fonts into CircuitPython displayio."
+    },
+    {
+        "name": "adafruit-circuitpython-bitmapsaver",
+        "summary": "Save a displayio.Bitmap (and associated displayio.Palette) into a BMP file."
+    },
+    {
+        "name": "adafruit-circuitpython-ble",
+        "summary": "Bluetooth Low Energy (BLE) library for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-adafruit",
+        "summary": "Access to sensors and hardware on or connected to BLE-capable boards"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-apple-media",
+        "summary": "Support for the Apple Media Service which provides media playback info and control."
+    },
+    {
+        "name": "adafruit-circuitpython-ble-apple-notification-center",
+        "summary": "BLE library for the Apple Notification Center"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-beacon",
+        "summary": "BLE Location Beacon for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-berrymed-pulse-oximeter",
+        "summary": "BLE Support for BerryMed Pulse Oximeter Service"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-broadcastnet",
+        "summary": "Basic IOT over BLE advertisements."
+    },
+    {
+        "name": "adafruit-circuitpython-ble-creation",
+        "summary": "Friendlier device discovery using Creation IDs"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-cycling-speed-and-cadence",
+        "summary": "BLE Cycling Speed and Cadence Service"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-eddystone",
+        "summary": "CircuitPython BLE library for Google's open 'physical web' Eddystone."
+    },
+    {
+        "name": "adafruit-circuitpython-ble-file-transfer",
+        "summary": "Simple BLE Service for reading and writing files over BLE"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-heart-rate",
+        "summary": "BLE Heart Rate Service"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-ibbq",
+        "summary": "BLE support for iBBQ thermometers"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-lywsd03mmc",
+        "summary": "BLE Support for Xiaomi LYWSD03MMC Thermometer/Hygrometer"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-magic-light",
+        "summary": "BLE service for Magic Light BLE RGB bulbs"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-midi",
+        "summary": "BLE MIDI service for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-pulse-oximeter",
+        "summary": "BLE Support for BerryMed Pulse Oximeter Service"
+    },
+    {
+        "name": "adafruit-circuitpython-ble-radio",
+        "summary": "Simple byte and string based inter-device communication via BLE."
+    },
+    {
+        "name": "adafruit-circuitpython-bluefruitconnect",
+        "summary": "CircuitPython library for use with the Adafruit Bluefruit Connect apps."
+    },
+    {
+        "name": "adafruit-circuitpython-bluefruitspi",
+        "summary": "CircuitPython helper class to work with the Adafruit Bluefruit LE SPI Friend."
+    },
+    {
+        "name": "adafruit-circuitpython-bme280",
+        "summary": "CircuitPython library for the Bosch BME280 temperature/humidity/pressure sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-bme680",
+        "summary": "CircuitPython driver for BME680 sensor over I2C"
+    },
+    {
+        "name": "adafruit-circuitpython-bmp280",
+        "summary": "CircuitPython driver for the BMP280."
+    },
+    {
+        "name": "adafruit-circuitpython-bmp3xx",
+        "summary": "CircuitPython library for BMP3XX Temperature and Barometric Pressure sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-bno055",
+        "summary": "CircuitPython library for BNO055 9-DOF absolute orientation sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-bno08x",
+        "summary": "Helper library for the Hillcrest Laboratories BNO08x IMUs"
+    },
+    {
+        "name": "adafruit-circuitpython-bno08x-rvc",
+        "summary": "A simple helper library for using the UART-RVC mode of the BNO08x IMUs"
+    },
+    {
+        "name": "adafruit-circuitpython-boardtest",
+        "summary": "Helper for verifying a board definition works as expected"
+    },
+    {
+        "name": "adafruit-circuitpython-busdevice",
+        "summary": "CircuitPython bus device classes to manage bus sharing."
+    },
+    {
+        "name": "adafruit-circuitpython-cap1188",
+        "summary": "CircuitPython driver for the CAP1188 8-Key Capacitive Touch Sensor Breakout."
+    },
+    {
+        "name": "adafruit-circuitpython-ccs811",
+        "summary": "CircuitPython library for CCS811 air quality sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-ch9328",
+        "summary": "CircuitPython driver for the CH9328 UART to HID keyboard breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-charlcd",
+        "summary": "CircuitPython library for standard character LCDs."
+    },
+    {
+        "name": "adafruit-circuitpython-circuitplayground",
+        "summary": "CircuitPython library for Circuit Playground Express"
+    },
+    {
+        "name": "adafruit-circuitpython-clue",
+        "summary": "A high-level library representing all the features of the Adafruit CLUE"
+    },
+    {
+        "name": "adafruit-circuitpython-colorsys",
+        "summary": "CircuitPython CPython compatible libraries"
+    },
+    {
+        "name": "adafruit-circuitpython-connectionmanager",
+        "summary": "A urllib3.poolmanager/urllib3.connectionpool-like library for managing sockets and connections"
+    },
+    {
+        "name": "adafruit-circuitpython-crickit",
+        "summary": "CircuitPython library for controlling a Crickit robotics board."
+    },
+    {
+        "name": "adafruit-circuitpython-cst8xx",
+        "summary": "CST8xx capacitive touch driver for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-cursorcontrol",
+        "summary": "Mouse cursor for interaction with CircuitPython UI elements."
+    },
+    {
+        "name": "adafruit-circuitpython-dash-display",
+        "summary": "CircuitPython library for creating Adafruit IO dashboards."
+    },
+    {
+        "name": "adafruit-circuitpython-datetime",
+        "summary": "Subset of CPython datetime module"
+    },
+    {
+        "name": "adafruit-circuitpython-debouncer",
+        "summary": "CircuitPython pin or arbitrary predicate debouncer."
+    },
+    {
+        "name": "adafruit-circuitpython-debug-i2c",
+        "summary": "Wrapper library for debugging I2C."
+    },
+    {
+        "name": "adafruit-circuitpython-dht",
+        "summary": "CircuitPython support for DHT11 and DHT22 type temperature/humidity devices"
+    },
+    {
+        "name": "adafruit-circuitpython-display-button",
+        "summary": "UI Buttons for displayio"
+    },
+    {
+        "name": "adafruit-circuitpython-display-notification",
+        "summary": "Displayio Widgets for displaying notifications"
+    },
+    {
+        "name": "adafruit-circuitpython-display-shapes",
+        "summary": "Various common shapes for use with displayio"
+    },
+    {
+        "name": "adafruit-circuitpython-display-text",
+        "summary": "Displays text using CircuitPython's displayio."
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-flipclock",
+        "summary": "DisplayIO widgets for showing flip clock style animattions changing from one number to another."
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-layout",
+        "summary": "CircuitPython helper library for displayio layouts and widgets."
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-sh1106",
+        "summary": "DisplayIO compatible library for SH1106 OLED displays"
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-sh1107",
+        "summary": "Support for the SH1107 OLED display driver IC"
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-ssd1305",
+        "summary": "DisplayIO driver for SSD1305 monochrome displays"
+    },
+    {
+        "name": "adafruit-circuitpython-displayio-ssd1306",
+        "summary": "DisplayIO driver for SSD1306 monochrome displays"
+    },
+    {
+        "name": "adafruit-circuitpython-dotstar",
+        "summary": "CircuitPython library for DotStar LEDs."
+    },
+    {
+        "name": "adafruit-circuitpython-dps310",
+        "summary": "Library for the DPS310 Precision Barometric Pressure Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-drv2605",
+        "summary": "CircuitPython library for DRV2605 haptic motor controller."
+    },
+    {
+        "name": "adafruit-circuitpython-ds1307",
+        "summary": "CircuitPython library for DS1307 real time clock."
+    },
+    {
+        "name": "adafruit-circuitpython-ds1841",
+        "summary": "I2C Logarithmic Resistor"
+    },
+    {
+        "name": "adafruit-circuitpython-ds18x20",
+        "summary": "CircuitPython driver for Dallas 1-Wire temperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-ds2413",
+        "summary": "CircuitPython library for DS2413 1-Wire Dual Channel Addressable Switch."
+    },
+    {
+        "name": "adafruit-circuitpython-ds248x",
+        "summary": "CircuitPython driver for the DS2484 I2C to 1-Wire Bus Adapter"
+    },
+    {
+        "name": "adafruit-circuitpython-ds3231",
+        "summary": "CircuitPython library for DS3231 precision real-time clock."
+    },
+    {
+        "name": "adafruit-circuitpython-ds3502",
+        "summary": "CircuitPython library for the Maxim DS3502 I2C Potentionmeter"
+    },
+    {
+        "name": "adafruit-circuitpython-ducky",
+        "summary": "CircuitPython library for running DuckyScript"
+    },
+    {
+        "name": "adafruit-circuitpython-dymoscale",
+        "summary": "CircuitPython interface for DYMO scales."
+    },
+    {
+        "name": "adafruit-circuitpython-ek79686",
+        "summary": "CircuitPython `displayio` driver for EK79686-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-emc2101",
+        "summary": "Brushless fan controller"
+    },
+    {
+        "name": "adafruit-circuitpython-ens160",
+        "summary": "CircuitPython / Python library for ScioSense ENS160 digital multi-gas sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-epd",
+        "summary": "CircuitPython library for EPD e-ink displays."
+    },
+    {
+        "name": "adafruit-circuitpython-esp-atcontrol",
+        "summary": "CircuitPython driver for communicating using ESP AT command set."
+    },
+    {
+        "name": "adafruit-circuitpython-esp32s2tft",
+        "summary": "Helper library for the Adafruit ESP32-S2 TFT Feather"
+    },
+    {
+        "name": "adafruit-circuitpython-esp32spi",
+        "summary": "CircuitPython driver library for using ESP32 as WiFi  co-processor using SPI"
+    },
+    {
+        "name": "adafruit-circuitpython-fakerequests",
+        "summary": "Fake Network Requests helper that retrieves data from a local file."
+    },
+    {
+        "name": "adafruit-circuitpython-fancyled",
+        "summary": "CircuitPython FancyLED helper library for LED animations."
+    },
+    {
+        "name": "adafruit-circuitpython-featherwing",
+        "summary": "CircuitPython library that provides FeatherWing specific classes for those that require a significant amount of initialization."
+    },
+    {
+        "name": "adafruit-circuitpython-fingerprint",
+        "summary": "CircuitPython library for UART fingerprint sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-floppy",
+        "summary": "Access floppy drives from CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-focaltouch",
+        "summary": "CircuitPython Focaltouch library for capacitive touch displays."
+    },
+    {
+        "name": "adafruit-circuitpython-fona",
+        "summary": "CircuitPython library for the Adafruit FONAA"
+    },
+    {
+        "name": "adafruit-circuitpython-fram",
+        "summary": "CircuitPython/Python library to support the I2C and SPI FRAM Breakouts."
+    },
+    {
+        "name": "adafruit-circuitpython-framebuf",
+        "summary": "CircuitPython frambuf module, based on the Python frambuf module."
+    },
+    {
+        "name": "adafruit-circuitpython-ft5336",
+        "summary": "Touchscreen driver for the FT5336 touch controller"
+    },
+    {
+        "name": "adafruit-circuitpython-funhouse",
+        "summary": "Helper library for the FunHouse board"
+    },
+    {
+        "name": "adafruit-circuitpython-fxas21002c",
+        "summary": "CircuitPython library for NXP FXAS21002C gyroscope."
+    },
+    {
+        "name": "adafruit-circuitpython-fxos8700",
+        "summary": "CircuitPython library for NXP FXOS8700 accelerometer and magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-gc-iot-core",
+        "summary": "Google Cloud IoT Core Client for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-gfx",
+        "summary": "CircuitPython pixel graphics drawing library"
+    },
+    {
+        "name": "adafruit-circuitpython-gizmo",
+        "summary": "CircuitPython classes for Adafruit Gizmos"
+    },
+    {
+        "name": "adafruit-circuitpython-gps",
+        "summary": "CircuitPython library for GPS modules."
+    },
+    {
+        "name": "adafruit-circuitpython-guvx-i2c",
+        "summary": "Python drivers for the GUVA-C32SM and GUVB-C31SM I2C UV sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-hashlib",
+        "summary": "Secure hashes and message digests"
+    },
+    {
+        "name": "adafruit-circuitpython-hcsr04",
+        "summary": "CircuitPython library for controlling HC-SR04 ultrasonic range sensors."
+    },
+    {
+        "name": "adafruit-circuitpython-hdc302x",
+        "summary": "CircuitPython driver for the Adafruit HDC302x Precision Temperature/Humidity breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-hid",
+        "summary": "CircuitPython helper library for simulating HID devices."
+    },
+    {
+        "name": "adafruit-circuitpython-ht16k33",
+        "summary": "CircuitPython library for HT16K33 LED matrices and segment displays."
+    },
+    {
+        "name": "adafruit-circuitpython-hts221",
+        "summary": "Helper library for the HTS221 Humidity and Temperature Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-httpserver",
+        "summary": "Simple HTTP Server for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-htu31d",
+        "summary": "Python library for TE HTU31D temperature and humidity sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-hue",
+        "summary": "CircuitPython helper library for the Philips Hue"
+    },
+    {
+        "name": "adafruit-circuitpython-husb238",
+        "summary": "CircuitPython helper library for the HUSB238 Type C Power Delivery Dummy Breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-hx711",
+        "summary": "CircuitPython driver for the HX711 24-bit ADC for Load Cells / Strain Gauges"
+    },
+    {
+        "name": "adafruit-circuitpython-hx8357",
+        "summary": "displayio driver for hx8357 and ILI9340 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-icm20649",
+        "summary": "Library for the ST ICM-20649 Wide-Range 6-DoF Accelerometer and Gyro"
+    },
+    {
+        "name": "adafruit-circuitpython-icm20x",
+        "summary": "Library for the ST ICM-20X Wide-Range 6-DoF Accelerometer and Gyro Family"
+    },
+    {
+        "name": "adafruit-circuitpython-il0373",
+        "summary": "CircuitPython `displayio` driver for IL0373-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-il0398",
+        "summary": "CircuitPython displayio drivers for IL0398 driven e-paper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-il91874",
+        "summary": "CircuitPython `displayio` driver for IL91874-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ili9341",
+        "summary": "displayio driver for ILI9341 and ILI9340 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-imageload",
+        "summary": "Displays text using CircuitPython's displayio."
+    },
+    {
+        "name": "adafruit-circuitpython-ina219",
+        "summary": "CircuitPython library for INA219 high side DC current sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-ina260",
+        "summary": "CircuitPython driver for the TI INA260 current and power sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-ina3221",
+        "summary": "CircuitPython driver for the INA3221 Triple 0-26 VDC, \u00b13.2 Amp Power Monitor"
+    },
+    {
+        "name": "adafruit-circuitpython-irremote",
+        "summary": "CircuitPython library for infrared transmit and receive."
+    },
+    {
+        "name": "adafruit-circuitpython-is31fl3731",
+        "summary": "CircuitPython library for IS31FL3731 charlieplex LED matrices."
+    },
+    {
+        "name": "adafruit-circuitpython-is31fl3741",
+        "summary": "CircuitPython library for IS31FL3741 RGB LED matrices."
+    },
+    {
+        "name": "adafruit-circuitpython-itertools",
+        "summary": "Python's itertools for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-json-stream",
+        "summary": null
+    },
+    {
+        "name": "adafruit-circuitpython-jwt",
+        "summary": "JSON Web Token Authentication"
+    },
+    {
+        "name": "adafruit-circuitpython-l3gd20",
+        "summary": "CircuitPython library for L3GD20 9-DOF absolute orientation IMU fusion breakout."
+    },
+    {
+        "name": "adafruit-circuitpython-lc709203f",
+        "summary": "Library for I2C LC709203F battery status and fuel gauge"
+    },
+    {
+        "name": "adafruit-circuitpython-led-animation",
+        "summary": "CircuitPython helper for LED colors and animations."
+    },
+    {
+        "name": "adafruit-circuitpython-lidarlite",
+        "summary": "A CircuitPython & Python library for Garmin LIDAR Lite sensors over I2C."
+    },
+    {
+        "name": "adafruit-circuitpython-lifx",
+        "summary": "LIFX Smart Lighting API Helper"
+    },
+    {
+        "name": "adafruit-circuitpython-lis2mdl",
+        "summary": "CircuitPython library for LIS2MDL 3-axis magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lis331",
+        "summary": "A library for the ST LIS331 family of high-g 3-axis accelerometers"
+    },
+    {
+        "name": "adafruit-circuitpython-lis3dh",
+        "summary": "CircuitPython library for LIS3DH accelerometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lis3mdl",
+        "summary": "CircuitPython helper library for the LIS3MDL 3-axis magnetometer"
+    },
+    {
+        "name": "adafruit-circuitpython-logging",
+        "summary": "Logging module for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-lps2x",
+        "summary": "Library for the ST LPS2x family of pressure sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-lps35hw",
+        "summary": "A driver for the ST LPS35HW water resistant mems pressure sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-lsm303",
+        "summary": "CircuitPython library for LSM303 6-DoF with 3-axis accelerometer and magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lsm303-accel",
+        "summary": "CircuitPython library for LSM303 's 3-axis accelerometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lsm303agr-mag",
+        "summary": "CircuitPython library for LSM303AGR's 3-axis magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lsm303dlh-mag",
+        "summary": "CircuitPython library for LSM303DLH's 3-axis magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-lsm6ds",
+        "summary": "CircuitPython helper library for the LSM6DS family of motion sensors from ST"
+    },
+    {
+        "name": "adafruit-circuitpython-lsm6dsox",
+        "summary": "CircuitPython library for the ST LSM6DSOX 6-axis Accelerometer and Gyro"
+    },
+    {
+        "name": "adafruit-circuitpython-lsm9ds0",
+        "summary": "CircuitPython library for LSM9DS0 accelerometer, magnetometer, gyroscope."
+    },
+    {
+        "name": "adafruit-circuitpython-lsm9ds1",
+        "summary": "CircuitPython library for LSM9DS1 accelerometer, magnetometer, gyroscope."
+    },
+    {
+        "name": "adafruit-circuitpython-ltr329-ltr303",
+        "summary": "Python driver for LTR-329/303 light sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-ltr390",
+        "summary": "Adafruit CircuitPython library for the LTR390"
+    },
+    {
+        "name": "adafruit-circuitpython-macropad",
+        "summary": "A helper library for the Adafruit MacroPad RP2040"
+    },
+    {
+        "name": "adafruit-circuitpython-magtag",
+        "summary": "Helper library for the Adafruit MagTag"
+    },
+    {
+        "name": "adafruit-circuitpython-matrixkeypad",
+        "summary": "CircuitPython library for passive matrix keypads."
+    },
+    {
+        "name": "adafruit-circuitpython-matrixportal",
+        "summary": "CircuitPython helper for Adafruit MatrixPortal M4, Adafruit RGB Matrix Shield + Metro M4 Airlift Lite, and Adafruit RGB Matrix FeatherWings"
+    },
+    {
+        "name": "adafruit-circuitpython-max1704x",
+        "summary": "MAX17048 or MAX17049 battery fuel gauge Python/CircuitPython library"
+    },
+    {
+        "name": "adafruit-circuitpython-max31855",
+        "summary": "CircuitPython library for controlling a MAX31855 Thermocouple sensor chip."
+    },
+    {
+        "name": "adafruit-circuitpython-max31856",
+        "summary": "CircuitPython library for the MAX31856 Universal Thermocouple Amplifier."
+    },
+    {
+        "name": "adafruit-circuitpython-max31865",
+        "summary": "CircuitPython library for MAX31865 thermocouple amplifier."
+    },
+    {
+        "name": "adafruit-circuitpython-max7219",
+        "summary": "CircuitPython library for MAX7219 LED matrix driver."
+    },
+    {
+        "name": "adafruit-circuitpython-max9744",
+        "summary": "CircuitPython library for MAX9744 20W class D amplifier."
+    },
+    {
+        "name": "adafruit-circuitpython-mcp230xx",
+        "summary": "CircuitPython library for controlling a MCP23008 or MCP23017 I2C GPIO expander."
+    },
+    {
+        "name": "adafruit-circuitpython-mcp2515",
+        "summary": "A CircuitPython library for working with the MCP2515 CAN bus controller"
+    },
+    {
+        "name": "adafruit-circuitpython-mcp3421",
+        "summary": "CircuitPython driver for the MCP3421 analog to digital converter"
+    },
+    {
+        "name": "adafruit-circuitpython-mcp3xxx",
+        "summary": "CircuitPython library for the MCP3xxx Analog-to-Digital converters."
+    },
+    {
+        "name": "adafruit-circuitpython-mcp4725",
+        "summary": "CircuitPython library for MCP4725 digital to analog converter."
+    },
+    {
+        "name": "adafruit-circuitpython-mcp4728",
+        "summary": "Helper library for the MCP4728 I2C 12-bit Quad DAC"
+    },
+    {
+        "name": "adafruit-circuitpython-mcp9600",
+        "summary": "CircuitPython library for the Adafruit MCP9600 breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-mcp9808",
+        "summary": "CircuitPython library for MCP9808 high accuracy temperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-midi",
+        "summary": "A CircuitPython helper for encoding/decoding MIDI packets over a MIDI or UART connection."
+    },
+    {
+        "name": "adafruit-circuitpython-miniesptool",
+        "summary": "CircuitPython ROM loader for ESP chips, works with ESP8266 or ESP32."
+    },
+    {
+        "name": "adafruit-circuitpython-minimqtt",
+        "summary": "MQTT client library for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-miniqr",
+        "summary": "A non-hardware dependant miniature QR generator library. All native Python!"
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90393",
+        "summary": "CircuitPython driver for the MLX90393 3-axis magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90395",
+        "summary": "CircuitPython helper library for using the Adafruit MLX90395 tri-Axis magnetometer breakout"
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90614",
+        "summary": "CircuitPython module for the Melexis MLX90614 Contact-less InfraredTemperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90640",
+        "summary": "Driver for the MLX90640 thermal camera"
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90939",
+        "summary": "CircuitPython driver for the MLX90393 3-axis magnetometer."
+    },
+    {
+        "name": "adafruit-circuitpython-mma8451",
+        "summary": "CircuitPython library for MMA8451 3-axis accelerometer.."
+    },
+    {
+        "name": "adafruit-circuitpython-mmc56x3",
+        "summary": "Magnetometer sensor library"
+    },
+    {
+        "name": "adafruit-circuitpython-monsterm4sk",
+        "summary": "Helper library for the MONSTER M4SK device. Allows usage of screens and other built-in hardware."
+    },
+    {
+        "name": "adafruit-circuitpython-motor",
+        "summary": "CircuitPython helper library provides higher level objects to control motors and servos."
+    },
+    {
+        "name": "adafruit-circuitpython-motorkit",
+        "summary": "CircuitPython helper library for DC & Stepper Motor FeatherWing, Shield, and Pi Hat kits."
+    },
+    {
+        "name": "adafruit-circuitpython-mpl115a2",
+        "summary": "CircuitPython driver for MPL115A2 I2C Barometric Pressure/Temperature Sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-mpl3115a2",
+        "summary": "CircuitPython library for MPL3115A2 barometric pressure and temperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-mpr121",
+        "summary": "CircuitPython library for MPR121 capacitive touch breakout board."
+    },
+    {
+        "name": "adafruit-circuitpython-mprls",
+        "summary": "CircuitPython library to support Honeywell MPRLS digital pressure sensors."
+    },
+    {
+        "name": "adafruit-circuitpython-mpu6050",
+        "summary": "CircuitPython helper library for the MPU6050 6-DoF Accelerometer and Gyroscope"
+    },
+    {
+        "name": "adafruit-circuitpython-ms8607",
+        "summary": "CircuitPython driver for the MS8607 PTH sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-msa301",
+        "summary": "CircuitPython library for the MSA301/MSA311 Accelerometers"
+    },
+    {
+        "name": "adafruit-circuitpython-neokey",
+        "summary": "CircuitPython library for using Adafruit NeoKey."
+    },
+    {
+        "name": "adafruit-circuitpython-neopixel",
+        "summary": "CircuitPython library for NeoPixel LEDs."
+    },
+    {
+        "name": "adafruit-circuitpython-neopixel-spi",
+        "summary": "SPI driven CircuitPython driver for neopixels."
+    },
+    {
+        "name": "adafruit-circuitpython-neopxl8",
+        "summary": "PIO-driven 8-way concurrent NeoPixel driver for RP2040"
+    },
+    {
+        "name": "adafruit-circuitpython-neotrellis",
+        "summary": "CircuitPython library for using Adafruit NeoTrellis."
+    },
+    {
+        "name": "adafruit-circuitpython-ntp",
+        "summary": "Network Time Protocol (NTP) helper for Python"
+    },
+    {
+        "name": "adafruit-circuitpython-nunchuk",
+        "summary": "CircuitPython library for Nintendo Nunchuk controller"
+    },
+    {
+        "name": "adafruit-circuitpython-oauth2",
+        "summary": "CircuitPython helper for OAuth2.0 authorization to access Google APIs."
+    },
+    {
+        "name": "adafruit-circuitpython-onewire",
+        "summary": "CircuitPython OneWire helper library for 1-wire bus devices."
+    },
+    {
+        "name": "adafruit-circuitpython-ov2640",
+        "summary": "CircuitPython driver for OV2640 cameras"
+    },
+    {
+        "name": "adafruit-circuitpython-ov5640",
+        "summary": "CircuitPython driver for OV5640 Camera"
+    },
+    {
+        "name": "adafruit-circuitpython-ov7670",
+        "summary": "CircuitPython driver for OV7670 cameras"
+    },
+    {
+        "name": "adafruit-circuitpython-pastebin",
+        "summary": "CircuitPython library for interacting with online pastebin services"
+    },
+    {
+        "name": "adafruit-circuitpython-pca9554",
+        "summary": "CircuitPython library for Adafruit PCA9554 GPIO expanders"
+    },
+    {
+        "name": "adafruit-circuitpython-pca9685",
+        "summary": "CircuitPython driver for motor, stepper, and servo based on PCA9685."
+    },
+    {
+        "name": "adafruit-circuitpython-pcd8544",
+        "summary": "CircuitPython display control library for Nokia PCD8544 monochrome displays."
+    },
+    {
+        "name": "adafruit-circuitpython-pcf8523",
+        "summary": "CircuitPython library for PCF8523 real time clock."
+    },
+    {
+        "name": "adafruit-circuitpython-pcf8563",
+        "summary": "CircuitPython library for PCF8563 real time clock."
+    },
+    {
+        "name": "adafruit-circuitpython-pcf8574",
+        "summary": "Python library for PCF8574 GPIO expander"
+    },
+    {
+        "name": "adafruit-circuitpython-pcf8575",
+        "summary": "CircuitPython library for Adafruit PCF8575 GPIO expander"
+    },
+    {
+        "name": "adafruit-circuitpython-pcf8591",
+        "summary": "ADC+DAC Combo"
+    },
+    {
+        "name": "adafruit-circuitpython-pct2075",
+        "summary": "CircuitPython library for the NXP PCT2075 Digital Temperature Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-pio-uart",
+        "summary": "PIO implementation of CircuitPython UART API"
+    },
+    {
+        "name": "adafruit-circuitpython-pioasm",
+        "summary": "Simple assembler to convert pioasm to bytes"
+    },
+    {
+        "name": "adafruit-circuitpython-pixel-framebuf",
+        "summary": "Neopixel and Dotstar Framebuffer Helper"
+    },
+    {
+        "name": "adafruit-circuitpython-pixelbuf",
+        "summary": "A pure Python implementation of adafruit_pixelbuf for smaller boards."
+    },
+    {
+        "name": "adafruit-circuitpython-pixelmap",
+        "summary": "CircuitPython library for mapping multiple neopixels to behave as one for the purposes of setting colors or showing animations."
+    },
+    {
+        "name": "adafruit-circuitpython-pixie",
+        "summary": "CircuitPython library for Pixie chainable 3W smart LED."
+    },
+    {
+        "name": "adafruit-circuitpython-pm25",
+        "summary": "CircuitPython library for PM2.5 Air Quality Sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-pn532",
+        "summary": "CircuitPython library for controlling PN532 RFID/NFC reader-writer."
+    },
+    {
+        "name": "adafruit-circuitpython-portalbase",
+        "summary": "Base Library for the Portal-style libraries."
+    },
+    {
+        "name": "adafruit-circuitpython-progressbar",
+        "summary": "Dynamic progress bar widget for CircuitPython displays"
+    },
+    {
+        "name": "adafruit-circuitpython-prompt-toolkit",
+        "summary": "Slimmed down implementation of prompt_toolkit for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-pybadger",
+        "summary": "Badge-focused CircuitPython helper library for PyBadge, PyBadge LC, PyGamer and CLUE"
+    },
+    {
+        "name": "adafruit-circuitpython-pycamera",
+        "summary": "Library for the Adafruit PyCamera"
+    },
+    {
+        "name": "adafruit-circuitpython-pypixelbuf",
+        "summary": "Pure python implementation of _pixelbuf for smaller boards."
+    },
+    {
+        "name": "adafruit-circuitpython-pyportal",
+        "summary": "CircuitPython driver for Adafruit PyPortal"
+    },
+    {
+        "name": "adafruit-circuitpython-qualia",
+        "summary": "Portal Style Library for the Adafruit Qualia ESP32-S3"
+    },
+    {
+        "name": "adafruit-circuitpython-qwiictwist",
+        "summary": "CircuitPython for the Sparkfun Qwiic Twist Rotary Encoder"
+    },
+    {
+        "name": "adafruit-circuitpython-ra8875",
+        "summary": "CircuitPython driver for TFT Touch screens based on RA8875."
+    },
+    {
+        "name": "adafruit-circuitpython-radial-controller",
+        "summary": "HID Radial Controller device helper library"
+    },
+    {
+        "name": "adafruit-circuitpython-register",
+        "summary": "CircuitPython data descriptor classes to represent hardware registers on I2C and SPI devices."
+    },
+    {
+        "name": "adafruit-circuitpython-register-spi",
+        "summary": "Python data descriptor classes to represent hardware registers on SPI devices."
+    },
+    {
+        "name": "adafruit-circuitpython-requests",
+        "summary": "A requests-like library for web interfacing"
+    },
+    {
+        "name": "adafruit-circuitpython-rfm",
+        "summary": "Support for RFM69 and RFM9x modules"
+    },
+    {
+        "name": "adafruit-circuitpython-rfm69",
+        "summary": "CircuitPython library for RFM69 packet radio."
+    },
+    {
+        "name": "adafruit-circuitpython-rfm9x",
+        "summary": "CircuitPython library for RFM95/6/7/8 LoRa 433/915mhz radio modules."
+    },
+    {
+        "name": "adafruit-circuitpython-rgb-display",
+        "summary": "CircuitPython library for RGB displays."
+    },
+    {
+        "name": "adafruit-circuitpython-rgbled",
+        "summary": "CircuitPython driver for RGB LEDs"
+    },
+    {
+        "name": "adafruit-circuitpython-rockblock",
+        "summary": "CircuitPython driver for Rock Seven RockBLOCK Iridium satellite modem"
+    },
+    {
+        "name": "adafruit-circuitpython-rplidar",
+        "summary": "RPLidar support"
+    },
+    {
+        "name": "adafruit-circuitpython-rsa",
+        "summary": "RSA implementation based on python-rsa"
+    },
+    {
+        "name": "adafruit-circuitpython-rtttl",
+        "summary": "CircuitPython library for playing RTTTL melodies."
+    },
+    {
+        "name": "adafruit-circuitpython-s35710",
+        "summary": "CircuitPython driver for the S-35710 low-power wake up timer"
+    },
+    {
+        "name": "adafruit-circuitpython-scd30",
+        "summary": "Helper library for the SCD30 CO2 sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-scd4x",
+        "summary": "Driver for Sensirion SCD4X CO2 sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-sd",
+        "summary": "CircuitPython library for SD cards."
+    },
+    {
+        "name": "adafruit-circuitpython-seesaw",
+        "summary": "CircuitPython library for controlling a SeeSaw helper chip."
+    },
+    {
+        "name": "adafruit-circuitpython-servokit",
+        "summary": "CircuitPython helper library for PWM/Servo FeatherWing, Shield, and Pi HAT and Bonnet kits."
+    },
+    {
+        "name": "adafruit-circuitpython-sgp30",
+        "summary": "CircuitPython library for Sensirion SGP30 gas sensor with eCO2 and TVOC."
+    },
+    {
+        "name": "adafruit-circuitpython-sgp40",
+        "summary": "CircuitPython library for the Adafruit SGP40 Air Quality Sensor / VOC Index Sensor Breakouts"
+    },
+    {
+        "name": "adafruit-circuitpython-sharpmemorydisplay",
+        "summary": "CircuitPython display control library for Sharp memory displays."
+    },
+    {
+        "name": "adafruit-circuitpython-sht31d",
+        "summary": "CircuitPython library for SHT31-D temperature and humidity sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-sht4x",
+        "summary": "Python library for Sensirion SHT4x temperature and humidity sensors"
+    },
+    {
+        "name": "adafruit-circuitpython-shtc3",
+        "summary": "A helper library for using the Senserion SHTC3 Humidity and Temperature Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-si1145",
+        "summary": "CircuitPython helper library for the SI1145 Digital UV Index IR Visible Light Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-si4713",
+        "summary": "CircuitPython library for SI4713 FM RDS transmitter."
+    },
+    {
+        "name": "adafruit-circuitpython-si5351",
+        "summary": "CircuitPython library for SI5351 clock generator module."
+    },
+    {
+        "name": "adafruit-circuitpython-si7021",
+        "summary": "CircuitPython library for SI7021 Temperature and Humidity Sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-simple-text-display",
+        "summary": "A helper library for displaying lines of text on a microcontroller with a built-in display, or externally connected display."
+    },
+    {
+        "name": "adafruit-circuitpython-simpleio",
+        "summary": "CircuitPython helper library to simplify hardware interactions."
+    },
+    {
+        "name": "adafruit-circuitpython-simplemath",
+        "summary": "Math utility functions"
+    },
+    {
+        "name": "adafruit-circuitpython-slideshow",
+        "summary": "CircuitPython helper library for displaying a slideshow of images on a display."
+    },
+    {
+        "name": "adafruit-circuitpython-spd1656",
+        "summary": "Driver for SPD1656 driven ACeP (7-color) e-paper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1305",
+        "summary": "Framebuf (non-displayio) driver for SSD1305 displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1306",
+        "summary": "CircuitPython library for SSD1306 OLED displays."
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1322",
+        "summary": "DisplayIO driver for grayscale OLEDs drive by SSD1322"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1325",
+        "summary": "DisplayIO driver for grayscale OLEDs drive by SSD1325"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1327",
+        "summary": "DisplayIO driver for grayscale OLEDs drive by SSD1327"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1331",
+        "summary": "displayio driver for SSD1331 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1351",
+        "summary": "displayio driver for SSD1351 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1608",
+        "summary": "CircuitPython `displayio` drivers for SSD1608-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1675",
+        "summary": "CircuitPython `displayio` drivers for SSD1675-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1680",
+        "summary": "CircuitPython `displayio` drivers for SSD1680-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-ssd1681",
+        "summary": "CircuitPython `displayio` drivers for SSD1681-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-st7565",
+        "summary": "CircuitPython display control library for devices using the ST7565 graphic display driver IC."
+    },
+    {
+        "name": "adafruit-circuitpython-st7735",
+        "summary": "displayio driver for ST7735 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-st7735r",
+        "summary": "displayio driver for ST7735R TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-st7789",
+        "summary": "displayio driver for ST7789 TFT-LCD displays."
+    },
+    {
+        "name": "adafruit-circuitpython-stmpe610",
+        "summary": "CircuitPython library for STMPE610 Resistive Touch Screen Controller."
+    },
+    {
+        "name": "adafruit-circuitpython-tc74",
+        "summary": "CircuitPython library for the Microchip TC74 Digital Temperature Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-tca8418",
+        "summary": "CircuitPython / Python library for TCA8418 Keyboard Multiplexor"
+    },
+    {
+        "name": "adafruit-circuitpython-tca9548a",
+        "summary": "CircuitPython driver for the TCA9548A I2C Multiplexer."
+    },
+    {
+        "name": "adafruit-circuitpython-tcs34725",
+        "summary": "CircuitPython library for TCS34725 color sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-templateengine",
+        "summary": "Templating engine to substitute variables into a template string. Templates can also include conditional logic and loops. Often used for web pages."
+    },
+    {
+        "name": "adafruit-circuitpython-testrepo",
+        "summary": "CircuitPython test library"
+    },
+    {
+        "name": "adafruit-circuitpython-tfmini",
+        "summary": "A CircuitPython/Python library for Benewake`s TF mini distance sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-thermal-printer",
+        "summary": "CircuitPython library for controlling thermal printers."
+    },
+    {
+        "name": "adafruit-circuitpython-thermistor",
+        "summary": "CircuitPython library for Thermistor thermal resistor temperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-ticks",
+        "summary": "Work with intervals and deadlines in milliseconds"
+    },
+    {
+        "name": "adafruit-circuitpython-tinylora",
+        "summary": "CircuitPython library for LoRaWAN and The Things Network."
+    },
+    {
+        "name": "adafruit-circuitpython-tla202x",
+        "summary": "Library for the TI TLA202x 12-bit ADCs"
+    },
+    {
+        "name": "adafruit-circuitpython-tlc5947",
+        "summary": "CircuitPython library for TLC5947 12-bit 24 channel LED PWM driver."
+    },
+    {
+        "name": "adafruit-circuitpython-tlc59711",
+        "summary": "CircuitPython library for TLC59711 16-bit 12 channel LED PWM driver."
+    },
+    {
+        "name": "adafruit-circuitpython-tlv493d",
+        "summary": "CircuitPython helper library for the TLV493D 3-axis magnetometer"
+    },
+    {
+        "name": "adafruit-circuitpython-tm1814",
+        "summary": "TM1814 RGB(W) LED driver for RP2 microcontrollers"
+    },
+    {
+        "name": "adafruit-circuitpython-tmp006",
+        "summary": "CircuitPython library for TMP006 contactless IR thermometer."
+    },
+    {
+        "name": "adafruit-circuitpython-tmp007",
+        "summary": "CircuitPython library for TMP007 contactless IR thermometer."
+    },
+    {
+        "name": "adafruit-circuitpython-tmp117",
+        "summary": "CircuitPython library for the TI TMP117 Temperature sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-touchscreen",
+        "summary": "CircuitPython library for 4-wire resistive touchscreens"
+    },
+    {
+        "name": "adafruit-circuitpython-tpa2016",
+        "summary": "CircuitPython driver for TPA2016 Class D Amplifier."
+    },
+    {
+        "name": "adafruit-circuitpython-trellis",
+        "summary": "CircuitPython library for Adafruit Trellis boards."
+    },
+    {
+        "name": "adafruit-circuitpython-trellism4",
+        "summary": "CircuitPython library Trellis M4 Express."
+    },
+    {
+        "name": "adafruit-circuitpython-tsc2007",
+        "summary": "Python library for TSC2007 resistive touch screen driver"
+    },
+    {
+        "name": "adafruit-circuitpython-tsl2561",
+        "summary": "CircuitPython library for TSL2561 Light Sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-tsl2591",
+        "summary": "CircuitPython library for TSL2591 high precision light sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-tt21100",
+        "summary": "Basic driver for TT21100 touchscreen drivers"
+    },
+    {
+        "name": "adafruit-circuitpython-turtle",
+        "summary": "Turtle graphics library for CircuitPython and displayio"
+    },
+    {
+        "name": "adafruit-circuitpython-typing",
+        "summary": "Types needed for type annotation that are not in `typing`"
+    },
+    {
+        "name": "adafruit-circuitpython-uc8151d",
+        "summary": "CircuitPython `displayio` driver for US8151D-based ePaper displays"
+    },
+    {
+        "name": "adafruit-circuitpython-us100",
+        "summary": "CircuitPython library for reading distance and temperature via US-100 ultra-sonic sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-usb-host-descriptors",
+        "summary": "Helpers for getting USB descriptors"
+    },
+    {
+        "name": "adafruit-circuitpython-usb-host-mass-storage",
+        "summary": "CircuitPython BlockDevice for USB mass storage devices"
+    },
+    {
+        "name": "adafruit-circuitpython-usb-host-midi",
+        "summary": "CircuitPython USB host driver for MIDI devices"
+    },
+    {
+        "name": "adafruit-circuitpython-vc0706",
+        "summary": "CircuitPython library for VC0706 serial TTL camera."
+    },
+    {
+        "name": "adafruit-circuitpython-vcnl4010",
+        "summary": "CircuitPython library for VCNL4010 proximity and light sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vcnl4020",
+        "summary": "Driver for the VCNL4020 proximity and light sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-vcnl4040",
+        "summary": "A CircuitPython library for the VCNL4040 proximity and ambient light sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vcnl4200",
+        "summary": "CircuitPython driver for the Adafruit VCNL4200 Long Distance IR Proximity and Light Sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-veml6070",
+        "summary": "CircuitPython library for VEML6070 UV Index Sensor Breakout."
+    },
+    {
+        "name": "adafruit-circuitpython-veml6075",
+        "summary": "CircuitPython library for interfacing with VEML6075 UV sensor"
+    },
+    {
+        "name": "adafruit-circuitpython-veml7700",
+        "summary": "CircuitPython driver for VEML7700 high precision I2C ambient light sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vl53l0x",
+        "summary": "CircuitPython library for VL53L0X time of flight distance sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vl53l1x",
+        "summary": "CircuitPython module for interacting with the VL53L1X distance sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vl53l4cd",
+        "summary": "CircuitPython helper library for the VL53L4CD time of flight distance sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vl6180x",
+        "summary": "CircuitPython library for VL6180X time of flight distance sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-vs1053",
+        "summary": "Driver for interacting and playing media files with the VS1053 audio codec over a SPI connection."
+    },
+    {
+        "name": "adafruit-circuitpython-wave",
+        "summary": "Read and write standard WAV-format files"
+    },
+    {
+        "name": "adafruit-circuitpython-waveform",
+        "summary": "CircuitPython library for generating simple waveforms for audio."
+    },
+    {
+        "name": "adafruit-circuitpython-wii-classic",
+        "summary": "CircuitPython library for Nintendo Wii Classic controllers."
+    },
+    {
+        "name": "adafruit-circuitpython-wiznet5k",
+        "summary": "Pure-Python interface for WIZNET 5k ethernet modules."
+    },
+    {
+        "name": "adafruit-circuitpython-wm8960",
+        "summary": "CircuitPython driver for WM8960 Stereo CODEC"
+    },
+    {
+        "name": "adafruit-circuitpython-ws2801",
+        "summary": "CircuitPython library for WS2801 LEDs."
+    },
+    {
+        "name": "adafruit-circuitpython-wsgi",
+        "summary": "CircuitPython framework for creating WSGI compatible web server applications."
+    },
+    {
+        "name": "barbudor-circuitpython-ina3221",
+        "summary": "CircuitPython library for INA3221 triple channel current sensor."
+    },
+    {
+        "name": "biffobear-circuitpython-as3935",
+        "summary": "CircuitPython driver library for the AS3935 lightning detector."
+    },
+    {
+        "name": "circuitpython-ArrowLine",
+        "summary": "CircuitPython library to draw Arrowlines."
+    },
+    {
+        "name": "circuitpython-Candlesticks",
+        "summary": "CandleSticks for CircuitPython"
+    },
+    {
+        "name": "circuitpython-Color-Picker",
+        "summary": "Colopicker en CircuitPython for TFT displays"
+    },
+    {
+        "name": "circuitpython-MorseCode",
+        "summary": "Morse Code Library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-adt7410",
+        "summary": "CircuitPython Driver for the Analog Devices ADT7410 Temperature Sensor"
+    },
+    {
+        "name": "circuitpython-ansi-escape-code",
+        "summary": "simple helper library for common ANSI escape codes"
+    },
+    {
+        "name": "circuitpython-async-button",
+        "summary": "a library for reading buttons using asyncio"
+    },
+    {
+        "name": "circuitpython-async-buzzer",
+        "summary": "Play simple tunes on a piezo buzzer asynchronously"
+    },
+    {
+        "name": "circuitpython-azurecustomvision-prediction",
+        "summary": "CircuitPython prediction library for the Azure custom vision SDK"
+    },
+    {
+        "name": "circuitpython-base64",
+        "summary": "RFC 3548: Base16, Base32, Base64 Data Encodings"
+    },
+    {
+        "name": "circuitpython-bma220",
+        "summary": "BMA220 Bosch Circuitpython Driver library"
+    },
+    {
+        "name": "circuitpython-bma400",
+        "summary": "BMA400 Bosch Accelerometer CircuitPython Driver"
+    },
+    {
+        "name": "circuitpython-bma423",
+        "summary": "CircuitPython Driver for the Bosch BMA423 accelerometer included in the lilygo watch"
+    },
+    {
+        "name": "circuitpython-bmi160",
+        "summary": "Driver for the BMI160 sensor"
+    },
+    {
+        "name": "circuitpython-bmp180",
+        "summary": "CircuitPython driver for the bmp180 sensor"
+    },
+    {
+        "name": "circuitpython-bmp384",
+        "summary": "CircuitPython Driver for the Bosch BMP384 Pressure and Temperature sensor"
+    },
+    {
+        "name": "circuitpython-bmp581",
+        "summary": "CircuitPython Driver for the Bosch BMP581 pressure sensor"
+    },
+    {
+        "name": "circuitpython-boxplot",
+        "summary": "calculates boxplot and creates its graphical representation"
+    },
+    {
+        "name": "circuitpython-build-tools",
+        "summary": "CircuitPython library build tools"
+    },
+    {
+        "name": "circuitpython-button-handler",
+        "summary": "This helper library simplifies the usage of buttons with CircuitPython, by detecting and differentiating button inputs, returning a set of the inputs and calling their corresponding functions."
+    },
+    {
+        "name": "circuitpython-caveble",
+        "summary": "Cave Surveying Bluetooth Protocol"
+    },
+    {
+        "name": "circuitpython-cirque-pinnacle",
+        "summary": "A CircuitPython driver for Cirque Pinnacle (1CA027) touch controller used in Cirque Trackpads"
+    },
+    {
+        "name": "circuitpython-consumer-control-extended",
+        "summary": "A big list of all HID consumer controls"
+    },
+    {
+        "name": "circuitpython-cst816",
+        "summary": "CircuitPython driver for the CST816 capacitive touch screen IC"
+    },
+    {
+        "name": "circuitpython-csv",
+        "summary": "CircuitPython helper library for working with CSV files"
+    },
+    {
+        "name": "circuitpython-dfrobot-gravity-drf0627-dual-uart",
+        "summary": "CircuitPython library for the DF DFRobot_Gravity_DRF0627_Dual_Uart"
+    },
+    {
+        "name": "circuitpython-display-frame",
+        "summary": "CircuitPython displayio widget to create a rounded rectangle frame with text label at the top center."
+    },
+    {
+        "name": "circuitpython-display-ht16k33",
+        "summary": "On Display Simulation for an HT16K33 driver. Works with 16x8 and 8x8 matrices."
+    },
+    {
+        "name": "circuitpython-displayio-annotation",
+        "summary": "A CircuitPython DisplayIO widget for annotating other widgets or freeform positions."
+    },
+    {
+        "name": "circuitpython-displayio-cartesian",
+        "summary": "A cartesian plane widget for displaying graphical information."
+    },
+    {
+        "name": "circuitpython-displayio-effects",
+        "summary": "Add some flair to your widgets with effects!"
+    },
+    {
+        "name": "circuitpython-displayio-flipinput",
+        "summary": "A flip style input selector. The value changes based on touch inputs"
+    },
+    {
+        "name": "circuitpython-displayio-listselect",
+        "summary": "ListSelect widget for circuitpython displayio. Display a list of strings with a selection indicator allow user to move selection up and down."
+    },
+    {
+        "name": "circuitpython-displayio-switchround",
+        "summary": "A sliding switch widget with a round shape."
+    },
+    {
+        "name": "circuitpython-equalizer",
+        "summary": "Equalizer Graphic Representation for CircuitPython"
+    },
+    {
+        "name": "circuitpython-esp32connection",
+        "summary": "A WiFi connection helper for ESP32-based boards"
+    },
+    {
+        "name": "circuitpython-fake-bme280",
+        "summary": "BME280 Driver for CircuitPython used for testing functionality with no hardware attached"
+    },
+    {
+        "name": "circuitpython-functools",
+        "summary": "A CircuitPython implementation of CPython's functools library"
+    },
+    {
+        "name": "circuitpython-gauge",
+        "summary": "CircuitPython Gauge"
+    },
+    {
+        "name": "circuitpython-gp2y0e02b",
+        "summary": "Driver for the GP2Y0E02B distance sensor"
+    },
+    {
+        "name": "circuitpython-gpio-expander",
+        "summary": "CircuitPython helper library for gpio expanders (Texas Instrument PCA95xx and TCA95xx chips)."
+    },
+    {
+        "name": "circuitpython-gt911",
+        "summary": "CircuitPython Driver for Goodix GT911-based touch screens"
+    },
+    {
+        "name": "circuitpython-h3lis200dl",
+        "summary": "CircuitPython Driver for the ST H3LIS200DL Accelerometer"
+    },
+    {
+        "name": "circuitpython-hmac",
+        "summary": "HMAC (Keyed-Hashing for Message Authentication) Python module. Implements the HMAC algorithm as described by RFC 2104."
+    },
+    {
+        "name": "circuitpython-homie",
+        "summary": "Homie specifications for MQTT implemented in CircuitPython"
+    },
+    {
+        "name": "circuitpython-i2c-button",
+        "summary": "CircuitPython I2C Button \u00e0 la Sparkfun Qwiic Button/Switch/Arcade"
+    },
+    {
+        "name": "circuitpython-i2c-expanders",
+        "summary": "Drivers for various I2C GPIO expanders."
+    },
+    {
+        "name": "circuitpython-isl29125",
+        "summary": "driver for the isl29125 light sensor"
+    },
+    {
+        "name": "circuitpython-jepler-udecimal",
+        "summary": "Reduced version of the decimal library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-jled",
+        "summary": "Non-blocking LED controlling library"
+    },
+    {
+        "name": "circuitpython-kernel",
+        "summary": "CircuitPython Kernel enables CircuitPython to be used in Jupyter Notebooks for learning Python coding with microcontrollers."
+    },
+    {
+        "name": "circuitpython-kx132",
+        "summary": "CircuitPython Driver for the Kionix KX132 Accelerometer"
+    },
+    {
+        "name": "circuitpython-laser-at",
+        "summary": "Driver for an inexpensive laser rangefinder module, made by AT, available on aliexpress."
+    },
+    {
+        "name": "circuitpython-laser-egismos",
+        "summary": "Device driver for the egismos series of lasers, available at https://www.egismos.com/laser-measuring-optoelectronics-module"
+    },
+    {
+        "name": "circuitpython-lilygo-t-deck",
+        "summary": "CircuitPython drivers for the LILYGO T-Deck peripherals."
+    },
+    {
+        "name": "circuitpython-lps28",
+        "summary": "LPS28 pressure sensor drive for CircuitPython"
+    },
+    {
+        "name": "circuitpython-mag-cal",
+        "summary": "Calibrate magnetometer and accelerometer readings"
+    },
+    {
+        "name": "circuitpython-mc3479",
+        "summary": "MC3479 Accelerometer Driver"
+    },
+    {
+        "name": "circuitpython-mcp48xx",
+        "summary": "CircuitPython library for the MCP4801, MCP4811, MCP4821, MCP4802, MCP4812, and MCP4822 digital to analog converters."
+    },
+    {
+        "name": "circuitpython-microosc",
+        "summary": "Minimal OSC parser and server for CircuitPython and CPython"
+    },
+    {
+        "name": "circuitpython-mocks",
+        "summary": "A library of mock structures for soft-testing CircuitPython-based projects."
+    },
+    {
+        "name": "circuitpython-noise",
+        "summary": "Simplex noise (like Perlin) for CircuitPython"
+    },
+    {
+        "name": "circuitpython-nrf24l01",
+        "summary": "Circuitpython driver library for the nRF24L01 transceiver"
+    },
+    {
+        "name": "circuitpython-parse",
+        "summary": "Parse (absolute and relative) URLs."
+    },
+    {
+        "name": "circuitpython-pca9674",
+        "summary": null
+    },
+    {
+        "name": "circuitpython-ps2controller",
+        "summary": "CircuitPython library to read Sony PS2 game controllers"
+    },
+    {
+        "name": "circuitpython-qmc5883l",
+        "summary": "CircuitPython driver for the qmc5883l magnetometer"
+    },
+    {
+        "name": "circuitpython-rm3100",
+        "summary": "Driver for the RM3100 megnetometer by PNI Corp"
+    },
+    {
+        "name": "circuitpython-rotary-slider",
+        "summary": "Displayio Layout Rotary Slider Widget"
+    },
+    {
+        "name": "circuitpython-rotaryselect",
+        "summary": "A circular rotary selection widget"
+    },
+    {
+        "name": "circuitpython-ruhrohrotaryio",
+        "summary": "pretend to be 'rotaryio' for boards that need non-sequential pins"
+    },
+    {
+        "name": "circuitpython-scales",
+        "summary": "Graphic Scales to represent values in a scale in CircuitPython"
+    },
+    {
+        "name": "circuitpython-schedule",
+        "summary": "Reduced version of the schedule library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-seeed-xiao-nrf52840",
+        "summary": "Provides access to onboard sensors and battet"
+    },
+    {
+        "name": "circuitpython-seriallcd",
+        "summary": "CircuitPython helper library for Parallax's serial LCDs"
+    },
+    {
+        "name": "circuitpython-simnple-dial",
+        "summary": "Simple dial widget"
+    },
+    {
+        "name": "circuitpython-simple-gyro",
+        "summary": "Displayio Gyro representation"
+    },
+    {
+        "name": "circuitpython-slider",
+        "summary": "CircuitPython slider Library"
+    },
+    {
+        "name": "circuitpython-softkeyboard",
+        "summary": "CircuitPython software defined keyboard for touch displays using displayio GridLayout."
+    },
+    {
+        "name": "circuitpython-sparkfun-qwiicquadsolidstaterelay",
+        "summary": "CircuitPython library for the Sparkfun Quad Solid State Qwiic Relay"
+    },
+    {
+        "name": "circuitpython-stts22h",
+        "summary": "CircuitPython Driver for the STTS22H Temperature Sensor"
+    },
+    {
+        "name": "circuitpython-stubs",
+        "summary": "PEP 561 type stubs for CircuitPython"
+    },
+    {
+        "name": "circuitpython-styles",
+        "summary": "Dynamic style helper for CircuitPython graphical elements"
+    },
+    {
+        "name": "circuitpython-table",
+        "summary": "CircuitPython Library to creat tables"
+    },
+    {
+        "name": "circuitpython-ticstepper",
+        "summary": "Driver for the TIC stepper motor drivers"
+    },
+    {
+        "name": "circuitpython-tmidi",
+        "summary": "MIDI library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-tmp117",
+        "summary": "CircuitPython TMP117 Temperature Sensor Low Memory driver"
+    },
+    {
+        "name": "circuitpython-tool",
+        "summary": "Command-line tool for interfacing with CircuitPython devices."
+    },
+    {
+        "name": "circuitpython-tzdb",
+        "summary": "IANA timezones for adafruit_datetime"
+    },
+    {
+        "name": "circuitpython-uboxplot",
+        "summary": "calculates boxplot and creates its graphical representation"
+    },
+    {
+        "name": "circuitpython-uhistogram",
+        "summary": "CircuitPython library to calculate and graph histograms"
+    },
+    {
+        "name": "circuitpython-unicornhathd",
+        "summary": "CircuitPython framebuf based driver for Pimoroni's Unicorn HAT HD"
+    },
+    {
+        "name": "circuitpython-uplot",
+        "summary": "framework to display different plots in displayio. similar to widget"
+    },
+    {
+        "name": "circuitpython-uschedule",
+        "summary": "Reduced version of the schedule library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-waveshare-epd",
+        "summary": "CircuitPython `displayio` drivers for Waveshare-based ePaper displays"
+    },
+    {
+        "name": "circuitpython-waveshare-lcd1602",
+        "summary": "Drive for Waveshare's I2C RGB character display LCD1602"
+    },
+    {
+        "name": "circuitpython-wiichuck",
+        "summary": "CircuitPython driver for Nintento WiiMote I2C Accessory Devices"
+    },
+    {
+        "name": "commedagh-circuitpython-pypi-version-testing",
+        "summary": "testing pypi versioning"
+    },
+    {
+        "name": "community-circuitpython-tca9555",
+        "summary": "CircuitPython library for connecting a TCA9555 16-Bit I2C GPIO expander"
+    },
+    {
+        "name": "creativecontrol-circuitpython-ltc166x",
+        "summary": "CircuitPython library for control of LTC166X 8-bit and 10-bit DACs."
+    },
+    {
+        "name": "ebyte-lora-e22-circuitpython",
+        "summary": "CircuitPython LoRa EBYTE E22 device library complete and tested with Arduino SAMD, esp8266, esp32, Raspberry, rp2040 and STM32. sx1262/sx1268"
+    },
+    {
+        "name": "ebyte-lora-e220-circuitpython",
+        "summary": "LoRa EBYTE E220 device library complete and tested with Arduino, esp8266, esp32, STM32 and Raspberry Pi Pico. LLCC68"
+    },
+    {
+        "name": "ebyte-lora-e32-circuitpython",
+        "summary": "Ebyte E32 LoRa circuitpython library device very cheap and very long range (from 3Km to 8Km). Arduino LoRa EBYTE E32 device library complete and tested with Arduino, esp8266, esp32, STM32 and Raspberry Pi Pico. sx1278/sx1276."
+    },
+    {
+        "name": "foamyguy-circuitpython-another-version-test",
+        "summary": "Testing version munging in cookiecutter"
+    },
+    {
+        "name": "foamyguy-circuitpython-gradienthelper",
+        "summary": "Tools for generating color gradient palettes and sha"
+    },
+    {
+        "name": "foamyguy-circuitpython-nvm-helper",
+        "summary": "Easy interface to store and retrieve objects persisted via NVM"
+    },
+    {
+        "name": "foamyguy-circuitpython-version-testing",
+        "summary": "Testing version munging PR"
+    },
+    {
+        "name": "jepler-circuitpython-udecimal",
+        "summary": "Reduced version of the decimal library for CircuitPython"
+    },
+    {
+        "name": "mindwidgets-circuitpython-df1201s",
+        "summary": "CircuitPython driver for DFRobot DFPlayer Pro MP3 player with onboard storage"
+    },
+    {
+        "name": "otterworks-circuitpython-drv8305",
+        "summary": "CircuitPython library for the Texas Instruments DRV8305 Three-Phase Gate Driver"
+    },
+    {
+        "name": "quax-circuitpython-hid",
+        "summary": "CircuitPython helper library for simulating HID devices."
+    },
+    {
+        "name": "quax-circuitpython-typing",
+        "summary": "Types needed for type annotation that are not in `typing`"
+    },
+    {
+        "name": "samourai-circuitpython-dps310",
+        "summary": "Library for the DPS310 Precision Barometric Pressure Sensor"
+    },
+    {
+        "name": "samourai-circuitpython-scratch",
+        "summary": "Example library for testing updates to cookiecutter"
+    },
+    {
+        "name": "sparkfun-circuitpython-qwiicas3935",
+        "summary": "CircuitPython driver library for the Sparkfun AS3935 Lightning Detector"
+    },
+    {
+        "name": "sparkfun-circuitpython-qwiicjoystick",
+        "summary": "CircuitPython library for the Sparkfun QwiicJoystick"
+    },
+    {
+        "name": "sparkfun-circuitpython-qwiickeypad",
+        "summary": "CircuitPython library for the Sparkfun Qwiic Keypad"
+    },
+    {
+        "name": "sparkfun-circuitpython-qwiicrelay",
+        "summary": "CircuitPython library for the Sparkfun Qwiic Relay"
+    },
+    {
+        "name": "sparkfun-circuitpython-qwiictwist",
+        "summary": "CircuitPython library for the Sparkfun Qwiic Twist RGB Rotary Encoder"
+    },
+    {
+        "name": "sparkfun-circuitpython-serlcd",
+        "summary": "CircuitPython driver library for the Sparkfun SerLCD displays"
+    },
+    {
+        "name": "thonny-circuitpython",
+        "summary": "CircuitPython support for Thonny IDE"
+    },
+    {
+        "name": "types-circuitpython",
+        "summary": "Type support (typings) for CircuitPython built-in binding packages."
+    },
+    {
+        "name": "woolseyworkshop-circuitpython-74hc165",
+        "summary": "CircuitPython driver for 74HC165 shift register."
+    },
+    {
+        "name": "xpt2046-circuitpython",
+        "summary": "A simple XPT2046 chip reader designed for use with CircuitPython."
+    }
+]
