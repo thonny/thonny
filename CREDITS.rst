@@ -155,6 +155,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Rene Lehtma
 * Richard Kanehl
 * Rune Langøy
+* Russell Taber
 * Saishen, Inc.
 * Sam Warmuth
 * Sami Almuhammady
