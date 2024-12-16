@@ -277,7 +277,13 @@ class Workbench(tk.Tk):
         self.set_default("general.large_icon_rowheight_threshold", 32)
         self.set_default("file.avoid_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        self.set_default(
+            "general.data_url_prefix", "https://raw.githubusercontent.com/thonny/thonny/master/data"
+        )
         self.update_debug_mode()
+
+    def get_data_url(self, file_name) -> str:
+        return self.get_option("general.data_url_prefix") + "/" + file_name
 
     def _tweak_environment(self):
         for entry in self.get_option("general.environment"):

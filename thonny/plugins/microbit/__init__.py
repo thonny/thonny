@@ -4,7 +4,7 @@ import time
 from time import sleep
 from typing import Dict, List, Optional
 
-from thonny import ui_utils
+from thonny import ui_utils, get_workbench
 from thonny.languages import tr
 from thonny.plugins.micropython import (
     BareMetalMicroPythonConfigPage,
@@ -81,7 +81,7 @@ class MicrobitFlashingDialog(Uf2FlashingDialog):
     """
 
     def get_variants_url(self) -> str:
-        return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-daplink.json"
+        return get_workbench().get_data_url(f"{self.firmware_name.lower()}-variants-daplink.json")
 
     def get_families_mapping(self) -> Dict[str, str]:
         return {

@@ -4,6 +4,7 @@ import time
 from logging import getLogger
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from thonny import get_workbench
 from thonny.common import UserError
 from thonny.misc_utils import get_win_volume_name, list_volumes
 from thonny.plugins.micropython.base_flashing_dialog import (
@@ -21,7 +22,7 @@ class Uf2FlashingDialog(BaseFlashingDialog):
         return "Target volume"
 
     def get_variants_url(self) -> str:
-        return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-uf2.json"
+        return get_workbench().get_data_url(f"{self.firmware_name.lower()}-variants-uf2.json")
 
     def get_families_mapping(self) -> Dict[str, str]:
         codes = ["rp2", "samd21", "samd51", "esp32s2", "esp32s3", "nrf52"]
