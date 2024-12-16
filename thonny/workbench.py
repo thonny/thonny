@@ -383,6 +383,9 @@ class Workbench(tk.Tk):
         self.set_default("general.large_icon_rowheight_threshold", 32)
         self.set_default("file.use_zenity", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        self.set_default(
+            "general.data_url_prefix", "https://raw.githubusercontent.com/thonny/thonny/master/data"
+        )
 
         self.set_default("layout.visible_views", [])
         for nb_name in VIEW_LOCATION_CODES:
@@ -390,6 +393,9 @@ class Workbench(tk.Tk):
             self.set_default("layout.notebook_" + nb_name + "_selected_view", None)
 
         self.update_debug_mode()
+
+    def get_data_url(self, file_name) -> str:
+        return self.get_option("general.data_url_prefix") + "/" + file_name
 
     def _get_secrets_path(self) -> str:
         return os.path.join(get_thonny_user_dir(), "secrets.json")

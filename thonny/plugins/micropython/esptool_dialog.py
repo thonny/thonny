@@ -223,7 +223,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         return False
 
     def get_variants_url(self) -> str:
-        return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-esptool.json"
+        return get_workbench().get_data_url(f"{self.firmware_name.lower()}-variants-esptool.json")
 
     def get_action_text_max_length(self):
         return 35

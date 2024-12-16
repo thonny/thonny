@@ -2,6 +2,7 @@ import os.path
 import time
 from typing import Dict, Optional
 
+from thonny import get_workbench
 from thonny.plugins.micropython.base_flashing_dialog import TargetInfo
 from thonny.plugins.micropython.uf2dialog import Uf2FlashingDialog, create_volume_description
 
@@ -13,7 +14,7 @@ class DaplinkFlashingDialog(Uf2FlashingDialog):
     """
 
     def get_variants_url(self) -> str:
-        return f"https://raw.githubusercontent.com/thonny/thonny/master/data/{self.firmware_name.lower()}-variants-daplink.json"
+        return get_workbench().get_data_url(f"{self.firmware_name.lower()}-variants-daplink.json")
 
     def get_families_mapping(self) -> Dict[str, str]:
         return {
