@@ -9,7 +9,7 @@ import sys
 import threading
 import time
 from logging import getLogger
-from typing import Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence, Tuple
 
 PASSWORD_METHOD = "password"
 PUBLIC_KEY_NO_PASS_METHOD = "public-key (without passphrase)"
@@ -295,6 +295,53 @@ def parse_cmd_line(s):
     return shlex.split(s, posix=True)
 
 
+def jaro_similarity(s, t):
+    """Jaro distance between two strings."""
+    # Source: https://rosettacode.org/wiki/Jaro_similarity
+    s_len = len(s)
+    t_len = len(t)
+
+    if s_len == 0 and t_len == 0:
+        return 1
+
+    match_distance = (max(s_len, t_len) // 2) - 1
+
+    s_matches = [False] * s_len
+    t_matches = [False] * t_len
+
+    matches = 0
+    transpositions = 0
+
+    for i in range(s_len):
+        start = max(0, i - match_distance)
+        end = min(i + match_distance + 1, t_len)
+
+        for j in range(start, end):
+            if t_matches[j]:
+                continue
+            if s[i] != t[j]:
+                continue
+            s_matches[i] = True
+            t_matches[j] = True
+            matches += 1
+            break
+
+    if matches == 0:
+        return 0
+
+    k = 0
+    for i in range(s_len):
+        if not s_matches[i]:
+            continue
+        while not t_matches[k]:
+            k += 1
+        if s[i] != t[k]:
+            transpositions += 1
+        k += 1
+
+    return ((matches / s_len) + (matches / t_len) + ((matches - transpositions / 2) / matches)) / 3
+
+
 def levenshtein_distance(s1, s2):
     # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
     if len(s1) < len(s2):
@@ -548,3 +595,29 @@ def get_menu_char():
         return "≡"  # Identical to
     else:
         return "☰"  # Trigram for heaven, too heavy on Windows
+
+
+def download_bytes(url: str, timeout: int = 10) -> bytes:
+    from urllib.request import Request, urlopen
+
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Accept-Encoding": "gzip, deflate",
+            "Cache-Control": "no-cache",
+        },
+    )
+    with urlopen(req, timeout=timeout) as fp:
+        if fp.info().get("Content-Encoding") == "gzip":
+            import gzip
+
+            return gzip.decompress(fp.read())
+        else:
+            return fp.read()
+
+
+def download_and_parse_json(url: str, timeout: int = 10) -> Any:
+    import json
+
+    return json.loads(download_bytes(url, timeout=timeout))

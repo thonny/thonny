@@ -3,6 +3,7 @@ from logging import getLogger
 from tkinter import messagebox
 from typing import Any, Dict, List, Optional
 
+from thonny import get_workbench
 from thonny.languages import tr
 from thonny.misc_utils import levenshtein_distance
 from thonny.plugins.micropython import LocalMicroPythonProxy, MicroPythonProxy
@@ -153,7 +154,13 @@ class MicroPythonPipDialog(BackendPipDialog):
         """Will be executed in background thread"""
 
         mp_org_result = self._perform_micropython_org_search(query)
-        pypi_result = self._perform_pypi_search(query, source="PyPI")
+        pypi_result = self._perform_pypi_search(
+            query,
+            source="PyPI",
+            data_url=get_workbench().get_data_url("pypi_summaries_microcircuit.json"),
+            common_tokens=[],
+        )
+        print("PPPP", pypi_result)
 
         combined_result = []
         mp_org_names = set()
@@ -171,7 +178,7 @@ class MicroPythonPipDialog(BackendPipDialog):
                 combined_result.append(item)
 
         sorted_result = sorted(combined_result, key=lambda x: x["distance"])
-        filtered_result = filter(lambda x: x["distance"] < 5, sorted_result[:20])
+        filtered_result = filter(lambda x: x["distance"] < 20, sorted_result[:20])
 
         # Combining, because this makes the shadowing performed by Pipkin more clear
         return {"combined": list(filtered_result)}

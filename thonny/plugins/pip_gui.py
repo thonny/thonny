@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import itertools
+import json
 import os
 import re
 import subprocess
@@ -12,7 +14,7 @@ from logging import exception, getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
@@ -24,7 +26,13 @@ from thonny.common import (
     running_in_virtual_environment,
 )
 from thonny.languages import tr
-from thonny.misc_utils import construct_cmd_line, levenshtein_distance
+from thonny.misc_utils import (
+    construct_cmd_line,
+    download_and_parse_json,
+    download_bytes,
+    jaro_similarity,
+    levenshtein_distance,
+)
 from thonny.running import InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
@@ -673,13 +681,7 @@ class PipDialog(CommonDialog, ABC):
             return self._normalize_target_path(dist.location) != self._get_target_directory()
 
     def _normalize_name(self, name):
-        # looks like (in some cases?) pip list gives the name as it was used during install
-        # ie. the list may contain lowercase entry, when actual metadata has uppercase name
-        # Example: when you "pip install cx-freeze", then "pip list"
-        # really returns "cx-freeze" although correct name is "cx_Freeze"
-
-        # https://www.python.org/dev/peps/pep-0503/#id4
-        return re.sub(r"[-_.]+", "-", name).lower().strip()
+        return canonicalize_name(name)
 
     def _normalize_target_path(self, path: str) -> str:
         return path
@@ -978,29 +980,93 @@ class PipDialog(CommonDialog, ABC):
 
     def _fetch_search_results(self, query: str) -> Dict[str, List[Dict[str, str]]]:
         """Will be executed in background thread"""
-        return {"*": self._perform_pypi_search(query)}
+        return {
+            "*": self._perform_pypi_search(
+                query,
+                source=None,
+                data_url=get_workbench().get_data_url("pypi_summaries_cpython.json"),
+                common_tokens=[],
+            )
+        }
 
     def _perform_pypi_search(
-        self, query: str, source: Optional[str] = None
+        self, query: str, source: Optional[str], data_url: str, common_tokens: List[str]
     ) -> List[Dict[str, str]]:
-        import urllib.parse
-        from urllib.request import urlopen
-
         logger.info("Performing PyPI search for %r", query)
 
-        url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
-        with urlopen(url, timeout=10) as fp:
-            data = fp.read()
+        data = download_bytes(data_url)
+        packages: List[Dict] = json.loads(data)
 
-        results = _extract_pypi_search_results(data.decode("utf-8"))
+        canonical_query = canonicalize_name(query)
+        query_parts = canonical_query.split("-")
+        for package in packages:
+            package["score"] = compute_dist_name_similarity(
+                package["name"], query_parts, common_tokens
+            )
 
-        for result in results:
-            if source:
-                result["source"] = source
-            result["distance"] = levenshtein_distance(query, result["name"])
+        packages.sort(key=lambda p: p["score"], reverse=True)
 
-        logger.info("Got %r matches")
-        return results
+        if not packages or packages[0]["score"] < 1.0:
+            # test for exact match
+            try:
+                dist_data = download_dist_data_from_pypi(canonical_query, None)
+                dist_info = dist_data["info"]
+                print(dist_info)
+                packages.insert(
+                    0,
+                    {"name": dist_info["name"], "summary": dist_info.get("summary"), "score": 1.0},
+                )
+            except Exception:
+                logger.info("No luck with exact match %r", canonical_query)
+
+        return [
+            dict(
+                name=p["name"],
+                version="0",
+                description=p.get("summary"),
+                source=source,
+                distance=levenshtein_distance(query, p["name"]),
+            )
+            for p in packages[:20]
+            if p["score"] > 0.6
+        ]
+
+
+def canonicalize_name(name: str) -> str:
+    return re.sub(r"[-_.]+", "-", name).lower().strip()
+
+
+def _get_sublists_of_length(l: List[Any], n: int) -> List[List[Any]]:
+    return [l[i : i + n] for i in range(len(l) - n + 1)]
+
+
+def compute_dist_name_similarity(
+    name: str, query_parts: List[str], common_tokens: List[str]
+) -> float:
+    name_parts = (name).split("-")
+
+    for common_token in common_tokens:
+        if common_token in name_parts and common_token not in query_parts:
+            # don't penalize omitting this part
+            name_parts.remove(common_token)
+
+    common_count = min(len(query_parts), len(name_parts))
+    name_perms = list(itertools.permutations(name_parts, common_count))
+    query_perms = list(itertools.permutations(query_parts, common_count))
+
+    if len(name_perms) * len(query_perms) > 36:
+        # 36 corresponds to 3-part name and 3-part query.
+        # More than that would be too much effort. Assume correct order and match sub-lists instead.
+        name_perms = _get_sublists_of_length(name_parts, common_count)
+        query_perms = _get_sublists_of_length(query_parts, common_count)
+
+    best_score = 0
+    for name_perm, query_perm in itertools.product(name_perms, query_perms):
+        score = jaro_similarity("-".join(name_perm), "-".join(query_perm))
+        best_score = max(score, best_score)
+
+    parts_length_penalty = 1.0 - abs(len(query_parts) - len(name_parts)) * 0.05
+    return best_score * parts_length_penalty
 
 
 class BackendPipDialog(PipDialog):
@@ -1565,6 +1631,19 @@ def _extract_click_text(widget, event, tag):
 
 def get_not_supported_translation():
     return tr("Package manager is not available for this interpreter")
+
+
+def download_dist_data_from_pypi(name: str, version: Optional[str]) -> Dict:
+    if version is None:
+        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
+    else:
+        url = "https://pypi.org/pypi/{}/{}/json".format(
+            urllib.parse.quote(name), urllib.parse.quote(version)
+        )
+
+    logger.info("Downloading package info (%r, %r) from %s", name, version, url)
+
+    return download_and_parse_json(url)
 
 
 def load_plugin() -> None:
