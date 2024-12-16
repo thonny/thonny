@@ -11,6 +11,14 @@ Breaking changes
 * Stop publishing binaries for Linux, #3210. The Linux installation script now creates a private venv (based on system python3) for Thonny even in x84_64.
 * Stop publishing XXL bundle as it is not trivial to prepare bundles for all popular architectures while making sure there are no version conflicts between the large number of packages. For teachers who relied on the XXL bundle, the work-around is to prepare a suitable requirements.txt, which can be used as input in Thonny's package manager.
 
+4.1.7 (2024-12-16)
+==================
+* Fix PyPI package search, #3401
+* Allow selecting ESP32-C6 family in esptool dialog, #3363
+* Update org.thonny.Thonny.appdata.xml
+* Update bundled esptool
+* Fix missing dbus-next dependency in Linux
+
 4.1.6 (2024-09-11)
 ==================
 * Make macOS installer work in Sequoia
