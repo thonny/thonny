@@ -2,6 +2,14 @@
 Version history
 ===============
 
+4.1.7 (2024-12-16)
+==================
+* Fix PyPI package search, #3401
+* Allow selecting ESP32-C6 family in esptool dialog, #3363
+* Update org.thonny.Thonny.appdata.xml
+* Update bundled esptool
+* Fix missing dbus-next dependency in Linux
+
 4.1.6 (2024-09-11)
 ==================
 * Make macOS installer work in Sequoia
