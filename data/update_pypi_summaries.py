@@ -73,8 +73,7 @@ update_packages_json("https://robert-96.github.io/top-pypi-packages/json/package
                      [], "pypi_summaries_cpython.json", attributes)
 
 update_packages_json(None,
-                     [r"micropython-", "-micropython"], "pypi_summaries_micropython.json", attributes)
+                     ["micropython-", "-micropython",
+                      "circuitpython-", "-circuitpython"], "pypi_summaries_microcircuit.json", attributes)
 
-update_packages_json(None,
-                     [r"circuitpython-", "-circuitpython"], "pypi_summaries_circuitpython.json", attributes)
 
