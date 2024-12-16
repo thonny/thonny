@@ -59,6 +59,10 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
         }
 
     @classmethod
+    def get_pypi_common_tokens(cls) -> List[str]:
+        return ["circuitpython", "adafruit"]
+
+    @classmethod
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID
 

@@ -319,104 +319,51 @@ def parse_cmd_line(s):
     return shlex.split(s, posix=True)
 
 
-def levenshtein_distance(s1, s2):
-    # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
-    if len(s1) < len(s2):
-        return levenshtein_distance(s2, s1)  # pylint: disable=arguments-out-of-order
+def jaro_similarity(s, t):
+    """Jaro distance between two strings."""
+    # Source: https://rosettacode.org/wiki/Jaro_similarity
+    s_len = len(s)
+    t_len = len(t)
 
-    # len(s1) >= len(s2)
-    if len(s2) == 0:
-        return len(s1)
+    if s_len == 0 and t_len == 0:
+        return 1
 
-    previous_row = range(len(s2) + 1)
-    for i, c1 in enumerate(s1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(s2):
-            insertions = (
-                previous_row[j + 1] + 1
-            )  # j+1 instead of j since previous_row and current_row are one character longer
-            deletions = current_row[j] + 1  # than s2
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
+    match_distance = (max(s_len, t_len) // 2) - 1
 
-    return previous_row[-1]
+    s_matches = [False] * s_len
+    t_matches = [False] * t_len
 
+    matches = 0
+    transpositions = 0
 
-def levenshtein_damerau_distance(s1, s2, maxDistance):
-    # https://gist.github.com/giststhebearbear/4145811
-    #  get smallest string so our rows are minimized
-    s1, s2 = (s1, s2) if len(s1) <= len(s2) else (s2, s1)
-    #  set lengths
-    l1, l2 = len(s1), len(s2)
+    for i in range(s_len):
+        start = max(0, i - match_distance)
+        end = min(i + match_distance + 1, t_len)
 
-    #  We are simulatng an NM matrix where n is the longer string
-    #  and m is the shorter string. By doing this we can minimize
-    #  memory usage to O(M).
-    #  Since we are simulating the matrix we only maintain two rows
-    #  at a time the current row and the previous rows.
-    #  A move from the current cell looking at the cell before it indicates
-    #  consideration of an insert operation.
-    #  A move from the current cell looking at the cell above it indicates
-    #  consideration of a deletion
-    #  Both operations are cost 1
-    #  A move from the current cell to the cell up and to the left indicates
-    #  an edit operation of 0 cost for a matching character and a 1 cost for
-    #  a non matching characters
-    #  no row has been previously computed yet, set empty row
-    #  Since this is also a Damerou-Levenshtein calculation transposition
-    #  costs will be taken into account. These look back 2 characters to
-    #  determine optimal cost based on a possible transposition
-    #  example: aei -> aie with levensthein has a cost of 2
-    #  match a, change e->i change i->e => aie
-    #  Damarau-Levenshtein has a cost of 1
-    #  match a, transpose ei to ie => aie
-    transpositionRow = []
-    prevRow = []
+        for j in range(start, end):
+            if t_matches[j]:
+                continue
+            if s[i] != t[j]:
+                continue
+            s_matches[i] = True
+            t_matches[j] = True
+            matches += 1
+            break
 
-    #  build first leven matrix row
-    #  The first row represents transformation from an empty string
-    #  to the shorter string making it static [0-n]
-    #  since this row is static we can set it as
-    #  curRow and start computation at the second row or index 1
-    curRow = list(range(0, l1 + 1))
+    if matches == 0:
+        return 0
 
-    # use second length to loop through all the rows being built
-    # we start at row one
-    for rowNum in range(1, l2 + 1):
-        #  set transposition, previous, and current
-        #  because the rowNum always increments by one
-        #  we can use rowNum to set the value representing
-        #  the first column which is indicitive of transforming TO
-        #  the empty string from our longer string
-        #  transposition row maintains an extra row so that it is possible
-        #  for us to apply Damarou's formula
-        transpositionRow, prevRow, curRow = prevRow, curRow, [rowNum] + [0] * l1
+    k = 0
+    for i in range(s_len):
+        if not s_matches[i]:
+            continue
+        while not t_matches[k]:
+            k += 1
+        if s[i] != t[k]:
+            transpositions += 1
+        k += 1
 
-        #  consider if we have passed the max distance if all paths through
-        #  the transposition row are larger than the max we can stop calculating
-        #  distance and return the last element in that row and return the max
-        if transpositionRow:
-            if not any(cellValue < maxDistance for cellValue in transpositionRow):
-                return maxDistance
-
-        for colNum in range(1, l1 + 1):
-            insertionCost = curRow[colNum - 1] + 1
-            deletionCost = prevRow[colNum] + 1
-            changeCost = prevRow[colNum - 1] + (0 if s1[colNum - 1] == s2[rowNum - 1] else 1)
-            #  set the cell value - min distance to reach this
-            #  position
-            curRow[colNum] = min(insertionCost, deletionCost, changeCost)
-
-            #  test for a possible transposition optimization
-            #  check to see if we have at least 2 characters
-            if 1 < rowNum <= colNum:
-                #  test for possible transposition
-                if s1[colNum - 1] == s2[colNum - 2] and s2[colNum - 1] == s1[colNum - 2]:
-                    curRow[colNum] = min(curRow[colNum], transpositionRow[colNum - 2] + 1)
-
-    #  the last cell of the matrix is ALWAYS the shortest distance between the two strings
-    return curRow[-1]
+    return ((matches / s_len) + (matches / t_len) + ((matches - transpositions / 2) / matches)) / 3
 
 
 def get_file_creation_date(path_to_file):

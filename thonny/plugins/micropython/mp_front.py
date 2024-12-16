@@ -19,7 +19,7 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
-from thonny.misc_utils import download_and_parse_json, levenshtein_distance
+from thonny.misc_utils import download_and_parse_json
 from thonny.plugins.backend_config_page import (
     BaseSshProxyConfigPage,
     TabbedBackendDetailsConfigurationPage,
@@ -132,45 +132,27 @@ class MicroPythonProxy(SubprocessProxy):
         return False
 
     @classmethod
+    def get_pypi_common_tokens(cls) -> List[str]:
+        return ["micropython"]
+
+    @classmethod
     def search_packages(cls, query: str) -> List[DistInfo]:
-        from thonny.plugins.pip_gui import perform_pypi_search
+        from thonny.plugins.pip_gui import compute_dist_name_similarity, perform_pypi_search
 
         norm_query = canonicalize_name(query.strip())
+        query_parts = norm_query.split("-")
 
-        def distance(item: DistInfo) -> int:
-            norm_name = canonicalize_name(item.name)
-            if norm_name == norm_query:
-                # don't argue with exact match
-                return 0
-
-            result = levenshtein_distance(norm_name, norm_query)
-
-            if "micropython" in norm_query and item.source == "micropython-lib":
-                # direct the user towards micropython-lib and names without "micropython"
-                new_result = levenshtein_distance(
-                    norm_name, norm_query.replace("micropython", "").strip("-")
-                )
-                if new_result < result:
-                    result = new_result
-
-            # try matching without qualifiers
-            simple_name = norm_name
-            simple_query = norm_query
-            for qualifier in ["adafruit-circuitpython", "circuitpython", "micropython"]:
-                simple_name = simple_name.replace(qualifier, "").replace("--", "-").strip("-")
-                simple_query = simple_query.replace(qualifier, "").replace("--", "-").strip("-")
-
-            new_result = levenshtein_distance(simple_name, simple_query)
-            if new_result < result:
-                result = new_result + 1
-
-            return result
+        def similarity(item: DistInfo) -> float:
+            return compute_dist_name_similarity(
+                item.name, query_parts, cls.get_pypi_common_tokens()
+            )
 
         mp_lib_result = cls._get_micropython_lib_dist_infos()
-        pypi_result = perform_pypi_search(query)
-        if "micropython" not in query.lower() and "circuitpython" not in query.lower():
-            pypi_result += perform_pypi_search("micropython " + query)
-            pypi_result += perform_pypi_search("circuitpython " + query)
+        pypi_result = perform_pypi_search(
+            query,
+            get_workbench().get_data_url("pypi_summaries_microcircuit.json"),
+            cls.get_pypi_common_tokens(),
+        )
 
         combined_result = []
         mp_lib_names = set()
@@ -199,8 +181,8 @@ class MicroPythonProxy(SubprocessProxy):
             if norm_name == norm_query or mentions_right_tokens:
                 combined_result.append(item)
 
-        sorted_result = sorted(combined_result, key=distance)
-        filtered_result = filter(lambda x: distance(x) < 4, sorted_result[:20])
+        sorted_result = sorted(combined_result, key=similarity, reverse=True)
+        filtered_result = filter(lambda x: similarity(x) > 0.6, sorted_result[:20])
 
         return list(filtered_result)
 

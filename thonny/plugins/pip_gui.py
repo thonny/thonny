@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import itertools
+import json
 import math
 import os
 import re
@@ -13,7 +15,7 @@ from logging import getLogger
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror, showwarning
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import packaging.version
 from packaging.requirements import Requirement
@@ -36,6 +38,7 @@ from thonny.misc_utils import (
     download_and_parse_json,
     download_bytes,
     get_menu_char,
+    jaro_similarity,
 )
 from thonny.running import BackendProxy, InlineCommandDialog, get_front_interpreter_for_subprocess
 from thonny.ui_utils import (
@@ -1340,7 +1343,9 @@ class PluginsPipFrame(PipFrame):
         self.info_text.direct_insert("end", self._normalize_target_path(path), ("url",))
 
     def _fetch_search_results(self, query: str) -> List[DistInfo]:
-        return perform_pypi_search(query)
+        return perform_pypi_search(
+            query, get_workbench().get_data_url("pypi_summaries_cpython.json"), ["thonny"]
+        )
 
     def _should_show_search_result_source(self):
         return False
@@ -1497,9 +1502,9 @@ class StubsPipFrame(PipFrame):
         return None
 
 
-def perform_pypi_search(query: str) -> List[DistInfo]:
+def perform_pypi_search(query: str, data_url: str, common_tokens: List[str]) -> List[DistInfo]:
     try:
-        return _perform_plain_pypi_search(query)
+        return _perform_plain_pypi_search(query, data_url, common_tokens)
     except Exception as e:
         logger.exception("Could not search PyPI for %r", query)
         # Let's try a fallback by treating the query as package name
@@ -1514,20 +1519,68 @@ def perform_pypi_search(query: str) -> List[DistInfo]:
             raise PyPiSearchErrorWithFallback(str(e), dist_info) from e
 
 
-def _perform_plain_pypi_search(query: str) -> List[DistInfo]:
-    import urllib.parse
-
+def _perform_plain_pypi_search(
+    query: str, data_url: str, common_tokens: List[str]
+) -> List[DistInfo]:
     logger.info("Performing PyPI search for %r", query)
 
-    url = "https://pypi.org/search/?q={}".format(urllib.parse.quote(query))
-    data = download_bytes(url)
+    data = download_bytes(data_url)
+    packages: List[Dict] = json.loads(data)
 
-    results = _extract_pypi_search_results(data.decode("utf-8"))
-    logger.info("Got %r PyPI matches", len(results))
+    canonical_query = canonicalize_name(query)
+    query_parts = canonical_query.split("-")
+    for package in packages:
+        package["score"] = compute_dist_name_similarity(package["name"], query_parts, common_tokens)
+
+    packages.sort(key=lambda p: p["score"], reverse=True)
+
+    if not packages or packages[0]["score"] < 1.0:
+        # test for exact match
+        try:
+            dist_info = download_dist_info_from_pypi(canonical_query, None)
+            packages.insert(0, {"name": dist_info.name, "summary": dist_info.summary, "score": 1.0})
+        except Exception:
+            logger.info("No luck with exact match %r", canonical_query)
+
     return [
-        DistInfo(name=r["name"], version=r["version"], summary=r.get("description"), source="PyPI")
-        for r in results
+        DistInfo(
+            name=p["name"],
+            version="0",
+            summary=p.get("summary"),
+            source="PyPI",
+        )
+        for p in packages[:20]
+        if p["score"] > 0.6
     ]
+
+
+def compute_dist_name_similarity(
+    name: str, query_parts: List[str], common_tokens: List[str]
+) -> float:
+    name_parts = canonicalize_name(name).split("-")
+
+    for common_token in common_tokens:
+        if common_token in name_parts and common_token not in query_parts:
+            # don't penalize omitting this part
+            name_parts.remove(common_token)
+
+    common_count = min(len(query_parts), len(name_parts))
+    name_perms = list(itertools.permutations(name_parts, common_count))
+    query_perms = list(itertools.permutations(query_parts, common_count))
+
+    if len(name_perms) * len(query_perms) > 36:
+        # 36 corresponds to 3-part name and 3-part query.
+        # More than that would be too much effort. Assume correct order and match sub-lists instead.
+        name_perms = _get_sublists_of_length(name_parts, common_count)
+        query_perms = _get_sublists_of_length(query_parts, common_count)
+
+    best_score = 0
+    for name_perm, query_perm in itertools.product(name_perms, query_perms):
+        score = jaro_similarity("-".join(name_perm), "-".join(query_perm))
+        best_score = max(score, best_score)
+
+    parts_length_penalty = 1.0 - abs(len(query_parts) - len(name_parts)) * 0.05
+    return best_score * parts_length_penalty
 
 
 def download_dist_info_from_pypi(name: str, version: Optional[str]) -> DistInfo:
@@ -1575,60 +1628,6 @@ def download_dist_data_from_pypi(name: str, version: Optional[str]) -> Dict:
     return download_and_parse_json(url)
 
 
-def _extract_pypi_search_results(html_data: str) -> List[Dict[str, str]]:
-    from html.parser import HTMLParser
-
-    def get_class(attrs):
-        for name, value in attrs:
-            if name == "class":
-                return value
-
-        return None
-
-    class_prefix = "package-snippet__"
-
-    class PypiSearchResultsParser(HTMLParser):
-        def __init__(self, data):
-            HTMLParser.__init__(self)
-            self.results = []
-            self.active_class = None
-            self.feed(data)
-
-        def handle_starttag(self, tag, attrs):
-            if tag == "a" and get_class(attrs) == "package-snippet":
-                self.results.append({})
-
-            if tag in ("span", "p"):
-                tag_class = get_class(attrs)
-                if tag_class in (
-                    "package-snippet__name",
-                    "package-snippet__description",
-                    "package-snippet__version",
-                ):
-                    self.active_class = tag_class
-                else:
-                    self.active_class = None
-            else:
-                self.active_class = None
-
-        def handle_data(self, data):
-            if self.active_class is not None:
-                att_name = self.active_class[len(class_prefix) :]
-                self.results[-1][att_name] = data
-
-        def handle_endtag(self, tag):
-            self.active_class = None
-
-    results = PypiSearchResultsParser(html_data).results
-    if not results:
-        # this may mean either no matches or changed structure of PyPI search page
-        # Let's probe for known marker of no matches
-        if not "There were no results for" in html_data:
-            raise RuntimeError("Unexpected structure of PyPI search results")
-
-    return results
-
-
 def _extract_click_text(widget, event, tag):
     # http://stackoverflow.com/a/33957256/261181
     try:
@@ -1652,6 +1651,10 @@ class PyPiSearchErrorWithFallback(RuntimeError):
     def __init__(self, message, fallback_result: DistInfo):
         super().__init__(message)
         self.fallback_result = fallback_result
+
+
+def _get_sublists_of_length(l: List[Any], n: int) -> List[List[Any]]:
+    return [l[i : i + n] for i in range(len(l) - n + 1)]
 
 
 def load_plugin() -> None:

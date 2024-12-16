@@ -1114,7 +1114,9 @@ class BackendProxy(ABC):
     def search_packages(cls, query: str) -> List[DistInfo]:
         from thonny.plugins.pip_gui import perform_pypi_search
 
-        return perform_pypi_search(query)
+        return perform_pypi_search(
+            query, get_workbench().get_data_url("pypi_summaries_cpython.json"), []
+        )
 
     @classmethod
     def get_package_info_from_index(cls, name: str, version: str) -> DistInfo:
