@@ -174,6 +174,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Suk-Hyung Hwang
 * Sven Duzont
 * Syed Nasim
+* @t2solve
 * Taavi Ilp
 * tabreturn
 * TANAKA Masayuki
