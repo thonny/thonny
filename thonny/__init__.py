@@ -2,6 +2,7 @@ import logging
 import os.path
 import sys
 import time
+import re
 from logging import getLogger
 from typing import TYPE_CHECKING, List, Optional, cast
 
@@ -51,6 +52,9 @@ _last_module_count = 0
 _last_modules = set()
 _last_time = time.time()
 
+def remove_weird_characters(input_string: str) -> str:
+    cleaned_string = re.sub(r'[^a-z]', '', input_string)
+    return cleaned_string
 
 def report_time(label: str) -> None:
     """
@@ -127,6 +131,7 @@ def get_ipc_file_path():
     import getpass
 
     username = getpass.getuser()
+    username = remove_weird_characters(username.lower())
 
     ipc_dir = os.path.join(base_dir, "thonny-%s" % username)
     os.makedirs(ipc_dir, exist_ok=True)
