@@ -43,15 +43,18 @@ class SshCPythonProxy(SubprocessProxy):
                     "main_backend_options": {
                         "run.warn_module_shadowing": get_workbench().get_option(
                             "run.warn_module_shadowing"
-                        )
+                        ),
+                        "user_stubs_location": self.get_user_stubs_location(),
                     },
-                    "user_stubs_location": self.get_user_stubs_location(),
                 }
             ),
         ]
 
     def _send_initial_input(self) -> None:
         assert self._proc is not None
+        assert self.is_connected()
+        assert self.process_is_alive()
+
         self._proc.stdin.write((get_ssh_password("SshCPython") or "") + "\n")
         self._proc.stdin.flush()
 
@@ -177,6 +180,9 @@ class SshCPythonProxy(SubprocessProxy):
 
     def get_machine_id(self) -> str:
         return self._host
+
+    def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
+        return None, self.get_externally_managed_message()
 
 
 class SshProxyConfigPage(BaseSshProxyConfigPage):

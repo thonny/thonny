@@ -245,9 +245,7 @@ class LocalCPythonProxy(SubprocessProxy):
 
     def get_packages_target_dir_with_comment(self):
         if self.is_externally_managed():
-            return None, tr(
-                "The packages of this interpreter can be managed via your system package manager."
-            ) + "\n" + tr("For pip-installing a package, you need to use a virtual environment.")
+            return None, self.get_externally_managed_message()
 
         if self._prefer_user_install():
             usp = self.get_user_site_packages()

@@ -1107,6 +1107,13 @@ class BackendProxy(ABC):
     def can_install_packages_from_files(self) -> bool:
         raise NotImplementedError()
 
+    def get_externally_managed_message(self) -> str:
+        return (
+            tr("The packages of this interpreter can be managed via your system package manager.")
+            + "\n"
+            + tr("For pip-installing a package, you need to use a virtual environment.")
+        )
+
     def normalize_target_path(self, path: str) -> str:
         return path
 
@@ -1453,11 +1460,13 @@ class SubprocessProxy(BackendProxy, ABC):
         while True:
             data = read_one_incoming_message_str(stderr.readline)
             if data == "":
+                logger.info("Reached end of STDERR")
                 break
             else:
                 self._response_queue.append(
                     BackendEvent("ProgramOutput", stream_name="stderr", data=data)
                 )
+                logger.error("STDERR: %r", data)
 
     def _store_state_info(self, msg):
         if "cwd" in msg:
