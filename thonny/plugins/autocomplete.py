@@ -3,14 +3,13 @@ from logging import getLogger
 from tkinter import messagebox
 from typing import List, Optional, Union, cast
 
-from thonny import editor_helpers, get_runner, get_shell, get_workbench, lsp_types
+from thonny import editor_helpers, get_runner, get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.editor_helpers import DocuBox, EditorInfoBox
-from thonny.editors import Editor
 from thonny.languages import tr
 from thonny.lsp_types import CompletionItem, CompletionParams, LspResponse, TextDocumentIdentifier
 from thonny.misc_utils import running_on_mac_os
-from thonny.shell import ShellText, ShellView
+from thonny.shell import ShellText
 from thonny.ui_utils import (
     alt_is_pressed_without_char,
     command_is_pressed,

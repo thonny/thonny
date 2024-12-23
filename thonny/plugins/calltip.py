@@ -1,16 +1,11 @@
 import tkinter as tk
 from logging import getLogger
 from tkinter import messagebox
-from typing import List, Optional
+from typing import Optional
 
 from thonny import editor_helpers, get_workbench
 from thonny.codeview import CodeViewText, SyntaxText
-from thonny.editor_helpers import (
-    DocuBoxBase,
-    get_active_text_widget,
-    get_cursor_position,
-    get_text_filename,
-)
+from thonny.editor_helpers import DocuBoxBase, get_active_text_widget
 from thonny.editors import Editor
 from thonny.languages import tr
 from thonny.lsp_types import (
