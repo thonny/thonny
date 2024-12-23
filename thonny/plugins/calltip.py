@@ -1,5 +1,4 @@
 import tkinter as tk
-import traceback
 from logging import getLogger
 from tkinter import messagebox
 from typing import List, Optional
@@ -52,14 +51,17 @@ class CalltipBox(DocuBoxBase):
 
         expected_height = 10  # TODO
         # call_bracket_start = ... # TODO
-        pos = get_cursor_position(text)
-        if pos:
-            self._show_on_target_text(
-                "%d.%d" % pos,
-                expected_height,
-                "above",
-                y_offset=-ems_to_pixels(0.3),
-            )
+        row, column = editor_helpers.get_cursor_position(text)
+        if isinstance(text, ShellText):
+            row -= text.get_current_line_ls_offset()
+            column -= text.get_current_column_ls_offset()
+
+        self._show_on_target_text(
+            "%d.%d" % (row, column),
+            expected_height,
+            "above",
+            y_offset=-ems_to_pixels(0.3),
+        )
 
     def _update_size(self):
         # will be called while box is off the screen
@@ -102,7 +104,6 @@ class CalltipBox(DocuBoxBase):
         if active_parameter is None:
             active_parameter = global_active_parameter
 
-        print("APA", active_parameter)
         if active_parameter is None or len(sig.parameters) <= active_parameter:
             self._append_chars(sig.label)
         else:
@@ -114,6 +115,7 @@ class CalltipBox(DocuBoxBase):
 
 class Calltipper:
     def __init__(self):
+        self._last_request_text: Optional[SyntaxText] = None
         self._last_request_uri = None
         self._last_request_position = None
         self._calltip_box: Optional[CalltipBox] = None
@@ -130,25 +132,35 @@ class Calltipper:
         self.request_calltip_for_text(text)
 
     def request_calltip_for_text(self, text: SyntaxText) -> None:
-        if not isinstance(text, CodeViewText):
-            # TODO: Shell?
-            return
-
-        editor = text.master.master
-        assert isinstance(editor, Editor)
-
-        uri = editor.get_uri()
-        if uri is None:
-            # TODO:
-            return
-
         ls_proxy = get_workbench().get_language_server_proxy()
         if ls_proxy is None:
             return
 
         ls_proxy.unbind_request_handler(self.handle_response)
 
-        position = editor_helpers.get_cursor_ls_position(text)
+        if isinstance(text, CodeViewText):
+            editor = text.master.master
+            assert isinstance(editor, Editor)
+
+            editor.send_changes_to_language_server()
+            uri = editor.get_uri()
+            position = editor_helpers.get_cursor_ls_position(text)
+        elif isinstance(text, ShellText):
+            text.send_changes_to_language_server()
+            uri = text.get_ls_uri()
+            position = editor_helpers.get_cursor_ls_position(
+                text, text.get_current_line_ls_offset(), text.get_current_column_ls_offset()
+            )
+
+        else:
+            logger.warning("Unexpected calltip request in %r", text)
+            return
+
+        if uri is None:
+            # TODO:
+            return
+
+        self._last_request_text = text
         ls_proxy.request_signature_help(
             SignatureHelpParams(
                 textDocument=TextDocumentIdentifier(uri), position=position, context=None
@@ -159,25 +171,27 @@ class Calltipper:
         self._last_request_position = position
 
     def handle_response(self, response: LspResponse[Optional[SignatureHelp]]) -> None:
-        text = get_active_text_widget()
-        if not text:
+        if not self._last_request_text:
+            logger.warning("SignatureHelp response without _last_request_text")
             return
 
-        if not isinstance(text, CodeViewText):
-            # TODO: Shell?
-            return
-
-        editor = text.master.master
-        assert isinstance(editor, Editor)
-
-        position = editor_helpers.get_cursor_ls_position(text)
-        uri = editor.get_uri()
+        if isinstance(self._last_request_text, CodeViewText):
+            editor = self._last_request_text.master.master
+            assert isinstance(editor, Editor)
+            uri = editor.get_uri()
+            position = editor_helpers.get_cursor_ls_position(self._last_request_text)
+        else:
+            assert isinstance(self._last_request_text, ShellText)
+            uri = self._last_request_text.get_ls_uri()
+            position = editor_helpers.get_cursor_ls_position(
+                self._last_request_text,
+                self._last_request_text.get_current_line_ls_offset(),
+                self._last_request_text.get_current_column_ls_offset(),
+            )
 
         if uri != self._last_request_uri or position != self._last_request_position:
-            # situation has changed, information is obsolete
+            logger.warning("Got outdated SignatureHelp response: %r", response)
             return
-
-        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
 
         if response.get_error():
             self._hide_box()
@@ -189,12 +203,12 @@ class Calltipper:
         result = response.get_result_or_raise()
 
         if not result or not result.signatures:
-            logger.debug("Server gave 0 signatures")
+            logger.info("Server gave 0 signatures")
             self._hide_box()
         else:
             if not self._calltip_box:
                 self._calltip_box = CalltipBox(self)
-            self._calltip_box.present_signatures(text, result)
+            self._calltip_box.present_signatures(self._last_request_text, result)
 
     def _on_autocomplete_insertion(self, event=None):
         text = get_active_text_widget()
