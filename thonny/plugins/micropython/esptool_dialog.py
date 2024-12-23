@@ -97,7 +97,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         x0_target_description = (
             "for CircuitPython and some variants of MicroPython"
             if self.firmware_name == "CircuitPython"
-                else "for MicroPython on ESP8266, ESP32-S3, ESP32-C3, ESP32-C6"
+            else "for MicroPython on ESP8266, ESP32-S3, ESP32-C3, ESP32-C6"
         )
         x1000_target_description = "for MicroPython on ESP32 and ESP32-S2"
         address_mapping = {

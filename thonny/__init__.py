@@ -1,8 +1,8 @@
 import logging
 import os.path
+import re
 import sys
 import time
-import re
 from logging import getLogger
 from typing import TYPE_CHECKING, List, Optional, cast
 
@@ -52,9 +52,11 @@ _last_module_count = 0
 _last_modules = set()
 _last_time = time.time()
 
+
 def remove_weird_characters(input_string: str) -> str:
-    cleaned_string = re.sub(r'[^a-z]', '', input_string)
+    cleaned_string = re.sub(r"[^a-z]", "", input_string)
     return cleaned_string
+
 
 def report_time(label: str) -> None:
     """
