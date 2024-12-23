@@ -97,6 +97,7 @@ class CompletionsBox(EditorInfoBox):
         row, column = editor_helpers.get_cursor_position(text)
         if isinstance(text, ShellText):
             row -= text.get_current_line_ls_offset()
+            column -= text.get_current_column_ls_offset()
 
         get_workbench().event_generate(
             "AutocompleteProposal",
@@ -488,7 +489,7 @@ class Completer:
             text.send_changes_to_language_server()
             uri = text.get_ls_uri()
             position = editor_helpers.get_cursor_ls_position(
-                text, text.get_current_line_ls_offset()
+                text, text.get_current_line_ls_offset(), text.get_current_column_ls_offset()
             )
         else:
             editor = get_workbench().get_editor_notebook().get_current_editor()

@@ -285,11 +285,16 @@ def get_text_filename(text: SyntaxText) -> Optional[str]:
     return None
 
 
-def get_cursor_ls_position(text: SyntaxText, line_offset: int = 0) -> lsp_types.Position:
+def get_cursor_ls_position(
+    text: SyntaxText, cursor_line_offset: int = 0, cursor_column_offset: int = 0
+) -> lsp_types.Position:
     row, col = get_cursor_position(text)
+    row += cursor_line_offset
+    col += cursor_column_offset
+
     # TODO: convert char position to UFT-16 items
     logger.warning("NB! convert to UTF-16 points")
-    return lsp_types.Position(line=row + line_offset - 1, character=col)
+    return lsp_types.Position(line=row - 1, character=col)
 
 
 def get_relevant_source_and_cursor_position(text: SyntaxText) -> Tuple[str, int, int]:

@@ -1813,6 +1813,18 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         num_preceding_lines_in_ls = len(self._context_lines_for_language_server)
         return num_preceding_lines_in_ls - num_preceding_lines_in_shell
 
+    def get_current_column_ls_offset(self) -> int:
+        """
+        Returns:
+            a negative integer if the line starts with non-input characters (e.g. prompt)
+        """
+        input_start_line, input_start_col = map(int, self.index("input_start").split("."))
+        current_line = int(float(self.index("insert")))
+        if current_line == input_start_line:
+            return -input_start_col
+
+        return 0
+
 
 class ShellText(BaseShellText):
     def __init__(self, master, view, **kw):
