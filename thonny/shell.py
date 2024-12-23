@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import pathlib
 import re
 import tkinter as tk
 import traceback
@@ -10,7 +11,16 @@ from logging import getLogger
 from tkinter import ttk
 from typing import List, Optional, cast
 
-from thonny import get_runner, get_shell, get_workbench, memory, roughparse, running, ui_utils
+from thonny import (
+    get_runner,
+    get_shell,
+    get_workbench,
+    lsp_types,
+    memory,
+    roughparse,
+    running,
+    ui_utils,
+)
 from thonny.codeview import SyntaxText, get_syntax_options_for_tag, perform_python_return
 from thonny.common import (
     OBJECT_LINK_END,
@@ -23,6 +33,18 @@ from thonny.common import (
 )
 from thonny.custom_notebook import CustomNotebook
 from thonny.languages import tr
+from thonny.lsp_proxy import LanguageServerProxy
+from thonny.lsp_types import (
+    DidChangeTextDocumentParams,
+    DidCloseTextDocumentParams,
+    DidOpenTextDocumentParams,
+    Position,
+    Range,
+    RangedTextDocumentContentChangeEvent,
+    TextDocumentIdentifier,
+    TextDocumentItem,
+    VersionedTextDocumentIdentifier,
+)
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line
 from thonny.running import EDITOR_CONTENT_TOKEN
 from thonny.tktextext import TextFrame, TweakableText, index2line
@@ -354,6 +376,12 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         )  # actually not really history, because each command occurs only once
         self._command_history_current_index = None
 
+        self._last_ls_cwd: str = get_workbench().get_local_cwd()
+        self._last_ls_uri: Optional[lsp_types.URI] = None
+        self._last_ls_version: Optional[int] = None
+        self._context_lines_for_language_server: List[str] = []
+        self._session_num_executed_lines_sent_to_ls: int = 0
+
         # logs of IO events for current toplevel block
         # (enables undoing and redoing the events)
         self._applied_io_events = []
@@ -483,6 +511,13 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         was_scrolled_to_end = self.is_scrolled_to_end()
+        if "source_for_language_server" in msg:
+            self._context_lines_for_language_server += msg["source_for_language_server"].splitlines(
+                keepends=True
+            )
+            if not self._context_lines_for_language_server[-1].endswith("\n"):
+                self._context_lines_for_language_server[-1] += os.linesep
+
         if msg.get("error"):
             self._ensure_visible()
 
@@ -972,6 +1007,11 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.see("end")
         get_shell().set_osc_title("")
 
+        self._last_ls_uri = None
+        self._last_ls_version = None
+        self._context_lines_for_language_server = []
+        self._session_num_executed_lines_sent_to_ls = 0
+
     def intercept_insert(self, index, chars, tags=None, **kw):
         if tags is None:
             tags = ()
@@ -1141,7 +1181,10 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
     def has_pending_input(self):
         pending = self.get("input_start", "end-1c")
-        return bool(pending)
+        return bool(self.get_pending_input())
+
+    def get_pending_input(self) -> str:
+        return self.get("input_start", "end-1c")
 
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
@@ -1668,6 +1711,107 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             return None
 
         return ExecutionInfo(command_line, io_start_index, io_end_index)
+
+    def get_ls_uri(self) -> str:
+        proxy = get_runner().get_backend_proxy()
+        assert proxy is not None
+
+        if not proxy.has_local_interpreter():
+            raise NotImplementedError("TODO")
+        else:
+            path = os.path.join(proxy.get_cwd(), "__shell_virtual_file__.py")
+
+        return pathlib.Path(path).as_uri()
+
+    def send_changes_to_language_server(self) -> None:
+        ls_proxy = get_workbench().get_language_server_proxy()
+        if ls_proxy is None:
+            return
+
+        proxy = get_runner().get_backend_proxy()
+        if proxy is None:
+            self._context_lines_for_language_server_are_sent_to_ls = False
+            return
+
+        ls_uri = self.get_ls_uri()
+        if ls_uri != self._last_ls_uri:
+            if self._last_ls_uri is not None:
+                ls_proxy.notify_did_close_text_document(
+                    DidCloseTextDocumentParams(TextDocumentIdentifier(uri=self._last_ls_uri))
+                )
+                self._session_num_executed_lines_sent_to_ls = 0
+
+            version = 1
+            ls_proxy.notify_did_open_text_document(
+                DidOpenTextDocumentParams(
+                    textDocument=TextDocumentItem(
+                        version=version,
+                        uri=ls_uri,
+                        text="".join(self._context_lines_for_language_server),
+                        languageId="python",
+                    )
+                )
+            )
+            self._last_ls_version = version
+            self._last_ls_uri = ls_uri
+            self._session_num_executed_lines_sent_to_ls = len(
+                self._context_lines_for_language_server
+            )
+
+        if self._session_num_executed_lines_sent_to_ls < len(
+            self._context_lines_for_language_server
+        ):
+            self._replace_suffix_at_ls(
+                ls_proxy,
+                self._session_num_executed_lines_sent_to_ls,
+                "".join(
+                    self._context_lines_for_language_server[
+                        self._session_num_executed_lines_sent_to_ls :
+                    ]
+                ),
+            )
+            self._session_num_executed_lines_sent_to_ls = len(
+                self._context_lines_for_language_server
+            )
+
+        self._replace_suffix_at_ls(
+            ls_proxy, self._session_num_executed_lines_sent_to_ls, self.get_pending_input()
+        )
+
+    def _replace_suffix_at_ls(
+        self, ls_proxy: LanguageServerProxy, unchanged_line_count: int, suffix_text: str
+    ) -> None:
+        version = self._last_ls_version + 1
+        ls_proxy.notify_did_change_text_document(
+            DidChangeTextDocumentParams(
+                textDocument=VersionedTextDocumentIdentifier(
+                    version=version, uri=self.get_ls_uri()
+                ),
+                contentChanges=[
+                    RangedTextDocumentContentChangeEvent(
+                        range=Range(
+                            start=Position(line=unchanged_line_count, character=0),
+                            end=Position(
+                                line=unchanged_line_count + len(suffix_text.splitlines()),
+                                character=0,
+                            ),
+                        ),
+                        text=suffix_text,
+                    )
+                ],
+            )
+        )
+        self._last_ls_version = version
+
+    def get_current_line_ls_offset(self) -> int:
+        """
+        Returns:
+            Difference between current line position in ls_source and shell's current content
+        """
+        input_start_line = int(float(self.index("input_start")))
+        num_preceding_lines_in_shell = input_start_line - 1
+        num_preceding_lines_in_ls = len(self._context_lines_for_language_server)
+        return num_preceding_lines_in_ls - num_preceding_lines_in_shell
 
 
 class ShellText(BaseShellText):

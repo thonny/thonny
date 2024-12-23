@@ -250,6 +250,10 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
                     % " ".join(map(shlex.quote, args[1:]))
                 )
             args = ["-c", cmd.source]
+            source = cmd.source
+        else:
+            logger.info("Omitting source_for_langage_server, as it is not readily available")
+            source = None
 
         self._connection = self._create_connection(args)
         report_time("afconn")
@@ -261,6 +265,11 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
         report_time("beffhelp")
         self._prepare_after_soft_reboot()
         report_time("affhelp")
+
+        if source is not None:
+            return {"source_for_language_server": source}
+        else:
+            return {}
 
     def _cmd_execute_system_command(self, cmd):
         assert cmd.cmd_line.startswith("!")

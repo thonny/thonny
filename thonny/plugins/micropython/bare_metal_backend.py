@@ -1070,7 +1070,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             self._execute(source, capture_output=False)
             if restart_interpreter_before_run:
                 self._prepare_after_soft_reboot(False)
-        return {}
+
+            return {"source_for_language_server": cmd["source"]}
+        else:
+            return {}
 
     def _cmd_execute_system_command(self, cmd):
         # Can't use stdin, because a thread is draining it

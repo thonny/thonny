@@ -818,9 +818,11 @@ class MainCPythonBackend(MainBackend):
         self._current_executor = executor_class(self, cmd)
         report_time("Done creating executor")
         try:
-            return self._current_executor.execute_source(
+            result = self._current_executor.execute_source(
                 source, filename, execution_mode, ast_postprocessors
             )
+            result["source_for_language_server"] = source
+            return result
         except SystemExit as e:
             sys.exit(e.code)
         finally:

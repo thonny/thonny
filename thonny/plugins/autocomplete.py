@@ -3,13 +3,14 @@ from logging import getLogger
 from tkinter import messagebox
 from typing import List, Optional, Union, cast
 
-from thonny import editor_helpers, get_runner, get_workbench, lsp_types
+from thonny import editor_helpers, get_runner, get_shell, get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
 from thonny.editor_helpers import DocuBox, EditorInfoBox
+from thonny.editors import Editor
 from thonny.languages import tr
 from thonny.lsp_types import CompletionItem, CompletionParams, LspResponse, TextDocumentIdentifier
 from thonny.misc_utils import running_on_mac_os
-from thonny.shell import ShellText
+from thonny.shell import ShellText, ShellView
 from thonny.ui_utils import (
     alt_is_pressed_without_char,
     command_is_pressed,
@@ -94,6 +95,9 @@ class CompletionsBox(EditorInfoBox):
 
         # broadcast logging info
         row, column = editor_helpers.get_cursor_position(text)
+        if isinstance(text, ShellText):
+            row -= text.get_current_line_ls_offset()
+
         get_workbench().event_generate(
             "AutocompleteProposal",
             text_widget=text,
@@ -366,6 +370,7 @@ class Completer:
     """
 
     def __init__(self):
+        self._last_request_text: Optional[SyntaxText] = None
         logger.debug("Creating Completer")
         self._completions_box: Optional[CompletionsBox] = None
 
@@ -390,11 +395,6 @@ class Completer:
     def _should_open_box_automatically(self, event):
         assert isinstance(event.widget, tk.Text)
         if not get_workbench().get_option("edit.automatic_completions"):
-            return False
-
-        # Don't autocomplete in remote shells
-        proxy = get_runner().get_backend_proxy()
-        if isinstance(event.widget, ShellText) and (not proxy or not proxy.has_local_interpreter()):
             return False
 
         # Don't autocomplete inside comments
@@ -480,27 +480,33 @@ class Completer:
         ls_proxy = get_workbench().get_language_server_proxy()
         if ls_proxy is None:
             return
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor.get_text_widget() is not text:
-            # TODO: handle shell completions
-            return
 
         ls_proxy.unbind_request_handler(self._handle_completions_response)
-        # TODO: cancel last unhandled request?
+        # TODO: cancel last unhandled request
 
-        editor_uri = editor.get_uri()
-        if editor_uri is None:
+        if isinstance(text, ShellText):
+            text.send_changes_to_language_server()
+            uri = text.get_ls_uri()
+            position = editor_helpers.get_cursor_ls_position(
+                text, text.get_current_line_ls_offset()
+            )
+        else:
+            editor = get_workbench().get_editor_notebook().get_current_editor()
+            if editor.get_text_widget() is not text:
+                logger.warning("Unexpected completions request in %r", text)
+                return
+
+            editor.send_changes_to_language_server()
+            uri = editor.get_uri()
+            position = editor_helpers.get_cursor_ls_position(text)
+
+        if uri is None:
             # TODO:
             return
 
-        editor.send_changes_to_language_server()
-
-        position = editor_helpers.get_cursor_ls_position(text)
-
+        self._last_request_text = text
         ls_proxy.request_completion(
-            CompletionParams(
-                textDocument=TextDocumentIdentifier(uri=editor_uri), position=position
-            ),
+            CompletionParams(textDocument=TextDocumentIdentifier(uri=uri), position=position),
             self._handle_completions_response,
         )
 
@@ -516,6 +522,10 @@ class Completer:
             messagebox.showerror("Autocomplete error", error.message, master=get_workbench())
             return
 
+        if not self._last_request_text:
+            logger.warning("Completions response without _last_request_text")
+            return
+
         result = response.get_result_or_raise()
         completions: List[lsp_types.CompletionItem]
         if isinstance(result, list):
@@ -529,12 +539,6 @@ class Completer:
 
         assert not item_defaults
 
-        text = editor_helpers.get_active_text_widget()
-        if not text:
-            return
-
-        source, row, column = editor_helpers.get_relevant_source_and_cursor_position(text)
-
         if len(completions) == 0:
             # the user typed something which is not completable
             self._close_box()
@@ -542,7 +546,7 @@ class Completer:
         else:
             if not self._completions_box:
                 self._completions_box = CompletionsBox(self)
-            self._completions_box.present_completions(text, completions)
+            self._completions_box.present_completions(self._last_request_text, completions)
 
     def patched_perform_midline_tab(self, event):
         self.cancel_active_request()
