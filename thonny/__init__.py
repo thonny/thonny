@@ -250,7 +250,11 @@ def configure_backend_logging() -> None:
 
 
 def get_backend_log_file():
-    return os.path.join(get_thonny_user_dir(), "backend.log")
+    file_name = "backend.log"
+    if any(var in os.environ for var in ["SSH_CLIENT", "SSH_TTY", "SSH_CONNECTION"]):
+        file_name = "ssh_" + file_name
+
+    return os.path.join(get_thonny_user_dir(), file_name)
 
 
 def configure_logging(log_file, console_level=None):

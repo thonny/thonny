@@ -195,6 +195,7 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             thonny.ast_utils.__file__,
             thonny.jedi_utils.__file__,
             thonny.backend.__file__,
+            thonny.backend.__file__.replace("backend.py", "VERSION"),
             thonny.plugins.cpython_backend.__file__,
             thonny.plugins.cpython_backend.cp_back.__file__,
             thonny.plugins.cpython_backend.cp_back.__file__.replace("cp_back.py", "cp_launcher.py"),
