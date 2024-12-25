@@ -734,26 +734,26 @@ class Editor(BaseEditor):
         for change in self._unpublished_incremental_changes:
             if change["sequence"] == "TextInsert":
                 insertion_line = int(float(change["index"]))
-                num_lines_added = change["text"].count("\n")
+                num_linebreaks_added = change["text"].count("\n")
 
                 clean_prefix_end_line = min(clean_prefix_end_line, insertion_line)
                 clean_suffix_start_line = (
-                    max(clean_suffix_start_line, insertion_line + 1) + num_lines_added
+                    max(clean_suffix_start_line, insertion_line + 1) + num_linebreaks_added
                 )
 
-                line_count_delta += num_lines_added
+                line_count_delta += num_linebreaks_added
             else:
                 assert change["sequence"] == "TextDelete"
                 del_start_line = int(float(change["index1"]))
                 del_end_line = int(float(change["index2"]))
-                num_lines_deleted = del_end_line - del_start_line
+                num_linebreaks_deleted = del_end_line - del_start_line
 
                 clean_prefix_end_line = min(clean_prefix_end_line, del_start_line)
                 clean_suffix_start_line = (
-                    max(clean_suffix_start_line, del_start_line + 1) - num_lines_deleted
+                    max(clean_suffix_start_line, del_start_line + 1) - num_linebreaks_deleted
                 )
 
-                line_count_delta -= num_lines_deleted
+                line_count_delta -= num_linebreaks_deleted
 
         # LSP uses 0-based line numbers, hence -1
         orig_zero_based_range_start_line = clean_prefix_end_line - 1
