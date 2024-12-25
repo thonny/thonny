@@ -750,7 +750,7 @@ class Editor(BaseEditor):
 
                 clean_prefix_end_line = min(clean_prefix_end_line, del_start_line)
                 clean_suffix_start_line = (
-                    max(clean_suffix_start_line, del_start_line + 1) - num_linebreaks_deleted
+                    max(clean_suffix_start_line - num_linebreaks_deleted, del_start_line + 1)
                 )
 
                 line_count_delta -= num_linebreaks_deleted
