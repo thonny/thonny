@@ -430,7 +430,7 @@ class MainCPythonBackend(MainBackend):
             in_venv=running_in_virtual_environment(),
             python_version=get_python_version_string(),
             cwd=os.getcwd(),
-            logfile=thonny.get_backend_log_file()
+            logfile=thonny.get_backend_log_file(),
         )
 
     def _cmd_cd(self, cmd):
