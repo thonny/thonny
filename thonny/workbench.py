@@ -287,30 +287,31 @@ class Workbench(tk.Tk):
         if not self._have_seen_visibility_events:
             self._have_seen_visibility_events = True
             logger.info("First <Visibility> event")
+            self.update_idletasks()
             self.after_idle(self.finalize_startup)
 
     def finalize_startup(self):
         logger.info("Finalizing startup")
-        self.ready = True
-        self._editor_notebook.update_appearance()
-        if self._configuration_manager.error_reading_existing_file:
-            messagebox.showerror(
-                "Problem",
-                f"Previous configuration could not be read:\n\n"
-                f"{self._configuration_manager.error_reading_existing_file}).\n\n"
-                "Using default settings",
-                master=self,
-            )
-        self._editor_notebook.load_previous_files()
-        self._load_stuff_from_command_line(self._initial_args)
-        self._editor_notebook.focus_set()
-        self.event_generate("WorkbenchReady")
-        self.poll_events()
         try:
+            self.ready = True
+            self._editor_notebook.update_appearance()
+            if self._configuration_manager.error_reading_existing_file:
+                messagebox.showerror(
+                    "Problem",
+                    f"Previous configuration could not be read:\n\n"
+                    f"{self._configuration_manager.error_reading_existing_file}).\n\n"
+                    "Using default settings",
+                    master=self,
+                )
+            self._editor_notebook.load_previous_files()
+            self._load_stuff_from_command_line(self._initial_args)
+            self._editor_notebook.focus_set()
+            self.event_generate("WorkbenchReady")
+            self.poll_events()
             self.start_or_restart_language_server()
         except Exception:
-            logger.exception("Could not start language server")
-            # self.report_exception() # would hang, at least on macOS TODO
+            logger.exception("Exception while finalizing startup")
+            self.report_exception()
 
     def poll_events(self) -> None:
         if self._event_queue is None or self._closing:
