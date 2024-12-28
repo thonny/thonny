@@ -17,6 +17,7 @@ from thonny.custom_notebook import CustomNotebook
 from thonny.editors import BaseEditor
 from thonny.languages import tr
 from thonny.misc_utils import (
+    PLACEHOLDER_URI,
     format_date_compact,
     format_time_compact,
     get_menu_char,
@@ -703,7 +704,9 @@ class ReplayerCodeView(ttk.Frame):
 
 class ReplayerEditor(BaseEditor):
     def __init__(self, master):
-        super().__init__(master, propose_remove_line_numbers=False, suppress_events=True)
+        super().__init__(
+            master, uri=PLACEHOLDER_URI, propose_remove_line_numbers=False, suppress_events=True
+        )
         self._code_view.text.set_read_only(True)
         self.update_appearance()
 

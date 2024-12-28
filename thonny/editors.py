@@ -78,8 +78,10 @@ class EditorCodeViewText(CodeViewText):
 
 
 class BaseEditor(ttk.Frame):
-    def __init__(self, master, propose_remove_line_numbers: bool, suppress_events: bool = False):
-        self._uri: str = PLACEHOLDER_URI
+    def __init__(
+        self, master, uri: str, propose_remove_line_numbers: bool, suppress_events: bool = False
+    ):
+        self._uri: str = uri
 
         ttk.Frame.__init__(self, master)
 
@@ -177,10 +179,9 @@ class BaseEditor(ttk.Frame):
 class Editor(BaseEditor):
     def __init__(self, master: "EditorNotebook", uri: str = PLACEHOLDER_URI):
         # initial uri is used when the editor is created for non-existent file
-        self._uri = uri
         self._ls_proxy: Optional[LanguageServerProxy] = None
         self.containing_notebook: EditorNotebook = master
-        super().__init__(master, propose_remove_line_numbers=True)
+        super().__init__(master, uri, propose_remove_line_numbers=True)
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
         )
@@ -205,6 +206,9 @@ class Editor(BaseEditor):
         get_workbench().bind("LanguageServerInvalidated", self._language_server_invalidated, True)
 
         self.update_appearance()
+
+        if self._uri != PLACEHOLDER_URI:
+            self._try_connect_to_language_server()
 
     def get_content(self, up_to_end=False) -> str:
         return self._code_view.get_content(up_to_end=up_to_end)
