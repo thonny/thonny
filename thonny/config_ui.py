@@ -1,3 +1,4 @@
+import re
 import sys
 import tkinter as tk
 import warnings
@@ -13,6 +14,8 @@ from thonny.ui_utils import CommonDialog, MappingCombobox, create_url_label, ems
 logger = getLogger(__name__)
 
 LABEL_PADDING_EMS = 1
+
+_regex_validators: Dict[str, Any] = {}
 
 
 class ConfigurationDialog(CommonDialog):
@@ -339,6 +342,7 @@ def add_option_entry(
     entry_columnspan: int = 1,
     entry_pady: Union[Tuple, int, str, None] = None,
     entry_padx: Union[Tuple, int, str] = 0,
+    regex: Optional[str] = None,
     tooltip: Optional[str] = None,
 ) -> ttk.Entry:
     if row is None:
@@ -356,11 +360,13 @@ def add_option_entry(
     )
 
     variable = get_workbench().get_variable(option_name)
-    entry = ttk.Entry(
-        master,
-        textvariable=variable,
-        width=width,
+
+    validation_args = (
+        {}
+        if regex is None
+        else {"validate": "all", "validatecommand": (get_regex_validator(regex), "%P")}
     )
+    entry = ttk.Entry(master, textvariable=variable, width=width, **validation_args)
     widget = _check_bundle_with_tooltip_icon(entry, tooltip)
     widget.grid(
         row=row,
@@ -550,3 +556,14 @@ def add_vertical_separator(
     frame.grid(row=row, column=column)
 
     return frame
+
+
+def get_regex_validator(regex: str) -> Any:
+    if regex not in _regex_validators:
+
+        def validate(s: str) -> bool:
+            return bool(re.fullmatch(regex, s))
+
+        _regex_validators[regex] = get_workbench().register(validate)
+
+    return _regex_validators[regex]
