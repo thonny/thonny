@@ -28,15 +28,8 @@ Plus any modules on the filesystem
 
 """
 
-from tkinter import ttk
-
 from thonny import get_workbench
-from thonny.config_ui import (
-    add_label_and_text,
-    add_label_and_url,
-    add_text_row,
-    add_vertical_separator,
-)
+from thonny.config_ui import add_label_and_text, add_label_and_url, add_vertical_separator
 from thonny.languages import tr
 from thonny.misc_utils import running_on_windows
 from thonny.plugins.micropython import (
@@ -44,7 +37,6 @@ from thonny.plugins.micropython import (
     SshMicroPythonProxy,
     add_micropython_backend,
 )
-from thonny.ui_utils import create_url_label, ems_to_pixels
 
 
 class EV3MicroPythonProxy(SshMicroPythonProxy):
@@ -55,6 +47,7 @@ class EV3MicroPythonProxy(SshMicroPythonProxy):
             "cwd": get_workbench().get_option(f"{self.backend_name}.cwd") or "",
             "interpreter": self._target_executable,
             "host": self._host,
+            "port": self._port,
             "user": self._user,
         }
 
@@ -104,5 +97,6 @@ def load_plugin():
     get_workbench().set_default(
         "EV3MicroPython.host", "ev3dev" if running_on_windows() else "ev3dev.local"
     )
+    get_workbench().set_default("EV3MicroPython.port", "22")
     get_workbench().set_default("EV3MicroPython.user", "robot")
     get_workbench().set_default("EV3MicroPython.auth_method", "password")

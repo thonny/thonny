@@ -359,7 +359,13 @@ class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args):
         password = sys.stdin.readline().strip("\r\n")
         SshMixin.__init__(
-            self, args["host"], args["user"], password, args["interpreter"], args.get("cwd")
+            self,
+            args["host"],
+            args["port"],
+            args["user"],
+            password,
+            args["interpreter"],
+            args.get("cwd"),
         )
         self._interpreter_launcher = args.get("interpreter_launcher", [])
         UnixMicroPythonBackend.__init__(self, args)

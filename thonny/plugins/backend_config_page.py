@@ -196,6 +196,13 @@ class BaseSshProxyConfigPage(TabbedBackendDetailsConfigurationPage):
 
         add_option_entry(self.connection_page, self.backend_name + ".host", tr("Host"), width=20)
         add_option_entry(
+            self.connection_page,
+            self.backend_name + ".port",
+            tr("Port"),
+            width=4,
+            regex=r"[0-9]{0,5}",
+        )
+        add_option_entry(
             self.connection_page, self.backend_name + ".user", tr("Username"), width=20
         )
 

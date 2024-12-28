@@ -12,6 +12,7 @@ from thonny.running import SubprocessProxy
 class SshCPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option("SshCPython.host")
+        self._port = get_workbench().get_option("SshCPython.port")
         self._user = get_workbench().get_option("SshCPython.user")
         self._target_executable = get_workbench().get_option("SshCPython.executable")
 
@@ -37,6 +38,7 @@ class SshCPythonProxy(SubprocessProxy):
             repr(
                 {
                     "host": self._host,
+                    "port": self._port,
                     "user": self._user,
                     "interpreter": self._target_executable,
                     "cwd": self._get_initial_cwd(),

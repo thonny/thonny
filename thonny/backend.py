@@ -761,13 +761,14 @@ class RemoteProcess:
 
 
 class SshMixin(UploadDownloadMixin):
-    def __init__(self, host, user, password, interpreter, cwd):
+    def __init__(self, host, port, user, password, interpreter, cwd):
         # UploadDownloadMixin.__init__(self)
         execute_with_frontend_sys_path(self._try_load_paramiko)
         import paramiko
         from paramiko.client import AutoAddPolicy, SSHClient
 
         self._host = host
+        self._port = port
         self._user = user
         self._password = password
         self._target_interpreter = interpreter
@@ -798,6 +799,7 @@ class SshMixin(UploadDownloadMixin):
         try:
             self._client.connect(
                 hostname=self._host,
+                port=int(self._port) if self._port else 22,
                 username=self._user,
                 password=self._password,
                 passphrase=self._password,

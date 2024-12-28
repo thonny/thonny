@@ -36,11 +36,11 @@ logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
 
 class SshCPythonBackend(BaseBackend, SshMixin):
-    def __init__(self, host, user, interpreter, cwd, main_backend_options: Dict[str, Any]):
+    def __init__(self, host, port, user, interpreter, cwd, main_backend_options: Dict[str, Any]):
         logger.info("Starting mediator for %s @ %s", user, host)
         self._main_backend_options = main_backend_options
         password = sys.stdin.readline().strip("\r\n")
-        SshMixin.__init__(self, host, user, password, interpreter, cwd)
+        SshMixin.__init__(self, host, port, user, password, interpreter, cwd)
         self._upload_main_backend()
         self._proc = self._start_main_backend()
         self._main_backend_is_fresh = True

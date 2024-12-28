@@ -5,6 +5,7 @@ from thonny.plugins.cpython_ssh.cps_front import SshCPythonProxy, SshProxyConfig
 
 def load_plugin():
     get_workbench().set_default("SshCPython.host", "")
+    get_workbench().set_default("SshCPython.port", "22")
     get_workbench().set_default("SshCPython.user", "")
     get_workbench().set_default("SshCPython.auth_method", "password")
     get_workbench().set_default("SshCPython.executable", "python3")

@@ -1315,6 +1315,7 @@ class LocalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 class SshMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
         self._host = get_workbench().get_option(f"{self.backend_name}.host")
+        self._port = get_workbench().get_option(f"{self.backend_name}.port")
         self._user = get_workbench().get_option(f"{self.backend_name}.user")
         self._target_executable = get_workbench().get_option(f"{self.backend_name}.executable")
 
@@ -1327,6 +1328,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "cwd": get_workbench().get_option(f"{self.backend_name}.cwd") or "",
             "interpreter": self._target_executable,
             "host": self._host,
+            "port": self._port,
             "user": self._user,
             "user_stubs_location": self.get_user_stubs_location(),
         }
