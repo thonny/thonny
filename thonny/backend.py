@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import _thread
 import io
 import os.path
 import pathlib
@@ -32,7 +31,6 @@ from thonny.common import (  # TODO: try to get rid of this
     ToplevelResponse,
     UserError,
     execute_with_frontend_sys_path,
-    is_local_path,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,

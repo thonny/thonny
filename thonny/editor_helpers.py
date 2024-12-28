@@ -274,17 +274,6 @@ def get_cursor_position(text: SyntaxText) -> Tuple[int, int]:
     return int(parts[0]), int(parts[1])
 
 
-def get_text_filename(text: SyntaxText) -> Optional[str]:
-    if isinstance(text, ShellText):
-        return "<Shell>"
-    elif isinstance(text, CodeViewText):
-        editor = text.master.master
-        if isinstance(editor, Editor):
-            return editor.get_filename()
-
-    return None
-
-
 def get_cursor_ls_position(
     text: SyntaxText, cursor_line_offset: int = 0, cursor_column_offset: int = 0
 ) -> lsp_types.Position:

@@ -1,22 +1,13 @@
-import os.path
-import threading
 import tkinter.font as tk_font
 from logging import getLogger
 from typing import List, Optional
 
 from thonny import get_workbench
 from thonny.codeview import get_syntax_options_for_tag
-from thonny.common import (
-    REMOTE_URI_PREFIX,
-    ToplevelResponse,
-    editor_path_matches_uri,
-    file_uri_to_path,
-)
-from thonny.editors import make_remote_path
 from thonny.languages import tr
 from thonny.lsp_proxy import LanguageServerProxy
 from thonny.lsp_types import Diagnostic, PublishDiagnosticsParams
-from thonny.program_analysis import ProgramAnalyzer, ProgramAnalyzerResponseItem
+from thonny.misc_utils import is_editor_supported_uri, is_local_uri, uri_to_long_title
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import ems_to_pixels, get_hyperlink_cursor
 
@@ -28,14 +19,12 @@ ITEM_PREFIX = " • "
 class ProblemsView(TextFrame):
     def __init__(self, master):
         super().__init__(master, horizontal_scrollbar=False, wrap="word", font="TkDefaultFont")
-        self._analyzers: List[ProgramAnalyzer] = []
 
         self._ls_proxy: Optional[LanguageServerProxy] = None
 
         get_workbench().bind("LanguageServerInitialized", self._language_server_initialized, True)
         get_workbench().bind("LanguageServerInvalidated", self._language_server_invalidated, True)
 
-        get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         base_font = tk_font.nametofont("TkDefaultFont")
         link_font = tk_font.nametofont("LinkFont")
         self.text.tag_configure("path", spacing3=ems_to_pixels(0.3))
@@ -55,27 +44,6 @@ class ProblemsView(TextFrame):
         self.text.tag_bind("link", "<Leave>", self._hyperlink_leave)
         self.text.tag_bind("link", "<ButtonRelease-1>", self._hyperlink_click)
 
-    def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
-        if msg.get("filename") and os.path.exists(msg["filename"]):
-            self.start_analyses(msg["filename"])
-
-    def start_analyses(self, main_file_path: str) -> None:
-        for analyzer in self._analyzers:
-            analyzer.cancel()
-
-        self._analyzers = [
-            analyzer
-            for name, analyzer in get_workbench().program_analyzers.items()
-            if get_workbench().get_option(f"analysis.{name}.enabled")
-        ]
-
-        for analyzer in self._analyzers:
-            threading.Thread(
-                target=analyzer.analyze,
-                daemon=True,
-                args=(main_file_path,),
-            ).start()
-
     def _hyperlink_enter(self, event):
         self.text.config(cursor=get_hyperlink_cursor())
 
@@ -89,7 +57,7 @@ class ProblemsView(TextFrame):
             return
 
         for tag in self.text.tag_names(index):
-            if "thonny-editor://" in tag:
+            if is_editor_supported_uri(tag):
                 get_workbench().open_url(tag)
 
     def _remove_uri_block(self, uri: str) -> None:
@@ -103,48 +71,43 @@ class ProblemsView(TextFrame):
         self.text.direct_delete(start, end)
 
     def _add_uri_block(self, uri: str, diagnostics: List[Diagnostic]) -> None:
-        this_target_path = file_uri_to_path(uri)
-        if uri.startswith(REMOTE_URI_PREFIX):
-            this_path = make_remote_path(this_target_path)
-        else:
-            this_path = this_target_path
 
-        next_path_start = "1.0"
+        this_title = uri_to_long_title(uri)
+
+        next_title_start = "1.0"
         while True:
-            indices = self.text.tag_nextrange("path", next_path_start)
+            indices = self.text.tag_nextrange("path", next_title_start)
             if not indices:
-                next_path_start = "end"
+                next_title_start = "end"
                 break
 
-            next_path_start, next_path_end = indices
-            next_path = self.text.get(next_path_start, next_path_end)
+            next_title_start, next_title_end = indices
+            next_title = self.text.get(next_title_start, next_title_end)
 
-            if this_path < next_path:
+            if this_title < next_title:
                 break
             else:
-                next_path_start = next_path_end
+                next_title_start = next_title_end
 
-        self._insert_uri_block(uri, this_path, diagnostics, next_path_start)
+        self._insert_uri_block(uri, this_title, diagnostics, next_title_start)
 
     def _insert_uri_block(
-        self, uri: str, path: str, diagnostics: List[Diagnostic], start_index
+        self, uri: str, title: str, diagnostics: List[Diagnostic], start_index
     ) -> None:
         mark = "insertion_point"
 
         def append(chars, extra_tags=()):
             self.text.direct_insert(mark, chars, (uri,) + extra_tags)
 
-        def append_file_link(
-            text: str, target_path: str, target_line: Optional[int], extra_tags=()
-        ):
-            url = f"thonny-editor://{target_path}"
+        def append_editor_link(text: str, uri: str, target_line: Optional[int], extra_tags=()):
+            url = uri
             if target_line is not None:
                 url += f"#{target_line}"
 
             append(text, ("link", url) + extra_tags)
 
         self.text.mark_set(mark, start_index)
-        append_file_link(path, path, None, ("path",))
+        append_editor_link(title, uri, None, ("path",))
         append("\n")
 
         for diagnostic in diagnostics:
@@ -153,7 +116,7 @@ class ProblemsView(TextFrame):
             first_line_tags = ("diagnostics_first_line",)
             append(ITEM_PREFIX, first_line_tags)
             line = diagnostic.range.start.line + 1  # LSP uses 0-based numbering
-            append_file_link(tr("Line") + f" {line}", path, line, first_line_tags)
+            append_editor_link(tr("Line") + f" {line}", uri, line, first_line_tags)
             append(" : ", first_line_tags)
             append(message_lines[0] + "\n", first_line_tags)
             for line in message_lines[1:]:

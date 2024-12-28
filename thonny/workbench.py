@@ -37,7 +37,7 @@ from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
 from thonny.custom_notebook import CustomNotebook, CustomNotebookPage
-from thonny.editors import Editor, EditorNotebook, is_local_path
+from thonny.editors import Editor, EditorNotebook
 from thonny.languages import tr
 from thonny.lsp_proxy import LanguageServerProxy
 from thonny.lsp_types import (
@@ -70,10 +70,12 @@ from thonny.lsp_types import (
 from thonny.misc_utils import (
     copy_to_clipboard,
     get_menu_char,
+    is_editor_supported_uri,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
     running_on_windows,
+    uri_to_legacy_filename,
 )
 from thonny.program_analysis import ProgramAnalyzer
 from thonny.running import BackendProxy, Runner
@@ -508,10 +510,14 @@ class Workbench(tk.Tk):
                 processId=os.getpid(),
                 clientInfo=ClientInfo(name="Thonny", version=thonny.get_version()),
                 locale=self.get_option("general.language"),
-                # workspaceFolders=[WorkspaceFolder(
-                #    uri=pathlib.Path(self.get_local_cwd()).as_uri(),
-                #    name="workspacename"
-                # )],
+                workspaceFolders=[
+                    WorkspaceFolder(
+                        uri="file:///remote/Users/aivarannamaa/python_stuff/uv2", name="remotews"
+                    ),
+                    WorkspaceFolder(
+                        uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
+                    ),
+                ],
             )
         )
 
@@ -2162,7 +2168,11 @@ class Workbench(tk.Tk):
             assert new_notebook is old_notebook
             new_notebook.remember_open_files()
             editor: Editor = page.content
-            self.event_generate("MoveEditor", filename=editor.get_filename())
+            self.event_generate(
+                "MoveEditor",
+                uri=editor.get_uri(),
+                filename=uri_to_legacy_filename(editor.get_uri()),
+            )
         else:
             assert isinstance(new_notebook, ViewNotebook)
             assert isinstance(old_notebook, ViewNotebook)
@@ -2959,9 +2969,8 @@ class Workbench(tk.Tk):
         self.title(title_text)
 
         if running_on_mac_os() and editor is not None:
-            current_file = editor.get_filename()
-            if current_file and is_local_path(current_file) and os.path.exists(current_file):
-                self.wm_attributes("-titlepath", current_file)
+            if editor.is_local() and os.path.exists(editor.get_target_path()):
+                self.wm_attributes("-titlepath", editor.get_target_path())
             else:
                 self.wm_attributes("-titlepath", "")
 
@@ -2989,16 +2998,20 @@ class Workbench(tk.Tk):
         else:
             self.focus_set()
 
-    def open_url(self, url):
-        m = re.match(r"^thonny-editor://(.*?)(#(\d+)(:(\d+))?)?$", url)
-        if m is not None:
-            filename = m.group(1).replace("%20", " ")
-            lineno = None if m.group(3) is None else int(m.group(3))
-            col_offset = None if m.group(5) is None else int(m.group(5))
-            if lineno is None:
-                self.get_editor_notebook().show_file(filename)
-            else:
-                self.get_editor_notebook().show_file_at_line(filename, lineno, col_offset)
+    def open_url(self, url: str) -> None:
+        if is_editor_supported_uri(url):
+            parts = url.rsplit("#", maxsplit=1)
+            if len(parts) == 1:
+                self.get_editor_notebook().show_file(url)
+            elif len(parts) == 2:
+                uri = parts[0]
+                loc_parts = parts[1].split(":")
+                lineno = int(loc_parts[0])
+                if len(loc_parts) > 1:
+                    col_offset = int(loc_parts[1])
+                else:
+                    col_offset = None
+                self.get_editor_notebook().show_file_at_line(uri, lineno, col_offset)
 
             return
 

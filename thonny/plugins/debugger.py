@@ -166,12 +166,11 @@ class SingleWindowDebugger(Debugger):
 
     def get_run_to_cursor_breakpoint(self):
         editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor:
-            filename = editor.get_filename()
+        if editor and editor.is_local():
             selection = editor.get_code_view().get_selected_range()
             lineno = selection.lineno
-            if filename and lineno:
-                return filename, lineno
+            if editor.get_target_path() and lineno:
+                return editor.get_target_path(), lineno
 
         return None
 

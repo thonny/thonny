@@ -527,6 +527,10 @@ class Completer:
             return
 
         result = response.get_result_or_raise()
+        if result is None:
+            logger.info("None completions response")
+            return
+
         completions: List[lsp_types.CompletionItem]
         if isinstance(result, list):
             completions = result

@@ -20,7 +20,9 @@ from thonny.misc_utils import (
     format_date_compact,
     format_time_compact,
     get_menu_char,
+    legacy_filename_to_uri,
     running_on_mac_os,
+    uri_to_long_title,
 )
 from thonny.plugins.event_logging import EventsInputOutputFileError, format_time_range
 from thonny.shell import BaseShellText
@@ -412,6 +414,10 @@ class Replayer(tk.Toplevel):
                 event_time = datetime.datetime.strptime(event_time_str, "%Y-%m-%dT%H:%M:%S.%f")
                 # yes, I'm modifying the argument. I'll live with this hack.
                 event["_epoch_time"] = event_time.timestamp()
+
+                if "filename" in event and "uri" not in event:
+                    event["uri"] = legacy_filename_to_uri(event["filename"])
+
             self.reset_session()
             self.scrubber.config(state="normal")
             for cmd in self.commands:
@@ -533,12 +539,7 @@ class Replayer(tk.Toplevel):
 
         editor: Optional[ReplayerEditor] = self.editor_notebook.get_current_child()
         if editor is not None:
-            if editor._filename is not None:
-                editor_desc = editor._filename
-            else:
-                editor_desc = tr("<untitled>")
-
-            s += f" • {editor_desc}"
+            s += f" • {uri_to_long_title(editor.get_uri())}"
 
         self.title(s)
 
@@ -729,20 +730,20 @@ class ReplayerEditor(BaseEditor):
             # Can't use old events Open, Save and SaveAs as they are not aligned with edit_modified
             self._code_view.text.edit_modified(False)
 
-        if "filename" in event:
-            if "_previous_filename" not in event:
+        if "uri" in event:
+            if "_previous_uri" not in event:
                 # store information for reverting this event
-                event["_previous_filename"] = self._filename
+                event["_previous_uri"] = self._uri
 
-            self._filename = event["filename"]
+            self._uri = event["uri"]
 
     def revert_event(self, event):
         _revert_event_on_text(event, self._code_view.text)
         if "_previous_modified" in event:
             self._code_view.text.edit_modified(event["_previous_modified"])
 
-        if "_previous_filename" in event:
-            self._filename = event["_previous_filename"]
+        if "_previous_uri" in event:
+            self._uri = event["_previous_uri"]
 
     def shorten_filename_for_title(self, path: str) -> str:
         # the path can be saved in Posix and replayed in Windows and vice versa
@@ -750,7 +751,7 @@ class ReplayerEditor(BaseEditor):
 
     def clear(self):
         self._code_view.text.direct_delete("1.0", "end")
-        self._filename = None
+        self._uri = None
         self._code_view.text.edit_modified(False)
 
     def complete_select_event(self):

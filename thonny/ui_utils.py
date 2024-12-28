@@ -11,33 +11,17 @@ import tkinter as tk
 import tkinter.font
 import traceback
 from _tkinter import TclError
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import filedialog, messagebox, ttk
-from typing import (  # @UnusedImport
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union  # @UnusedImport
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange, normpath_with_actual_case
-from thonny.custom_notebook import CustomNotebook, CustomNotebookPage, CustomNotebookTab
+from thonny.custom_notebook import CustomNotebook, CustomNotebookPage
 from thonny.languages import get_button_padding, tr
-from thonny.misc_utils import (
-    running_on_linux,
-    running_on_mac_os,
-    running_on_rpi,
-    running_on_windows,
-)
-from thonny.tktextext import EnhancedText, TweakableText
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.tktextext import TweakableText
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 

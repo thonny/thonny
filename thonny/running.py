@@ -61,7 +61,6 @@ from thonny.common import (
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    extract_target_path,
     is_same_path,
     parse_message,
     path_startswith,
@@ -73,18 +72,20 @@ from thonny.common import (
 )
 from thonny.editors import (
     get_current_breakpoints,
-    get_saved_current_script_filename,
-    get_target_dirname_from_editor_filename,
-    is_local_path,
-    is_remote_path,
+    get_saved_current_script_path,
+    get_target_dir_from_uri,
 )
 from thonny.languages import tr
 from thonny.misc_utils import (
+    UNTITLED_URI_SCHEME,
     construct_cmd_line,
     inside_flatpak,
+    is_local_uri,
+    is_remote_uri,
     running_on_mac_os,
     running_on_windows,
     show_command_not_available_in_flatpak_message,
+    uri_to_target_path,
 )
 from thonny.ui_utils import select_sequence, show_dialog
 from thonny.workdlg import WorkDialog
@@ -523,44 +524,41 @@ class Runner:
         if not editor:
             return
 
-        UNTITLED = "<untitled>"
-        if editor.get_filename() or not get_workbench().get_option(
+        UNTITLED = f"{UNTITLED_URI_SCHEME}:0"
+        if not editor.is_untitled() or not get_workbench().get_option(
             "run.allow_running_unnamed_programs"
         ):
-            if editor.get_filename() and not editor.is_modified():
+            if not editor.is_untitled() and not editor.is_modified():
                 # Don't attempt to save as the file may be read-only
-                logger.debug("Not saving read only file %s", editor.get_filename())
-                filename = editor.get_filename()
+                logger.debug("Not saving read only file %s", editor.get_uri())
+                uri = editor.get_uri()
             else:
-                filename = editor.save_file()
-                if not filename:
+                uri = editor.save_file()
+                if not uri:
                     # user has cancelled file saving
                     return
         else:
-            filename = UNTITLED
+            uri = UNTITLED
 
         if not self._proxy:
             # Saving the file may have killed the proxy
             return
 
         if (
-            is_remote_path(filename)
+            is_remote_uri(uri)
             and not self._proxy.can_run_remote_files()
-            or is_local_path(filename)
+            or is_local_uri(uri)
             and not self._proxy.can_run_local_files()
-            or filename == UNTITLED
+            or uri == UNTITLED
         ):
             self.execute_editor_content(command_name, self._get_active_arguments())
         else:
             if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
-                working_directory = get_target_dirname_from_editor_filename(filename)
+                working_directory = get_target_dir_from_uri(uri)
             else:
                 working_directory = self._proxy.get_cwd()
 
-            if is_local_path(filename):
-                target_path = filename
-            else:
-                target_path = extract_target_path(filename)
+            target_path = uri_to_target_path(uri)
             self.execute_script(
                 target_path, self._get_active_arguments(), working_directory, command_name
             )
@@ -610,12 +608,12 @@ class Runner:
             show_command_not_available_in_flatpak_message()
             return
 
-        filename = get_saved_current_script_filename()
-        if not filename:
+        path = get_saved_current_script_path()
+        if not path:
             return
 
         self._proxy.run_script_in_terminal(
-            filename,
+            path,
             self._get_active_arguments(),
             get_workbench().get_option("run.run_in_terminal_python_repl"),
             get_workbench().get_option("run.run_in_terminal_keep_open"),

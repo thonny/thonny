@@ -1323,7 +1323,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                             if source == EDITOR_CONTENT_TOKEN:
                                 editor = get_workbench().get_editor_notebook().get_current_editor()
                                 assert editor
-                                self._last_main_file = editor.get_identifier()
+                                self._last_main_file = editor.get_uri()
                                 source = editor.get_content()
                         else:
                             source = None
@@ -1716,10 +1716,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         proxy = get_runner().get_backend_proxy()
         assert proxy is not None
 
-        if not proxy.has_local_interpreter():
-            raise NotImplementedError("TODO")
-        else:
-            path = os.path.join(proxy.get_cwd(), "__shell_virtual_file__.py")
+        path = os.path.join(proxy.get_cwd(), "__shell_virtual_file__.py")
 
         return pathlib.Path(path).as_uri()
 

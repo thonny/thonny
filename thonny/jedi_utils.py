@@ -9,13 +9,7 @@ from typing import Dict, List, Optional
 import jedi.api.classes
 from jedi.api.classes import BaseSignature, ParamName
 
-from thonny.common import (
-    CompletionInfo,
-    NameReference,
-    SignatureInfo,
-    SignatureParameter,
-    is_local_path,
-)
+from thonny.common import CompletionInfo, NameReference, SignatureInfo, SignatureParameter
 
 logger = getLogger(__name__)
 
@@ -149,7 +143,7 @@ def get_references(
 
 def _create_script(source: str, filename: str, sys_path: List[str]) -> jedi.api.Script:
     # Beside local scripts, this is also used for MicroPython remote scripts and also in MP shell
-    if filename and is_local_path(filename) or filename is None:
+    if filename and "::" not in filename and not filename.startswith("<") or filename is None:
         # local and unnamed files
         project_path = os.getcwd()
         smart_sys_path = True

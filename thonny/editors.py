@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
 import os.path
-import pathlib
 import re
 import time
 import tkinter as tk
+import warnings
 from _tkinter import TclError
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
-from typing import Literal, Optional, Union
+from typing import List, Literal, Optional, Union, cast
 
 from thonny import get_runner, get_workbench
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
 from thonny.codeview import BinaryFileException, CodeView, CodeViewText
 from thonny.common import (
-    REMOTE_PATH_MARKER,
     InlineCommand,
     TextRange,
     ToplevelResponse,
-    extract_target_path,
-    is_local_path,
-    is_remote_path,
     is_same_path,
     normpath_with_actual_case,
     universal_dirname,
@@ -38,7 +34,23 @@ from thonny.lsp_types import (
     TextDocumentItem,
     VersionedTextDocumentIdentifier,
 )
-from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.misc_utils import (
+    PLACEHOLDER_URI,
+    UNTITLED_URI_SCHEME,
+    ensure_uri,
+    format_untitled_uri,
+    is_local_uri,
+    is_remote_uri,
+    is_untitled_uri,
+    local_path_to_uri,
+    make_legacy_remote_path,
+    remote_path_to_uri,
+    running_on_mac_os,
+    running_on_windows,
+    uri_to_legacy_filename,
+    uri_to_long_title,
+    uri_to_target_path,
+)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, get_beam_cursor, select_sequence
 
@@ -48,6 +60,7 @@ _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde"), (tr("all files")
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
 PYTHONLIKE_EXTENSIONS = set()
 DEBOUNCE_SECONDS = 0.5
+
 
 logger = getLogger(__name__)
 
@@ -65,7 +78,9 @@ class EditorCodeViewText(CodeViewText):
 
 
 class BaseEditor(ttk.Frame):
-    def __init__(self, master, propose_remove_line_numbers, suppress_events=False):
+    def __init__(self, master, propose_remove_line_numbers: bool, suppress_events: bool = False):
+        self._uri: str = PLACEHOLDER_URI
+
         ttk.Frame.__init__(self, master)
 
         self._code_view = CodeView(
@@ -81,8 +96,25 @@ class BaseEditor(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self._filename = None
         self._file_source = None
+
+    def is_untitled(self) -> bool:
+        return is_untitled_uri(self.get_uri())
+
+    def is_local(self) -> bool:
+        return is_local_uri(self.get_uri())
+
+    def is_remote(self) -> bool:
+        return is_remote_uri(self.get_uri())
+
+    def get_uri(self) -> str:
+        return self._uri
+
+    def get_target_path(self) -> Optional[str]:
+        if self.is_untitled():
+            return None
+
+        return uri_to_target_path(self.get_uri())
 
     def update_appearance(self):
         self._code_view.set_gutter_visibility(
@@ -98,10 +130,10 @@ class BaseEditor(ttk.Frame):
         self._code_view.grid_main_widgets()
 
     def update_file_type(self):
-        if self._filename is None:
-            self._code_view.set_file_type(None)
+        if self.is_untitled():
+            self._code_view.set_file_type("python")
         else:
-            ext = self._filename.split(".")[-1].lower()
+            ext = self.get_target_path().split(".")[-1].lower()
             if ext in PYTHON_EXTENSIONS:
                 file_type = "python"
             elif ext in PYTHONLIKE_EXTENSIONS:
@@ -117,14 +149,14 @@ class BaseEditor(ttk.Frame):
         return bool(self._code_view.text.edit_modified())
 
     def get_title(self):
-        if self._filename is None:
-            result = tr("<untitled>")
-        elif is_remote_path(self._filename):
-            path = extract_target_path(self._filename)
-            name = path.split("/")[-1]
+        if self.is_untitled():
+            result = format_untitled_uri(self.get_uri())
+        elif self.is_remote():
+            name = self.get_target_path().split("/")[-1]
             result = "[ " + name + " ]"
         else:
-            result = self.shorten_filename_for_title(self._filename)
+            assert self.is_local()
+            result = self.shorten_filename_for_title(self.get_target_path())
 
         if self.is_modified():
             result += " *"
@@ -143,10 +175,11 @@ class BaseEditor(ttk.Frame):
 
 
 class Editor(BaseEditor):
-    def __init__(self, master):
-        assert isinstance(master, EditorNotebook)
+    def __init__(self, master: "EditorNotebook", uri: str = PLACEHOLDER_URI):
+        # initial uri is used when the editor is created for non-existent file
+        self._uri = uri
         self._ls_proxy: Optional[LanguageServerProxy] = None
-        self.containing_notebook = master  # type: EditorNotebook
+        self.containing_notebook: EditorNotebook = master
         super().__init__(master, propose_remove_line_numbers=True)
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -176,59 +209,58 @@ class Editor(BaseEditor):
     def get_content(self, up_to_end=False) -> str:
         return self._code_view.get_content(up_to_end=up_to_end)
 
-    def set_filename(self, path):
-        self._filename = path
-
     def get_filename(self, try_hard=False):
-        if self._filename is None and try_hard:
+        warnings.warn(
+            "Editor.get_filename is deprecated. Use get_target_path instead", DeprecationWarning
+        )
+
+        if self.is_untitled() and try_hard:
             self.save_file()
 
-        return self._filename
+        path = self.get_target_path()
+        if path is None:
+            return None
 
-    def get_identifier(self):
-        if self._filename:
-            return self._filename
+        if self.is_remote():
+            return make_legacy_remote_path(path)
         else:
-            return str(self.winfo_id())
+            return path
 
     def get_file_source(self):
         return self._file_source
 
     def check_for_external_changes(self):
-        if self._filename is None:
-            return
-
-        if is_remote_path(self._filename):
+        if self.is_untitled() or self.is_remote():
             return
 
         if self._last_known_mtime is None:
             return
 
-        elif not os.path.exists(self._filename):
-            self.master.select(self)
+        elif not os.path.exists(self.get_target_path()):
+            self.containing_notebook.select(self)
 
             if messagebox.askyesno(
                 tr("File is gone"),
-                tr("Looks like '%s' was deleted or moved.") % self._filename
+                tr("Looks like '%s' was deleted or moved.") % self.get_target_path()
                 + "\n\n"
                 + tr("Do you want to also close the editor?"),
                 master=self,
             ):
-                self.master.close_editor(self)
+                self.containing_notebook.close_editor(self)
             else:
                 self.get_text_widget().edit_modified(True)
                 self._last_known_mtime = None
 
-        elif os.path.getmtime(self._filename) != self._last_known_mtime:
+        elif os.path.getmtime(self.get_target_path()) != self._last_known_mtime:
             skip_confirmation = not self.is_modified() and get_workbench().get_option(
                 "edit.auto_refresh_saved_files"
             )
             if not skip_confirmation:
-                self.master.select(self)
+                self.containing_notebook.select(self)
 
             if skip_confirmation or messagebox.askyesno(
                 tr("External modification"),
-                tr("Looks like '%s' was modified outside of the editor.") % self._filename
+                tr("Looks like '%s' was modified outside of the editor.") % self.get_target_path()
                 + "\n\n"
                 + tr(
                     "Do you want to discard current editor content and reload the file from disk?"
@@ -236,20 +268,17 @@ class Editor(BaseEditor):
                 master=self,
             ):
                 prev_location = self.get_text_widget().index("insert")
-                self._load_file(self._filename, keep_undo=True)
+                self._load_file(self.get_uri(), keep_undo=True)
                 try:
                     self.get_text_widget().mark_set("insert", prev_location)
                     self.see_line(int(prev_location.split(".")[0]))
                 except Exception:
                     logger.exception("Could not restore previous location")
 
-            self._last_known_mtime = os.path.getmtime(self._filename)
+            self._last_known_mtime = os.path.getmtime(self.get_target_path())
 
     def get_long_description(self):
-        if self._filename is None:
-            result = tr("<untitled>")
-        else:
-            result = self._filename
+        result = uri_to_long_title(self._uri)
 
         try:
             index = self._code_view.text.index("insert")
@@ -261,17 +290,21 @@ class Editor(BaseEditor):
 
         return result
 
-    def _load_file(self, filename, keep_undo=False):
+    def _load_file(self, uri: str, keep_undo=False):
         try:
-            if is_remote_path(filename):
-                result = self._load_remote_file(filename)
+            if is_remote_uri(uri):
+                result = self._load_remote_file(uri_to_target_path(uri))
             else:
-                result = self._load_local_file(filename, keep_undo)
+                result = self._load_local_file(uri_to_target_path(uri), keep_undo)
             if not result:
                 return False
+            self._uri = uri
+            self.update_file_type()
+            self.update_title()
+
         except BinaryFileException:
             messagebox.showerror(
-                tr("Problem"), tr("%s doesn't look like a text file") % (filename,), master=self
+                tr("Problem"), tr("%s doesn't look like a text file") % (uri,), master=self
             )
             return False
         except SyntaxError as e:
@@ -291,9 +324,9 @@ class Editor(BaseEditor):
         self._update_file_source()
         return True
 
-    def _load_local_file(self, filename, keep_undo=False):
-        if os.path.exists(filename):
-            with open(filename, "rb") as fp:
+    def _load_local_file(self, path, keep_undo=False):
+        if os.path.exists(path):
+            with open(path, "rb") as fp:
                 source = fp.read()
                 exists = True
         else:
@@ -301,33 +334,31 @@ class Editor(BaseEditor):
             exists = False
 
         # Make sure Windows filenames have proper format
-        filename = normpath_with_actual_case(filename)
-        self._filename = filename
-        self.update_file_type()
+        path = normpath_with_actual_case(path)
         if exists:
-            self._last_known_mtime = os.path.getmtime(self._filename)
+            self._last_known_mtime = os.path.getmtime(path)
 
-        get_workbench().event_generate("Open", editor=self, filename=filename)
+        get_workbench().event_generate(
+            "Open", editor=self, uri=local_path_to_uri(path), filename=path
+        )
         if not self._code_view.set_content_as_bytes(source, keep_undo):
             return False
         self.get_text_widget().edit_modified(not exists)
         self._code_view.focus_set()
-        self.master.remember_recent_file(filename)
-        get_workbench().event_generate("Opened", editor=self, filename=self._filename)
+        get_workbench().get_editor_notebook().remember_recent_file(path)
+        get_workbench().event_generate(
+            "Opened", editor=self, uri=local_path_to_uri(path), filename=path
+        )
         return True
 
-    def _load_remote_file(self, filename):
-        self._filename = filename
-        self.update_file_type()
+    def _load_remote_file(self, remote_path):
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
-
-        target_filename = extract_target_path(self._filename)
 
         self.update_title()
         response = get_runner().send_command_and_wait(
             InlineCommand(
-                "read_file", path=target_filename, description=tr("Loading %s") % target_filename
+                "read_file", path=remote_path, description=tr("Loading %s") % remote_path
             ),
             dialog_title=tr("Loading"),
         )
@@ -345,19 +376,24 @@ class Editor(BaseEditor):
         return True
 
     def save_file_enabled(self):
-        return self.is_modified() or not self.get_filename()
+        return self.is_modified() or self.is_untitled()
 
-    def save_file(self, ask_filename=False, save_copy=False, node=None) -> Optional[str]:
-        if self._filename is not None and not ask_filename:
-            save_filename = self._filename
-            get_workbench().event_generate("Save", editor=self, filename=save_filename)
+    def save_file(self, ask_target=False, save_copy=False, node=None) -> Optional[str]:
+        if self._uri is not None and not ask_target:
+            save_uri = self._uri
+            get_workbench().event_generate(
+                "Save",
+                editor=self,
+                uri=save_uri,
+                filename=uri_to_legacy_filename(save_uri),
+            )
         else:
-            save_filename = self.ask_new_path(node)
+            save_uri = self.ask_new_uri(node)
 
-            if not save_filename:
+            if not save_uri:
                 return None
 
-            if self.containing_notebook.get_editor(save_filename) is not None:
+            if self.containing_notebook.get_editor(save_uri) is not None:
                 messagebox.showerror(
                     tr("File is open"),
                     tr(
@@ -370,31 +406,37 @@ class Editor(BaseEditor):
                 return None
 
             get_workbench().event_generate(
-                "SaveAs", editor=self, filename=save_filename, save_copy=save_copy
+                "SaveAs",
+                editor=self,
+                uri=save_uri,
+                filename=uri_to_legacy_filename(save_uri),
+                save_copy=save_copy,
             )
 
         content_bytes = self._code_view.get_content_as_bytes()
 
-        if is_remote_path(save_filename):
-            result = self.write_remote_file(save_filename, content_bytes, save_copy)
+        if is_remote_uri(save_uri):
+            result = self.write_remote_file(uri_to_target_path(save_uri), content_bytes, save_copy)
         else:
-            result = self.write_local_file(save_filename, content_bytes, save_copy)
+            result = self.write_local_file(uri_to_target_path(save_uri), content_bytes, save_copy)
 
         if not result:
             return None
 
         if not save_copy:
-            self._filename = save_filename
+            self._uri = save_uri
             self.update_file_type()
 
-        if not save_copy or self._filename == save_filename:
+        if not save_copy or self._uri == save_uri:
             self.update_title()
-            get_workbench().event_generate("Saved", editor=self, filename=self._filename)
+            get_workbench().event_generate(
+                "Saved", editor=self, uri=save_uri, filename=uri_to_legacy_filename(save_uri)
+            )
 
         self._update_file_source()
-        return save_filename
+        return save_uri
 
-    def write_local_file(self, save_filename, content_bytes, save_copy):
+    def write_local_file(self, target_path, content_bytes, save_copy):
         process_shebang = content_bytes.startswith(b"#!/") and get_workbench().get_option(
             "file.make_saved_shebang_scripts_executable"
         )
@@ -402,19 +444,17 @@ class Editor(BaseEditor):
             content_bytes = content_bytes.replace(b"\r\n", b"\n")
 
         try:
-            f = open(save_filename, mode="wb")
+            f = open(target_path, mode="wb")
             f.write(content_bytes)
             f.flush()
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             os.fsync(f)
             f.close()
             if process_shebang:
-                os.chmod(save_filename, 0o755)
-            if not save_copy or save_filename == self._filename:
-                self._last_known_mtime = os.path.getmtime(save_filename)
-            get_workbench().event_generate(
-                "LocalFileOperation", path=save_filename, operation="save"
-            )
+                os.chmod(target_path, 0o755)
+            if not save_copy or target_path == self.get_target_path():
+                self._last_known_mtime = os.path.getmtime(target_path)
+            get_workbench().event_generate("LocalFileOperation", path=target_path, operation="save")
         except PermissionError:
             messagebox.showerror(
                 tr("Permission Error"),
@@ -423,26 +463,25 @@ class Editor(BaseEditor):
             )
             return False
 
-        if not save_copy or save_filename == self._filename:
-            self.master.remember_recent_file(save_filename)
+        if not save_copy or target_path == self.get_target_path():
+            self.containing_notebook.remember_recent_file(target_path)
 
-        if not save_copy or save_filename == self._filename:
+        if not save_copy or target_path == self.get_target_path():
             self._code_view.text.edit_modified(False)
 
         return True
 
-    def write_remote_file(self, save_filename, content_bytes, save_copy):
+    def write_remote_file(self, target_path, content_bytes, save_copy):
         if get_runner().ready_for_remote_file_operations(show_message=True):
-            target_filename = extract_target_path(save_filename)
 
             result = get_runner().send_command_and_wait(
                 InlineCommand(
                     "write_file",
-                    path=target_filename,
+                    path=target_path,
                     content_bytes=content_bytes,
                     editor_id=id(self),
                     blocking=True,
-                    description=tr("Saving to %s") % target_filename,
+                    description=tr("Saving to %s") % target_path,
                     make_shebang_scripts_executable=get_workbench().get_option(
                         "file.make_saved_shebang_scripts_executable"
                     ),
@@ -464,7 +503,7 @@ class Editor(BaseEditor):
 
             # NB! edit_modified is not falsed yet!
             get_workbench().event_generate(
-                "RemoteFileOperation", path=target_filename, operation="save"
+                "RemoteFileOperation", path=target_path, operation="save"
             )
             get_workbench().event_generate("RemoteFilesChanged")
             return True
@@ -472,33 +511,39 @@ class Editor(BaseEditor):
             messagebox.showerror(tr("Could not save"), tr("Back-end is not ready"))
             return False
 
-    def ask_new_path(self, node=None):
+    def ask_new_uri(self, node=None) -> Optional[str]:
         if node is None:
             node = choose_node_for_file_operations(self.winfo_toplevel(), tr("Where to save to?"))
         if not node:
             return None
 
         if node == "local":
-            return self.ask_new_local_path()
+            path = self.ask_new_local_path()
+            if path is not None:
+                return local_path_to_uri(path)
         else:
             assert node == "remote"
-            return self.ask_new_remote_path()
+            path = self.ask_new_remote_path()
+            if path is not None:
+                return remote_path_to_uri(path)
 
-    def ask_new_remote_path(self):
+        return None
+
+    def ask_new_remote_path(self) -> Optional[str]:
         target_path = ask_backend_path(self.winfo_toplevel(), "save", filetypes=_dialog_filetypes)
         if target_path:
             target_path = self._check_add_py_extension(target_path)
-            return make_remote_path(target_path)
+            return make_legacy_remote_path(target_path)
         else:
             return None
 
-    def ask_new_local_path(self):
-        if self._filename is None:
+    def ask_new_local_path(self) -> Optional[str]:
+        if self.is_untitled() is None:
             initialdir = get_workbench().get_local_cwd()
             initialfile = None
         else:
-            initialdir = os.path.dirname(self._filename)
-            initialfile = os.path.basename(self._filename)
+            initialdir = os.path.dirname(self.get_target_path())
+            initialfile = os.path.basename(self.get_target_path())
 
         # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
         type_var = tk.StringVar(value="")
@@ -560,7 +605,7 @@ class Editor(BaseEditor):
         return new_filename
 
     def show(self):
-        self.master.select(self)
+        self.containing_notebook.select(self)
 
     def close(self):
         if self._ls_proxy is not None:
@@ -582,11 +627,11 @@ class Editor(BaseEditor):
             direction = -1
         else:
             direction = 1
-        self.master.select_next_prev_editor(direction)
+        self.containing_notebook.select_next_prev_editor(direction)
         return "break"
 
     def _shift_control_tab(self, event):
-        self.master.select_next_prev_editor(-1)
+        self.containing_notebook.select_next_prev_editor(-1)
         return "break"
 
     def select_range(self, text_range):
@@ -617,7 +662,7 @@ class Editor(BaseEditor):
 
     def update_title(self):
         try:
-            self.master.update_editor_title(self)
+            self.containing_notebook.update_editor_title(self)
         except Exception:
             logger.exception("Could not update editor title")
 
@@ -665,7 +710,7 @@ class Editor(BaseEditor):
         return path
 
     def _update_file_source(self):
-        if is_remote_path(self._filename):
+        if self.is_remote():
             proxy = get_runner().get_backend_proxy()
             if proxy is not None:
                 self._file_source = get_runner().get_backend_proxy().get_machine_id()
@@ -681,10 +726,6 @@ class Editor(BaseEditor):
         self._ls_proxy = None
 
     def _try_connect_to_language_server(self):
-        if not is_local_path(self._filename):
-            # TODO
-            return
-
         current_ls_proxy = get_workbench().get_language_server_proxy()
         if self._ls_proxy == current_ls_proxy:
             return
@@ -694,7 +735,7 @@ class Editor(BaseEditor):
             self._ls_proxy = None
             return
 
-        logger.info(f"Connecting {self._filename} to language server")
+        logger.info(f"Connecting {self.get_uri()} to language server")
         version = 1
         current_content = self.get_content(up_to_end=True)
         current_ls_proxy.notify_did_open_text_document(
@@ -707,7 +748,7 @@ class Editor(BaseEditor):
                 )
             )
         )
-        get_workbench().event_generate("AfterSendingDocumentUpdates", path=self.get_filename())
+        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
         self._last_published_version = version
         self._ls_proxy = current_ls_proxy
         self._unpublished_incremental_changes = []
@@ -749,8 +790,8 @@ class Editor(BaseEditor):
                 num_linebreaks_deleted = del_end_line - del_start_line
 
                 clean_prefix_end_line = min(clean_prefix_end_line, del_start_line)
-                clean_suffix_start_line = (
-                    max(clean_suffix_start_line - num_linebreaks_deleted, del_start_line + 1)
+                clean_suffix_start_line = max(
+                    clean_suffix_start_line - num_linebreaks_deleted, del_start_line + 1
                 )
 
                 line_count_delta -= num_linebreaks_deleted
@@ -790,23 +831,13 @@ class Editor(BaseEditor):
                 ],
             )
         )
-        get_workbench().event_generate("AfterSendingDocumentUpdates", path=self.get_filename())
+        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
         self._last_published_version = version
         self._unpublished_incremental_changes = []
         self._content_at_server = assembled_content
 
     def get_language_id(self) -> str:
         return "python"  # TODO
-
-    def get_uri(self) -> Optional[str]:
-        if self._filename is None:
-            return None
-
-        elif is_local_path(self._filename):
-            return pathlib.Path(self._filename).as_uri()
-
-        # TODO
-        raise NotImplementedError("Remote paths not supported yet")
 
 
 class EditorNotebook(CustomNotebook):
@@ -816,6 +847,7 @@ class EditorNotebook(CustomNotebook):
 
     def __init__(self, master):
         super().__init__(master)
+        self._untitled_name_counter: int = 0
 
         get_workbench().set_default("file.reopen_files", True)
         get_workbench().set_default("file.open_files", [])
@@ -1008,8 +1040,8 @@ class EditorNotebook(CustomNotebook):
 
     def save_all_named_editors(self):
         all_saved = True
-        for editor in self.winfo_children():
-            if editor.get_filename() and editor.is_modified():
+        for editor in self.get_all_editors():
+            if not editor.is_untitled() and editor.is_modified():
                 success = editor.save_file()
                 all_saved = all_saved and success
 
@@ -1027,7 +1059,7 @@ class EditorNotebook(CustomNotebook):
     def _update_recent_menu(self):
         recents = get_workbench().get_option("file.recent_files")
         relevant_recents = [
-            path for path in recents if os.path.exists(path) and not self.file_is_opened(path)
+            path for path in recents if os.path.exists(path) and not self.local_file_is_opened(path)
         ]
         self._recent_menu.delete(0, "end")
         for path in relevant_recents:
@@ -1038,32 +1070,33 @@ class EditorNotebook(CustomNotebook):
             self._recent_menu.insert_command("end", label=path, command=load)
 
     def remember_open_files(self):
-        if (
-            self.get_current_editor() is not None
-            and self.get_current_editor().get_filename() is not None
-        ):
-            current_file = self.get_current_editor().get_filename()
+        if self.get_current_editor() is not None and self.get_current_editor().is_local():
+            current_file = self.get_current_editor().get_target_path()
         else:
             current_file = None
 
         get_workbench().set_option("file.current_file", current_file)
 
         open_files = [
-            editor.get_filename() for editor in self.winfo_children() if editor.get_filename()
+            cast(Editor, editor).get_target_path()
+            for editor in self.get_all_editors()
+            if editor.is_local()
         ]
         get_workbench().set_option("file.open_files", open_files)
 
     def _cmd_new_file(self):
         self.open_new_file()
 
-    def open_new_file(self, path=None, remote=False):
-        new_editor = Editor(self)
+    def open_new_file(self, target_path=None, remote=False):
+        if target_path is None:
+            uri = self.create_next_untitled_uri()
+        elif remote:
+            uri = remote_path_to_uri(target_path)
+        else:
+            uri = local_path_to_uri(target_path)
+
+        new_editor = Editor(self, uri=uri)
         get_workbench().event_generate("NewFile", editor=new_editor)
-        if path:
-            if remote:
-                new_editor.set_filename(make_remote_path(path))
-            else:
-                new_editor.set_filename(path)
         self.add(new_editor, text=new_editor.get_title())
         self.select(new_editor)
         new_editor.focus_set()
@@ -1077,10 +1110,10 @@ class EditorNotebook(CustomNotebook):
             initialdir = get_workbench().get_local_cwd()
             if (
                 self.get_current_editor() is not None
-                and self.get_current_editor().get_filename() is not None
+                and not self.get_current_editor().is_untitled()
             ):
-                initialdir = os.path.dirname(self.get_current_editor().get_filename())
-            path = askopenfilename(
+                initialdir = os.path.dirname(self.get_current_editor().get_target_path())
+            target_path = askopenfilename(
                 filetypes=_dialog_filetypes, initialdir=initialdir, parent=get_workbench()
             )
         else:
@@ -1091,11 +1124,9 @@ class EditorNotebook(CustomNotebook):
             if not target_path:
                 return
 
-            path = make_remote_path(target_path)
-
-        if path:
+        if target_path:
             # self.close_single_untitled_unmodified_editor()
-            self.show_file(path, propose_dialog=False)
+            self.show_file(remote_path_to_uri(target_path), propose_dialog=False)
 
     def _control_o(self, event):
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -1108,6 +1139,7 @@ class EditorNotebook(CustomNotebook):
                 continue
             else:
                 editor = self.get_child_by_index(tab_index)
+                assert isinstance(editor, Editor)
                 self.close_editor(editor, force=False)
 
     def _cmd_close_file(self):
@@ -1122,7 +1154,7 @@ class EditorNotebook(CustomNotebook):
         assert isinstance(page.content, Editor)
         self.close_editor(page.content)
 
-    def close_editor(self, editor, force=False):
+    def close_editor(self, editor: Editor, force=False):
         if not force and not self.check_allow_closing(editor):
             return
         self.forget(editor)
@@ -1152,7 +1184,7 @@ class EditorNotebook(CustomNotebook):
         if not self.get_current_editor():
             return
 
-        self.get_current_editor().save_file(ask_filename=True, node=node)
+        self.get_current_editor().save_file(ask_target=True, node=node)
         self.update_editor_title(self.get_current_editor())
         get_workbench().update_title()
 
@@ -1160,7 +1192,7 @@ class EditorNotebook(CustomNotebook):
         if not self.get_current_editor():
             return
 
-        self.get_current_editor().save_file(ask_filename=True, save_copy=True)
+        self.get_current_editor().save_file(ask_target=True, save_copy=True)
         self.update_editor_title(self.get_current_editor())
 
     def _cmd_save_file_as_enabled(self):
@@ -1168,40 +1200,40 @@ class EditorNotebook(CustomNotebook):
 
     def _cmd_move_rename_file(self):
         editor = self.get_current_editor()
-        old_filename = editor.get_filename()
-        assert old_filename is not None
+        assert not editor.is_untitled()
 
-        if is_remote_path(old_filename):
+        old_path = editor.get_target_path()
+
+        if editor.is_remote():
             node = "remote"
         else:
             node = "local"
 
         self._cmd_save_file_as(node=node)
 
-        if editor.get_filename() != old_filename:
-            if is_remote_path(old_filename):
-                remote_path = extract_target_path(old_filename)
+        if editor.get_target_path() != old_path:
+            if node == "remote":
                 get_runner().send_command_and_wait(
                     InlineCommand(
-                        "delete", paths=[remote_path], description=tr("Deleting" + remote_path)
+                        "delete", paths=[old_path], description=tr("Deleting" + old_path)
                     ),
                     dialog_title=tr("Deleting"),
                 )
                 get_workbench().event_generate(
-                    "RemoteFileOperation", path=remote_path, operation="delete"
+                    "RemoteFileOperation", path=old_path, operation="delete"
                 )
             else:
-                os.remove(old_filename)
+                os.remove(old_path)
                 get_workbench().event_generate(
-                    "LocalFileOperation", path=old_filename, operation="delete"
+                    "LocalFileOperation", path=old_path, operation="delete"
                 )
 
     def _cmd_move_rename_file_enabled(self):
-        return self.get_current_editor() and self.get_current_editor().get_filename() is not None
+        return self.get_current_editor() and not self.get_current_editor().is_untitled()
 
     def close_single_untitled_unmodified_editor(self):
-        editors = self.winfo_children()
-        if len(editors) == 1 and not editors[0].is_modified() and not editors[0].get_filename():
+        editors = cast(List[Editor], self.winfo_children())
+        if len(editors) == 1 and not editors[0].is_modified() and editors[0].is_untitled():
             self._cmd_close_file()
 
     def _cmd_goto_source_line(self):
@@ -1227,7 +1259,7 @@ class EditorNotebook(CustomNotebook):
         else:
             return editor.get_content()
 
-    def get_all_editors(self):
+    def get_all_editors(self) -> List[Editor]:
         # When workspace is closing, self.winfo_children()
         # may return an unexplainable tkinter.Frame
         return [child for child in self.winfo_children() if isinstance(child, Editor)]
@@ -1237,20 +1269,20 @@ class EditorNotebook(CustomNotebook):
         next_index = (cur_index + direction) % len(self.tabs())
         self.select(self.get_child_by_index(next_index))
 
-    def file_is_opened(self, path):
+    def local_file_is_opened(self, path):
         for editor in self.get_all_editors():
-            if editor.get_filename() and is_same_path(path, editor.get_filename()):
+            if editor.is_local() and is_same_path(path, editor.get_target_path()):
                 return True
 
         return False
 
-    def show_file(self, filename, text_range=None, set_focus=True, propose_dialog=True):
+    def show_file(self, path_or_uri, text_range=None, set_focus=True, propose_dialog=True):
         # self.close_single_untitled_unmodified_editor()
         try:
-            editor = self.get_editor(filename, True)
+            editor = self.get_editor(path_or_uri, True)
         except PermissionError:
-            logger.exception("Loading " + filename)
-            msg = tr("Got permission error when trying to load\n%s") % (filename,)
+            logger.exception("Loading " + path_or_uri)
+            msg = tr("Got permission error when trying to load\n%s") % (path_or_uri,)
             if running_on_mac_os() and propose_dialog:
                 msg += "\n\n" + tr("Try opening it with File => Open.")
 
@@ -1273,14 +1305,14 @@ class EditorNotebook(CustomNotebook):
         if not get_runner().ready_for_remote_file_operations(show_message=True):
             return None
         else:
-            return self.show_file(make_remote_path(target_filename))
+            return self.show_file(make_legacy_remote_path(target_filename))
 
-    def show_file_at_line(self, filename, lineno, col_offset=None):
+    def show_file_at_line(self, filename, lineno: int, col_offset: Optional[int] = None) -> None:
         editor = self.show_file(filename)
         editor.select_line(lineno, col_offset)
 
     def update_appearance(self):
-        for editor in self.winfo_children():
+        for editor in self.get_all_editors():
             editor.update_appearance()
 
     def update_editor_title(self, editor, title=None):
@@ -1318,33 +1350,37 @@ class EditorNotebook(CustomNotebook):
             if mod == ("-modified", 1):
                 self.winfo_toplevel().wm_attributes(*(rest + ("-modified", 0)))
 
-    def _open_file(self, filename):
-        editor = Editor(self)
-        if editor._load_file(filename):
-            self.add(editor, text=editor.get_title())
+    def _open_file(self, uri: str):
+        editor = Editor(self, uri=uri)
+        self.add(editor, text=editor.get_title())
+        if editor._load_file(uri):
             return editor
         else:
+            self.close_editor(editor, force=True)
             editor.destroy()
             return None
 
-    def get_editor(self, filename_or_id, open_when_necessary=False):
-        if os.path.isfile(filename_or_id):
-            filename_or_id = normpath_with_actual_case(os.path.abspath(filename_or_id))
+    def get_editor(self, path_or_uri, open_when_necessary=False):
+        uri = ensure_uri(path_or_uri)
 
-        for child in self.winfo_children():
-            assert isinstance(child, Editor)
-            child_identifier = child.get_identifier()
-            if child_identifier == filename_or_id:
+        if is_local_uri(uri):
+            path = uri_to_target_path(uri)
+            if os.path.isfile(path_or_uri):
+                path = normpath_with_actual_case(os.path.abspath(path))
+                uri = local_path_to_uri(path)
+
+        for child in self.get_all_editors():
+            if child.get_uri() == uri:
                 return child
 
         if open_when_necessary:
-            return self._open_file(filename_or_id)
+            return self._open_file(uri)
         else:
             return None
 
     def check_allow_closing(self, editor=None):
         if not editor:
-            modified_editors = [e for e in self.winfo_children() if e.is_modified()]
+            modified_editors = [e for e in self.get_all_editors() if e.is_modified()]
         else:
             if not editor.is_modified():
                 return True
@@ -1364,9 +1400,8 @@ class EditorNotebook(CustomNotebook):
         if confirm:
             for editor_ in modified_editors:
                 assert isinstance(editor_, Editor)
-                if editor_.get_filename(True):
-                    if not editor_.save_file():
-                        return False
+                if not editor_.save_file():
+                    return False
                 else:
                     return False
             return True
@@ -1396,7 +1431,8 @@ class EditorNotebook(CustomNotebook):
         old_notebook: Optional[CustomNotebook],
     ) -> None:
         super().after_insert(pos, page, old_notebook)
-        editor: Editor = page.content
+        editor = page.content
+        assert isinstance(editor, Editor)
         get_workbench().event_generate(
             "InsertEditorToNotebook", pos=pos, editor=editor, text_widget=editor.get_text_widget()
         )
@@ -1405,7 +1441,8 @@ class EditorNotebook(CustomNotebook):
         self, pos: int, page: CustomNotebookPage, new_notebook: Optional[CustomNotebook]
     ) -> None:
         super().after_forget(pos, page, new_notebook)
-        editor: Editor = page.content
+        editor = page.content
+        assert isinstance(editor, Editor)
         get_workbench().event_generate(
             "RemoveEditorFromNotebook", pos=pos, editor=editor, text_widget=editor.get_text_widget()
         )
@@ -1420,12 +1457,11 @@ class EditorNotebook(CustomNotebook):
             if editor.get_file_source() == new_machine_id:
                 continue
 
-            filename = editor.get_filename()
-            if filename is not None and is_remote_path(filename):
+            if editor.is_remote():
                 all_remote_editors_to_be_closed.append(editor)
                 if editor.is_modified():
                     modified_remote_editors_to_be_closed.append(editor)
-                    modified_remote_files_to_be_closed.append(extract_target_path(filename))
+                    modified_remote_files_to_be_closed.append(editor.get_target_path())
 
         if len(modified_remote_files_to_be_closed) > 0:
             message = (
@@ -1450,41 +1486,43 @@ class EditorNotebook(CustomNotebook):
 
         return True
 
+    def create_next_untitled_uri(self) -> str:
+        self._untitled_name_counter += 1
+        return f"{UNTITLED_URI_SCHEME}:{self._untitled_name_counter}"
+
 
 def get_current_breakpoints():
     result = {}
 
     for editor in get_workbench().get_editor_notebook().get_all_editors():
-        filename = editor.get_filename()
-        if filename:
+        if editor.is_local():
             linenos = editor.get_code_view().get_breakpoint_line_numbers()
             if linenos:
-                result[filename] = linenos
+                result[editor.get_target_path()] = linenos
 
     return result
 
 
-def get_saved_current_script_filename(force=True):
+def get_saved_current_script_path(force=True):
     editor = get_workbench().get_editor_notebook().get_current_editor()
     if not editor:
         return None
 
-    filename = editor.get_filename(force)
-    if not filename:
+    if editor.is_untitled() and force:
+        editor.save_file()
+
+    path = editor.get_target_path()
+    if not path:
         return None
 
     if editor.is_modified():
-        filename = editor.save_file()
+        path = editor.save_file()
 
-    return filename
+    return path
 
 
-def get_target_dirname_from_editor_filename(s):
-    if is_local_path(s):
-        return os.path.dirname(s)
+def get_target_dir_from_uri(uri: str) -> str:
+    if is_local_uri(uri):
+        return os.path.dirname(uri_to_target_path(uri))
     else:
-        return universal_dirname(extract_target_path(s))
-
-
-def make_remote_path(target_path):
-    return get_runner().get_node_label() + REMOTE_PATH_MARKER + target_path
+        return universal_dirname(uri_to_target_path(uri))

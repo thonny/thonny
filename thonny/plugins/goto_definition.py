@@ -1,4 +1,3 @@
-import os.path
 import tkinter as tk
 from logging import getLogger
 from tkinter import messagebox
@@ -6,7 +5,6 @@ from typing import List, Set, Union, cast
 
 from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText
-from thonny.common import file_uri_to_path
 from thonny.editor_helpers import get_cursor_ls_position
 from thonny.editors import Editor
 from thonny.languages import tr
@@ -85,19 +83,14 @@ class GotoHandler:
             uri = first_def.uri
             range = first_def.range
 
-        module_path = file_uri_to_path(uri)
-        if not os.path.isfile(module_path):
-            logger.warning("%s is not a file", module_path)
-            return
-
-        if module_path and range is not None:
+        if range is not None:
             # TODO: Select range instead?
             line = range.start.line + 1
         else:
             line = None
 
-        logger.info("Going to %s, line %s", module_path, line)
-        get_workbench().get_editor_notebook().show_file(module_path, line)
+        logger.info("Going to %s, line %s", uri, line)
+        get_workbench().get_editor_notebook().show_file(uri, line)
 
     def on_motion(self, event):
         text = cast(SyntaxText, event.widget)

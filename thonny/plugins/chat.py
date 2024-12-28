@@ -16,12 +16,10 @@ from thonny.assistance import (
     ChatResponseChunk,
     ChatResponseFragmentWithRequestId,
     EchoAssistant,
-    _get_imported_user_files,
-    _get_main_file,
     format_file_url,
     logger,
 )
-from thonny.common import STRING_PSEUDO_FILENAME, ToplevelResponse, is_local_path
+from thonny.common import STRING_PSEUDO_FILENAME, ToplevelResponse
 from thonny.languages import tr
 from thonny.tktextext import EnhancedText, TweakableText
 from thonny.ui_utils import (
@@ -478,14 +476,16 @@ class ChatView(tktextext.TextFrame):
 
             if tag == "currentFile":
                 if current_editor is not None:
-                    path = current_editor.get_filename()
-                    if path is not None:
-                        if is_local_path(path):
-                            editor_name = os.path.relpath(path, get_workbench().get_local_cwd())
-                        else:
-                            # TODO: can do better
-                            editor_name = path.split("/")[-1]
+                    if current_editor.is_local():
+                        editor_name = os.path.relpath(
+                            current_editor.get_target_path(), get_workbench().get_local_cwd()
+                        )
+
+                    elif current_editor.is_remote():
+                        # TODO: can do better
+                        editor_name = current_editor.get_target_path().split("/")[-1]
                     else:
+                        assert current_editor.is_untitled()
                         editor_name = "unnamed file"
 
                     attachment = Attachment(editor_name, tag, current_editor.get_content())
@@ -580,11 +580,8 @@ class ChatView(tktextext.TextFrame):
     def _complete_chat_in_thread(self, assistant: Assistant, request_id: str):
         try:
             # TODO: pass editor contents from UI thread
-            main_file_path = _get_main_file()
             context = ChatContext(
                 messages=self._chat_messages,
-                main_file_path=main_file_path,
-                imported_file_paths=_get_imported_user_files(main_file=main_file_path),
             )
             for fragment in assistant.complete_chat(context):
                 get_workbench().queue_event(

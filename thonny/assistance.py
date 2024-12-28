@@ -8,7 +8,8 @@ from logging import getLogger
 from typing import Dict, Iterator, List, Optional
 
 from thonny import get_workbench, rst_utils
-from thonny.common import is_remote_path, read_source
+from thonny.common import read_source
+from thonny.misc_utils import local_path_to_uri
 
 logger = getLogger(__name__)
 
@@ -47,8 +48,6 @@ class ChatResponseFragmentWithRequestId:
 @dataclass
 class ChatContext:
     messages: List[ChatMessage]
-    main_file_path: Optional[str] = None
-    imported_file_paths: List[str] = dataclasses.field(default_factory=list)
     active_file_path: Optional[str] = None
     active_file_selection: Optional[str] = None
     file_contents_by_path: Dict[str, str] = dataclasses.field(default=dict)
@@ -121,18 +120,6 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
         pass
 
 
-def _get_main_file() -> Optional[str]:
-    editor = get_workbench().get_editor_notebook().get_current_editor()
-    if editor is None:
-        return None
-
-    filename = editor.get_filename()
-    if filename is None or is_remote_path(filename):
-        return None
-
-    return filename
-
-
 def _get_imported_user_files(main_file, source=None) -> List[str]:
     assert os.path.isabs(main_file)
 
@@ -168,7 +155,7 @@ def _get_imported_user_files(main_file, source=None) -> List[str]:
 
 
 def format_file_url(filename, lineno, col_offset):
-    s = "thonny-editor://" + rst_utils.escape(filename).replace(" ", "%20")
+    s = local_path_to_uri(filename)
     if lineno is not None:
         s += "#" + str(lineno)
         if col_offset is not None:
