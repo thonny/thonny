@@ -310,7 +310,6 @@ class Workbench(tk.Tk):
             self._editor_notebook.focus_set()
             self.event_generate("WorkbenchReady")
             self.poll_events()
-            self.start_or_restart_language_server()
         except Exception:
             logger.exception("Exception while finalizing startup")
             self.report_exception()
@@ -433,7 +432,7 @@ class Workbench(tk.Tk):
         if self._active_lsp is not None:
             self.shut_down_language_server()
 
-        # TODO: make it configurable
+        logger.info("Starting language server")
         from thonny.plugins.pyright import PyrightProxy
 
         # from thonny.plugins.ruff import RuffProxy
@@ -447,6 +446,7 @@ class Workbench(tk.Tk):
                         inlineValue=None,
                         inlayHint=None,
                         diagnostics=None,
+                        # workspaceFolders=True, # TODO: This may require workspace/didChangeWorkspaceFolders to activate Pyright?
                     ),
                     textDocument=TextDocumentClientCapabilities(
                         publishDiagnostics=PublishDiagnosticsClientCapabilities(
@@ -520,6 +520,7 @@ class Workbench(tk.Tk):
 
     def shut_down_language_server(self):
         if self._active_lsp is not None:
+            logger.info("Shutting down language server")
             self._active_lsp.shut_down()
 
     def _init_language(self) -> None:
@@ -1207,6 +1208,7 @@ class Workbench(tk.Tk):
                 logger.warning("Problem with switcher popup", exc_info=e)
 
     def _on_backend_restart(self, event):
+        logger.info("Handling backend restart")
         proxy = get_runner().get_backend_proxy()
         if proxy:
             conf = proxy.get_current_switcher_configuration()
@@ -1220,6 +1222,8 @@ class Workbench(tk.Tk):
         self._last_active_backend_conf_variable_value = switcher_value
         self._backend_button.configure(text=desc + "  " + get_menu_char())
         self._update_connection_button()
+
+        self.start_or_restart_language_server()
 
     def _on_backend_terminated(self, event):
         self._update_connection_button()

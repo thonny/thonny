@@ -112,6 +112,11 @@ class BaseEditor(ttk.Frame):
     def get_uri(self) -> str:
         return self._uri
 
+    def set_uri(self, uri: str) -> None:
+        self._uri = uri
+        self.update_file_type()
+        self.update_appearance()
+
     def get_target_path(self) -> Optional[str]:
         if self.is_untitled():
             return None
@@ -233,6 +238,16 @@ class Editor(BaseEditor):
     def get_file_source(self):
         return self._file_source
 
+    def set_uri(self, uri: str) -> None:
+        old_uri = self._uri
+        if old_uri != uri:
+            self._try_disconnect_from_language_server()
+
+        super().set_uri(uri)
+        self.update_title()
+        if old_uri != uri:
+            self._try_connect_to_language_server()
+
     def check_for_external_changes(self):
         if self.is_untitled() or self.is_remote():
             return
@@ -302,9 +317,7 @@ class Editor(BaseEditor):
                 result = self._load_local_file(uri_to_target_path(uri), keep_undo)
             if not result:
                 return False
-            self._uri = uri
-            self.update_file_type()
-            self.update_title()
+            self.set_uri(uri)
 
         except BinaryFileException:
             messagebox.showerror(
@@ -359,7 +372,6 @@ class Editor(BaseEditor):
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
 
-        self.update_title()
         response = get_runner().send_command_and_wait(
             InlineCommand(
                 "read_file", path=remote_path, description=tr("Loading %s") % remote_path
@@ -376,14 +388,13 @@ class Editor(BaseEditor):
         if not self._code_view.set_content_as_bytes(content):
             return False
         self.get_text_widget().edit_modified(False)
-        self.update_title()
         return True
 
     def save_file_enabled(self):
         return self.is_modified() or self.is_untitled()
 
     def save_file(self, ask_target=False, save_copy=False, node=None) -> Optional[str]:
-        if self._uri is not None and not ask_target:
+        if not self.is_untitled() and not ask_target:
             save_uri = self._uri
             get_workbench().event_generate(
                 "Save",
@@ -428,8 +439,7 @@ class Editor(BaseEditor):
             return None
 
         if not save_copy:
-            self._uri = save_uri
-            self.update_file_type()
+            self.set_uri(save_uri)
 
         if not save_copy or self._uri == save_uri:
             self.update_title()
@@ -542,7 +552,7 @@ class Editor(BaseEditor):
             return None
 
     def ask_new_local_path(self) -> Optional[str]:
-        if self.is_untitled() is None:
+        if self.is_untitled():
             initialdir = get_workbench().get_local_cwd()
             initialfile = None
         else:
@@ -612,11 +622,15 @@ class Editor(BaseEditor):
         self.containing_notebook.select(self)
 
     def close(self):
+        self._try_disconnect_from_language_server()
+        self.destroy()
+
+    def _try_disconnect_from_language_server(self) -> None:
         if self._ls_proxy is not None:
             self._ls_proxy.notify_did_close_text_document(
                 DidCloseTextDocumentParams(TextDocumentIdentifier(uri=self.get_uri()))
             )
-        self.destroy()
+            self._ls_proxy = None
 
     def _listen_debugger_progress(self, event):
         # Go read-only
