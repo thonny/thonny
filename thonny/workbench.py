@@ -512,9 +512,6 @@ class Workbench(tk.Tk):
                 locale=self.get_option("general.language"),
                 workspaceFolders=[
                     WorkspaceFolder(
-                        uri="file:///remote/Users/aivarannamaa/python_stuff/uv2", name="remotews"
-                    ),
-                    WorkspaceFolder(
                         uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
                     ),
                 ],
