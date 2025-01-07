@@ -1,0 +1,50 @@
+# The structure of this file is as follows:
+# - Blank lines and comments starting with `#` are ignored.
+# - Lines contain the name of a module, followed by a colon,
+#   a space, and a version range (for example: `symbol: 2.7-3.9`).
+#
+# Version ranges may be of the form "X.Y-A.B" or "X.Y-". The
+# first form means that a module was introduced in version X.Y and last
+# available in version A.B. The second form means that the module was
+# introduced in version X.Y and is still available in the latest
+# version of Python.
+#
+# If a submodule is not listed separately, it has the same lifetime as
+# its parent module.
+#
+# Python versions before 2.7 are ignored, so any module that was already
+# present in 2.7 will have "2.7" as its minimum version. Version ranges
+# for unsupported versions of Python 3 (currently 3.5 and lower) are
+# generally accurate but we do not guarantee their correctness.
+
+antigravity: 3.0-
+array: 3.0-
+audio: 3.0-
+builtins: 3.0-
+errno: 3.0-
+gc: 3.0-
+love: 3.0-
+machine: 3.0-
+math: 3.0-
+microbit: 3.0-
+micropython: 3.0-
+music: 3.0-
+neopixel: 3.0-
+os: 3.0-
+radio: 3.0-
+random: 3.0-
+speech: 3.0-
+struct: 3.0-
+sys: 3.0-
+this: 3.0-
+time: 3.0-
+typing_extensions: 3.0-
+typing: 3.0-
+uarray: 3.0-
+ucollections: 3.0-
+uerrno: 3.0-
+uos: 3.0-
+urandom: 3.0-
+ustruct: 3.0-
+usys: 3.0-
+utime: 3.0-
