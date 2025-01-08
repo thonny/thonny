@@ -3,6 +3,7 @@
 import dataclasses
 import inspect
 import json
+import os.path
 import subprocess
 import threading
 import time
@@ -27,8 +28,9 @@ from typing import (
     get_type_hints,
 )
 
-from thonny import get_workbench, lsp_types
+from thonny import get_thonny_user_dir, get_workbench, lsp_types
 from thonny.lsp_types import (
+    DidChangeConfigurationParams,
     ErrorCodes,
     InitializedParams,
     InitializeResult,
@@ -68,6 +70,9 @@ class JsonRpcError(RuntimeError):
 
 class LanguageServerProxy(ABC):
     def __init__(self, initialize_params: lsp_types.InitializeParams):
+        if os.path.exists(self._get_communication_log_path()):
+            os.remove(self._get_communication_log_path())
+
         self._proc: Optional[subprocess.Popen] = None
         self._invalidated: bool = False
         self._shutdown_accepted: bool = False
@@ -179,6 +184,28 @@ class LanguageServerProxy(ABC):
 
     def _collect_diagnostics(self, result: PublishDiagnosticsParams):
         self._diagnostics[result.uri] = result
+
+    def _handle_configuration(self, params: lsp_types.ConfigurationParams) -> Any:
+        logger.info("Configuration request: %r", params)
+        result = []
+        settings = self.get_settings()
+        for item in params.items:
+            result.append(self._extract_settings(settings, item.section))
+
+        return result
+
+    def _extract_settings(self, block: Dict, section: str) -> Dict:
+        if "." in section:
+            head, tail = section.split(".", maxsplit=1)
+            if head in block:
+                return self._extract_settings(block[head], tail)
+            else:
+                return {}
+        else:
+            if section in block:
+                return block[section]
+            else:
+                return {}
 
     def _request_initialize(
         self,
@@ -1063,6 +1090,8 @@ class LanguageServerProxy(ABC):
         self._send_json_rpc_message(msg)
 
     def _send_json_rpc_message(self, msg: Dict) -> None:
+        if get_workbench().in_debug_mode():
+            self._add_to_communication_log(msg, "CLIENT")
         json_bytes = json.dumps(msg).encode("utf-8")
         print("SEnding", json_bytes)
         self._proc.stdin.write(JSON_RPC_LEN_HEADER_PREFIX)
@@ -1096,6 +1125,8 @@ class LanguageServerProxy(ABC):
 
     def _handle_message_from_server(self, msg: Dict) -> None:
         logger.debug("Handling message from server: %r", msg)
+        if get_workbench().in_debug_mode():
+            self._add_to_communication_log(msg, "SERVER")
         method = msg.get("method")
         result = msg.get("result")
         error = msg.get("error")
@@ -1161,6 +1192,15 @@ class LanguageServerProxy(ABC):
         for handler in self._notification_handlers.get(method, []):
             expected_params_type = _get_function_arg_type(handler)
             handler(_convert_from_json_value(params, expected_params_type))
+
+    def _get_communication_log_path(self) -> str:
+        return os.path.join(get_thonny_user_dir(), "lsp_communication.log")
+
+    def _add_to_communication_log(self, msg: Dict, sender: str) -> None:
+        with open(self._get_communication_log_path(), mode="ta") as fp:
+            fp.write(f"[[[ FROM {sender} ]]]\n")
+            fp.write(json.dumps(msg, indent=4, sort_keys=True))
+            fp.write("\n")
 
 
 def _read_json_rpc_message(proc: subprocess.Popen) -> Optional[Dict]:
