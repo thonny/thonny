@@ -15,6 +15,7 @@ from thonny.misc_utils import (
     get_menu_char,
     get_os_level_favorite_folders,
     is_local_project_dir,
+    is_local_venv_dir,
     running_on_windows,
     sizeof_fmt,
 )
@@ -1305,7 +1306,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         return is_local_project_dir(path)
 
     def is_venv_dir(self, path: str) -> bool:
-        return os.path.isfile(os.path.join(path, "pyvenv.cfg"))
+        return is_local_venv_dir(path)
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):

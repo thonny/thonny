@@ -185,6 +185,9 @@ class LocalCPythonProxy(SubprocessProxy):
     def has_local_interpreter(self):
         return True
 
+    def interpreter_is_cpython_compatible(self) -> bool:
+        return True
+
     def can_debug(self) -> bool:
         return True
 

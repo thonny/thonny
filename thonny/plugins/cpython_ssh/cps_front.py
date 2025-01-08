@@ -173,6 +173,9 @@ class SshCPythonProxy(SubprocessProxy):
     def has_local_interpreter(self):
         return False
 
+    def interpreter_is_cpython_compatible(self) -> bool:
+        return True
+
     @classmethod
     def is_valid_configuration(cls, conf: Dict[str, Any]) -> bool:
         return True

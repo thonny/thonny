@@ -91,6 +91,9 @@ class MicroPythonProxy(SubprocessProxy):
     def has_local_interpreter(self):
         return False
 
+    def interpreter_is_cpython_compatible(self) -> bool:
+        return False
+
     def can_debug(self) -> bool:
         return False
 
@@ -285,6 +288,9 @@ class MicroPythonProxy(SubprocessProxy):
 
     def needs_disconnect_button(self):
         return True
+
+    def get_typeshed_path(self) -> Optional[str]:
+        return os.path.join(os.path.dirname(__file__), "typeshed")
 
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):

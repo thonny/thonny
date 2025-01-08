@@ -1,3 +1,4 @@
+import os.path
 from logging import getLogger
 from typing import List, Optional
 
@@ -65,6 +66,9 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
     @classmethod
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID
+
+    def get_typeshed_path(self) -> Optional[str]:
+        return os.path.join(os.path.dirname(__file__), "typeshed")
 
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.circuitpython.cirpy_back

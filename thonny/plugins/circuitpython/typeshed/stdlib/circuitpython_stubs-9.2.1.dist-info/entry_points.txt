@@ -1,0 +1,2 @@
+[console_scripts]
+circuitpython_setboard = circuitpython_setboard:set_board

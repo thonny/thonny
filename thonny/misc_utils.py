@@ -30,7 +30,7 @@ PLACEHOLDER_URI = f"{UNTITLED_URI_SCHEME}:0"
 
 REMOTE_PATH_MARKER = " :: "
 
-PROJECT_MARKERS = ["pyproject.toml", "setup.cfg", "setup.py"]
+PROJECT_MARKERS = ["pyproject.toml", "setup.cfg", "setup.py", ".python-version", "Pipfile"]
 
 
 logger = getLogger(__name__)
@@ -863,3 +863,37 @@ def is_local_project_dir(path: str) -> bool:
             return True
 
     return False
+
+
+def is_local_venv_dir(path: str) -> bool:
+    if not os.path.isdir(path):
+        return False
+
+    return os.path.isfile(os.path.join(path, "pyvenv.cfg"))
+
+
+def get_project_venv_interpreters(project_path: str) -> List[str]:
+    if not os.path.isdir(project_path):
+        return []
+
+    # TODO: try find Pyenv, Pipenv and Poetry interpreters
+
+    name_ranking = [".venv", "venv", ".env"]
+
+    exe_candidates = []
+    for name in os.listdir(project_path):
+        venv_candidate = os.path.join(project_path, name)
+        if ("venv" in name or ".env" in name) and is_local_venv_dir(venv_candidate):
+            if os.name == "nt":
+                exe_candidate = os.path.join(venv_candidate, "Scripts", "python.exe")
+            else:
+                exe_candidate = os.path.join(venv_candidate, "bin", "python")
+
+            if os.path.isfile(exe_candidate):
+                if name in name_ranking:
+                    rank = name_ranking.index(name)
+                else:
+                    rank = 10
+                exe_candidates.append((rank, exe_candidate))
+
+    return [candidate for _, candidate in sorted(exe_candidates)]

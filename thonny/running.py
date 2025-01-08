@@ -1004,6 +1004,9 @@ class BackendProxy(ABC):
     def has_local_interpreter(self): ...
 
     @abstractmethod
+    def interpreter_is_cpython_compatible(self) -> bool: ...
+
+    @abstractmethod
     def get_target_executable(self) -> Optional[str]:
         """Returns `sys.executable` if the interpreter has it."""
 
@@ -1141,6 +1144,9 @@ class BackendProxy(ABC):
     @classmethod
     def get_user_stubs_location(cls):
         return os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
+
+    def get_typeshed_path(self) -> Optional[str]:
+        return None
 
     def get_machine_id(self) -> str:
         return "localhost"

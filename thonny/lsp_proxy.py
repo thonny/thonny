@@ -91,11 +91,20 @@ class LanguageServerProxy(ABC):
         self._keep_processing_messages_from_server()
         threading.Thread(target=self._listen_stdout, daemon=True).start()
         threading.Thread(target=self._listen_stderr, daemon=True).start()
+
         logger.info("Initializing language server")
+        if isinstance(initialize_params, dict):
+            initialize_params["initializationOptions"] = self.get_settings()
+        else:
+            assert isinstance(initialize_params, lsp_types.InitializeParams)
+            initialize_params.initializationOptions = self.get_settings()
         self._request_initialize(initialize_params, self._handle_initialize_response)
 
         # keep the cache of latest diagnostics TODO: do I need it?
         self.bind_publish_diagnostics(self._collect_diagnostics)
+
+        # TODO: not really required, but let it be, maybe it becomes handy later
+        self.bind_configuration(self._handle_configuration)
 
     @abstractmethod
     def _create_server_process(self) -> subprocess.Popen[bytes]: ...
@@ -112,6 +121,11 @@ class LanguageServerProxy(ABC):
 
         get_workbench().event_generate("LanguageServerInitialized", self)
 
+        # Specifying settings as initializationOptions is not enough
+        self.notify_workspace_did_change_configuration(
+            DidChangeConfigurationParams(settings=self.get_settings())
+        )
+
     def is_ready(self) -> bool:
         return self._server_process_alive() and self.server_capabilities is not None
 
@@ -127,6 +141,9 @@ class LanguageServerProxy(ABC):
         if not self._invalidated:
             self._invalidated = True
             get_workbench().event_generate("LanguageServerInvalidated", self)
+
+    def get_settings(self) -> Dict:
+        return {}
 
     def shut_down(self):
         self._invalidate()

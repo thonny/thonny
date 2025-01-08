@@ -63,6 +63,7 @@ from thonny.lsp_types import (
     SymbolKinds,
     TextDocumentClientCapabilities,
     TextDocumentSyncClientCapabilities,
+    TraceValues,
     WindowClientCapabilities,
     WorkspaceClientCapabilities,
     WorkspaceFolder,
@@ -71,6 +72,7 @@ from thonny.misc_utils import (
     copy_to_clipboard,
     get_menu_char,
     is_editor_supported_uri,
+    is_local_project_dir,
     running_on_linux,
     running_on_mac_os,
     running_on_rpi,
@@ -515,6 +517,7 @@ class Workbench(tk.Tk):
                         uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
                     ),
                 ],
+                trace=TraceValues.Verbose if self.in_debug_mode() else TraceValues.Messages,
             )
         )
 
@@ -1929,6 +1932,15 @@ class Workbench(tk.Tk):
             return normpath_with_actual_case(cwd)
         else:
             return normpath_with_actual_case(os.path.expanduser("~"))
+
+    def get_local_project_path(self) -> Optional[str]:
+        dir_path = self.get_local_cwd()
+
+        while dir_path and dir_path[-1] not in ["/", "\\", ":"]:
+            if is_local_project_dir(dir_path):
+                return dir_path
+
+        return None
 
     def set_local_cwd(self, value: str) -> None:
         if self.get_option("run.working_directory") != value:

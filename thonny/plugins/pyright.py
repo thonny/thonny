@@ -3,15 +3,62 @@ import shutil
 import subprocess
 import sys
 from logging import getLogger
+from typing import Dict
 
-from thonny import get_workbench
+from thonny import get_runner, get_workbench
 from thonny.common import UserError
 from thonny.lsp_proxy import LanguageServerProxy
+from thonny.misc_utils import get_project_venv_interpreters
 
 logger = getLogger(__name__)
 
 
 class PyrightProxy(LanguageServerProxy):
+
+    def get_settings(self) -> Dict:
+        proxy = get_runner().get_backend_proxy()
+        if proxy is None:
+            return {}
+
+        result = {
+            "python": {},
+            "basedpyright": {
+                "analysis": {
+                    "diagnosticMode": "openFilesOnly",
+                    "diagnosticSeverityOverrides": {},
+                    "logLevel": "Information",  # "Error", "Warning", "Information", "Trace"
+                }
+            },
+        }
+
+        project_path = get_workbench().get_local_project_path()
+        if project_path is None:
+            base_path = project_path
+        else:
+            base_path = get_workbench().get_local_cwd()
+
+        if (
+            proxy.interpreter_is_cpython_compatible()
+            and proxy.has_local_interpreter()
+            and proxy.get_target_executable()
+        ):
+            result["python"]["pythonPath"] = proxy.get_target_executable()
+        elif project_path is not None:
+            # may have a dev-venv in project directory
+            venv_interpreters = get_project_venv_interpreters(project_path)
+            if venv_interpreters:
+                result["python"]["pythonPath"] = venv_interpreters[0]
+
+        if not proxy.interpreter_is_cpython_compatible() or not proxy.has_local_interpreter():
+            # MicroPython stdlib and frozen modules have only stubs, so the modules won't have source
+            result["basedpyright"]["analysis"]["diagnosticSeverityOverrides"][
+                "reportMissingModuleSource"
+            ] = "none"
+
+        if proxy.get_typeshed_path():
+            result["basedpyright"]["analysis"]["typeshedPaths"] = [proxy.get_typeshed_path()]
+
+        return result
 
     def _create_server_process(self) -> subprocess.Popen[bytes]:
         node_path = self._get_node_path()
@@ -31,6 +78,14 @@ class PyrightProxy(LanguageServerProxy):
             startupinfo = None
             creationflags = 0
 
+        env = {
+            key: os.environ[key]
+            for key in os.environ
+            if not key.startswith("PYTHON") and key != "VIRTUAL_ENV"
+        }
+        for key in env:
+            logger.info("Pyright env: %s=%r", key, env.get(key))
+
         return subprocess.Popen(
             [node_path, langserv_js, "--stdio"],
             executable=node_path,
@@ -40,6 +95,7 @@ class PyrightProxy(LanguageServerProxy):
             creationflags=creationflags,
             startupinfo=startupinfo,
             universal_newlines=False,
+            env=env,
         )
 
     def _get_node_path(self) -> str:
