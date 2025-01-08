@@ -14,6 +14,7 @@ from thonny.misc_utils import (
     format_date_and_time_compact,
     get_menu_char,
     get_os_level_favorite_folders,
+    is_local_project_dir,
     running_on_windows,
     sizeof_fmt,
 )
@@ -93,6 +94,7 @@ class BaseFileBrowser(ttk.Frame):
             yscrollcommand=self.vert_scrollbar.set,
             selectmode="extended",
         )
+        self.tree.tag_configure("project", font="BoldTkDefaultFont")
         self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
@@ -164,6 +166,7 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.set_read_only(True)
         self.path_bar.bind("<Configure>", self.resize_path_bar, True)
         self.path_bar.tag_configure("dir", foreground=self.get_url_foreground())
+        self.path_bar.tag_configure("project", font="BoldTkDefaultFont")
         self.path_bar.tag_configure("underline", underline=True)
 
         def get_dir_range(event):
@@ -255,7 +258,11 @@ class BaseFileBrowser(ttk.Frame):
                     self.path_bar.direct_insert("end", self.get_dir_separator())
                     self.path_bar.window_create("end", window=create_spacer())
 
-                self.path_bar.direct_insert("end", part, tags=("dir",))
+                tags = ("dir",)
+                partial_path = self.path_bar.get("2.0", "end").strip() + part
+                if self.is_project_dir(partial_path):
+                    tags += ("project",)
+                self.path_bar.direct_insert("end", part, tags=tags)
 
         self.building_breadcrumbs = False
         self.resize_path_bar()
@@ -510,9 +517,14 @@ class BaseFileBrowser(ttk.Frame):
             # add missing children
             for name in fs_children_names:
                 if name not in children:
-                    child_id = self.tree.insert(node_id, "end")
+                    child_path = self.join(path, name)
+                    if self.is_project_dir(child_path):
+                        tags = ("project",)
+                    else:
+                        tags = ()
+                    child_id = self.tree.insert(node_id, "end", tags=tags)
                     children[name] = child_id
-                    self.tree.set(children[name], "path", self.join(path, name))
+                    self.tree.set(children[name], "path", child_path)
                     self.update_node_data(child_id, name, children_data[name])
 
             def file_order(name):
@@ -1077,6 +1089,9 @@ class BaseFileBrowser(ttk.Frame):
         self.unbind("<<ThemeChanged>>", self._on_theme_changed_binding)
         super().destroy()
 
+    def is_project_dir(self, path: str) -> bool:
+        return False
+
 
 class CopyPaste(object):
     def __init__(self, filebrowser):
@@ -1276,6 +1291,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             raise UserError(tr("File already exists"))
 
         os.rename(old_name, full_path)
+
+    def is_project_dir(self, path: str) -> bool:
+        return is_local_project_dir(path)
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):

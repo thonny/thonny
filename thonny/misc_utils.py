@@ -30,6 +30,9 @@ PLACEHOLDER_URI = f"{UNTITLED_URI_SCHEME}:0"
 
 REMOTE_PATH_MARKER = " :: "
 
+PROJECT_MARKERS = ["pyproject.toml", "setup.cfg", "setup.py"]
+
+
 logger = getLogger(__name__)
 
 
@@ -849,3 +852,14 @@ def format_untitled_uri(uri: str) -> str:
 
 def make_legacy_remote_path(target_path):
     return get_runner().get_node_label() + REMOTE_PATH_MARKER + target_path
+
+
+def is_local_project_dir(path: str) -> bool:
+    if not os.path.isdir(path):
+        return False
+
+    for marker in PROJECT_MARKERS:
+        if os.path.exists(os.path.join(path, marker)):
+            return True
+
+    return False
