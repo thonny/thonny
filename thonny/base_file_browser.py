@@ -95,6 +95,7 @@ class BaseFileBrowser(ttk.Frame):
             selectmode="extended",
         )
         self.tree.tag_configure("project", font="BoldTkDefaultFont")
+        self.tree.tag_configure("venv", font="ItalicTkDefaultFont")
         self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
@@ -167,6 +168,7 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.bind("<Configure>", self.resize_path_bar, True)
         self.path_bar.tag_configure("dir", foreground=self.get_url_foreground())
         self.path_bar.tag_configure("project", font="BoldTkDefaultFont")
+        self.path_bar.tag_configure("venv", font="ItalicTkDefaultFont")
         self.path_bar.tag_configure("underline", underline=True)
 
         def get_dir_range(event):
@@ -262,6 +264,8 @@ class BaseFileBrowser(ttk.Frame):
                 partial_path = self.path_bar.get("2.0", "end").strip() + part
                 if self.is_project_dir(partial_path):
                     tags += ("project",)
+                elif self.is_venv_dir(partial_path):
+                    tags += ("venv",)
                 self.path_bar.direct_insert("end", part, tags=tags)
 
         self.building_breadcrumbs = False
@@ -520,6 +524,8 @@ class BaseFileBrowser(ttk.Frame):
                     child_path = self.join(path, name)
                     if self.is_project_dir(child_path):
                         tags = ("project",)
+                    elif self.is_venv_dir(child_path):
+                        tags = "venv"
                     else:
                         tags = ()
                     child_id = self.tree.insert(node_id, "end", tags=tags)
@@ -1092,6 +1098,9 @@ class BaseFileBrowser(ttk.Frame):
     def is_project_dir(self, path: str) -> bool:
         return False
 
+    def is_venv_dir(self, path: str) -> bool:
+        return False
+
 
 class CopyPaste(object):
     def __init__(self, filebrowser):
@@ -1294,6 +1303,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
     def is_project_dir(self, path: str) -> bool:
         return is_local_project_dir(path)
+
+    def is_venv_dir(self, path: str) -> bool:
+        return os.path.isfile(os.path.join(path, "pyvenv.cfg"))
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
