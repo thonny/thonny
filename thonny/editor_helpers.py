@@ -5,15 +5,7 @@ from typing import List, Optional, Tuple, Union
 
 from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag
-from thonny.common import SignatureInfo, SignatureParameter
-from thonny.editors import Editor
-from thonny.lsp_types import (
-    CompletionItem,
-    CompletionItemKind,
-    MarkupContent,
-    MarkupKind,
-    SignatureInformation,
-)
+from thonny.lsp_types import CompletionItem, MarkupContent, MarkupKind
 from thonny.misc_utils import running_on_mac_os
 from thonny.shell import ShellText
 from thonny.tktextext import TextFrame

@@ -30,7 +30,7 @@ It's a really nice language for teaching programming. It also has some nice tech
 Libraries, resources and tools
 ------------------------------
 * asttokens (https://github.com/gristlabs/asttokens) provides source locations to AST nodes.
-* jedi (http://jedi.readthedocs.io) is used for code completion, go to definition, etc.
+* basedpyright (https://docs.basedpyright.com/latest/) is used for code completion, go to definition, diagnostics etc.
 * pylint (https://www.pylint.org/) is used as one of the engines behind warnings presented by the Assistant.
 * mypy (http://mypy-lang.org/) is used, just like pylint, as a warning engine in the Assistant.
 * pyserial (https://github.com/pyserial/pyserial) is used for communicating with MicroPython devices.

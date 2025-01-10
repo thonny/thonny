@@ -18,11 +18,7 @@ logger = getLogger("thonny.plugins.micropython.rp2040_backend")
 
 
 class RP2040Backend(BareMetalMicroPythonBackend):
-    def _get_sys_path_for_analysis(self) -> Optional[List[str]]:
-        return [
-            self.get_user_stubs_location(),
-            os.path.join(os.path.dirname(__file__), "api_stubs"),
-        ] + super()._get_sys_path_for_analysis()
+    pass
 
 
 if __name__ == "__main__":

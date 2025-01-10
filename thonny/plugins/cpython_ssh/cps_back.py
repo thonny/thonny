@@ -183,7 +183,6 @@ class SshCPythonBackend(BaseBackend, SshMixin):
 
         import thonny.ast_utils
         import thonny.backend
-        import thonny.jedi_utils
         import thonny.plugins.cpython_backend.cp_back
 
         # Don't want to import cp_back_launcher and cp_tracers
@@ -193,7 +192,6 @@ class SshCPythonBackend(BaseBackend, SshMixin):
             thonny.__file__,
             thonny.common.__file__,
             thonny.ast_utils.__file__,
-            thonny.jedi_utils.__file__,
             thonny.backend.__file__,
             thonny.backend.__file__.replace("backend.py", "VERSION"),
             thonny.plugins.cpython_backend.__file__,

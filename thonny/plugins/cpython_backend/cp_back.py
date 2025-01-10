@@ -885,8 +885,6 @@ class MainCPythonBackend(MainBackend):
 
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
-        if isinstance(msg, ToplevelResponse):
-            self._check_load_jedi()
 
     def export_value(self, value, max_repr_length=5000):
         self._heap[id(value)] = value

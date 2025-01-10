@@ -37,6 +37,8 @@ class PyrightProxy(LanguageServerProxy):
         else:
             base_path = get_workbench().get_local_cwd()
 
+        typings_path = os.path.join(base_path, "typings")
+
         if (
             proxy.interpreter_is_cpython_compatible()
             and proxy.has_local_interpreter()

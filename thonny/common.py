@@ -419,45 +419,6 @@ def update_system_path(env, value):
         env["PATH"] = value
 
 
-@dataclass
-class SignatureParameter:
-    kind: str
-    name: str
-    annotation: Optional[str]
-    default: Optional[str]
-
-
-@dataclass
-class SignatureInfo:
-    name: str
-    params: List[SignatureParameter]
-    return_type: Optional[str]
-    current_param_index: Optional[int] = None
-    call_bracket_start: Optional[Tuple[int, int]] = None
-
-
-@dataclass
-class CompletionInfo:
-    name: str
-    name_with_symbols: str
-    full_name: str
-    type: str
-    prefix_length: int  # the number of chars to be deleted before inserting name
-    signatures: Optional[List[SignatureInfo]]
-    docstring: Optional[str]
-    module_name: Optional[str]
-    module_path: Optional[str]
-
-
-@dataclass
-class NameReference:
-    module_name: str
-    module_path: str
-    row: int
-    column: int
-    length: int
-
-
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
 

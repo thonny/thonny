@@ -12,6 +12,8 @@ import thonny
 from thonny import get_workbench
 from thonny.codeview import get_syntax_options_for_tag
 
+logger = getLogger(__name__)
+
 
 def create_bitmap_file(width, height, predicate, name):
     cache_dir = os.path.join(thonny.get_thonny_user_dir(), "image_cache")
@@ -147,7 +149,7 @@ def clear_tags(text):
 def add_tags(text):
     source = text.get("1.0", "end")
     clear_tags(text)
-    # tree = jedi_ utils.parse_source(source)
+    tree = ...  # TODO
 
     print_tree(tree)
     last_line = 0
