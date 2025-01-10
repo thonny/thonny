@@ -26,7 +26,8 @@ RELEVANT_FAMILIES = {
     "esp32c6",
     "esp32h2",
     "nrf52840",
-    "raspberrypi",
+    "rp2040",
+    "rp2350",
 }
 
 DAPLINK_BOARDS = {"microbit_v2", "makerdiary_nrf52840_mdk"}
@@ -83,7 +84,7 @@ for i, variant in enumerate(all_variants):
         prev_major_url = f"https://downloads.circuitpython.org/bin/{variant['_id']}/en_US/adafruit-circuitpython-{variant['_id']}-en_US-{PREV_RELEVANT_VERSION}.{extension}"
         add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
-    if variant["family"] == "raspberrypi":
+    if variant["family"] in ["rp2040", "rp2350"]:
         variant["family"] = "rp2"
     elif variant["family"].startswith("nrf52"):
         variant["family"] = "nrf52"
