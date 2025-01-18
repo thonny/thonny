@@ -1956,6 +1956,7 @@ class Workbench(tk.Tk):
         while dir_path and dir_path[-1] not in ["/", "\\", ":"]:
             if is_local_project_dir(dir_path):
                 return dir_path
+            dir_path = os.path.dirname(dir_path)
 
         return None
 
