@@ -151,7 +151,7 @@
 :inherit-non-class (E0239): *Inheriting %r, which is not a class.*
   Used when a class inherits from something which is not a class.
 :inconsistent-mro (E0240): *Inconsistent method resolution order for class %r*
-  Used when a class has an inconsistent method resolutin order.
+  Used when a class has an inconsistent method resolution order.
 :duplicate-bases (E0241): *Duplicate bases for class %r*
   Used when a class has duplicate bases.
 :non-iterator-returned (E0301): *__iter__ returns non-iterator*
