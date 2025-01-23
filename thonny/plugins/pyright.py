@@ -32,7 +32,8 @@ class PyrightProxy(LanguageServerProxy):
         }
 
         project_path = get_workbench().get_local_project_path()
-        if project_path is None:
+        logger.info("Detected project path: %s", project_path)
+        if project_path is not None:
             base_path = project_path
         else:
             base_path = get_workbench().get_local_cwd()
