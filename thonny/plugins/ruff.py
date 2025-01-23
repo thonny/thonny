@@ -19,4 +19,4 @@ class RuffProxy(LanguageServerProxy):
 
 
 def load_plugin():
-    get_workbench().add_language_server_proxy("Ruff", RuffProxy)
+    get_workbench().add_language_server_proxy_class(RuffProxy)

@@ -70,7 +70,7 @@ class OutlineView(ttk.Frame):
         if current_editor is None:
             return
 
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 

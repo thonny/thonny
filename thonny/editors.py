@@ -184,7 +184,10 @@ class BaseEditor(ttk.Frame):
 class Editor(BaseEditor):
     def __init__(self, master: "EditorNotebook", uri: str = PLACEHOLDER_URI):
         # initial uri is used when the editor is created for non-existent file
-        self._ls_proxy: Optional[LanguageServerProxy] = None
+        self._initialized_ls_proxies: List[LanguageServerProxy] = (
+            get_workbench().get_language_server_proxies()
+        )
+        self._primed_ls_proxies: List[LanguageServerProxy] = []
         self.containing_notebook: EditorNotebook = master
         super().__init__(master, uri, propose_remove_line_numbers=True)
         get_workbench().event_generate(
@@ -195,7 +198,7 @@ class Editor(BaseEditor):
         self._unpublished_incremental_changes = []
         self._content_at_server: Optional[str] = None  # for validating incremental updates
 
-        self._last_published_version: Optional[int] = None
+        self._last_fully_published_version: Optional[int] = None
 
         self._last_known_mtime = None
 
@@ -213,7 +216,7 @@ class Editor(BaseEditor):
         self.update_appearance()
 
         if self._uri != PLACEHOLDER_URI:
-            self._try_connect_to_language_server()
+            self._update_language_servers()
 
     def get_content(self, up_to_end=False) -> str:
         return self._code_view.get_content(up_to_end=up_to_end)
@@ -241,12 +244,12 @@ class Editor(BaseEditor):
     def set_uri(self, uri: str) -> None:
         old_uri = self._uri
         if old_uri != uri:
-            self._try_disconnect_from_language_server()
+            self._disconnect_from_language_servers()
 
         super().set_uri(uri)
         self.update_title()
         if old_uri != uri:
-            self._try_connect_to_language_server()
+            self._update_language_servers()
 
     def check_for_external_changes(self):
         if self.is_untitled() or self.is_remote():
@@ -336,7 +339,7 @@ class Editor(BaseEditor):
             )
             return False
 
-        self._try_connect_to_language_server()
+        self._update_language_servers()
         self.update_appearance()
         self._update_file_source()
         return True
@@ -622,15 +625,17 @@ class Editor(BaseEditor):
         self.containing_notebook.select(self)
 
     def close(self):
-        self._try_disconnect_from_language_server()
+        self._disconnect_from_language_servers()
         self.destroy()
 
-    def _try_disconnect_from_language_server(self) -> None:
-        if self._ls_proxy is not None:
-            self._ls_proxy.notify_did_close_text_document(
+    def _disconnect_from_language_servers(self) -> None:
+        for ls_proxy in self._primed_ls_proxies:
+            logger.info("Disconnecting from %s", ls_proxy)
+            ls_proxy.notify_did_close_text_document(
                 DidCloseTextDocumentParams(TextDocumentIdentifier(uri=self.get_uri()))
             )
-            self._ls_proxy = None
+
+        self._primed_ls_proxies = []
 
     def _listen_debugger_progress(self, event):
         # Go read-only
@@ -695,7 +700,7 @@ class Editor(BaseEditor):
 
         self._last_change_time = time.time()
 
-        if self._last_published_version is not None:
+        if self._last_fully_published_version is not None:
             # meaning the changes should be collected
             self._unpublished_incremental_changes.append(event)
 
@@ -737,52 +742,69 @@ class Editor(BaseEditor):
         else:
             self._file_source = "-"  # should not match any machine id
 
-    def _language_server_initialized(self, lsp: LanguageServerProxy) -> None:
-        self._try_connect_to_language_server()
+    def _language_server_initialized(self, ls_proxy: LanguageServerProxy) -> None:
+        logger.info("Registering initialized language server %s", ls_proxy)
+        self._initialized_ls_proxies.append(ls_proxy)
+        self._update_language_servers()
 
-    def _language_server_invalidated(self, lsp: LanguageServerProxy) -> None:
-        self._ls_proxy = None
+    def _language_server_invalidated(self, ls_proxy: LanguageServerProxy) -> None:
+        if ls_proxy in self._initialized_ls_proxies:
+            self._initialized_ls_proxies.remove(ls_proxy)
 
-    def _try_connect_to_language_server(self):
-        current_ls_proxy = get_workbench().get_language_server_proxy()
-        if self._ls_proxy == current_ls_proxy:
-            return
+        if ls_proxy in self._primed_ls_proxies:
+            self._primed_ls_proxies.remove(ls_proxy)
 
-        if current_ls_proxy is None:
-            logger.warning("Missed earlier language server invalidation, doing it now")
-            self._ls_proxy = None
-            return
+    def _get_version_to_be_published(self) -> int:
+        return (
+            1
+            if self._last_fully_published_version is None
+            else self._last_fully_published_version + 1
+        )
 
-        logger.info(f"Connecting {self.get_uri()} to language server")
-        version = 1
+    def _update_language_servers(self) -> None:
+        self.send_changes_to_primed_servers()
+
+        for ls_proxy in self._initialized_ls_proxies:
+            if ls_proxy not in self._primed_ls_proxies:
+                self._prime_language_server(ls_proxy)
+
+        self._unpublished_incremental_changes = []
+        self._content_at_server = self.get_content()
+        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
+        self._last_fully_published_version = self._get_version_to_be_published()
+
+    def _prime_language_server(self, ls_proxy: LanguageServerProxy) -> None:
+        logger.info("Connecting %r to language server %s", self.get_uri(), ls_proxy)
+        assert ls_proxy not in self._primed_ls_proxies
         current_content = self.get_content(up_to_end=True)
-        current_ls_proxy.notify_did_open_text_document(
+        ls_proxy.notify_did_open_text_document(
             DidOpenTextDocumentParams(
                 textDocument=TextDocumentItem(
-                    version=version,
+                    version=self._get_version_to_be_published(),
                     uri=self.get_uri(),
                     text=current_content,
                     languageId=self.get_language_id(),
                 )
             )
         )
-        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
-        self._last_published_version = version
-        self._ls_proxy = current_ls_proxy
-        self._unpublished_incremental_changes = []
-        self._content_at_server = current_content
+        self._primed_ls_proxies.append(ls_proxy)
 
     def _consider_sending_changes_to_server(self, event=None):
         time_since_last_change = time.time() - self._last_change_time
 
         if time_since_last_change >= DEBOUNCE_SECONDS:
-            self.send_changes_to_language_server()
+            self.send_changes_to_primed_servers()
         else:
             wait_time = DEBOUNCE_SECONDS - time_since_last_change
             self.after(int(wait_time * 1000), self._consider_sending_changes_to_server)
 
-    def send_changes_to_language_server(self) -> None:
+    def send_changes_to_primed_servers(self) -> None:
         if not self._unpublished_incremental_changes:
+            logger.debug("No unpublished changes")
+            return
+
+        if not self._primed_ls_proxies:
+            logger.debug("No primed proxies, not sending changes")
             return
 
         logger.debug("Merging changes from %s events", len(self._unpublished_incremental_changes))
@@ -834,25 +856,24 @@ class Editor(BaseEditor):
                 f" {assembled_content!r} vs {current_content!r}"
             )
 
-        version = self._last_published_version + 1
-        self._ls_proxy.notify_did_change_text_document(
-            DidChangeTextDocumentParams(
-                textDocument=VersionedTextDocumentIdentifier(version=version, uri=self.get_uri()),
-                contentChanges=[
-                    RangedTextDocumentContentChangeEvent(
-                        range=Range(
-                            start=Position(line=orig_zero_based_range_start_line, character=0),
-                            end=Position(line=orig_zero_based_range_end_line, character=0),
-                        ),
-                        text=replacement_text,
-                    )
-                ],
+        version = self._get_version_to_be_published()
+        for ls_proxy in self._primed_ls_proxies:
+            ls_proxy.notify_did_change_text_document(
+                DidChangeTextDocumentParams(
+                    textDocument=VersionedTextDocumentIdentifier(
+                        version=version, uri=self.get_uri()
+                    ),
+                    contentChanges=[
+                        RangedTextDocumentContentChangeEvent(
+                            range=Range(
+                                start=Position(line=orig_zero_based_range_start_line, character=0),
+                                end=Position(line=orig_zero_based_range_end_line, character=0),
+                            ),
+                            text=replacement_text,
+                        )
+                    ],
+                )
             )
-        )
-        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
-        self._last_published_version = version
-        self._unpublished_incremental_changes = []
-        self._content_at_server = assembled_content
 
     def get_language_id(self) -> str:
         return "python"  # TODO

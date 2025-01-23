@@ -45,14 +45,6 @@ JSON_RPC_TYPE_HEADER_PREFIX = b"Content-Type: "
 logger = getLogger(__name__)
 
 
-@dataclass
-class CompletionParams:
-    pass
-
-
-METHOD_PARAMS_AND_RESPONSES = {"textDocument/completion": (CompletionParams,)}
-
-
 class ResponseException(RuntimeError):
     def __init__(self, message: str, code: int = ErrorCodes.UnknownErrorCode, data: Any = None):
         super().__init__(message)

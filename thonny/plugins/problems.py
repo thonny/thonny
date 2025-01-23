@@ -133,7 +133,7 @@ class ProblemsView(TextFrame):
         self._try_bind_to_language_server()
 
     def _try_bind_to_language_server(self):
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
 
         if self._ls_proxy != ls_proxy:
             self._ls_proxy = ls_proxy

@@ -169,7 +169,7 @@ class Workbench(tk.Tk):
         self._is_portable = is_portable()
         self._event_queue = queue.Queue()  # Can be appended to by threads
         self._event_polling_id = None
-        self._active_lsp: Optional[LanguageServerProxy] = None
+        self._ls_proxies: List[LanguageServerProxy] = []
         self.initializing = True
 
         self._secrets: Dict[str, str] = {}
@@ -197,7 +197,7 @@ class Workbench(tk.Tk):
         )  # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
-        self._language_server_proxy_classes = {}  # type: Dict[str, Type[LanguageServerProxy]]
+        self._language_server_proxy_classes: List[Type[LanguageServerProxy]] = []
         self.assistants: Dict[str, assistance.Assistant] = {}
         self._commands = []  # type: List[Dict[str, Any]]
         self._notebook_drop_targets: List[tk.Widget] = []
@@ -444,104 +444,109 @@ class Workbench(tk.Tk):
         os.environ["THONNY_DEBUG"] = str(self.get_option("general.debug_mode", False))
         thonny.set_logging_level()
 
-    def get_language_server_proxy(self) -> Optional[LanguageServerProxy]:
-        return self._active_lsp
+    def get_main_language_server_proxy(self) -> Optional[LanguageServerProxy]:
+        assert self._ls_proxies
+        return self._ls_proxies[0]
 
-    def start_or_restart_language_server(self) -> None:
-        if self._active_lsp is not None:
-            self.shut_down_language_server()
+    def get_language_server_proxies(self) -> List[LanguageServerProxy]:
+        return self._ls_proxies
 
-        logger.info("Starting language server")
-        from thonny.plugins.pyright import PyrightProxy
+    def start_or_restart_language_servers(self) -> None:
+        self.shut_down_language_servers()
 
-        # from thonny.plugins.ruff import RuffProxy
-        self._active_lsp = PyrightProxy(
-            InitializeParams(
-                capabilities=ClientCapabilities(
-                    workspace=WorkspaceClientCapabilities(
-                        applyEdit=None,
-                        codeLens=None,
-                        fileOperations=None,
-                        inlineValue=None,
-                        inlayHint=None,
-                        diagnostics=None,
-                        # workspaceFolders=True, # TODO: This may require workspace/didChangeWorkspaceFolders to activate Pyright?
-                    ),
-                    textDocument=TextDocumentClientCapabilities(
-                        publishDiagnostics=PublishDiagnosticsClientCapabilities(
-                            relatedInformation=False
+        for class_ in self._language_server_proxy_classes:
+            logger.info("Constructing language server %s", class_)
+            ls_proxy = class_(
+                InitializeParams(
+                    capabilities=ClientCapabilities(
+                        workspace=WorkspaceClientCapabilities(
+                            applyEdit=None,
+                            codeLens=None,
+                            fileOperations=None,
+                            inlineValue=None,
+                            inlayHint=None,
+                            diagnostics=None,
+                            # workspaceFolders=True, # TODO: This may require workspace/didChangeWorkspaceFolders to activate Pyright?
                         ),
-                        synchronization=TextDocumentSyncClientCapabilities(),
-                        documentSymbol=DocumentSymbolClientCapabilities(
-                            symbolKind=SymbolKinds(
-                                [
-                                    SymbolKind.Enum,
-                                    SymbolKind.Class,
-                                    SymbolKind.Method,
-                                    SymbolKind.Property,
-                                    SymbolKind.Function,
-                                ]
+                        textDocument=TextDocumentClientCapabilities(
+                            publishDiagnostics=PublishDiagnosticsClientCapabilities(
+                                relatedInformation=False
                             ),
-                            hierarchicalDocumentSymbolSupport=True,
-                        ),
-                        completion=CompletionClientCapabilities(
-                            completionItem=CompletionClientCapabilitiesCompletionItem(
-                                snippetSupport=False,
-                                commitCharactersSupport=True,
-                                documentationFormat=None,  # TODO
-                                deprecatedSupport=False,  # TODO
-                                preselectSupport=True,
-                                insertReplaceSupport=True,
-                                labelDetailsSupport=False,
-                            ),
-                            completionItemKind=None,  # TODO
-                            insertTextMode=None,
-                            contextSupport=False,
-                            completionList=CompletionClientCapabilitiesCompletionList(
-                                itemDefaults=["commitCharacters"]
-                            ),
-                        ),
-                        signatureHelp=SignatureHelpClientCapabilities(
-                            signatureInformation=SignatureHelpClientCapabilitiesSignatureInformation(
-                                documentationFormat=[MarkupKind.PlainText, MarkupKind.Markdown],
-                                parameterInformation=SignatureHelpClientCapabilitiesParameterInformation(
-                                    labelOffsetSupport=True
+                            synchronization=TextDocumentSyncClientCapabilities(),
+                            documentSymbol=DocumentSymbolClientCapabilities(
+                                symbolKind=SymbolKinds(
+                                    [
+                                        SymbolKind.Enum,
+                                        SymbolKind.Class,
+                                        SymbolKind.Method,
+                                        SymbolKind.Property,
+                                        SymbolKind.Function,
+                                    ]
                                 ),
-                                activeParameterSupport=True,
-                            )
+                                hierarchicalDocumentSymbolSupport=True,
+                            ),
+                            completion=CompletionClientCapabilities(
+                                completionItem=CompletionClientCapabilitiesCompletionItem(
+                                    snippetSupport=False,
+                                    commitCharactersSupport=True,
+                                    documentationFormat=None,  # TODO
+                                    deprecatedSupport=False,  # TODO
+                                    preselectSupport=True,
+                                    insertReplaceSupport=True,
+                                    labelDetailsSupport=False,
+                                ),
+                                completionItemKind=None,  # TODO
+                                insertTextMode=None,
+                                contextSupport=False,
+                                completionList=CompletionClientCapabilitiesCompletionList(
+                                    itemDefaults=["commitCharacters"]
+                                ),
+                            ),
+                            signatureHelp=SignatureHelpClientCapabilities(
+                                signatureInformation=SignatureHelpClientCapabilitiesSignatureInformation(
+                                    documentationFormat=[MarkupKind.PlainText, MarkupKind.Markdown],
+                                    parameterInformation=SignatureHelpClientCapabilitiesParameterInformation(
+                                        labelOffsetSupport=True
+                                    ),
+                                    activeParameterSupport=True,
+                                )
+                            ),
+                            definition=DefinitionClientCapabilities(linkSupport=True),
+                            documentHighlight=DocumentHighlightClientCapabilities(),
                         ),
-                        definition=DefinitionClientCapabilities(linkSupport=True),
-                        documentHighlight=DocumentHighlightClientCapabilities(),
+                        notebookDocument=None,
+                        window=WindowClientCapabilities(
+                            workDoneProgress=None,
+                            showMessage=None,
+                            showDocument=None,
+                        ),
+                        general=GeneralClientCapabilities(
+                            staleRequestSupport=None,
+                            regularExpressions=None,
+                            markdown=None,
+                            positionEncodings=[PositionEncodingKind.UTF16],
+                        ),
                     ),
-                    notebookDocument=None,
-                    window=WindowClientCapabilities(
-                        workDoneProgress=None,
-                        showMessage=None,
-                        showDocument=None,
-                    ),
-                    general=GeneralClientCapabilities(
-                        staleRequestSupport=None,
-                        regularExpressions=None,
-                        markdown=None,
-                        positionEncodings=[PositionEncodingKind.UTF16],
-                    ),
-                ),
-                processId=os.getpid(),
-                clientInfo=ClientInfo(name="Thonny", version=thonny.get_version()),
-                locale=self.get_option("general.language"),
-                workspaceFolders=[
-                    WorkspaceFolder(
-                        uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
-                    ),
-                ],
-                trace=TraceValues.Verbose if self.in_debug_mode() else TraceValues.Messages,
+                    processId=os.getpid(),
+                    clientInfo=ClientInfo(name="Thonny", version=thonny.get_version()),
+                    locale=self.get_option("general.language"),
+                    workspaceFolders=[
+                        WorkspaceFolder(
+                            uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
+                        ),
+                    ],
+                    trace=TraceValues.Verbose if self.in_debug_mode() else TraceValues.Messages,
+                )
             )
-        )
 
-    def shut_down_language_server(self):
-        if self._active_lsp is not None:
-            logger.info("Shutting down language server")
-            self._active_lsp.shut_down()
+            self._ls_proxies.append(ls_proxy)
+
+    def shut_down_language_servers(self):
+        for ls_proxy in self._ls_proxies:
+            logger.info("Shutting down language server %s", ls_proxy)
+            ls_proxy.shut_down()
+
+        self._ls_proxies = []
 
     def _init_language(self) -> None:
         """Initialize language."""
@@ -1243,7 +1248,7 @@ class Workbench(tk.Tk):
         self._backend_button.configure(text=desc + "  " + get_menu_char())
         self._update_connection_button()
 
-        self.start_or_restart_language_server()
+        self.start_or_restart_language_servers()
 
     def _on_backend_terminated(self, event):
         self._update_connection_button()
@@ -1576,8 +1581,8 @@ class Workbench(tk.Tk):
     def add_assistant(self, name: str, assistant: assistance.Assistant):
         self.assistants[name.lower()] = assistant
 
-    def add_language_server_proxy(self, name: str, proxy_class: Type[LanguageServerProxy]):
-        self._language_server_proxy_classes[name] = proxy_class
+    def add_language_server_proxy_class(self, proxy_class: Type[LanguageServerProxy]):
+        self._language_server_proxy_classes.append(proxy_class)
 
     def add_backend(
         self,
@@ -2802,7 +2807,7 @@ class Workbench(tk.Tk):
             return
 
         self._closing = True
-        self.shut_down_language_server()
+        self.shut_down_language_servers()
         try:
             from thonny.plugins import replayer
 
