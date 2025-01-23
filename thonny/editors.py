@@ -185,7 +185,7 @@ class Editor(BaseEditor):
     def __init__(self, master: "EditorNotebook", uri: str = PLACEHOLDER_URI):
         # initial uri is used when the editor is created for non-existent file
         self._initialized_ls_proxies: List[LanguageServerProxy] = (
-            get_workbench().get_language_server_proxies()
+            get_workbench().get_initialized_ls_proxies()
         )
         self._primed_ls_proxies: List[LanguageServerProxy] = []
         self.containing_notebook: EditorNotebook = master

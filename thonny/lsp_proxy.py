@@ -118,11 +118,11 @@ class LanguageServerProxy(ABC):
             DidChangeConfigurationParams(settings=self.get_settings())
         )
 
-    def is_ready(self) -> bool:
+    def is_initialized(self) -> bool:
         return self._server_process_alive() and self.server_capabilities is not None
 
-    def _check_ready(self) -> None:
-        if not self.is_ready():
+    def _check_initialized(self) -> None:
+        if not self.is_initialized():
             if not self._server_process_alive():
                 raise RuntimeError("Server has been closed")
 
@@ -1062,7 +1062,7 @@ class LanguageServerProxy(ABC):
         self, method: str, params: Any, handler: Callable[[LspResponse[Any]], None]
     ) -> None:
         if method != "initialize":
-            self._check_ready()
+            self._check_initialized()
 
         request_id = self._last_request_id + 1
         self._last_request_id = request_id
@@ -1077,7 +1077,7 @@ class LanguageServerProxy(ABC):
         )
 
     def _send_notification(self, method: str, params: Any) -> None:
-        self._check_ready()
+        self._check_initialized()
 
         self._send_json_rpc_message(
             {"jsonrpc": "2.0", "method": method, "params": _convert_to_json_value(params)}
@@ -1086,7 +1086,7 @@ class LanguageServerProxy(ABC):
     def _send_response(
         self, request_id: Union[str, int], result: Any, error: Optional[ResponseError] = None
     ) -> None:
-        self._check_ready()
+        self._check_initialized()
 
         msg = {
             "jsonrpc": "2.0",
@@ -1102,7 +1102,7 @@ class LanguageServerProxy(ABC):
         if get_workbench().in_debug_mode():
             self._add_to_communication_log(msg, "CLIENT")
         json_bytes = json.dumps(msg).encode("utf-8")
-        print("SEnding", json_bytes)
+        # print("SEnding", json_bytes)
         self._proc.stdin.write(JSON_RPC_LEN_HEADER_PREFIX)
         self._proc.stdin.write(str(len(json_bytes)).encode("utf-8"))
         self._proc.stdin.write(b"\r\n\r\n")
