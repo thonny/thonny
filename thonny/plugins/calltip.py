@@ -127,7 +127,7 @@ class Calltipper:
         self.request_calltip_for_text(text)
 
     def request_calltip_for_text(self, text: SyntaxText) -> None:
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 
@@ -137,7 +137,7 @@ class Calltipper:
             editor = text.master.master
             assert isinstance(editor, Editor)
 
-            editor.send_changes_to_language_server()
+            editor.send_changes_to_primed_servers()
             uri = editor.get_uri()
             position = editor_helpers.get_cursor_ls_position(text)
         elif isinstance(text, ShellText):

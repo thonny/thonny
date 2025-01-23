@@ -66,7 +66,7 @@ class OccurrencesHighlighter:
     def _request(self):
         self._clear()
 
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 

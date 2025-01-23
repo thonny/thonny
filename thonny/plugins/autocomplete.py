@@ -307,7 +307,7 @@ class CompletionsBox(EditorInfoBox):
 
         self._details_box.set_content(completion)
 
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is not None:
             # TODO: cancel previous request
             ls_proxy.unbind_request_handler(self._handle_details_response)
@@ -471,13 +471,13 @@ class Completer:
         return True
 
     def cancel_active_request(self) -> None:
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is not None:
             # TODO: actually cancel
             ls_proxy.unbind_request_handler(self._handle_completions_response)
 
     def request_completions_for_text(self, text: SyntaxText) -> None:
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 
@@ -496,7 +496,7 @@ class Completer:
                 logger.warning("Unexpected completions request in %r", text)
                 return
 
-            editor.send_changes_to_language_server()
+            editor.send_changes_to_primed_servers()
             uri = editor.get_uri()
             position = editor_helpers.get_cursor_ls_position(text)
 

@@ -1721,7 +1721,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return pathlib.Path(path).as_uri()
 
     def send_changes_to_language_server(self) -> None:
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 

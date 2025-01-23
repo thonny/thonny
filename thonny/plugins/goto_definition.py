@@ -41,7 +41,7 @@ class GotoHandler:
             return  # TODO
         pos = get_cursor_ls_position(text)
 
-        ls_proxy = get_workbench().get_language_server_proxy()
+        ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
 

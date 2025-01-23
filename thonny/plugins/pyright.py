@@ -122,4 +122,4 @@ class PyrightProxy(LanguageServerProxy):
 
 
 def load_plugin():
-    get_workbench().add_language_server_proxy("Pyright", PyrightProxy)
+    get_workbench().add_language_server_proxy_class(PyrightProxy)
