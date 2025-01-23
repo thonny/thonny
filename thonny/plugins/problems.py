@@ -1,6 +1,7 @@
 import tkinter.font as tk_font
+from dataclasses import dataclass
 from logging import getLogger
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from thonny import get_workbench
 from thonny.codeview import get_syntax_options_for_tag
@@ -16,14 +17,23 @@ logger = getLogger(__name__)
 ITEM_PREFIX = " • "
 
 
+@dataclass
+class DiagnosticWithProxy:
+    diagnostic: Diagnostic
+    ls_proxy: LanguageServerProxy
+
+
 class ProblemsView(TextFrame):
     def __init__(self, master):
         super().__init__(master, horizontal_scrollbar=False, wrap="word", font="TkDefaultFont")
+        self._current_diagnostics_per_uri: Dict[str, List[DiagnosticWithProxy]] = {}
 
-        self._ls_proxy: Optional[LanguageServerProxy] = None
-
-        get_workbench().bind("LanguageServerInitialized", self._language_server_initialized, True)
-        get_workbench().bind("LanguageServerInvalidated", self._language_server_invalidated, True)
+        for ls_proxy in get_workbench().get_initialized_ls_proxies():
+            self._connect_to_language_server(ls_proxy)
+        get_workbench().bind("LanguageServerInitialized", self._connect_to_language_server, True)
+        get_workbench().bind(
+            "LanguageServerInvalidated", self._disconnect_from_language_server, True
+        )
 
         base_font = tk_font.nametofont("TkDefaultFont")
         link_font = tk_font.nametofont("LinkFont")
@@ -70,7 +80,7 @@ class ProblemsView(TextFrame):
 
         self.text.direct_delete(start, end)
 
-    def _add_uri_block(self, uri: str, diagnostics: List[Diagnostic]) -> None:
+    def _add_uri_block(self, uri: str, diagnostics: List[DiagnosticWithProxy]) -> None:
 
         this_title = uri_to_long_title(uri)
 
@@ -92,7 +102,7 @@ class ProblemsView(TextFrame):
         self._insert_uri_block(uri, this_title, diagnostics, next_title_start)
 
     def _insert_uri_block(
-        self, uri: str, title: str, diagnostics: List[Diagnostic], start_index
+        self, uri: str, title: str, diagnostics: List[DiagnosticWithProxy], start_index
     ) -> None:
         mark = "insertion_point"
 
@@ -110,12 +120,14 @@ class ProblemsView(TextFrame):
         append_editor_link(title, uri, None, ("path",))
         append("\n")
 
-        for diagnostic in diagnostics:
+        for ds in diagnostics:
+            diagnostic = ds.diagnostic
             message = diagnostic.message.replace("\n\xa0\xa0", ". ")
             message_lines = message.splitlines()
             first_line_tags = ("diagnostics_first_line",)
             append(ITEM_PREFIX, first_line_tags)
             line = diagnostic.range.start.line + 1  # LSP uses 0-based numbering
+            append(f"{type(ds.ls_proxy).__name__} => ")
             append_editor_link(tr("Line") + f" {line}", uri, line, first_line_tags)
             append(" : ", first_line_tags)
             append(message_lines[0] + "\n", first_line_tags)
@@ -124,23 +136,29 @@ class ProblemsView(TextFrame):
 
         append("\n")
 
-    def _handle_diagnostics_notification(self, params: PublishDiagnosticsParams) -> None:
+    def _handle_diagnostics_notification(
+        self, params: PublishDiagnosticsParams, ls_proxy: LanguageServerProxy
+    ) -> None:
+        # remove old diagnostics from the same server and add the new ones
+        current_diagnostics = self._current_diagnostics_per_uri.get(params.uri, [])
+        self._current_diagnostics_per_uri[params.uri] = list(
+            filter(lambda ds: ds.ls_proxy is not ls_proxy, current_diagnostics)
+        ) + [DiagnosticWithProxy(diagnostic, ls_proxy) for diagnostic in params.diagnostics]
+
         self._remove_uri_block(params.uri)
         if params.diagnostics:
-            self._add_uri_block(params.uri, params.diagnostics)
+            self._add_uri_block(params.uri, self._current_diagnostics_per_uri[params.uri])
 
-    def _language_server_initialized(self, ls_proxy: LanguageServerProxy) -> None:
-        self._try_bind_to_language_server()
+    def _connect_to_language_server(self, ls_proxy: LanguageServerProxy):
+        logger.info("Connecting to ls_proxy %s", ls_proxy)
 
-    def _try_bind_to_language_server(self):
-        ls_proxy = get_workbench().get_main_language_server_proxy()
+        def handle(params: PublishDiagnosticsParams) -> None:
+            self._handle_diagnostics_notification(params, ls_proxy)
 
-        if self._ls_proxy != ls_proxy:
-            self._ls_proxy = ls_proxy
-            self._ls_proxy.bind_publish_diagnostics(self._handle_diagnostics_notification)
+        ls_proxy.bind_publish_diagnostics(handle)
 
-    def _language_server_invalidated(self, ls_proxy: LanguageServerProxy) -> None:
-        self._ls_proxy = None
+    def _disconnect_from_language_server(self, ls_proxy: LanguageServerProxy) -> None:
+        logger.info("Disconnecting from ls_proxy %s", ls_proxy)
         ls_proxy.unbind_notification_handler(self._handle_diagnostics_notification)
 
 

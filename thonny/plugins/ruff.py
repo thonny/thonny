@@ -1,5 +1,4 @@
 import subprocess
-from typing import List
 
 from thonny import get_workbench
 from thonny.lsp_proxy import LanguageServerProxy

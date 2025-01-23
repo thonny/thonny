@@ -448,8 +448,8 @@ class Workbench(tk.Tk):
         assert self._ls_proxies
         return self._ls_proxies[0]
 
-    def get_language_server_proxies(self) -> List[LanguageServerProxy]:
-        return self._ls_proxies
+    def get_initialized_ls_proxies(self) -> List[LanguageServerProxy]:
+        return [ls_proxy for ls_proxy in self._ls_proxies if ls_proxy.is_initialized()]
 
     def start_or_restart_language_servers(self) -> None:
         self.shut_down_language_servers()
