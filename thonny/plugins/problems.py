@@ -139,7 +139,10 @@ class ProblemsView(TextFrame):
     def _handle_diagnostics_notification(
         self, params: PublishDiagnosticsParams, ls_proxy: LanguageServerProxy
     ) -> None:
-        # remove old diagnostics from the same server and add the new ones
+        # NB! Even though each diagnostic has "source" attribute, proxy reference is needed in order to clear
+        # right diagnostics when the list of new diagnostics is empty.
+
+        # Remove old diagnostics from the same server and add the new ones
         current_diagnostics = self._current_diagnostics_per_uri.get(params.uri, [])
         self._current_diagnostics_per_uri[params.uri] = list(
             filter(lambda ds: ds.ls_proxy is not ls_proxy, current_diagnostics)
