@@ -16,6 +16,7 @@ from thonny.common import (
     InlineCommand,
     TextRange,
     ToplevelResponse,
+    UserError,
     is_same_path,
     normpath_with_actual_case,
     universal_dirname,
@@ -182,8 +183,7 @@ class BaseEditor(ttk.Frame):
 
 
 class Editor(BaseEditor):
-    def __init__(self, master: "EditorNotebook", uri: str = PLACEHOLDER_URI):
-        # initial uri is used when the editor is created for non-existent file
+    def __init__(self, master: "EditorNotebook", uri: str):
         self._initialized_ls_proxies: List[LanguageServerProxy] = (
             get_workbench().get_initialized_ls_proxies()
         )
@@ -215,7 +215,13 @@ class Editor(BaseEditor):
 
         self.update_appearance()
 
-        if self._uri != PLACEHOLDER_URI:
+        if is_local_uri(self._uri) or is_remote_uri(self._uri):
+            successful_load = self._load_file(self._uri)
+            if not successful_load:
+                # Encoding errors were communicated to the user already during _load_file
+                raise UserError(f"Could not load {self._uri}")
+        else:
+            assert is_untitled_uri(self._uri)
             self._update_language_servers()
 
     def get_content(self, up_to_end=False) -> str:
@@ -684,10 +690,8 @@ class Editor(BaseEditor):
         self.update_title()
 
     def update_title(self):
-        try:
+        if self.containing_notebook.has_content(self):
             self.containing_notebook.update_editor_title(self)
-        except Exception:
-            logger.exception("Could not update editor title")
 
     def _on_text_change(self, event):
         # may not be added to the Notebook yet
@@ -1392,12 +1396,7 @@ class EditorNotebook(CustomNotebook):
     def _open_file(self, uri: str):
         editor = Editor(self, uri=uri)
         self.add(editor, text=editor.get_title())
-        if editor._load_file(uri):
-            return editor
-        else:
-            self.close_editor(editor, force=True)
-            editor.destroy()
-            return None
+        return editor
 
     def get_editor(self, path_or_uri, open_when_necessary=False):
         uri = ensure_uri(path_or_uri)
