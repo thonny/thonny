@@ -1203,7 +1203,7 @@ class LanguageServerProxy(ABC):
             handler(_convert_from_json_value(params, expected_params_type))
 
     def _get_communication_log_path(self) -> str:
-        return os.path.join(get_thonny_user_dir(), "lsp_communication.log")
+        return os.path.join(get_thonny_user_dir(), f"lsp_communication_{type(self).__name__}.log")
 
     def _add_to_communication_log(self, msg: Dict, sender: str) -> None:
         with open(self._get_communication_log_path(), mode="ta") as fp:
