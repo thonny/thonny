@@ -100,6 +100,7 @@ class BaseEditor(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._file_source = None
+        self.update_file_type()
 
     def is_untitled(self) -> bool:
         return is_untitled_uri(self.get_uri())
@@ -150,8 +151,6 @@ class BaseEditor(ttk.Frame):
                 file_type = None
 
             self._code_view.set_file_type(file_type)
-
-        self.update_appearance()
 
     def is_modified(self):
         return bool(self._code_view.text.edit_modified())
@@ -642,6 +641,10 @@ class Editor(BaseEditor):
             )
 
         self._primed_ls_proxies = []
+        self._initialized_ls_proxies = []
+        self._unpublished_incremental_changes = []
+        self._last_fully_published_version = None
+        self._content_at_server = None
 
     def _listen_debugger_progress(self, event):
         # Go read-only
@@ -769,7 +772,10 @@ class Editor(BaseEditor):
         self.send_changes_to_primed_servers()
 
         for ls_proxy in self._initialized_ls_proxies:
-            if ls_proxy not in self._primed_ls_proxies:
+            if (
+                ls_proxy not in self._primed_ls_proxies
+                and self.get_language_id() in ls_proxy.get_supported_language_ids()
+            ):
                 self._prime_language_server(ls_proxy)
 
         self._unpublished_incremental_changes = []
@@ -880,7 +886,7 @@ class Editor(BaseEditor):
             )
 
     def get_language_id(self) -> str:
-        return "python"  # TODO
+        return self.get_text_widget().file_type
 
 
 class EditorNotebook(CustomNotebook):
