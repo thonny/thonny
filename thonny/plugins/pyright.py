@@ -2,6 +2,7 @@ import os.path
 import shutil
 import subprocess
 import sys
+import typing
 from logging import getLogger
 from typing import Dict
 
@@ -120,6 +121,9 @@ class PyrightProxy(LanguageServerProxy):
             )
 
         return node_in_path
+
+    def get_supported_language_ids(self) -> typing.Set[str]:
+        return {"python"}
 
 
 def load_plugin():

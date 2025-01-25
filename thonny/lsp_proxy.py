@@ -1211,6 +1211,9 @@ class LanguageServerProxy(ABC):
             fp.write(json.dumps(msg, indent=4, sort_keys=True))
             fp.write("\n")
 
+    @abstractmethod
+    def get_supported_language_ids(self) -> typing.Set[str]: ...
+
 
 def _read_json_rpc_message(proc: subprocess.Popen) -> Optional[Dict]:
     message_size = None
