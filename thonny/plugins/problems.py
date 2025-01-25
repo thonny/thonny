@@ -127,7 +127,7 @@ class ProblemsView(TextFrame):
             first_line_tags = ("diagnostics_first_line",)
             append(ITEM_PREFIX, first_line_tags)
             line = diagnostic.range.start.line + 1  # LSP uses 0-based numbering
-            append(f"{type(ds.ls_proxy).__name__} => ")
+            append(f"{diagnostic.source} => ")
             append_editor_link(tr("Line") + f" {line}", uri, line, first_line_tags)
             append(" : ", first_line_tags)
             append(message_lines[0] + "\n", first_line_tags)
