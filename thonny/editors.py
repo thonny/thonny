@@ -56,10 +56,10 @@ from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, get_beam_cursor, select_sequence
 
 PYTHON_FILES_STR = tr("Python files")
-_dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde"), (tr("all files"), ".*")]
+_dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde .pyx"), (tr("all files"), ".*")]
 
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
-PYTHONLIKE_EXTENSIONS = set()
+PYTHONLIKE_EXTENSIONS = {"pyx", "pyde"}
 DEBOUNCE_SECONDS = 0.5
 
 

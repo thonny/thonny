@@ -16,11 +16,10 @@ Regexes are adapted from idlelib
 """
 
 import re
-import tkinter
 from logging import getLogger
 
 from thonny import get_workbench
-from thonny.codeview import CodeViewText
+from thonny.codeview import CodeViewText, SyntaxText
 from thonny.shell import ShellText
 
 logger = getLogger(__name__)
@@ -29,8 +28,8 @@ TODO = "COLOR_TODO"
 
 
 class SyntaxColorer:
-    def __init__(self, text: tkinter.Text):
-        self.text = text
+    def __init__(self, text: SyntaxText):
+        self.text: SyntaxText = text
         self._compile_regexes()
         self._config_tags()
         self._update_scheduled = False
@@ -153,10 +152,8 @@ class SyntaxColorer:
 
     def schedule_update(self):
         self._highlight_tabs = get_workbench().get_option("view.highlight_tabs")
-        self._use_coloring = (
-            get_workbench().get_option("view.syntax_coloring")
-            and self.text.is_python_text()
-            or self.text.is_pythonlike_text()
+        self._use_coloring = get_workbench().get_option("view.syntax_coloring") and (
+            self.text.is_python_text() or self.text.is_pythonlike_text()
         )
 
         if not self._update_scheduled:

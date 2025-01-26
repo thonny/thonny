@@ -624,6 +624,7 @@ def load_plugin() -> None:
         ".pyw",
         ".pyi",
         ".pyde",
+        ".pyx",
         ".txt",
         ".log",
         ".json",
