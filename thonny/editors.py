@@ -641,7 +641,6 @@ class Editor(BaseEditor):
             )
 
         self._primed_ls_proxies = []
-        self._initialized_ls_proxies = []
         self._unpublished_incremental_changes = []
         self._last_fully_published_version = None
         self._content_at_server = None
