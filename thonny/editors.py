@@ -36,10 +36,12 @@ from thonny.ui_utils import (
 )
 
 PYTHON_FILES_STR = tr("Python files")
-_dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi"), (tr("all files"), ".*")]
+_dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde .pyx"), (tr("all files"), ".*")]
 
-PYTHON_EXTENSIONS = {"py", "pyw", "pyi"}
-PYTHONLIKE_EXTENSIONS = set()
+PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
+PYTHONLIKE_EXTENSIONS = {"pyx", "pyde"}
+DEBOUNCE_SECONDS = 0.5
+
 
 logger = getLogger(__name__)
 
