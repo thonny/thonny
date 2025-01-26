@@ -154,6 +154,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * @razzius
 * Rene Lehtma
 * Richard Kanehl
+* Rosen Mitrev
 * Rune Langøy
 * Russell Taber
 * Saishen, Inc.
