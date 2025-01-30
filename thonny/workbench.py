@@ -181,6 +181,9 @@ class Workbench(tk.Tk):
 
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
+
+        self._init_moderntext()
+
         ui_utils.add_messagebox_parent_checker()
         self._event_handlers = {}  # type: Dict[str, Set[Callable]]
         self._images = (
@@ -286,6 +289,20 @@ class Workbench(tk.Tk):
         self.bind("<Visibility>", self._on_visibility, True)
         self.become_active_window()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
+
+    def _init_moderntext(self):
+        # Reference: https://wiki.tcl-lang.org/page/Modern+Bindings+for+the+Text+Widget
+        filename = os.path.join(self.get_package_dir(), "res", "modernText.tcl")
+        if os.path.exists(filename):
+            try:
+                # Load the modernText library into the Tcl interpreter
+                self.evalfile(filename)
+                # Make sure modernText loaded properly
+                self.exprlong("$::modernText::mouseSelectIgnoresKbd")
+            except tk.TclError as x:
+                logger.error(f"Tcl error from modernText: {x}")
+        else:
+            logger.error(f"Not found: {filename}")
 
     def _on_visibility(self, event):
         if not self._have_seen_visibility_events:
