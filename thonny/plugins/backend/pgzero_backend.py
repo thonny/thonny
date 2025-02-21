@@ -66,6 +66,7 @@ def augment_ast(root):
         ast.Call(ast.Attribute(ast.Name("__pgzrun", ast.Load()), "go", ast.Load()), [], [])
     )
     go.lineno = 1000000
+    go.end_lineno = 1000000
     go.col_offset = 0
     ast.fix_missing_locations(go)
     go.tags = {"ignore"}
