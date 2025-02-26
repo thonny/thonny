@@ -2686,5 +2686,10 @@ def get_treeview_open_item_ids(tree: ttk.Treeview, parent: str = "") -> List[str
     return result
 
 
+def parse_text_index(index: str) -> Tuple[int, int]:
+    line, col = map(int, index.split(".", maxsplit=1))
+    return line, col
+
+
 if __name__ == "__main__":
     print(windows_known_extensions_are_hidden())

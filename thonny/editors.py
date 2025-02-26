@@ -53,7 +53,13 @@ from thonny.misc_utils import (
     uri_to_target_path,
 )
 from thonny.tktextext import rebind_control_a
-from thonny.ui_utils import askopenfilename, asksaveasfilename, get_beam_cursor, select_sequence
+from thonny.ui_utils import (
+    askopenfilename,
+    asksaveasfilename,
+    get_beam_cursor,
+    parse_text_index,
+    select_sequence,
+)
 
 PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde .pyx"), (tr("all files"), ".*")]
@@ -816,54 +822,30 @@ class Editor(BaseEditor):
             logger.debug("No primed proxies, not sending changes")
             return
 
-        logger.debug("Merging changes from %s events", len(self._unpublished_incremental_changes))
-        clean_prefix_end_line = 9999999999  # lines before this line have not been modified
-        clean_suffix_start_line = -1  # this line and lines after this have not been modified
-        line_count_delta = 0
+        logger.debug("Publishing %s events", len(self._unpublished_incremental_changes))
 
+        ls_changes = []
         for change in self._unpublished_incremental_changes:
+            logger.info("processing change %r", change)
             if change["sequence"] == "TextInsert":
-                insertion_line = int(float(change["index"]))
-                num_linebreaks_added = change["text"].count("\n")
-
-                clean_prefix_end_line = min(clean_prefix_end_line, insertion_line)
-                clean_suffix_start_line = (
-                    max(clean_suffix_start_line, insertion_line + 1) + num_linebreaks_added
+                line, col = parse_text_index(change["index"])
+                pos = Position(line=line - 1, character=col)  # TODO: Utf-16
+                ls_change = RangedTextDocumentContentChangeEvent(
+                    range=Range(start=pos, end=pos), text=change["text"]
                 )
-
-                line_count_delta += num_linebreaks_added
             else:
                 assert change["sequence"] == "TextDelete"
-                del_start_line = int(float(change["index1"]))
-                del_end_line = int(float(change["index2"]))
-                num_linebreaks_deleted = del_end_line - del_start_line
-
-                clean_prefix_end_line = min(clean_prefix_end_line, del_start_line)
-                clean_suffix_start_line = max(
-                    clean_suffix_start_line - num_linebreaks_deleted, del_start_line + 1
+                start_line, start_col = parse_text_index(change["index1"])
+                end_line, end_col = parse_text_index(change["index2"])
+                ls_change = RangedTextDocumentContentChangeEvent(
+                    range=Range(
+                        start=Position(line=start_line - 1, character=start_col),
+                        end=Position(line=end_line - 1, character=end_col),
+                    ),
+                    text="",
                 )
 
-                line_count_delta -= num_linebreaks_deleted
-
-        # LSP uses 0-based line numbers, hence -1
-        orig_zero_based_range_start_line = clean_prefix_end_line - 1
-        orig_zero_based_range_end_line = clean_suffix_start_line - line_count_delta - 1
-        replacement_text = self.get_text_widget().get(
-            f"{clean_prefix_end_line}.0", f"{clean_suffix_start_line}.0"
-        )
-
-        # validate
-        lines_at_server = self._content_at_server.splitlines(keepends=True)
-        unmodified_prefix = "".join(lines_at_server[:orig_zero_based_range_start_line])
-        unmodified_suffix = "".join(lines_at_server[orig_zero_based_range_end_line:])
-        assembled_content = unmodified_prefix + replacement_text + unmodified_suffix
-
-        current_content = self.get_content(up_to_end=True)
-        if assembled_content != current_content:
-            raise RuntimeError(
-                f"Assembled content doesn't match actual content:"
-                f" {assembled_content!r} vs {current_content!r}"
-            )
+            ls_changes.append(ls_change)
 
         version = self._get_version_to_be_published()
         for ls_proxy in self._primed_ls_proxies:
@@ -872,17 +854,11 @@ class Editor(BaseEditor):
                     textDocument=VersionedTextDocumentIdentifier(
                         version=version, uri=self.get_uri()
                     ),
-                    contentChanges=[
-                        RangedTextDocumentContentChangeEvent(
-                            range=Range(
-                                start=Position(line=orig_zero_based_range_start_line, character=0),
-                                end=Position(line=orig_zero_based_range_end_line, character=0),
-                            ),
-                            text=replacement_text,
-                        )
-                    ],
+                    contentChanges=ls_changes,
                 )
             )
+
+        self._unpublished_incremental_changes = []
 
     def get_language_id(self) -> str:
         return self.get_text_widget().file_type
