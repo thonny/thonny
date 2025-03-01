@@ -189,7 +189,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
         "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
     },
-    ["0.0.11"],
+    ["0.0.12", "0.0.11"],
     pimo2350_variants,
 )
 
