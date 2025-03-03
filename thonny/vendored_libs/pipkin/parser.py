@@ -280,12 +280,12 @@ def parse_arguments(raw_args: Optional[List[str]] = None) -> Any:
     list_parser.add_argument(
         "-u",
         "--uptodate",
-        help="List uptodate packages",
+        help="List up-to-date packages",
         action="store_true",
     )
     list_parser.add_argument(
         "--pre",
-        help="Also consider pre-release and development versions when deciding whether package is outdated or uptodate.",
+        help="Also consider pre-release and development versions when deciding whether package is outdated or up-to-date.",
         action="store_true",
     )
     list_parser.add_argument(
