@@ -27,9 +27,9 @@ def _selection_is_line_commented(text):
     sel_range = _get_focused_code_range(text)
 
     for lineno in range(sel_range.lineno, sel_range.end_lineno + 1):
-        _line = text.get(str(lineno) + ".0", str(lineno) + ".end")
+        _line = text.get("{}.0".format(lineno), "{}.end".format(lineno))
         _line_indent = len(_line) - len(_line.lstrip())
-        line = text.get(str(lineno) + "." + str(_line_indent), str(lineno) + ".end")
+        line = text.get("{}.{}".format(lineno, _line_indent), "{}.end".format(lineno))
         if not line.startswith(BLOCK_COMMENT_PREFIX):
             return False
 
@@ -55,9 +55,9 @@ def _comment_selection(text):
     sel_range = _get_focused_code_range(text)
 
     for lineno in range(sel_range.lineno, sel_range.end_lineno + 1):
-        line = text.get(str(lineno) + ".0", str(lineno) + ".end")
+        line = text.get("{}.0".format(lineno), "{}.end".format(lineno))
         line_indent = len(line) - len(line.lstrip())
-        text.insert(str(lineno) + "." + str(line_indent), BLOCK_COMMENT_PREFIX)
+        text.insert("{}.{}".format(lineno, line_indent), BLOCK_COMMENT_PREFIX)
 
     if sel_range.end_lineno > sel_range.lineno:
         _select_lines(text, sel_range.lineno, sel_range.end_lineno)
@@ -69,15 +69,15 @@ def _uncomment_selection(text):
     sel_range = _get_focused_code_range(text)
 
     for lineno in range(sel_range.lineno, sel_range.end_lineno + 1):
-        _line = text.get(str(lineno) + ".0", str(lineno) + ".end")
+        _line = text.get("{}.0".format(lineno), "{}.end".format(lineno))
         _line_indent = len(_line) - len(_line.lstrip())
 
-        line = text.get(str(lineno) + "." + str(_line_indent), str(lineno) + ".end")
+        line = text.get("{}.{}".format(lineno, _line_indent), "{}.end".format(lineno))
 
         if line.startswith(BLOCK_COMMENT_PREFIX):
             text.delete(
-                str(lineno) + "." + str(_line_indent),
-                str(lineno) + "." + str(_line_indent + len(BLOCK_COMMENT_PREFIX)),
+                "{}.{}".format(lineno, _line_indent),
+                "{}.{}".format(lineno, _line_indent + len(BLOCK_COMMENT_PREFIX)),
             )
 
 
