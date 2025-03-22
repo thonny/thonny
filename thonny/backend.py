@@ -8,7 +8,6 @@ import sys
 import threading
 import time
 import traceback
-import warnings
 from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -34,7 +33,6 @@ from thonny.common import (  # TODO: try to get rid of this
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
-    try_load_modules_with_frontend_sys_path,
     universal_dirname,
 )
 

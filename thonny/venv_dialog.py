@@ -7,10 +7,9 @@ from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import get_runner, get_workbench, ui_utils
-from thonny.common import normpath_with_actual_case
 from thonny.languages import tr
 from thonny.misc_utils import inside_flatpak, running_on_windows
-from thonny.ui_utils import MappingCombobox, askdirectory, askopenfilename, set_text_if_different
+from thonny.ui_utils import MappingCombobox, askdirectory, askopenfilename
 from thonny.workdlg import SubprocessDialog
 
 logger = logging.getLogger(__name__)

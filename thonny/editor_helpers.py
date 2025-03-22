@@ -1,7 +1,6 @@
 import tkinter as tk
-import traceback
 from logging import getLogger
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from thonny import get_workbench, lsp_types
 from thonny.codeview import CodeViewText, SyntaxText, get_syntax_options_for_tag

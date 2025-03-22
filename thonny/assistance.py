@@ -7,16 +7,13 @@ from dataclasses import dataclass
 from logging import getLogger
 from typing import Dict, Iterator, List, Optional
 
-from thonny import get_workbench, rst_utils
+from thonny import get_workbench
 from thonny.common import read_source
 from thonny.misc_utils import local_path_to_uri
 
 logger = getLogger(__name__)
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
-
-_last_feedback_timestamps = {}  # type: Dict[str, str]
-
 
 @dataclass
 class Attachment:

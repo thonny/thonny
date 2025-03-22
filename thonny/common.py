@@ -9,7 +9,6 @@ import dataclasses
 import os.path
 import site
 import sys
-import urllib.parse
 from collections import namedtuple
 from dataclasses import dataclass
 from logging import getLogger
