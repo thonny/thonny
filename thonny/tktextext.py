@@ -8,7 +8,6 @@ from logging import getLogger
 from tkinter import TclError
 from tkinter import font as tkfont
 from tkinter import ttk
-from typing import Optional
 
 logger = getLogger(__name__)
 

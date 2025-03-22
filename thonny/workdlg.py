@@ -3,7 +3,6 @@ import queue
 import signal
 import subprocess
 import threading
-import time
 import tkinter as tk
 from logging import getLogger
 from tkinter import messagebox, ttk

@@ -9,11 +9,10 @@ import threading
 import time
 import typing
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, is_dataclass
-from enum import Enum, StrEnum
+from dataclasses import is_dataclass
+from enum import Enum
 from logging import getLogger
 from queue import Queue
-from turtledemo.penrose import start
 from types import NoneType, UnionType
 from typing import (
     Any,

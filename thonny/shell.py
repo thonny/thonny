@@ -9,7 +9,7 @@ from _tkinter import TclError
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
-from typing import List, Optional, cast
+from typing import List, Optional
 
 from thonny import (
     get_runner,
