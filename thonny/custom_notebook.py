@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import tkinter as tk
 from logging import getLogger
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from thonny import dnd  # inspired by and very similar to tkinter.dnd
 from thonny.languages import tr

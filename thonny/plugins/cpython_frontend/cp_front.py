@@ -8,7 +8,7 @@ from tkinter import ttk
 from typing import Any, Dict, List, Optional, Tuple
 
 import thonny
-from thonny import get_runner, get_shell, get_workbench, ui_utils
+from thonny import get_runner, get_shell, get_workbench, ui_utils, SUPPORTED_VERSIONS
 from thonny.base_file_browser import (
     FILE_DIALOG_HEIGHT_EMS_OPTION,
     FILE_DIALOG_WIDTH_EMS_OPTION,
@@ -294,7 +294,7 @@ class LocalCPythonConfigurationPage(TabbedBackendDetailsConfigurationPage):
         self._select_button.grid(row=1, column=2, sticky="e", padx=(10, 0))
         self.executable_page.columnconfigure(1, weight=1)
 
-        extra_text = tr("NB! Thonny only supports Python %s and later") % "3.9"
+        extra_text = tr("NB! Thonny only supports Python %s and later") % SUPPORTED_VERSIONS[0]
         extra_label = ttk.Label(self.executable_page, text=extra_text)
         extra_label.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
 

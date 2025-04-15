@@ -125,6 +125,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Kaspar Papli
 * Kauri Raba
 * @kemelzaidan
+* @konflic
 * kr-g
 * Laszlo Kocsis
 * Louis Lenchant

@@ -10,11 +10,10 @@ import threading
 import time
 import typing
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, is_dataclass
+from dataclasses import is_dataclass
 from enum import Enum
 from logging import getLogger
 from queue import Queue
-from turtledemo.penrose import start
 if sys.version_info >= (3, 10):
     from types import NoneType, UnionType
 else:

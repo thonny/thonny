@@ -11,8 +11,8 @@
                 "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -32,8 +32,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -52,8 +52,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -72,8 +72,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -88,8 +88,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -108,8 +108,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -128,8 +128,8 @@
                 "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -149,8 +149,8 @@
                 "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -170,8 +170,8 @@
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -190,8 +190,8 @@
                 "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -207,8 +207,8 @@
                 "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -224,8 +224,8 @@
                 "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -241,8 +241,8 @@
                 "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -261,8 +261,8 @@
                 "url": "https://micropython.org/resources/firmware/SIL_WESP32-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -281,8 +281,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -301,8 +301,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -321,8 +321,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -341,8 +341,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -357,8 +357,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_NANOS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -377,8 +377,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_OMGS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -393,8 +393,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_PROS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -413,8 +413,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -429,8 +429,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYC6-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             }
         ]
     },
@@ -445,8 +445,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -465,8 +465,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS2-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -485,8 +485,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -505,8 +505,8 @@
                 "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -525,8 +525,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -545,8 +545,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
@@ -565,8 +565,8 @@
                 "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20241129-v1.24.1.bin"
             },
             {
-                "version": "20250117-v1.25.0-preview.216.g6db29978a",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20250117-v1.25.0-preview.216.g6db29978a.bin"
+                "version": "20250228-v1.25.0-preview.336.g69ffd2aaf",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20250228-v1.25.0-preview.336.g69ffd2aaf.bin"
             },
             {
                 "version": "1.23.0",
