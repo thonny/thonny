@@ -12,9 +12,9 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = r"\d{8}-v1.25.0-preview\.\d+\.[a-z0-9]{10}"
-PREV_RELEVANT_VERSION = "1.23.0"
-PREV_RELEVANT_VERSION_IN_URL = "20240602-v1.23.0"
+UNSTABLE_VERSION = r"\d{8}-v1.26.0-preview\.\d+\.[a-z0-9]{10}"
+PREV_RELEVANT_VERSION = "1.24.1"
+PREV_RELEVANT_VERSION_IN_URL = "20241129-v1.24.1"
 
 
 class IndexParser(HTMLParser):
