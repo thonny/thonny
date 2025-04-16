@@ -1,0 +1,2184 @@
+# Indonesian (Indonesia) translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# Evan William <evanwilliam303@gmail.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Thonny 4.1.0\n"
+"Report-Msgid-Bugs-To: evanwilliam303@gmail.com\n"
+"POT-Creation-Date: 2025-04-13 14:25+0700\n"
+"PO-Revision-Date: 2025-04-13 14:25+0700\n"
+"Last-Translator: Evan William <evanwilliam303@gmail.com>\n"
+"Language: id_ID\n"
+"Language-Team: Evan William <evanwilliam303@gmail.com>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "Assisten"
+
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
+msgid "Name"
+msgstr "Nama"
+
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
+msgid "Modified"
+msgstr "Dimodifikasi"
+
+#: thonny/base_file_browser.py:96
+msgid "Size (bytes)"
+msgstr "Ukuran"
+
+#: thonny/base_file_browser.py:294
+#, python-format
+msgid "%d items"
+msgstr "%d items"
+
+#: thonny/base_file_browser.py:346
+msgid "Storage space on this drive or filesystem"
+msgstr "Ruang penyimpanan pada drive atau sistem berkas ini"
+
+#: thonny/base_file_browser.py:347
+msgid "total space"
+msgstr "total ruang"
+
+#: thonny/base_file_browser.py:349
+msgid "used space"
+msgstr "ruang terpakai"
+
+#: thonny/base_file_browser.py:350
+msgid "free space"
+msgstr "ruang kosong"
+
+#: thonny/base_file_browser.py:357
+msgid "Storage info"
+msgstr "Informasi penyimpanan"
+
+#: thonny/base_file_browser.py:648
+msgid "Refresh"
+msgstr "Segarkan"
+
+#: thonny/base_file_browser.py:650
+msgid "Open in system file manager"
+msgstr "Buka di pengelola file sistem"
+
+#: thonny/base_file_browser.py:657
+msgid "Focus into"
+msgstr "Fokus ke"
+
+#: thonny/base_file_browser.py:661
+msgid "Open in Thonny"
+msgstr "Buka di Thonny"
+
+#: thonny/base_file_browser.py:666
+msgid "Open in default external app"
+msgstr "Buka di aplikasi eksternal bawaan"
+
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
+#, python-format
+msgid "Configure %s files"
+msgstr "Konfigurasi file %s"
+
+#: thonny/base_file_browser.py:678
+msgid "Hide hidden files"
+msgstr "Sembunyikan file tersembunyi"
+
+#: thonny/base_file_browser.py:678
+msgid "Show hidden files"
+msgstr "Tampilkan file tersembunyi"
+
+#: thonny/base_file_browser.py:692
+msgid "Open in system default app"
+msgstr "Buka di aplikasi bawaan sistem"
+
+#: thonny/base_file_browser.py:693
+msgid "Open in Thonny's text editor"
+msgstr "Buka di editor teks Thonny"
+
+#: thonny/base_file_browser.py:702
+#, python-format
+msgid ""
+"What to do with a %s file when you double-click it in Thonny's file "
+"browser?"
+msgstr "Apa yang harus dilakukan dengan file %s saat Anda mengklik dua-kali di browser file Thonny?"
+
+#: thonny/base_file_browser.py:722
+msgid "New file"
+msgstr "File baru"
+
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
+msgid "New directory"
+msgstr "Direktori baru"
+
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2348
+msgid "Cut"
+msgstr "Potong"
+
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2349
+msgid "Copy"
+msgstr "Salin"
+
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2350
+msgid "Paste"
+msgstr "Tempel"
+
+#: thonny/base_file_browser.py:740
+msgid "Rename"
+msgstr "Ganti nama"
+
+#: thonny/base_file_browser.py:743
+msgid "Move to Trash"
+msgstr "Pindahkan ke Sampah"
+
+#: thonny/base_file_browser.py:746
+msgid "Delete"
+msgstr "Hapus"
+
+#: thonny/base_file_browser.py:749
+msgid "Properties"
+msgstr "Properti"
+
+#: thonny/base_file_browser.py:751
+msgid "Storage space"
+msgstr "Ruang penyimpanan"
+
+#: thonny/base_file_browser.py:761
+msgid "Path"
+msgstr "Jalur"
+
+#: thonny/base_file_browser.py:763
+msgid "Directory properties"
+msgstr "Properti direktori"
+
+#: thonny/base_file_browser.py:765
+msgid "File properties"
+msgstr "Properti file"
+
+#: thonny/base_file_browser.py:767
+msgid "bytes"
+msgstr "bytes"
+
+#: thonny/base_file_browser.py:770
+msgid "Size"
+msgstr "Ukuran"
+
+#: thonny/base_file_browser.py:842
+#, python-format
+msgid "Deleting %s"
+msgstr "Menghapus %s"
+
+#: thonny/base_file_browser.py:853
+msgid "Moving to Trash"
+msgstr "Memindahkan ke Sampah"
+
+#: thonny/base_file_browser.py:854
+#, python-format
+msgid "Move %s to Trash?"
+msgstr "Pindahkan %s ke Sampah?"
+
+#: thonny/base_file_browser.py:861
+#, python-format
+msgid "Moving %s to Trash"
+msgstr "Memindahkan %s ke Sampah"
+
+#: thonny/base_file_browser.py:879
+#, python-format
+msgid ""
+"Enter name for new directory under\n"
+"%s"
+msgstr ""
+"Masukkan nama untuk direktori baru di bawah\n"
+"%s"
+
+#: thonny/base_file_browser.py:902
+msgid "Nothing selected"
+msgstr "Tidak ada yang dipilih"
+
+#: thonny/base_file_browser.py:902
+msgid "Select an item and try again!"
+msgstr "Pilih item dan coba lagi!"
+
+#: thonny/base_file_browser.py:928
+#, python-format
+msgid "Rename '%s'"
+msgstr "Ganti nama '%s'"
+
+#: thonny/base_file_browser.py:928
+msgid "Enter new name"
+msgstr "Masukkan nama baru"
+
+#: thonny/base_file_browser.py:1016
+msgid "Paste failed"
+msgstr "Gagal menempel"
+
+#: thonny/base_file_browser.py:1016
+msgid "There are conflicting folders"
+msgstr "Ada folder yang bertabrakan"
+
+#: thonny/base_file_browser.py:1144
+msgid "File already exists"
+msgstr "File sudah ada"
+
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1579
+msgid "Not supported"
+msgstr "Tidak didukung"
+
+#: thonny/base_file_browser.py:1210
+msgid "Opening remote files in external app is not supported."
+msgstr "Membuka file remote di aplikasi eksternal tidak didukung."
+
+#: thonny/base_file_browser.py:1213
+msgid ""
+"If it is a text file, then you can configure it to open in Thonny by "
+"right-clicking it and selecting 'Configure ... files'."
+msgstr ""
+"Jika ini adalah file teks, Anda dapat mengonfigurasinya untuk dibuka di Thonny "
+"dengan mengklik kanan dan memilih 'Konfigurasi ... file'."
+
+#: thonny/base_file_browser.py:1218
+msgid ""
+"If the file needs to be opened in external app, then download it to a "
+"local directory and open it from there!"
+msgstr ""
+"Jika file perlu dibuka di aplikasi eksternal, unduh terlebih dahulu ke "
+"direktori lokal dan buka dari sana!"
+
+#: thonny/base_file_browser.py:1258 thonny/editors.py:986 thonny/editors.py:988
+msgid "Deleting"
+msgstr "Menghapus"
+
+#: thonny/base_file_browser.py:1265
+msgid "Creating directory"
+msgstr "Membuat direktori"
+
+#: thonny/base_file_browser.py:1329
+#, python-format
+msgid "Open from %s"
+msgstr "Buka dari %s"
+
+#: thonny/base_file_browser.py:1332
+#, python-format
+msgid "Save to %s"
+msgstr "Simpan ke %s"
+
+#: thonny/base_file_browser.py:1351
+msgid "File name:"
+msgstr "Nama file:"
+
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
+#: thonny/ui_utils.py:157 thonny/ui_utils.py:1831 thonny/workdlg.py:256
+msgid "OK"
+msgstr "OK"
+
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1341
+#: thonny/ui_utils.py:160 thonny/ui_utils.py:1748 thonny/ui_utils.py:1834
+#: thonny/workdlg.py:205 thonny/workdlg.py:259
+msgid "Cancel"
+msgstr "Batal"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+#: thonny/plugins/autocomplete.py:303 thonny/plugins/highlight_names.py:86
+msgid "Error"
+msgstr "Error
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+msgid "You need to select a file!"
+msgstr "Anda perlu memilih file!"
+
+#: thonny/base_file_browser.py:1427
+msgid "Overwrite?"
+msgstr "Tulis ulang?"
+
+#: thonny/base_file_browser.py:1427
+#, python-format
+msgid "Do you want to overwrite '%s' ?"
+msgstr "Apakah Anda ingin menulis ulang '%s'?"
+
+#: thonny/base_file_browser.py:1576
+msgid "This computer"
+msgstr "Komputer ini"
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "Opsi Thonny"
+
+#: thonny/editors.py:38
+msgid "Python files"
+msgstr "File Python"
+
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:296
+#: thonny/plugins/pip_gui.py:857 thonny/plugins/pip_gui.py:870
+msgid "all files"
+msgstr "semua file"
+
+#: thonny/editors.py:123 thonny/editors.py:189
+msgid "<untitled>"
+msgstr "<belum diberi judul>"
+
+#: thonny/editors.py:150
+msgid "File is gone"
+msgstr "File telah hilang"
+
+#: thonny/editors.py:151
+#, python-format
+msgid "Looks like '%s' was deleted or moved."
+msgstr "Sepertinya '%s' telah dihapus atau dipindahkan."
+
+#: thonny/editors.py:153
+msgid "Do you want to also close the editor?"
+msgstr "Apakah Anda juga ingin menutup editor?"
+
+#: thonny/editors.py:169
+msgid "External modification"
+msgstr "Modifikasi eksternal"
+
+#: thonny/editors.py:170
+#, python-format
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "Sepertinya '%s' telah dimodifikasi di luar editor."
+
+#: thonny/editors.py:173
+msgid ""
+"Do you want to discard current editor content and reload the file from "
+"disk?"
+msgstr ""
+"Apakah Anda ingin membuang konten editor saat ini dan memuat ulang file dari"
+"disk?"
+
+#: thonny/editors.py:213 thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "Masalah"
+
+#: thonny/editors.py:213
+#, python-format
+msgid "%s doesn't look like a text file"
+msgstr "%s tidak terlihat seperti file teks"
+
+#: thonny/editors.py:219
+msgid "Problem loading file"
+msgstr "Masalah saat memuat file"
+
+#: thonny/editors.py:221
+msgid ""
+"This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr ""
+"Sepertinya file ini memiliki masalah dengan encoding"
+"\n"
+"Pastikan file ini menggunakan UTF-8 atau mengandung petunjuk encoding yang tepat"
+
+#: thonny/editors.py:260
+#, python-format
+msgid "Loading %s"
+msgstr "Memuat %s"
+
+#: thonny/editors.py:262
+msgid "Loading"
+msgstr "Memuat"
+
+#: thonny/editors.py:295
+msgid "File is open"
+msgstr "File sudah terbuka"
+
+#: thonny/editors.py:297
+msgid ""
+"This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr ""
+"File ini sudah terbuka di Thonny.\n"
+"\n"
+"Jika Anda ingin menyimpan dengan nama ini,\n"
+"tutup editor yang ada terlebih dahulu!"
+
+#: thonny/editors.py:349
+msgid "Permission Error"
+msgstr "Kesalahan Izin"
+
+#: thonny/editors.py:350
+msgid "Looks like this file or folder is not writable."
+msgstr "Sepertinya file atau folder ini tidak dapat ditulis"
+
+#: thonny/editors.py:390
+#, python-format
+msgid "Saving to %s"
+msgstr "Menyimpan ke %s"
+
+#: thonny/editors.py:395
+msgid "Saving"
+msgstr "Menyimpan"
+
+#: thonny/editors.py:399 thonny/editors.py:414
+msgid "Could not save"
+msgstr "Gagal menyimpan"
+
+#: thonny/editors.py:414
+msgid "Back-end is not ready"
+msgstr "Back-end belum siap"
+
+#: thonny/editors.py:419
+msgid "Where to save to?"
+msgstr "Harus menyimpan ke mana?"
+
+#: thonny/editors.py:490
+msgid "Potential problem"
+msgstr "Potensi masalah"
+
+#: thonny/editors.py:492
+#, python-format
+msgid ""
+"If you name your script '%s', you won't be able to import the library "
+"module named '%s'"
+msgstr ""
+"Jika Anda memberi nama skrip Anda '%s', Anda tidak akan bisa mengimpor modul pustaka"
+"dengan nama '%s'"
+
+#: thonny/editors.py:497
+msgid "Do you still want to use this name for your script?"
+msgstr "Apakah Anda masih ingin menggunakan nama ini untuk skrip Anda?"
+
+#: thonny/editors.py:587 thonny/plugins/micropython/pip_gui.py:25
+#: thonny/plugins/pip_gui.py:1043
+msgid "Confirmation"
+msgstr "Konfirmasi"
+
+#: thonny/editors.py:588
+msgid "Python files usually have .py extension."
+msgstr "File Python biasanya memiliki ekstensi .py."
+
+#: thonny/editors.py:590
+#, python-format
+msgid "Did you mean '%s'?"
+msgstr "Apakah maksud Anda '%s'?"
+
+#: thonny/editors.py:658 thonny/editors.py:660
+msgid "New"
+msgstr "Baru"
+
+#: thonny/editors.py:671
+msgid "Open..."
+msgstr "Buka"
+
+#: thonny/editors.py:673
+msgid "Load"
+msgstr "Muat"
+
+#: thonny/editors.py:682
+msgid "Recent files"
+msgstr "File terbaru"
+
+#: thonny/editors.py:693 thonny/plugins/pip_gui.py:260 thonny/ui_utils.py:496
+#: thonny/ui_utils.py:1887 thonny/workdlg.py:203
+msgid "Close"
+msgstr "Tutup"
+
+#: thonny/editors.py:704 thonny/ui_utils.py:498
+msgid "Close all"
+msgstr "Tutup semua"
+
+#: thonny/editors.py:714 thonny/editors.py:716
+msgid "Save"
+msgstr "Simpan"
+
+#: thonny/editors.py:728 thonny/editors.py:730
+msgid "Save All files"
+msgstr "Simpan semua file"
+
+#: thonny/editors.py:739
+msgid "Save as..."
+msgstr "Simpan sebagai..."
+
+#: thonny/editors.py:750
+msgid "Save copy..."
+msgstr "Simpan salinan..."
+
+#: thonny/editors.py:759
+msgid "Move / rename..."
+msgstr "Pindahkan / ganti nama..."
+
+#: thonny/editors.py:768
+msgid "Go to line..."
+msgstr "Pergi ke baris..."
+
+#: thonny/editors.py:1010
+msgid "Go to line"
+msgstr "Pergi ke baris"
+
+#: thonny/editors.py:1010
+msgid "Line number"
+msgstr "Nomor baris"
+
+#: thonny/editors.py:1053
+#, python-format
+msgid ""
+"Got permission error when trying to load\n"
+"%s"
+msgstr ""
+"Terjadi kesalahan izin saat mencoba memuat\n"
+"%s"
+
+#: thonny/editors.py:1055
+msgid "Try opening it with File => Open."
+msgstr "Cobalah membuka dengan File => Buka."
+
+#: thonny/editors.py:1057
+msgid "Permission error"
+msgstr "Kesalahan izin"
+
+#: thonny/editors.py:1156
+msgid "Do you want to save files before closing?"
+msgstr "Apakah Anda ingin menyimpan file sebelum menutup?"
+
+#: thonny/editors.py:1158
+msgid "Do you want to save file before closing?"
+msgstr "Apakah Anda ingin menyimpan file sebelum menutup?"
+
+#: thonny/editors.py:1161
+msgid "Save On Close"
+msgstr "Simpan Saat Menutup"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:617
+msgid "Value ID"
+msgstr "ID Nilai"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value"
+msgstr "Nilai"
+
+#: thonny/misc_utils.py:178
+#, python-format
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "Tidak dapat menemukan disk '%s'. Apakah Anda ingin mencarikannya sendiri?"
+
+#: thonny/misc_utils.py:181
+#, python-format
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "Tidak dapat menemukan disk '%s'. Apakah Anda ingin mencarikannya sendiri?"
+
+#: thonny/misc_utils.py:197
+msgid "Can't find suitable disk"
+msgstr "Tidak dapat menemukan disk yang sesuai"
+
+#: thonny/misc_utils.py:540
+msgid "Command not available"
+msgstr "Perintah tidak tersedia"
+
+#: thonny/misc_utils.py:541
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "Perintah ini tidak tersedia jika Thonny dijalankan melalui Flatpak"
+
+#: thonny/running.py:160
+msgid "Run current script"
+msgstr "Jalankan skrip saat ini"
+
+#: thonny/running.py:161 thonny/workbench.py:378
+msgid "Run"
+msgstr "Jalankan"
+
+#: thonny/running.py:191
+msgid "Run current script in terminal"
+msgstr "Jalankan skrip saat ini di terminal"
+
+#: thonny/running.py:204
+msgid "Stop/Restart backend"
+msgstr "Hentikan/Mulai ulang backend"
+
+#: thonny/running.py:205
+msgid "Stop"
+msgstr "Hentikan"
+
+#: thonny/running.py:216
+msgid "Interrupt execution"
+msgstr "Hentikan eksekusi"
+
+#: thonny/running.py:229
+msgid "Send EOF / Soft reboot"
+msgstr "Kirim EOF / Restart halus"
+
+#: thonny/running.py:240
+msgid "Disconnect"
+msgstr "Putuskan hubungan"
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr "Informasi"
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr "Untuk debugging, program harus disimpan terlebih dahulu."
+
+#: thonny/shell.py:101
+msgid "Clear shell"
+msgstr "Bersihkan shell"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:164
+msgid "Shell"
+msgstr "Shell"
+
+#: thonny/shell.py:185
+msgid "Plotter"
+msgstr "Plotter"
+
+#: thonny/shell.py:317
+msgid "Clear"
+msgstr "Bersihkan"
+
+#: thonny/shell.py:330
+msgid "Show Plotter"
+msgstr "Tampilkan Plotter"
+
+#: thonny/shell.py:1661
+msgid ""
+"For performance reasons, Shell avoids showing very long lines in full "
+"(see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr ""
+"Demi alasan kinerja, Shell menghindari menampilkan baris yang sangat panjang secara penuh"
+"(lihat Alat => Opsi => Shell). \n"
+"Di sini Anda dapat berinteraksi dengan potongan teks aslinya."
+
+#: thonny/shell.py:1671
+msgid "Wrap text (may be slow)"
+msgstr "Bungkus teks (mungkin lambat)"
+
+#: thonny/shell.py:1713
+#, python-format
+msgid "Squeezed text (%d characters)"
+msgstr "Teks terkompresi (%d karakter)"
+
+#: thonny/shell.py:1883
+msgid ""
+"Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr ""
+"Plotter memvisualisasikan deretan \n"
+"angka yang dicetak ke Shell."
+
+#: thonny/shell.py:1885
+msgid "See Help for details."
+msgstr "Lihat Bantuan untuk detail"
+
+#: thonny/ui_utils.py:497
+msgid "Close others"
+msgstr "Tutup lainnya"
+
+#: thonny/ui_utils.py:1737
+msgid "Copying"
+msgstr "Menyalin"
+
+#: thonny/ui_utils.py:1740
+#, python-format
+msgid ""
+"Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr ""
+"Menyalin\n"
+"  %s\n"
+"ke\n"
+"  %s"
+
+#: thonny/ui_utils.py:1882
+msgid "Copy to clipboard"
+msgstr "Salin ke papan klip"
+
+#: thonny/ui_utils.py:2354
+msgid "Select All"
+msgstr "Pilih Semua"
+
+#: thonny/workbench.py:375
+msgid "File"
+msgstr "Berkas"
+
+#: thonny/workbench.py:376
+msgid "Edit"
+msgstr "Edit"
+
+#: thonny/workbench.py:377
+msgid "View"
+msgstr "Tampilan"
+
+#: thonny/workbench.py:379
+msgid "Tools"
+msgstr "Alat"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:380
+msgid "Help"
+msgstr "Bantuan"
+
+#: thonny/workbench.py:598
+msgid "Exit"
+msgstr "Keluar"
+
+#: thonny/workbench.py:608
+msgid "Options..."
+msgstr "Opsi..."
+
+#: thonny/workbench.py:615
+msgid "Increase font size"
+msgstr "Perbesar ukuran font"
+
+#: thonny/workbench.py:625
+msgid "Decrease font size"
+msgstr "Perkecil ukuran font"
+
+#: thonny/workbench.py:637
+msgid "Focus editor"
+msgstr "Fokus ke editor"
+
+#: thonny/workbench.py:646
+msgid "Focus shell"
+msgstr "Fokus ke shell"
+
+#: thonny/workbench.py:656
+msgid "Maximize view"
+msgstr "Maksimalkan tampilan"
+
+#: thonny/workbench.py:668
+msgid "Full screen"
+msgstr "Layar penuh"
+
+#: thonny/workbench.py:679
+msgid "Change font size"
+msgstr "Ubah ukuran font"
+
+#: thonny/workbench.py:680
+msgid "Zoom"
+msgstr "Zoom"
+
+#: thonny/workbench.py:689
+msgid "Exit Thonny"
+msgstr "Keluar dari Thonny"
+
+#: thonny/workbench.py:692
+msgid "Quit"
+msgstr "Keluar"
+
+#: thonny/workbench.py:700 thonny/workbench.py:799
+msgid "Support Ukraine"
+msgstr "Dukung Ukraina"
+
+#: thonny/workbench.py:703
+msgid "Support"
+msgstr "Dukungan"
+
+#: thonny/workbench.py:870
+msgid "Install MicroPython"
+msgstr "Pasang MicroPython"
+
+#: thonny/workbench.py:874
+msgid "Install CircuitPython"
+msgstr "Pasang CircuitPython"
+
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:880
+msgid "Configure interpreter..."
+msgstr "Konfigurasi interpreter..."
+
+#: thonny/workbench.py:1247 thonny/workbench.py:1255
+#, python-format
+msgid "Overwriting theme '%s'"
+msgstr "Menimpa tema '%s'"
+
+#: thonny/workbench.py:1438
+msgid "Program arguments:"
+msgstr "Argumen program:"
+
+#: thonny/workbench.py:1467
+msgid "Program arguments"
+msgstr "Argumen program"
+
+#: thonny/workbench.py:1481
+msgid ""
+"Switch to\n"
+"regular\n"
+"mode"
+msgstr ""
+"Beralih ke \n"
+"mode\n"
+"biasa"
+
+#: thonny/workbench.py:1492
+msgid "Regular mode"
+msgstr "Mode biasa"
+
+#: thonny/workbench.py:1494
+msgid ""
+"Configuration has been updated. Restart Thonny to start working in "
+"regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr ""
+"Konfigurasi telah diperbarui. Mulai ulang Thonny untuk bekerja dalam "
+"mode biasa.\n"
+"\n"
+"(Lihat 'Alat → Opsi → Umum' jika Anda berubah pikiran nanti.)"
+
+#: thonny/workbench.py:1591
+msgid "Device"
+msgstr "Perangkat"
+
+#: thonny/workdlg.py:234
+msgid "Cancelling"
+msgstr "Membatalkan"
+
+#: thonny/workdlg.py:270
+msgid "Starting"
+msgstr "Memulai"
+
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
+msgid "About Thonny"
+msgstr "Tentang Thonny"
+
+#: thonny/plugins/about.py:82
+msgid ""
+"Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr ""
+"Dibuat di\n"
+"Universitas Tartu, Estonia,\n"
+"dengan bantuan dari\n"
+"komunitas open-source,\n"
+"Raspberry Pi Foundation\n"
+"dan Cybernetica AS"
+
+#: thonny/plugins/about.py:102
+msgid ""
+"This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr ""
+"Program ini tidak memberikan\n"
+"GARANSI APA PUN!\n"
+"Ini adalah perangkat lunak gratis, dan Anda dipersilakan untuk\n"
+"mendistribusikannya ulang dalam kondisi tertentu, lihat\n"
+"https://opensource.org/licenses/MIT\n"
+"untuk detailnya"
+
+#: thonny/plugins/about.py:142
+msgid "Version history"
+msgstr "Riwayat versi"
+
+#: thonny/plugins/about.py:149
+msgid "Report problems"
+msgstr "Laporkan masalah"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "Buka Asisten secara otomatis saat program mengalami crash karena exception"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "Buka Asisten secara otomatis saat ada peringatan terhadap kode Anda"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "Lakukan pemeriksaan Pylint yang dipilih"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "Lakukan pemeriksaan MyPy"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "Pemeriksaan yang dinonaktifkan (satu ID per baris)"
+
+#: thonny/plugins/ast_view.py:211
+msgid "Program tree"
+msgstr "Pohon program"
+
+#: thonny/plugins/autocomplete.py:529
+msgid "Auto-complete"
+msgstr "Lengkap otomatis"
+
+#: thonny/plugins/backend_config_page.py:90
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Jenis interpreter apa yang sebaiknya digunakan Thonny untuk menjalankan kode Anda?"
+
+#: thonny/plugins/backend_config_page.py:109
+msgid "Details"
+msgstr "Detail"
+
+#: thonny/plugins/backend_config_page.py:210
+msgid "Make uploaded shebang scripts executable"
+msgstr "Jadikan skrip shebang yang diunggah dapat dieksekusi"
+
+#: thonny/plugins/backend_config_page.py:249
+msgid "Authentication"
+msgstr "Autentikasi"
+
+#: thonny/plugins/backend_config_page.py:251
+#, python-brace-format
+msgid ""
+"Enter the passphrase of your private key for\n"
+"{}"
+msgstr ""
+"Masukkan kata sandi untuk kunci privat Anda untuk\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:254
+#, python-brace-format
+msgid ""
+"Enter your password for\n"
+"{}"
+msgstr ""
+"Masukkan kata sandi Anda untuk\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:272
+msgid "Save password"
+msgstr "Simpan kata sandi"
+
+#: thonny/plugins/backend_config_page.py:335
+msgid "Interpreter"
+msgstr "Interpreter"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "Tentang Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:57
+msgid ""
+"Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr ""
+"Birdseye adalah debugger Python yang perlu diinstal secara terpisah.\n"
+"\n"
+"Apakah Anda ingin membuka halaman bantuan dan mempelajarinya lebih lanjut?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "Debug skrip saat ini (birdseye)"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "Tampilkan info parameter"
+
+#: thonny/plugins/commenting_indenting.py:142
+msgid "Indent selected lines"
+msgstr "Indentasi baris yang dipilih"
+
+#: thonny/plugins/commenting_indenting.py:152
+msgid "Dedent selected lines"
+msgstr "Hapus indentasi pada baris yang dipilih"
+
+#: thonny/plugins/commenting_indenting.py:162
+msgid "Replace tabs with spaces"
+msgstr "Ganti tab dengan spasi"
+
+#: thonny/plugins/commenting_indenting.py:171
+msgid "Toggle comment"
+msgstr "Nyalakan komentar"
+
+#: thonny/plugins/commenting_indenting.py:181
+msgid "Comment out"
+msgstr "Komentari"
+
+#: thonny/plugins/commenting_indenting.py:191
+msgid "Uncomment"
+msgstr "Hapus komentar"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "Urungkan"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "Ulangi"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "Pilih semua"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1402
+msgid "Run to cursor"
+msgstr "Jalankan hingga kursor"
+
+#: thonny/plugins/debugger.py:557
+#, python-format
+msgid "Function call at %s"
+msgstr "Pemanggilan fungsi di %s"
+
+#: thonny/plugins/debugger.py:964
+msgid "Source code"
+msgstr "Kode sumber"
+
+#: thonny/plugins/debugger.py:985
+msgid "Can't close yet"
+msgstr "Belum bisa ditutup"
+
+#: thonny/plugins/debugger.py:986
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "Gunakan perintah \"Stop\" jika ingin membatalkan debugging"
+
+#: thonny/plugins/debugger.py:1006
+msgid "Local variables"
+msgstr "Variabel lokal"
+
+#: thonny/plugins/debugger.py:1038
+msgid "Function"
+msgstr "Fungsi"
+
+#: thonny/plugins/debugger.py:1039
+msgid "Location"
+msgstr "Lokasi"
+
+#: thonny/plugins/debugger.py:1115
+msgid ""
+"If last command raised an exception then this view will show the "
+"stacktrace."
+msgstr ""
+"Jika perintah terakhir menghasilkan exception, tampilan ini akan menunjukkan "
+"jejak eksekusi (stacktrace)."
+
+#: thonny/plugins/debugger.py:1284
+msgid "Resume"
+msgstr "Lanjutkan"
+
+#: thonny/plugins/debugger.py:1300
+msgid "Run / resume"
+msgstr "Jalankan / lanjutkan"
+
+#: thonny/plugins/debugger.py:1315
+msgid "Debug current script"
+msgstr "Debug skrip saat ini"
+
+#: thonny/plugins/debugger.py:1317
+msgid "Debug"
+msgstr "Debug"
+
+#: thonny/plugins/debugger.py:1328
+msgid "Debug current script (nicer)"
+msgstr "Debug skrip saat ini (lebih ramah)"
+
+#: thonny/plugins/debugger.py:1340
+msgid "Debug current script (faster)"
+msgstr "Debug skrip saat ini (lebih cepat)"
+
+#: thonny/plugins/debugger.py:1351
+msgid "Step over"
+msgstr "Langkahi"
+
+#: thonny/plugins/debugger.py:1353
+msgid "Over"
+msgstr "Lewati"
+
+#: thonny/plugins/debugger.py:1364
+msgid "Step into"
+msgstr "Melangkah ke dalam"
+
+#: thonny/plugins/debugger.py:1366
+msgid "Into"
+msgstr "Masuk"
+
+#: thonny/plugins/debugger.py:1377
+msgid "Step out"
+msgstr "Melangkah ke luar"
+
+#: thonny/plugins/debugger.py:1379
+msgid "Out"
+msgstr "Keluar"
+
+#: thonny/plugins/debugger.py:1414
+msgid "Step back"
+msgstr "Langkah mundur"
+
+#: thonny/plugins/debugger.py:1416
+msgid "Back"
+msgstr "Mundur"
+
+#: thonny/plugins/debugger.py:1422
+msgid "Stack"
+msgstr "Tumpukan"
+
+#: thonny/plugins/debugger.py:1423
+msgid "Exception"
+msgstr "Exception"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "Jendela pengguna yang ditambatkan"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "Sorot nama yang cocok"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "Sorot variabel lokal"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "Sorot tanda kurung"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "Sorot elemen sintaks"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "Sorot karakter tab"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "Sorot baris saat ini (perlu membuka ulang editor)"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "Tampilkan info parameter secara otomatis setelah mengetik '('"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "Tawarkan pelengkapan otomatis saat mengetik"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "Tampilkan dokumentasi pelengkapan secara otomatis"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "Minta pelengkapan dengan tombol Tab di editor"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "Minta pelengkapan dengan tombol Tab di Shell"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "Indentasi dengan karakter tab (tidak disarankan untuk Python)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "Tampilkan nomor baris"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid ""
+"Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr ""
+"Panjang baris maksimum yang disarankan\n"
+"(Atur ke 0 untuk menonaktifkan garis batas)"
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr "Buat skrip shebang yang disimpan dapat dieksekusi"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "Editor"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "Ekspor log penggunaan..."
+
+#: thonny/plugins/event_view.py:39
+msgid "Events"
+msgstr "Peristiwa"
+
+#: thonny/plugins/files.py:219
+#, python-format
+msgid "Upload to %s"
+msgstr "Unggah ke %s"
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr "Aktifkan lingkungan virtual"
+
+#: thonny/plugins/files.py:326
+#, python-format
+msgid "Download to %s"
+msgstr "Unduh ke %s"
+
+#: thonny/plugins/files.py:420
+#, python-format
+msgid "Downloading %s to %s"
+msgstr "Mengunduh %s ke %s"
+
+#: thonny/plugins/files.py:609
+msgid "Files"
+msgstr "Berkas"
+
+#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:438
+msgid "Find & Replace"
+msgstr "Cari & Ganti"
+
+#: thonny/plugins/find_replace.py:66
+msgid "Find:"
+msgstr "Cari:"
+
+#: thonny/plugins/find_replace.py:90
+msgid "Replace with:"
+msgstr "Ganti dengan:"
+
+#: thonny/plugins/find_replace.py:108
+msgid "Case sensitive"
+msgstr "Peka huruf besar/kecil"
+
+#: thonny/plugins/find_replace.py:115
+msgid "Up"
+msgstr "Atas"
+
+#: thonny/plugins/find_replace.py:119
+msgid "Down"
+msgstr "Bawah"
+
+#: thonny/plugins/find_replace.py:128
+msgid "Find"
+msgstr "Cari"
+
+#: thonny/plugins/find_replace.py:138
+msgid "Replace"
+msgstr "Gantikan"
+
+#: thonny/plugins/find_replace.py:146
+msgid "Replace+Find"
+msgstr "Gantikan+Cari"
+
+#: thonny/plugins/find_replace.py:156
+msgid "Replace all"
+msgstr "Gantikan semua"
+
+#: thonny/plugins/find_replace.py:254
+msgid "Enter string to be replaced."
+msgstr "Masukkan teks (string) yang akan digantikan."
+
+#: thonny/plugins/find_replace.py:339
+msgid "The specified text was not found!"
+msgstr "Teks yang dimaksud tidak ditemukan!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "Izinkan hanya satu instansi Thonny"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "Catat aktivitas penggunaan program"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "Buka kembali semua file dari sesi sebelumnya"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Gunakan dialog file Tk alih-alih Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "Pilih jika dialog file muncul di belakang jendela utama"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "Nonaktifkan suara notifikasi"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "Mode debug (menyediakan log diagnostik yang lebih rinci)"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "Bahasa"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "Mode antarmuka (UI)"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "Faktor skala UI"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "Mode skala huruf"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "Variabel lingkungan (satu KEY=VALUE per baris)"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "Catatan! Mulai ulang Thonny setelah mengubah opsi-opsi ini!"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "Peringatan"
+
+#: thonny/plugins/general_config_page.py:137
+msgid ""
+"If you quote the value of an environment variable, the quotes will be "
+"part of the value.\n"
+"Did you intend this?"
+msgstr ""
+"Jika Anda menambahkan tanda kutip pada nilai variabel lingkungan, tanda kutip akan menjadi bagian dari nilainya.\n"
+"Apakah memang itu yang Anda maksudkan?"
+
+#: thonny/plugins/general_config_page.py:148
+msgid "General"
+msgstr "Umum"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "Tidak dapat menemukan definisi"
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "ID"
+
+#: thonny/plugins/heap.py:37
+msgid ""
+"Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr ""
+"Mode Heap aktif.\n"
+"Tutup tampilan Heap untuk menonaktifkannya."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "Heap"
+
+#: thonny/plugins/notes.py:36
+msgid ""
+"This box is meant for your working notes -- assignment instructions, code"
+" snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny "
+"next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr ""
+"Kotak ini ditujukan untuk catatan kerja Anda — instruksi tugas, potongan kode, dan lainnya.\n"
+"\n"
+"Semua akan disimpan secara otomatis dan dimuat saat Anda membuka Thonny lagi nanti.\n"
+"\n"
+"Silakan hapus teks ini untuk memberikan ruang bagi catatan Anda sendiri."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "Catatan"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "Data"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "Atribut"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "Objek sebelumnya"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "Objek berikutnya"
+
+#: thonny/plugins/object_inspector.py:487
+#, python-format
+msgid ""
+"The representation above is an approximate value of this float. The exact"
+" stored value is %s which is about %s"
+msgstr ""
+"Representasi di atas adalah nilai perkiraan dari float ini. Nilai sebenarnya"
+"yang disimpan adalah %s, yang kira-kira sama dengan %s"
+
+#: thonny/plugins/object_inspector.py:537
+msgid "Index"
+msgstr "Indeks"
+
+#: thonny/plugins/object_inspector.py:615
+msgid "Key ID"
+msgstr "ID Kunci"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key"
+msgstr "Kunci"
+
+#: thonny/plugins/object_inspector.py:732
+msgid "Object inspector"
+msgstr "Pemeriksa objek"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "Garis besar"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "Mode Pygame Zero"
+
+#: thonny/plugins/pip_gui.py:77
+msgid "Search on PyPI"
+msgstr "Cari di PyPI"
+
+#: thonny/plugins/micropython/base_flashing_dialog.py:398
+#: thonny/plugins/pip_gui.py:80
+msgid "Install"
+msgstr "Pasang"
+
+#: thonny/plugins/pip_gui.py:83
+msgid "Upgrade"
+msgstr "Perbarui"
+
+#: thonny/plugins/pip_gui.py:86
+msgid "Uninstall"
+msgstr "Hapus"
+
+#: thonny/plugins/pip_gui.py:151
+msgid "INSTALL"
+msgstr "PASANG"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:376
+msgid "Browse the packages"
+msgstr "Jelajahi paket-paket"
+
+#: thonny/plugins/pip_gui.py:380
+msgid ""
+"With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or "
+"uninstalling."
+msgstr ""
+"Dengan interpreter saat ini, Anda hanya dapat menjelajahi paket di sini.\n"
+"Gunakan 'Alat → Buka shell sistem...' untuk memasang, memperbarui, atau"
+"menghapus"
+
+#: thonny/plugins/pip_gui.py:387
+msgid "Packages' directory"
+msgstr "Direktori paket"
+
+#: thonny/plugins/pip_gui.py:391
+msgid "Install from PyPI"
+msgstr "Pasang dari PyPI"
+
+#: thonny/plugins/pip_gui.py:395
+msgid ""
+"If you don't know where to get the package from, then most likely you'll "
+"want to search the Python Package Index. Start by entering the name of "
+"the package in the search box above and pressing ENTER."
+msgstr ""
+"Jika Anda tidak tahu dari mana mendapatkan paketnya, kemungkinan besar Anda "
+"ingin mencarinya di Python Package Index. Mulailah dengan memasukkan nama "
+"paket di kotak pencarian di atas dan tekan ENTER."
+
+#: thonny/plugins/pip_gui.py:404
+msgid "Install from requirements file"
+msgstr "Pasang dari file requirements"
+
+#: thonny/plugins/pip_gui.py:406
+msgid "Click "
+msgstr "Klik"
+
+#: thonny/plugins/pip_gui.py:407 thonny/plugins/pip_gui.py:418
+msgid "here"
+msgstr "di sini"
+
+#: thonny/plugins/pip_gui.py:411
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "untuk menemukan file requirements.txt dan memasang paket-paket yang disebutkan di dalamnya."
+
+#: thonny/plugins/pip_gui.py:416
+msgid "Install from local file"
+msgstr "Pasang dari file lokal"
+
+#: thonny/plugins/pip_gui.py:417
+msgid "Click"
+msgstr "Klik"
+
+#: thonny/plugins/pip_gui.py:423
+msgid ""
+"to locate and install the package file (usually with .whl, .tar.gz or "
+".zip extension)."
+msgstr ""
+"untuk menemukan dan memasang file paket (biasanya berekstensi .whl, .tar.gz, atau "
+".zip)."
+
+#: thonny/plugins/pip_gui.py:429
+msgid "Upgrade or uninstall"
+msgstr "Perbarui atau hapus"
+
+#: thonny/plugins/pip_gui.py:431
+msgid "Start by selecting the package from the left."
+msgstr "Mulailah dengan memilih paket dari sebelah kiri."
+
+#: thonny/plugins/micropython/pip_gui.py:119 thonny/plugins/pip_gui.py:435
+msgid "Target"
+msgstr "Target"
+
+#: thonny/plugins/pip_gui.py:440
+msgid ""
+"This dialog lists all available packages, but allows upgrading and "
+"uninstalling only packages from"
+msgstr ""
+"Dialog ini menampilkan semua paket yang tersedia, tetapi hanya memungkinkan pembaruan dan "
+"penghapusan untuk paket dari"
+
+#: thonny/plugins/pip_gui.py:450
+msgid ""
+"New packages will be also installed into this directory. Other locations "
+"must be managed by alternative means."
+msgstr ""
+"Paket baru juga akan dipasang ke direktori ini. Lokasi lain "
+"harus dikelola dengan cara alternatif."
+
+#: thonny/plugins/pip_gui.py:502
+msgid "Installed version:"
+msgstr "Versi terpasang"
+
+#: thonny/plugins/pip_gui.py:504
+msgid "Installed to:"
+msgstr "Dipasang ke:"
+
+#: thonny/plugins/pip_gui.py:579
+msgid "Could not find the package from PyPI."
+msgstr "Tidak dapat menemukan paket dari PyPI."
+
+#: thonny/plugins/pip_gui.py:582
+msgid "Please check your spelling!"
+msgstr "Silakan periksa ejaan Anda!"
+
+#: thonny/plugins/pip_gui.py:586
+msgid "Could not find the package info from PyPI."
+msgstr "Tidak dapat menemukan informasi paket dari PyPI."
+
+#: thonny/plugins/pip_gui.py:588 thonny/plugins/pip_gui.py:1411
+msgid "Error code:"
+msgstr "Kode Error:"
+
+#: thonny/plugins/pip_gui.py:601
+msgid "Latest stable version"
+msgstr "Versi stabil terbaru"
+
+#: thonny/plugins/pip_gui.py:603
+msgid "Latest version"
+msgstr "Versi terbaru"
+
+#: thonny/plugins/pip_gui.py:605
+msgid "Summary"
+msgstr "Ringkasan"
+
+#: thonny/plugins/pip_gui.py:607
+msgid "Author"
+msgstr "Penulis"
+
+#: thonny/plugins/pip_gui.py:609
+msgid "License"
+msgstr "Lisensi"
+
+#: thonny/plugins/pip_gui.py:611
+msgid "Homepage"
+msgstr "Beranda"
+
+#: thonny/plugins/pip_gui.py:613
+msgid "Bugtracker"
+msgstr "Pelacak Bug"
+
+#: thonny/plugins/pip_gui.py:615
+msgid "Documentation"
+msgstr "Dokumentasi"
+
+#: thonny/plugins/pip_gui.py:617
+msgid "PyPI page"
+msgstr "Halaman PyPI"
+
+#: thonny/plugins/pip_gui.py:657
+msgid "Requires"
+msgstr "Membutuhkan"
+
+#: thonny/plugins/pip_gui.py:691
+msgid "Search results"
+msgstr "Hasil pencarian"
+
+#: thonny/plugins/pip_gui.py:692
+msgid "Searching"
+msgstr "Mencari"
+
+#: thonny/plugins/pip_gui.py:757
+msgid "Can't find package name from the list:"
+msgstr "Tidak dapat menemukan nama paket dari daftar:"
+
+#: thonny/plugins/pip_gui.py:796 thonny/plugins/pip_gui.py:885
+#, python-format
+msgid "Installing '%s'"
+msgstr "Menginstal '%s'"
+
+#: thonny/plugins/pip_gui.py:802
+#, python-format
+msgid "Upgrading '%s'"
+msgstr "Memperbarui '%s'"
+
+#: thonny/plugins/pip_gui.py:809
+#, python-format
+msgid "Uninstalling '%s'"
+msgstr "Menghapus instalasi '%s'"
+
+#: thonny/plugins/pip_gui.py:811
+msgid "Really uninstall?"
+msgstr "Yakin ingin menghapus instalasi?"
+
+#: thonny/plugins/pip_gui.py:813
+#, python-brace-format
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "Paket '{}' diperlukan untuk menginstal dan menghapus paket lainnya."
+
+#: thonny/plugins/pip_gui.py:816
+msgid "Are you sure you want to uninstall it?"
+msgstr "Apakah Anda yakin ingin menghapus instalasinya?"
+
+#: thonny/plugins/pip_gui.py:823
+msgid "Installing"
+msgstr "Menginstal"
+
+#: thonny/plugins/pip_gui.py:857
+msgid "Package"
+msgstr "Paket"
+
+#: thonny/plugins/pip_gui.py:969
+#, python-format
+msgid "Manage packages for %s"
+msgstr "Kelola paket untuk %s"
+
+#: thonny/plugins/pip_gui.py:1045
+#, python-format
+msgid ""
+"Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr ""
+"Sepertinya Anda sedang menginstal paket yang terkait dengan Thonny.\n"
+"Jika maksud Anda adalah menginstal plugin Thonny, maka sebaiknya Anda\n"
+"memilih 'Alat → Kelola plugin...'\n"
+"\n"
+"Apakah Anda yakin ingin menginstal %s untuk backend?"
+
+#: thonny/plugins/pip_gui.py:1145
+msgid ""
+"NB! There may be another version available which is compatible with "
+"current Thonny version. Click on '...' button to choose the version to "
+"install."
+msgstr ""
+"Catatan! Mungkin ada versi lain yang kompatibel dengan Thonny saat ini. "
+"Klik tombol '...' untuk memilih versi yang akan diinstal."
+
+#: thonny/plugins/pip_gui.py:1152
+msgid "Thonny plugin without requirements"
+msgstr "Plugin Thonny tanpa dependensi"
+
+#: thonny/plugins/pip_gui.py:1168
+msgid "Unsuitable requirements"
+msgstr "Persyaratan tidak cocok"
+
+#: thonny/plugins/pip_gui.py:1169
+msgid "This package requires different Thonny version:"
+msgstr "Paket ini memerlukan versi Thonny yang berbeda:"
+
+#: thonny/plugins/pip_gui.py:1173
+msgid "If you still want it, then please install it from the command line."
+msgstr "Jika Anda tetap menginginkannya, silakan instal melalui command line."
+
+#: thonny/plugins/pip_gui.py:1204
+msgid ""
+"This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools "
+"→ Manage packages...'"
+msgstr ""
+"Dialog ini untuk mengelola plugin Thonny dan dependensinya.\n"
+"Jika Anda ingin menginstal paket untuk program Anda sendiri, pilih 'Alat "
+"→ Kelola paket...'"
+
+#: thonny/plugins/pip_gui.py:1211
+msgid ""
+"NB! You need to restart Thonny after installing / upgrading / "
+"uninstalling a plug-in."
+msgstr ""
+"Catatan! Anda perlu memulai ulang Thonny setelah menginstal / memperbarui / "
+"menghapus plugin."
+
+#: thonny/plugins/pip_gui.py:1220
+msgid "Thonny plug-ins"
+msgstr "Plugin Thonny"
+
+#: thonny/plugins/pip_gui.py:1256
+msgid "Advanced install / upgrade / downgrade"
+msgstr "Instalasi / pembaruan / penurunan versi lanjutan"
+
+#: thonny/plugins/pip_gui.py:1265
+msgid "Desired version"
+msgstr "Versi yang diinginkan"
+
+#: thonny/plugins/pip_gui.py:1324
+msgid "Upgrade dependencies"
+msgstr "Perbarui dependensi"
+
+#: thonny/plugins/pip_gui.py:1409
+msgid "Requires:"
+msgstr "Membutuhkan:"
+
+#: thonny/plugins/pip_gui.py:1413
+msgid "Error:"
+msgstr "Kesalahan:"
+
+#: thonny/plugins/pip_gui.py:1565
+msgid "Package manager is not available for this interpreter"
+msgstr "Manajer paket tidak tersedia untuk interpreter ini"
+
+#: thonny/plugins/micropython/pip_gui.py:142 thonny/plugins/pip_gui.py:1584
+msgid "Not available"
+msgstr "Tidak tersedia"
+
+#: thonny/plugins/pip_gui.py:1585
+msgid "You need to stop your program before launching the package manager."
+msgstr "Anda perlu menghentikan program Anda sebelum meluncurkan manajer paket."
+
+#: thonny/plugins/pip_gui.py:1604
+msgid "Manage packages..."
+msgstr "Kelola paket..."
+
+#: thonny/plugins/pip_gui.py:1610
+msgid "Manage plug-ins..."
+msgstr "Kelola plugin..."
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr "Visualisasikan skrip saat ini di Python Tutor"
+
+#: thonny/plugins/replayer.py:364
+msgid "Open replayer..."
+msgstr "Buka pemutar ulang..."
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr "Izinkan menjalankan program tanpa nama"
+
+#: thonny/plugins/run_debug_config_page.py:21
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "Ubah direktori kerja ke direktori skrip saat Menjalankan / Debugging"
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr "Peringatkan jika modul pengguna menutupi modul pustaka"
+
+#: thonny/plugins/run_debug_config_page.py:35
+msgid "Show function calls (frames) in separate windows"
+msgstr "Tampilkan panggilan fungsi (frame) di jendela terpisah"
+
+#: thonny/plugins/run_debug_config_page.py:36
+msgid "Uncheck if you want more traditional experience."
+msgstr "Hapus centang jika Anda menginginkan pengalaman yang lebih tradisional."
+
+#: thonny/plugins/run_debug_config_page.py:42
+msgid "Open and close Stack view automatically"
+msgstr "Buka dan tutup tampilan Stack secara otomatis"
+
+#: thonny/plugins/run_debug_config_page.py:44
+msgid ""
+"Opens the Stack view on first call and closes it when program returns to "
+"main frame."
+msgstr ""
+"Membuka tampilan Stack pada panggilan pertama dan menutupnya ketika program kembali ke "
+"frame utama."
+
+#: thonny/plugins/run_debug_config_page.py:52
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "Izinkan memasuki pustaka (misalnya di luar direktori skrip utama)"
+
+#: thonny/plugins/run_debug_config_page.py:53
+msgid "May make debugging slower."
+msgstr "Mungkin memperlambat proses debugging."
+
+#: thonny/plugins/run_debug_config_page.py:58
+msgid "Preferred debugger"
+msgstr "Debugger yang diinginkan"
+
+#: thonny/plugins/run_debug_config_page.py:70
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(digunakan saat mengklik tombol toolbar Debug)"
+
+#: thonny/plugins/run_debug_config_page.py:75
+msgid "Birdseye port"
+msgstr "Port Birdseye"
+
+#: thonny/plugins/run_debug_config_page.py:79
+msgid "(restart Thonny after changing this)"
+msgstr "(restart Thonny setelah mengubah ini)"
+
+#: thonny/plugins/run_debug_config_page.py:87
+msgid "Run & Debug"
+msgstr "Jalankan & Debug"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "Bersihkan Shell sebelum memulai proses baru (Jalankan, Debug, Hentikan/Restart, ...)"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "Emulasi terminal"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "mendukung warna dan gaya ANSI dasar"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "Jumlah maksimum baris yang akan disimpan."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "NB! Nilai besar dapat menyebabkan kinerja buruk!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "Panjang maksimum fragmen baris sebelum dipadatkan"
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "Buka nilai yang dievaluasi di Inspector Objek"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "Menjalankan skrip saat ini di terminal"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "Tampilkan Python REPL setelah program berakhir"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Biarkan jendela terminal terbuka setelah proses Python berakhir"
+
+#: thonny/plugins/terminal_config_page.py:32
+msgid ""
+"NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr ""
+"NB! Penutupan otomatis perlu diaktifkan dalam pengaturan Terminal\n"
+"(Profil → Shell → Ketika shell keluar)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "Terminal"
+
+#: thonny/plugins/theme_and_font_config_page.py:39
+msgid "UI theme"
+msgstr "Tema UI"
+
+#: thonny/plugins/theme_and_font_config_page.py:52
+msgid "Syntax theme"
+msgstr "Tema sintaksis"
+
+#: thonny/plugins/theme_and_font_config_page.py:84
+msgid "Editor font"
+msgstr "Font editor"
+
+#: thonny/plugins/theme_and_font_config_page.py:107
+msgid "IO font"
+msgstr "Font IO"
+
+#: thonny/plugins/theme_and_font_config_page.py:132
+msgid "Preview"
+msgstr "Pratinjau"
+
+#: thonny/plugins/theme_and_font_config_page.py:150
+msgid "This is a comment"
+msgstr "Ini adalah komentar"
+
+#: thonny/plugins/theme_and_font_config_page.py:153
+msgid "The answer is"
+msgstr "Jawaban adalah"
+
+#: thonny/plugins/theme_and_font_config_page.py:157
+msgid "unclosed_string"
+msgstr "string_tidak_tertutup"
+
+#: thonny/plugins/theme_and_font_config_page.py:159
+msgid "blah, blah"
+msgstr "bla, bla"
+
+#: thonny/plugins/theme_and_font_config_page.py:183
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "NB! Beberapa elemen gaya hanya berubah setelah merestart Thonny!"
+
+#: thonny/plugins/theme_and_font_config_page.py:222
+msgid "Enter an integer"
+msgstr "Masukkan angka bulat"
+
+#: thonny/plugins/theme_and_font_config_page.py:235
+msgid "Theme & Font"
+msgstr "Tema & Font"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Buka folder program Thonny..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Buka folder data Thonny..."
+
+#: thonny/plugins/todo_view.py:43
+msgid "Line"
+msgstr "Baris"
+
+#: thonny/plugins/todo_view.py:44
+msgid "Info"
+msgstr "Info"
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr "Tidak ada baris yang ditandai dengan #todo ditemukan"
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr "TODO"
+
+#: thonny/plugins/variables.py:22
+msgid ""
+"Back to\n"
+"current frame"
+msgstr ""
+"Kembali ke\n"
+"kerangka saat ini"
+
+#: thonny/plugins/variables.py:39
+#, python-format
+msgid ""
+"Back to\n"
+"%s"
+msgstr ""
+"Kembali ke\n"
+"%s"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "Variabel"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (umum)"
+
+#: thonny/plugins/circuitpython/cirpy_front.py:113
+#: thonny/plugins/micropython/mp_front.py:537
+#, python-format
+msgid "Install or update %s"
+msgstr "Instal atau perbarui %s"
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr "Python 3 Lokal"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:196
+msgid "Thonny's Python"
+msgstr "Python Thonny"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:234
+msgid "Python executable"
+msgstr "Eksekutabel Python"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:256
+#, python-format
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "NB! Thonny hanya mendukung Python %s dan versi lebih baru"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:259
+msgid ""
+"NB! File selection button may not work properly when selecting "
+"executables\n"
+"from a virtual environment. In this case choose the 'activate' script "
+"instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr ""
+"NB! Tombol pemilihan file mungkin tidak berfungsi dengan baik saat memilih "
+"eksekutabel\n"
+"dari lingkungan virtual. Dalam hal ini pilih skrip 'activate' "
+"sebagai ganti\n"
+"interpreter (atau masukkan path langsung ke kotak)!"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:267
+msgid ""
+"You can activate an existing virtual environment also via the right-click"
+" context menu in the file navagation when selecting a virtual environment"
+" folder, or the 'pyveng.cfg' file inside."
+msgstr ""
+"Anda juga dapat mengaktifkan lingkungan virtual yang ada melalui menu konteks klik kanan"
+" pada navigasi file saat memilih folder lingkungan virtual"
+" atau file 'pyveng.cfg' di dalamnya."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:295
+msgid "Python interpreters"
+msgstr "Interpreter Python"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:324
+msgid "Select empty directory for new virtual environment"
+msgstr "Pilih direktori kosong untuk lingkungan virtual baru"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:331
+msgid "Bad directory"
+msgstr "Direktori buruk"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:332
+msgid ""
+"Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr ""
+"Direktori yang dipilih tidak kosong.\n"
+"Pilih yang lain atau batalkan."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:349
+msgid "Creating virtual environment"
+msgstr "Membuat lingkungan virtual"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid ""
+"The packages of this interpreter can be managed via your system package "
+"manager."
+msgstr ""
+"Paket dari interpreter ini dapat dikelola melalui manajer "
+"paket sistem Anda."
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
+msgstr "Untuk menginstal paket dengan pip, Anda perlu menggunakan lingkungan virtual."
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "Python 3 Jarak Jauh (SSH)
+
+#: thonny/plugins/ev3/__init__.py:72
+msgid "Preparations (skip the VS Code part)"
+msgstr "Persiapan (lewati bagian VS Code)"
+
+#: thonny/plugins/ev3/__init__.py:78
+msgid "Default password"
+msgstr "Kata sandi default"
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "Beranda"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "Isi Bantuan"
+
+#: thonny/plugins/microbit/__init__.py:62
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Pastikan MicroPython telah terinstal di micro:bit Anda."
+
+#: thonny/plugins/microbit/__init__.py:64
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Jangan lupa bahwa main.py hanya berfungsi tanpa skrip utama yang tersemat."
+
+#: thonny/plugins/micropython/__init__.py:24
+msgid "MicroPython (generic)"
+msgstr "MicroPython (umum)"
+
+#: thonny/plugins/micropython/__init__.py:35
+msgid "MicroPython (local)"
+msgstr "MicroPython (lokal)"
+
+#: thonny/plugins/micropython/__init__.py:46
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:290
+msgid "CircuitPython device"
+msgstr "Perangkat CircuitPython"
+
+#: thonny/plugins/micropython/mp_front.py:294
+msgid "MicroPython device"
+msgstr "Perangkat MicroPython"
+
+#: thonny/plugins/micropython/mp_front.py:300
+msgid "Not connected"
+msgstr "Tidak terhubung"
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port or WebREPL"
+msgstr "Port atau WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port"
+msgstr "Port"
+
+#: thonny/plugins/micropython/mp_front.py:445
+msgid "Try to detect port automatically"
+msgstr "Coba deteksi port secara otomatis"
+
+#: thonny/plugins/micropython/mp_front.py:483
+msgid "Interrupt working program on connect"
+msgstr "Hentikan program yang berjalan saat terhubung"
+
+#: thonny/plugins/micropython/mp_front.py:491
+msgid "Synchronize device's real time clock"
+msgstr "Sinkronkan jam waktu nyata perangkat"
+
+#: thonny/plugins/micropython/mp_front.py:497
+msgid "Use local time in real time clock"
+msgstr "Gunakan waktu lokal di jam waktu nyata"
+
+#: thonny/plugins/micropython/mp_front.py:503
+msgid "Restart interpreter before running a script"
+msgstr "Mulai ulang interpreter sebelum menjalankan skrip"
+
+#: thonny/plugins/micropython/mp_front.py:545
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "Hubungkan perangkatmu ke komputer dan pilih port yang sesuai di bawah ini"
+
+#: thonny/plugins/micropython/mp_front.py:548
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "cari nama perangkatmu, \"USB Serial\" atau \"UART\""
+
+#: thonny/plugins/micropython/mp_front.py:550
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "Jika kamu tidak menemukannya, mungkin kamu perlu menginstal driver USB yang sesuai terlebih dahulu."
+
+#: thonny/plugins/micropython/mp_front.py:586
+msgid "Password"
+msgstr "Kata sandi"
+
+#: thonny/plugins/micropython/pip_gui.py:27
+msgid ""
+"This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr ""
+"Ini sepertinya bukan paket MicroPython/CircuitPython.\n"
+"Apakah kamu yakin ingin menginstalnya?"
+
+#: thonny/plugins/micropython/pip_gui.py:65
+msgid "Search micropython-lib and PyPI"
+msgstr "Cari di micropython-lib dan PyPI"
+
+#: thonny/plugins/micropython/pip_gui.py:144
+msgid "no absolute lib directory in sys.path"
+msgstr "tidak ada direktori lib absolut di sys.path"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "Cetak..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "Buka shell sistem..."
+
