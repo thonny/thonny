@@ -541,7 +541,7 @@
   containing a raise statement. As such, it will warn when it encounters an
   else following a chain of ifs, all of them containing a raise statement.
 :unnecessary-comprehension (R1721): *Unnecessary use of a comprehension*
-  Instead of using an identitiy comprehension, consider using the list, dict or
+  Instead of using an identity comprehension, consider using the list, dict or
   set constructor. It is faster and simpler.
 :consider-using-sys-exit (R1722): *Consider using sys.exit()*
   Instead of using exit() or quit(), consider using the sys.exit().
@@ -750,7 +750,7 @@
   Emitted when the caller's argument names fully match the parameter names in
   the function signature but do not have the same order.
 :non-str-assignment-to-dunder-name (W1115): *Non-string value assigned to __name__*
-  Emitted when a non-string vaue is assigned to __name__
+  Emitted when a non-string value is assigned to __name__
 :isinstance-second-argument-not-valid-type (W1116): *Second argument of isinstance is not a type*
   Emitted when the second argument of an isinstance call is not a type.
 :logging-not-lazy (W1201): *Use %s formatting in logging functions*
