@@ -428,8 +428,9 @@ class Workbench(tk.Tk):
         thonny.set_logging_level()
 
     def get_main_language_server_proxy(self) -> Optional[LanguageServerProxy]:
-        assert self._ls_proxies
-        return self._ls_proxies[0]
+        if self._ls_proxies:
+            return self._ls_proxies[0]
+        return None
 
     def get_initialized_ls_proxies(self) -> List[LanguageServerProxy]:
         return [ls_proxy for ls_proxy in self._ls_proxies if ls_proxy.is_initialized()]
