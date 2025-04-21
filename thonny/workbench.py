@@ -2981,10 +2981,12 @@ class Workbench(tk.Tk):
 
         profile = self.get_profile()
         if profile != "default":
-            title_text += f"〈 {profile} 〉"
+            title_text += f" 〈 {profile} 〉 "
+        else:
+            title_text += "  -  "
 
         if editor is not None:
-            title_text += "  -  " + editor.get_long_description()
+            title_text += editor.get_long_description().replace(os.path.expanduser("~"), "~")
 
         self.title(title_text)
 
