@@ -816,7 +816,7 @@ class Runner:
 
         get_workbench().event_generate("BackendRestart", full=True)
 
-        self._poll_backend_messages()
+        get_workbench().after_idle(self._poll_backend_messages)
 
     def destroy_backend(self, for_restart: bool = False) -> None:
         logger.info("Destroying backend")
