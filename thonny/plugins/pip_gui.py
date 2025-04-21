@@ -454,12 +454,13 @@ class PipFrame(ttk.Frame, ABC):
     def _show_sys_path(self):
         pass
 
-    def _get_dist_info(self, name: str, version: str) -> DistInfo:
+    def _get_dist_info(self, name: str, version: Optional[str]) -> DistInfo:
         # NB! Runs in a background thread
         installed_dist = self._installed_dists.get(canonicalize_name(name))
-        if installed_dist is not None and canonicalize_version(
-            installed_dist.version
-        ) == canonicalize_version(version):
+        if installed_dist is not None and (
+            version is None
+            or canonicalize_version(installed_dist.version) == canonicalize_version(version)
+        ):
             if installed_dist.complete:
                 return installed_dist
             else:
@@ -490,13 +491,13 @@ class PipFrame(ttk.Frame, ABC):
 
         return self._version_list_cache[norm_name]
 
-    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+    def _download_dist_info(self, name: str, version: Optional[str]) -> DistInfo:
         return download_dist_info_from_pypi(name, version)
 
     def _download_version_list(self, name: str) -> List[str]:
         return try_download_version_list_from_pypi(name)
 
-    def _start_show_package_info(self, name, version):
+    def _start_show_package_info(self, name: str, version: Optional[str]):
         self._current_dist_info = None
         # Fetch info from PyPI
         self._set_state("fetching")
@@ -505,68 +506,6 @@ class PipFrame(ttk.Frame, ABC):
 
         self._append_info_text(name, tags=("title",))
         self._append_info_text("   ")
-        bordercolor = "#aaaaaa"  # TODO
-
-        norm_installed_version = self._get_normalized_installed_version(name)
-        norm_new_version = canonicalize_version(version)
-        is_installed = norm_new_version == norm_installed_version
-
-        if is_installed:
-            version_text = version + " (" + tr("installed") + ")"
-            action = self._on_uninstall_click
-            action_text = tr("Uninstall")
-        else:
-            version_text = version
-            action = self._on_install_click
-            if norm_installed_version is None:
-                action_text = tr("Install")
-            elif norm_installed_version < norm_new_version:
-                action_text = tr("Upgrade to this version")
-            else:
-                assert norm_installed_version > norm_new_version
-                action_text = tr("Downgrade to this version")
-
-        text_background = get_style_configuration("Text")["background"]
-
-        version_button_frame = create_custom_toolbutton_in_frame(
-            #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
-            self.info_text,
-            text=f" {version_text}  ⏷ ",
-            command=self._show_version_menu,
-            state="disabled",
-            background=text_background,
-            borderwidth=1,
-            bordercolor=bordercolor,
-        )
-        self._version_button = version_button_frame.button
-        self.info_text.window_create("end", window=version_button_frame)
-
-        if not self._is_read_only_env() and not self._is_read_only_dist(name, version):
-            self._append_info_text("  ")
-            action_button_frame = create_custom_toolbutton_in_frame(
-                self.info_text,
-                text=f" {action_text} ",
-                command=action,
-                state="disabled",
-                borderwidth=1,
-                bordercolor=bordercolor,
-            )
-            self._action_button = action_button_frame.button
-            self.info_text.window_create("end", window=action_button_frame)
-        else:
-            logger.debug(
-                "Not creating action button - read only env: %r, read only dist: %r",
-                self._is_read_only_env(),
-                self._is_read_only_dist(name, version),
-            )
-
-        self._append_info_text("\n")
-
-        if is_installed:
-            self._select_list_item(name)
-        else:
-            logger.info("Selecting '%s' over '%s'", norm_new_version, norm_installed_version)
-            self._select_list_item(0)
 
         # start download and polling
         from concurrent.futures.thread import ThreadPoolExecutor
@@ -596,6 +535,71 @@ class PipFrame(ttk.Frame, ABC):
     def _complete_show_package_info(self, dist_info: DistInfo):
         logger.info("complete_show_package_info %r", dist_info)
         self._set_state("idle")
+
+        bordercolor = "#aaaaaa"  # TODO
+        norm_installed_version = self._get_normalized_installed_version(dist_info.name)
+        norm_new_version = canonicalize_version(dist_info.version)
+        is_installed = norm_new_version == norm_installed_version
+
+        if is_installed:
+            version_text = dist_info.version + " (" + tr("installed") + ")"
+            action = self._on_uninstall_click
+            action_text = tr("Uninstall")
+        else:
+            version_text = dist_info.version
+            action = self._on_install_click
+            if norm_installed_version is None:
+                action_text = tr("Install")
+            elif norm_installed_version < norm_new_version:
+                action_text = tr("Upgrade to this version")
+            else:
+                assert norm_installed_version > norm_new_version
+                action_text = tr("Downgrade to this version")
+
+        text_background = get_style_configuration("Text")["background"]
+
+        version_button_frame = create_custom_toolbutton_in_frame(
+            #  ﹀⌄˅˯  ⌄⌃ ▾▴ ⏷⏶ ▼▲ ▽△ ▿▵  ⬧ ⟠ ↓↑  ˄˅
+            self.info_text,
+            text=f" {version_text}  ⏷ ",
+            command=self._show_version_menu,
+            state="disabled",
+            background=text_background,
+            borderwidth=1,
+            bordercolor=bordercolor,
+        )
+        self._version_button = version_button_frame.button
+        self.info_text.window_create("end", window=version_button_frame)
+
+        if not self._is_read_only_env() and not self._is_read_only_dist(
+            dist_info.name, dist_info.version
+        ):
+            self._append_info_text("  ")
+            action_button_frame = create_custom_toolbutton_in_frame(
+                self.info_text,
+                text=f" {action_text} ",
+                command=action,
+                state="disabled",
+                borderwidth=1,
+                bordercolor=bordercolor,
+            )
+            self._action_button = action_button_frame.button
+            self.info_text.window_create("end", window=action_button_frame)
+        else:
+            logger.debug(
+                "Not creating action button - read only env: %r, read only dist: %r",
+                self._is_read_only_env(),
+                self._is_read_only_dist(dist_info.name, dist_info.version),
+            )
+
+        self._append_info_text("\n")
+
+        if is_installed:
+            self._select_list_item(dist_info.name)
+        else:
+            logger.info("Selecting '%s' over '%s'", norm_new_version, norm_installed_version)
+            self._select_list_item(0)
+
         assert self._version_button is not None
         self._version_button.configure(state="normal")
 
@@ -811,12 +815,6 @@ class PipFrame(ttk.Frame, ABC):
                 assert isinstance(results, Exception)
                 self._append_info_text("Could not fetch search results:\n")
                 self._append_info_text(str(results) + "\n\n")
-                if isinstance(results, PyPiSearchErrorWithFallback):
-                    self._append_info_text("There is an exact match, though:\n\n")
-                    results = [results.fallback_result]
-                else:
-                    self._append_info_text("Try searching for exact package name.\n")
-                    return
 
         assert isinstance(results, list)
         self._last_search_results = {canonicalize_name(r.name): r for r in results}
@@ -1189,7 +1187,7 @@ class BackendPipFrame(PipFrame):
     def _fetch_search_results(self, query: str) -> List[DistInfo]:
         return self._get_proxy().search_packages(query)
 
-    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+    def _download_dist_info(self, name: str, version: Optional[str]) -> DistInfo:
         return self._get_proxy().get_package_info_from_index(name, version)
 
     def _download_version_list(self, name: str) -> List[str]:
@@ -1485,7 +1483,7 @@ class StubsPipFrame(PipFrame):
     def _fetch_search_results(self, query: str) -> List[DistInfo]:
         return self.proxy_class.search_packages(query)
 
-    def _download_dist_info(self, name: str, version: str) -> DistInfo:
+    def _download_dist_info(self, name: str, version: Optional[str]) -> DistInfo:
         return self.proxy_class.get_package_info_from_index(name, version)
 
     def _download_version_list(self, name: str) -> List[str]:
@@ -1503,25 +1501,6 @@ class StubsPipFrame(PipFrame):
 
 
 def perform_pypi_search(query: str, data_url: str, common_tokens: List[str]) -> List[DistInfo]:
-    try:
-        return _perform_plain_pypi_search(query, data_url, common_tokens)
-    except Exception as e:
-        logger.exception("Could not search PyPI for %r", query)
-        # Let's try a fallback by treating the query as package name
-        name = canonicalize_name(query.strip().replace(" ", ""))
-        logger.info("Probing for package named %r", name)
-        try:
-            dist_info = download_dist_info_from_pypi(name, None)
-        except Exception:
-            logger.exception("No luck with %r", name)
-            raise e from None
-        else:
-            raise PyPiSearchErrorWithFallback(str(e), dist_info) from e
-
-
-def _perform_plain_pypi_search(
-    query: str, data_url: str, common_tokens: List[str]
-) -> List[DistInfo]:
     logger.info("Performing PyPI search for %r", query)
 
     data = download_bytes(data_url)
@@ -1545,7 +1524,7 @@ def _perform_plain_pypi_search(
     return [
         DistInfo(
             name=p["name"],
-            version="0",
+            version=None,
             summary=p.get("summary"),
             source="PyPI",
         )
@@ -1645,12 +1624,6 @@ def _extract_click_text(widget, event, tag):
 
 def export_installed_distributions_info_as_dict() -> Dict[NormalizedName, DistInfo]:
     return {canonicalize_name(d.name): d for d in export_installed_distributions_info()}
-
-
-class PyPiSearchErrorWithFallback(RuntimeError):
-    def __init__(self, message, fallback_result: DistInfo):
-        super().__init__(message)
-        self.fallback_result = fallback_result
 
 
 def _get_sublists_of_length(l: List[Any], n: int) -> List[List[Any]]:

@@ -64,7 +64,7 @@ TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_
 @dataclass(frozen=True)
 class DistInfo:
     name: str
-    version: str
+    version: Optional[str]
     summary: Optional[str] = None
     license: Optional[str] = None
     author: Optional[str] = None
