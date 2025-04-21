@@ -126,9 +126,6 @@ class PipFrame(ttk.Frame, ABC):
         self.search_box.bind("<Return>", self._on_search, False)
         self.search_box.bind("<KP_Enter>", self._on_search, False)
 
-        # Selecting chars in the search box with mouse didn't make the box active on Linux without following line
-        self.search_box.bind("<B1-Motion>", lambda _: self.search_box.focus_set())
-
         search_button_text = "🔍"
         self.search_button = CustomToolbutton(
             self.header_frame,
@@ -326,7 +323,7 @@ class PipFrame(ttk.Frame, ABC):
             self._on_listbox_select_package(name_to_show)
 
     def _on_listbox_select(self, event):
-        self.listbox.focus_set()
+        # self.listbox.focus_set() # Messes up double-click and mouse-drag selection in the search box
         selection = self.listbox.curselection()
         if len(selection) == 1:
             self.listbox.activate(selection[0])
