@@ -5,11 +5,12 @@ import pathlib
 import re
 import tkinter as tk
 import traceback
-from _tkinter import TclError
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
 from typing import List, Optional
+
+from _tkinter import TclError
 
 from thonny import (
     get_runner,
@@ -616,7 +617,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
-            elif data.startswith("\x1B]"):
+            elif data.startswith("\x1b]"):
                 self._handle_osc_sequence(data)
             elif data.endswith("D") or data.endswith("C"):
                 self._change_io_cursor_offset_csi(data)

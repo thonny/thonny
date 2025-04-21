@@ -1,5 +1,4 @@
-""" Helper view for Thonny developers
-"""
+"""Helper view for Thonny developers"""
 
 from thonny import get_workbench
 from thonny.common import DebuggerResponse

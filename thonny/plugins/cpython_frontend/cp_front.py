@@ -8,7 +8,7 @@ from tkinter import ttk
 from typing import Any, Dict, List, Optional, Tuple
 
 import thonny
-from thonny import get_runner, get_shell, get_workbench, ui_utils, SUPPORTED_VERSIONS
+from thonny import SUPPORTED_VERSIONS, get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
     FILE_DIALOG_HEIGHT_EMS_OPTION,
     FILE_DIALOG_WIDTH_EMS_OPTION,

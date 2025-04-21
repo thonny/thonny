@@ -24,7 +24,7 @@ OBJECT_LINK_END = "[/object_link_for_thonny]"
 PROCESS_ACK = "OK"
 ALL_EXPLAINED_STATUS_CODE = 193
 
-NBSP = "\u00A0"
+NBSP = "\u00a0"
 
 IGNORED_FILES_AND_DIRS = [
     "System Volume Information",

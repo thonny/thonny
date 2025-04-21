@@ -15,6 +15,7 @@ logger = getLogger(__name__)
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
+
 @dataclass
 class Attachment:
     description: str

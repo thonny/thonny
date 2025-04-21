@@ -1,5 +1,5 @@
 """
-NB! Stippling doesn't work on mac: 
+NB! Stippling doesn't work on mac:
 http://wiki.tcl.tk/44444
 http://rkeene.org/projects/tcl/tk.fossil/tkthistory/2954673
 """
