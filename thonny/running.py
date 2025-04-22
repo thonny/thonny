@@ -705,12 +705,20 @@ class Runner:
         if self._pull_backend_messages() is False:
             return
 
-        self._polling_after_id = get_workbench().after(20, self._poll_backend_messages)
+        if self._proxy.has_next_message():
+            # Some events didn't fit into this batch. Start the next batch as soon as possible
+            self._polling_after_id = get_workbench().after_idle(self._poll_backend_messages)
+        else:
+            # take it easy
+            self._polling_after_id = get_workbench().after(
+                20, lambda: get_workbench().after_idle(self._poll_backend_messages)
+            )
 
     def _pull_backend_messages(self):
         # Don't process too many messages in single batch, allow screen updates
         # and user actions between batches.
         # Mostly relevant when backend prints a lot quickly.
+        # TODO: Should I leave new messages (caused by processing this batch) for next batch?
         msg_count = 0
         max_msg_count = 10
         while self._proxy is not None and msg_count < max_msg_count:
@@ -946,6 +954,9 @@ class BackendProxy(ABC):
     @abstractmethod
     def send_program_input(self, data: str) -> None:
         """Send input data to backend"""
+
+    @abstractmethod
+    def has_next_message(self) -> bool: ...
 
     @abstractmethod
     def fetch_next_message(self):
@@ -1525,6 +1536,12 @@ class SubprocessProxy(BackendProxy, ABC):
     def can_be_isolated(self) -> bool:
         """Says whether the backend may be launched with -s switch"""
         return True
+
+    def has_next_message(self) -> bool:
+        if self.is_terminated():
+            return False
+
+        return len(self._response_queue) > 0
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
