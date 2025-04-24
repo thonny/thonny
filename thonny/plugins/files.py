@@ -629,6 +629,7 @@ def load_plugin() -> None:
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 
+    # NB! Keep these in lowercase
     for ext in [
         ".py",
         ".pyw",
@@ -657,6 +658,8 @@ def load_plugin() -> None:
         ".sh",
         ".bat",
         ".csv",
+        "metadata",
+        "record"
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
