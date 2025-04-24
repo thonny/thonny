@@ -100,6 +100,16 @@ class PipFrame(ttk.Frame, ABC):
         self._start_update_list()
         self.search_box.focus_set()
 
+    def unload_content(self):
+        self._installed_dists = None
+        self._version_list_cache = {}
+        self._current_dist_info = None
+        self._last_search_results = None
+
+        self._clear_current_package_or_info()
+        self.listbox.delete(0, "end")
+        self._set_state("inactive")
+
     def _create_widgets(self, parent):
         header_pady = ems_to_pixels(0.5)
         self.header_frame = ttk.Frame(parent, style=self._get_toolbar_frame_style())
@@ -356,7 +366,7 @@ class PipFrame(ttk.Frame, ABC):
             self._uninstall_current()
             self.load_content()
 
-    def _clear(self):
+    def _clear_current_package_or_info(self):
         self._current_dist_info = None
         self._clear_info_text()
 
@@ -369,7 +379,7 @@ class PipFrame(ttk.Frame, ABC):
         self.info_text.direct_insert("end", text, tags)
 
     def _show_instructions(self):
-        self._clear()
+        self._clear_current_package_or_info()
         self._append_info_text("\n")
         if self._is_read_only_env():
             self._show_read_only_instructions()
@@ -773,7 +783,7 @@ class PipFrame(ttk.Frame, ABC):
         self._current_dist_info = None
         # Fetch info from PyPI
         self._set_state("fetching")
-        self._clear()
+        self._clear_current_package_or_info()
         self._append_info_text(tr("Search results") + "\n", tags=("title",))
         self._append_info_text(tr("Searching") + " ...")
         if discard_selection:
@@ -1031,6 +1041,7 @@ class BackendPipFrame(PipFrame):
         self._last_name_to_show = None
         super().__init__(master)
 
+        get_workbench().bind("BackendRestart", self.on_backend_restart, True)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
         if self._get_proxy():
@@ -1053,6 +1064,9 @@ class BackendPipFrame(PipFrame):
     def on_toplevel_response(self, event=None):
         if self._state == "inactive":
             self.load_content()
+
+    def on_backend_restart(self, event=None):
+        self.unload_content()
 
     def _get_proxy(self) -> Optional[running.BackendProxy]:
         runner = get_runner()
