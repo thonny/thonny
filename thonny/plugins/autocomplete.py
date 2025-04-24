@@ -1,5 +1,6 @@
 import tkinter as tk
 from logging import getLogger
+from readline import insert_text
 from tkinter import messagebox
 from typing import List, Optional, Union, cast
 
@@ -65,32 +66,36 @@ class CompletionsBox(EditorInfoBox):
         self, text: SyntaxText, completions: List[lsp_types.CompletionItem]
     ) -> None:
         # Next events need to know this
-        for comp in completions:
-            print("COMP", comp)
         assert completions
         self._target_text_widget = text
         self._check_bind_for_keypress(text)
 
-        # Check if user typed an underscore,
-        # if not then don't show names starting with '_'
-        """TODO: try both fuzzy and non-fuzzy completions
-        source = text.get("insert linestart", tk.INSERT)
-        try:
-            current_source_chunk = re.split(r"\W", source)[-1]
-        except IndexError:
-            current_source_chunk = ""
+        prefix_start_index = self._find_completion_insertion_index()
+        assert self._target_text_widget.compare(prefix_start_index, "<=", "insert")
+        prefix = self._target_text_widget.get(prefix_start_index, "insert")
 
-        if current_source_chunk.startswith("_"):
-            filtered_completions = all_completions
-        else:
-            filtered_completions = [c for c in all_completions if not c.get("name", "_").startswith("_")]
-            if len(filtered_completions) < 5:
-                filtered_completions = all_completions
-        
-        self._completions = filtered_completions
-        """
+        def sort_key(completion: lsp_types.CompletionItem):
+            sort_text = completion.sortText or completion.label
+            insert_text = self._get_insert_text(completion)
+            print(f"{prefix=!r}, {insert_text=!r}, {sort_text=!r}")
 
-        self._completions = completions
+            if not prefix:
+                return (2 if insert_text.startswith("_") else 1, sort_text, completion.label)
+            elif insert_text.startswith(prefix):
+                return (1, sort_text, completion.label)
+            elif insert_text.lower().startswith(prefix.lower()):
+                return (2, sort_text, completion.label)
+            else:
+                return (4 if insert_text.startswith("_") else 3, sort_text, completion.label)
+
+        sorted_completions = sorted(completions, key=sort_key)
+        if not prefix.startswith("__"):
+            sorted_completions = [
+                comp
+                for comp in sorted_completions
+                if not self._get_insert_text(comp).startswith("__")
+            ]
+        self._completions = sorted_completions
 
         # broadcast logging info
         row, column = editor_helpers.get_cursor_position(text)
@@ -103,21 +108,21 @@ class CompletionsBox(EditorInfoBox):
             text_widget=text,
             row=row,
             column=column,
-            proposal_count=len(completions),
+            proposal_count=len(sorted_completions),
         )
 
         # present
-        if len(completions) == 0:
+        if len(sorted_completions) == 0:
             self.hide()
             return
 
         self._listbox.delete(0, self._listbox.size())
-        self._listbox.insert(0, *[c.label for c in completions])
+        self._listbox.insert(0, *[c.label for c in sorted_completions])
         self._listbox.activate(0)
         self._listbox.selection_set(0)
 
         max_visible_items = 10
-        self._listbox["height"] = min(len(completions), max_visible_items)
+        self._listbox["height"] = min(len(sorted_completions), max_visible_items)
 
         _, _, _, list_row_height = self._listbox.bbox(0)
         # the measurement is not accurate, but good enough for deciding whether
@@ -125,9 +130,7 @@ class CompletionsBox(EditorInfoBox):
         # Actual placement will be managed otherwise
         approx_box_height = round(list_row_height * (self._listbox["height"] + 0.5))
 
-        # TODO: try to align with the start of the word
-        # name_start_index = "insert-%dc" % completions[0].prefix_length
-        name_start_index = "insert"
+        name_start_index = self._find_completion_insertion_index()
 
         self._show_on_target_text(name_start_index, approx_box_height, "below")
 
@@ -235,7 +238,7 @@ class CompletionsBox(EditorInfoBox):
 
         return self._completions[sel[0]]
 
-    def _insert_completion(self, completion: CompletionItem, replace_suffix: bool) -> None:
+    def _get_insert_text(self, completion: CompletionItem) -> str:
         if completion.textEdit is not None:
             raise RuntimeError("TODO: handle textEdit")
 
@@ -244,11 +247,13 @@ class CompletionsBox(EditorInfoBox):
                 raise RuntimeError("TODO support snippets")
             if completion.insertTextMode == lsp_types.InsertTextMode.AdjustIndentation:
                 raise RuntimeError("TODO support adjust indentation")
-            insert_text = completion.insertText
+            return completion.insertText
         else:
             assert completion.label is not None
-            insert_text = completion.label
+            return completion.label
 
+    def _insert_completion(self, completion: CompletionItem, replace_suffix: bool) -> None:
+        insert_text = self._get_insert_text(completion)
         prefix_start_index = self._find_completion_insertion_index()
         typed_prefix = self._target_text_widget.get(prefix_start_index, "insert")
 
