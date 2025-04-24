@@ -21,11 +21,20 @@ class HeapView(MemoryFrame):
         self.tree.heading("id", text=tr("ID"), anchor=tk.W)
         self.tree.heading("value", text=tr("Value"), anchor=tk.W)
 
-        get_workbench().bind("get_heap_response", self._handle_heap_event, True)
+        self.search_var = tk.StringVar()
+        self.search_frame = ttk.Frame(self)
+        self.search_frame.grid(row=2, column=0, sticky="ew", columnspan=2)
+        self.search_label = ttk.Label(self.search_frame, text=tr("Search ID:"))
+        self.search_label.pack(side="left", padx=(5, 2))
+        self.search_entry = ttk.Entry(self.search_frame, textvariable=self.search_var)
+        self.search_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.search_entry.bind("<Return>", lambda event: self._search_heap()) 
+        self.search_button = ttk.Button(self.search_frame, text=tr("Find"), command=self._search_heap)
+        self.search_button.pack(side="left")
 
+        get_workbench().bind("get_heap_response", self._handle_heap_event, True)
         get_workbench().bind("DebuggerResponse", self._request_heap_data, True)
         get_workbench().bind("ToplevelResponse", self._request_heap_data, True)
-        # Showing new globals may introduce new interesting objects
         get_workbench().bind("get_globals_response", self._request_heap_data, True)
 
         self.bind("<Map>", self._on_map, True)
@@ -40,6 +49,18 @@ class HeapView(MemoryFrame):
             foreground="green",
             padding=(3, 0),
         )
+
+    def _search_heap(self):
+        search_id = self.search_var.get()
+        found = False
+        for child in self.tree.get_children():
+            if self.tree.set(child, "id").startswith(search_id):
+                self.tree.selection_set(child)
+                self.tree.see(child)
+                found = True
+                break
+        if not found:
+            tk.messagebox.showinfo(tr("Search"), tr(f"No ID starting with '{search_id}' found in the heap."))
 
     def _update_data(self, data):
         self._clear_tree()
