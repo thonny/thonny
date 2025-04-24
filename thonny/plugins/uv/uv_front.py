@@ -17,7 +17,7 @@ class LocalCPythonUvProxy(LocalCPythonProxy):
 
     def compute_mgmt_executable(self):
         # TODO
-        return os.path.expanduser("~/.cargo/bin/uv")
+        return os.path.expanduser("~/.local/bin/uv")
 
     def get_target_executable(self):
         # TODO: should give python exe?
