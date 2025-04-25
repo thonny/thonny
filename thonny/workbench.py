@@ -1486,6 +1486,9 @@ class Workbench(tk.Tk):
                 toolbar_group,
             )
 
+    def set_status_message(self, text: str) -> None:
+        self._status_label.configure(text=text)
+
     def add_view(
         self,
         cls: Type[tk.Widget],
@@ -2897,7 +2900,7 @@ class Workbench(tk.Tk):
             logger.info("Got KeyboardInterrupt, closing")
             self._on_close()
             return
-        self.report_exception()
+        self.report_exception(title="Internal Tk error")
 
     def report_exception(self, title: str = "Internal error") -> None:
         logger.exception(title)
@@ -2906,11 +2909,20 @@ class Workbench(tk.Tk):
             assert typ is not None
             if issubclass(typ, UserError):
                 msg = str(value)
+                status_prefix = ""
             else:
-                msg = traceback.format_exc()
+                msg = f"{str(value) or type(value)}\nSee frontend.log for more details"
+                status_prefix = "INTERNAL ERROR: "
 
-            dlg = ui_utils.LongTextDialog(title, msg, parent=self)
-            ui_utils.show_dialog(dlg, self)
+            try:
+                self.set_status_message(status_prefix + msg)
+                messagebox.showerror(
+                    title,
+                    msg,
+                    parent=tk._default_root,
+                )
+            except Exception:
+                logger.exception("Could not show internal error")
 
     def _convert_view_id(self, view_id: str):
         if view_id == "GlobalsView":

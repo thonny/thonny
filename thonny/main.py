@@ -67,18 +67,22 @@ def run() -> int:
         bench.mainloop()
         return 0
 
-    except Exception:
-        logger.exception("Internal launch or mainloop error")
+    except Exception as e:
+        title = "Internal launch or mainloop error"
+        logger.exception(title)
 
         import tkinter as tk
 
         if tk._default_root is not None:
-            import traceback
+            from tkinter import messagebox
 
-            from thonny import ui_utils
-
-            dlg = ui_utils.LongTextDialog("Internal error", traceback.format_exc())
-            ui_utils.show_dialog(dlg, tk._default_root)
+            # Messagebox may or may not be shown, but here it's no use of being defencive anymore
+            messagebox.showerror(
+                title,
+                f"Thonny encountered an internal error:\n{str(e) or type(e)}"
+                f"\n\nSee frontend.log for more details",
+                parent=tk._default_root,
+            )
 
         return -1
     finally:
