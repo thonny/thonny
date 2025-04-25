@@ -66,7 +66,7 @@ PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde .pyx"), (tr("all files"), ".*")]
 
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
-PYTHONLIKE_EXTENSIONS = {"pyx", "pyde"}
+PYTHONLIKE_EXTENSIONS = {"pyx", "pyde", "toml"}
 DEBOUNCE_SECONDS = 0.5
 
 
