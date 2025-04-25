@@ -292,9 +292,14 @@ def configure_logging(log_file, console_level=None):
     main_logger.info("sys.flags: %s", sys.flags)
 
     import faulthandler
+    import signal
 
-    fault_out = open(os.path.join(get_thonny_user_dir(), "frontend_faults.log"), mode="w")
+    fault_out = open(
+        os.path.join(get_thonny_user_dir(), "frontend_faults.log"), mode="w", buffering=1
+    )
     faulthandler.enable(fault_out)
+    faulthandler.register(signal.SIGUSR1, file=fault_out, all_threads=True)
+    # for getting traces of hung process, on macOS invoke  "kill -USR1 <pid>" and then "kill -USR2 <pid>"
 
 
 def get_user_base_directory_for_plugins() -> str:
