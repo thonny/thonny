@@ -659,7 +659,7 @@ def load_plugin() -> None:
         ".bat",
         ".csv",
         "metadata",
-        "record"
+        "record",
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 
