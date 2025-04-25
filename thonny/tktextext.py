@@ -874,7 +874,9 @@ class TextFrame(tk.Frame):
                 self._vbar_stripe.grid(row=0, column=2, sticky="nse")
                 self._vbar_stripe.tkraise()
         if self._hbar:
-            self._hbar.grid(row=vertical_scrollbar_rowspan, column=0, sticky=tk.NSEW, columnspan=3)
+            self._hbar.grid(
+                row=vertical_scrollbar_rowspan - 1, column=0, sticky=tk.NSEW, columnspan=2
+            )
 
     def focus_set(self):
         self.text.focus_set()
