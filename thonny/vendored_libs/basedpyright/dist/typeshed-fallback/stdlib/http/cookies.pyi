@@ -1,10 +1,7 @@
-import sys
 from collections.abc import Iterable, Mapping
+from types import GenericAlias
 from typing import Any, Generic, TypeVar, overload
 from typing_extensions import TypeAlias
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 __all__ = ["CookieError", "BaseCookie", "SimpleCookie"]
 
@@ -44,14 +41,13 @@ class Morsel(dict[str, Any], Generic[_T]):
     def OutputString(self, attrs: list[str] | None = None) -> str: ...
     def __eq__(self, morsel: object) -> bool: ...
     def __setitem__(self, K: str, V: Any) -> None: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...
 
 class BaseCookie(dict[str, Morsel[_T]], Generic[_T]):
     def __init__(self, input: _DataType | None = None) -> None: ...

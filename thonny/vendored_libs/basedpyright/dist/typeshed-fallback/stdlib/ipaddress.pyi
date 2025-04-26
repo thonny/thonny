@@ -18,7 +18,7 @@ def ip_network(
     address: _RawIPAddress | _RawNetworkPart | tuple[_RawIPAddress] | tuple[_RawIPAddress, int], strict: bool = True
 ) -> IPv4Network | IPv6Network: ...
 def ip_interface(
-    address: _RawIPAddress | _RawNetworkPart | tuple[_RawIPAddress] | tuple[_RawIPAddress, int]
+    address: _RawIPAddress | _RawNetworkPart | tuple[_RawIPAddress] | tuple[_RawIPAddress, int],
 ) -> IPv4Interface | IPv6Interface: ...
 
 class _IPAddressBase:
@@ -44,14 +44,11 @@ class _IPAddressBase:
     def version(self) -> int: ...
 
 class _BaseAddress(_IPAddressBase):
-    def __init__(self, address: object) -> None: ...
     def __add__(self, other: int) -> Self: ...
     def __hash__(self) -> int: ...
     def __int__(self) -> int: ...
     def __sub__(self, other: int) -> Self: ...
-    if sys.version_info >= (3, 9):
-        def __format__(self, fmt: str) -> str: ...
-
+    def __format__(self, fmt: str) -> str: ...
     def __eq__(self, other: object) -> bool: ...
     def __lt__(self, other: Self) -> bool: ...
     if sys.version_info >= (3, 11):
@@ -63,29 +60,9 @@ class _BaseAddress(_IPAddressBase):
         def __gt__(self, other: Self, NotImplemented: Any = ...) -> bool: ...
         def __le__(self, other: Self, NotImplemented: Any = ...) -> bool: ...
 
-    @property
-    def is_global(self) -> bool: ...
-    @property
-    def is_link_local(self) -> bool: ...
-    @property
-    def is_loopback(self) -> bool: ...
-    @property
-    def is_multicast(self) -> bool: ...
-    @property
-    def is_private(self) -> bool: ...
-    @property
-    def is_reserved(self) -> bool: ...
-    @property
-    def is_unspecified(self) -> bool: ...
-    @property
-    def max_prefixlen(self) -> int: ...
-    @property
-    def packed(self) -> bytes: ...
-
 class _BaseNetwork(_IPAddressBase, Generic[_A]):
     network_address: _A
     netmask: _A
-    def __init__(self, address: object, strict: bool = ...) -> None: ...
     def __contains__(self, other: Any) -> bool: ...
     def __getitem__(self, n: int) -> _A: ...
     def __iter__(self) -> Iterator[_A]: ...
@@ -176,8 +153,6 @@ class _BaseNetwork(_IPAddressBase, Generic[_A]):
         """
         ...
     @property
-    def max_prefixlen(self) -> int: ...
-    @property
     def num_addresses(self) -> int:
         """Number of hosts in the current subnet."""
         ...
@@ -204,6 +179,94 @@ class _BaseV4:
     def max_prefixlen(self) -> Literal[32]: ...
 
 class IPv4Address(_BaseV4, _BaseAddress):
+    def __init__(self, address: object) -> None: ...
+    @property
+    def is_global(self) -> bool:
+        """
+        ``True`` if the address is defined as globally reachable by
+        iana-ipv4-special-registry_ (for IPv4) or iana-ipv6-special-registry_
+        (for IPv6) with the following exception:
+
+        For IPv4-mapped IPv6-addresses the ``is_private`` value is determined by the
+        semantics of the underlying IPv4 addresses and the following condition holds
+        (see :attr:`IPv6Address.ipv4_mapped`)::
+
+            address.is_global == address.ipv4_mapped.is_global
+
+        ``is_global`` has value opposite to :attr:`is_private`, except for the ``100.64.0.0/10``
+        IPv4 range where they are both ``False``.
+        """
+        ...
+    @property
+    def is_link_local(self) -> bool:
+        """
+        Test if the address is reserved for link-local.
+
+        Returns:
+            A boolean, True if the address is link-local per RFC 3927.
+        """
+        ...
+    @property
+    def is_loopback(self) -> bool:
+        """
+        Test if the address is a loopback address.
+
+        Returns:
+            A boolean, True if the address is a loopback per RFC 3330.
+        """
+        ...
+    @property
+    def is_multicast(self) -> bool:
+        """
+        Test if the address is reserved for multicast use.
+
+        Returns:
+            A boolean, True if the address is multicast.
+            See RFC 3171 for details.
+        """
+        ...
+    @property
+    def is_private(self) -> bool:
+        """
+        ``True`` if the address is defined as not globally reachable by
+        iana-ipv4-special-registry_ (for IPv4) or iana-ipv6-special-registry_
+        (for IPv6) with the following exceptions:
+
+        * ``is_private`` is ``False`` for ``100.64.0.0/10``
+        * For IPv4-mapped IPv6-addresses the ``is_private`` value is determined by the
+            semantics of the underlying IPv4 addresses and the following condition holds
+            (see :attr:`IPv6Address.ipv4_mapped`)::
+
+                address.is_private == address.ipv4_mapped.is_private
+
+        ``is_private`` has value opposite to :attr:`is_global`, except for the ``100.64.0.0/10``
+        IPv4 range where they are both ``False``.
+        """
+        ...
+    @property
+    def is_reserved(self) -> bool:
+        """
+        Test if the address is otherwise IETF reserved.
+
+        Returns:
+            A boolean, True if the address is within the
+            reserved IPv4 Network range.
+        """
+        ...
+    @property
+    def is_unspecified(self) -> bool:
+        """
+        Test if the address is unspecified.
+
+        Returns:
+            A boolean, True if this is the unspecified address as defined in
+            RFC 5735 3.
+        """
+        ...
+    @property
+    def packed(self) -> bytes:
+        """The binary representation of this address."""
+        ...
     if sys.version_info >= (3, 13):
         @property
         def ipv6_mapped(self) -> IPv6Address:
@@ -215,7 +278,8 @@ class IPv4Address(_BaseV4, _BaseAddress):
             """
             ...
 
-class IPv4Network(_BaseV4, _BaseNetwork[IPv4Address]): ...
+class IPv4Network(_BaseV4, _BaseNetwork[IPv4Address]):
+    def __init__(self, address: object, strict: bool = ...) -> None: ...
 
 class IPv4Interface(IPv4Address):
     netmask: IPv4Address
@@ -240,6 +304,95 @@ class _BaseV6:
     def max_prefixlen(self) -> Literal[128]: ...
 
 class IPv6Address(_BaseV6, _BaseAddress):
+    def __init__(self, address: object) -> None: ...
+    @property
+    def is_global(self) -> bool:
+        """
+        ``True`` if the address is defined as globally reachable by
+        iana-ipv4-special-registry_ (for IPv4) or iana-ipv6-special-registry_
+        (for IPv6) with the following exception:
+
+        For IPv4-mapped IPv6-addresses the ``is_private`` value is determined by the
+        semantics of the underlying IPv4 addresses and the following condition holds
+        (see :attr:`IPv6Address.ipv4_mapped`)::
+
+            address.is_global == address.ipv4_mapped.is_global
+
+        ``is_global`` has value opposite to :attr:`is_private`, except for the ``100.64.0.0/10``
+        IPv4 range where they are both ``False``.
+        """
+        ...
+    @property
+    def is_link_local(self) -> bool:
+        """
+        Test if the address is reserved for link-local.
+
+        Returns:
+            A boolean, True if the address is reserved per RFC 4291.
+        """
+        ...
+    @property
+    def is_loopback(self) -> bool:
+        """
+        Test if the address is a loopback address.
+
+        Returns:
+            A boolean, True if the address is a loopback address as defined in
+            RFC 2373 2.5.3.
+        """
+        ...
+    @property
+    def is_multicast(self) -> bool:
+        """
+        Test if the address is reserved for multicast use.
+
+        Returns:
+            A boolean, True if the address is a multicast address.
+            See RFC 2373 2.7 for details.
+        """
+        ...
+    @property
+    def is_private(self) -> bool:
+        """
+        ``True`` if the address is defined as not globally reachable by
+        iana-ipv4-special-registry_ (for IPv4) or iana-ipv6-special-registry_
+        (for IPv6) with the following exceptions:
+
+        * ``is_private`` is ``False`` for ``100.64.0.0/10``
+        * For IPv4-mapped IPv6-addresses the ``is_private`` value is determined by the
+            semantics of the underlying IPv4 addresses and the following condition holds
+            (see :attr:`IPv6Address.ipv4_mapped`)::
+
+                address.is_private == address.ipv4_mapped.is_private
+
+        ``is_private`` has value opposite to :attr:`is_global`, except for the ``100.64.0.0/10``
+        IPv4 range where they are both ``False``.
+        """
+        ...
+    @property
+    def is_reserved(self) -> bool:
+        """
+        Test if the address is otherwise IETF reserved.
+
+        Returns:
+            A boolean, True if the address is within one of the
+            reserved IPv6 Network ranges.
+        """
+        ...
+    @property
+    def is_unspecified(self) -> bool:
+        """
+        Test if the address is unspecified.
+
+        Returns:
+            A boolean, True if this is the unspecified address as defined in
+            RFC 2373 2.5.2.
+        """
+        ...
+    @property
+    def packed(self) -> bytes:
+        """The binary representation of this address."""
+        ...
     @property
     def ipv4_mapped(self) -> IPv4Address | None:
         """
@@ -284,23 +437,22 @@ class IPv6Address(_BaseV6, _BaseAddress):
             2001::/32)
         """
         ...
-    if sys.version_info >= (3, 9):
-        @property
-        def scope_id(self) -> str | None:
-            """
-            Identifier of a particular zone of the address's scope.
+    @property
+    def scope_id(self) -> str | None:
+        """
+        Identifier of a particular zone of the address's scope.
 
-            See RFC 4007 for details.
+        See RFC 4007 for details.
 
-            Returns:
-                A string identifying the zone of the address if specified, else None.
-            """
-            ...
-
+        Returns:
+            A string identifying the zone of the address if specified, else None.
+        """
+        ...
     def __hash__(self) -> int: ...
     def __eq__(self, other: object) -> bool: ...
 
 class IPv6Network(_BaseV6, _BaseNetwork[IPv6Address]):
+    def __init__(self, address: object, strict: bool = ...) -> None: ...
     @property
     def is_site_local(self) -> bool:
         """

@@ -11,14 +11,13 @@ from collections.abc import (
     Iterable,
     Iterator,
     KeysView,
+    Mapping,
     MutableSequence,
     ValuesView,
 )
 from importlib.machinery import ModuleSpec
-
-# pytype crashes if types.MappingProxyType inherits from collections.abc.Mapping instead of typing.Mapping
-from typing import Any, ClassVar, Literal, Mapping, TypeVar, final, overload  # noqa: Y022
-from typing_extensions import ParamSpec, Self, TypeVarTuple, deprecated
+from typing import Any, ClassVar, Literal, TypeVar, final, overload
+from typing_extensions import ParamSpec, Self, TypeAliasType, TypeVarTuple, deprecated
 
 __all__ = [
     "FunctionType",
@@ -47,10 +46,8 @@ __all__ = [
     "WrapperDescriptorType",
     "resolve_bases",
     "CellType",
+    "GenericAlias",
 ]
-
-if sys.version_info >= (3, 9):
-    __all__ += ["GenericAlias"]
 
 if sys.version_info >= (3, 10):
     __all__ += ["EllipsisType", "NoneType", "NotImplementedType", "UnionType"]
@@ -105,14 +102,26 @@ class FunctionType:
         __type_params__: tuple[TypeVar | ParamSpec | TypeVarTuple, ...]
 
     __module__: str
-    def __new__(
-        cls,
-        code: CodeType,
-        globals: dict[str, Any],
-        name: str | None = ...,
-        argdefs: tuple[object, ...] | None = ...,
-        closure: tuple[CellType, ...] | None = ...,
-    ) -> Self: ...
+    if sys.version_info >= (3, 13):
+        def __new__(
+            cls,
+            code: CodeType,
+            globals: dict[str, Any],
+            name: str | None = None,
+            argdefs: tuple[object, ...] | None = None,
+            closure: tuple[CellType, ...] | None = None,
+            kwdefaults: dict[str, object] | None = None,
+        ) -> Self: ...
+    else:
+        def __new__(
+            cls,
+            code: CodeType,
+            globals: dict[str, Any],
+            name: str | None = None,
+            argdefs: tuple[object, ...] | None = None,
+            closure: tuple[CellType, ...] | None = None,
+        ) -> Self: ...
+
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Call self as a function."""
         ...
@@ -295,9 +304,7 @@ class CodeType:
             co_filename: str = ...,
             co_name: str = ...,
             co_linetable: bytes = ...,
-        ) -> Self:
-            """Return a copy of the code object with new values for the specified fields."""
-            ...
+        ) -> Self: ...
     else:
         def replace(
             self,
@@ -318,9 +325,7 @@ class CodeType:
             co_filename: str = ...,
             co_name: str = ...,
             co_lnotab: bytes = ...,
-        ) -> Self:
-            """Return a copy of the code object with new values for the specified fields."""
-            ...
+        ) -> Self: ...
 
     if sys.version_info >= (3, 13):
         __replace__ = replace
@@ -362,19 +367,18 @@ class MappingProxyType(Mapping[_KT, _VT_co]):
     def get(self, key: _KT, default: _VT_co | _T2, /) -> _VT_co | _T2:
         """Return the value for key if key is in the mapping, else default."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
-        def __reversed__(self) -> Iterator[_KT]:
-            """D.__reversed__() -> reverse iterator"""
-            ...
-        def __or__(self, value: Mapping[_T1, _T2], /) -> dict[_KT | _T1, _VT_co | _T2]:
-            """Return self|value."""
-            ...
-        def __ror__(self, value: Mapping[_T1, _T2], /) -> dict[_KT | _T1, _VT_co | _T2]:
-            """Return value|self."""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
+    def __reversed__(self) -> Iterator[_KT]:
+        """D.__reversed__() -> reverse iterator"""
+        ...
+    def __or__(self, value: Mapping[_T1, _T2], /) -> dict[_KT | _T1, _VT_co | _T2]:
+        """Return self|value."""
+        ...
+    def __ror__(self, value: Mapping[_T1, _T2], /) -> dict[_KT | _T1, _VT_co | _T2]:
+        """Return value|self."""
+        ...
 
 class SimpleNamespace:
     __hash__: ClassVar[None]  # type: ignore[assignment]
@@ -449,6 +453,12 @@ _ReturnT_co = TypeVar("_ReturnT_co", covariant=True)
 @final
 class GeneratorType(Generator[_YieldT_co, _SendT_contra, _ReturnT_co]):
     @property
+    def gi_code(self) -> CodeType: ...
+    @property
+    def gi_frame(self) -> FrameType: ...
+    @property
+    def gi_running(self) -> bool: ...
+    @property
     def gi_yieldfrom(self) -> GeneratorType[_YieldT_co, _SendT_contra, Any] | None:
         """object being iterated by yield from, or None"""
         ...
@@ -506,6 +516,12 @@ class AsyncGeneratorType(AsyncGenerator[_YieldT_co, _SendT_contra]):
     def ag_await(self) -> Awaitable[Any] | None:
         """object being awaited on, or None"""
         ...
+    @property
+    def ag_code(self) -> CodeType: ...
+    @property
+    def ag_frame(self) -> FrameType: ...
+    @property
+    def ag_running(self) -> bool: ...
     __name__: str
     __qualname__: str
     if sys.version_info >= (3, 12):
@@ -548,15 +564,24 @@ class AsyncGeneratorType(AsyncGenerator[_YieldT_co, _SendT_contra]):
     def aclose(self) -> Coroutine[Any, Any, None]:
         """aclose() -> raise GeneratorExit inside generator."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 @final
 class CoroutineType(Coroutine[_YieldT_co, _SendT_contra, _ReturnT_co]):
     __name__: str
     __qualname__: str
+    @property
+    def cr_await(self) -> Any | None:
+        """object being awaited on, or None"""
+        ...
+    @property
+    def cr_code(self) -> CodeType: ...
+    @property
+    def cr_frame(self) -> FrameType: ...
+    @property
+    def cr_running(self) -> bool: ...
     @property
     def cr_origin(self) -> tuple[tuple[str, int, str], ...] | None: ...
     if sys.version_info >= (3, 11):
@@ -627,7 +652,7 @@ class MethodType:
     def __name__(self) -> str: ...  # inherited from the added function
     @property
     def __qualname__(self) -> str: ...  # inherited from the added function
-    def __new__(cls, func: Callable[..., Any], obj: object, /) -> Self: ...
+    def __new__(cls, func: Callable[..., Any], instance: object, /) -> Self: ...
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Call self as a function."""
         ...
@@ -815,8 +840,27 @@ def prepare_class(
 if sys.version_info >= (3, 12):
     def get_original_bases(cls: type, /) -> tuple[Any, ...]: ...
 
-# Actually a different type, but `property` is special and we want that too.
-DynamicClassAttribute = property
+# Does not actually inherit from property, but saying it does makes sure that
+# pyright handles this class correctly.
+class DynamicClassAttribute(property):
+    fget: Callable[[Any], Any] | None
+    fset: Callable[[Any, Any], object] | None  # type: ignore[assignment]
+    fdel: Callable[[Any], object] | None  # type: ignore[assignment]
+    overwrite_doc: bool
+    __isabstractmethod__: bool
+    def __init__(
+        self,
+        fget: Callable[[Any], Any] | None = None,
+        fset: Callable[[Any, Any], object] | None = None,
+        fdel: Callable[[Any], object] | None = None,
+        doc: str | None = None,
+    ) -> None: ...
+    def __get__(self, instance: Any, ownerclass: type | None = None) -> Any: ...
+    def __set__(self, instance: Any, value: Any) -> None: ...
+    def __delete__(self, instance: Any) -> None: ...
+    def getter(self, fget: Callable[[Any], Any]) -> DynamicClassAttribute: ...
+    def setter(self, fset: Callable[[Any, Any], object]) -> DynamicClassAttribute: ...
+    def deleter(self, fdel: Callable[[Any], object]) -> DynamicClassAttribute: ...
 
 _Fn = TypeVar("_Fn", bound=Callable[..., object])
 _R = TypeVar("_R")
@@ -828,41 +872,41 @@ def coroutine(func: Callable[_P, Generator[Any, Any, _R]]) -> Callable[_P, Await
 @overload
 def coroutine(func: _Fn) -> _Fn: ...
 
-if sys.version_info >= (3, 9):
-    class GenericAlias:
+class GenericAlias:
+    @property
+    def __origin__(self) -> type | TypeAliasType: ...
+    @property
+    def __args__(self) -> tuple[Any, ...]: ...
+    @property
+    def __parameters__(self) -> tuple[Any, ...]:
+        """Type variables in the GenericAlias."""
+        ...
+    def __new__(cls, origin: type, args: Any, /) -> Self: ...
+    def __getitem__(self, typeargs: Any, /) -> GenericAlias:
+        """Return self[key]."""
+        ...
+    def __eq__(self, value: object, /) -> bool:
+        """Return self==value."""
+        ...
+    def __hash__(self) -> int:
+        """Return hash(self)."""
+        ...
+    def __mro_entries__(self, bases: Iterable[object], /) -> tuple[type, ...]: ...
+    if sys.version_info >= (3, 11):
         @property
-        def __origin__(self) -> type: ...
+        def __unpacked__(self) -> bool: ...
         @property
-        def __args__(self) -> tuple[Any, ...]: ...
-        @property
-        def __parameters__(self) -> tuple[Any, ...]:
-            """Type variables in the GenericAlias."""
+        def __typing_unpacked_tuple_args__(self) -> tuple[Any, ...] | None: ...
+    if sys.version_info >= (3, 10):
+        def __or__(self, value: Any, /) -> UnionType:
+            """Return self|value."""
             ...
-        def __new__(cls, origin: type, args: Any) -> Self: ...
-        def __getitem__(self, typeargs: Any, /) -> GenericAlias:
-            """Return self[key]."""
+        def __ror__(self, value: Any, /) -> UnionType:
+            """Return value|self."""
             ...
-        def __eq__(self, value: object, /) -> bool:
-            """Return self==value."""
-            ...
-        def __hash__(self) -> int:
-            """Return hash(self)."""
-            ...
-        if sys.version_info >= (3, 11):
-            @property
-            def __unpacked__(self) -> bool: ...
-            @property
-            def __typing_unpacked_tuple_args__(self) -> tuple[Any, ...] | None: ...
-        if sys.version_info >= (3, 10):
-            def __or__(self, value: Any, /) -> UnionType:
-                """Return self|value."""
-                ...
-            def __ror__(self, value: Any, /) -> UnionType:
-                """Return value|self."""
-                ...
 
-        # GenericAlias delegates attr access to `__origin__`
-        def __getattr__(self, name: str) -> Any: ...
+    # GenericAlias delegates attr access to `__origin__`
+    def __getattr__(self, name: str) -> Any: ...
 
 if sys.version_info >= (3, 10):
     @final
@@ -884,6 +928,10 @@ if sys.version_info >= (3, 10):
     class UnionType:
         @property
         def __args__(self) -> tuple[Any, ...]: ...
+        @property
+        def __parameters__(self) -> tuple[Any, ...]:
+            """Type variables in the types.UnionType."""
+            ...
         def __or__(self, value: Any, /) -> UnionType:
             """Return self|value."""
             ...

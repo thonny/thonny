@@ -1,18 +1,3 @@
-"""
-zipimport provides support for importing Python modules from Zip archives.
-
-This module exports three objects:
-- zipimporter: a class; its constructor takes a path to a Zip archive.
-- ZipImportError: exception raised by zipimporter objects. It's a
-  subclass of ImportError, so it can be caught as ImportError, too.
-- _zip_directory_cache: a dict, mapping archive paths to zip directory
-  info dicts, as used in zipimporter._files.
-
-It is usually not needed to use the zipimport module explicitly; it is
-used by the builtin import mechanism for sys.path items that are paths
-to Zip archives.
-"""
-
 import sys
 from _typeshed import StrOrBytesPath
 from importlib.abc import ResourceReader
@@ -30,20 +15,6 @@ __all__ = ["ZipImportError", "zipimporter"]
 class ZipImportError(ImportError): ...
 
 class zipimporter(_LoaderBasics):
-    """
-    zipimporter(archivepath) -> zipimporter object
-
-    Create a new zipimporter instance. 'archivepath' must be a path to
-    a zipfile, or to a specific path inside a zipfile. For example, it can be
-    '/tmp/myimport.zip', or '/tmp/myimport.zip/mydirectory', if mydirectory is a
-    valid directory inside the archive.
-
-    'ZipImportError is raised if 'archivepath' doesn't point to a valid Zip
-    archive.
-
-    The 'archive' attribute of zipimporter objects contains the name of the
-    zipfile targeted.
-    """
     archive: str
     prefix: str
     if sys.version_info >= (3, 11):

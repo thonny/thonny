@@ -1,12 +1,12 @@
 import sys
 from abc import abstractmethod
 from time import struct_time
-from typing import ClassVar, Final, NamedTuple, NoReturn, SupportsIndex, final, overload
-from typing_extensions import Self, TypeAlias, deprecated
+from typing import ClassVar, Final, NoReturn, SupportsIndex, final, overload, type_check_only
+from typing_extensions import CapsuleType, Self, TypeAlias, deprecated
 
 if sys.version_info >= (3, 11):
     __all__ = ("date", "datetime", "time", "timedelta", "timezone", "tzinfo", "MINYEAR", "MAXYEAR", "UTC")
-elif sys.version_info >= (3, 9):
+else:
     __all__ = ("date", "datetime", "time", "timedelta", "timezone", "tzinfo", "MINYEAR", "MAXYEAR")
 
 MINYEAR: Final = 1
@@ -37,7 +37,7 @@ class timezone(tzinfo):
     utc: ClassVar[timezone]
     min: ClassVar[timezone]
     max: ClassVar[timezone]
-    def __init__(self, offset: timedelta, name: str = ...) -> None: ...
+    def __new__(cls, offset: timedelta, name: str = ...) -> Self: ...
     def tzname(self, dt: datetime | None, /) -> str:
         """If name is specified when timezone is created, returns the name.  Otherwise returns offset as 'UTC(+|-)HH:MM'."""
         ...
@@ -57,11 +57,17 @@ class timezone(tzinfo):
 if sys.version_info >= (3, 11):
     UTC: timezone
 
-if sys.version_info >= (3, 9):
-    class _IsoCalendarDate(NamedTuple):
-        year: int
-        week: int
-        weekday: int
+# This class calls itself datetime.IsoCalendarDate. It's neither
+# NamedTuple nor structseq.
+@final
+@type_check_only
+class _IsoCalendarDate(tuple[int, int, int]):
+    @property
+    def year(self) -> int: ...
+    @property
+    def week(self) -> int: ...
+    @property
+    def weekday(self) -> int: ...
 
 class date:
     min: ClassVar[date]
@@ -114,9 +120,7 @@ class date:
             """format -> strftime() style string."""
             ...
     else:
-        def strftime(self, format: str, /) -> str:
-            """format -> strftime() style string."""
-            ...
+        def strftime(self, format: str, /) -> str: ...
 
     def __format__(self, fmt: str, /) -> str:
         """Formats self with strftime."""
@@ -186,14 +190,9 @@ class date:
         Monday == 1 ... Sunday == 7
         """
         ...
-    if sys.version_info >= (3, 9):
-        def isocalendar(self) -> _IsoCalendarDate:
-            """Return a named tuple containing ISO year, week number, and weekday."""
-            ...
-    else:
-        def isocalendar(self) -> tuple[int, int, int]:
-            """Return a 3-tuple containing ISO year, week number, and weekday."""
-            ...
+    def isocalendar(self) -> _IsoCalendarDate:
+        """Return a named tuple containing ISO year, week number, and weekday."""
+        ...
 
 class time:
     min: ClassVar[time]
@@ -260,9 +259,7 @@ class time:
             """format -> strftime() style string."""
             ...
     else:
-        def strftime(self, format: str, /) -> str:
-            """format -> strftime() style string."""
-            ...
+        def strftime(self, format: str, /) -> str: ...
 
     def __format__(self, fmt: str, /) -> str:
         """Formats self with strftime."""
@@ -445,9 +442,7 @@ class datetime(date):
             ...
     else:
         @classmethod
-        def fromtimestamp(cls, timestamp: float, /, tz: _TzInfo | None = ...) -> Self:
-            """timestamp[, tz] -> tz's local time from POSIX timestamp."""
-            ...
+        def fromtimestamp(cls, timestamp: float, /, tz: _TzInfo | None = ...) -> Self: ...
 
     @classmethod
     @deprecated("Use timezone-aware objects to represent datetimes in UTC; e.g. by calling .fromtimestamp(datetime.timezone.utc)")
@@ -573,3 +568,5 @@ class datetime(date):
     def __sub__(self, value: timedelta, /) -> Self:
         """Return self-value."""
         ...
+
+datetime_CAPI: CapsuleType

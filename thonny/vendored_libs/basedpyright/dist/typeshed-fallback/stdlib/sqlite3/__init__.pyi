@@ -63,7 +63,7 @@ from sqlite3.dbapi2 import (
     version_info as version_info,
 )
 from types import TracebackType
-from typing import Any, Literal, Protocol, SupportsIndex, TypeVar, final, overload
+from typing import Any, Literal, Protocol, SupportsIndex, TypeVar, final, overload, type_check_only
 from typing_extensions import Self, TypeAlias
 
 if sys.version_info >= (3, 12):
@@ -461,9 +461,7 @@ class Connection:
             """
             ...
     else:
-        def iterdump(self) -> Generator[str, None, None]:
-            """Returns iterator to the dump of the database in an SQL text format."""
-            ...
+        def iterdump(self) -> Generator[str, None, None]: ...
 
     def rollback(self) -> None:
         """
@@ -521,9 +519,7 @@ class Connection:
             """Load SQLite extension module."""
             ...
     else:
-        def load_extension(self, name: str, /) -> None:
-            """Load SQLite extension module."""
-            ...
+        def load_extension(self, name: str, /) -> None: ...
 
     def backup(
         self,
@@ -687,7 +683,7 @@ class PrepareProtocol:
     def __init__(self, *args: object, **kwargs: object) -> None: ...
 
 class Row(Sequence[Any]):
-    def __init__(self, cursor: Cursor, data: tuple[Any, ...], /) -> None: ...
+    def __new__(cls, cursor: Cursor, data: tuple[Any, ...], /) -> Self: ...
     def keys(self) -> list[str]:
         """Returns the keys of the row."""
         ...
@@ -728,7 +724,9 @@ class Row(Sequence[Any]):
         """Return self!=value."""
         ...
 
+# This class is not exposed. It calls itself sqlite3.Statement.
 @final
+@type_check_only
 class _Statement: ...
 
 if sys.version_info >= (3, 11):

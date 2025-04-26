@@ -1,10 +1,8 @@
 import sys
 from _queue import Empty as Empty, SimpleQueue as SimpleQueue
 from threading import Condition, Lock
+from types import GenericAlias
 from typing import Any, Generic, TypeVar
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 __all__ = ["Empty", "Full", "Queue", "PriorityQueue", "LifoQueue", "SimpleQueue"]
 if sys.version_info >= (3, 13):
@@ -47,14 +45,13 @@ class Queue(Generic[_T]):
     def qsize(self) -> int: ...
     def _qsize(self) -> int: ...
     def task_done(self) -> None: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...
 
 class PriorityQueue(Queue[_T]):
     queue: list[_T]

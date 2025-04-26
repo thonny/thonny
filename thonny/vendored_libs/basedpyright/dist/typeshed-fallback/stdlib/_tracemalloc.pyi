@@ -1,6 +1,5 @@
 """Debug module to trace memory blocks allocated by Python."""
 
-import sys
 from collections.abc import Sequence
 from tracemalloc import _FrameTuple, _TraceTuple
 
@@ -51,16 +50,13 @@ def get_tracemalloc_memory() -> int:
 def is_tracing() -> bool:
     """Return True if the tracemalloc module is tracing Python memory allocations."""
     ...
+def reset_peak() -> None:
+    """
+    Set the peak size of memory blocks traced by tracemalloc to the current size.
 
-if sys.version_info >= (3, 9):
-    def reset_peak() -> None:
-        """
-        Set the peak size of memory blocks traced by tracemalloc to the current size.
-
-        Do nothing if the tracemalloc module is not tracing memory allocations.
-        """
-        ...
-
+    Do nothing if the tracemalloc module is not tracing memory allocations.
+    """
+    ...
 def start(nframe: int = 1, /) -> None:
     """
     Start tracing Python memory allocations.

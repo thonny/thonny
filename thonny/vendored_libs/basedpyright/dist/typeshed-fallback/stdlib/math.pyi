@@ -4,8 +4,9 @@ defined by the C standard.
 """
 
 import sys
+from _typeshed import SupportsMul, SupportsRMul
 from collections.abc import Iterable
-from typing import Protocol, SupportsFloat, SupportsIndex, TypeVar, overload
+from typing import Any, Final, Literal, Protocol, SupportsFloat, SupportsIndex, TypeVar, overload
 from typing_extensions import TypeAlias
 
 _T = TypeVar("_T")
@@ -13,11 +14,11 @@ _T_co = TypeVar("_T_co", covariant=True)
 
 _SupportsFloatOrIndex: TypeAlias = SupportsFloat | SupportsIndex
 
-e: float
-pi: float
-inf: float
-nan: float
-tau: float
+e: Final[float]
+pi: Final[float]
+inf: Final[float]
+nan: Final[float]
+tau: Final[float]
 
 def acos(x: _SupportsFloatOrIndex, /) -> float:
     """
@@ -201,17 +202,9 @@ def fsum(seq: Iterable[_SupportsFloatOrIndex], /) -> float:
 def gamma(x: _SupportsFloatOrIndex, /) -> float:
     """Gamma function at x."""
     ...
-
-if sys.version_info >= (3, 9):
-    def gcd(*integers: SupportsIndex) -> int:
-        """Greatest Common Divisor."""
-        ...
-
-else:
-    def gcd(x: SupportsIndex, y: SupportsIndex, /) -> int:
-        """greatest common divisor of x and y"""
-        ...
-
+def gcd(*integers: SupportsIndex) -> int:
+    """Greatest Common Divisor."""
+    ...
 def hypot(*coordinates: _SupportsFloatOrIndex) -> float:
     """
     hypot(*coordinates) -> value
@@ -269,12 +262,9 @@ def isnan(x: _SupportsFloatOrIndex, /) -> bool:
 def isqrt(n: SupportsIndex, /) -> int:
     """Return the integer part of the square root of the input."""
     ...
-
-if sys.version_info >= (3, 9):
-    def lcm(*integers: SupportsIndex) -> int:
-        """Least Common Multiple."""
-        ...
-
+def lcm(*integers: SupportsIndex) -> int:
+    """Least Common Multiple."""
+    ...
 def ldexp(x: _SupportsFloatOrIndex, i: int, /) -> float:
     """
     Return x * (2**i).
@@ -326,10 +316,8 @@ if sys.version_info >= (3, 12):
         """
         ...
 
-elif sys.version_info >= (3, 9):
-    def nextafter(x: _SupportsFloatOrIndex, y: _SupportsFloatOrIndex, /) -> float:
-        """Return the next floating-point value after x towards y."""
-        ...
+else:
+    def nextafter(x: _SupportsFloatOrIndex, y: _SupportsFloatOrIndex, /) -> float: ...
 
 def perm(n: SupportsIndex, k: SupportsIndex | None = None, /) -> int:
     """
@@ -348,8 +336,25 @@ def perm(n: SupportsIndex, k: SupportsIndex | None = None, /) -> int:
 def pow(x: _SupportsFloatOrIndex, y: _SupportsFloatOrIndex, /) -> float:
     """Return x**y (x to the power of y)."""
     ...
+
+_PositiveInteger: TypeAlias = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+_NegativeInteger: TypeAlias = Literal[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20]
+_LiteralInteger = _PositiveInteger | _NegativeInteger | Literal[0]  # noqa: Y026  # TODO: Use TypeAlias once mypy bugs are fixed
+
+_MultiplicableT1 = TypeVar("_MultiplicableT1", bound=SupportsMul[Any, Any])
+_MultiplicableT2 = TypeVar("_MultiplicableT2", bound=SupportsMul[Any, Any])
+
+class _SupportsProdWithNoDefaultGiven(SupportsMul[Any, Any], SupportsRMul[int, Any], Protocol): ...
+
+_SupportsProdNoDefaultT = TypeVar("_SupportsProdNoDefaultT", bound=_SupportsProdWithNoDefaultGiven)
+
+# This stub is based on the type stub for `builtins.sum`.
+# Like `builtins.sum`, it cannot be precisely represented in a type stub
+# without introducing many false positives.
+# For more details on its limitations and false positives, see #13572.
+# Instead, just like `builtins.sum`, we explicitly handle several useful cases.
 @overload
-def prod(iterable: Iterable[SupportsIndex], /, *, start: SupportsIndex = 1) -> int:
+def prod(iterable: Iterable[bool | _LiteralInteger], /, *, start: int = 1) -> int:
     """
     Calculate the product of all the elements in the input iterable.
 
@@ -361,7 +366,19 @@ def prod(iterable: Iterable[SupportsIndex], /, *, start: SupportsIndex = 1) -> i
     """
     ...
 @overload
-def prod(iterable: Iterable[_SupportsFloatOrIndex], /, *, start: _SupportsFloatOrIndex = 1) -> float:
+def prod(iterable: Iterable[_SupportsProdNoDefaultT], /) -> _SupportsProdNoDefaultT | Literal[1]:
+    """
+    Calculate the product of all the elements in the input iterable.
+
+    The default start value for the product is 1.
+
+    When the iterable is empty, return the start value.  This function is
+    intended specifically for use with numeric values and may reject
+    non-numeric types.
+    """
+    ...
+@overload
+def prod(iterable: Iterable[_MultiplicableT1], /, *, start: _MultiplicableT2) -> _MultiplicableT1 | _MultiplicableT2:
     """
     Calculate the product of all the elements in the input iterable.
 
@@ -426,11 +443,9 @@ def trunc(x: _SupportsTrunc[_T], /) -> _T:
     Uses the __trunc__ magic method.
     """
     ...
-
-if sys.version_info >= (3, 9):
-    def ulp(x: _SupportsFloatOrIndex, /) -> float:
-        """Return the value of the least significant bit of the float x."""
-        ...
+def ulp(x: _SupportsFloatOrIndex, /) -> float:
+    """Return the value of the least significant bit of the float x."""
+    ...
 
 if sys.version_info >= (3, 13):
     def fma(x: _SupportsFloatOrIndex, y: _SupportsFloatOrIndex, z: _SupportsFloatOrIndex, /) -> float:
