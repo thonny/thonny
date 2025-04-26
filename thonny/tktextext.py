@@ -819,6 +819,7 @@ class TextFrame(tk.Frame):
         relief="sunken",
         **text_options,
     ):
+        self._vertical_scrollbar_rowspan = vertical_scrollbar_rowspan
         tk.Frame.__init__(
             self, master=master, borderwidth=borderwidth, relief=relief, background=background
         )
@@ -854,7 +855,7 @@ class TextFrame(tk.Frame):
         else:
             self._hbar = None
 
-        self.grid_main_widgets(vertical_scrollbar_rowspan=vertical_scrollbar_rowspan)
+        self.grid_main_widgets()
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
@@ -866,17 +867,17 @@ class TextFrame(tk.Frame):
 
         self._reload_theme_options(None)
 
-    def grid_main_widgets(self, vertical_scrollbar_rowspan=1):
+    def grid_main_widgets(self):
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         if self._vbar:
-            self._vbar.grid(row=0, column=2, sticky=tk.NSEW, rowspan=vertical_scrollbar_rowspan)
+            self._vbar.grid(
+                row=0, column=2, sticky=tk.NSEW, rowspan=self._vertical_scrollbar_rowspan
+            )
             if self._vbar_stripe:
                 self._vbar_stripe.grid(row=0, column=2, sticky="nse")
                 self._vbar_stripe.tkraise()
         if self._hbar:
-            self._hbar.grid(
-                row=vertical_scrollbar_rowspan - 1, column=0, sticky=tk.NSEW, columnspan=2
-            )
+            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
 
     def focus_set(self):
         self.text.focus_set()

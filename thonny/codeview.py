@@ -162,6 +162,7 @@ class CodeView(tktextext.EnhancedTextFrame):
             undo=True,
             wrap=tk.NONE,
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
+            vertical_scrollbar_rowspan=2,
             **frame_args,
         )
 

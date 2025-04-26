@@ -143,7 +143,7 @@ class BaseEditor(ttk.Frame):
         self._code_view.text.indent_width = get_workbench().get_option("edit.indent_width")
         self._code_view.text.tab_width = get_workbench().get_option("edit.tab_width")
         self._code_view.text.event_generate("<<UpdateAppearance>>")
-        self._code_view.grid_main_widgets(vertical_scrollbar_rowspan=2)
+        self._code_view.grid_main_widgets()
 
     def update_file_type(self):
         if self.is_untitled():

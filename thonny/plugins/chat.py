@@ -41,7 +41,6 @@ class ChatView(tktextext.TextFrame):
             self,
             master,
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
-            vertical_scrollbar_rowspan=2,
             read_only=True,
             wrap="word",
             font="TkDefaultFont",
