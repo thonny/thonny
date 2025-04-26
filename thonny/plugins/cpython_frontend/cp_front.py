@@ -94,9 +94,6 @@ class LocalCPythonProxy(SubprocessProxy):
         super()._close_backend()
 
     def get_target_executable(self):
-        return self._mgmt_executable
-
-    def get_executable(self):
         return self._reported_executable
 
     def get_base_executable(self) -> Optional[str]:

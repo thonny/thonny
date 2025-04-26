@@ -19,10 +19,6 @@ class LocalCPythonUvProxy(LocalCPythonProxy):
         # TODO
         return os.path.expanduser("~/.local/bin/uv")
 
-    def get_target_executable(self):
-        # TODO: should give python exe?
-        return self._mgmt_executable
-
     def get_mgmt_executable_special_switches(self) -> List[str]:
         cmd = ["run", "--project", self.get_cwd()]
 
