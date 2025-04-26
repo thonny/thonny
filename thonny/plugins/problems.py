@@ -145,7 +145,7 @@ class ProblemsView(TextFrame):
         # Remove old diagnostics from the same server and add the new ones
         current_diagnostics = self._current_diagnostics_per_uri.get(params.uri, [])
         self._current_diagnostics_per_uri[params.uri] = list(
-            filter(lambda ds: ds.ls_proxy is not ls_proxy, current_diagnostics)
+            filter(lambda ds: type(ds.ls_proxy) is not type(ls_proxy), current_diagnostics)
         ) + [DiagnosticWithProxy(diagnostic, ls_proxy) for diagnostic in params.diagnostics]
 
         self._remove_uri_block(params.uri)
