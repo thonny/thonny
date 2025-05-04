@@ -74,6 +74,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Bui Huy Quang
 * borpol
 * CADTEC GmbH (cadtec.ch)
+* @cclauss
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
