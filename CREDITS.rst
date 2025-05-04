@@ -153,6 +153,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * phr0gger
 * @plexus
 * Pop Vasile Alexandru
+* @r0zh
 * Radim
 * Ralf Michael Metzing
 * @rauferd
