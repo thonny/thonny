@@ -84,6 +84,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * cspaier
 * cubimon
 * Curtis Wang
+* @devk-op
 * Dominic Twyman
 * Dominik George
 * Donald Butt
