@@ -769,7 +769,7 @@ class DeviceRegistry:
             if location_paths is not None:
                 # Parse interface number from location paths.
                 for p in location_paths:
-                    # Find the #USBMI(?) patten in the last part of location string.
+                    # Find the #USBMI(?) pattern in the last part of location string.
                     m = re.fullmatch(r'.*?#USBMI\((\d+)\)', p, re.IGNORECASE)
                     if m is not None:
                         bInterfaceNumber = int(m.group(1))

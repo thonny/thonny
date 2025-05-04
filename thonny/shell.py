@@ -1079,7 +1079,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             self._try_submit_input()
 
         elif get_runner().is_waiting_toplevel_command():
-            # Same with editin middle of command, but only if it's a single line command
+            # Same with editing middle of command, but only if it's a single line command
             whole_input = self.get("input_start", "end-1c")  # asking the whole input
             if "\n" not in whole_input and self._code_is_ready_for_submission(whole_input):
                 self.mark_set("insert", "end")  # move cursor to the end
@@ -1617,7 +1617,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_add("inactive", "1.0", end_index)
 
-        # inactivate values
+        # deactivate values
         pos = end_index
         while True:
             rng = self.tag_prevrange("value", pos)
@@ -2192,7 +2192,7 @@ class PlotterCanvas(tk.Canvas):
             fill=self.colors[color % len(self.colors)],
             tags=("segment",),
             # arrow may be confusing
-            # and doesn't play nice with distinguising between
+            # and doesn't play nice with distinguishing between
             # scrollback view and fresh_range view
             # arrow="last",
             # arrowshape=(3,5,3)

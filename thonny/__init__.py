@@ -395,7 +395,7 @@ def _get_orig_argv() -> Optional[List[str]]:
         except AttributeError:
             # See https://github.com/thonny/thonny/issues/2206
             # and https://bugs.python.org/issue40910
-            # This symbol is not available in thonny.exe built agains Python 3.8
+            # This symbol is not available in thonny.exe built against Python 3.8
             return None
 
         # Ctypes are weird. They can't be used in list comprehensions, you can't use `in` with them, and you can't

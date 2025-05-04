@@ -1589,7 +1589,7 @@ class Workbench(tk.Tk):
 
         self.set_default(f"{name}.last_configurations", [])
 
-        # assing names to related classes
+        # assign names to related classes
         proxy_class.backend_name = name  # type: ignore
         proxy_class.backend_description = description  # type: ignore
         config_page_constructor.backend_name = name
