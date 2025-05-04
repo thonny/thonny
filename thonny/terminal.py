@@ -84,6 +84,21 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
         whole_cmd = "{term_cmd} --command={in_term_cmd}".format(
             term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
         )
+    elif term_cmd == "kitty":
+        # Kitty doesn't support -e
+        whole_cmd = "{term_cmd} {in_term_cmd}".format(term_cmd=term_cmd, in_term_cmd=in_term_cmd)
+
+    elif term_cmd == "wezterm":
+        # Wezterm needs each argument to be quoted separately
+        parts = in_term_cmd.replace('"', "").split(
+            " ", 2
+        )  # Split only twice to preserve the quoted command
+        
+        # cd into current working directory since wezterm doesn't mantain the working directory
+        parts[2] = "cd " + cwd + ";" + parts[2]
+        in_term_cmd = " ".join(f'"{part}"' for part in parts)
+        whole_cmd = "{term_cmd} -e {in_term_cmd}".format(term_cmd=term_cmd, in_term_cmd=in_term_cmd)
+
     else:
         whole_cmd = "{term_cmd} -e {in_term_cmd}".format(
             term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
@@ -211,6 +226,10 @@ def _get_linux_terminal_command():
         return "lxterminal"
     elif shutil.which("xterm"):
         return "xterm"
+    elif shutil.which("kitty"):
+        return "kitty"
+    elif shutil.which("wezterm"):
+        return "wezterm"
     else:
         raise RuntimeError("Don't know how to open terminal emulator")
 
