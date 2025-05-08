@@ -21,7 +21,6 @@ unfreeze() -- Unfreeze all objects in the permanent generation.
 get_freeze_count() -- Return the number of objects in the permanent generation.
 """
 
-import sys
 from collections.abc import Callable
 from typing import Any, Final, Literal
 from typing_extensions import TypeAlias
@@ -109,12 +108,9 @@ def is_tracked(obj: Any, /) -> bool:
     Simple atomic objects will return false.
     """
     ...
-
-if sys.version_info >= (3, 9):
-    def is_finalized(obj: Any, /) -> bool:
-        """Returns true if the object has been already finalized by the GC."""
-        ...
-
+def is_finalized(obj: Any, /) -> bool:
+    """Returns true if the object has been already finalized by the GC."""
+    ...
 def isenabled() -> bool:
     """Returns true if automatic garbage collection is enabled."""
     ...

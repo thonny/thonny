@@ -3,7 +3,10 @@ This module provides primitive operations to manage Python interpreters.
 The 'interpreters' module provides a more convenient interface.
 """
 
-from typing import Any, SupportsIndex
+from typing import Any, Literal, SupportsIndex
+from typing_extensions import TypeAlias
+
+_UnboundOp: TypeAlias = Literal[1, 2, 3]
 
 class QueueError(RuntimeError):
     """Indicates that a queue-related error happened."""
@@ -18,7 +21,7 @@ def bind(qid: SupportsIndex) -> None:
     The queue is not destroyed until there are no references left.
     """
     ...
-def create(maxsize: SupportsIndex, fmt: SupportsIndex) -> int:
+def create(maxsize: SupportsIndex, fmt: SupportsIndex, unboundop: _UnboundOp) -> int:
     """
     create(maxsize, fmt, unboundop) -> qid
 
@@ -37,7 +40,7 @@ def destroy(qid: SupportsIndex) -> None:
     will behave as though it never existed.
     """
     ...
-def get(qid: SupportsIndex) -> tuple[Any, int]:
+def get(qid: SupportsIndex) -> tuple[Any, int, _UnboundOp | None]:
     """
     get(qid) -> (obj, fmt)
 
@@ -61,7 +64,7 @@ def get_maxsize(qid: SupportsIndex) -> int:
     Return the maximum number of items in the queue.
     """
     ...
-def get_queue_defaults(qid: SupportsIndex) -> tuple[int]:
+def get_queue_defaults(qid: SupportsIndex) -> tuple[int, _UnboundOp]:
     """
     get_queue_defaults(qid)
 
@@ -75,7 +78,7 @@ def is_full(qid: SupportsIndex) -> bool:
     Return true if the queue has a maxsize and has reached it.
     """
     ...
-def list_all() -> list[tuple[int, int]]:
+def list_all() -> list[tuple[int, int, _UnboundOp]]:
     """
     list_all() -> [(qid, fmt)]
 
@@ -83,7 +86,7 @@ def list_all() -> list[tuple[int, int]]:
     Each corresponding default format is also included.
     """
     ...
-def put(qid: SupportsIndex, obj: Any, fmt: SupportsIndex) -> None:
+def put(qid: SupportsIndex, obj: Any, fmt: SupportsIndex, unboundop: _UnboundOp) -> None:
     """
     put(qid, obj, fmt)
 

@@ -44,9 +44,7 @@ else:
 
 class PackageNotFoundError(ModuleNotFoundError):
     @property
-    def name(self) -> str:
-        """module name"""
-        ...
+    def name(self) -> str: ...  # type: ignore[override]
 
 if sys.version_info >= (3, 13):
     _EntryPointBase = object
@@ -73,11 +71,10 @@ class EntryPoint(_EntryPointBase):
     def load(self) -> Any: ...  # Callable[[], Any] or an importable module
     @property
     def extras(self) -> list[str]: ...
-    if sys.version_info >= (3, 9):
-        @property
-        def module(self) -> str: ...
-        @property
-        def attr(self) -> str: ...
+    @property
+    def module(self) -> str: ...
+    @property
+    def attr(self) -> str: ...
     if sys.version_info >= (3, 10):
         dist: ClassVar[Distribution | None]
         def matches(
@@ -91,12 +88,8 @@ class EntryPoint(_EntryPointBase):
             extras: list[str] = ...,
         ) -> bool: ...  # undocumented
 
-    def __hash__(self) -> int:
-        """Return hash(self)."""
-        ...
-    def __eq__(self, other: object) -> bool:
-        """Return self==value."""
-        ...
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
     if sys.version_info >= (3, 11):
         def __lt__(self, other: object) -> bool: ...
     if sys.version_info < (3, 12):
@@ -141,25 +134,15 @@ elif sys.version_info >= (3, 10):
             extras: list[str] = ...,
         ) -> EntryPoints: ...
         @property
-        def names(self) -> set[str]:
-            """Return the set of all names of all entry points."""
-            ...
+        def names(self) -> set[str]: ...
         @property
-        def groups(self) -> set[str]:
-            """
-            Return the set of all groups of all entry points.
-
-            For coverage while SelectableGroups is present.
-            >>> EntryPoints().groups
-            set()
-            """
-            ...
+        def groups(self) -> set[str]: ...
 
 if sys.version_info >= (3, 10) and sys.version_info < (3, 12):
     class Deprecated(Generic[_KT, _VT]):
         def __getitem__(self, name: _KT) -> _VT: ...
         @overload
-        def get(self, name: _KT) -> _VT | None: ...
+        def get(self, name: _KT, default: None = None) -> _VT | None: ...
         @overload
         def get(self, name: _KT, default: _T) -> _VT | _T: ...
         def __iter__(self) -> Iterator[_KT]: ...
@@ -173,13 +156,7 @@ if sys.version_info >= (3, 10) and sys.version_info < (3, 12):
         @property
         def groups(self) -> set[str]: ...
         @property
-        def names(self) -> set[str]:
-            """
-            for coverage:
-            >>> SelectableGroups().names
-            set()
-            """
-            ...
+        def names(self) -> set[str]: ...
         @overload
         def select(self) -> Self: ...
         @overload
@@ -257,14 +234,7 @@ class Distribution(_distribution_parent):
             ...
     else:
         @property
-        def metadata(self) -> Message:
-            """
-            Return the parsed metadata for this Distribution.
-
-            The returned object will have keys that name the various bits of
-            metadata.  See PEP 566 for details.
-            """
-            ...
+        def metadata(self) -> Message: ...
         @property
         def entry_points(self) -> list[EntryPoint]: ...
 

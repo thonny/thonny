@@ -1,7 +1,8 @@
+import sys
 from _typeshed import ReadableBuffer
 from collections.abc import Mapping, Sequence
 from typing import Any, Final, final
-from typing_extensions import TypeAlias
+from typing_extensions import Self, TypeAlias
 
 _FilterChain: TypeAlias = Sequence[Mapping[str, Any]]
 
@@ -56,7 +57,11 @@ class LZMADecompressor:
 
     For one-shot decompression, use the decompress() function instead.
     """
-    def __init__(self, format: int | None = ..., memlimit: int | None = ..., filters: _FilterChain | None = ...) -> None: ...
+    if sys.version_info >= (3, 12):
+        def __new__(cls, format: int | None = ..., memlimit: int | None = ..., filters: _FilterChain | None = ...) -> Self: ...
+    else:
+        def __init__(self, format: int | None = ..., memlimit: int | None = ..., filters: _FilterChain | None = ...) -> None: ...
+
     def decompress(self, data: ReadableBuffer, max_length: int = -1) -> bytes:
         """
         Decompress *data*, returning uncompressed data as bytes.
@@ -122,9 +127,15 @@ class LZMACompressor:
 
     For one-shot compression, use the compress() function instead.
     """
-    def __init__(
-        self, format: int | None = ..., check: int = ..., preset: int | None = ..., filters: _FilterChain | None = ...
-    ) -> None: ...
+    if sys.version_info >= (3, 12):
+        def __new__(
+            cls, format: int | None = ..., check: int = ..., preset: int | None = ..., filters: _FilterChain | None = ...
+        ) -> Self: ...
+    else:
+        def __init__(
+            self, format: int | None = ..., check: int = ..., preset: int | None = ..., filters: _FilterChain | None = ...
+        ) -> None: ...
+
     def compress(self, data: ReadableBuffer, /) -> bytes:
         """
         Provide data to the compressor object.

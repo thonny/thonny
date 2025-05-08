@@ -2,7 +2,7 @@ import sys
 from collections.abc import Awaitable, Callable, Coroutine, Iterable, Mapping, Sequence
 from contextlib import _GeneratorContextManager
 from types import TracebackType
-from typing import Any, Final, Generic, Literal, TypeVar, overload
+from typing import Any, ClassVar, Final, Generic, Literal, TypeVar, overload
 from typing_extensions import ParamSpec, Self, TypeAlias
 
 _T = TypeVar("_T")
@@ -51,9 +51,6 @@ else:
         "seal",
     )
 
-if sys.version_info < (3, 9):
-    __version__: Final[str]
-
 FILTER_DIR: Any
 
 class _SentinelObject:
@@ -85,6 +82,7 @@ class _Call(tuple[Any, ...]):
         two: bool = False,
         from_kall: bool = True,
     ) -> None: ...
+    __hash__: ClassVar[None]  # type: ignore[assignment]
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, value: object, /) -> bool:
         """Return self!=value."""
@@ -405,6 +403,7 @@ class MagicProxy(Base):
 class _ANY:
     def __eq__(self, other: object) -> Literal[True]: ...
     def __ne__(self, other: object) -> Literal[False]: ...
+    __hash__: ClassVar[None]  # type: ignore[assignment]
 
 ANY: Any
 

@@ -88,7 +88,7 @@ class PyrightProxy(LanguageServerProxy):
             if not key.startswith("PYTHON") and key != "VIRTUAL_ENV"
         }
         for key in env:
-            logger.info("Pyright env: %s=%r", key, env.get(key))
+            logger.debug("Pyright env: %s=%r", key, env.get(key))
 
         return subprocess.Popen(
             [node_path, langserv_js, "--stdio"],

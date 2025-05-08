@@ -1,7 +1,7 @@
 from _typeshed import Incomplete, SupportsGetItem, SupportsLenAndGetItem, Unused
 from abc import abstractmethod
 from collections.abc import Iterable, Iterator, MutableSequence
-from typing import Final
+from typing import ClassVar, Final
 from typing_extensions import Self, TypeAlias
 
 from .fixer_base import BaseFix
@@ -24,6 +24,7 @@ class Base:
     was_changed: bool
     was_checked: bool
     def __eq__(self, other: object) -> bool: ...
+    __hash__: ClassVar[None]  # type: ignore[assignment]
     @abstractmethod
     def _eq(self, other: Base) -> bool: ...
     @abstractmethod
@@ -37,19 +38,9 @@ class Base:
     def changed(self) -> None: ...
     def remove(self) -> int | None: ...
     @property
-    def next_sibling(self) -> _NL | None:
-        """
-        The node immediately following the invocant in their parent's children
-        list. If the invocant does not have a next sibling, it is None
-        """
-        ...
+    def next_sibling(self) -> _NL | None: ...
     @property
-    def prev_sibling(self) -> _NL | None:
-        """
-        The node immediately preceding the invocant in their parent's children
-        list. If the invocant does not have a previous sibling, it is None.
-        """
-        ...
+    def prev_sibling(self) -> _NL | None: ...
     def leaves(self) -> Iterator[Leaf]: ...
     def depth(self) -> int: ...
     def get_suffix(self) -> str: ...

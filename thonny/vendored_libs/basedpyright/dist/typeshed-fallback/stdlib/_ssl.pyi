@@ -17,7 +17,7 @@ from ssl import (
     SSLWantWriteError as SSLWantWriteError,
     SSLZeroReturnError as SSLZeroReturnError,
 )
-from typing import Any, Literal, TypedDict, final, overload
+from typing import Any, ClassVar, Literal, TypedDict, final, overload
 from typing_extensions import NotRequired, Self, TypeAlias
 
 _PasswordType: TypeAlias = Callable[[], str | bytes | bytearray] | str | bytes | bytearray
@@ -63,14 +63,7 @@ def RAND_bytes(n: int, /) -> bytes:
     ...
 
 if sys.version_info < (3, 12):
-    def RAND_pseudo_bytes(n: int, /) -> tuple[bytes, bool]:
-        """
-        Generate n pseudo-random bytes.
-
-        Return a pair (bytes, is_cryptographic).  is_cryptographic is True
-        if the bytes generated are cryptographically strong.
-        """
-        ...
+    def RAND_pseudo_bytes(n: int, /) -> tuple[bytes, bool]: ...
 
 if sys.version_info < (3, 10):
     def RAND_egd(path: str) -> None: ...
@@ -223,13 +216,14 @@ class MemoryBIO:
 
 @final
 class SSLSession:
+    __hash__: ClassVar[None]  # type: ignore[assignment]
     @property
     def has_ticket(self) -> bool:
         """Does the session contain a ticket?"""
         ...
     @property
     def id(self) -> bytes:
-        """Session id"""
+        """Session ID."""
         ...
     @property
     def ticket_lifetime_hint(self) -> int:
@@ -353,9 +347,7 @@ OP_SINGLE_ECDH_USE: int
 OP_NO_COMPRESSION: int
 OP_ENABLE_MIDDLEBOX_COMPAT: int
 OP_NO_RENEGOTIATION: int
-if sys.version_info >= (3, 11):
-    OP_IGNORE_UNEXPECTED_EOF: int
-elif sys.version_info >= (3, 8) and sys.platform == "linux":
+if sys.version_info >= (3, 11) or sys.platform == "linux":
     OP_IGNORE_UNEXPECTED_EOF: int
 if sys.version_info >= (3, 12):
     OP_LEGACY_SERVER_CONNECT: int

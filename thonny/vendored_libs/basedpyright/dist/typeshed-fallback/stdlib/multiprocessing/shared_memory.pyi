@@ -1,10 +1,8 @@
 import sys
 from collections.abc import Iterable
+from types import GenericAlias
 from typing import Any, Generic, TypeVar, overload
 from typing_extensions import Self
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 __all__ = ["SharedMemory", "ShareableList"]
 
@@ -48,11 +46,10 @@ class ShareableList(Generic[_SLT]):
         ...
     def count(self, value: _SLT) -> int: ...
     def index(self, value: _SLT) -> int: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...

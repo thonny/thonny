@@ -292,9 +292,14 @@ def configure_logging(log_file, console_level=None):
     main_logger.info("sys.flags: %s", sys.flags)
 
     import faulthandler
+    import signal
 
-    fault_out = open(os.path.join(get_thonny_user_dir(), "frontend_faults.log"), mode="w")
+    fault_out = open(
+        os.path.join(get_thonny_user_dir(), "frontend_faults.log"), mode="w", buffering=1
+    )
     faulthandler.enable(fault_out)
+    faulthandler.register(signal.SIGUSR1, file=fault_out, all_threads=True)
+    # for getting traces of hung process, on macOS invoke  "kill -USR1 <pid>" and then "kill -USR2 <pid>"
 
 
 def get_user_base_directory_for_plugins() -> str:
@@ -390,7 +395,7 @@ def _get_orig_argv() -> Optional[List[str]]:
         except AttributeError:
             # See https://github.com/thonny/thonny/issues/2206
             # and https://bugs.python.org/issue40910
-            # This symbol is not available in thonny.exe built agains Python 3.8
+            # This symbol is not available in thonny.exe built against Python 3.8
             return None
 
         # Ctypes are weird. They can't be used in list comprehensions, you can't use `in` with them, and you can't

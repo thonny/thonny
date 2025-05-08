@@ -24,7 +24,7 @@ def ltask(blinks,delay):
 
 _thread.start_new_thread(ltask, (10, 0.2))
 
-# The problem can be avoided by joining the thread before returing:
+# The problem can be avoided by joining the thread before returning:
 # while not thread_done:
 #     pass
 
@@ -81,7 +81,7 @@ pb.exec_(thread_script, data_consumer=print)
 #pb.exec_(direct_script, data_consumer=print)
 
 time.sleep(15)
-pb.serial.read_all() # Othewise exec_ gets confused by the output of the thread
+pb.serial.read_all() # Otherwise exec_ gets confused by the output of the thread
 pb.enter_raw_repl()
 
 pb.exec_(second_script, data_consumer=print)

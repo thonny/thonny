@@ -1,5 +1,7 @@
+import sys
 from _typeshed import ReadableBuffer
 from typing import final
+from typing_extensions import Self
 
 @final
 class BZ2Compressor:
@@ -11,7 +13,11 @@ class BZ2Compressor:
 
     For one-shot compression, use the compress() function instead.
     """
-    def __init__(self, compresslevel: int = 9) -> None: ...
+    if sys.version_info >= (3, 12):
+        def __new__(cls, compresslevel: int = 9, /) -> Self: ...
+    else:
+        def __init__(self, compresslevel: int = 9, /) -> None: ...
+
     def compress(self, data: ReadableBuffer, /) -> bytes:
         """
         Provide data to the compressor object.

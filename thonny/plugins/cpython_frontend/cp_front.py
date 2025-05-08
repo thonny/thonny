@@ -8,7 +8,7 @@ from tkinter import ttk
 from typing import Any, Dict, List, Optional, Tuple
 
 import thonny
-from thonny import get_runner, get_shell, get_workbench, ui_utils, SUPPORTED_VERSIONS
+from thonny import SUPPORTED_VERSIONS, get_runner, get_shell, get_workbench, ui_utils
 from thonny.base_file_browser import (
     FILE_DIALOG_HEIGHT_EMS_OPTION,
     FILE_DIALOG_WIDTH_EMS_OPTION,
@@ -94,9 +94,6 @@ class LocalCPythonProxy(SubprocessProxy):
         super()._close_backend()
 
     def get_target_executable(self):
-        return self._mgmt_executable
-
-    def get_executable(self):
         return self._reported_executable
 
     def get_base_executable(self) -> Optional[str]:

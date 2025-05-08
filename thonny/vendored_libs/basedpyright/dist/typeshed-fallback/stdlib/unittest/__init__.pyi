@@ -60,9 +60,4 @@ if sys.version_info >= (3, 11):
 if sys.version_info < (3, 12):
     def load_tests(loader: TestLoader, tests: TestSuite, pattern: str | None) -> TestSuite: ...
 
-def __dir__() -> set[str]:
-    """
-    __dir__() -> list
-    specialized dir() implementation
-    """
-    ...
+def __dir__() -> set[str]: ...

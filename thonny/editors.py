@@ -4,10 +4,11 @@ import re
 import time
 import tkinter as tk
 import warnings
-from _tkinter import TclError
 from logging import exception, getLogger
 from tkinter import messagebox, simpledialog, ttk
 from typing import List, Literal, Optional, Union, cast
+
+from _tkinter import TclError
 
 from thonny import get_runner, get_workbench
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
@@ -65,7 +66,7 @@ PYTHON_FILES_STR = tr("Python files")
 _dialog_filetypes = [(PYTHON_FILES_STR, ".py .pyw .pyi .pyde .pyx"), (tr("all files"), ".*")]
 
 PYTHON_EXTENSIONS = {"py", "pyw", "pyi", "pyde"}
-PYTHONLIKE_EXTENSIONS = {"pyx", "pyde"}
+PYTHONLIKE_EXTENSIONS = {"pyx", "pyde", "toml"}
 DEBOUNCE_SECONDS = 0.5
 
 

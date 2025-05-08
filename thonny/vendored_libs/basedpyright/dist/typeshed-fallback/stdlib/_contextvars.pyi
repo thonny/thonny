@@ -1,12 +1,9 @@
 """Context Variables"""
 
-import sys
 from collections.abc import Callable, Iterator, Mapping
+from types import GenericAlias
 from typing import Any, ClassVar, Generic, TypeVar, final, overload
-from typing_extensions import ParamSpec
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
+from typing_extensions import ParamSpec, Self
 
 _T = TypeVar("_T")
 _D = TypeVar("_D")
@@ -15,9 +12,9 @@ _P = ParamSpec("_P")
 @final
 class ContextVar(Generic[_T]):
     @overload
-    def __init__(self, name: str) -> None: ...
+    def __new__(cls, name: str) -> Self: ...
     @overload
-    def __init__(self, name: str, *, default: _T) -> None: ...
+    def __new__(cls, name: str, *, default: _T) -> Self: ...
     def __hash__(self) -> int:
         """Return hash(self)."""
         ...
@@ -77,10 +74,9 @@ class ContextVar(Generic[_T]):
         created the token was used.
         """
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 @final
 class Token(Generic[_T]):
@@ -89,10 +85,10 @@ class Token(Generic[_T]):
     @property
     def old_value(self) -> Any: ...  # returns either _T or MISSING, but that's hard to express
     MISSING: ClassVar[object]
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    __hash__: ClassVar[None]  # type: ignore[assignment]
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 def copy_context() -> Context: ...
 
@@ -132,6 +128,7 @@ class Context(Mapping[ContextVar[Any], Any]):
     def copy(self) -> Context:
         """Return a shallow copy of the context object."""
         ...
+    __hash__: ClassVar[None]  # type: ignore[assignment]
     def __getitem__(self, key: ContextVar[_T], /) -> _T:
         """Return self[key]."""
         ...

@@ -1,6 +1,7 @@
 import sys
-from _typeshed import ReadOnlyBuffer, SupportsRead
-from typing import IO, Any, NamedTuple, final, overload
+from _typeshed import ReadOnlyBuffer, SupportsRead, SupportsWrite
+from curses import _ncurses_version
+from typing import Any, final, overload
 from typing_extensions import TypeAlias
 
 # NOTE: This module is ordinarily only available on Unix, but the windows-curses
@@ -393,26 +394,23 @@ def flushinp() -> None:
     yet been processed by the program.
     """
     ...
+def get_escdelay() -> int:
+    """
+    Gets the curses ESCDELAY setting.
 
-if sys.version_info >= (3, 9):
-    def get_escdelay() -> int:
-        """
-        Gets the curses ESCDELAY setting.
+    Gets the number of milliseconds to wait after reading an escape character,
+    to distinguish between an individual escape character entered on the
+    keyboard from escape sequences sent by cursor and function keys.
+    """
+    ...
+def get_tabsize() -> int:
+    """
+    Gets the curses TABSIZE setting.
 
-        Gets the number of milliseconds to wait after reading an escape character,
-        to distinguish between an individual escape character entered on the
-        keyboard from escape sequences sent by cursor and function keys.
-        """
-        ...
-    def get_tabsize() -> int:
-        """
-        Gets the curses TABSIZE setting.
-
-        Gets the number of columns used by the curses library when converting a tab
-        character to spaces as it adds the tab to a window.
-        """
-        ...
-
+    Gets the number of columns used by the curses library when converting a tab
+    character to spaces as it adds the tab to a window.
+    """
+    ...
 def getmouse() -> tuple[int, int, int, int, int]:
     """
     Retrieve the queued mouse event.
@@ -747,32 +745,29 @@ def resizeterm(nlines: int, ncols: int, /) -> None:
 def savetty() -> None:
     """Save terminal mode."""
     ...
+def set_escdelay(ms: int, /) -> None:
+    """
+    Sets the curses ESCDELAY setting.
 
-if sys.version_info >= (3, 9):
-    def set_escdelay(ms: int, /) -> None:
-        """
-        Sets the curses ESCDELAY setting.
+      ms
+        length of the delay in milliseconds.
 
-          ms
-            length of the delay in milliseconds.
+    Sets the number of milliseconds to wait after reading an escape character,
+    to distinguish between an individual escape character entered on the
+    keyboard from escape sequences sent by cursor and function keys.
+    """
+    ...
+def set_tabsize(size: int, /) -> None:
+    """
+    Sets the curses TABSIZE setting.
 
-        Sets the number of milliseconds to wait after reading an escape character,
-        to distinguish between an individual escape character entered on the
-        keyboard from escape sequences sent by cursor and function keys.
-        """
-        ...
-    def set_tabsize(size: int, /) -> None:
-        """
-        Sets the curses TABSIZE setting.
+      size
+        rendered cell width of a tab character.
 
-          size
-            rendered cell width of a tab character.
-
-        Sets the number of columns used by the curses library when converting a tab
-        character to spaces as it adds the tab to a window.
-        """
-        ...
-
+    Sets the number of columns used by the curses library when converting a tab
+    character to spaces as it adds the tab to a window.
+    """
+    ...
 def setsyx(y: int, x: int, /) -> None:
     """
     Set the virtual screen cursor.
@@ -1677,7 +1672,7 @@ class window:  # undocumented
         window.
         """
         ...
-    def putwin(self, file: IO[Any], /) -> None:
+    def putwin(self, file: SupportsWrite[bytes], /) -> None:
         """
         Write all data associated with the window into the provided file object.
 
@@ -1889,10 +1884,5 @@ class window:  # undocumented
             Attributes for the character.
         """
         ...
-
-class _ncurses_version(NamedTuple):
-    major: int
-    minor: int
-    patch: int
 
 ncurses_version: _ncurses_version

@@ -63,27 +63,29 @@ class FilesView(tk.PanedWindow):
     def reset_remote(self, msg=None):
         runner = get_runner()
         if not runner:
+            logger.info("No runner in reset_remote")
             return
 
         proxy = runner.get_backend_proxy()
         if not proxy:
+            logger.info("No proxy in reset_remote")
             self.hide_remote()
             return
 
         if proxy.supports_remote_files():
-            # remote pane is needed
             if not self.remote_added:
+                logger.info("Adding remote browser")
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
                 self.restore_split()
             self.remote_files.clear()
             self.remote_files.check_update_focus()
         else:
-            # remote pane not needed
             self.hide_remote()
 
     def hide_remote(self):
         if self.remote_added:
+            logger.info("Hiding remote browser")
             self.save_split()
             self.remove(self.remote_files)
             self.remote_added = False
@@ -103,6 +105,7 @@ class FilesView(tk.PanedWindow):
         self.sash_place(0, 0, split)
 
     def on_backend_restart(self, event):
+        logger.info("on_backend_restart, full=%r", event.get("full"))
         if event.get("full"):
             self.reset_remote(event)
 
@@ -289,6 +292,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
     def on_toplevel_response(self, msg):
         if not self.winfo_ismapped():
+            logger.info("ActiveRemoteFileBrowser not mapped on_toplevel_response")
             return
         if get_runner().get_backend_proxy().supports_remote_files():
             # pass cwd, as proxy may not yet know it
@@ -306,8 +310,14 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             proxy = get_runner().get_backend_proxy()
             new_cwd = proxy.get_cwd()
 
-        if self.current_focus != new_cwd:
-            self.focus_into(new_cwd)
+        if new_cwd is None:
+            logger.info("Can't update focus, proxy doesn't have cwd yet")
+        else:
+            if self.current_focus != new_cwd:
+                logger.info(
+                    "Changing focus, current_focus=%r, new_cwd=%r", self.current_focus, new_cwd
+                )
+                self.focus_into(new_cwd)
 
     def request_new_focus(self, path):
         get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
@@ -619,6 +629,7 @@ def load_plugin() -> None:
 
     get_workbench().add_view(FilesView, tr("Files"), "nw")
 
+    # NB! Keep these in lowercase
     for ext in [
         ".py",
         ".pyw",
@@ -647,6 +658,8 @@ def load_plugin() -> None:
         ".sh",
         ".bat",
         ".csv",
+        "metadata",
+        "record",
     ]:
         get_workbench().set_default(get_file_handler_conf_key(ext), "thonny")
 

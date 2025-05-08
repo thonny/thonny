@@ -13,12 +13,9 @@ from _typeshed import (
     WriteableBuffer,
 )
 from collections.abc import Iterable, Iterator
-from types import TracebackType
+from types import GenericAlias, TracebackType
 from typing import IO, Any, AnyStr, Generic, Literal, overload
 from typing_extensions import Self
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 __all__ = [
     "NamedTemporaryFile",
@@ -401,14 +398,13 @@ class SpooledTemporaryFile(IO[AnyStr], _SpooledTemporaryFileBase):
     def __next__(self) -> AnyStr:
         """Implement next(self)."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...
 
 class TemporaryDirectory(Generic[AnyStr]):
     name: AnyStr
@@ -466,14 +462,13 @@ class TemporaryDirectory(Generic[AnyStr]):
     def cleanup(self) -> None: ...
     def __enter__(self) -> AnyStr: ...
     def __exit__(self, exc: type[BaseException] | None, value: BaseException | None, tb: TracebackType | None) -> None: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...
 
 # The overloads overlap, but they should still work fine.
 @overload

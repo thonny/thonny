@@ -5,11 +5,12 @@ import pathlib
 import re
 import tkinter as tk
 import traceback
-from _tkinter import TclError
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
 from typing import List, Optional
+
+from _tkinter import TclError
 
 from thonny import (
     get_runner,
@@ -616,7 +617,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
-            elif data.startswith("\x1B]"):
+            elif data.startswith("\x1b]"):
                 self._handle_osc_sequence(data)
             elif data.endswith("D") or data.endswith("C"):
                 self._change_io_cursor_offset_csi(data)
@@ -1078,7 +1079,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             self._try_submit_input()
 
         elif get_runner().is_waiting_toplevel_command():
-            # Same with editin middle of command, but only if it's a single line command
+            # Same with editing middle of command, but only if it's a single line command
             whole_input = self.get("input_start", "end-1c")  # asking the whole input
             if "\n" not in whole_input and self._code_is_ready_for_submission(whole_input):
                 self.mark_set("insert", "end")  # move cursor to the end
@@ -1616,7 +1617,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         self.tag_add("inactive", "1.0", end_index)
 
-        # inactivate values
+        # deactivate values
         pos = end_index
         while True:
             rng = self.tag_prevrange("value", pos)
@@ -2191,7 +2192,7 @@ class PlotterCanvas(tk.Canvas):
             fill=self.colors[color % len(self.colors)],
             tags=("segment",),
             # arrow may be confusing
-            # and doesn't play nice with distinguising between
+            # and doesn't play nice with distinguishing between
             # scrollback view and fresh_range view
             # arrow="last",
             # arrowshape=(3,5,3)

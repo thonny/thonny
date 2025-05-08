@@ -78,14 +78,13 @@ from builtins import object as _object
 from collections.abc import AsyncGenerator, Callable, Sequence
 from io import TextIOWrapper
 from types import FrameType, ModuleType, TracebackType
-from typing import Any, Final, Literal, NoReturn, Protocol, TextIO, TypeVar, final
-from typing_extensions import TypeAlias
+from typing import Any, Final, Literal, NoReturn, Protocol, TextIO, TypeVar, final, type_check_only
+from typing_extensions import LiteralString, TypeAlias
 
 _T = TypeVar("_T")
 
 # see https://github.com/python/typeshed/issues/8513#issue-1333671093 for the rationale behind this alias
 _ExitCode: TypeAlias = str | int | None
-_OptExcInfo: TypeAlias = OptExcInfo  # noqa: Y047  # TODO: obsolete, remove fall 2022 or later
 
 # ----- sys variables -----
 if sys.platform != "win32":
@@ -119,9 +118,8 @@ if sys.version_info >= (3, 10):
 path: list[str]
 path_hooks: list[Callable[[str], PathEntryFinderProtocol]]
 path_importer_cache: dict[str, PathEntryFinderProtocol | None]
-platform: str
-if sys.version_info >= (3, 9):
-    platlibdir: str
+platform: LiteralString
+platlibdir: str
 prefix: str
 pycache_prefix: str | None
 ps1: object
@@ -147,7 +145,7 @@ if sys.version_info >= (3, 10):
 __stdin__: Final[TextIOWrapper | None]  # Contains the original value of stdin
 __stdout__: Final[TextIOWrapper | None]  # Contains the original value of stdout
 __stderr__: Final[TextIOWrapper | None]  # Contains the original value of stderr
-tracebacklimit: int
+tracebacklimit: int | None
 version: str
 api_version: int
 warnoptions: Any
@@ -163,13 +161,63 @@ _UninstantiableStructseq: TypeAlias = structseq[Any]
 
 flags: _flags
 
-if sys.version_info >= (3, 10):
-    _FlagTuple: TypeAlias = tuple[int, int, int, int, int, int, int, int, int, int, int, int, int, bool, int, int]
-else:
-    _FlagTuple: TypeAlias = tuple[int, int, int, int, int, int, int, int, int, int, int, int, int, bool, int]
-
+# This class is not exposed at runtime. It calls itself sys.flags.
+# As a tuple, it can have a length between 15 and 18. We don't model
+# the exact length here because that varies by patch version due to
+# the backported security fix int_max_str_digits. The exact length shouldn't
+# be relied upon. See #13031
+# This can be re-visited when typeshed drops support for 3.10,
+# at which point all supported versions will include int_max_str_digits
+# in all patch versions.
+# 3.8 and 3.9 are 15 or 16-tuple
+# 3.10 is 16 or 17-tuple
+# 3.11+ is an 18-tuple.
 @final
-class _flags(_UninstantiableStructseq, _FlagTuple):
+@type_check_only
+class _flags(_UninstantiableStructseq, tuple[int, ...]):
+    # `safe_path` was added in py311
+    if sys.version_info >= (3, 11):
+        __match_args__: Final = (
+            "debug",
+            "inspect",
+            "interactive",
+            "optimize",
+            "dont_write_bytecode",
+            "no_user_site",
+            "no_site",
+            "ignore_environment",
+            "verbose",
+            "bytes_warning",
+            "quiet",
+            "hash_randomization",
+            "isolated",
+            "dev_mode",
+            "utf8_mode",
+            "warn_default_encoding",
+            "safe_path",
+            "int_max_str_digits",
+        )
+    elif sys.version_info >= (3, 10):
+        __match_args__: Final = (
+            "debug",
+            "inspect",
+            "interactive",
+            "optimize",
+            "dont_write_bytecode",
+            "no_user_site",
+            "no_site",
+            "ignore_environment",
+            "verbose",
+            "bytes_warning",
+            "quiet",
+            "hash_randomization",
+            "isolated",
+            "dev_mode",
+            "utf8_mode",
+            "warn_default_encoding",
+            "int_max_str_digits",
+        )
+
     @property
     def debug(self) -> int: ...
     @property
@@ -202,15 +250,39 @@ class _flags(_UninstantiableStructseq, _FlagTuple):
     def utf8_mode(self) -> int: ...
     if sys.version_info >= (3, 10):
         @property
-        def warn_default_encoding(self) -> int: ...  # undocumented
+        def warn_default_encoding(self) -> int: ...
     if sys.version_info >= (3, 11):
         @property
         def safe_path(self) -> bool: ...
+    # Whether or not this exists on lower versions of Python
+    # may depend on which patch release you're using
+    # (it was backported to all Python versions on 3.8+ as a security fix)
+    # Added in: 3.8.14, 3.9.14, 3.10.7
+    # and present in all versions of 3.11 and later.
+    @property
+    def int_max_str_digits(self) -> int: ...
 
 float_info: _float_info
 
+# This class is not exposed at runtime. It calls itself sys.float_info.
 @final
+@type_check_only
 class _float_info(structseq[float], tuple[float, int, int, float, int, int, int, int, float, int, int]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = (
+            "max",
+            "max_exp",
+            "max_10_exp",
+            "min",
+            "min_exp",
+            "min_10_exp",
+            "dig",
+            "mant_dig",
+            "epsilon",
+            "radix",
+            "rounds",
+        )
+
     @property
     def max(self) -> float: ...  # DBL_MAX
     @property
@@ -236,8 +308,13 @@ class _float_info(structseq[float], tuple[float, int, int, float, int, int, int,
 
 hash_info: _hash_info
 
+# This class is not exposed at runtime. It calls itself sys.hash_info.
 @final
+@type_check_only
 class _hash_info(structseq[Any | int], tuple[int, int, int, int, int, str, int, int, int]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = ("width", "modulus", "inf", "nan", "imag", "algorithm", "hash_bits", "seed_bits", "cutoff")
+
     @property
     def width(self) -> int: ...
     @property
@@ -259,6 +336,9 @@ class _hash_info(structseq[Any | int], tuple[int, int, int, int, int, str, int, 
 
 implementation: _implementation
 
+# This class isn't really a thing. At runtime, implementation is an instance
+# of types.SimpleNamespace. This allows for better typing.
+@type_check_only
 class _implementation:
     name: str
     version: _version_info
@@ -271,8 +351,13 @@ class _implementation:
 
 int_info: _int_info
 
+# This class is not exposed at runtime. It calls itself sys.int_info.
 @final
+@type_check_only
 class _int_info(structseq[int], tuple[int, int, int, int]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = ("bits_per_digit", "sizeof_digit", "default_max_str_digits", "str_digits_check_threshold")
+
     @property
     def bits_per_digit(self) -> int: ...
     @property
@@ -285,8 +370,13 @@ class _int_info(structseq[int], tuple[int, int, int, int]):
 _ThreadInfoName: TypeAlias = Literal["nt", "pthread", "pthread-stubs", "solaris"]
 _ThreadInfoLock: TypeAlias = Literal["semaphore", "mutex+cond"] | None
 
+# This class is not exposed at runtime. It calls itself sys.thread_info.
 @final
+@type_check_only
 class _thread_info(_UninstantiableStructseq, tuple[_ThreadInfoName, _ThreadInfoLock, str | None]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = ("name", "lock", "version")
+
     @property
     def name(self) -> _ThreadInfoName: ...
     @property
@@ -297,8 +387,13 @@ class _thread_info(_UninstantiableStructseq, tuple[_ThreadInfoName, _ThreadInfoL
 thread_info: _thread_info
 _ReleaseLevel: TypeAlias = Literal["alpha", "beta", "candidate", "final"]
 
+# This class is not exposed at runtime. It calls itself sys.version_info.
 @final
+@type_check_only
 class _version_info(_UninstantiableStructseq, tuple[int, int, int, _ReleaseLevel, int]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = ("major", "minor", "micro", "releaselevel", "serial")
+
     @property
     def major(self) -> int: ...
     @property
@@ -505,6 +600,18 @@ def intern(string: str, /) -> str:
     the previously interned string object with the same value.
     """
     ...
+
+if sys.version_info >= (3, 13):
+    def _is_gil_enabled() -> bool:
+        """Return True if the GIL is currently enabled and False otherwise."""
+        ...
+    def _clear_internal_caches() -> None:
+        """Clear all internal performance-related caches."""
+        ...
+    def _is_interned(string: str, /) -> bool:
+        """Return True if the given string is "interned"."""
+        ...
+
 def is_finalizing() -> bool:
     """Return True if Python is exiting."""
     ...
@@ -552,49 +659,8 @@ def setswitchinterval(interval: float, /) -> None:
     ...
 def gettotalrefcount() -> int: ...  # Debug builds only
 
-if sys.version_info < (3, 9):
-    def getcheckinterval() -> int:
-        """Return the current check interval; see sys.setcheckinterval()."""
-        ...
-    def setcheckinterval(n: int, /) -> None:
-        """
-        Set the async event check interval to n instructions.
-
-        This tells the Python interpreter to check for asynchronous events
-        every n instructions.
-
-        This also affects how often thread switches occur.
-        """
-        ...
-
-if sys.version_info < (3, 9):
-    # An 11-tuple or None
-    def callstats() -> tuple[int, int, int, int, int, int, int, int, int, int, int] | None:
-        """
-        Return a tuple of function call statistics.
-
-        A tuple is returned only if CALL_PROFILE was defined when Python was
-        built.  Otherwise, this returns None.
-
-        When enabled, this function returns detailed, implementation-specific
-        details about the number of function calls executed. The return value
-        is a 11-tuple where the entries in the tuple are counts of:
-        0. all function calls
-        1. calls to PyFunction_Type objects
-        2. PyFunction calls that do not create an argument tuple
-        3. PyFunction calls that do not create an argument tuple
-           and bypass PyEval_EvalCodeEx()
-        4. PyMethod calls
-        5. PyMethod calls on bound methods
-        6. PyType calls
-        7. PyCFunction calls
-        8. generator calls
-        9. All other calls
-        10. Number of stack pops performed by call_function()
-        """
-        ...
-
 # Doesn't exist at runtime, but exported in the stubs so pytest etc. can annotate their code more easily.
+@type_check_only
 class UnraisableHookArgs(Protocol):
     exc_type: type[BaseException]
     exc_value: BaseException | None
@@ -626,8 +692,13 @@ def audit(event: str, /, *args: Any) -> None:
 
 _AsyncgenHook: TypeAlias = Callable[[AsyncGenerator[Any, Any]], None] | None
 
+# This class is not exposed at runtime. It calls itself builtins.asyncgen_hooks.
 @final
+@type_check_only
 class _asyncgen_hooks(structseq[_AsyncgenHook], tuple[_AsyncgenHook, _AsyncgenHook]):
+    if sys.version_info >= (3, 10):
+        __match_args__: Final = ("firstiter", "finalizer")
+
     @property
     def firstiter(self) -> _AsyncgenHook: ...
     @property
@@ -680,9 +751,7 @@ if sys.version_info >= (3, 12):
             """Return the number of elements of the unicode interned dictionary"""
             ...
     else:
-        def getunicodeinternedsize() -> int:
-            """Return the number of elements of the unicode interned dictionary"""
-            ...
+        def getunicodeinternedsize() -> int: ...
 
     def deactivate_stack_trampoline() -> None:
         """

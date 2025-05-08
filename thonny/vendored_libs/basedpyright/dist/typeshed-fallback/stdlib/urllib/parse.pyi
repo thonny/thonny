@@ -1,10 +1,8 @@
 import sys
 from collections.abc import Callable, Iterable, Mapping, Sequence
+from types import GenericAlias
 from typing import Any, AnyStr, Generic, Literal, NamedTuple, TypeVar, overload
 from typing_extensions import TypeAlias
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 __all__ = [
     "urlparse",
@@ -55,14 +53,13 @@ class _NetlocResultMixinBase(Generic[AnyStr]):
     def hostname(self) -> AnyStr | None: ...
     @property
     def port(self) -> int | None: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """
-            Represent a PEP 585 generic type
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """
+        Represent a PEP 585 generic type
 
-            E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
-            """
-            ...
+        E.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,).
+        """
+        ...
 
 class _NetlocResultMixinStr(_NetlocResultMixinBase[str], _ResultMixinStr): ...
 class _NetlocResultMixinBytes(_NetlocResultMixinBase[bytes], _ResultMixinBytes): ...
@@ -133,13 +130,7 @@ def quote_from_bytes(bs: bytes | bytearray, safe: str | Iterable[int] = "/") -> 
 def quote_plus(string: str, safe: str | Iterable[int] = "", encoding: str | None = None, errors: str | None = None) -> str: ...
 @overload
 def quote_plus(string: bytes | bytearray, safe: str | Iterable[int] = "") -> str: ...
-
-if sys.version_info >= (3, 9):
-    def unquote(string: str | bytes, encoding: str = "utf-8", errors: str = "replace") -> str: ...
-
-else:
-    def unquote(string: str, encoding: str = "utf-8", errors: str = "replace") -> str: ...
-
+def unquote(string: str | bytes, encoding: str = "utf-8", errors: str = "replace") -> str: ...
 def unquote_to_bytes(string: str | bytes | bytearray) -> bytes: ...
 def unquote_plus(string: str, encoding: str = "utf-8", errors: str = "replace") -> str: ...
 @overload

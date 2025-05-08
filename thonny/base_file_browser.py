@@ -234,6 +234,7 @@ class BaseFileBrowser(ttk.Frame):
         return self.focus_into(path)
 
     def focus_into(self, path):
+        logger.info("focus_into %r", path)
         self.clear_error()
         self.invalidate_cache()
 
@@ -1439,7 +1440,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         return get_runner().get_backend_proxy().supports_trash()
 
     def request_focus_into(self, path):
+        logger.info("request_focus_into %r", path)
         if not get_runner().ready_for_remote_file_operations(show_message=True):
+            logger.info("Remote not ready for file operations")
             return False
 
         # super().request_focus_into(path)

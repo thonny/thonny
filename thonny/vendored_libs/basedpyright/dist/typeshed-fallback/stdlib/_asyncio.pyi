@@ -4,12 +4,9 @@ import sys
 from asyncio.events import AbstractEventLoop
 from collections.abc import Awaitable, Callable, Coroutine, Generator
 from contextvars import Context
-from types import FrameType
+from types import FrameType, GenericAlias
 from typing import Any, Literal, TextIO, TypeVar
 from typing_extensions import Self, TypeAlias
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 _T = TypeVar("_T")
 _T_co = TypeVar("_T_co", covariant=True)
@@ -57,27 +54,15 @@ class Future(Awaitable[_T]):
         scheduled with call_soon.
         """
         ...
-    if sys.version_info >= (3, 9):
-        def cancel(self, msg: Any | None = None) -> bool:
-            """
-            Cancel the future and schedule callbacks.
+    def cancel(self, msg: Any | None = None) -> bool:
+        """
+        Cancel the future and schedule callbacks.
 
-            If the future is already done or cancelled, return False.  Otherwise,
-            change the future's state to cancelled, schedule the callbacks and
-            return True.
-            """
-            ...
-    else:
-        def cancel(self) -> bool:
-            """
-            Cancel the future and schedule callbacks.
-
-            If the future is already done or cancelled, return False.  Otherwise,
-            change the future's state to cancelled, schedule the callbacks and
-            return True.
-            """
-            ...
-
+        If the future is already done or cancelled, return False.  Otherwise,
+        change the future's state to cancelled, schedule the callbacks and
+        return True.
+        """
+        ...
     def cancelled(self) -> bool:
         """Return True if the future was cancelled."""
         ...
@@ -139,17 +124,14 @@ class Future(Awaitable[_T]):
         ...
     @property
     def _loop(self) -> AbstractEventLoop: ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 if sys.version_info >= (3, 12):
     _TaskCompatibleCoro: TypeAlias = Coroutine[Any, Any, _T_co]
-elif sys.version_info >= (3, 9):
-    _TaskCompatibleCoro: TypeAlias = Generator[_TaskYieldType, None, _T_co] | Coroutine[Any, Any, _T_co]
 else:
-    _TaskCompatibleCoro: TypeAlias = Generator[_TaskYieldType, None, _T_co] | Awaitable[_T_co]
+    _TaskCompatibleCoro: TypeAlias = Generator[_TaskYieldType, None, _T_co] | Coroutine[Any, Any, _T_co]
 
 # mypy and pyright complain that a subclass of an invariant class shouldn't be covariant.
 # While this is true in general, here it's sort-of okay to have a covariant subclass,
@@ -162,7 +144,7 @@ class Task(Future[_T_co]):  # type: ignore[type-var]  # pyright: ignore[reportIn
             self,
             coro: _TaskCompatibleCoro[_T_co],
             *,
-            loop: AbstractEventLoop = ...,
+            loop: AbstractEventLoop | None = None,
             name: str | None = ...,
             context: Context | None = None,
             eager_start: bool = False,
@@ -172,13 +154,13 @@ class Task(Future[_T_co]):  # type: ignore[type-var]  # pyright: ignore[reportIn
             self,
             coro: _TaskCompatibleCoro[_T_co],
             *,
-            loop: AbstractEventLoop = ...,
+            loop: AbstractEventLoop | None = None,
             name: str | None = ...,
             context: Context | None = None,
         ) -> None: ...
     else:
         def __init__(
-            self, coro: _TaskCompatibleCoro[_T_co], *, loop: AbstractEventLoop = ..., name: str | None = ...
+            self, coro: _TaskCompatibleCoro[_T_co], *, loop: AbstractEventLoop | None = None, name: str | None = ...
         ) -> None: ...
 
     if sys.version_info >= (3, 12):
@@ -244,29 +226,10 @@ class Task(Future[_T_co]):  # type: ignore[type-var]  # pyright: ignore[reportIn
             Returns the remaining number of cancellation requests.
             """
             ...
-    if sys.version_info < (3, 9):
-        @classmethod
-        def current_task(cls, loop: AbstractEventLoop | None = None) -> Task[Any] | None:
-            """
-            Return the currently running task in an event loop or None.
 
-            By default the current task for the current event loop is returned.
-
-            None is returned when called not in the context of a Task.
-            """
-            ...
-        @classmethod
-        def all_tasks(cls, loop: AbstractEventLoop | None = None) -> set[Task[Any]]:
-            """
-            Return a set of all tasks for an event loop.
-
-            By default all tasks for the current event loop are returned.
-            """
-            ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 def get_event_loop() -> AbstractEventLoop:
     """

@@ -104,7 +104,9 @@ def whence(id: SupportsIndex) -> int:
     Return an identifier for where the interpreter was created.
     """
     ...
-def exec(id: SupportsIndex, code: str, shared: bool | None = None, *, restrict: bool = False) -> None:
+def exec(
+    id: SupportsIndex, code: str | types.CodeType | Callable[[], object], shared: bool | None = None, *, restrict: bool = False
+) -> None | types.SimpleNamespace:
     """
     exec(id, code, shared=None, *, restrict=False)
 

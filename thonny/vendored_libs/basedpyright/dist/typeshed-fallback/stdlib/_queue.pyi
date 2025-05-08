@@ -3,11 +3,8 @@ C implementation of the Python queue module.
 This module is an implementation detail, please do not use it directly.
 """
 
-import sys
+from types import GenericAlias
 from typing import Any, Generic, TypeVar
-
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
 
 _T = TypeVar("_T")
 
@@ -61,7 +58,6 @@ class SimpleQueue(Generic[_T]):
     def qsize(self) -> int:
         """Return the approximate size of the queue (not reliable!)."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...

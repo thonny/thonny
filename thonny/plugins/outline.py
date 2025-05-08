@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Union
 from thonny import get_workbench, logger, lsp_types
 from thonny.editors import Editor
 from thonny.languages import tr
+from thonny.lsp_proxy import LanguageServerProxy
 from thonny.lsp_types import DocumentSymbolParams, LspResponse, SymbolKind, TextDocumentIdentifier
 from thonny.ui_utils import (
     SafeScrollbar,
@@ -27,7 +28,7 @@ class OutlineView(ttk.Frame):
             .get_editor_notebook()
             .bind("<<NotebookTabChanged>>", self._request_document_symbols, True)
         )
-        get_workbench().bind("AfterSendingDocumentUpdates", self._request_document_symbols, True)
+        get_workbench().bind("LanguageServerInitialized", self._request_document_symbols, True)
 
         self._request_document_symbols()
 
@@ -71,7 +72,7 @@ class OutlineView(ttk.Frame):
             return
 
         ls_proxy = get_workbench().get_main_language_server_proxy()
-        if ls_proxy is None:
+        if ls_proxy is None or not ls_proxy.is_initialized():
             return
 
         # ignore the pending results for last request

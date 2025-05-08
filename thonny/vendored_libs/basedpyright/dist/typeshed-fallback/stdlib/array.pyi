@@ -7,14 +7,10 @@ except that the type of objects stored in them is constrained.
 
 import sys
 from _typeshed import ReadableBuffer, SupportsRead, SupportsWrite
-from collections.abc import Iterable
-
-# pytype crashes if array inherits from collections.abc.MutableSequence instead of typing.MutableSequence
-from typing import Any, Literal, MutableSequence, SupportsIndex, TypeVar, overload  # noqa: Y022
+from collections.abc import Iterable, MutableSequence
+from types import GenericAlias
+from typing import Any, ClassVar, Literal, SupportsIndex, TypeVar, overload
 from typing_extensions import Self, TypeAlias
-
-if sys.version_info >= (3, 12):
-    from types import GenericAlias
 
 _IntTypeCode: TypeAlias = Literal["b", "B", "h", "H", "i", "I", "l", "L", "q", "Q"]
 _FloatTypeCode: TypeAlias = Literal["f", "d"]
@@ -93,19 +89,21 @@ class array(MutableSequence[_T]):
         """the size, in bytes, of one array item"""
         ...
     @overload
-    def __init__(self: array[int], typecode: _IntTypeCode, initializer: bytes | bytearray | Iterable[int] = ..., /) -> None: ...
+    def __new__(
+        cls: type[array[int]], typecode: _IntTypeCode, initializer: bytes | bytearray | Iterable[int] = ..., /
+    ) -> array[int]: ...
     @overload
-    def __init__(
-        self: array[float], typecode: _FloatTypeCode, initializer: bytes | bytearray | Iterable[float] = ..., /
-    ) -> None: ...
+    def __new__(
+        cls: type[array[float]], typecode: _FloatTypeCode, initializer: bytes | bytearray | Iterable[float] = ..., /
+    ) -> array[float]: ...
     @overload
-    def __init__(
-        self: array[str], typecode: _UnicodeTypeCode, initializer: bytes | bytearray | Iterable[str] = ..., /
-    ) -> None: ...
+    def __new__(
+        cls: type[array[str]], typecode: _UnicodeTypeCode, initializer: bytes | bytearray | Iterable[str] = ..., /
+    ) -> array[str]: ...
     @overload
-    def __init__(self, typecode: str, initializer: Iterable[_T], /) -> None: ...
+    def __new__(cls, typecode: str, initializer: Iterable[_T], /) -> Self: ...
     @overload
-    def __init__(self, typecode: str, initializer: bytes | bytearray = ..., /) -> None: ...
+    def __new__(cls, typecode: str, initializer: bytes | bytearray = ..., /) -> Self: ...
     def append(self, v: _T, /) -> None:
         """Append new value v to the end of the array."""
         ...
@@ -158,9 +156,7 @@ class array(MutableSequence[_T]):
             """
             ...
     else:
-        def index(self, v: _T, /) -> int:
-            """Return index of first occurrence of v in the array."""
-            ...
+        def index(self, v: _T, /) -> int: ...  # type: ignore[override]
 
     def insert(self, i: int, v: _T, /) -> None:
         """Insert a new item v into the array before position i."""
@@ -193,22 +189,8 @@ class array(MutableSequence[_T]):
         unicode string from an array of some other type.
         """
         ...
-    if sys.version_info < (3, 9):
-        def fromstring(self, buffer: str | ReadableBuffer, /) -> None:
-            """
-            Appends items from the string, interpreting it as an array of machine values, as if it had been read from a file using the fromfile() method).
 
-            This method is deprecated. Use frombytes instead.
-            """
-            ...
-        def tostring(self) -> bytes:
-            """
-            Convert the array to an array of machine values and return the bytes representation.
-
-            This method is deprecated. Use tobytes instead.
-            """
-            ...
-
+    __hash__: ClassVar[None]  # type: ignore[assignment]
     def __len__(self) -> int:
         """Return len(self)."""
         ...

@@ -51,7 +51,9 @@ class ParenMatcher:
     def update_highlighting(self):
         clear_highlighting(self.text)
 
-        if get_workbench().get_option("view.paren_highlighting") and self.text.is_python_text():
+        if get_workbench().get_option("view.paren_highlighting") and (
+            self.text.is_python_text() or self.text.is_pythonlike_text()
+        ):
             self._update_highlighting_for_active_range()
 
     def _update_highlighting_for_active_range(self):

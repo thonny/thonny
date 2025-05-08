@@ -1,5 +1,3 @@
-# ruff: noqa: PYI036 # This is the module declaring BaseException
-
 """
 Built-in functions, types, exceptions, and other objects.
 
@@ -14,6 +12,7 @@ which the built-in of that name is also needed.
 """
 
 import _ast
+import _sitebuiltins
 import _typeshed
 import sys
 import types
@@ -23,7 +22,6 @@ from _typeshed import (
     ConvertibleToFloat,
     ConvertibleToInt,
     FileDescriptorOrPath,
-    MaybeNone,
     OpenBinaryMode,
     OpenBinaryModeReading,
     OpenBinaryModeUpdating,
@@ -47,11 +45,11 @@ from _typeshed import (
 )
 from collections.abc import Awaitable, Callable, Iterable, Iterator, MutableSet, Reversible, Set as AbstractSet, Sized
 from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
-from types import CellType, CodeType, TracebackType
+from types import CellType, CodeType, GenericAlias, TracebackType
 
 # mypy crashes if any of {ByteString, Sequence, MutableSequence, Mapping, MutableMapping}
 # are imported from collections.abc in builtins.pyi
-from typing import (  # noqa: Y022
+from typing import (  # noqa: Y022,UP035
     IO,
     Any,
     BinaryIO,
@@ -60,7 +58,6 @@ from typing import (  # noqa: Y022
     Mapping,
     MutableMapping,
     MutableSequence,
-    NoReturn,
     Protocol,
     Sequence,
     SupportsAbs,
@@ -88,9 +85,6 @@ from typing_extensions import (  # noqa: Y023
     deprecated,
 )
 
-if sys.version_info >= (3, 9):
-    from types import GenericAlias
-
 _T = TypeVar("_T")
 _I = TypeVar("_I", default=int)
 _T_co = TypeVar("_T_co", covariant=True)
@@ -104,14 +98,19 @@ _T2 = TypeVar("_T2")
 _T3 = TypeVar("_T3")
 _T4 = TypeVar("_T4")
 _T5 = TypeVar("_T5")
-_SupportsNextT = TypeVar("_SupportsNextT", bound=SupportsNext[Any], covariant=True)
-_SupportsAnextT = TypeVar("_SupportsAnextT", bound=SupportsAnext[Any], covariant=True)
+_SupportsNextT_co = TypeVar("_SupportsNextT_co", bound=SupportsNext[Any], covariant=True)
+_SupportsAnextT_co = TypeVar("_SupportsAnextT_co", bound=SupportsAnext[Any], covariant=True)
 _AwaitableT = TypeVar("_AwaitableT", bound=Awaitable[Any])
 _AwaitableT_co = TypeVar("_AwaitableT_co", bound=Awaitable[Any], covariant=True)
 _P = ParamSpec("_P")
-_StartT = TypeVar("_StartT", covariant=True, default=Any)
-_StopT = TypeVar("_StopT", covariant=True, default=Any)
-_StepT = TypeVar("_StepT", covariant=True, default=Any)
+
+# Type variables for slice
+_StartT_co = TypeVar("_StartT_co", covariant=True, default=Any)  # slice -> slice[Any, Any, Any]
+_StopT_co = TypeVar("_StopT_co", covariant=True, default=_StartT_co)  #  slice[A] -> slice[A, A, A]
+# NOTE: step could differ from start and stop, (e.g. datetime/timedelta)l
+#   the default (start|stop) is chosen to cater to the most common case of int/index slices.
+# FIXME: https://github.com/python/typing/issues/213 (replace step=start|stop with step=start&stop)
+_StepT_co = TypeVar("_StepT_co", covariant=True, default=_StartT_co | _StopT_co)  #  slice[A,B] -> slice[A, B, A|B]
 
 class object:
     """
@@ -129,7 +128,7 @@ class object:
         """the object's class"""
         ...
     @__class__.setter
-    def __class__(self, type: type[object], /) -> None:
+    def __class__(self, type: type[Self], /) -> None:
         """the object's class"""
         ...
     def __init__(self) -> None:
@@ -515,25 +514,7 @@ class int:
             """
             ...
     else:
-        def to_bytes(self, length: SupportsIndex, byteorder: Literal["little", "big"], *, signed: bool = False) -> bytes:
-            """
-            Return an array of bytes representing an integer.
-
-            length
-              Length of bytes object to use.  An OverflowError is raised if the
-              integer is not representable with the given number of bytes.
-            byteorder
-              The byte order used to represent the integer.  If byteorder is 'big',
-              the most significant byte is at the beginning of the byte array.  If
-              byteorder is 'little', the most significant byte is at the end of the
-              byte array.  To request the native byte order of the host system, use
-              `sys.byteorder' as the byte order value.
-            signed
-              Determines whether two's complement is used to represent the integer.
-              If signed is False and a negative integer is given, an OverflowError
-              is raised.
-            """
-            ...
+        def to_bytes(self, length: SupportsIndex, byteorder: Literal["little", "big"], *, signed: bool = False) -> bytes: ...
         @classmethod
         def from_bytes(
             cls,
@@ -541,25 +522,7 @@ class int:
             byteorder: Literal["little", "big"],
             *,
             signed: bool = False,
-        ) -> Self:
-            """
-            Return the integer represented by the given array of bytes.
-
-            bytes
-              Holds the array of bytes to convert.  The argument must either
-              support the buffer protocol or be an iterable object producing bytes.
-              Bytes and bytearray are examples of built-in objects that support the
-              buffer protocol.
-            byteorder
-              The byte order used to represent the integer.  If byteorder is 'big',
-              the most significant byte is at the beginning of the byte array.  If
-              byteorder is 'little', the most significant byte is at the end of the
-              byte array.  To request the native byte order of the host system, use
-              `sys.byteorder' as the byte order value.
-            signed
-              Indicates whether two's complement is used to represent the integer.
-            """
-            ...
+        ) -> Self: ...
 
     if sys.version_info >= (3, 12):
         def is_integer(self) -> Literal[True]:
@@ -852,14 +815,12 @@ class float:
     def __trunc__(self) -> int:
         """Return the Integral closest to x between 0 and x."""
         ...
-    if sys.version_info >= (3, 9):
-        def __ceil__(self) -> int:
-            """Return the ceiling as an Integral."""
-            ...
-        def __floor__(self) -> int:
-            """Return the floor as an Integral."""
-            ...
-
+    def __ceil__(self) -> int:
+        """Return the ceiling as an Integral."""
+        ...
+    def __floor__(self) -> int:
+        """Return the floor as an Integral."""
+        ...
     @overload
     def __round__(self, ndigits: None = None, /) -> int:
         """
@@ -1219,10 +1180,9 @@ class str(Sequence[str]):
         ...
     def isprintable(self) -> bool:
         """
-        Return True if the string is printable, False otherwise.
+        Return True if all characters in the string are printable, False otherwise.
 
-        A string is printable if all of its characters are considered printable in
-        repr() or if it is empty.
+        A character is printable if repr() may use it in its output.
         """
         ...
     def isspace(self) -> bool:
@@ -1370,71 +1330,48 @@ class str(Sequence[str]):
         @overload
         def replace(
             self: LiteralString, old: LiteralString, new: LiteralString, count: SupportsIndex = -1, /
-        ) -> LiteralString:
-            """
-            Return a copy with all occurrences of substring old replaced by new.
-
-              count
-                Maximum number of occurrences to replace.
-                -1 (the default value) means replace all occurrences.
-
-            If the optional argument count is given, only the first count occurrences are
-            replaced.
-            """
-            ...
+        ) -> LiteralString: ...
         @overload
-        def replace(self, old: str, new: str, count: SupportsIndex = -1, /) -> str:
-            """
-            Return a copy with all occurrences of substring old replaced by new.
+        def replace(self, old: str, new: str, count: SupportsIndex = -1, /) -> str: ...  # type: ignore[misc]
 
-              count
-                Maximum number of occurrences to replace.
-                -1 (the default value) means replace all occurrences.
+    @overload
+    def removeprefix(self: LiteralString, prefix: LiteralString, /) -> LiteralString:
+        """
+        Return a str with the given prefix string removed if present.
 
-            If the optional argument count is given, only the first count occurrences are
-            replaced.
-            """
-            ...
-    if sys.version_info >= (3, 9):
-        @overload
-        def removeprefix(self: LiteralString, prefix: LiteralString, /) -> LiteralString:
-            """
-            Return a str with the given prefix string removed if present.
+        If the string starts with the prefix string, return string[len(prefix):].
+        Otherwise, return a copy of the original string.
+        """
+        ...
+    @overload
+    def removeprefix(self, prefix: str, /) -> str:
+        """
+        Return a str with the given prefix string removed if present.
 
-            If the string starts with the prefix string, return string[len(prefix):].
-            Otherwise, return a copy of the original string.
-            """
-            ...
-        @overload
-        def removeprefix(self, prefix: str, /) -> str:
-            """
-            Return a str with the given prefix string removed if present.
+        If the string starts with the prefix string, return string[len(prefix):].
+        Otherwise, return a copy of the original string.
+        """
+        ...
+    @overload
+    def removesuffix(self: LiteralString, suffix: LiteralString, /) -> LiteralString:
+        """
+        Return a str with the given suffix string removed if present.
 
-            If the string starts with the prefix string, return string[len(prefix):].
-            Otherwise, return a copy of the original string.
-            """
-            ...
-        @overload
-        def removesuffix(self: LiteralString, suffix: LiteralString, /) -> LiteralString:
-            """
-            Return a str with the given suffix string removed if present.
+        If the string ends with the suffix string and that suffix is not empty,
+        return string[:-len(suffix)]. Otherwise, return a copy of the original
+        string.
+        """
+        ...
+    @overload
+    def removesuffix(self, suffix: str, /) -> str:
+        """
+        Return a str with the given suffix string removed if present.
 
-            If the string ends with the suffix string and that suffix is not empty,
-            return string[:-len(suffix)]. Otherwise, return a copy of the original
-            string.
-            """
-            ...
-        @overload
-        def removesuffix(self, suffix: str, /) -> str:
-            """
-            Return a str with the given suffix string removed if present.
-
-            If the string ends with the suffix string and that suffix is not empty,
-            return string[:-len(suffix)]. Otherwise, return a copy of the original
-            string.
-            """
-            ...
-
+        If the string ends with the suffix string and that suffix is not empty,
+        return string[:-len(suffix)]. Otherwise, return a copy of the original
+        string.
+        """
+        ...
     def rfind(self, sub: str, start: SupportsIndex | None = ..., end: SupportsIndex | None = ..., /) -> int:
         """
         Return the highest index in S where substring sub is found, such that sub is contained within S[start:end].
@@ -2081,25 +2018,23 @@ class bytes(Sequence[int]):
         replaced.
         """
         ...
-    if sys.version_info >= (3, 9):
-        def removeprefix(self, prefix: ReadableBuffer, /) -> bytes:
-            """
-            Return a bytes object with the given prefix string removed if present.
+    def removeprefix(self, prefix: ReadableBuffer, /) -> bytes:
+        """
+        Return a bytes object with the given prefix string removed if present.
 
-            If the bytes starts with the prefix string, return bytes[len(prefix):].
-            Otherwise, return a copy of the original bytes.
-            """
-            ...
-        def removesuffix(self, suffix: ReadableBuffer, /) -> bytes:
-            """
-            Return a bytes object with the given suffix string removed if present.
+        If the bytes starts with the prefix string, return bytes[len(prefix):].
+        Otherwise, return a copy of the original bytes.
+        """
+        ...
+    def removesuffix(self, suffix: ReadableBuffer, /) -> bytes:
+        """
+        Return a bytes object with the given suffix string removed if present.
 
-            If the bytes ends with the suffix string and that suffix is not empty,
-            return bytes[:-len(prefix)].  Otherwise, return a copy of the original
-            bytes.
-            """
-            ...
-
+        If the bytes ends with the suffix string and that suffix is not empty,
+        return bytes[:-len(prefix)].  Otherwise, return a copy of the original
+        bytes.
+        """
+        ...
     def rfind(
         self, sub: ReadableBuffer | SupportsIndex, start: SupportsIndex | None = ..., end: SupportsIndex | None = ..., /
     ) -> int:
@@ -2630,26 +2565,24 @@ class bytearray(MutableSequence[int]):
           The value to remove.
         """
         ...
-    if sys.version_info >= (3, 9):
-        def removeprefix(self, prefix: ReadableBuffer, /) -> bytearray:
-            """
-            Return a bytearray with the given prefix string removed if present.
+    def removeprefix(self, prefix: ReadableBuffer, /) -> bytearray:
+        """
+        Return a bytearray with the given prefix string removed if present.
 
-            If the bytearray starts with the prefix string, return
-            bytearray[len(prefix):].  Otherwise, return a copy of the original
-            bytearray.
-            """
-            ...
-        def removesuffix(self, suffix: ReadableBuffer, /) -> bytearray:
-            """
-            Return a bytearray with the given suffix string removed if present.
+        If the bytearray starts with the prefix string, return
+        bytearray[len(prefix):].  Otherwise, return a copy of the original
+        bytearray.
+        """
+        ...
+    def removesuffix(self, suffix: ReadableBuffer, /) -> bytearray:
+        """
+        Return a bytearray with the given suffix string removed if present.
 
-            If the bytearray ends with the suffix string and that suffix is not
-            empty, return bytearray[:-len(suffix)].  Otherwise, return a copy of
-            the original bytearray.
-            """
-            ...
-
+        If the bytearray ends with the suffix string and that suffix is not
+        empty, return bytearray[:-len(suffix)].  Otherwise, return a copy of
+        the original bytearray.
+        """
+        ...
     def replace(self, old: ReadableBuffer, new: ReadableBuffer, count: SupportsIndex = -1, /) -> bytearray:
         """
         Return a copy with all occurrences of substring old replaced by new.
@@ -2993,7 +2926,11 @@ class memoryview(Sequence[_I]):
     def __new__(cls, obj: ReadableBuffer) -> Self: ...
     def __enter__(self) -> Self: ...
     def __exit__(
-        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None, /
+        self,
+        exc_type: type[BaseException] | None,  # noqa: PYI036 # This is the module declaring BaseException
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+        /,
     ) -> None:
         """Release the underlying buffer exposed by the memoryview object."""
         ...
@@ -3055,15 +2992,7 @@ class memoryview(Sequence[_I]):
             """
             ...
     else:
-        def tobytes(self, order: Literal["C", "F", "A"] | None = None) -> bytes:
-            """
-            Return the data in the buffer as a byte string. Order can be {'C', 'F', 'A'}.
-            When order is 'C' or 'F', the data of the original array is converted to C or
-            Fortran order. For contiguous views, 'A' returns an exact copy of the physical
-            memory. In particular, in-memory Fortran order is preserved. For non-contiguous
-            views, the data is converted to C first. order=None is the same as order='C'.
-            """
-            ...
+        def tobytes(self, order: Literal["C", "F", "A"] | None = None) -> bytes: ...
 
     def tolist(self) -> list[int]:
         """Return the data in the buffer as a list of elements."""
@@ -3173,7 +3102,7 @@ class bool(int):
         ...
 
 @final
-class slice(Generic[_StartT, _StopT, _StepT]):
+class slice(Generic[_StartT_co, _StopT_co, _StepT_co]):
     """
     slice(stop)
     slice(start, stop[, step])
@@ -3181,21 +3110,33 @@ class slice(Generic[_StartT, _StopT, _StepT]):
     Create a slice object.  This is used for extended slicing (e.g. a[0:10:2]).
     """
     @property
-    def start(self) -> _StartT: ...
+    def start(self) -> _StartT_co: ...
     @property
-    def step(self) -> _StepT: ...
+    def step(self) -> _StepT_co: ...
     @property
-    def stop(self) -> _StopT: ...
+    def stop(self) -> _StopT_co: ...
+    # Note: __new__ overloads map `None` to `Any`, since users expect slice(x, None)
+    #  to be compatible with slice(None, x).
+    # generic slice --------------------------------------------------------------------
     @overload
-    def __new__(cls, stop: int | None, /) -> slice[int | MaybeNone, int | MaybeNone, int | MaybeNone]: ...
-    @overload
-    def __new__(
-        cls, start: int | None, stop: int | None, step: int | None = None, /
-    ) -> slice[int | MaybeNone, int | MaybeNone, int | MaybeNone]: ...
+    def __new__(cls, start: None, stop: None = None, step: None = None, /) -> slice[Any, Any, Any]: ...
+    # unary overloads ------------------------------------------------------------------
     @overload
     def __new__(cls, stop: _T2, /) -> slice[Any, _T2, Any]: ...
+    # binary overloads -----------------------------------------------------------------
     @overload
-    def __new__(cls, start: _T1, stop: _T2, /) -> slice[_T1, _T2, Any]: ...
+    def __new__(cls, start: _T1, stop: None, step: None = None, /) -> slice[_T1, Any, Any]: ...
+    @overload
+    def __new__(cls, start: None, stop: _T2, step: None = None, /) -> slice[Any, _T2, Any]: ...
+    @overload
+    def __new__(cls, start: _T1, stop: _T2, step: None = None, /) -> slice[_T1, _T2, Any]: ...
+    # ternary overloads ----------------------------------------------------------------
+    @overload
+    def __new__(cls, start: None, stop: None, step: _T3, /) -> slice[Any, Any, _T3]: ...
+    @overload
+    def __new__(cls, start: _T1, stop: None, step: _T3, /) -> slice[_T1, Any, _T3]: ...
+    @overload
+    def __new__(cls, start: None, stop: _T2, step: _T3, /) -> slice[Any, _T2, _T3]: ...
     @overload
     def __new__(cls, start: _T1, stop: _T2, step: _T3, /) -> slice[_T1, _T2, _T3]: ...
     def __eq__(self, value: object, /) -> bool:
@@ -3288,10 +3229,9 @@ class tuple(Sequence[_T_co]):
         Raises ValueError if the value is not present.
         """
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 # Doesn't exist at runtime, but deleting this breaks mypy and pyright. See:
 # https://github.com/python/typeshed/issues/7580
@@ -3471,10 +3411,9 @@ class list(MutableSequence[_T]):
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 class dict(MutableMapping[_KT, _VT]):
     """
@@ -3547,7 +3486,7 @@ class dict(MutableMapping[_KT, _VT]):
         ...
     # Positional-only in dict, but not in MutableMapping
     @overload  # type: ignore[override]
-    def get(self, key: _KT, /) -> _VT | None:
+    def get(self, key: _KT, default: None = None, /) -> _VT | None:
         """Return the value for key if key is in the dictionary, else default."""
         ...
     @overload
@@ -3607,35 +3546,34 @@ class dict(MutableMapping[_KT, _VT]):
         """Return a reverse iterator over the dict keys."""
         ...
     __hash__: ClassVar[None]  # type: ignore[assignment]
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
-        @overload
-        def __or__(self, value: dict[_KT, _VT], /) -> dict[_KT, _VT]:
-            """Return self|value."""
-            ...
-        @overload
-        def __or__(self, value: dict[_T1, _T2], /) -> dict[_KT | _T1, _VT | _T2]:
-            """Return self|value."""
-            ...
-        @overload
-        def __ror__(self, value: dict[_KT, _VT], /) -> dict[_KT, _VT]:
-            """Return value|self."""
-            ...
-        @overload
-        def __ror__(self, value: dict[_T1, _T2], /) -> dict[_KT | _T1, _VT | _T2]:
-            """Return value|self."""
-            ...
-        # dict.__ior__ should be kept roughly in line with MutableMapping.update()
-        @overload  # type: ignore[misc]
-        def __ior__(self, value: SupportsKeysAndGetItem[_KT, _VT], /) -> Self:
-            """Return self|=value."""
-            ...
-        @overload
-        def __ior__(self, value: Iterable[tuple[_KT, _VT]], /) -> Self:
-            """Return self|=value."""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
+    @overload
+    def __or__(self, value: dict[_KT, _VT], /) -> dict[_KT, _VT]:
+        """Return self|value."""
+        ...
+    @overload
+    def __or__(self, value: dict[_T1, _T2], /) -> dict[_KT | _T1, _VT | _T2]:
+        """Return self|value."""
+        ...
+    @overload
+    def __ror__(self, value: dict[_KT, _VT], /) -> dict[_KT, _VT]:
+        """Return value|self."""
+        ...
+    @overload
+    def __ror__(self, value: dict[_T1, _T2], /) -> dict[_KT | _T1, _VT | _T2]:
+        """Return value|self."""
+        ...
+    # dict.__ior__ should be kept roughly in line with MutableMapping.update()
+    @overload  # type: ignore[misc]
+    def __ior__(self, value: SupportsKeysAndGetItem[_KT, _VT], /) -> Self:
+        """Return self|=value."""
+        ...
+    @overload
+    def __ior__(self, value: Iterable[tuple[_KT, _VT]], /) -> Self:
+        """Return self|=value."""
+        ...
 
 class set(MutableSet[_T]):
     """Build an unordered collection of unique elements."""
@@ -3750,10 +3688,9 @@ class set(MutableSet[_T]):
         """Return self==value."""
         ...
     __hash__: ClassVar[None]  # type: ignore[assignment]
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 class frozenset(AbstractSet[_T_co]):
     """Build an immutable unordered collection of unique elements."""
@@ -3824,10 +3761,9 @@ class frozenset(AbstractSet[_T_co]):
     def __hash__(self) -> int:
         """Return hash(self)."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 class enumerate(Generic[_T]):
     """
@@ -3849,10 +3785,9 @@ class enumerate(Generic[_T]):
     def __next__(self) -> tuple[int, _T]:
         """Implement next(self)."""
         ...
-    if sys.version_info >= (3, 9):
-        def __class_getitem__(cls, item: Any, /) -> GenericAlias:
-            """See PEP 585"""
-            ...
+    def __class_getitem__(cls, item: Any, /) -> GenericAlias:
+        """See PEP 585"""
+        ...
 
 @final
 class range(Sequence[int]):
@@ -3970,6 +3905,11 @@ class property:
     def deleter(self, fdel: Callable[[Any], None], /) -> property:
         """Descriptor to obtain a copy of the property with a different deleter."""
         ...
+    @overload
+    def __get__(self, instance: None, owner: type, /) -> Self:
+        """Return an attribute of instance, which is of type owner."""
+        ...
+    @overload
     def __get__(self, instance: Any, owner: type | None = None, /) -> Any:
         """Return an attribute of instance, which is of type owner."""
         ...
@@ -4037,7 +3977,7 @@ def callable(obj: object, /) -> TypeIs[Callable[..., object]]:
     __call__() method.
     """
     ...
-def chr(i: int, /) -> str:
+def chr(i: int | SupportsIndex, /) -> str:
     """Return a Unicode string of one character with ordinal i; 0 <= i <= 0x10ffff."""
     ...
 
@@ -4047,7 +3987,7 @@ class _PathLike(Protocol[AnyStr_co]):
     def __fspath__(self) -> AnyStr_co: ...
 
 if sys.version_info >= (3, 10):
-    def aiter(async_iterable: SupportsAiter[_SupportsAnextT], /) -> _SupportsAnextT:
+    def aiter(async_iterable: SupportsAiter[_SupportsAnextT_co], /) -> _SupportsAnextT_co:
         """Return an AsyncIterator for an AsyncIterable object."""
         ...
 
@@ -4182,8 +4122,10 @@ def compile(
     in addition to any features explicitly specified.
     """
     ...
-def copyright() -> None: ...
-def credits() -> None: ...
+
+copyright: _sitebuiltins._Printer
+credits: _sitebuiltins._Printer
+
 def delattr(obj: object, name: str, /) -> None:
     """
     Deletes the named attribute from the given object.
@@ -4242,17 +4184,7 @@ else:
         globals: dict[str, Any] | None = None,
         locals: Mapping[str, object] | None = None,
         /,
-    ) -> Any:
-        """
-        Evaluate the given source in the context of globals and locals.
-
-        The source may be a string representing a Python expression
-        or a code object as returned by compile().
-        The globals must be a dictionary and locals can be any mapping,
-        defaulting to the current globals and locals.
-        If only globals is given, locals defaults to it.
-        """
-        ...
+    ) -> Any: ...
 
 # Comment above regarding `eval` applies to `exec` as well
 if sys.version_info >= (3, 13):
@@ -4285,19 +4217,7 @@ elif sys.version_info >= (3, 11):
         /,
         *,
         closure: tuple[CellType, ...] | None = None,
-    ) -> None:
-        """
-        Execute the given source in the context of globals and locals.
-
-        The source may be a string representing one or more Python statements
-        or a code object as returned by compile().
-        The globals must be a dictionary and locals can be any mapping,
-        defaulting to the current globals and locals.
-        If only globals is given, locals defaults to it.
-        The closure must be a tuple of cellvars, and can only be used
-        when source is a code object requiring exactly that many cellvars.
-        """
-        ...
+    ) -> None: ...
 
 else:
     def exec(
@@ -4305,19 +4225,9 @@ else:
         globals: dict[str, Any] | None = None,
         locals: Mapping[str, object] | None = None,
         /,
-    ) -> None:
-        """
-        Execute the given source in the context of globals and locals.
+    ) -> None: ...
 
-        The source may be a string representing one or more Python statements
-        or a code object as returned by compile().
-        The globals must be a dictionary and locals can be any mapping,
-        defaulting to the current globals and locals.
-        If only globals is given, locals defaults to it.
-        """
-        ...
-
-def exit(code: sys._ExitCode = None) -> NoReturn: ...
+exit: _sitebuiltins.Quitter
 
 class filter(Generic[_T]):
     """
@@ -4438,7 +4348,9 @@ def hash(obj: object, /) -> int:
     reverse is not necessarily true.
     """
     ...
-def help(request: object = ...) -> None: ...
+
+help: _sitebuiltins._Helper
+
 def hex(number: int | SupportsIndex, /) -> str:
     """
     Return the hexadecimal representation of an integer.
@@ -4471,7 +4383,7 @@ class _GetItemIterable(Protocol[_T_co]):
     def __getitem__(self, i: int, /) -> _T_co: ...
 
 @overload
-def iter(object: SupportsIter[_SupportsNextT], /) -> _SupportsNextT:
+def iter(object: SupportsIter[_SupportsNextT_co], /) -> _SupportsNextT_co:
     """
     iter(iterable) -> iterator
     iter(callable, sentinel) -> iterator
@@ -4542,7 +4454,9 @@ def issubclass(cls: type, class_or_tuple: _ClassInfo, /) -> bool:
 def len(obj: Sized, /) -> int:
     """Return the number of items in a container."""
     ...
-def license() -> None: ...
+
+license: _sitebuiltins._Printer
+
 def locals() -> dict[str, Any]:
     """
     Return a dictionary containing the current scope's local variables.
@@ -4559,18 +4473,18 @@ class map(Generic[_S]):
     each of the iterables.  Stops when the shortest iterable is exhausted.
     """
     @overload
-    def __new__(cls, func: Callable[[_T1], _S], iter1: Iterable[_T1], /) -> Self: ...
+    def __new__(cls, func: Callable[[_T1], _S], iterable: Iterable[_T1], /) -> Self: ...
     @overload
-    def __new__(cls, func: Callable[[_T1, _T2], _S], iter1: Iterable[_T1], iter2: Iterable[_T2], /) -> Self: ...
+    def __new__(cls, func: Callable[[_T1, _T2], _S], iterable: Iterable[_T1], iter2: Iterable[_T2], /) -> Self: ...
     @overload
     def __new__(
-        cls, func: Callable[[_T1, _T2, _T3], _S], iter1: Iterable[_T1], iter2: Iterable[_T2], iter3: Iterable[_T3], /
+        cls, func: Callable[[_T1, _T2, _T3], _S], iterable: Iterable[_T1], iter2: Iterable[_T2], iter3: Iterable[_T3], /
     ) -> Self: ...
     @overload
     def __new__(
         cls,
         func: Callable[[_T1, _T2, _T3, _T4], _S],
-        iter1: Iterable[_T1],
+        iterable: Iterable[_T1],
         iter2: Iterable[_T2],
         iter3: Iterable[_T3],
         iter4: Iterable[_T4],
@@ -4580,7 +4494,7 @@ class map(Generic[_S]):
     def __new__(
         cls,
         func: Callable[[_T1, _T2, _T3, _T4, _T5], _S],
-        iter1: Iterable[_T1],
+        iterable: Iterable[_T1],
         iter2: Iterable[_T2],
         iter3: Iterable[_T3],
         iter4: Iterable[_T4],
@@ -4591,7 +4505,7 @@ class map(Generic[_S]):
     def __new__(
         cls,
         func: Callable[..., _S],
-        iter1: Iterable[Any],
+        iterable: Iterable[Any],
         iter2: Iterable[Any],
         iter3: Iterable[Any],
         iter4: Iterable[Any],
@@ -5727,17 +5641,17 @@ def print(
     """
     ...
 
-_E = TypeVar("_E", contravariant=True)
-_M = TypeVar("_M", contravariant=True)
+_E_contra = TypeVar("_E_contra", contravariant=True)
+_M_contra = TypeVar("_M_contra", contravariant=True)
 
-class _SupportsPow2(Protocol[_E, _T_co]):
-    def __pow__(self, other: _E, /) -> _T_co: ...
+class _SupportsPow2(Protocol[_E_contra, _T_co]):
+    def __pow__(self, other: _E_contra, /) -> _T_co: ...
 
-class _SupportsPow3NoneOnly(Protocol[_E, _T_co]):
-    def __pow__(self, other: _E, modulo: None = None, /) -> _T_co: ...
+class _SupportsPow3NoneOnly(Protocol[_E_contra, _T_co]):
+    def __pow__(self, other: _E_contra, modulo: None = None, /) -> _T_co: ...
 
-class _SupportsPow3(Protocol[_E, _M, _T_co]):
-    def __pow__(self, other: _E, modulo: _M, /) -> _T_co: ...
+class _SupportsPow3(Protocol[_E_contra, _M_contra, _T_co]):
+    def __pow__(self, other: _E_contra, modulo: _M_contra, /) -> _T_co: ...
 
 _SupportsSomeKindOfPow = (  # noqa: Y026  # TODO: Use TypeAlias once mypy bugs are fixed
     _SupportsPow2[Any, Any] | _SupportsPow3NoneOnly[Any, Any] | _SupportsPow3[Any, Any, Any]
@@ -5843,7 +5757,7 @@ def pow(base: complex, exp: complex | _SupportsSomeKindOfPow, mod: None = None) 
     """
     ...
 @overload
-def pow(base: _SupportsPow2[_E, _T_co], exp: _E, mod: None = None) -> _T_co:
+def pow(base: _SupportsPow2[_E_contra, _T_co], exp: _E_contra, mod: None = None) -> _T_co:
     """
     Equivalent to base**exp with 2 arguments or base**exp % mod with 3 arguments
 
@@ -5852,7 +5766,7 @@ def pow(base: _SupportsPow2[_E, _T_co], exp: _E, mod: None = None) -> _T_co:
     """
     ...
 @overload
-def pow(base: _SupportsPow3NoneOnly[_E, _T_co], exp: _E, mod: None = None) -> _T_co:
+def pow(base: _SupportsPow3NoneOnly[_E_contra, _T_co], exp: _E_contra, mod: None = None) -> _T_co:
     """
     Equivalent to base**exp with 2 arguments or base**exp % mod with 3 arguments
 
@@ -5861,7 +5775,7 @@ def pow(base: _SupportsPow3NoneOnly[_E, _T_co], exp: _E, mod: None = None) -> _T
     """
     ...
 @overload
-def pow(base: _SupportsPow3[_E, _M, _T_co], exp: _E, mod: _M) -> _T_co:
+def pow(base: _SupportsPow3[_E_contra, _M_contra, _T_co], exp: _E_contra, mod: _M_contra) -> _T_co:
     """
     Equivalent to base**exp with 2 arguments or base**exp % mod with 3 arguments
 
@@ -5887,7 +5801,8 @@ def pow(base: _SupportsSomeKindOfPow, exp: complex, mod: None = None) -> complex
     invoked using the three argument form.
     """
     ...
-def quit(code: sys._ExitCode = None) -> NoReturn: ...
+
+quit: _sitebuiltins.Quitter
 
 class reversed(Generic[_T]):
     """Return a reverse iterator over the values of the given sequence."""
@@ -6287,21 +6202,39 @@ class ReferenceError(Exception):
 class RuntimeError(Exception):
     """Unspecified run-time error."""
     ...
-
 class StopAsyncIteration(Exception):
     """Signal the end from iterator.__anext__()."""
-    value: Any
+    ...
 
 class SyntaxError(Exception):
     """Invalid syntax."""
     msg: str
+    filename: str | None
     lineno: int | None
     offset: int | None
     text: str | None
-    filename: str | None
+    # Errors are displayed differently if this attribute exists on the exception.
+    # The value is always None.
+    print_file_and_line: None
     if sys.version_info >= (3, 10):
         end_lineno: int | None
         end_offset: int | None
+
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, msg: object, /) -> None: ...
+    # Second argument is the tuple (filename, lineno, offset, text)
+    @overload
+    def __init__(self, msg: str, info: tuple[str | None, int | None, int | None, str | None], /) -> None: ...
+    if sys.version_info >= (3, 10):
+        # end_lineno and end_offset must both be provided if one is.
+        @overload
+        def __init__(
+            self, msg: str, info: tuple[str | None, int | None, int | None, str | None, int | None, int | None], /
+        ) -> None: ...
+    # If you provide more than two arguments, it still creates the SyntaxError, but
+    # the arguments from the info tuple are not parsed. This form is omitted.
 
 class SystemError(Exception):
     """
