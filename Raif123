@@ -1,0 +1,16 @@
+Thonny (IDE)
+import pygame pygame. init ( )
+screen = pygame.display.set_mode ( (500, 400))
+x, y = 200,
+150
+running = True
+while running:
+for event in pygame.event.get () :
+if event. type =
+pygame. QUIT:
+running = False
+keys = pygame. key.get pressed ()
+if keys [pygame.K_LEFT]: x -= 5
+if keys [pygame.K_RIGHT]: x += 5 screen. fill((255, 255, 255))
+pygame.draw.rect(screen, rect(screen, (0, 0, (x, (x, y, 50, 50)) pygame.display.update()
+pygame. quit ( )
