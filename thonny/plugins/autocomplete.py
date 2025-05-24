@@ -76,24 +76,26 @@ class CompletionsBox(EditorInfoBox):
 
         def sort_key(completion: lsp_types.CompletionItem):
             sort_text = completion.sortText or completion.label
-            insert_text = self._get_insert_text(completion)
-            print(f"{prefix=!r}, {insert_text=!r}, {sort_text=!r}")
+            label = completion.label
+            print(f"{prefix=!r}, {label=!r}, {sort_text=!r}")
 
             if not prefix:
-                return (2 if insert_text.startswith("_") else 1, sort_text, completion.label)
-            elif insert_text.startswith(prefix):
-                return (1, sort_text, completion.label)
-            elif insert_text.lower().startswith(prefix.lower()):
-                return (2, sort_text, completion.label)
+                return (2 if label.startswith("_") else 1, sort_text, label)
+            elif label.startswith(prefix):
+                return (1, sort_text, label)
+            elif label.lower().startswith(prefix.lower()):
+                return (2, sort_text, label)
             else:
-                return (4 if insert_text.startswith("_") else 3, sort_text, completion.label)
+                return (4 if label.startswith("_") else 3, sort_text, label)
 
         sorted_completions = sorted(completions, key=sort_key)
         if not prefix.startswith("__"):
             sorted_completions = [
                 comp
                 for comp in sorted_completions
-                if not self._get_insert_text(comp).startswith("__")
+                if not comp.label.startswith("__")
+                and comp.textEdit is None  # TODO: support textEdit
+                and not comp.additionalTextEdits  # TODO: support this
             ]
         self._completions = sorted_completions
 
