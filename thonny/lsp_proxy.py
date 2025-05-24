@@ -1,11 +1,11 @@
 # Adapted from https://github.com/predragnikolic/OLSP/
 
-import sys
 import dataclasses
 import inspect
 import json
 import os.path
 import subprocess
+import sys
 import threading
 import time
 import typing
@@ -14,12 +14,14 @@ from dataclasses import is_dataclass
 from enum import Enum
 from logging import getLogger
 from queue import Queue
+
 if sys.version_info >= (3, 10):
     from types import NoneType, UnionType
 else:
     # For Python < 3.10, use the built-in type(None) instead of NoneType
     NoneType = type(None)
     from typing import Union as UnionType
+
 from typing import (
     Any,
     Callable,

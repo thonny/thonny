@@ -93,7 +93,7 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
         parts = in_term_cmd.replace('"', "").split(
             " ", 2
         )  # Split only twice to preserve the quoted command
-        
+
         # cd into current working directory since wezterm doesn't mantain the working directory
         parts[2] = "cd " + cwd + ";" + parts[2]
         in_term_cmd = " ".join(f'"{part}"' for part in parts)
