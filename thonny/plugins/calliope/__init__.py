@@ -31,7 +31,7 @@ class CalliopeMiniConfigPage(SimplifiedMicroPythonConfigPage):
         )
 
 
-def load_plugin():
+def _load_plugin():
     add_micropython_backend(
         "calliope",
         CalliopeMiniProxy,
