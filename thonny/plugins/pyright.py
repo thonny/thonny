@@ -59,9 +59,11 @@ class PyrightProxy(LanguageServerProxy):
                 "reportMissingModuleSource"
             ] = "none"
 
-        if proxy.get_typeshed_path():
-            result["basedpyright"]["analysis"]["typeshedPaths"] = [proxy.get_typeshed_path()]
+        user_stubs_path = proxy.get_user_stubs_location()
+        if os.path.isdir(os.path.join(user_stubs_path, "stdlib")):
+            result["basedpyright"]["analysis"]["typeshedPaths"] = [user_stubs_path]
 
+        logger.info("Using following basedpyright configuration: %r", result)
         return result
 
     def _create_server_process(self) -> subprocess.Popen[bytes]:

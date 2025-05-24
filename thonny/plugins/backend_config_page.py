@@ -189,6 +189,7 @@ class BaseSshProxyConfigPage(TabbedBackendDetailsConfigurationPage):
         super().__init__(master)
         self.connection_page = self.create_and_add_empty_page(tr("Connection"))
         self.options_page = self.create_and_add_empty_page(tr("Options"))
+        self.stubs_page = self.create_and_add_stubs_page(proxy_class=self.proxy_class)
         self._init_connection_page()
         self._init_options_page()
 

@@ -67,9 +67,6 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
     def get_vids_pids_to_avoid(self):
         return VIDS_PIDS_TO_AVOID
 
-    def get_typeshed_path(self) -> Optional[str]:
-        return os.path.join(os.path.dirname(__file__), "typeshed")
-
     def _get_backend_launcher_path(self) -> str:
         import thonny.plugins.circuitpython.cirpy_back
 
@@ -94,6 +91,10 @@ class CircuitPythonProxy(BareMetalMicroPythonProxy):
             return True
 
         return "CircuitPython CDC " in (p.interface or "")
+
+    @classmethod
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return ["circuitpython-typeshed"]
 
 
 class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):

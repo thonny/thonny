@@ -1,0 +1,70 @@
+Metadata-Version: 2.4
+Name: circuitpython-typeshed
+Version: 0.1.0
+Summary: A typeshed for checking CircuitPython code
+Author: Aivar Annamaa
+License: MIT License
+        
+        Copyright (c) 2025 Aivar Annamaa
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/aivarannamaa/circuitpython-typeshed
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Typing :: Typed
+Classifier: Typing :: Stubs Only
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# circuitpython-typeshed
+
+This package contains a custom [typeshed](https://github.com/python/typeshed) suitable for type-checking or completing 
+CircuitPython code.
+
+The goal has been to provide CircuitPython specific stubs also for modules present in CPython's stdlib, which 
+some type-checkers (e.g. MyPy) may consider special.
+For this reason, the stubs are arranged into typeshed layout (i.e. under `stdlib` and `stubs` folders). 
+This means, it doesn't suffice to install this package into a venv -- you also
+need to set your type-checker's typeshed path to the installation directory of this package.
+
+The stubs and typeshed helpers are compiled from the following sources.
+
+* Most stubs come from [circuitpython-stubs](https://pypi.org/project/circuitpython-stubs/), including the stubs present in the sdist of said package
+  but omitted from the wheel (`math`, `os`, `random`, `struct`, `ssl`, `time`).
+* Typeshed helpers and some stdlib stubs come from [micropython-stdlib-stubs](https://pypi.org/project/micropython-stdlib-stubs/).
+* Remaining stdlib stubs come from [micropython-rp2-stubs](https://pypi.org/project/micropython-rp2-stubs/).  
+
+## Installation
+
+You can install this package into a venv (e.g. `pip install circuitython-typeshed`) or into a plain directory
+(e.g. `python3 -m pip install circuitpython-typeshed --target typeshed --no-user`).
+
+## Using with Pyright and basedpyright
+
+You need to indicate the installed location via the `-t` (or `--typeshedpath`) option (e.g.
+ `pyright -t .venv/lib/python3.10/site-packages my-code.py` or `pyright -t typeshed my-code.py`).
+
+## Using with MyPy
+
+You need to indicate the installed location via the `--custom-typeshed-dir` option (e.g. `mypy --custom-typeshed-dir typeshed my-code.py`).
+  

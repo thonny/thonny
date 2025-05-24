@@ -1330,9 +1330,6 @@ class MicroPythonBackend(MainBackend, ABC):
             e.err,
         )
 
-    def get_user_stubs_location(self):
-        return self._args["user_stubs_location"]
-
 
 class ProtocolError(RuntimeError):
     pass

@@ -289,9 +289,6 @@ class MicroPythonProxy(SubprocessProxy):
     def needs_disconnect_button(self):
         return True
 
-    def get_typeshed_path(self) -> Optional[str]:
-        return os.path.join(os.path.dirname(__file__), "typeshed")
-
 
 class BareMetalMicroPythonProxy(MicroPythonProxy):
     def __init__(self, clean):
@@ -343,7 +340,6 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
                 self.backend_name + ".interrupt_on_connect"
             ),
             "proxy_class": self.__class__.__name__,
-            "user_stubs_location": self.get_user_stubs_location(),
         }
         if self._port == WEBREPL_PORT_VALUE:
             args["url"] = get_workbench().get_option(self.backend_name + ".webrepl_url")
@@ -646,6 +642,10 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     def get_machine_id(self) -> str:
         return self._machine_id
+
+    @classmethod
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return ["micropython-typeshed"]
 
 
 class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
@@ -1206,7 +1206,6 @@ class LocalMicroPythonProxy(MicroPythonProxy):
                 {
                     "interpreter": self._target_executable,
                     "cwd": self.get_cwd(),
-                    "user_stubs_location": self.get_user_stubs_location(),
                 }
             ),
         ]
@@ -1300,6 +1299,10 @@ class LocalMicroPythonProxy(MicroPythonProxy):
     def can_install_packages_from_files(self) -> bool:
         return True
 
+    @classmethod
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return ["micropython-unix-typeshed"]
+
 
 class LocalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
@@ -1336,7 +1339,6 @@ class SshMicroPythonProxy(MicroPythonProxy):
             "host": self._host,
             "port": self._port,
             "user": self._user,
-            "user_stubs_location": self.get_user_stubs_location(),
         }
 
         args.update(self._get_time_args())
@@ -1467,6 +1469,10 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
     def get_machine_id(self) -> str:
         return self._host
+
+    @classmethod
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return ["micropython-unix-typeshed"]
 
 
 class SshMicroPythonConfigPage(BaseSshProxyConfigPage):

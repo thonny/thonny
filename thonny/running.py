@@ -12,6 +12,7 @@ import os.path
 import queue
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import threading
@@ -32,6 +33,7 @@ from thonny import (
     get_runner,
     get_shell,
     get_thonny_user_dir,
+    get_vendored_libs_dir,
     get_version,
     get_workbench,
     report_time,
@@ -1144,11 +1146,24 @@ class BackendProxy(ABC):
         return tr("Search on PyPI")
 
     @classmethod
-    def get_user_stubs_location(cls):
-        return os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return []
 
-    def get_typeshed_path(self) -> Optional[str]:
-        return None
+    @classmethod
+    def get_user_stubs_location(cls) -> str:
+        result_path = os.path.join(thonny.get_thonny_user_dir(), "stubs", cls.backend_name)
+        if not os.path.exists(result_path):
+            # copy default stubs to user editable location on the first request
+            os.makedirs(result_path)
+            for vendored_id in cls.get_vendored_user_stubs_ids():
+                vendored_path = os.path.join(get_vendored_libs_dir(), vendored_id)
+                for item_name in os.listdir(vendored_path):
+                    full_item_path = os.path.join(vendored_path, item_name)
+                    if os.path.isdir(full_item_path):
+                        shutil.copytree(full_item_path, os.path.join(result_path, item_name))
+                    else:
+                        shutil.copy(full_item_path, os.path.join(result_path, item_name))
+        return result_path
 
     def get_machine_id(self) -> str:
         return "localhost"

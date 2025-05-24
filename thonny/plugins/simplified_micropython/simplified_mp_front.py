@@ -42,8 +42,9 @@ class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):
     def get_packages_target_dir_with_comment(self) -> Tuple[Optional[str], Optional[str]]:
         return None, tr("This device does not support packages")
 
-    def get_typeshed_path(self) -> Optional[str]:
-        return os.path.join(os.path.dirname(__file__), "typeshed")
+    @classmethod
+    def get_vendored_user_stubs_ids(cls) -> List[str]:
+        return ["micropython-simplified-typeshed"]
 
 
 class SimplifiedMicroPythonConfigPage(BareMetalMicroPythonConfigPage):

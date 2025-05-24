@@ -1,0 +1,78 @@
+MP 1.25 on Pico W
+
+__main__          asyncio/__init__  hashlib           rp2
+_asyncio          asyncio/core      heapq             select
+_boot             asyncio/event     io                socket
+_boot_fat         asyncio/funcs     json              ssl
+_onewire          asyncio/lock      lwip              struct
+_rp2              asyncio/stream    machine           sys
+_thread           binascii          math              time
+_webrepl          bluetooth         micropython       tls
+aioble/__init__   builtins          mip/__init__      uasyncio
+aioble/central    cmath             neopixel          uctypes
+aioble/client     collections       network           urequests
+aioble/core       cryptolib         ntptime           vfs
+aioble/device     deflate           onewire           webrepl
+aioble/l2cap      dht               os                webrepl_setup
+aioble/peripheral ds18x20           platform          websocket
+aioble/security   errno             random
+aioble/server     framebuf          re
+array             gc                requests/__init__
+Plus any modules on the filesystem
+
+CP 9.2.7 on Pico W
+__future__        busdisplay        math              struct
+__main__          busio             mdns              supervisor
+_asyncio          codeop            memorymap         synthio
+_bleio            collections       microcontroller   sys
+_eve              countio           micropython       terminalio
+_pixelmap         cyw43             msgpack           tilepalettemapper
+adafruit_bus_device                 digitalio         neopixel_write    time
+adafruit_bus_device.i2c_device      displayio         nvm               touchio
+adafruit_bus_device.spi_device      epaperdisplay     onewireio         traceback
+adafruit_pixelbuf errno             os                ulab
+aesio             floppyio          paralleldisplay   ulab.numpy
+alarm             fontio            paralleldisplaybus                  ulab.numpy.fft
+analogbufio       fourwire          pulseio           ulab.numpy.linalg
+analogio          framebufferio     pwmio             ulab.scipy
+array             gc                qrio              ulab.scipy.linalg
+atexit            getpass           rainbowio         ulab.scipy.optimize
+audiobusio        gifio             random            ulab.scipy.signal
+audiocore         hashlib           re                ulab.scipy.special
+audiomixer        i2cdisplaybus     rgbmatrix         ulab.utils
+audiomp3          i2ctarget         rotaryio          usb_cdc
+audiopwmio        imagecapture      rp2pio            usb_hid
+binascii          io                rtc               usb_midi
+bitbangio         ipaddress         sdcardio          usb_video
+bitmapfilter      jpegio            select            vectorio
+bitmaptools       json              sharpdisplay      warnings
+bitops            keypad            socketpool        watchdog
+board             keypad_demux      ssl               wifi
+builtins          locale            storage           zlib
+Plus any modules on the filesystem
+
+
+micropython-stdlib
+array on puudu
+#atexit on puudu (olemas CP-s), olemas CP-stubs
+binascii on puudu
+cmath on puudu (olemas MP-s)
+gc on puudu
+#getpass on puudu (on olemas CP-s), olemas CP-stubs
+errno on puudu
+#hashlib on puudu, olemas CP-stubs
+heapq on puudu (olemas MP-s)
+json on puudu
+#locale on puudu (olemas MP-s), olemas CP-stubs
+#math on puudu, olemas CP-stubs
+platform puudu (olemas MP-s)
+random on puudu
+re on puudu
+select on puudu
+socket on puudu (olemas MP-s)
+ssl on puudu
+struct on puudu
+time on puudu
+uctypes on puudu (olemas MP-s)
+traceback on puudu (olemas CP-s)
+zlib on puudu (olemas CP-s)

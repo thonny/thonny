@@ -1,0 +1,4 @@
+board_definitions
+circuitpython_setboard
+stdlib
+stubs

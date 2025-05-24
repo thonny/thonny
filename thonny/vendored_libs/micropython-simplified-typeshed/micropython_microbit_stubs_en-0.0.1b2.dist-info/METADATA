@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: micropython-microbit-stubs-en
+Version: 0.0.1b2
+Summary: BBC micro:bit MicroPython type stubs (language: en)
+License-Expression: MIT AND Apache-2.0
+Project-URL: Homepage, https://github.com/microbit-foundation/micropython-microbit-stubs
+Classifier: Programming Language :: Python :: Implementation :: MicroPython
+Classifier: Typing :: Stubs Only
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Dynamic: license-file
+
+# BBC micro:bit MicroPython typing stubs
+
+This package contains Python stub files for 
+[MicroPython for micro:bit V2](https://github.com/microbit-foundation/micropython-microbit-v2).
+
+The docstrings are given in language en.
+
+As the package contains stdlib stubs, the _typeshed path_ of the program analyzer (e.g. MyPy or Pyright) 
+needs to be configured accordingly.
