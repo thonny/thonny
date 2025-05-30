@@ -1309,6 +1309,7 @@ class LocalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
         self.executable_page = self.create_and_add_empty_page(tr("Executable"))
+        self.stubs_page = self.create_and_add_stubs_page(proxy_class=self.proxy_class)
 
         add_option_entry(
             self.executable_page, "LocalMicroPython.executable", tr("Interpreter"), width=30
