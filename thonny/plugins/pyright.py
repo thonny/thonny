@@ -72,7 +72,13 @@ class PyrightProxy(LanguageServerProxy):
 
     def _folder_may_contain_stubs_beyond_typeshed(self, path) -> bool:
         for name in os.listdir(path):
-            if name not in ["bin", "board_definitions", "circuitpython_setboard", "stdlib", "stubs"] and not name.endswith(".dist-info"):
+            if name not in [
+                "bin",
+                "board_definitions",
+                "circuitpython_setboard",
+                "stdlib",
+                "stubs",
+            ] and not name.endswith(".dist-info"):
                 return True
 
         return False
