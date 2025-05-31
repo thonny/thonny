@@ -1,6 +1,7 @@
 import os.path
 import sys
 from logging import getLogger
+from textwrap import dedent
 from typing import List, Optional
 
 # make sure thonny folder is in sys.path (relevant in dev)
@@ -49,6 +50,21 @@ _AUTO_RELOAD_PHRASES = [
 
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
+    def _fetch_board_id(self) -> Optional[str]:
+        logger.debug("Fetching board_id")
+        return self._evaluate(
+            dedent(
+                """
+        try:
+            from board import board_id as __temp_board_id
+            __thonny_helper.print_mgmt_value(__temp_board_id)
+            del __temp_board_id
+        except ImportError:
+            __thonny_helper.print_mgmt_value(None)
+        """
+            )
+        )
+
     def _clear_repl(self):
         """
         CP runs code.py after soft-reboot even in raw repl.

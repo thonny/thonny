@@ -969,6 +969,9 @@ class BackendProxy(ABC):
         "backend's sys.path"
         ...
 
+    @abstractmethod
+    def get_board_id(self): ...
+
     def get_backend_name(self):
         return type(self).backend_name
 
@@ -1183,6 +1186,7 @@ class SubprocessProxy(BackendProxy, ABC):
         self._proc = None
         self._response_queue = None
         self._sys_path = []
+        self._board_id: Optional[str] = None
         self._usersitepackages = None
         self._externally_managed = None
         self._reported_executable = None
@@ -1397,6 +1401,9 @@ class SubprocessProxy(BackendProxy, ABC):
     def get_sys_path(self):
         return self._sys_path
 
+    def get_board_id(self):
+        return self._board_id
+
     def destroy(self, for_restart: bool = False):
         self._close_backend()
 
@@ -1503,6 +1510,14 @@ class SubprocessProxy(BackendProxy, ABC):
         if "sys_path" in msg:
             self._sys_path = msg["sys_path"]
 
+        if msg.get("board_id", None) is not None:
+            logger.info("Got board_id: %r", msg["board_id"])
+            if self._board_id != msg["board_id"]:
+                self._board_id = msg["board_id"]
+                did_change_stubs = self._check_set_board_specific_stubs(self._board_id)
+                if did_change_stubs:
+                    get_workbench().start_or_restart_language_servers()
+
         if "usersitepackages" in msg:
             self._usersitepackages = msg["usersitepackages"]
 
@@ -1523,6 +1538,49 @@ class SubprocessProxy(BackendProxy, ABC):
 
         if "logfile" in msg:
             logger.info("Back-end reported logfile: %s", msg["logfile"])
+
+    def _check_set_board_specific_stubs(self, board_id: str) -> bool:
+        user_stubs_location = self.get_user_stubs_location()
+        if user_stubs_location is None:
+            return False
+
+        logger.debug("Trying to set up board specific stubs for %r", board_id)
+
+        specific_board_path = os.path.join(
+            user_stubs_location, "board_definitions", board_id, "__init__.pyi"
+        )
+        if not os.path.exists(specific_board_path):
+            logger.debug("Board path %r does not exist", specific_board_path)
+            return False
+
+        # replace in both stdlib and in plain packages, as different language servers may use different precedences
+        did_replace = False
+        for target_path in [
+            os.path.join(user_stubs_location, "board", "__init__.pyi"),
+            os.path.join(user_stubs_location, "stdlib", "board", "__init__.pyi"),
+        ]:
+
+            if not os.path.exists(target_path):
+                continue
+
+            files_are_identical = True
+            with open(specific_board_path, "br") as f1, open(target_path, "br") as f2:
+                while True:
+                    line1 = f1.readline()
+                    line2 = f2.readline()
+                    if line1 == b"" and line2 == b"":
+                        break
+
+                    if line1 != line2:
+                        files_are_identical = False
+                        break
+
+            if not files_are_identical:
+                logger.info("Copying %r over %r", specific_board_path, target_path)
+                shutil.copy(specific_board_path, target_path)
+                did_replace = True
+
+        return did_replace
 
     def _publish_cwd(self, cwd):
         if self.uses_local_filesystem():
