@@ -17,4 +17,4 @@ ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
 dbus-next==0.2.*; sys_platform == "linux"
 
 grpcio==1.66.2
-protobuf==5.28.2
+protobuf==5.29.5
