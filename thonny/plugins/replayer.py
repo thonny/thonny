@@ -262,7 +262,10 @@ class Replayer(tk.Toplevel):
                     self.open_file(path)
                 except EventsInputOutputFileError as e:
                     messagebox.showerror(tr("Error"), str(e), parent=self)
-        finally:
+
+            return "break"
+        except Exception:
+            logger.warning("Could not open", exc_info=True)
             return "break"
 
     def open_file(self, path: str) -> None:

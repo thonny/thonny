@@ -540,7 +540,6 @@ def perform_python_return(text: EnhancedText, event):
     finally:
         text.see("insert")
         text.event_generate("<<NewLine>>")
-        return "break"
 
 
 def perform_simple_return(text: EnhancedText, event):
@@ -575,7 +574,6 @@ def perform_simple_return(text: EnhancedText, event):
     finally:
         text.see("insert")
         text.event_generate("<<NewLine>>")
-        return "break"
 
 
 class BinaryFileException(RuntimeError):
