@@ -1,3 +1,81 @@
+[build-system]
+requires = ["uv_build>=0.8.3,<0.9.0"]
+build-backend = "uv_build"
+
+[project]
+name = "thonny"
+version = "5.0.0b1.dev0"
+description = "Python IDE for beginners"
+readme = "README.rst"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Aivar Annamaa and others", email = "thonny@googlegroups.com" },
+]
+keywords = [
+    "IDE",
+    "debugger",
+    "education",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: End Users/Desktop",
+    "License :: Freeware",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Text Editors",
+]
+dependencies = [
+    "asttokens>=2.2.1",
+    "docutils>=0.19",
+    "mypy>=1.0.1",
+    "packaging>=23.0",
+    "pylint>=2.16.2",
+    "Send2Trash>=1.8.0",
+    "wheel>=0.38.4",
+]
+
+[project.urls]
+"Bug tracker" = "https://github.com/thonny/thonny/issues"
+Homepage = "https://thonny.org"
+"Source code" = "https://github.com/thonny/thonny"
+
+[project.gui-scripts]
+thonny = "thonny.main:run"
+
+
+[dependency-groups]
+dev = [
+    "black>=24.8.0",
+    "isort>=5.13.2",
+]
+
+[tool.uv.build-backend]
+module-name = "thonny"
+module-root = ""
+source-exclude = ["registered.json", ".mypy_cache"]
+source-include = ["/defaults.ini"]
+
 [tool.black]
 line-length = 100
 target_version = ['py38', 'py39', 'py310']

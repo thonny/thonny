@@ -132,11 +132,18 @@ class PyrightProxy(LanguageServerProxy):
         if os.path.isfile(preferred_node_path):
             return preferred_node_path
 
+        import thonny
+
+        dev_dir = os.path.dirname(os.path.dirname(thonny.__file__))
+        dev_node_path = os.path.join(os.path.join(dev_dir, exe_name))
+        if os.path.isfile(dev_node_path):
+            return dev_node_path
+
         node_in_path = shutil.which(exe_name)
         if node_in_path is None:
             raise UserError(
                 f"Can't find {exe_name}. In order to make code completion and analysis work, "
-                f"{exe_name} needs to be copied to {bin_dir} or Node.js needs to be installed globally"
+                f"{exe_name} needs to be copied to {bin_dir} or {dev_dir} or Node.js needs to be installed globally"
             )
 
         return node_in_path

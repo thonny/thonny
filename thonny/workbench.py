@@ -312,6 +312,7 @@ class Workbench(tk.Tk):
             self._editor_notebook.focus_set()
             self.event_generate("WorkbenchReady")
             self.poll_events()
+            self._check_version_alignment()
         except Exception:
             logger.exception("Exception while finalizing startup")
             self.report_exception()
@@ -3171,6 +3172,19 @@ class Workbench(tk.Tk):
             self.set_option("run.backend_name", "LocalCPython")
             self.set_option("LocalCPython.executable", created_exe)
             get_runner().restart_backend(False)
+
+    def _check_version_alignment(self):
+        # A smoke test and a guard against forgetting to update one of the 2 places during release
+        from importlib.metadata import version
+
+        installation_version = version("thonny")
+        embedded_version = thonny.get_version()
+        if installation_version != embedded_version:
+            messagebox.showwarning(
+                "Warning",
+                f"Thonny's installation version is reported as {installation_version!r},\n"
+                + f"but embedded version is {embedded_version!r}.",
+            )
 
 
 class WorkbenchEvent(Record):
