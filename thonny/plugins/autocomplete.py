@@ -1,6 +1,5 @@
 import tkinter as tk
 from logging import getLogger
-from readline import insert_text
 from tkinter import messagebox
 from typing import List, Optional, Union, cast
 
