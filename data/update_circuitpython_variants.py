@@ -25,6 +25,7 @@ RELEVANT_FAMILIES = {
     "esp32c3",
     "esp32c6",
     "esp32h2",
+    "esp32p4",
     "nrf52840",
     "rp2040",
     "rp2350",
