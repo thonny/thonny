@@ -131,6 +131,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * kr-g
 * Laszlo Kocsis
 * Louis Lenchant
+* Luis Miguel
 * Lrasinen
 * M Burak Kalkan
 * Marcelo de Gomensoro Malheiros
