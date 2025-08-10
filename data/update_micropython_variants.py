@@ -12,9 +12,9 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = r"\d{8}-v1.26.0-preview\.\d+\.[a-z0-9]{10}"
-PREV_RELEVANT_VERSION = "1.24.1"
-PREV_RELEVANT_VERSION_IN_URL = "20241129-v1.24.1"
+UNSTABLE_VERSION = r"\d{8}-v1.27.0-preview\.\d+\.[a-z0-9]{10}"
+PREV_RELEVANT_VERSION = "1.25.0"
+PREV_RELEVANT_VERSION_IN_URL = "20250415-v1.25.0"
 
 
 class IndexParser(HTMLParser):
@@ -50,7 +50,7 @@ class IndexParser(HTMLParser):
 
 all_variants = []
 
-mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c3, esp32c6, rp2040, rp2350, samd21, samd51, nrf51, nrf52"
+mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c2, esp32c3, esp32c6, rp2040, rp2350, samd21, samd51, nrf51, nrf52"
 
 for mcu in map(str.strip, mcu_list.split(",")):
     print("Fetching mcu", mcu, end="... ")
@@ -397,7 +397,7 @@ save_variants(
 save_variants(
     all_variants,
     ["bin"],
-    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c6"},
+    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c2", "esp32c3", "esp32c6"},
     "micropython-variants-esptool.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
 )

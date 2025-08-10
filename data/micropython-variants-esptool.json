@@ -1,21 +1,20 @@
 [
     {
         "vendor": "Arduino",
-        "model": "Arduino Nano ESP32",
+        "model": "Nano ESP32",
         "family": "esp32s3",
-        "title": "Nano ESP32",
         "info_url": "https://micropython.org/download/ARDUINO_NANO_ESP32",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ARDUINO_NANO_ESP32-20250415-v1.25.0.bin"
             }
         ],
-        "latest_prerelease_regex": "\\d{8}-v1.26.0-preview\\.\\d+\\.[a-z0-9]{10}"
+        "latest_prerelease_regex": "\\d{8}-v1.27.0-preview\\.\\d+\\.[a-z0-9]{10}"
     },
     {
         "vendor": "Espressif",
@@ -24,12 +23,24 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC-20250415-v1.25.0.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Espressif",
+        "model": "ESP32-C2",
+        "family": "esp32c2",
+        "info_url": "https://micropython.org/download/ESP32_GENERIC_C2",
+        "downloads": [
+            {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C2-20250809-v1.26.0.bin"
             }
         ]
     },
@@ -40,12 +51,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_C3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -56,12 +67,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_C6",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_C6-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -72,12 +83,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_S2",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S2-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -88,12 +99,12 @@
         "info_url": "https://micropython.org/download/ESP32_GENERIC_S3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -104,129 +115,148 @@
         "info_url": "https://micropython.org/download/ESP8266_GENERIC",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/ESP8266_GENERIC-20250415-v1.25.0.bin"
             }
         ]
     },
     {
         "vendor": "LILYGO",
-        "model": "LILYGO TTGO LoRa32",
+        "model": "TTGO LoRa32",
         "family": "esp32",
-        "title": "TTGO LoRa32",
         "info_url": "https://micropython.org/download/LILYGO_TTGO_LORA32",
         "downloads": [
             {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20250809-v1.26.0.bin"
+            },
+            {
                 "version": "1.25.0",
                 "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20250415-v1.25.0.bin"
-            },
-            {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/LILYGO_TTGO_LORA32-20241129-v1.24.1.bin"
-            }
-        ]
-    },
-    {
-        "vendor": "M5 Stack",
-        "model": "M5 Stack Atom",
-        "family": "esp32",
-        "title": "Atom",
-        "info_url": "https://micropython.org/download/M5STACK_ATOM",
-        "downloads": [
-            {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20250415-v1.25.0.bin"
-            },
-            {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20241129-v1.24.1.bin"
-            }
-        ]
-    },
-    {
-        "vendor": "M5 Stack",
-        "model": "AtomS3 Lite",
-        "family": "esp32s3",
-        "info_url": "https://micropython.org/download/M5STACK_ATOMS3_LITE",
-        "downloads": [
-            {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20250415-v1.25.0.bin"
-            },
-            {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20241129-v1.24.1.bin"
             }
         ]
     },
     {
         "vendor": "M5Stack",
-        "model": "M5Stack NanoC6",
+        "model": "Atom",
+        "family": "esp32",
+        "info_url": "https://micropython.org/download/M5STACK_ATOM",
+        "downloads": [
+            {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20250809-v1.26.0.bin"
+            },
+            {
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOM-20250415-v1.25.0.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "AtomS3 Lite",
+        "family": "esp32s3",
+        "info_url": "https://micropython.org/download/M5STACK_ATOMS3_LITE",
+        "downloads": [
+            {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20250809-v1.26.0.bin"
+            },
+            {
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_ATOMS3_LITE-20250415-v1.25.0.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "M5Stack",
+        "model": "NanoC6",
         "family": "esp32c6",
-        "title": "NanoC6",
         "info_url": "https://micropython.org/download/M5STACK_NANOC6",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/M5STACK_NANOC6-20250415-v1.25.0.bin"
             }
         ]
     },
     {
-        "vendor": "OLIMEX",
-        "model": "Olimex ESP32 EVB",
+        "vendor": "McHobby",
+        "model": "PYBSTICK26_ESP32C3",
+        "family": "esp32c3",
+        "info_url": "https://micropython.org/download/GARATRONIC_PYBSTICK26_ESP32C3",
+        "downloads": [
+            {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/GARATRONIC_PYBSTICK26_ESP32C3-20250809-v1.26.0.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "Olimex",
+        "model": "ESP32 EVB",
         "family": "esp32",
-        "title": "ESP32 EVB",
         "info_url": "https://micropython.org/download/OLIMEX_ESP32_EVB",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_EVB-20250415-v1.25.0.bin"
             }
         ]
     },
     {
-        "vendor": "OLIMEX",
-        "model": "Olimex ESP32 POE",
+        "vendor": "Olimex",
+        "model": "ESP32 POE",
         "family": "esp32",
-        "title": "ESP32 POE",
         "info_url": "https://micropython.org/download/OLIMEX_ESP32_POE",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/OLIMEX_ESP32_POE-20250415-v1.25.0.bin"
             }
         ]
     },
     {
         "vendor": "Silicognition",
-        "model": "SIL WESP32",
+        "model": "wESP32",
         "family": "esp32",
         "info_url": "https://micropython.org/download/SIL_WESP32",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/SIL_WESP32-20250415-v1.25.0.bin"
+            }
+        ]
+    },
+    {
+        "vendor": "SparkFun",
+        "model": "ESP32 / WROOM",
+        "family": "esp32",
+        "info_url": "https://micropython.org/download/SPARKFUN_IOT_REDBOARD_ESP32",
+        "downloads": [
+            {
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/SPARKFUN_IOT_REDBOARD_ESP32-20250809-v1.26.0.bin"
             }
         ]
     },
@@ -237,12 +267,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS2",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -253,12 +283,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS2NEO",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS2NEO-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -269,12 +299,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -285,12 +315,12 @@
         "info_url": "https://micropython.org/download/UM_FEATHERS3NEO",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_FEATHERS3NEO-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -301,12 +331,12 @@
         "info_url": "https://micropython.org/download/UM_NANOS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_NANOS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -317,12 +347,12 @@
         "info_url": "https://micropython.org/download/UM_OMGS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_OMGS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -333,12 +363,12 @@
         "info_url": "https://micropython.org/download/UM_PROS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_PROS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_PROS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -349,12 +379,12 @@
         "info_url": "https://micropython.org/download/UM_RGBTOUCH_MINI",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_RGBTOUCH_MINI-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -365,12 +395,12 @@
         "info_url": "https://micropython.org/download/UM_TINYC6",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYC6-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -381,12 +411,12 @@
         "info_url": "https://micropython.org/download/UM_TINYPICO",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYPICO-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -397,12 +427,12 @@
         "info_url": "https://micropython.org/download/UM_TINYS2",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS2-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -413,12 +443,12 @@
         "info_url": "https://micropython.org/download/UM_TINYS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -429,12 +459,12 @@
         "info_url": "https://micropython.org/download/UM_TINYWATCHS3",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/UM_TINYWATCHS3-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -445,12 +475,12 @@
         "info_url": "https://micropython.org/download/LOLIN_C3_MINI",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_C3_MINI-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -461,12 +491,12 @@
         "info_url": "https://micropython.org/download/LOLIN_S2_MINI",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_MINI-20250415-v1.25.0.bin"
             }
         ]
     },
@@ -477,12 +507,12 @@
         "info_url": "https://micropython.org/download/LOLIN_S2_PICO",
         "downloads": [
             {
-                "version": "1.25.0",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20250415-v1.25.0.bin"
+                "version": "1.26.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20250809-v1.26.0.bin"
             },
             {
-                "version": "1.24.1",
-                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20241129-v1.24.1.bin"
+                "version": "1.25.0",
+                "url": "https://micropython.org/resources/firmware/LOLIN_S2_PICO-20250415-v1.25.0.bin"
             }
         ]
     }
