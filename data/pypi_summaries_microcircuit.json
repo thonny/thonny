@@ -44,8 +44,16 @@
         "summary": "MicroPython Library for Ultrasonic Sensor, created by DIYables"
     },
     {
+        "name": "MKE-M17-MicroPython",
+        "summary": "A MicroPython driver for the L9110 motor controller over I2C"
+    },
+    {
         "name": "MicroPython-Dashboard-carlsonrocco",
         "summary": "A modular dashboard made using WS2812b individually addressable LEDs and an ESP8266 microcontroller running MicroPython"
+    },
+    {
+        "name": "aalec-micropython-stubs",
+        "summary": "Stubs for Micropython Firmware for the AALeC"
     },
     {
         "name": "adafruit-circuitpython-24lc32",
@@ -120,12 +128,24 @@
         "summary": "CircuitPython library for AMG88xx thermal camera."
     },
     {
+        "name": "adafruit-circuitpython-anchored-group",
+        "summary": "A displayio Group that supports placement by anchor_point and anchored_position properties"
+    },
+    {
         "name": "adafruit-circuitpython-anchored-tilegrid",
         "summary": "TileGrid subclass that can be placed relative to an arbitrary anchor point."
     },
     {
         "name": "adafruit-circuitpython-apds9960",
         "summary": "CircuitPython driver for APSD9960 Gesture breakout board"
+    },
+    {
+        "name": "adafruit-circuitpython-argv-file",
+        "summary": "Pass arguments to code files by writing them to a file before launching."
+    },
+    {
+        "name": "adafruit-circuitpython-as5600",
+        "summary": "CircuitPython driver for the AS5600 Magnetic Angle Sensor"
     },
     {
         "name": "adafruit-circuitpython-as726x",
@@ -280,6 +300,10 @@
         "summary": "CircuitPython library for BMP3XX Temperature and Barometric Pressure sensor."
     },
     {
+        "name": "adafruit-circuitpython-bmp5xx",
+        "summary": "CircuitPython library for the BMP580 / BMP581 / BMP585 / etc barometric pressure sensors."
+    },
+    {
         "name": "adafruit-circuitpython-bno055",
         "summary": "CircuitPython library for BNO055 9-DOF absolute orientation sensor."
     },
@@ -324,6 +348,10 @@
         "summary": "A high-level library representing all the features of the Adafruit CLUE"
     },
     {
+        "name": "adafruit-circuitpython-color-terminal",
+        "summary": "Extension of terminalio.Terminal that supports ANSI color escapes for subsets of the text"
+    },
+    {
         "name": "adafruit-circuitpython-colorsys",
         "summary": "CircuitPython CPython compatible libraries"
     },
@@ -342,6 +370,14 @@
     {
         "name": "adafruit-circuitpython-cursorcontrol",
         "summary": "Mouse cursor for interaction with CircuitPython UI elements."
+    },
+    {
+        "name": "adafruit-circuitpython-dacx578",
+        "summary": "CircuitPython driver for the Adafruit DAC7578 - 8 x Channel 12-bit I2C DAC - STEMMA QT / Qwiic"
+    },
+    {
+        "name": "adafruit-circuitpython-dang",
+        "summary": "A subset of the curses framework. Used for making terminal based applications."
     },
     {
         "name": "adafruit-circuitpython-dash-display",
@@ -364,8 +400,16 @@
         "summary": "CircuitPython support for DHT11 and DHT22 type temperature/humidity devices"
     },
     {
+        "name": "adafruit-circuitpython-display-analogclock",
+        "summary": "Draw a traditional 12-hour analog clock face with hour and minute hands. Allows you to provide graphics to customize the clock."
+    },
+    {
         "name": "adafruit-circuitpython-display-button",
         "summary": "UI Buttons for displayio"
+    },
+    {
+        "name": "adafruit-circuitpython-display-emoji-text",
+        "summary": "Displayio class for displaying text that contains emoji"
     },
     {
         "name": "adafruit-circuitpython-display-notification",
@@ -516,6 +560,10 @@
         "summary": "CircuitPython frambuf module, based on the Python frambuf module."
     },
     {
+        "name": "adafruit-circuitpython-fruitjam",
+        "summary": "Helper library for the FruitJam board"
+    },
+    {
         "name": "adafruit-circuitpython-ft5336",
         "summary": "Touchscreen driver for the FT5336 touch controller"
     },
@@ -534,6 +582,10 @@
     {
         "name": "adafruit-circuitpython-gc-iot-core",
         "summary": "Google Cloud IoT Core Client for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-gc9a01a",
+        "summary": "displayio driver for GC9A01A displays."
     },
     {
         "name": "adafruit-circuitpython-gfx",
@@ -632,6 +684,14 @@
         "summary": "CircuitPython library for INA219 high side DC current sensor."
     },
     {
+        "name": "adafruit-circuitpython-ina228",
+        "summary": "CircuitPython driver for the INA228 I2C 85V, 20-bit High or Low Side Power Monitor"
+    },
+    {
+        "name": "adafruit-circuitpython-ina23x",
+        "summary": "CircuitPython driver for the INA237 and INA238 DC Current Voltage Power Monitor"
+    },
+    {
         "name": "adafruit-circuitpython-ina260",
         "summary": "CircuitPython driver for the TI INA260 current and power sensor"
     },
@@ -656,12 +716,16 @@
         "summary": "Python's itertools for CircuitPython"
     },
     {
+        "name": "adafruit-circuitpython-jd79661",
+        "summary": "CircuitPython library for the JD79661 e-paper driver IC"
+    },
+    {
         "name": "adafruit-circuitpython-json-stream",
         "summary": null
     },
     {
         "name": "adafruit-circuitpython-jwt",
-        "summary": "JSON Web Token Authentication"
+        "summary": "JSON Web Token Authentication "
     },
     {
         "name": "adafruit-circuitpython-l3gd20",
@@ -702,6 +766,10 @@
     {
         "name": "adafruit-circuitpython-logging",
         "summary": "Logging module for CircuitPython"
+    },
+    {
+        "name": "adafruit-circuitpython-lps28",
+        "summary": "CircuitPython driver for the LPS28 (LPS28DFW) Pressure Sensor"
     },
     {
         "name": "adafruit-circuitpython-lps2x",
@@ -828,6 +896,10 @@
         "summary": "A CircuitPython helper for encoding/decoding MIDI packets over a MIDI or UART connection."
     },
     {
+        "name": "adafruit-circuitpython-midi-parser",
+        "summary": "CircuitPython helper for parsing MIDI files"
+    },
+    {
         "name": "adafruit-circuitpython-miniesptool",
         "summary": "CircuitPython ROM loader for ESP chips, works with ESP8266 or ESP32."
     },
@@ -850,6 +922,10 @@
     {
         "name": "adafruit-circuitpython-mlx90614",
         "summary": "CircuitPython module for the Melexis MLX90614 Contact-less InfraredTemperature sensor."
+    },
+    {
+        "name": "adafruit-circuitpython-mlx90632",
+        "summary": "CircuitPython driver for the MLX90632"
     },
     {
         "name": "adafruit-circuitpython-mlx90640",
@@ -944,6 +1020,10 @@
         "summary": "CircuitPython OneWire helper library for 1-wire bus devices."
     },
     {
+        "name": "adafruit-circuitpython-opt4048",
+        "summary": "CircuitPython driver library for the Adafruit OPT4048 breakout board, a high-speed, high-precision tristimulus XYZ color sensor."
+    },
+    {
         "name": "adafruit-circuitpython-ov2640",
         "summary": "CircuitPython driver for OV2640 cameras"
     },
@@ -958,6 +1038,10 @@
     {
         "name": "adafruit-circuitpython-pastebin",
         "summary": "CircuitPython library for interacting with online pastebin services"
+    },
+    {
+        "name": "adafruit-circuitpython-pathlib",
+        "summary": "Subset of the CPython module pathlib"
     },
     {
         "name": "adafruit-circuitpython-pca9554",
@@ -1056,6 +1140,10 @@
         "summary": "CircuitPython driver for Adafruit PyPortal"
     },
     {
+        "name": "adafruit-circuitpython-qmc5883p",
+        "summary": "CircuitPython driver for the Adafruit QMC5883P - Triple Axis Magnetometer - STEMMA QT"
+    },
+    {
         "name": "adafruit-circuitpython-qualia",
         "summary": "Portal Style Library for the Adafruit Qualia ESP32-S3"
     },
@@ -1138,6 +1226,10 @@
     {
         "name": "adafruit-circuitpython-seesaw",
         "summary": "CircuitPython library for controlling a SeeSaw helper chip."
+    },
+    {
+        "name": "adafruit-circuitpython-sen6x",
+        "summary": "CircuitPython driver for the Sensirion SEN6x environmental sensor node"
     },
     {
         "name": "adafruit-circuitpython-servokit",
@@ -1268,6 +1360,10 @@
         "summary": "CircuitPython library for STMPE610 Resistive Touch Screen Controller."
     },
     {
+        "name": "adafruit-circuitpython-stspin",
+        "summary": "CircuitPython driver for the Adafruit STSPIN220 Stepper Motor Driver Breakout Board"
+    },
+    {
         "name": "adafruit-circuitpython-tc74",
         "summary": "CircuitPython library for the Microchip TC74 Digital Temperature Sensor"
     },
@@ -1322,6 +1418,10 @@
     {
         "name": "adafruit-circuitpython-tlc59711",
         "summary": "CircuitPython library for TLC59711 16-bit 12 channel LED PWM driver."
+    },
+    {
+        "name": "adafruit-circuitpython-tlv320",
+        "summary": "CircuitPython driver for the TLV320DAC3100 I2S DAC"
     },
     {
         "name": "adafruit-circuitpython-tlv493d",
@@ -1388,6 +1488,10 @@
         "summary": "CircuitPython `displayio` driver for US8151D-based ePaper displays"
     },
     {
+        "name": "adafruit-circuitpython-uc8253",
+        "summary": "CircuitPython `displayio` driver for epaper driven by UC8253 driver IC"
+    },
+    {
         "name": "adafruit-circuitpython-us100",
         "summary": "CircuitPython library for reading distance and temperature via US-100 ultra-sonic sensor."
     },
@@ -1402,6 +1506,10 @@
     {
         "name": "adafruit-circuitpython-usb-host-midi",
         "summary": "CircuitPython USB host driver for MIDI devices"
+    },
+    {
+        "name": "adafruit-circuitpython-usb-host-mouse",
+        "summary": "Helper class that encapsulates the objects needed for user code to interact with a USB mouse, draw a visible cursor, and determine when buttons are pressed."
     },
     {
         "name": "adafruit-circuitpython-vc0706",
@@ -1466,6 +1574,10 @@
     {
         "name": "adafruit-circuitpython-wii-classic",
         "summary": "CircuitPython library for Nintendo Wii Classic controllers."
+    },
+    {
+        "name": "adafruit-circuitpython-wiz",
+        "summary": "CircuitPython helper library for Wiz connected lights"
     },
     {
         "name": "adafruit-circuitpython-wiznet5k",
@@ -1625,11 +1737,11 @@
     },
     {
         "name": "circuitpython-displayio-cartesian",
-        "summary": "A cartesian plane widget for displaying graphical information."
+        "summary": "A Cartesian plane widget for displaying graphical information."
     },
     {
         "name": "circuitpython-displayio-effects",
-        "summary": "Add some flair to your widgets with effects!"
+        "summary": "Add some flair to your displayio widgets with effects!"
     },
     {
         "name": "circuitpython-displayio-flipinput",
@@ -1660,6 +1772,10 @@
         "summary": "A CircuitPython implementation of CPython's functools library"
     },
     {
+        "name": "circuitpython-gamecontrols",
+        "summary": "An abstraction layer for CircuitPython to access commonly used video game control inputs in a consistent manner across different hardware devices and configurations."
+    },
+    {
         "name": "circuitpython-gauge",
         "summary": "CircuitPython Gauge"
     },
@@ -1680,6 +1796,10 @@
         "summary": "CircuitPython Driver for the ST H3LIS200DL Accelerometer"
     },
     {
+        "name": "circuitpython-hdc1080",
+        "summary": null
+    },
+    {
         "name": "circuitpython-hmac",
         "summary": "HMAC (Keyed-Hashing for Message Authentication) Python module. Implements the HMAC algorithm as described by RFC 2104."
     },
@@ -1694,6 +1814,10 @@
     {
         "name": "circuitpython-i2c-expanders",
         "summary": "Drivers for various I2C GPIO expanders."
+    },
+    {
+        "name": "circuitpython-ilps28qsw",
+        "summary": "CircuitPython module for the ILPS28QSW absolute digital output barometer."
     },
     {
         "name": "circuitpython-isl29125",
@@ -1736,6 +1860,10 @@
         "summary": "Calibrate magnetometer and accelerometer readings"
     },
     {
+        "name": "circuitpython-max734x",
+        "summary": "CircuitPython driver for MAX7347/MAX7348/MAX7349 keybord and sounder controllers"
+    },
+    {
         "name": "circuitpython-mc3479",
         "summary": "MC3479 Accelerometer Driver"
     },
@@ -1757,7 +1885,7 @@
     },
     {
         "name": "circuitpython-nrf24l01",
-        "summary": "Circuitpython driver library for the nRF24L01 transceiver"
+        "summary": "CircuitPython driver library for the nRF24L01 transceiver"
     },
     {
         "name": "circuitpython-parse",
@@ -1766,6 +1894,10 @@
     {
         "name": "circuitpython-pca9674",
         "summary": null
+    },
+    {
+        "name": "circuitpython-pixel-mapper",
+        "summary": "Pixel Mapper for Adafruit_CircuitPython_LED_Animation"
     },
     {
         "name": "circuitpython-ps2controller",
@@ -1802,6 +1934,10 @@
     {
         "name": "circuitpython-seeed-xiao-nrf52840",
         "summary": "Provides access to onboard sensors and battet"
+    },
+    {
+        "name": "circuitpython-serial-controlled-servo",
+        "summary": "CircuitPython library for Serial Servo Bus (UART)"
     },
     {
         "name": "circuitpython-seriallcd",
@@ -1860,6 +1996,10 @@
         "summary": "Command-line tool for interfacing with CircuitPython devices."
     },
     {
+        "name": "circuitpython-typeshed",
+        "summary": "A typeshed for checking CircuitPython code"
+    },
+    {
         "name": "circuitpython-tzdb",
         "summary": "IANA timezones for adafruit_datetime"
     },
@@ -1882,6 +2022,10 @@
     {
         "name": "circuitpython-uschedule",
         "summary": "Reduced version of the schedule library for CircuitPython"
+    },
+    {
+        "name": "circuitpython-vl53lxcx",
+        "summary": "CircuitPython driver for VL53L5CX and VL53L8CX ToF sensors"
     },
     {
         "name": "circuitpython-waveshare-epd",
@@ -1926,6 +2070,10 @@
     {
         "name": "eiscp-micropython",
         "summary": "Micropython packages for the Onkyo EISCP protocol."
+    },
+    {
+        "name": "esp32-micropython",
+        "summary": "All-in-one utility for flashing and managing MicroPython deployments on ESP32-C3 SuperMini boards."
     },
     {
         "name": "esp32-micropython-i2cLCD",
@@ -2604,6 +2752,14 @@
         "summary": "MicroPython stubs"
     },
     {
+        "name": "micropython-esp32-esp32_generic_c6-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-esp32-esp32_generic_s2-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
         "name": "micropython-esp32-esp32_generic_s3-stubs",
         "summary": "MicroPython stubs"
     },
@@ -2686,10 +2842,6 @@
     {
         "name": "micropython-eydam-prototyping-statemachine",
         "summary": "Some statemachine functions for MicroPython"
-    },
-    {
-        "name": "micropython-eydam-prototyping-wifi",
-        "summary": "Some wifi functions for MicroPython"
     },
     {
         "name": "micropython-faulthandler",
@@ -2940,6 +3092,10 @@
         "summary": "Dummy importlib.resources module for MicroPython"
     },
     {
+        "name": "micropython-ina228",
+        "summary": "TI INA228 library for MicroPython"
+    },
+    {
         "name": "micropython-inspect",
         "summary": "inspect module for MicroPython"
     },
@@ -3120,6 +3276,54 @@
         "summary": "mesmerize module for MicroPython"
     },
     {
+        "name": "micropython-microbit-stubs-ca",
+        "summary": "BBC micro:bit MicroPython type stubs (language: ca)"
+    },
+    {
+        "name": "micropython-microbit-stubs-de",
+        "summary": "BBC micro:bit MicroPython type stubs (language: de)"
+    },
+    {
+        "name": "micropython-microbit-stubs-en",
+        "summary": "BBC micro:bit MicroPython type stubs (language: en)"
+    },
+    {
+        "name": "micropython-microbit-stubs-es-es",
+        "summary": "BBC micro:bit MicroPython type stubs (language: es-es)"
+    },
+    {
+        "name": "micropython-microbit-stubs-fr",
+        "summary": "BBC micro:bit MicroPython type stubs (language: fr)"
+    },
+    {
+        "name": "micropython-microbit-stubs-ja",
+        "summary": "BBC micro:bit MicroPython type stubs (language: ja)"
+    },
+    {
+        "name": "micropython-microbit-stubs-ko",
+        "summary": "BBC micro:bit MicroPython type stubs (language: ko)"
+    },
+    {
+        "name": "micropython-microbit-stubs-lol",
+        "summary": "BBC micro:bit MicroPython type stubs (language: lol)"
+    },
+    {
+        "name": "micropython-microbit-stubs-nl",
+        "summary": "BBC micro:bit MicroPython type stubs (language: nl)"
+    },
+    {
+        "name": "micropython-microbit-stubs-pl",
+        "summary": "BBC micro:bit MicroPython type stubs (language: pl)"
+    },
+    {
+        "name": "micropython-microbit-stubs-zh-cn",
+        "summary": "BBC micro:bit MicroPython type stubs (language: zh-cn)"
+    },
+    {
+        "name": "micropython-microbit-stubs-zh-tw",
+        "summary": "BBC micro:bit MicroPython type stubs (language: zh-tw)"
+    },
+    {
         "name": "micropython-microbmp",
         "summary": "A small Python module for BMP image processing."
     },
@@ -3278,6 +3482,10 @@
     {
         "name": "micropython-oled",
         "summary": "Micropython scripts for use OLED displays."
+    },
+    {
+        "name": "micropython-om2m-client",
+        "summary": "A MicroPython client for interacting with OM2M CSE (Work in Progress)."
     },
     {
         "name": "micropython-opcode",
@@ -3592,11 +3800,23 @@
         "summary": "MicroPython stubs"
     },
     {
+        "name": "micropython-rp2-pimoroni_picolipo-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
         "name": "micropython-rp2-pimoroni_picolipo_16mb-stubs",
         "summary": "MicroPython stubs"
     },
     {
         "name": "micropython-rp2-rpi_pico-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-rpi_pico2-stubs",
+        "summary": "MicroPython stubs"
+    },
+    {
+        "name": "micropython-rp2-rpi_pico2_w-stubs",
         "summary": "MicroPython stubs"
     },
     {
@@ -3786,6 +4006,10 @@
     {
         "name": "micropython-ssd1306",
         "summary": "ssd1306 module for MicroPython"
+    },
+    {
+        "name": "micropython-ssd1306-driver",
+        "summary": "MicroPython Library for SSD1306 OLED Displays with some simple shape drawing functions."
     },
     {
         "name": "micropython-ssd1306py",
@@ -3986,6 +4210,10 @@
     {
         "name": "micropython-types",
         "summary": "CPython types module ported to MicroPython"
+    },
+    {
+        "name": "micropython-typeshed",
+        "summary": "A typeshed for checking MicroPython code"
     },
     {
         "name": "micropython-typesheds",
