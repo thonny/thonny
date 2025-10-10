@@ -4,6 +4,9 @@ mypy>=1.0.1
 asttokens>=2.2.1
 Send2Trash>=1.8.0
 packaging>=23.0
+pyserial
+pyperclip
+asttokens
 
 # wheel is required by pipkin, which is currently vendored
 wheel>=0.38.4
