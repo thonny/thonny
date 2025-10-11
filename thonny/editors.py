@@ -1196,8 +1196,12 @@ class EditorNotebook(CustomNotebook):
     def _cmd_save_all_files(self):
         for editor in self.get_all_editors():
             if editor.save_file_enabled() == True:
-                editor.save_file()
-                self.update_editor_title(editor)
+                try:
+                    editor.save_file()
+                except Exception as e:
+                    messagebox.showerror("Save Files", f"Could not save files\n{e}")
+                finally:
+                    self.update_editor_title(editor)
 
     def _cmd_save_all_files_enabled(self):
         for editor in self.get_all_editors():
