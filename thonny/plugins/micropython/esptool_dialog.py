@@ -117,6 +117,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         self._advanced_widgets += [address_label, self._address_combo]
 
         speed_mapping = {
+            "921600 (supported by some boards)": "921600",
             "460800 (supported by some boards)": "460800",
             "230400 (supported by many boards)": "230400",
             "115200 (default)": "115200",
