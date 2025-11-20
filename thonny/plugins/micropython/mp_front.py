@@ -1,3 +1,10 @@
+"""MicroPython backend frontend for Thonny.
+
+This module provides helper functions and classes used to load, initialize,
+and interact with MicroPython backends (for example, connecting to a board,
+starting a REPL, and running code remotely). The functions here are helpers
+used by higher-level plugin components in Thonny's MicroPython integration.
+"""
 import dataclasses
 import os
 import shutil
