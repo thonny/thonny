@@ -1,5 +1,8 @@
 """
 Downloads: https://adafruit-circuit-python.s3.amazonaws.com/index.html?prefix=bin/
+Interesting:
+    https://raw.githubusercontent.com/adafruit/circuitpython-org/main/_data/files.json
+    https://circuitpython.org/api/boards.json
 """
 
 from html.parser import HTMLParser

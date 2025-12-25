@@ -29,7 +29,7 @@ PLACEHOLDER_URI = f"{UNTITLED_URI_SCHEME}:0"
 
 REMOTE_PATH_MARKER = " :: "
 
-PROJECT_MARKERS = ["pyproject.toml", "setup.cfg", "setup.py", ".python-version", "Pipfile"]
+PROJECT_MARKERS = ["pyproject.toml", "setup.cfg", "setup.py", ".python-version", "Pipfile", "package.json"]
 
 
 logger = getLogger(__name__)
