@@ -5,12 +5,11 @@ import pathlib
 import re
 import tkinter as tk
 import traceback
+from _tkinter import TclError
 from dataclasses import dataclass
 from logging import getLogger
 from tkinter import ttk
 from typing import List, Optional
-
-from _tkinter import TclError
 
 from thonny import (
     get_runner,

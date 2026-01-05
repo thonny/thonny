@@ -12,7 +12,7 @@ import sys
 from collections import namedtuple
 from dataclasses import dataclass
 from logging import getLogger
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple  # @UnusedImport
+from typing import Any, Callable, Dict, Iterable, List, Optional  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -255,7 +255,7 @@ def serialize_message(msg: Record, max_line_length=65536) -> str:
     # default (safe) window size in Paramiko (https://github.com/thonny/thonny/issues/1680)
     msg_str = ascii(msg)
 
-    lines = []
+    lines: List[str] = []
     for i in range(0, len(msg_str), max_line_length):
         lines.append(msg_str[i : i + max_line_length])
 
@@ -284,7 +284,7 @@ def normpath_with_actual_case(name: str) -> str:
             # https://stackoverflow.com/questions/2113822/python-getting-filename-case-as-stored-in-windows/2114975
             norm_name = os.path.normpath(name)
 
-            from ctypes import create_unicode_buffer, windll
+            from ctypes import create_unicode_buffer, windll  # type: ignore
 
             buf = create_unicode_buffer(512)
             # GetLongPathNameW alone doesn't fix filename part
@@ -385,7 +385,6 @@ def get_site_dir(symbolic_name, executable=None):
                 [executable, "-m", "site", "--" + symbolic_name.lower().replace("_", "-")],
                 universal_newlines=True,
             )
-            .decode()
             .strip()
         )
 
@@ -454,7 +453,7 @@ def get_single_dir_child_data(path: str, include_hidden: bool = False) -> Option
             return get_single_dir_child_data("/", include_hidden)
 
     elif os.path.isdir(path) or os.path.ismount(path):
-        result = {}
+        result: Dict[str, Any] = {}
 
         try:
             for child in os.listdir(path):
@@ -489,7 +488,7 @@ def get_windows_volumes_info():
     # http://stackoverflow.com/a/2288225/261181
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
     import string
-    from ctypes import windll
+    from ctypes import windll  # type: ignore
 
     all_drive_types = [
         "DRIVE_UNKNOWN",
@@ -551,7 +550,7 @@ def get_windows_volume_name(path):
     # https://stackoverflow.com/a/12056414/261181
     import ctypes
 
-    kernel32 = ctypes.windll.kernel32
+    kernel32 = ctypes.windll.kernel32 # type: ignore
     volume_name_buffer = ctypes.create_unicode_buffer(1024)
     file_system_name_buffer = ctypes.create_unicode_buffer(1024)
     serial_number = None
@@ -581,7 +580,7 @@ def get_windows_network_locations():
     CSIDL_NETHOOD = 0x13
     SHGFP_TYPE_CURRENT = 0
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf)
+    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf) # type: ignore
     shortcuts_dir = buf.value
     if not buf.value:
         logger.warning("Could not determine windows shortcuts directory")
@@ -627,7 +626,7 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
     # Make sure this python interpreter and its scripts are available
     # in PATH
     update_system_path(env, get_augmented_system_path(get_exe_dirs()))
-    popen_kw = dict(
+    popen_kw: Dict[str, Any] = dict(
         env=env,
         universal_newlines=True,
         bufsize=0,
@@ -639,9 +638,8 @@ def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
     if disconnect_stdin:
         popen_kw["stdin"] = subprocess.DEVNULL
 
-    if sys.version_info >= (3, 6):
-        popen_kw["errors"] = "replace"
-        popen_kw["encoding"] = encoding
+    popen_kw["errors"] = "replace"
+    popen_kw["encoding"] = encoding
 
     if isinstance(cmd.cmd_line, str) and cmd.cmd_line.startswith("!"):
         cmd_line = cmd.cmd_line[1:]

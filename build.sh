@@ -16,3 +16,5 @@ black thonny
 echo
 #echo "running pylint ..."
 #pylint --msg-template='{abspath}:{line},{column:2d}: {msg} ({symbol})' thonny
+
+uv run pyrefly check --relative-to '' | perl -pe 's/^\s*-->\s+(?=\/)//'

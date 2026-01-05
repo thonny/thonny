@@ -472,16 +472,17 @@ class PipFrame(ttk.Frame, ABC):
                 return installed_dist
             else:
                 assert installed_dist.meta_dir_path is not None
-                result = self._fetch_complete_installed_dist_info(installed_dist.meta_dir_path)
+                result = self._fetch_complete_installed_dist_info(installed_dist)
                 self._installed_dists[canonicalize_name(name)] = result
                 return result
 
         return self._download_dist_info(name, version)
 
-    def _fetch_complete_installed_dist_info(self, meta_dir_path: str) -> DistInfo:
+    def _fetch_complete_installed_dist_info(self, dist_info: DistInfo) -> DistInfo:
         # NB! Runs in a background thread
+        # TODO:
         msg = get_runner().send_command_and_wait_in_thread(
-            InlineCommand("get_installed_distribution_metadata", meta_dir_path=meta_dir_path),
+            InlineCommand("get_complete_dist_info", dist_name=dist_info.name),
             timeout=8,
         )
 
@@ -1005,18 +1006,18 @@ class PipFrame(ttk.Frame, ABC):
     @abstractmethod
     def _fetch_search_results(self, query: str) -> List[DistInfo]: ...
 
-    def _advertise_pipkin(self):
+    def _advertise_minny(self):
         self._append_info_text("\n\n")
         self._append_info_text(tr("Under the hood") + " \n", ("caption", "right"))
         self._append_info_text(
             tr(
-                "This dialog uses `pipkin`, a command line tool for managing "
+                "This dialog uses `minny`, a command line tool for managing "
                 "MicroPython and CircuitPython packages."
             )
             + " \n",
             ("right",),
         )
-        self._append_info_text("https://pypi.org/project/pipkin/", ("url", "right"))
+        self._append_info_text("https://pypi.org/project/minny/", ("url", "right"))
         self._append_info_text(" \n", ("right",))
 
     def get_large_padding(self):
@@ -1159,7 +1160,7 @@ class BackendPipFrame(PipFrame):
         from thonny.plugins.micropython.mp_front import MicroPythonProxy
 
         if isinstance(self._get_proxy(), MicroPythonProxy):
-            self._advertise_pipkin()
+            self._advertise_minny()
 
     def _show_read_only_instructions(self):
         path, comment = self._get_proxy().get_packages_target_dir_with_comment()
@@ -1468,7 +1469,7 @@ class StubsPipFrame(PipFrame):
         return normpath_with_actual_case(path)
 
     def _run_pip_with_dialog(self, command: str, args: Dict, title: str) -> Tuple[int, str, str]:
-        cmd = ["-m", "pipkin", "--dir", self._get_target_directory(), command]
+        cmd = ["-m", "minny", "--dir", self._get_target_directory(), command]
         if command == "uninstall":
             cmd += ["--yes"]
         cmd += args
@@ -1481,7 +1482,7 @@ class StubsPipFrame(PipFrame):
         dlg = SubprocessDialog(
             self,
             prepared_proc=proc,
-            title="pipkin " + command,
+            title="minny " + command,
             long_description=title,
             autostart=True,
         )

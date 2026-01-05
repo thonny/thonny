@@ -50,30 +50,7 @@ _AUTO_RELOAD_PHRASES = [
 
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
-    def _fetch_board_id(self) -> Optional[str]:
-        logger.debug("Fetching board_id")
-        return self._evaluate(
-            dedent(
-                """
-        try:
-            from board import board_id as __temp_board_id
-            __thonny_helper.print_mgmt_value(__temp_board_id)
-            del __temp_board_id
-        except ImportError:
-            __thonny_helper.print_mgmt_value(None)
-        """
-            )
-        )
 
-    def _clear_repl(self):
-        """
-        CP runs code.py after soft-reboot even in raw repl.
-        At the same time, it re-initializes VM and hardware just by switching
-        between raw and friendly REPL (tested in CP 6.3 and 7.1)
-        """
-        logger.info("Creating fresh REPL for CP")
-        self._ensure_normal_mode()
-        self._ensure_raw_mode()
 
     def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work in Thonny's shell
@@ -81,14 +58,6 @@ class CircuitPythonBackend(BareMetalMicroPythonBackend):
             data = data.replace(phrase + "\r\n", "").replace(phrase + "\n", "")
 
         return data
-
-    def _output_warrants_interrupt(self, data):
-        data = data.strip()
-        for phrase in _ENTER_REPL_PHRASES:
-            if data.endswith(phrase.encode("utf-8")):
-                return True
-
-        return False
 
 
 if __name__ == "__main__":

@@ -7,12 +7,11 @@ import ast
 import os.path
 import tkinter as tk
 import tokenize
+from _tkinter import TclError
 from logging import getLogger
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
-
-from _tkinter import TclError
 
 from thonny import (
     ast_utils,

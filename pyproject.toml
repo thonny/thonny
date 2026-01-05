@@ -8,7 +8,7 @@ version = "5.0.0b1.dev0"
 description = "Python IDE for beginners"
 readme = "README.rst"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [
     { name = "Aivar Annamaa and others", email = "thonny@googlegroups.com" },
 ]
@@ -35,11 +35,10 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Education",
     "Topic :: Software Development",
     "Topic :: Software Development :: Debuggers",
@@ -48,11 +47,20 @@ classifiers = [
 dependencies = [
     "asttokens>=2.2.1",
     "docutils>=0.19",
+    "minny",
     "mypy>=1.0.1",
     "packaging>=23.0",
     "pylint>=2.16.2",
     "Send2Trash>=1.8.0",
     "wheel>=0.38.4",
+]
+
+[project.optional-dependencies]
+ssh = [
+  "paramiko>=2.12.0"
+]
+pty = [
+  "ptyprocess>=0.7.0"
 ]
 
 [project.urls]
@@ -68,7 +76,10 @@ thonny = "thonny.main:run"
 dev = [
     "black>=24.8.0",
     "isort>=5.13.2",
+    "pyrefly",
     "requests",
+    "paramiko",
+    "ptyprocess",
 ]
 
 [tool.uv.build-backend]
@@ -76,6 +87,9 @@ module-name = "thonny"
 module-root = ""
 source-exclude = ["registered.json", ".mypy_cache"]
 source-include = ["/defaults.ini"]
+
+[tool.uv.sources]
+minny = { path = "../minny", editable = true }
 
 [tool.black]
 line-length = 100
@@ -87,3 +101,14 @@ profile = "black"
 src_paths = ["thonny"]
 line_length = 100
 skip = ["typeshed", "api_stubs", "esp32_api_stubs", "esp_common_api_stubs", "base_api_stubs", "generic_api_stubs", "vendored_libs"]
+
+[tool.pyrefly]
+project-includes = [
+    "thonny/__init__.py",
+    "thonny/common.py",
+    "thonny/backend.py",
+    "thonny/plugins/micropython/__init__.py",
+    "thonny/plugins/micropython/mp_back.py",
+    "thonny/plugins/micropython/bare_metal_backend.py",
+]
+search-path = [""]

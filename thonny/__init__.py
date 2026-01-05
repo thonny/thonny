@@ -92,7 +92,9 @@ def get_version():
     if _version:
         return _version
     try:
-        package_dir = os.path.dirname(sys.modules["thonny"].__file__)
+        thonny_file = sys.modules["thonny"].__file__
+        assert thonny_file is not None
+        package_dir = os.path.dirname(thonny_file)
         with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
             _version = fp.read().strip()
             return _version
@@ -267,10 +269,10 @@ def configure_logging(log_file, console_level=None):
 
     main_logger = logging.getLogger("thonny")
     contrib_logger = logging.getLogger("thonnycontrib")
-    pipkin_logger = logging.getLogger("pipkin")
+    minny_logger = logging.getLogger("minny")
 
     # NB! Don't mess with the main root logger, because (CPython) backend runs user code
-    for logger in [main_logger, contrib_logger, pipkin_logger]:
+    for logger in [main_logger, contrib_logger, minny_logger]:
         logger.setLevel(choose_logging_level())
         logger.propagate = False  # otherwise it will be also reported by IDE-s root logger
         logger.addHandler(file_handler)

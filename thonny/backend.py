@@ -47,9 +47,10 @@ class BaseBackend(ABC):
 
     def __init__(self):
         self._current_command = None
+        self._current_command_interrupt_event = None
         self._incoming_message_queue = queue.Queue()  # populated by the reader thread
         self._interrupt_lock = threading.Lock()
-        self._last_progress_reporting_time = 0
+        self._last_progress_reporting_time: float = 0
         self._last_sent_output = ""
         self._init_command_reader()
 
@@ -81,6 +82,7 @@ class BaseBackend(ABC):
                         self._handle_eof_command(msg)
                     else:
                         self._current_command = msg
+                        self._current_command_interrupt_event = threading.Event()
                         self._handle_normal_command(msg)
         except KeyboardInterrupt:
             self._send_output("\nKeyboardInterrupt", "stderr")
@@ -111,7 +113,7 @@ class BaseBackend(ABC):
         sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _current_command_is_interrupted(self):
-        return getattr(self._current_command, "interrupted", False)
+        return self._current_command_interrupt_event is not None and self._current_command_interrupt_event.is_set()
 
     def _fetch_next_incoming_message(self, timeout=None):
         return self._incoming_message_queue.get(timeout=timeout)
@@ -321,17 +323,15 @@ class MainBackend(BaseBackend, ABC):
         """Returns info about all items under and including cmd.paths"""
         return {"all_items": self._get_paths_info(cmd.source_paths, recurse=True)}
 
-    def _cmd_get_active_distributions(self, cmd):
-        raise NotImplementedError()
+    @abstractmethod
+    def _cmd_get_active_distributions(self, cmd) -> Dict[str, Any]:  ...
 
-    def _cmd_get_installed_distribution_metadata(self, cmd):
-        raise NotImplementedError()
+    @abstractmethod
+    def _cmd_install_distributions(self, cmd) -> Dict[str, Any]: ...
 
-    def _cmd_install_distributions(self, cmd):
-        raise NotImplementedError()
 
-    def _cmd_uninstall_distributions(self, cmd):
-        raise NotImplementedError()
+    @abstractmethod
+    def _cmd_uninstall_distributions(self, cmd)  -> Dict[str, Any]: ...
 
     def _get_paths_info(self, paths: List[str], recurse: bool) -> Dict[str, Dict]:
         result = {}
@@ -354,6 +354,7 @@ class MainBackend(BaseBackend, ABC):
         """Assumes path is dir. Dict is keyed by full path"""
         result = {}
         children_info = self._get_filtered_dir_children_info(path, include_hidden)
+        assert children_info is not None
         for child_name, child_info in children_info.items():
             full_child_path = path + self._get_sep() + child_name
             result[full_child_path] = child_info
@@ -539,8 +540,7 @@ class UploadDownloadMixin(ABC):
         """returns None if path doesn't exist"""
 
     @abstractmethod
-    def _mkdir_for_upload(self, path: str) -> None:
-        raise NotImplementedError()
+    def _mkdir_for_upload(self, path: str) -> None: ...
 
     @abstractmethod
     def _write_file(
@@ -550,24 +550,20 @@ class UploadDownloadMixin(ABC):
         file_size: int,
         callback: Callable[[int, int], None],
         make_shebang_scripts_executable: bool,
-    ) -> None:
-        raise NotImplementedError()
+    ) -> None: ...
 
     @abstractmethod
     def _read_file(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
-    ) -> None:
-        raise NotImplementedError()
+    ) -> None: ...
 
     @abstractmethod
-    def _report_internal_exception(self):
-        raise NotImplementedError()
+    def _report_internal_exception(self, msg: str) -> None: ...
 
     @abstractmethod
     def _report_progress(
         self, cmd, description: Optional[str], value: float, maximum: float
-    ) -> None:
-        raise NotImplementedError()
+    ) -> None: ...
 
     def _read_file_return_bytes(self, source_path: str) -> bytes:
         def callback(x, y):
@@ -725,7 +721,9 @@ class SshMixin(UploadDownloadMixin):
             import paramiko
 
             # TODO: does it get closed properly after process gets killed?
-            self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+            transport = self._client.get_transport()
+            assert transport is not None
+            self._sftp = paramiko.SFTPClient.from_transport(transport)
 
         return self._sftp
 
