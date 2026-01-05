@@ -45,7 +45,10 @@ class LocalCPythonUvProxy(LocalCPythonProxy):
     def get_switcher_configuration_label(cls, conf: Dict[str, Any]) -> str:
         python = conf[f"{cls.backend_name}.python"]
 
-        return cls.backend_description + "  •  " + python
+        rhs = python
+        if rhs != "auto" and "/" not in rhs and "\\" not in rhs:
+            rhs = "Python " + rhs
+        return cls.backend_description + "  •  " + rhs
 
     @classmethod
     def get_switcher_entries(cls) -> List[Tuple[Dict[str, Any], str, str]]:
