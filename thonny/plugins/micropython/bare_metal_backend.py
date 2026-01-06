@@ -91,22 +91,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         logger.debug("completed _run_main_program")
 
 
-    def _cmd_Run(self, cmd) -> Dict[str, Any]:
-        return self._cmd_Run_or_run(cmd, True)
-
-    def _cmd_run(self, cmd):
-        return self._cmd_Run_or_run(cmd, False)
-
-    def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
-        """Only for %run $EDITOR_CONTENT. start runs are handled differently."""
-        if cmd.get("source"):
-            assert isinstance(self._tmgr, BareMetalTargetManager)
-            self._tmgr.run_user_code_via_repl(cmd["source"], restart_interpreter_before_run, cmd.get("populate_argv", False),
-                                              cmd.get("args", []))
-            return {"source_for_language_server": cmd["source"]}
-        else:
-            return {}
-
     def _cmd_execute_system_command(self, cmd) -> Dict[str, Any]:
         # Can't use stdin, because a thread is draining it
         returncode = execute_system_command(cmd, cwd=self._local_cwd, disconnect_stdin=True)
@@ -211,8 +195,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             + "%s device and try again.\n" % self._tmgr._get_interpreter_kind()
         )
 
-    def _get_sep(self):
-        return self._tmgr.get_dir_sep()
 
 
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):

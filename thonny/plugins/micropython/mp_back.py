@@ -127,8 +127,8 @@ class MicroPythonBackend(MainBackend, ABC):
     def _evaluate(self, script: str) -> Any:
         return self._tmgr._evaluate(script)
 
-    def _execute(self, script: str) -> Tuple[str, str]:
-        return self._tmgr._execute(script)
+    def _execute(self, script: str, capture_output: bool = False) -> Tuple[str, str]:
+        return self._tmgr._execute(script, capture_output)
 
     def _perform_idle_tasks(self):
         read_bytes = self._tmgr.handle_unexpected_output()
@@ -228,8 +228,20 @@ class MicroPythonBackend(MainBackend, ABC):
         else:
             raise UserError("%cd takes one parameter")
 
-    @abstractmethod
-    def _cmd_Run(self, cmd) -> Dict[str, Any]: ...
+    def _cmd_Run(self, cmd) -> Dict[str, Any]:
+        return self._cmd_Run_or_run(cmd, True)
+
+    def _cmd_run(self, cmd):
+        return self._cmd_Run_or_run(cmd, False)
+
+    def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
+        """Only for %run $EDITOR_CONTENT. start runs are handled differently."""
+        if cmd.get("source"):
+            self._tmgr.run_user_program_via_repl(cmd["source"], restart_interpreter_before_run, cmd.get("populate_argv", False),
+                                                 cmd.get("args", []))
+            return {"source_for_language_server": cmd["source"]}
+        else:
+            return {}
 
     def _cmd_execute_source(self, cmd):
         # TODO: clear last object inspector requests dictionary
@@ -725,15 +737,7 @@ class MicroPythonBackend(MainBackend, ABC):
             e.err,
         )
 
+    def _get_sep(self):
+        return self._tmgr.get_dir_sep()
 
-class ProtocolError(RuntimeError):
-    pass
-
-
-class ManagementError(ProtocolError):
-    def __init__(self, msg, script, out, err):
-        RuntimeError.__init__(self, msg)
-        self.script = script
-        self.out = out
-        self.err = err
 

@@ -110,5 +110,6 @@ project-includes = [
     "thonny/plugins/micropython/__init__.py",
     "thonny/plugins/micropython/mp_back.py",
     "thonny/plugins/micropython/bare_metal_backend.py",
+    "thonny/plugins/micropython/os_mp_backend.py",
 ]
 search-path = [""]
