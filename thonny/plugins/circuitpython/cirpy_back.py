@@ -51,7 +51,6 @@ _AUTO_RELOAD_PHRASES = [
 
 class CircuitPythonBackend(BareMetalMicroPythonBackend):
 
-
     def _transform_output(self, data, stream_name):
         # Any keypress wouldn't work in Thonny's shell
         for phrase in _ENTER_REPL_PHRASES + _AUTO_RELOAD_PHRASES:

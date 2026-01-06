@@ -120,7 +120,7 @@ class Record:
     def __eq__(self, other):
         # pylint: disable=unidiomatic-typecheck
 
-        if type(self) != type(other):
+        if type(self) is type(other):
             return False
 
         if len(self.__dict__) != len(other.__dict__):
@@ -132,7 +132,7 @@ class Record:
             self_value = getattr(self, key)
             other_value = getattr(other, key)
 
-            if type(self_value) != type(other_value) or self_value != other_value:
+            if type(self_value) is type(other_value) or self_value != other_value:
                 return False
 
         return True
@@ -265,7 +265,7 @@ def serialize_message(msg: Record, max_line_length=65536) -> str:
 def parse_message(msg_string: str) -> Record:
     # DataFrames may have nan
     # pylint: disable=unused-variable
-    nan = float("nan")  # @UnusedVariable
+    locals()["nan"] = float("nan")
     assert msg_string[0] == MESSAGE_MARKER
     assert msg_string.strip().endswith(")")
     msg_start = msg_string.index(" ")
@@ -380,13 +380,10 @@ def get_site_dir(symbolic_name, executable=None):
     else:
         import subprocess
 
-        result = (
-            subprocess.check_output(
-                [executable, "-m", "site", "--" + symbolic_name.lower().replace("_", "-")],
-                universal_newlines=True,
-            )
-            .strip()
-        )
+        result = subprocess.check_output(
+            [executable, "-m", "site", "--" + symbolic_name.lower().replace("_", "-")],
+            universal_newlines=True,
+        ).strip()
 
     return result if result else None
 
@@ -550,7 +547,7 @@ def get_windows_volume_name(path):
     # https://stackoverflow.com/a/12056414/261181
     import ctypes
 
-    kernel32 = ctypes.windll.kernel32 # type: ignore
+    kernel32 = ctypes.windll.kernel32  # type: ignore
     volume_name_buffer = ctypes.create_unicode_buffer(1024)
     file_system_name_buffer = ctypes.create_unicode_buffer(1024)
     serial_number = None
@@ -580,7 +577,7 @@ def get_windows_network_locations():
     CSIDL_NETHOOD = 0x13
     SHGFP_TYPE_CURRENT = 0
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf) # type: ignore
+    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf)  # type: ignore
     shortcuts_dir = buf.value
     if not buf.value:
         logger.warning("Could not determine windows shortcuts directory")

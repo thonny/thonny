@@ -80,6 +80,7 @@ dev = [
     "requests",
     "paramiko",
     "ptyprocess",
+    "ruff",
 ]
 
 [tool.uv.build-backend]
@@ -113,3 +114,19 @@ project-includes = [
     "thonny/plugins/micropython/os_mp_backend.py",
 ]
 search-path = [""]
+
+[tool.ruff]
+include = [
+    "thonny/__init__.py",
+    "thonny/common.py",
+    "thonny/backend.py",
+    "thonny/plugins/micropython/__init__.py",
+    "thonny/plugins/micropython/mp_back.py",
+    "thonny/plugins/micropython/bare_metal_backend.py",
+    "thonny/plugins/micropython/os_mp_backend.py",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E402"
+]

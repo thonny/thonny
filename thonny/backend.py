@@ -113,7 +113,10 @@ class BaseBackend(ABC):
         sys.exit(ALL_EXPLAINED_STATUS_CODE)
 
     def _current_command_is_interrupted(self):
-        return self._current_command_interrupt_event is not None and self._current_command_interrupt_event.is_set()
+        return (
+            self._current_command_interrupt_event is not None
+            and self._current_command_interrupt_event.is_set()
+        )
 
     def _fetch_next_incoming_message(self, timeout=None):
         return self._incoming_message_queue.get(timeout=timeout)
@@ -294,7 +297,7 @@ class MainBackend(BaseBackend, ABC):
                     response = {}
                 else:
                     response = {"error": "Interrupted", "interrupted": True}
-            except Exception as e:
+            except Exception:
                 logger.exception("Exception while handling %r", cmd.name)
                 self._report_internal_exception("Exception while handling %r" % cmd.name)
                 sys.exit(ALL_EXPLAINED_STATUS_CODE)
@@ -324,14 +327,13 @@ class MainBackend(BaseBackend, ABC):
         return {"all_items": self._get_paths_info(cmd.source_paths, recurse=True)}
 
     @abstractmethod
-    def _cmd_get_active_distributions(self, cmd) -> Dict[str, Any]:  ...
+    def _cmd_get_active_distributions(self, cmd) -> Dict[str, Any]: ...
 
     @abstractmethod
     def _cmd_install_distributions(self, cmd) -> Dict[str, Any]: ...
 
-
     @abstractmethod
-    def _cmd_uninstall_distributions(self, cmd)  -> Dict[str, Any]: ...
+    def _cmd_uninstall_distributions(self, cmd) -> Dict[str, Any]: ...
 
     def _get_paths_info(self, paths: List[str], recurse: bool) -> Dict[str, Dict]:
         result = {}
@@ -608,7 +610,7 @@ class SshMixin(UploadDownloadMixin):
         # UploadDownloadMixin.__init__(self)
         execute_with_frontend_sys_path(self._try_load_paramiko)
         import paramiko
-        from paramiko.client import AutoAddPolicy, SSHClient
+        from paramiko.client import SSHClient
 
         self._host = host
         self._port = port
@@ -627,6 +629,8 @@ class SshMixin(UploadDownloadMixin):
     def _try_load_paramiko(self):
         try:
             import paramiko.client
+
+            logger.debug("Could import %", paramiko.client)
         except ImportError:
             logger.info("Could not import paramiko")
             print(
@@ -771,7 +775,7 @@ class SshMixin(UploadDownloadMixin):
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         try:
             return self._perform_sftp_operation_with_retry(lambda sftp: sftp.stat(path).st_mode)
-        except OSError as e:
+        except OSError:
             return None
 
     def _mkdir_for_upload(self, path: str) -> None:

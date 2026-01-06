@@ -35,7 +35,6 @@ CP 5.0
 
 import ast
 import os
-import pathlib
 import sys
 from abc import ABC, abstractmethod
 from logging import getLogger
@@ -58,7 +57,6 @@ from thonny.backend import MainBackend
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
-    DistInfo,
     EOFCommand,
     ImmediateCommand,
     InputSubmission,
@@ -74,8 +72,6 @@ from thonny.common import (
 WAIT_OR_CRASH_TIMEOUT = 5
 
 SECONDS_IN_YEAR = 60 * 60 * 24 * 365
-
-
 
 
 EXTRA_HELPER_CODE = """"
@@ -154,7 +150,6 @@ class MicroPythonBackend(MainBackend, ABC):
                 self._current_command_interrupt_event.set()
             self._tmgr._interrupt()
 
-
     def _handle_normal_command(self, cmd: CommandToBackend) -> None:
         logger.debug("Handling normal command '%s' in micropython backend ", cmd.name)
         report_time("before " + cmd.name)
@@ -178,7 +173,6 @@ class MicroPythonBackend(MainBackend, ABC):
 
         self.send_message(ToplevelResponse(**args))
 
-
     def send_message(self, msg: MessageFromBackend) -> None:
         if "cwd" not in msg:
             msg["cwd"] = self._tmgr.get_cwd()
@@ -193,7 +187,6 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _send_error_message(self, msg):
         self._send_output("\n" + msg + "\n", "stderr")
-
 
     def _check_for_side_commands(self):
         # NB! EOFCommand gets different treatment depending whether it is read during processing a command
@@ -237,8 +230,12 @@ class MicroPythonBackend(MainBackend, ABC):
     def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
         """Only for %run $EDITOR_CONTENT. start runs are handled differently."""
         if cmd.get("source"):
-            self._tmgr.run_user_program_via_repl(cmd["source"], restart_interpreter_before_run, cmd.get("populate_argv", False),
-                                                 cmd.get("args", []))
+            self._tmgr.run_user_program_via_repl(
+                cmd["source"],
+                restart_interpreter_before_run,
+                cmd.get("populate_argv", False),
+                cmd.get("args", []),
+            )
             return {"source_for_language_server": cmd["source"]}
         else:
             return {}
@@ -460,15 +457,13 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _cmd_get_active_distributions(self, cmd) -> Dict[str, Any]:
         try:
-            current_state = ...#self._perform_pipkin_operation_and_list(None)
+            current_state = ...  # self._perform_pipkin_operation_and_list(None)
             return dict(
                 distributions=current_state,
             )
         except Exception as e:
             logger.exception("Could not get active distributions")
             return dict(error=str(e))
-
-
 
     def _cmd_install_distributions(self, cmd) -> Dict[str, Any]:
         args = cast(List[str], cmd.args[:])
@@ -493,6 +488,7 @@ class MicroPythonBackend(MainBackend, ABC):
         specs = args
 
         try:
+            print("TODO", specs, requirement_files, args, upgrade)
             """
             new_state = self._perform_pipkin_operation_and_list(
                 command="install",
@@ -522,12 +518,8 @@ class MicroPythonBackend(MainBackend, ABC):
             logger.exception("Could not uninstall")
             return dict(error=str(e))
 
-
-
     def _guess_package_pypi_name(self, installed_name) -> str:
         return "micropython-" + installed_name
-
-
 
     def _cmd_mkdir(self, cmd):
         assert self._tmgr._supports_directories()
@@ -545,7 +537,7 @@ class MicroPythonBackend(MainBackend, ABC):
         return self._expand_stat(stat, basename)
 
     def _get_dir_children_info(
-            self, path: str, include_hidden: bool = False
+        self, path: str, include_hidden: bool = False
     ) -> Optional[Dict[str, Dict]]:
         """The key of the result dict is simple name"""
         if self._tmgr._supports_directories():
@@ -584,7 +576,7 @@ class MicroPythonBackend(MainBackend, ABC):
     def handle_connection_error(self, error=None):
         try:
             self._tmgr.handle_unexpected_output("stderr")
-        except:
+        except Exception:
             logger.warning("Could not forward output", exc_info=True)
         super().handle_connection_error(error)
 
@@ -671,7 +663,6 @@ class MicroPythonBackend(MainBackend, ABC):
             logger.warning("Problem adding Expr handlers", exc_info=e)
             return source
 
-
     def _mark_nodes_to_be_guarded_from_instrumentation(self, node, guarded_context):
         if not guarded_context and isinstance(node, ast.FunctionDef):
             guarded_context = True
@@ -739,5 +730,3 @@ class MicroPythonBackend(MainBackend, ABC):
 
     def _get_sep(self):
         return self._tmgr.get_dir_sep()
-
-

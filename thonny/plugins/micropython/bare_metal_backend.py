@@ -72,14 +72,16 @@ logger = getLogger("thonny.plugins.micropython.bare_metal_backend")
 class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     def __init__(self, connection: MicroPythonConnection, clean: bool, args: Dict[str, Any]):
 
-        tmgr = BareMetalTargetManager(connection,
-                                      submit_mode=args.get("submit_mode") or "raw_paste",
-                                      write_block_size=args.get("write_block_size") or 127,
-                                      write_block_delay=args.get("write_block_delay") or 0.01,
-                                      uses_local_time=args.get("local_rtc") or True,
-                                      clean=clean,
-                                      interrupt=args.get("interrupt_on_connect", False) or clean,
-                                      cwd=args.get("cwd"))
+        tmgr = BareMetalTargetManager(
+            connection,
+            submit_mode=args.get("submit_mode") or "raw_paste",
+            write_block_size=args.get("write_block_size") or 127,
+            write_block_delay=args.get("write_block_delay") or 0.01,
+            uses_local_time=args.get("local_rtc") or True,
+            clean=clean,
+            interrupt=args.get("interrupt_on_connect", False) or clean,
+            cwd=args.get("cwd"),
+        )
         super().__init__(tmgr)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
@@ -89,7 +91,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         self._tmgr._process_output_until_active_prompt(self._send_output)
         self.send_message(ToplevelResponse(cwd=self._tmgr.get_cwd()))
         logger.debug("completed _run_main_program")
-
 
     def _cmd_execute_system_command(self, cmd) -> Dict[str, Any]:
         # Can't use stdin, because a thread is draining it
@@ -148,7 +149,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         # NB! Don't let the mainloop see the prompt and act on it
         self._tmgr._prepare_disconnect()
 
-
     def _get_stat_mode_for_upload(self, path: str) -> Optional[int]:
         return self._tmgr._get_stat_mode(path)
 
@@ -160,9 +160,10 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
     ) -> None:
         assert self._current_command_interrupt_event is not None
         start_time = time.time()
-        self._tmgr.read_file_ex(source_path, target_fp, callback, self._current_command_interrupt_event)
+        self._tmgr.read_file_ex(
+            source_path, target_fp, callback, self._current_command_interrupt_event
+        )
         logger.info("Read %s in %.1f seconds", source_path, time.time() - start_time)
-
 
     def _write_file(
         self,
@@ -173,7 +174,6 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         make_shebang_scripts_executable: bool,
     ) -> None:
         start_time = time.time()
-
 
         if make_shebang_scripts_executable:
             source_fp, _ = convert_newlines_if_has_shebang(source_fp)
@@ -196,10 +196,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         )
 
 
-
 class GenericBareMetalMicroPythonBackend(BareMetalMicroPythonBackend):
     pass
-
 
 
 def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonBackend]) -> None:
@@ -218,14 +216,14 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
         elif args["port"] == "webrepl":
             connection = WebReplConnection(args["url"], args["password"])
         else:
-            from minny.serial_connection import DifficultSerialConnection, SerialConnection
+            from minny.serial_connection import SerialConnection
 
             connection = SerialConnection(
                 args["port"], BAUDRATE, dtr=args.get("dtr"), rts=args.get("rts")
             )
             # connection = DifficultSerialConnection(args["port"], BAUDRATE)
 
-        backend = backend_class(connection, clean=args["clean"], args=args)
+        backend_class(connection, clean=args["clean"], args=args)
 
     except ConnectionError as e:
         text = "\n" + str(e) + "\n"

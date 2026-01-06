@@ -20,14 +20,12 @@ from thonny.plugins.micropython.mp_back import MicroPythonBackend
 logger = getLogger("thonny.plugins.micropython.os_mp_backend")
 
 
-
-
 class UnixMicroPythonBackend(MicroPythonBackend, ABC):
     def _cmd_execute_system_command(self, cmd) -> Dict[str, Any]:
         assert cmd.cmd_line.startswith("!")
         cmd_line = cmd.cmd_line[1:]
         returncode = self._evaluate("__thonny_helper.os.system(%r)" % cmd_line)
-        return {"returncode" : returncode}
+        return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
         script = """__thonny_helper.os.system("stat -f -c '%b %f %a %S' {path}") or None""".format(
@@ -60,6 +58,7 @@ class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
         os.chdir(cwd)
         return result
 
+
 """
 class SshUnixMicroPythonBackend(UnixMicroPythonBackend, SshMixin):
     def __init__(self, args: Dict[str, Any]):
@@ -91,7 +90,7 @@ if __name__ == "__main__":
     args = ast.literal_eval(sys.argv[1])
 
     if "host" in args:
-        #backend = SshUnixMicroPythonBackend(args)
+        # backend = SshUnixMicroPythonBackend(args)
         raise NotImplementedError("ssh backend out of order")
     else:
         backend = LocalUnixMicroPythonBackend(args)
