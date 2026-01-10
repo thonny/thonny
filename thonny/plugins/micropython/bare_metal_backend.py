@@ -26,7 +26,6 @@ from thonny.common import (
     serialize_message,
 )
 from thonny.plugins.micropython.mp_back import MicroPythonBackend
-from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
 RAW_PASTE_COMMAND = b"\x05A\x01"
 RAW_PASTE_CONFIRMATION = b"R\x01"
@@ -102,8 +101,8 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             used = self._evaluate(
                 dedent(
                     """
-                    __thonny_helper.print_mgmt_value(
-                        __thonny_helper.builtins.sum([__thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()])
+                    __minny_helper.print_mgmt_value(
+                        __minny_helper.builtins.sum([__minny_helper.os.size(name) for name in __minny_helper.os.listdir()])
                     )  
                     """
                 )
@@ -119,11 +118,11 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             result = self._evaluate(
                 dedent(
                     """
-                __thonny_stat = __thonny_helper.os.statvfs(%r)
+                __thonny_stat = __minny_helper.os.statvfs(%r)
                 __thonny_total = __thonny_stat[2] * __thonny_stat[0]
                 __thonny_free = __thonny_stat[3] * __thonny_stat[0]
 
-                __thonny_helper.print_mgmt_value({
+                __minny_helper.print_mgmt_value({
                     "total" : __thonny_total,
                     "used" : __thonny_total - __thonny_free,
                     "free": __thonny_free,
@@ -214,6 +213,8 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
             print("\nPort not defined", file=sys.stderr)
             sys.exit(ALL_EXPLAINED_STATUS_CODE)
         elif args["port"] == "webrepl":
+            from minny.webrepl_connection import WebReplConnection
+
             connection = WebReplConnection(args["url"], args["password"])
         else:
             from minny.serial_connection import SerialConnection

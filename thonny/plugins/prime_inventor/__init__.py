@@ -1,9 +1,11 @@
 from thonny.plugins.micropython import (
-    BareMetalMicroPythonConfigPage,
-    BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
-from thonny.plugins.micropython.mp_front import VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND
+from thonny.plugins.micropython.mp_front import (
+    VIDS_PIDS_TO_AVOID_IN_GENERIC_BACKEND,
+    BareMetalMicroPythonProxy,
+    BareMetalMicroPythonConfigPage,
+)
 
 LEGO_INVENTOR_PRIME_VIDS_PIDS = {
     (0x0694, 0x0009),  # Spike Prime

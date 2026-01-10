@@ -24,11 +24,11 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
     def _cmd_execute_system_command(self, cmd) -> Dict[str, Any]:
         assert cmd.cmd_line.startswith("!")
         cmd_line = cmd.cmd_line[1:]
-        returncode = self._evaluate("__thonny_helper.os.system(%r)" % cmd_line)
+        returncode = self._evaluate("__minny_helper.os.system(%r)" % cmd_line)
         return {"returncode": returncode}
 
     def _cmd_get_fs_info(self, cmd):
-        script = """__thonny_helper.os.system("stat -f -c '%b %f %a %S' {path}") or None""".format(
+        script = """__minny_helper.os.system("stat -f -c '%b %f %a %S' {path}") or None""".format(
             path=cmd.path
         )
         out, err = self._execute(script, capture_output=True)

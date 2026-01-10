@@ -1,12 +1,13 @@
-import os.path
 import sys
-from time import sleep
-from typing import List, Optional, Tuple
-
 from thonny import ui_utils
 from thonny.languages import tr
-from thonny.plugins.micropython import BareMetalMicroPythonConfigPage, BareMetalMicroPythonProxy
 from thonny.plugins.micropython.daplink_flasher import DaplinkFlashingDialog
+from thonny.plugins.micropython.mp_front import (
+    BareMetalMicroPythonProxy,
+    BareMetalMicroPythonConfigPage,
+)
+from time import sleep
+from typing import List, Optional, Tuple
 
 
 class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):

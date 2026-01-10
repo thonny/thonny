@@ -1,11 +1,15 @@
 from logging import getLogger
 from typing import List, Optional
 
-from thonny.plugins.micropython import BareMetalMicroPythonConfigPage, BareMetalMicroPythonProxy
 from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
 
 # from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
-from thonny.plugins.micropython.mp_front import add_micropython_backend, get_uart_adapter_vids_pids
+from thonny.plugins.micropython.mp_front import (
+    add_micropython_backend,
+    get_uart_adapter_vids_pids,
+    BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
+)
 from thonny.plugins.micropython.uf2dialog import show_uf2_installer
 
 logger = getLogger(__name__)
@@ -15,7 +19,7 @@ VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS = set()
 
 class ESPProxy(BareMetalMicroPythonProxy):
     @classmethod
-    def get_vids_pids_to_avoid(self):
+    def get_vids_pids_to_avoid(cls):
         return VIDS_PIDS_TO_AVOID_IN_ESP_BACKENDS
 
 

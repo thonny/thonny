@@ -85,5 +85,5 @@ pb.serial.read_all() # Otherwise exec_ gets confused by the output of the thread
 pb.enter_raw_repl()
 
 pb.exec_(second_script, data_consumer=print)
-pb.exec_("print('__thonny_helper' in dir())", data_consumer=print)
+pb.exec_("print('__minny_helper' in dir())", data_consumer=print)
 

@@ -53,6 +53,7 @@ dependencies = [
     "pylint>=2.16.2",
     "Send2Trash>=1.8.0",
     "wheel>=0.38.4",
+    "esptool"
 ]
 
 [project.optional-dependencies]
