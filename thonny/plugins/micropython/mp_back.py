@@ -65,6 +65,10 @@ from thonny.common import (
     UserError,
     ValueInfo,
 )
+from thonny.plugins.micropython.mp_project_managers import (
+    MicroPythonProjectManager,
+    create_project_manager,
+)
 
 # How many seconds to wait for something that should appear quickly.
 # In other words -- how long to wait with reporting a protocol error
@@ -101,9 +105,12 @@ logger = getLogger(__name__)
 
 
 class MicroPythonBackend(MainBackend, ABC):
-    def __init__(self, tmgr: ProperTargetManager):
+    def __init__(self, tmgr: ProperTargetManager, args: Dict[str, Any]):
         logger.info("Initializing MicroPythonBackend of type %s", type(self).__name__)
         self._tmgr: ProperTargetManager = tmgr
+        self._project_manager: Optional[MicroPythonProjectManager] = (
+            self._check_create_project_manager(args)
+        )
         MainBackend.__init__(self)
         # Get rid of the welcome text which was printed while searching for prompt
         self.send_message(
@@ -119,6 +126,24 @@ class MicroPythonBackend(MainBackend, ABC):
         except Exception:
             logger.exception("Exception in MicroPython main method")
             self._report_internal_exception("Internal error")
+
+    def _check_create_project_manager(
+        self, args: Dict[str, Any]
+    ) -> Optional[MicroPythonProjectManager]:
+        manager_name = args.get("project_manager")
+        assert isinstance(manager_name, str)
+        if manager_name == "-":
+            return None
+
+        project_path = args.get("local_project_path")
+        assert isinstance(project_path, str)
+        if project_path is None:
+            self._show_error(
+                "WARNING: Ignoring selected project manager as no project is selected."
+            )
+            return None
+
+        return create_project_manager(manager_name, project_path, self._tmgr)
 
     def _evaluate(self, script: str) -> Any:
         return self._tmgr._evaluate(script)
@@ -222,6 +247,9 @@ class MicroPythonBackend(MainBackend, ABC):
             raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd) -> Dict[str, Any]:
+        if self._project_manager is not None:
+            self._project_manager.deploy(True)
+
         return self._cmd_Run_or_run(cmd, True)
 
     def _cmd_run(self, cmd):

@@ -85,6 +85,12 @@ class MicroPythonProxy(SubprocessProxy):
         }
         return result
 
+    def _get_project_args(self):
+        return {
+            "local_project_path": get_workbench().get_local_project_path(),
+            "project_manager": get_workbench().get_option(self.backend_name + ".project_manager"),
+        }
+
     def _installer_runs_locally(self):
         return True
 
@@ -346,6 +352,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             args["password"] = get_workbench().get_option(self.backend_name + ".webrepl_password")
 
         args.update(self._get_time_args())
+        args.update(self._get_project_args())
 
         cmd = [
             self._get_backend_launcher_path(),
@@ -758,6 +765,16 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
             self.options_page,
             self.backend_name + ".populate_argv",
             tr("Populate sys.argv on run"),
+        )
+
+        add_vertical_separator(self.options_page)
+
+        add_option_combobox(
+            self.options_page,
+            self.backend_name + ".project_manager",
+            tr("Project manager"),
+            ["Minny", "Belay", "-"],
+            tooltip="Minny and Belay can manage dependencies and perform deployment by the project spec",
         )
 
     def _init_advanced_page(self) -> None:
@@ -1344,6 +1361,7 @@ class SshMicroPythonProxy(MicroPythonProxy):
 
         args.update(self._get_time_args())
         args.update(self._get_extra_launcher_args())
+        args.update(self._get_project_args())
 
         cmd = [
             thonny.plugins.micropython.os_mp_backend.__file__,
@@ -1627,4 +1645,5 @@ def add_micropython_backend(
     get_workbench().set_default(name + ".sync_time", sync_time)
     get_workbench().set_default(name + ".local_rtc", local_rtc)
     get_workbench().set_default(name + ".validate_time", validate_time)
+    get_workbench().set_default(name + ".project_manager", "-")
     get_workbench().add_backend(name, proxy_class, description, config_page, sort_key=sort_key)

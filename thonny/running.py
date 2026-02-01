@@ -39,7 +39,7 @@ from thonny import (
     report_time,
 )
 from thonny.common import (
-    ALL_EXPLAINED_STATUS_CODE,
+    INTERNAL_ERROR_STATUS_CODE,
     PROCESS_ACK,
     BackendEvent,
     CommandToBackend,
@@ -774,7 +774,7 @@ class Runner:
         self._send_postponed_commands()
 
     def _handle_backend_termination(self, returncode: Optional[int]) -> None:
-        if returncode is None or returncode == ALL_EXPLAINED_STATUS_CODE:
+        if returncode is None or returncode == INTERNAL_ERROR_STATUS_CODE:
             err = ""
         else:
             err = f"Process ended with exit code {returncode}."
@@ -791,7 +791,10 @@ class Runner:
 
         get_workbench().become_active_window(False)
         self.destroy_backend()
-        if self._should_restart_after_command(self._last_accepted_backend_command):
+        if (
+            self._should_restart_after_command(self._last_accepted_backend_command)
+            and returncode != INTERNAL_ERROR_STATUS_CODE
+        ):
             self.restart_backend(clean=True, automatic=True)
 
     def _should_restart_after_command(self, cmd: CommandToBackend):

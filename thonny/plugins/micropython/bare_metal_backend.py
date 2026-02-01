@@ -17,7 +17,7 @@ if thonny_container not in sys.path:
 import thonny
 from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
-    ALL_EXPLAINED_STATUS_CODE,
+    INTERNAL_ERROR_STATUS_CODE,
     PROCESS_ACK,
     BackendEvent,
     EOFCommand,
@@ -81,7 +81,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
             interrupt=args.get("interrupt_on_connect", False) or clean,
             cwd=args.get("cwd"),
         )
-        super().__init__(tmgr)
+        super().__init__(tmgr, args)
 
     def _handle_eof_command(self, msg: EOFCommand) -> None:
         logger.info("_run_main_program")
@@ -211,7 +211,7 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
     try:
         if args["port"] is None:
             print("\nPort not defined", file=sys.stderr)
-            sys.exit(ALL_EXPLAINED_STATUS_CODE)
+            sys.exit(INTERNAL_ERROR_STATUS_CODE)
         elif args["port"] == "webrepl":
             from minny.webrepl_connection import WebReplConnection
 
@@ -231,7 +231,7 @@ def launch_bare_metal_backend(backend_class: Callable[..., BareMetalMicroPythonB
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
-        sys.exit(ALL_EXPLAINED_STATUS_CODE)
+        sys.exit(INTERNAL_ERROR_STATUS_CODE)
 
 
 if __name__ == "__main__":

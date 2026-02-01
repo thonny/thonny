@@ -47,7 +47,7 @@ class UnixMicroPythonBackend(MicroPythonBackend, ABC):
 class LocalUnixMicroPythonBackend(UnixMicroPythonBackend):
     def __init__(self, args: Dict[str, Any]):
         tmgr = LocalOsTargetManager(args["interpreter"])
-        super().__init__(tmgr)
+        super().__init__(tmgr, args)
 
     def _cmd_cd(self, cmd):
         result = super()._cmd_cd(cmd)

@@ -52,6 +52,7 @@ class EV3MicroPythonProxy(SshMicroPythonProxy):
         }
 
         args.update(self._get_time_args())
+        args.update(self._get_project_args())
         args.update(self._get_extra_launcher_args())
 
         cmd = [
