@@ -279,6 +279,10 @@ pololu_variants = [
         "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
             {
+                "version": "260210",
+                "url": "https://github.com/pololu/micropython-build/releases/download/260210/micropython-pololu-3pi-2040-robot-v1.27.0-260210.uf2"
+            },
+            {
                 "version": "240117",
                 "url": "https://github.com/pololu/micropython-build/releases/download/240117/micropython-pololu-3pi-2040-robot-v1.22.1-240117.uf2"
             },
@@ -306,6 +310,10 @@ pololu_variants = [
         "family": "rp2",
         "info_url": "https://github.com/pololu/micropython-build/releases/",
         "downloads": [
+            {
+                "version": "260210",
+                "url": "https://github.com/pololu/micropython-build/releases/download/260210/micropython-pololu-zumo-2040-robot-v1.27.0-260210.uf2"
+            },
             {
                 "version": "240117",
                 "url": "https://github.com/pololu/micropython-build/releases/download/240117/micropython-pololu-zumo-2040-robot-v1.22.1-240117.uf2"
