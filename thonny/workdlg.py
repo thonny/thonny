@@ -429,7 +429,7 @@ class SubprocessDialog(WorkDialog):
         if hasattr(self._proc, "cmd"):
             try:
                 self.append_text(subprocess.list2cmdline(self._proc.cmd) + "\n")
-            except:
+            except Exception:
                 logger.warning("Could not extract cmd (%s)", self._proc.cmd)
         self._start_listening_current_proc()
 

@@ -2886,7 +2886,7 @@ class Workbench(tk.Tk):
         finally:
             try:
                 super().destroy()
-            except:
+            except Exception:
                 logger.exception("Problem during close")
                 sys.exit(1)
 

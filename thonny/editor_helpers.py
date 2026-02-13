@@ -95,7 +95,7 @@ class EditorInfoBox(tk.Toplevel):
                 if box.focus_get():
                     # it's alright
                     return
-            except:
+            except Exception:
                 pass
 
         self.hide()
