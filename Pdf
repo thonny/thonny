@@ -1,0 +1,53 @@
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+
+# Crear el PDF
+file_path = "Formulometro_Quimica.pdf"  # se guardará en la misma carpeta donde ejecutes el script
+doc = SimpleDocTemplate(file_path, pagesize=A4)
+
+# Estilos
+styles = getSampleStyleSheet()
+title_style = styles["Heading1"]
+
+# Título
+elements = [Paragraph("Formulómetro de Química – Expresiones de Concentración", title_style), Spacer(1, 12)]
+
+# Datos de la tabla
+data = [
+    ["Expresión de concentración", "Símbolo", "Fórmula", "Unidad"],
+    ["Molaridad", "M", "M = n_soluto / V_disolución", "mol/L"],
+    ["Molalidad", "m", "m = n_soluto / m_disolvente", "mol/kg"],
+    ["Normalidad", "N", "N = equivalentes de soluto / V_disolución", "eq/L"],
+    ["Fracción molar", "X", "Xi = ni / Σnj", "adimensional"],
+    ["Porcentaje en masa", "% m/m", "%m/m = (m_soluto / m_disolución) × 100", "%"],
+    ["Porcentaje en volumen", "% V/V", "%V/V = (V_soluto / V_disolución) × 100", "%"],
+    ["Porcentaje masa-volumen", "% m/V", "%m/V = (m_soluto / V_disolución) × 100", "g/100 mL"],
+    ["Concentración en g/L", "C (g/L)", "C = m_soluto / V_disolución", "g/L"],
+    ["Partes por millón", "ppm", "ppm = (m_soluto / m_disolución) × 10⁶", "mg/L"],
+    ["Partes por billón", "ppb", "ppb = (m_soluto / m_disolución) × 10⁹", "µg/L"],
+]
+
+# Crear la tabla
+table = Table(data, colWidths=[140, 80, 170, 80])
+
+# Estilo de la tabla
+table.setStyle(TableStyle([
+    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4CAF50")),
+    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+    ("FONTSIZE", (0, 0), (-1, 0), 11),
+    ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
+    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+    ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+]))
+
+# Agregar tabla al PDF
+elements.append(table)
+
+# Construir PDF
+doc.build(elements)
+
+print(f"✅ PDF generado: {file_path}")
