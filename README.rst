@@ -8,6 +8,24 @@ Thonny
 
 Thonny is a Python `IDE <https://en.wikipedia.org/wiki/Integrated_development_environment>`_ meant for learning programming.
 
+Installation guide:
+
+**Note (Linux):**
+
+You can also install Thonny directly using apt:
+::
+    sudo apt update
+    sudo apt install thonny
+
+Or, if you prefer using pip:
+::
+    pip3 install --user thonny
+
+Then run it using:
+::
+    thonny
+
+
 
 End users
 ---------
