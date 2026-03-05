@@ -189,7 +189,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
         "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
     },
-    ["0.0.12", "0.0.11"],
+    ["1.26.1"],
     pimo2350_variants,
 )
 
@@ -208,6 +208,18 @@ pimoroni_variants = [
         "model": "Pico",
     },
     {
+        "_id": "pico_ppp",
+        "vendor": "Raspberry Pi",
+        "model": "Pico",
+        "title": "Pico (with Pimoroni libraries and PPP)",
+    },
+    {
+        "_id": "pico_usb",
+        "vendor": "Raspberry Pi",
+        "model": "Pico",
+        "title": "Pico (with Pimoroni libraries and USB)",
+    },
+    {
         "_id": "picolipo_16mb",
         "model": "Pimoroni Pico LiPo (16MB)",
     },
@@ -221,24 +233,12 @@ pimoroni_variants = [
         "model": "Pico W",
     },
     {
-        "_id": "cosmic_unicorn",
-        "model": "Cosmic Unicorn",
-    },
-    {
         "_id": "enviro",
         "model": "Enviro",
     },
     {
-        "_id": "galactic_unicorn",
-        "model": "Galactic Unicorn",
-    },
-    {
         "_id": "inky_frame",
         "model": "Inky Frame",
-    },
-    {
-        "_id": "stellar_unicorn",
-        "model": "Stellar Unicorn",
     },
     {
         "_id": "tiny2040_8mb",
@@ -259,7 +259,7 @@ add_defaults_and_downloads_to_variants(
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
     },
-    ["1.23.0-1"],
+    ["1.27.0", "1.25.0"],
     pimoroni_variants,
 )
 
