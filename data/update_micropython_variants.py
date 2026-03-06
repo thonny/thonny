@@ -152,30 +152,30 @@ all_variants += badger_variants
 ########################################################
 pimo2350_variants = [
     {
-        "_id": "pico2",
+        "_id": "rpi_pico2",
         "vendor": "Raspberry Pi",
         "model": "Pico 2",
     },
     {
-        "_id": "pico2b_rp2350",
+        "_id": "rpi_pico2b",
         "vendor": "Raspberry Pi",
         "model": "Pico 2 (b)",
     },
     {
-        "_id": "pico2_w",
+        "_id": "rpi_pico2_w",
         "vendor": "Raspberry Pi",
         "model": "Pico 2 W",
     },
     {
-        "_id": "pico_plus2_rp2350",
+        "_id": "pimoroni_pico_plus2",
         "model": "Pico Plus 2",
     },
     {
-        "_id": "plasma2350",
+        "_id": "pimoroni_plasma2350",
         "model": "Plasma 2350",
     },
     {
-        "_id": "tiny2350",
+        "_id": "pimoroni_tiny2350",
         "model": "Tiny 2350",
     },
 ]
@@ -187,7 +187,7 @@ add_defaults_and_downloads_to_variants(
         "vendor": "Pimoroni",
         "family": "rp2",
         "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
-        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
+        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-micropython.uf2",
     },
     ["1.26.1"],
     pimo2350_variants,
