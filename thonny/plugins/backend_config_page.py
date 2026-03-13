@@ -114,7 +114,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
 
-        self._combo_variable.trace("w", self._backend_changed)
+        self._combo_variable.trace_add("write", self._backend_changed)
         self._backend_changed()
 
     def _backend_changed(self, *args):
