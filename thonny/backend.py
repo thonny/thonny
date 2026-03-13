@@ -650,6 +650,8 @@ class SshMixin(UploadDownloadMixin):
                 username=self._user,
                 password=self._password,
                 passphrase=self._password,
+                look_for_keys=False,
+                allow_agent=False
             )
         except (SSHException, OSError) as e:
             print(
