@@ -2,13 +2,24 @@
 """Adds commands for opening certain Thonny folders"""
 
 from thonny import get_thonny_user_dir, get_workbench
+from tkinter.messagebox import askyesnocancel
 from thonny.languages import tr
 from thonny.ui_utils import open_path_in_system_file_manager
 
 
 def load_plugin() -> None:
     def cmd_open_data_dir():
-        open_path_in_system_file_manager(get_thonny_user_dir())
+        quit_dir_response = askyesnocancel(
+            title=tr("Thonny Closure"),
+            message=tr(
+                "Do you want to close Thonny before enterring the data folder? This is useful if you want to manually edit the configuration files. Closing Thonny ensures that any changes you make are not overwritten and are properly loaded when Thonny restarts."
+            ),
+            parent=get_workbench(),
+        )
+        if quit_dir_response != None:
+            open_path_in_system_file_manager(get_thonny_user_dir())
+            if quit_dir_response:
+                get_workbench().quit()
 
     def cmd_open_program_dir():
         open_path_in_system_file_manager(get_workbench().get_package_dir())
