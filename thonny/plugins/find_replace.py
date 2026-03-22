@@ -165,7 +165,7 @@ class FindDialog(CommonDialog):
 
         # create bindings
         self.bind("<Escape>", self._ok)
-        self.find_entry_var.trace("w", self._update_button_statuses)
+        self.find_entry_var.trace_add("write", self._update_button_statuses)
         self.find_entry.bind("<Return>", self._perform_find, True)
         self.bind("<F3>", self._perform_find, True)
         self.find_entry.bind("<KP_Enter>", self._perform_find, True)
