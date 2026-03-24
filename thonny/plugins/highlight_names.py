@@ -138,6 +138,10 @@ def update_highlighting(event):
     if not hasattr(text, "name_highlighter"):
         text.name_highlighter = OccurrencesHighlighter(text)
 
+    if getattr(event, "sequence", None) == "<<TextChange>>":
+        text.name_highlighter._clear()
+        return
+
     text.name_highlighter.trigger()
 
 
