@@ -22,6 +22,10 @@ class OccurrencesHighlighter:
     def __init__(self, text):
         self.text: SyntaxText = text
         self._request_scheduled: bool = False
+        self._request_in_progress: bool = False
+        self._request_refresh_pending: bool = False
+        self._active_request_serial: Union[int, None] = None
+        self._last_request_serial: int = 0
 
     def get_positions_for(self, source, line, column):
         raise NotImplementedError()
@@ -58,6 +62,10 @@ class OccurrencesHighlighter:
         if not self._should_request():
             return
 
+        if self._request_in_progress:
+            self._request_refresh_pending = True
+            return
+
         def consider_request():
             if time.time() - self.text.get_last_operation_time() < 0.3:
                 # wait a bit more, there may be more keypresses or cursor location changes coming
@@ -65,7 +73,10 @@ class OccurrencesHighlighter:
             else:
                 try:
                     if self._should_request():
-                        self._request()
+                        if self._request_in_progress:
+                            self._request_refresh_pending = True
+                        else:
+                            self._request()
                 finally:
                     self._request_scheduled = False
 
@@ -83,8 +94,6 @@ class OccurrencesHighlighter:
         if ls_proxy is None:
             return
 
-        ls_proxy.unbind_request_handler(self._handle_response)
-
         editor = self.text.master.master
         assert isinstance(editor, Editor)
         editor.send_changes_to_primed_servers()
@@ -94,27 +103,55 @@ class OccurrencesHighlighter:
         if uri is None:
             return
 
+        self._request_in_progress = True
+        self._request_refresh_pending = False
+        self._last_request_serial += 1
+        request_serial = self._last_request_serial
+        self._active_request_serial = request_serial
+        self.text.after(2500, lambda serial=request_serial: self._handle_request_timeout(serial))
+
+        def handle_response(
+            response: LspResponse[Union[List[lsp_types.DocumentHighlight], None]],
+        ) -> None:
+            self._handle_response(request_serial, response)
+
         ls_proxy.request_document_highlight(
             DocumentHighlightParams(textDocument=TextDocumentIdentifier(uri=uri), position=pos),
-            self._handle_response,
+            handle_response,
         )
 
-    def _handle_response(
-        self, response: LspResponse[Union[List[lsp_types.DocumentHighlight], None]]
-    ) -> None:
-        error = response.get_error()
-        if error:
-            messagebox.showerror(tr("Error"), str(error), master=get_workbench())
+    def _handle_request_timeout(self, request_serial: int) -> None:
+        self._finish_request(request_serial)
+
+    def _finish_request(self, request_serial: int) -> None:
+        if request_serial != self._active_request_serial:
             return
 
-        # TODO: check if the situation is still the same
+        self._active_request_serial = None
+        self._request_in_progress = False
 
-        result = response.get_result_or_raise()
+        if self._request_refresh_pending:
+            self._request_refresh_pending = False
+            self.text.after_idle(self.trigger)
 
-        if not result:
+    def _handle_response(
+        self, request_serial: int, response: LspResponse[Union[List[lsp_types.DocumentHighlight], None]]
+    ) -> None:
+        if request_serial != self._active_request_serial:
             return
 
         try:
+            error = response.get_error()
+            if error:
+                messagebox.showerror(tr("Error"), str(error), master=get_workbench())
+                return
+
+            # TODO: check if the situation is still the same
+            result = response.get_result_or_raise()
+
+            if not result:
+                return
+
             if len(result) > 1:
                 for ref in result:
                     # TODO: UTF-16
@@ -124,6 +161,8 @@ class OccurrencesHighlighter:
                     self.text.tag_add("matched_name", start_index, end_index)
         except Exception as e:
             logger.exception("Problem when updating name highlighting", exc_info=e)
+        finally:
+            self._finish_request(request_serial)
 
 
 def update_highlighting(event):
