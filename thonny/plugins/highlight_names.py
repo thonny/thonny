@@ -85,9 +85,11 @@ class OccurrencesHighlighter:
 
         ls_proxy.unbind_request_handler(self._handle_response)
 
-        pos = get_cursor_ls_position(self.text)
         editor = self.text.master.master
         assert isinstance(editor, Editor)
+        editor.send_changes_to_primed_servers()
+
+        pos = get_cursor_ls_position(self.text)
         uri = editor.get_uri()
         if uri is None:
             return
