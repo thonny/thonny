@@ -17,7 +17,11 @@ logger = getLogger(__name__)
 class PyrightProxy(LanguageServerProxy):
 
     def get_settings(self) -> Dict:
-        proxy = get_runner().get_backend_proxy()
+        runner = get_runner()
+        if runner is None:
+            return {}
+
+        proxy = runner.get_backend_proxy()
         if proxy is None:
             return {}
 
