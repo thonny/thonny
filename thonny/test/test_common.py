@@ -1,6 +1,7 @@
 import os
 
 from thonny.common import path_startswith
+from thonny.misc_utils import local_path_to_uri
 
 
 def test_path_startswith():
@@ -31,3 +32,8 @@ def test_path_startswith():
         assert path_startswith("c:\\foo\\bar.txt/kala\\pala", "C:\\")
 
         assert not path_startswith("C:\\kalapala\\pala", "C:\\kala")
+
+
+def test_local_path_to_uri_accepts_windows_forward_slashes():
+    assert local_path_to_uri("C:/CodeBlocks/thonny-test.py") == "file:///C:/CodeBlocks/thonny-test.py"
+    assert local_path_to_uri("C:\\CodeBlocks\\thonny-test.py") == "file:///C:/CodeBlocks/thonny-test.py"

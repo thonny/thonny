@@ -818,11 +818,11 @@ def uri_to_long_title(uri: str) -> str:
 
 
 def local_path_to_uri(path: str) -> str:
-    if path.startswith("//"):
+    if path.startswith("\\\\") or path.startswith("//"):
         # UNC
-        return f"{FILE_URI_SCHEME}:{urllib.parse.quote(path)}"
-    elif path[1:3] == ":\\":
-        # Regular Windows path, needs special treatment on other platforms
+        return pathlib.PureWindowsPath(path).as_uri()
+    elif len(path) >= 3 and path[1] == ":" and path[2] in "\\/":
+        # Regular Windows path, may use either slash style
         return pathlib.PureWindowsPath(path).as_uri()
     else:
         assert path.startswith("/")
