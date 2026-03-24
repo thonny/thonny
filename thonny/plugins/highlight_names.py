@@ -14,6 +14,10 @@ from thonny.lsp_types import DocumentHighlightParams, LspResponse, TextDocumentI
 logger = getLogger(__name__)
 
 
+def _is_python_name_char(char: str) -> bool:
+    return bool(char) and (char == "_" or char.isalnum())
+
+
 class OccurrencesHighlighter:
     def __init__(self, text):
         self.text: SyntaxText = text
@@ -37,6 +41,11 @@ class OccurrencesHighlighter:
 
         return self.get_positions_for(source, line, column)
 
+    def _should_request(self) -> bool:
+        previous_char = self.text.get("insert -1 chars", "insert")
+        current_char = self.text.get("insert", "insert +1 chars")
+        return _is_python_name_char(previous_char) or _is_python_name_char(current_char)
+
     def trigger(self):
         self._clear()
 
@@ -46,13 +55,17 @@ class OccurrencesHighlighter:
         ):
             return
 
+        if not self._should_request():
+            return
+
         def consider_request():
             if time.time() - self.text.get_last_operation_time() < 0.3:
                 # wait a bit more, there may be more keypresses or cursor location changes coming
                 self.text.after(100, consider_request)
             else:
                 try:
-                    self._request()
+                    if self._should_request():
+                        self._request()
                 finally:
                     self._request_scheduled = False
 
@@ -75,7 +88,6 @@ class OccurrencesHighlighter:
         pos = get_cursor_ls_position(self.text)
         editor = self.text.master.master
         assert isinstance(editor, Editor)
-
         uri = editor.get_uri()
         if uri is None:
             return
