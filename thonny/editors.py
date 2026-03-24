@@ -1325,6 +1325,7 @@ class EditorNotebook(CustomNotebook):
             return
 
         self.select(editor)
+        get_workbench().maybe_update_language_server_workspace(editor)
         if set_focus:
             editor.focus_set()
 
