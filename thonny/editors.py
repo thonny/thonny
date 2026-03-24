@@ -859,6 +859,9 @@ class Editor(BaseEditor):
             )
 
         self._unpublished_incremental_changes = []
+        self._content_at_server = self.get_content()
+        self._last_fully_published_version = version
+        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
 
     def get_language_id(self) -> str:
         return self.get_text_widget().file_type
