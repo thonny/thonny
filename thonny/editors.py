@@ -721,6 +721,10 @@ class Editor(BaseEditor):
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
+        get_workbench().unbind("LanguageServerInitialized", self._language_server_initialized)
+        get_workbench().unbind("LanguageServerInvalidated", self._language_server_invalidated)
+        get_workbench().unbind("TextInsert", self._register_text_change)
+        get_workbench().unbind("TextDelete", self._register_text_change)
         ttk.Frame.destroy(self)
         get_workbench().event_generate(
             "EditorTextDestroyed", editor=self, text_widget=self.get_text_widget()
@@ -755,6 +759,9 @@ class Editor(BaseEditor):
             self._file_source = "-"  # should not match any machine id
 
     def _language_server_initialized(self, ls_proxy: LanguageServerProxy) -> None:
+        if ls_proxy in self._initialized_ls_proxies:
+            return
+
         logger.info("Registering initialized language server %s", ls_proxy)
         self._initialized_ls_proxies.append(ls_proxy)
         self._update_language_servers()
