@@ -553,7 +553,7 @@ class MicroPythonBackend(MainBackend, ABC):
         assert self._tmgr._supports_directories()
         assert cmd.path.startswith("/")
         assert not cmd.path.startswith("//")
-        self._tmgr._mkdir(cmd.path)
+        self._tmgr.mkdir(cmd.path)
 
     def _get_path_info(self, path: str) -> Optional[Dict]:
         stat = self._tmgr.try_get_stat(path)

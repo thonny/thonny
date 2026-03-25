@@ -152,7 +152,7 @@ class BareMetalMicroPythonBackend(MicroPythonBackend, UploadDownloadMixin):
         return self._tmgr._get_stat_mode(path)
 
     def _mkdir_for_upload(self, path: str) -> None:
-        self._tmgr._mkdir(path)
+        self._tmgr.mkdir(path)
 
     def _read_file(
         self, source_path: str, target_fp: BinaryIO, callback: Callable[[int, int], None]
