@@ -61,3 +61,4 @@ thonnycontrib
 node
 node.exe
 .python-version
+/dist/
