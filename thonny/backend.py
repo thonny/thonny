@@ -28,12 +28,12 @@ from thonny.common import (  # TODO: try to get rid of this
     MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
-    UserError,
     execute_with_frontend_sys_path,
     parse_message,
     read_one_incoming_message_str,
     serialize_message,
     universal_dirname,
+    UserError,
 )
 
 NEW_DIR_MODE = 0o755

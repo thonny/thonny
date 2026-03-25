@@ -669,6 +669,7 @@ class MicroPythonBackend(MainBackend, ABC):
 
             lines = source.splitlines(keepends=True)
             for node in reversed(expr_stmts):
+                assert node.end_lineno is not None
                 lines[node.end_lineno - 1] = (
                     lines[node.end_lineno - 1][: node.end_col_offset]
                     + marker_suffix

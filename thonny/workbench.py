@@ -1154,6 +1154,7 @@ class Workbench(tk.Tk):
         num_entries = 0
         added_micropython_separator = False
         for backend in sorted(self.get_backends().values(), key=lambda x: x.sort_key):
+            logger.debug(f"Getting menu entries for {backend}")
             entries = backend.proxy_class.get_switcher_entries()
 
             for conf, label, machine_id in entries:
@@ -1172,6 +1173,7 @@ class Workbench(tk.Tk):
         num_entries += 1
 
         # self._backend_conf_variable.set(value=self.get_option("run.backend_name"))
+        logger.debug("Completed listing backend entries")
 
         self._backend_menu.add_separator()
 
