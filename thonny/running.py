@@ -1439,6 +1439,12 @@ class SubprocessProxy(BackendProxy, ABC):
             msg = parse_message(data)
             if "cwd" in msg:
                 self.cwd = msg["cwd"]
+
+            if isinstance(msg, ToplevelResponse):
+                # wait a bit in case stderr reader hasn't completed its work.
+                # (Yes, wrongly interleaved stdout and stderr are also ugly, but misplaced prompt is more)
+                sleep(0.01)
+
             message_queue.append(msg)
 
             if len(message_queue) > 10:
