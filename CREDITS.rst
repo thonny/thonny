@@ -170,6 +170,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Saishen, Inc.
 * Sam Warmuth
 * Sami Almuhammady
+* @sampotaas-hub
 * S Jonkers
 * sailslack
 * Scott Blackledge
@@ -196,6 +197,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Tristan Bunn
 * Tusamten
 * Vytenis (svajoklis-1)
+* @WhitespaceQ
 * Xin Rong
 * YEON
 * 丁向阳 (Ding-XiangYang)
