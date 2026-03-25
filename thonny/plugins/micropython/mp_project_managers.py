@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import minny.common
+import thonny.common
 from minny.target import ProperTargetManager
 
 from logging import getLogger
@@ -30,7 +32,12 @@ class MinnyProjectManager(MicroPythonProjectManager):
 
     def deploy(self, before_run: bool) -> None:
         logger.debug(f"Deploying project {self._project_path}")
-        self._pmgr.deploy(except_main=before_run)
+        try:
+            self._pmgr.deploy(except_main=before_run)
+        except minny.common.ProjectError as e:
+            raise thonny.common.UserError(f"Project error: {e}") from e
+        except minny.common.UserError as e:
+            raise thonny.common.UserError(str(e)) from e
         logger.info(f"Done deploying project {self._project_path}")
 
 
