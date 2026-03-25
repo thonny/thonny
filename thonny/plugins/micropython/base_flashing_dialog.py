@@ -377,8 +377,6 @@ class BaseFlashingDialog(WorkDialog, ABC):
         return self._target_combo.get_selected_value() and self._version_combo.get_selected_value()
 
     def start_work(self):
-        from thonny.plugins.micropython import BareMetalMicroPythonProxy
-
         variant_info: Dict[str, Any] = self._variant_combo.get_selected_value()
         download_info: Dict[str, Any] = self._version_combo.get_selected_value()
         target_info: TargetInfo = self._target_combo.get_selected_value()
