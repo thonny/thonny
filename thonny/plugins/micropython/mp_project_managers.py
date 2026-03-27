@@ -31,7 +31,7 @@ class MinnyProjectManager(MicroPythonProjectManager):
         )
 
     def deploy(self, before_run: bool) -> None:
-        logger.debug(f"Deploying project {self._project_path}")
+        logger.info(f"Deploying project {self._project_path}")
         try:
             self._pmgr.deploy(except_main=before_run)
         except minny.common.ProjectError as e:

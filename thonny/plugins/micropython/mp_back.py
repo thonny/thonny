@@ -111,6 +111,8 @@ class MicroPythonBackend(MainBackend, ABC):
         self._project_manager: Optional[MicroPythonProjectManager] = (
             self._check_create_project_manager(args)
         )
+        logger.info(f"Project manager: {self._project_manager}")
+
         MainBackend.__init__(self)
         # Get rid of the welcome text which was printed while searching for prompt
         self.send_message(
@@ -247,15 +249,15 @@ class MicroPythonBackend(MainBackend, ABC):
             raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd) -> Dict[str, Any]:
-        if self._project_manager is not None:
-            self._project_manager.deploy(True)
-
         return self._cmd_Run_or_run(cmd, True)
 
     def _cmd_run(self, cmd):
         return self._cmd_Run_or_run(cmd, False)
 
     def _cmd_Run_or_run(self, cmd, restart_interpreter_before_run):
+        if self._project_manager is not None:
+            self._project_manager.deploy(True)
+
         """Only for %run $EDITOR_CONTENT. start runs are handled differently."""
         if cmd.get("source"):
             self._tmgr.run_user_program_via_repl(
