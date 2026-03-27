@@ -58,3 +58,5 @@ thonny.egg-info
 temp_build_dir
 thonnyapp/thonnyapp.egg-info
 thonnycontrib
+node
+.python-version
