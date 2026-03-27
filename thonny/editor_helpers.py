@@ -292,13 +292,13 @@ class DocuBoxBase(EditorInfoBox):
         self._append_chars(param.name, base_tags)
 
         if param.annotation:
-            self._append_chars(":\u00A0" + param.annotation, base_tags + ["annotation"])
+            self._append_chars(":\u00a0" + param.annotation, base_tags + ["annotation"])
 
         if param.default:
             self._append_chars("=" + param.default, base_tags + ["default"])
 
     def format_signature(self, s: str) -> str:
-        s = s.replace(": ", ":\u00A0")
+        s = s.replace(": ", ":\u00a0")
         if len(s) > self.text["width"] * 1.8 and s.count("(") and s.count(")"):
             args_index = s.index("(") + 1
             suffix_index = s.rindex(")")

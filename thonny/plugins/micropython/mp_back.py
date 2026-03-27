@@ -3,12 +3,12 @@ MP 1.12
 
 >>> #import uos
 >>> dir(uos)
-['__class__', '__name__', 'remove', 'VfsFat', 'VfsLfs2', 'chdir', 'dupterm', 'dupterm_notify', 
-'getcwd', 'ilistdir', 'listdir', 'mkdir', 'mount', 'rename', 'rmdir', 'stat', 'statvfs', 'umount', 
+['__class__', '__name__', 'remove', 'VfsFat', 'VfsLfs2', 'chdir', 'dupterm', 'dupterm_notify',
+'getcwd', 'ilistdir', 'listdir', 'mkdir', 'mount', 'rename', 'rmdir', 'stat', 'statvfs', 'umount',
 'uname', 'urandom']
 >>> import sys
 >>> dir(sys)
-['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules', 
+['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules',
 'path', 'platform', 'print_exception', 'stderr', 'stdin', 'stdout', 'version', 'version_info']
 
 micro:bit (1.9.2)
@@ -18,7 +18,7 @@ micro:bit (1.9.2)
 ['__name__', 'remove', 'listdir', 'size', 'uname']
 >>> import sys
 >>> dir(sys)
-['__name__', 'version', 'version_info', 'implementation', 'platform', 'byteorder', 'exit', 
+['__name__', 'version', 'version_info', 'implementation', 'platform', 'byteorder', 'exit',
 'print_exception']
 
 CP 5.0
@@ -27,7 +27,7 @@ CP 5.0
 'stat', 'statvfs', 'sync', 'uname', 'unlink', 'urandom']
 >>> import sys
 >>> dir(sys)
-['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules', 
+['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules',
 'path', 'platform', 'print_exception', 'stderr', 'stdin', 'stdout', 'version', 'version_info']
 
 
@@ -1007,8 +1007,7 @@ class MicroPythonBackend(MainBackend, ABC):
         self._execute_without_output("__thonny_helper.os.mkdir(%r)" % path)
 
     @abstractmethod
-    def _create_pipkin_adapter(self):
-        ...
+    def _create_pipkin_adapter(self): ...
 
     def _perform_pipkin_operation_and_list(self, command: Optional[str], **kwargs) -> Set[DistInfo]:
         import pipkin.common

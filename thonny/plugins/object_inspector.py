@@ -49,7 +49,7 @@ class ObjectInspector(ttk.Frame):
         self.title_label = ttk.Label(
             toolbar,
             style="ViewToolbar.TLabel",
-            text=""
+            text="",
             # borderwidth=1,
             # background=ui_utils.get_main_background()
         )

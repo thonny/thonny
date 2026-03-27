@@ -1,6 +1,7 @@
 """
 Utils to handle different jedi versions
 """
+
 import os.path
 from logging import getLogger
 from typing import Dict, List, Optional

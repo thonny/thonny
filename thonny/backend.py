@@ -224,8 +224,7 @@ class BaseBackend(ABC):
         print(user_msg, file=sys.stderr)
 
     @abstractmethod
-    def _check_for_connection_error(self) -> None:
-        ...
+    def _check_for_connection_error(self) -> None: ...
 
     @abstractmethod
     def _handle_user_input(self, msg: InputSubmission) -> None:
