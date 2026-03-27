@@ -4,9 +4,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from logging import getLogger
-from typing import List, Optional, Set, Tuple
-
-import pkg_resources
+from typing import Any, List, Optional, Set, Tuple
 
 logger = getLogger(__name__)
 
@@ -54,9 +52,9 @@ def parse_wheel_filename(filename: str) -> ParsedWheelFilename:
 def create_dist_info_version_name(dist_name: str, version: str) -> str:
     # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#escaping-and-unicode
     # https://peps.python.org/pep-0440/
-    safe_name = pkg_resources.safe_name(dist_name).replace("-", "_")
-    safe_version = pkg_resources.safe_version(version)
-    return f"{safe_name}-{safe_version}"
+    name = safe_name(dist_name).replace("-", "_")
+    version = safe_version(version)
+    return f"{name}-{version}"
 
 
 def get_windows_folder(ID: int) -> str:
@@ -175,7 +173,7 @@ def is_continuation_byte(byte: int) -> bool:
 
 def custom_normalize_dist_name(name: str) -> str:
     # https://peps.python.org/pep-0503/#normalized-names
-    return pkg_resources.safe_name(name).lower().replace("-", "_").replace(".", "_")
+    return safe_name(name).lower().replace("-", "_").replace(".", "_")
 
 
 def list_volumes(skip_letters: Optional[Set[str]] = None) -> List[str]:
@@ -209,3 +207,46 @@ def list_volumes(skip_letters: Optional[Set[str]] = None) -> List[str]:
         # Call the unix "mount" command to list the mounted volumes.
         mount_output = subprocess.check_output(["mount"], stdin=subprocess.DEVNULL).splitlines()
         return [x.split()[2].decode("utf-8") for x in mount_output]
+
+
+def safe_name(name: str) -> str:
+    """Convert an arbitrary string to a standard distribution name
+
+    Any runs of non-alphanumeric/. characters are replaced with a single '-'.
+    Copied from pkg_resources
+    """
+    return re.sub("[^A-Za-z0-9.]+", "-", name)
+
+
+def safe_version(version):
+    """
+    Convert an arbitrary string to a standard version string
+    Adapted from pkg_resources
+    """
+    return re.sub("[^A-Za-z0-9.]+", "-", version)
+
+
+def download_and_parse_json(url: str, timeout: int = 10) -> Any:
+    import json
+
+    return json.loads(download_bytes(url, timeout=timeout))
+
+
+def download_bytes(url: str, timeout: int = 10) -> bytes:
+    from urllib.request import Request, urlopen
+
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Accept-Encoding": "gzip, deflate",
+            "Cache-Control": "no-cache",
+        },
+    )
+    with urlopen(req, timeout=timeout) as fp:
+        if fp.info().get("Content-Encoding") == "gzip":
+            import gzip
+
+            return gzip.decompress(fp.read())
+        else:
+            return fp.read()

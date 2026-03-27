@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2023 Aivar Annamaa
+Copyright (c) 2024 Aivar Annamaa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,23 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import logging
-import subprocess
 import sys
-import textwrap
-from typing import List, Optional
 
 from pipkin import main
 
 logger = logging.getLogger(__name__)
-
-MP_ORG_INDEX = "https://micropython.org/pi"
-PYPI_INDEX = "https://pypi.org/pypi"
-PYPI_SIMPLE_INDEX = "https://pypi.org/simple"
-DEFAULT_INDEX_URLS = [MP_ORG_INDEX, PYPI_INDEX]
-SERVER_ENCODING = "utf-8"
-
-__version__ = "0.2b1"
 
 """
 steps:

@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import copy
 import email.parser
 import errno
@@ -47,17 +48,20 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
-from pkg_resources import safe_name, safe_version
-
 from pipkin.util import (
     create_dist_info_version_name,
     custom_normalize_dist_name,
+    download_and_parse_json,
     parse_dist_file_name,
+    safe_name,
+    safe_version,
 )
 
 MP_ORG_INDEX_V1 = "https://micropython.org/pi"
 MP_ORG_INDEX_V2 = "https://micropython.org/pi/v2"
 PYPI_SIMPLE_INDEX = "https://pypi.org/simple"
+MICROPYTHON_LIB_EXTRA_METADATA_URL = "https://raw.githubusercontent.com/aivarannamaa/pipkin/master/data/micropython-lib-extra-metadata.json"
+
 SERVER_ENCODING = "utf-8"
 
 # https://github.com/adafruit/circuitpython-build-tools/blob/de44a709f6287d2759df14c89707f2d8f5a026f5/circuitpython_build_tools/scripts/build_bundles.py#L42
@@ -412,6 +416,7 @@ class MpOrgV1IndexDownloader(JsonIndexDownloader):
 class MpOrgV2IndexDownloader(BaseIndexDownloader):
     def __init__(self, index_url):
         self._packages = None
+        self._mp_lib_extra_metadata_cache = {}
         super().__init__(index_url)
 
     def get_dist_file_names(self, dist_name: str) -> Optional[List[str]]:
@@ -446,15 +451,23 @@ class MpOrgV2IndexDownloader(BaseIndexDownloader):
 
         return self._construct_wheel_content(dist_meta, version_meta)
 
+    def _get_micropython_lib_extra_metadata(self) -> Dict[str, Any]:
+        if not self._mp_lib_extra_metadata_cache:
+            self._mp_lib_extra_metadata_cache = download_and_parse_json(
+                MICROPYTHON_LIB_EXTRA_METADATA_URL, timeout=10
+            )
+
+        return self._mp_lib_extra_metadata_cache
+
     def _construct_wheel_content(
         self, dist_meta: Dict[str, Any], version_meta: Dict[str, Any]
     ) -> bytes:
         urls_per_wheel_path = {}
 
         for wheel_path, short_hash in version_meta.get("hashes", []):
-            urls_per_wheel_path[
-                wheel_path
-            ] = f"{self._index_url}/file/{short_hash[:2]}/{short_hash}"
+            urls_per_wheel_path[wheel_path] = (
+                f"{self._index_url}/file/{short_hash[:2]}/{short_hash}"
+            )
 
         for wheel_path, url in version_meta.get("urls", []):
             urls_per_wheel_path[wheel_path] = url
@@ -469,6 +482,12 @@ class MpOrgV2IndexDownloader(BaseIndexDownloader):
         meta_dir = f"{meta_dir_prefix}.dist-info"
         summary = dist_meta.get("description", "").replace("\r\n", "\n").replace("\n", " ")
 
+        extra_meta = self._get_micropython_lib_extra_metadata().get(dist_meta["name"], {})
+        home_page = extra_meta.get("home_page", "https://github.com/micropython/micropython-lib")
+        source_url = extra_meta.get("source_url", "https://github.com/micropython/micropython-lib")
+        if not summary.strip():
+            summary = extra_meta.get("description", "")
+
         metadata = textwrap.dedent(
             f"""
             Metadata-Version: 2.1
@@ -477,6 +496,8 @@ class MpOrgV2IndexDownloader(BaseIndexDownloader):
             Summary: {summary}
             Author: {dist_meta.get("author", "")}
             License: {dist_meta.get("license", "")}
+            Home-page: {home_page}
+            Project-URL: Source, {source_url}
             """
         ).lstrip()
 

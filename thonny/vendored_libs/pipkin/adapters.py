@@ -61,24 +61,19 @@ class Adapter(ABC):
         ...
 
     @abstractmethod
-    def join_path(self, *parts: str) -> str:
-        ...
+    def join_path(self, *parts: str) -> str: ...
 
     @abstractmethod
-    def split_dir_and_basename(self, path: str) -> Tuple[str, str]:
-        ...
+    def split_dir_and_basename(self, path: str) -> Tuple[str, str]: ...
 
     @abstractmethod
-    def normpath(self, path: str) -> str:
-        ...
+    def normpath(self, path: str) -> str: ...
 
     @abstractmethod
-    def get_implementation_name_and_version_prefix(self) -> Tuple[str, str]:
-        ...
+    def get_implementation_name_and_version_prefix(self) -> Tuple[str, str]: ...
 
     @abstractmethod
-    def get_mpy_cross_args(self) -> List[str]:
-        ...
+    def get_mpy_cross_args(self) -> List[str]: ...
 
 
 class DummyAdapter(Adapter):
@@ -162,8 +157,7 @@ class BaseAdapter(Adapter, ABC):
         return args
 
     @abstractmethod
-    def fetch_sys_path(self) -> List[str]:
-        ...
+    def fetch_sys_path(self) -> List[str]: ...
 
     def get_sys_implementation(self) -> Tuple[str, str, int]:
         if self._sys_implementation is None:
@@ -171,16 +165,13 @@ class BaseAdapter(Adapter, ABC):
         return self._sys_implementation
 
     @abstractmethod
-    def fetch_sys_implementation(self) -> Tuple[str, str, int]:
-        ...
+    def fetch_sys_implementation(self) -> Tuple[str, str, int]: ...
 
     @abstractmethod
-    def remove_file_if_exists(self, path: str) -> None:
-        ...
+    def remove_file_if_exists(self, path: str) -> None: ...
 
     @abstractmethod
-    def remove_dir_if_empty(self, path: str) -> bool:
-        ...
+    def remove_dir_if_empty(self, path: str) -> bool: ...
 
     @abstractmethod
     def list_meta_dir_names(self, path: str, dist_name: Optional[str] = None) -> List[str]:
@@ -282,8 +273,7 @@ class BaseAdapter(Adapter, ABC):
         return path.replace("\\", self.get_dir_sep()).replace("/", self.get_dir_sep())
 
     @abstractmethod
-    def get_dir_sep(self) -> str:
-        ...
+    def get_dir_sep(self) -> str: ...
 
     def write_file(self, path: str, content: bytes) -> None:
         parent, _ = self.split_dir_and_basename(path)
@@ -306,12 +296,10 @@ class BaseAdapter(Adapter, ABC):
             self._ensured_directories.add(path)
 
     @abstractmethod
-    def write_file_in_existing_dir(self, path: str, content: bytes) -> None:
-        ...
+    def write_file_in_existing_dir(self, path: str, content: bytes) -> None: ...
 
     @abstractmethod
-    def mkdir_in_existing_parent_exists_ok(self, path: str) -> None:
-        ...
+    def mkdir_in_existing_parent_exists_ok(self, path: str) -> None: ...
 
 
 class InterpreterAdapter(BaseAdapter, ABC):
@@ -327,12 +315,10 @@ class ExecutableAdapter(InterpreterAdapter, ABC):
         return os.path.sep
 
 
-class LocalExecutableAdapter(ExecutableAdapter):
-    ...
+class LocalExecutableAdapter(ExecutableAdapter): ...
 
 
-class SshExecutableAdapter(ExecutableAdapter):
-    ...
+class SshExecutableAdapter(ExecutableAdapter): ...
 
 
 class LocalMirrorAdapter(BaseAdapter, ABC):
