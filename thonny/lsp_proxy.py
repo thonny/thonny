@@ -77,6 +77,7 @@ class LanguageServerProxy(ABC):
         self._shutdown_accepted: bool = False
         self._last_request_id: int = 0
         self._pending_handlers: Dict[int, Callable] = {}
+        self._pending_request_info: Dict[int, Dict[str, Any]] = {}
         self._request_handlers: Dict[str, Optional[Callable]] = {}
         self._notification_handlers: Dict[str, List[Callable]] = {}
         self._diagnostics: Dict[str, PublishDiagnosticsParams] = {}
@@ -1074,6 +1075,19 @@ class LanguageServerProxy(ABC):
         request_id = self._last_request_id + 1
         self._last_request_id = request_id
         self._pending_handlers[request_id] = handler
+
+        should_trace = get_workbench().in_debug_mode() and method in [
+            "textDocument/documentHighlight",
+            "textDocument/signatureHelp",
+        ]
+        if should_trace:
+            self._pending_request_info[request_id] = {
+                "method": method,
+                "sent_at": time.time(),
+                "params": params,
+            }
+            logger.info("LSP trace send_request_before: method=%s request_id=%s params=%r", method, request_id, params)
+
         self._send_json_rpc_message(
             {
                 "jsonrpc": "2.0",
@@ -1082,6 +1096,10 @@ class LanguageServerProxy(ABC):
                 "params": _convert_to_json_value(params),
             }
         )
+
+        if should_trace:
+            logger.info("LSP trace send_request_after: method=%s request_id=%s", method, request_id)
+            get_workbench().after(2000, lambda rid=request_id: self._log_pending_request_timeout(rid))
 
     def _send_notification(self, method: str, params: Any) -> None:
         self._check_initialized()
@@ -1165,6 +1183,15 @@ class LanguageServerProxy(ABC):
         if request_id in self._pending_handlers:
             handler = self._pending_handlers[request_id]
             del self._pending_handlers[request_id]
+            request_info = self._pending_request_info.pop(request_id, None)
+            if request_info is not None:
+                logger.info(
+                    "LSP trace response_before_handler: request_id=%s method=%s handler=%s error=%r",
+                    request_id,
+                    request_info["method"],
+                    getattr(handler, "__qualname__", repr(handler)),
+                    error,
+                )
             expected_response_type = _get_function_arg_type(handler)
             assert typing.get_origin(expected_response_type) == LspResponse
             expected_result_type = typing.get_args(expected_response_type)[0]
@@ -1176,6 +1203,7 @@ class LanguageServerProxy(ABC):
                 )
             )
         else:
+            self._pending_request_info.pop(request_id, None)
             logger.info("Ignoring response for request %r", request_id)
 
     def _handle_request_from_server(
@@ -1208,6 +1236,19 @@ class LanguageServerProxy(ABC):
         for handler in self._notification_handlers.get(method, []):
             expected_params_type = _get_function_arg_type(handler)
             handler(_convert_from_json_value(params, expected_params_type))
+
+    def _log_pending_request_timeout(self, request_id: int) -> None:
+        request_info = self._pending_request_info.get(request_id)
+        if request_info is None:
+            return
+
+        logger.warning(
+            "LSP trace pending_request_timeout: request_id=%s method=%s age=%.3f params=%r",
+            request_id,
+            request_info["method"],
+            time.time() - request_info["sent_at"],
+            request_info["params"],
+        )
 
     def _get_communication_log_path(self) -> str:
         return os.path.join(get_thonny_user_dir(), f"lsp_communication_{type(self).__name__}.log")

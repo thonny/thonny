@@ -170,6 +170,10 @@ class Workbench(tk.Tk):
         self._event_queue = queue.Queue()  # Can be appended to by threads
         self._event_polling_id = None
         self._ls_proxies: List[LanguageServerProxy] = []
+        self._ls_workspace_path: Optional[str] = None
+        self._pending_ls_workspace_path: Optional[str] = None
+        self._pending_language_server_restart = False
+        self._finalizing_startup = False
         self.initializing = True
 
         self._secrets: Dict[str, str] = {}
@@ -296,8 +300,8 @@ class Workbench(tk.Tk):
 
     def finalize_startup(self):
         logger.info("Finalizing startup")
+        self._finalizing_startup = True
         try:
-            self.ready = True
             self._editor_notebook.update_appearance()
             if self._configuration_manager.error_reading_existing_file:
                 messagebox.showerror(
@@ -309,6 +313,15 @@ class Workbench(tk.Tk):
                 )
             self._editor_notebook.load_previous_files()
             self._load_stuff_from_command_line(self._initial_args)
+            self.maybe_update_language_server_workspace()
+            runner = get_runner()
+            if self._pending_language_server_restart or not self._ls_proxies:
+                if runner is not None and runner.get_backend_proxy() is not None:
+                    self._pending_language_server_restart = False
+                    self.start_or_restart_language_servers()
+                else:
+                    self._pending_language_server_restart = True
+            self.ready = True
             self._editor_notebook.focus_set()
             self.event_generate("WorkbenchReady")
             self.poll_events()
@@ -316,6 +329,8 @@ class Workbench(tk.Tk):
         except Exception:
             logger.exception("Exception while finalizing startup")
             self.report_exception()
+        finally:
+            self._finalizing_startup = False
 
     def poll_events(self) -> None:
         if self._event_queue is None or self._closing:
@@ -439,8 +454,12 @@ class Workbench(tk.Tk):
     def start_or_restart_language_servers(self) -> None:
         self.shut_down_language_servers()
 
+        workspace_path = self.get_language_server_workspace_path()
+        self._ls_workspace_path = workspace_path
+        self._pending_ls_workspace_path = None
+
         for class_ in self._language_server_proxy_classes:
-            logger.info("Constructing language server %s", class_)
+            logger.info("Constructing language server %s for workspace %s", class_, workspace_path)
             ls_proxy = class_(
                 InitializeParams(
                     capabilities=ClientCapabilities(
@@ -516,9 +535,7 @@ class Workbench(tk.Tk):
                     clientInfo=ClientInfo(name="Thonny", version=thonny.get_version()),
                     locale=self.get_option("general.language"),
                     workspaceFolders=[
-                        WorkspaceFolder(
-                            uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
-                        ),
+                        WorkspaceFolder(uri=pathlib.Path(workspace_path).as_uri(), name="localws"),
                     ],
                     trace=TraceValues.Verbose if self.in_debug_mode() else TraceValues.Messages,
                 )
@@ -532,6 +549,99 @@ class Workbench(tk.Tk):
             ls_proxy.shut_down()
 
         self._ls_proxies = []
+
+    def _find_local_project_path_from(self, dir_path: str) -> Optional[str]:
+        while dir_path and dir_path[-1] not in ["/", "\\", ":"]:
+            if is_local_project_dir(dir_path):
+                return dir_path
+            dir_path = os.path.dirname(dir_path)
+
+        return None
+
+    def _find_python_project_path_from(self, dir_path: str) -> Optional[str]:
+        python_markers = ["pyproject.toml", "setup.cfg", "setup.py", ".python-version", "Pipfile"]
+
+        while dir_path and dir_path[-1] not in ["/", "\\", ":"]:
+            if os.path.isdir(dir_path) and any(
+                os.path.exists(os.path.join(dir_path, marker)) for marker in python_markers
+            ):
+                return dir_path
+            dir_path = os.path.dirname(dir_path)
+
+        return None
+
+    def _get_preferred_language_server_editor(self) -> Optional[Editor]:
+        if self._editor_notebook is None:
+            return None
+
+        def is_python_local_editor(editor: Optional[Editor]) -> bool:
+            return (
+                editor is not None
+                and editor.is_local()
+                and not editor.is_untitled()
+                and editor.get_language_id() in {"python", "pythonlike"}
+            )
+
+        current_editor = self._editor_notebook.get_current_editor()
+        if is_python_local_editor(current_editor):
+            return current_editor
+
+        for editor in self._editor_notebook.get_all_editors():
+            if is_python_local_editor(editor):
+                return editor
+
+        if current_editor is not None and current_editor.is_local() and not current_editor.is_untitled():
+            return current_editor
+
+        for editor in self._editor_notebook.get_all_editors():
+            if editor.is_local() and not editor.is_untitled():
+                return editor
+
+        return current_editor
+
+    def _get_editor_language_server_workspace_path(self, editor: Optional[Editor]) -> Optional[str]:
+        if editor is not None and editor.is_local() and not editor.is_untitled():
+            target_path = editor.get_target_path()
+            if target_path:
+                local_dir = os.path.dirname(target_path)
+                if editor.get_language_id() in {"python", "pythonlike"}:
+                    return self._find_python_project_path_from(local_dir) or local_dir
+                return self._find_local_project_path_from(local_dir) or local_dir
+
+        return None
+
+    def get_language_server_workspace_path(self, editor: Optional[Editor] = None) -> str:
+        if editor is None:
+            editor = self._get_preferred_language_server_editor()
+
+        workspace_path = self._get_editor_language_server_workspace_path(editor)
+        if workspace_path:
+            return workspace_path
+
+        if self._pending_ls_workspace_path:
+            return self._pending_ls_workspace_path
+
+        return self.get_local_project_path() or self.get_local_cwd()
+
+    def maybe_update_language_server_workspace(self, editor: Optional[Editor] = None) -> None:
+        if editor is not None:
+            editor_workspace = self._get_editor_language_server_workspace_path(editor)
+            if editor_workspace is not None:
+                self._pending_ls_workspace_path = editor_workspace
+
+        desired_path = self.get_language_server_workspace_path(editor)
+
+        if (
+            desired_path != self._ls_workspace_path
+            and self._ls_proxies
+            and not self.initializing
+        ):
+            logger.info(
+                "Restarting language servers for new workspace %s (was %s)",
+                desired_path,
+                self._ls_workspace_path,
+            )
+            self.start_or_restart_language_servers()
 
     def _init_language(self) -> None:
         """Initialize language."""
@@ -1234,6 +1344,10 @@ class Workbench(tk.Tk):
         self._last_active_backend_conf_variable_value = switcher_value
         self._backend_button.configure(text=desc + "  " + get_menu_char())
         self._update_connection_button()
+
+        if not self.ready or self._finalizing_startup:
+            self._pending_language_server_restart = True
+            return
 
         self.start_or_restart_language_servers()
 

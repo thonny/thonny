@@ -721,6 +721,10 @@ class Editor(BaseEditor):
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
+        get_workbench().unbind("LanguageServerInitialized", self._language_server_initialized)
+        get_workbench().unbind("LanguageServerInvalidated", self._language_server_invalidated)
+        get_workbench().unbind("TextInsert", self._register_text_change)
+        get_workbench().unbind("TextDelete", self._register_text_change)
         ttk.Frame.destroy(self)
         get_workbench().event_generate(
             "EditorTextDestroyed", editor=self, text_widget=self.get_text_widget()
@@ -755,6 +759,9 @@ class Editor(BaseEditor):
             self._file_source = "-"  # should not match any machine id
 
     def _language_server_initialized(self, ls_proxy: LanguageServerProxy) -> None:
+        if ls_proxy in self._initialized_ls_proxies:
+            return
+
         logger.info("Registering initialized language server %s", ls_proxy)
         self._initialized_ls_proxies.append(ls_proxy)
         self._update_language_servers()
@@ -859,6 +866,9 @@ class Editor(BaseEditor):
             )
 
         self._unpublished_incremental_changes = []
+        self._content_at_server = self.get_content()
+        self._last_fully_published_version = version
+        get_workbench().event_generate("AfterSendingDocumentUpdates", uri=self.get_uri())
 
     def get_language_id(self) -> str:
         return self.get_text_widget().file_type
@@ -1150,7 +1160,12 @@ class EditorNotebook(CustomNotebook):
 
         if target_path:
             # self.close_single_untitled_unmodified_editor()
-            self.show_file(remote_path_to_uri(target_path), propose_dialog=False)
+            if node == "remote":
+                uri = remote_path_to_uri(target_path)
+            else:
+                uri = local_path_to_uri(target_path)
+
+            self.show_file(uri, propose_dialog=False)
 
     def _control_o(self, event):
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -1317,6 +1332,7 @@ class EditorNotebook(CustomNotebook):
             return
 
         self.select(editor)
+        get_workbench().maybe_update_language_server_workspace(editor)
         if set_focus:
             editor.focus_set()
 

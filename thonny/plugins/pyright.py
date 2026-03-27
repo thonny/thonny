@@ -17,7 +17,11 @@ logger = getLogger(__name__)
 class PyrightProxy(LanguageServerProxy):
 
     def get_settings(self) -> Dict:
-        proxy = get_runner().get_backend_proxy()
+        runner = get_runner()
+        if runner is None:
+            return {}
+
+        proxy = runner.get_backend_proxy()
         if proxy is None:
             return {}
 
@@ -32,12 +36,14 @@ class PyrightProxy(LanguageServerProxy):
             },
         }
 
-        project_path = get_workbench().get_local_project_path()
-        logger.info("Detected project path: %s", project_path)
-        if project_path is not None:
-            base_path = project_path
+        workspace_path = get_workbench().get_language_server_workspace_path()
+        logger.info("Detected language server workspace path: %s", workspace_path)
+        if os.path.isdir(workspace_path) and os.path.exists(os.path.join(workspace_path, "pyproject.toml")):
+            project_path = workspace_path
         else:
-            base_path = get_workbench().get_local_cwd()
+            project_path = None
+
+        base_path = workspace_path
 
         typings_path = os.path.join(base_path, "typings")
 
