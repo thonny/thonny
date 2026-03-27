@@ -24,6 +24,7 @@ from thonny.common import (
     normpath_with_actual_case,
     path_startswith,
     running_in_virtual_environment,
+    get_installed_distributions,
 )
 from thonny.languages import tr
 from thonny.misc_utils import (
@@ -1165,30 +1166,20 @@ class PluginsPipDialog(PipDialog):
 
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
-        import pkg_resources
-
-        pkg_resources._initialize_master_working_set()
-
-        self._active_distributions = {
-            dist.key: DistInfo(
-                project_name=dist.project_name,
-                key=dist.key,
-                location=dist.location,
-                version=dist.version,
-            )
-            for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
-        }
+        self._active_distributions = get_installed_distributions()
 
         self._update_list(name_to_show)
 
     def _conflicts_with_thonny_version(self, req_strings):
-        import pkg_resources
-
         try:
             conflicts = []
             for req_string in req_strings:
-                req = pkg_resources.Requirement.parse(req_string)
-                if req.project_name == "thonny" and thonny.get_version() not in req:
+                if (
+                    req_string.startswith("thonny")
+                    and not req_string.startswith("thonny-")
+                    and not req_string.startswith("thonny_")
+                    and thonny.get_version() not in req
+                ):
                     conflicts.append(req_string)
 
             return conflicts

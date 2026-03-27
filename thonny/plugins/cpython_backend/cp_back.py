@@ -51,6 +51,7 @@ from thonny.common import (
     running_in_virtual_environment,
     serialize_message,
     update_system_path,
+    get_installed_distributions,
 )
 
 _REPL_HELPER_NAME = "_thonny_repl_print"
@@ -695,19 +696,7 @@ class MainCPythonBackend(MainBackend):
             else:
                 sys.path.append(site.getusersitepackages())
 
-        import pkg_resources
-
-        # TODO: consider using importlib.metadata.distributions()
-        pkg_resources._initialize_master_working_set()
-        return {
-            dist.key: DistInfo(
-                key=dist.key,
-                project_name=dist.project_name,
-                location=dist.location,
-                version=dist.version,
-            )
-            for dist in pkg_resources.working_set  # pylint: disable=not-an-iterable
-        }
+        return get_installed_distributions()
 
     def _get_sep(self) -> str:
         return os.path.sep

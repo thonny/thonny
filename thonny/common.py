@@ -814,3 +814,31 @@ def is_remote_path(s: str) -> bool:
 
 def is_local_path(s: str) -> bool:
     return not is_remote_path(s) and not s.startswith("<")
+
+
+def get_installed_distributions():
+    from importlib import metadata
+    from pathlib import Path
+
+    def _dist_key(project_name: str) -> str:
+        # pkg_resources keys are normalized and lowercase.
+        # This is a close compatibility approximation.
+        return project_name.lower().replace("-", "_")
+
+    result = {}
+
+    for dist in metadata.distributions():
+        project_name = dist.metadata.get("Name")
+        if not project_name:
+            continue
+
+        key = _dist_key(project_name)
+
+        result[key] = DistInfo(
+            key=key,
+            project_name=project_name,
+            location=str(Path(dist.locate_file("")).resolve()),
+            version=dist.version,
+        )
+
+    return result
