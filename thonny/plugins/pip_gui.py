@@ -1302,7 +1302,13 @@ class PluginsPipDialog(PipDialog):
 
 class DetailsDialog(CommonDialog):
     def __init__(self, master, package_metadata, selected_version, support_update_deps_switch):
-        from distutils.version import StrictVersion
+        def extract_version_numbers(s):
+            parts = s.split(".")
+            result = []
+            for part in parts:
+                if part.isdigit():
+                    result.append(int(part))
+            return result
 
         assert isinstance(master, PipDialog)
         self._pip_dialog = cast(PipDialog, master)
@@ -1340,13 +1346,13 @@ class DetailsDialog(CommonDialog):
             else:
                 s2 = s
             try:
-                return StrictVersion(s2)
+                return extract_version_numbers(s2)
             except Exception:
                 # use only numbers
                 nums = re.findall(r"\d+", s)
                 while len(nums) < 2:
                     nums.append("0")
-                return StrictVersion(".".join(nums[:3]))
+                return extract_version_numbers(".".join(nums[:3]))
 
         version_strings = list(package_metadata["releases"].keys())
         version_strings.sort(key=version_sort_key, reverse=True)
@@ -1507,20 +1513,15 @@ def _fetch_url_future(url, fallback_url=None, timeout=10):
     return executor.submit(load_url)
 
 
-def _get_latest_stable_version(version_strings):
-    from distutils.version import LooseVersion
+def _get_latest_stable_version(version_strings: List[str]) -> Optional[str]:
+    stable_versions = [
+        s for s in version_strings if s and all(part.isdigit() for part in s.split("."))
+    ]
 
-    versions = []
-    for s in version_strings:
-        if s.replace(".", "").isnumeric():  # Assuming stable versions have only dots and numbers
-            versions.append(
-                LooseVersion(s)
-            )  # LooseVersion __str__ doesn't change the version string
-
-    if len(versions) == 0:
+    if not stable_versions:
         return None
 
-    return str(sorted(versions)[-1])
+    return max(stable_versions, key=lambda s: tuple(int(part) for part in s.split(".")))
 
 
 def _ask_installation_details(master, data, selected_version, support_update_deps_switch):
