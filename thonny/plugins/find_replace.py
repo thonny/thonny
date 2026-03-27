@@ -7,6 +7,7 @@ from tkinter import ttk
 from thonny import get_workbench
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os
+from thonny.tktextext import TweakableText
 from thonny.ui_utils import CommonDialog, select_sequence, show_dialog
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -70,13 +71,14 @@ class FindDialog(CommonDialog):
         seed_text = ""
         try:
             widget = get_workbench().focus_get()
-            if isinstance(widget, tk.Text):
+            if isinstance(widget, TweakableText):
                 # NB! selection_get may give selection from another app,
                 # that's why I'm checkin that Text has sel tags
-                selected_lines = widget.selection_get().splitlines()
-                if selected_lines and len(widget.tag_ranges("sel")) > 0:
-                    seed_text = selected_lines[0]
-                    logger.debug("Got seed text %r from widget %s", seed_text, widget)
+                if widget.has_selection():
+                    selected_lines = widget.selection_get().splitlines()
+                    if selected_lines and len(widget.tag_ranges("sel")) > 0:
+                        seed_text = selected_lines[0]
+                        logger.debug("Got seed text %r from widget %s", seed_text, widget)
         except Exception:
             logger.exception("Could not get seed text")
 
