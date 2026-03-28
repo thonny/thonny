@@ -2,6 +2,10 @@
 Version history
 ===============
 
+4.2.0b1 (2026-03-??)
+====================
+* Add Arabic, Bulgarian, Hindi, Indonesian, Icelandic and Malayalam translation. Update several other translations. Thanks for all contributors! Please see https://poeditor.com/projects/view?id=256075 for credits! *Please note that Thonny's maintainers have not reviewed the translations!*
+
 4.1.7 (2024-12-16)
 ==================
 * Fix PyPI package search, #3401

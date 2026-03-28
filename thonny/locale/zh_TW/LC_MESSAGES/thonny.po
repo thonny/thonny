@@ -7,55 +7,55 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: zh-TW\n"
 
-#: thonny/workbench.py:375
+#: thonny/workbench.py:381
 msgid "File"
 msgstr "檔案"
 
-#: thonny/workbench.py:376
+#: thonny/workbench.py:382
 msgid "Edit"
 msgstr "編輯"
 
-#: thonny/workbench.py:377
+#: thonny/workbench.py:383
 msgid "View"
 msgstr "檢視"
 
-#: thonny/running.py:161 thonny/workbench.py:378
+#: thonny/running.py:161 thonny/workbench.py:384
 msgid "Run"
 msgstr "執行"
 
-#: thonny/workbench.py:379
+#: thonny/workbench.py:385
 msgid "Tools"
 msgstr "工具"
 
-#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:380
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
 msgid "Help"
 msgstr "說明"
 
-#: thonny/workbench.py:598
+#: thonny/workbench.py:604
 msgid "Exit"
 msgstr "結束"
 
-#: thonny/workbench.py:625
+#: thonny/workbench.py:631
 msgid "Decrease font size"
 msgstr "縮小字體"
 
-#: thonny/workbench.py:637
+#: thonny/workbench.py:643
 msgid "Focus editor"
 msgstr "取得焦點 (編輯器)"
 
-#: thonny/workbench.py:646
+#: thonny/workbench.py:652
 msgid "Focus shell"
 msgstr "切換輸入焦點到互動環境"
 
-#: thonny/workbench.py:656
+#: thonny/workbench.py:662
 msgid "Maximize view"
 msgstr "最大化視窗"
 
-#: thonny/workbench.py:668
+#: thonny/workbench.py:674
 msgid "Full screen"
 msgstr "全螢幕"
 
-#: thonny/workbench.py:1467
+#: thonny/workbench.py:1473
 msgid "Program arguments"
 msgstr "程式引數 (args)"
 
@@ -63,7 +63,7 @@ msgstr "程式引數 (args)"
 msgid "About Thonny"
 msgstr "關於 Thonny"
 
-#: thonny/plugins/about.py:81
+#: thonny/plugins/about.py:82
 msgid "Made in\n"
 "University of Tartu, Estonia,\n"
 "with the help from\n"
@@ -72,7 +72,7 @@ msgid "Made in\n"
 "and Cybernetica AS"
 msgstr "由愛沙尼亞‧塔爾圖大學在 Cybernetica AS、樹莓派基金會及開源社群的協助下製作"
 
-#: thonny/plugins/about.py:101
+#: thonny/plugins/about.py:102
 msgid "This program comes with\n"
 "ABSOLUTELY NO WARRANTY!\n"
 "It is free software, and you are welcome to\n"
@@ -113,7 +113,7 @@ msgstr "執行 MyPy 檢查"
 msgid "Disabled checks (one id per line)"
 msgstr "取消檢查 (每行 1 個 id)"
 
-#: thonny/assistance.py:981 thonny/plugins/assistant_config_page.py:74
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
 msgid "Assistant"
 msgstr "協助功能"
 
@@ -129,7 +129,7 @@ msgstr "直譯器"
 msgid "About Birdseye"
 msgstr "關於 Birdseye"
 
-#: thonny/plugins/birdseye_frontend.py:56
+#: thonny/plugins/birdseye_frontend.py:57
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
@@ -161,17 +161,17 @@ msgid "Redo"
 msgstr "取消復原"
 
 #: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
-#: thonny/ui_utils.py:2339
+#: thonny/ui_utils.py:2349
 msgid "Cut"
 msgstr "剪下"
 
 #: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
-#: thonny/ui_utils.py:2340
+#: thonny/ui_utils.py:2350
 msgid "Copy"
 msgstr "複製"
 
 #: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
-#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2341
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
 msgid "Paste"
 msgstr "貼上"
 
@@ -179,15 +179,15 @@ msgstr "貼上"
 msgid "Select all"
 msgstr "全選"
 
-#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1402
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
 msgid "Run to cursor"
 msgstr "執行至游標"
 
-#: thonny/plugins/debugger.py:985
+#: thonny/plugins/debugger.py:987
 msgid "Can't close yet"
 msgstr "目前還不能關閉"
 
-#: thonny/plugins/debugger.py:986
+#: thonny/plugins/debugger.py:988
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr "要取消除錯，請使用 “停止” 指令"
 
@@ -232,7 +232,7 @@ msgstr "編輯器"
 msgid "Export usage logs..."
 msgstr "匯出使用日誌"
 
-#: thonny/plugins/event_view.py:39
+#: thonny/plugins/event_view.py:38
 msgid "Events"
 msgstr "事件"
 
@@ -240,51 +240,51 @@ msgstr "事件"
 msgid "Files"
 msgstr "檔案"
 
-#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:438
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
 msgid "Find & Replace"
 msgstr "尋找/取代"
 
-#: thonny/plugins/find_replace.py:66
+#: thonny/plugins/find_replace.py:67
 msgid "Find:"
 msgstr "尋找:"
 
-#: thonny/plugins/find_replace.py:90
+#: thonny/plugins/find_replace.py:92
 msgid "Replace with:"
 msgstr "取代:"
 
-#: thonny/plugins/find_replace.py:108
+#: thonny/plugins/find_replace.py:110
 msgid "Case sensitive"
 msgstr "區分大小寫"
 
-#: thonny/plugins/find_replace.py:115
+#: thonny/plugins/find_replace.py:117
 msgid "Up"
 msgstr "向上"
 
-#: thonny/plugins/find_replace.py:119
+#: thonny/plugins/find_replace.py:121
 msgid "Down"
 msgstr "向下"
 
-#: thonny/plugins/find_replace.py:128
+#: thonny/plugins/find_replace.py:130
 msgid "Find"
 msgstr "尋找"
 
-#: thonny/plugins/find_replace.py:138
+#: thonny/plugins/find_replace.py:140
 msgid "Replace"
 msgstr "取代"
 
-#: thonny/plugins/find_replace.py:146
+#: thonny/plugins/find_replace.py:148
 msgid "Replace+Find"
 msgstr "取代+尋找"
 
-#: thonny/plugins/find_replace.py:156
+#: thonny/plugins/find_replace.py:158
 msgid "Replace all"
 msgstr "全部取代"
 
-#: thonny/plugins/find_replace.py:254
+#: thonny/plugins/find_replace.py:256
 msgid "Enter string to be replaced."
 msgstr "輸入要取代的字符串"
 
-#: thonny/plugins/find_replace.py:339
+#: thonny/plugins/find_replace.py:341
 msgid "The specified text was not found!"
 msgstr "找不到指定的文字！"
 
@@ -318,7 +318,7 @@ msgstr "堆積 (Heap)"
 msgid "Language"
 msgstr "語言"
 
-#: thonny/plugins/notes.py:35
+#: thonny/plugins/notes.py:36
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
 "\n"
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
@@ -354,77 +354,77 @@ msgstr "大綱"
 msgid "Pygame Zero mode"
 msgstr "Pygame Zero 模式"
 
-#: thonny/plugins/pip_gui.py:80
+#: thonny/plugins/pip_gui.py:95
 msgid "Uninstall"
 msgstr "解除安裝"
 
-#: thonny/editors.py:693 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:496
-#: thonny/ui_utils.py:1884 thonny/workdlg.py:203
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
 msgid "Close"
 msgstr "關閉"
 
-#: thonny/plugins/pip_gui.py:397
+#: thonny/plugins/pip_gui.py:415
 msgid "Click "
 msgstr "點擊"
 
-#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
 msgid "here"
 msgstr "這裡"
 
-#: thonny/plugins/pip_gui.py:77
+#: thonny/plugins/pip_gui.py:92
 msgid "Upgrade"
 msgstr "更新"
 
 #: thonny/plugins/micropython/base_flashing_dialog.py:398
-#: thonny/plugins/pip_gui.py:74
+#: thonny/plugins/pip_gui.py:89
 msgid "Install"
 msgstr "安裝"
 
-#: thonny/plugins/pip_gui.py:570
+#: thonny/plugins/pip_gui.py:590
 msgid "Could not find the package from PyPI."
 msgstr "無法從 PyPI 中找到該套件"
 
-#: thonny/plugins/pip_gui.py:592
+#: thonny/plugins/pip_gui.py:612
 msgid "Latest stable version"
 msgstr "最新穩定版本"
 
-#: thonny/plugins/pip_gui.py:594
+#: thonny/plugins/pip_gui.py:614
 msgid "Latest version"
 msgstr "最新版本"
 
-#: thonny/plugins/pip_gui.py:596
+#: thonny/plugins/pip_gui.py:616
 msgid "Summary"
 msgstr "摘要"
 
-#: thonny/plugins/pip_gui.py:598
+#: thonny/plugins/pip_gui.py:618
 msgid "Author"
 msgstr "作者"
 
-#: thonny/plugins/pip_gui.py:602
+#: thonny/plugins/pip_gui.py:622
 msgid "Homepage"
 msgstr "網站主頁"
 
-#: thonny/plugins/pip_gui.py:604
+#: thonny/plugins/pip_gui.py:624
 msgid "Bugtracker"
 msgstr "問題追蹤"
 
-#: thonny/plugins/pip_gui.py:606
+#: thonny/plugins/pip_gui.py:626
 msgid "Documentation"
 msgstr "文件"
 
-#: thonny/plugins/pip_gui.py:608
+#: thonny/plugins/pip_gui.py:628
 msgid "PyPI page"
 msgstr "PyPI 頁面"
 
-#: thonny/plugins/pip_gui.py:648
+#: thonny/plugins/pip_gui.py:668
 msgid "Requires"
 msgstr "相依套件"
 
-#: thonny/plugins/pip_gui.py:802
+#: thonny/plugins/pip_gui.py:816
 msgid "Really uninstall?"
 msgstr "確定要解除安裝？"
 
-#: thonny/plugins/pip_gui.py:807
+#: thonny/plugins/pip_gui.py:821
 msgid "Are you sure you want to uninstall it?"
 msgstr "您確定要將它解除安裝嗎？"
 
@@ -467,35 +467,35 @@ msgstr "覆寫?"
 msgid "Do you want to overwrite '%s' ?"
 msgstr "你想要覆蓋 '%s' 嗎？"
 
-#: thonny/editors.py:658 thonny/editors.py:660
+#: thonny/editors.py:660 thonny/editors.py:662
 msgid "New"
 msgstr "開新檔案"
 
-#: thonny/editors.py:671
+#: thonny/editors.py:673
 msgid "Open..."
 msgstr "開啟舊檔"
 
-#: thonny/editors.py:673
+#: thonny/editors.py:675
 msgid "Load"
 msgstr "載入"
 
-#: thonny/editors.py:682
+#: thonny/editors.py:684
 msgid "Recent files"
 msgstr "最近編輯的檔案"
 
-#: thonny/editors.py:704 thonny/ui_utils.py:498
+#: thonny/editors.py:706 thonny/ui_utils.py:499
 msgid "Close all"
 msgstr "關閉全部"
 
-#: thonny/editors.py:714 thonny/editors.py:716
+#: thonny/editors.py:716 thonny/editors.py:718
 msgid "Save"
 msgstr "儲存檔案"
 
-#: thonny/editors.py:739
+#: thonny/editors.py:741
 msgid "Save as..."
 msgstr "另存新檔"
 
-#: thonny/editors.py:750
+#: thonny/editors.py:752
 msgid "Save copy..."
 msgstr "儲存複本..."
 
@@ -531,30 +531,30 @@ msgstr "送出 EOF / 軟開機"
 msgid "Disconnect"
 msgstr "中斷連接"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:295
+#: thonny/plugins/cpython_frontend/cp_front.py:301
 msgid "Python interpreters"
 msgstr "Python 直譯器"
 
-#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:296
-#: thonny/plugins/pip_gui.py:848 thonny/plugins/pip_gui.py:861
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
 msgid "all files"
 msgstr "所有檔案"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:324
+#: thonny/plugins/cpython_frontend/cp_front.py:330
 msgid "Select empty directory for new virtual environment"
 msgstr "為新的虛擬環境選取一個空的資料夾"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:331
+#: thonny/plugins/cpython_frontend/cp_front.py:337
 msgid "Bad directory"
 msgstr "不合適的資料夾"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:332
+#: thonny/plugins/cpython_frontend/cp_front.py:338
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
 msgstr "選取的並不是空的資料夾.\n"
 "請選取其他資料夾或是取消."
 
-#: thonny/plugins/cpython_frontend/cp_front.py:349
+#: thonny/plugins/cpython_frontend/cp_front.py:355
 msgid "Creating virtual environment"
 msgstr "建立虛擬環境"
 
@@ -566,50 +566,50 @@ msgstr "清除互動環境"
 msgid "Plotter"
 msgstr "繪圖器"
 
-#: thonny/shell.py:317
+#: thonny/shell.py:319
 msgid "Clear"
 msgstr "清除"
 
-#: thonny/shell.py:330
+#: thonny/shell.py:332
 msgid "Show Plotter"
 msgstr "顯示繪圖器"
 
-#: thonny/shell.py:1660
+#: thonny/shell.py:1671
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
 msgstr "互動環境會為了效能而避免完整顯示過長的內容 (請參考『工具/選項/互動環境)。\n"
 "這裡可以看到原本的文字片段。"
 
-#: thonny/shell.py:1671
+#: thonny/shell.py:1681
 msgid "Wrap text (may be slow)"
 msgstr "自動換行 (可能會變慢)"
 
-#: thonny/ui_utils.py:1879
+#: thonny/ui_utils.py:1883
 msgid "Copy to clipboard"
 msgstr "複製到剪貼簿"
 
-#: thonny/shell.py:1713
+#: thonny/shell.py:1723
 msgid "Squeezed text (%d characters)"
 msgstr "縮減文字 (%d 個字元)"
 
-#: thonny/shell.py:1883
+#: thonny/shell.py:1893
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr "繪圖器會將一連串輸出到互動環境的數值繪成圖表。"
 
-#: thonny/shell.py:1885
+#: thonny/shell.py:1895
 msgid "See Help for details."
 msgstr "請看說明了解更多細節。"
 
-#: thonny/ui_utils.py:497
+#: thonny/ui_utils.py:498
 msgid "Close others"
 msgstr "關閉其他"
 
-#: thonny/ui_utils.py:1734
+#: thonny/ui_utils.py:1738
 msgid "Copying"
 msgstr "複製"
 
-#: thonny/ui_utils.py:1737
+#: thonny/ui_utils.py:1741
 msgid "Copying\n"
 "  %s\n"
 "to\n"
@@ -620,19 +620,19 @@ msgstr "複製\n"
 "%s"
 
 #: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
-#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1338
-#: thonny/ui_utils.py:160 thonny/ui_utils.py:1745 thonny/ui_utils.py:1831
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
 #: thonny/workdlg.py:205 thonny/workdlg.py:259
 msgid "Cancel"
 msgstr "取消"
 
 #: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
 #: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
-#: thonny/ui_utils.py:157 thonny/ui_utils.py:1828 thonny/workdlg.py:256
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
 msgid "OK"
 msgstr "確認"
 
-#: thonny/ui_utils.py:2345
+#: thonny/ui_utils.py:2355
 msgid "Select All"
 msgstr "全選"
 
@@ -641,43 +641,43 @@ msgstr "全選"
 msgid "Shell"
 msgstr "互動環境"
 
-#: thonny/workbench.py:608
+#: thonny/workbench.py:614
 msgid "Options..."
 msgstr "選項..."
 
-#: thonny/workbench.py:615
+#: thonny/workbench.py:621
 msgid "Increase font size"
 msgstr "放大字體"
 
-#: thonny/workbench.py:679
+#: thonny/workbench.py:685
 msgid "Change font size"
 msgstr "變更字型尺寸"
 
-#: thonny/workbench.py:680
+#: thonny/workbench.py:686
 msgid "Zoom"
 msgstr "縮放"
 
-#: thonny/workbench.py:689
+#: thonny/workbench.py:695
 msgid "Exit Thonny"
 msgstr "離開Thonny"
 
-#: thonny/workbench.py:692
+#: thonny/workbench.py:698
 msgid "Quit"
 msgstr "離開"
 
-#: thonny/workbench.py:1247 thonny/workbench.py:1255
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
 msgid "Overwriting theme '%s'"
 msgstr "覆寫主題 '%s'"
 
-#: thonny/workbench.py:1438
+#: thonny/workbench.py:1444
 msgid "Program arguments:"
 msgstr "程式引數:"
 
-#: thonny/workbench.py:1492
+#: thonny/workbench.py:1498
 msgid "Regular mode"
 msgstr "一般模式"
 
-#: thonny/workbench.py:1493
+#: thonny/workbench.py:1500
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
@@ -689,67 +689,67 @@ msgstr "設置已更新. 請重新啟動 Thonny 進入一般模式\n"
 msgid "Program tree"
 msgstr "程式樹"
 
-#: thonny/plugins/debugger.py:1284
+#: thonny/plugins/debugger.py:1286
 msgid "Resume"
 msgstr "繼續"
 
-#: thonny/plugins/debugger.py:1300
+#: thonny/plugins/debugger.py:1302
 msgid "Run / resume"
 msgstr "執行 / 繼續"
 
-#: thonny/plugins/debugger.py:1315
+#: thonny/plugins/debugger.py:1317
 msgid "Debug current script"
 msgstr "為目前腳本除錯"
 
-#: thonny/plugins/debugger.py:1317
+#: thonny/plugins/debugger.py:1319
 msgid "Debug"
 msgstr "除錯"
 
-#: thonny/plugins/debugger.py:1328
+#: thonny/plugins/debugger.py:1330
 msgid "Debug current script (nicer)"
 msgstr "為目前腳本除錯 (呈現詳細步驟)"
 
-#: thonny/plugins/debugger.py:1340
+#: thonny/plugins/debugger.py:1342
 msgid "Debug current script (faster)"
 msgstr "為目前腳本除錯 (不呈現詳細步驟)"
 
-#: thonny/plugins/debugger.py:1351
+#: thonny/plugins/debugger.py:1353
 msgid "Step over"
 msgstr "跳過 (Step Over)"
 
-#: thonny/plugins/debugger.py:1353
+#: thonny/plugins/debugger.py:1355
 msgid "Over"
 msgstr "跳下一步"
 
-#: thonny/plugins/debugger.py:1364
+#: thonny/plugins/debugger.py:1366
 msgid "Step into"
 msgstr "跳入 (Step into)"
 
-#: thonny/plugins/debugger.py:1366
+#: thonny/plugins/debugger.py:1368
 msgid "Into"
 msgstr "跳入"
 
-#: thonny/plugins/debugger.py:1377
+#: thonny/plugins/debugger.py:1379
 msgid "Step out"
 msgstr "跳出 (Step out) "
 
-#: thonny/plugins/debugger.py:1379
+#: thonny/plugins/debugger.py:1381
 msgid "Out"
 msgstr "跳出"
 
-#: thonny/plugins/debugger.py:1414
+#: thonny/plugins/debugger.py:1416
 msgid "Step back"
 msgstr "跳回 (Step back)"
 
-#: thonny/plugins/debugger.py:1416
+#: thonny/plugins/debugger.py:1418
 msgid "Back"
 msgstr "跳回"
 
-#: thonny/plugins/debugger.py:1422
+#: thonny/plugins/debugger.py:1424
 msgid "Stack"
 msgstr "堆疊 (Stack)"
 
-#: thonny/plugins/debugger.py:1423
+#: thonny/plugins/debugger.py:1425
 msgid "Exception"
 msgstr "異常 (Exception)"
 
@@ -777,103 +777,104 @@ msgstr "注意! 這些選項變更後，請重新啟動 Thonny"
 msgid "General"
 msgstr "一般"
 
-#: thonny/plugins/pip_gui.py:142
+#: thonny/plugins/pip_gui.py:160
 msgid "INSTALL"
 msgstr "安裝"
 
-#: thonny/plugins/pip_gui.py:367
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
 msgid "Browse the packages"
 msgstr "瀏覽套件"
 
-#: thonny/plugins/pip_gui.py:370
+#: thonny/plugins/pip_gui.py:389
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
 msgstr "目前的直譯器只能瀏覽套件。\n"
 "請使用『'工具/開啟系統終端機』來安裝、升級或移除套件。"
 
-#: thonny/plugins/pip_gui.py:378
+#: thonny/plugins/pip_gui.py:396
 msgid "Packages' directory"
 msgstr "套件的資料夾"
 
-#: thonny/plugins/pip_gui.py:382
+#: thonny/plugins/pip_gui.py:400
 msgid "Install from PyPI"
 msgstr "從 PyPI 安裝"
 
-#: thonny/plugins/pip_gui.py:385
+#: thonny/plugins/pip_gui.py:404
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
 msgstr "如果你不知道要從何處取得套件，你可以搜尋 PyPI。請在上面的文字框中\n"
 "輸入套件名稱並按下 ENTER"
 
-#: thonny/plugins/pip_gui.py:402
+#: thonny/plugins/pip_gui.py:420
 msgid "to locate requirements.txt file and install the packages specified in it."
 msgstr "來找 requirements.txt 檔, 並安裝裡面的套件"
 
-#: thonny/plugins/pip_gui.py:408
+#: thonny/plugins/pip_gui.py:426
 msgid "Click"
 msgstr "點選"
 
-#: thonny/plugins/pip_gui.py:413
+#: thonny/plugins/pip_gui.py:432
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
 msgstr "來安裝套件檔案(常見副檔名為 .whl   .tar.gz  或是 .zip)"
 
-#: thonny/plugins/pip_gui.py:420
+#: thonny/plugins/pip_gui.py:438
 msgid "Upgrade or uninstall"
 msgstr "升級或移除"
 
-#: thonny/plugins/pip_gui.py:422
+#: thonny/plugins/pip_gui.py:440
 msgid "Start by selecting the package from the left."
 msgstr "從左方的套件開始選擇"
 
-#: thonny/plugins/pip_gui.py:430
+#: thonny/plugins/pip_gui.py:449
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
 msgstr "這裡會列出所有可用的套件，但允許能升級或移除的套件只有在"
 
-#: thonny/plugins/pip_gui.py:440
+#: thonny/plugins/pip_gui.py:459
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
 msgstr "新套件也會安裝在這個資料夾。其他的地方需要另外處理"
 
-#: thonny/plugins/pip_gui.py:493
+#: thonny/plugins/pip_gui.py:511
 msgid "Installed version:"
 msgstr "安裝版本:"
 
-#: thonny/plugins/pip_gui.py:495
+#: thonny/plugins/pip_gui.py:513
 msgid "Installed to:"
 msgstr "安裝到: "
 
-#: thonny/plugins/pip_gui.py:573
+#: thonny/plugins/pip_gui.py:593
 msgid "Please check your spelling!"
 msgstr "請檢查你的拼字"
 
-#: thonny/plugins/pip_gui.py:577
+#: thonny/plugins/pip_gui.py:597
 msgid "Could not find the package info from PyPI."
 msgstr "無法從 PyPI 找到套件的資訊"
 
-#: thonny/plugins/pip_gui.py:579 thonny/plugins/pip_gui.py:1408
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
 msgid "Error code:"
 msgstr "錯誤碼: "
 
-#: thonny/plugins/pip_gui.py:748
+#: thonny/plugins/pip_gui.py:762
 msgid "Can't find package name from the list:"
 msgstr "無法從清單中找到套件名稱"
 
-#: thonny/plugins/pip_gui.py:803
+#: thonny/plugins/pip_gui.py:818
 msgid "Package '{}' is required for installing and uninstalling other packages."
 msgstr "需要 '{}' 套件來安裝或移除其他套件"
 
-#: thonny/plugins/pip_gui.py:848
+#: thonny/plugins/pip_gui.py:862
 msgid "Package"
 msgstr "套件"
 
-#: thonny/plugins/pip_gui.py:960
+#: thonny/plugins/pip_gui.py:974
 msgid "Manage packages for %s"
 msgstr "為 %s 管理套件"
 
-#: thonny/editors.py:587 thonny/plugins/micropython/pip_gui.py:25
-#: thonny/plugins/pip_gui.py:1034
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
 msgid "Confirmation"
 msgstr "確認"
 
-#: thonny/plugins/pip_gui.py:1035
+#: thonny/plugins/pip_gui.py:1114
 msgid "Looks like you are installing a Thonny-related package.\n"
 "If you meant to install a Thonny plugin, then you should\n"
 "choose 'Tools → Manage plugins...' instead\n"
@@ -885,59 +886,59 @@ msgstr "看來你正要安裝 Thonny 相關套件。\n"
 "\n"
 "你確定要為後端程式安裝 %s  嗎？"
 
-#: thonny/plugins/pip_gui.py:1141
+#: thonny/plugins/pip_gui.py:1204
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
 msgstr "注意！可能有與目前 Thonny 相容的其他版本, 請按一下 '...' 按鈕來選擇要安裝的版本."
 
-#: thonny/plugins/pip_gui.py:1149
+#: thonny/plugins/pip_gui.py:1211
 msgid "Thonny plugin without requirements"
 msgstr "沒有相依套件的 Thonny 外掛 "
 
-#: thonny/plugins/pip_gui.py:1165
+#: thonny/plugins/pip_gui.py:1227
 msgid "Unsuitable requirements"
 msgstr "不相配的相依套件"
 
-#: thonny/plugins/pip_gui.py:1166
+#: thonny/plugins/pip_gui.py:1228
 msgid "This package requires different Thonny version:"
 msgstr "這個套件需要不同版本的 Thonny"
 
-#: thonny/plugins/pip_gui.py:1170
+#: thonny/plugins/pip_gui.py:1232
 msgid "If you still want it, then please install it from the command line."
 msgstr "如果你仍想要，請從終端機進行安裝"
 
-#: thonny/plugins/pip_gui.py:1207
+#: thonny/plugins/pip_gui.py:1270
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
 msgstr "注意！在安裝 / 升級 / 移除外掛後，你必須要重新啟動 Thonny"
 
-#: thonny/plugins/pip_gui.py:1217
+#: thonny/plugins/pip_gui.py:1279
 msgid "Thonny plug-ins"
 msgstr "Thonny 外掛"
 
-#: thonny/plugins/pip_gui.py:1253
+#: thonny/plugins/pip_gui.py:1321
 msgid "Advanced install / upgrade / downgrade"
 msgstr "進階 安裝 / 升級 / 降級"
 
-#: thonny/plugins/pip_gui.py:1262
+#: thonny/plugins/pip_gui.py:1330
 msgid "Desired version"
 msgstr "想要的版本"
 
-#: thonny/plugins/pip_gui.py:1321
+#: thonny/plugins/pip_gui.py:1389
 msgid "Upgrade dependencies"
 msgstr "升級相依套件"
 
-#: thonny/plugins/pip_gui.py:1406
+#: thonny/plugins/pip_gui.py:1474
 msgid "Requires:"
 msgstr "相依套件:"
 
-#: thonny/plugins/pip_gui.py:1410
+#: thonny/plugins/pip_gui.py:1478
 msgid "Error:"
 msgstr "錯誤: "
 
-#: thonny/plugins/pip_gui.py:1601
+#: thonny/plugins/pip_gui.py:1677
 msgid "Manage packages..."
 msgstr "管理套件..."
 
-#: thonny/plugins/pip_gui.py:1607
+#: thonny/plugins/pip_gui.py:1683
 msgid "Manage plug-ins..."
 msgstr "管理外掛..."
 
@@ -961,7 +962,7 @@ msgstr "如果你想要更傳統的體驗，請取消勾選"
 msgid "Open and close Stack view automatically"
 msgstr "自動開啟與關閉堆疊 (Stack) 檢視"
 
-#: thonny/plugins/run_debug_config_page.py:43
+#: thonny/plugins/run_debug_config_page.py:44
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
 msgstr "在第一次呼叫時打開堆疊 (Stack) 檢視，並在程式返回主要 frame 時關閉"
 
@@ -1025,7 +1026,7 @@ msgstr "在程式結束後呈現 Python 互動環境"
 msgid "Keep terminal window open after Python process ends"
 msgstr "在 python 程式結束後，維持終端機視窗開啟"
 
-#: thonny/plugins/terminal_config_page.py:31
+#: thonny/plugins/terminal_config_page.py:32
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
 msgstr "注意! 需要開啟終端機設定才能自動關閉"
@@ -1098,31 +1099,31 @@ msgstr "回主畫面"
 msgid "Help contents"
 msgstr "說明內容"
 
-#: thonny/plugins/micropython/mp_front.py:303
+#: thonny/plugins/micropython/mp_front.py:290
 msgid "CircuitPython device"
 msgstr "CircuitPython 設備"
 
-#: thonny/plugins/micropython/mp_front.py:307
+#: thonny/plugins/micropython/mp_front.py:294
 msgid "MicroPython device"
 msgstr "MicroPython 設備"
 
-#: thonny/plugins/micropython/mp_front.py:558
+#: thonny/plugins/micropython/mp_front.py:545
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr "將設備連接到電腦，並選擇下方的連接埠"
 
-#: thonny/plugins/micropython/mp_front.py:561
+#: thonny/plugins/micropython/mp_front.py:548
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr "尋找名稱中有 \"USB Serial\" 或是 \"UART\" 的設備 "
 
-#: thonny/plugins/micropython/mp_front.py:563
+#: thonny/plugins/micropython/mp_front.py:550
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr "如果找不到，你需要先安裝正確的 USB 驅動程式"
 
-#: thonny/plugins/micropython/mp_front.py:453
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port"
 msgstr "連接埠"
 
-#: thonny/plugins/micropython/mp_front.py:458
+#: thonny/plugins/micropython/mp_front.py:445
 msgid "Try to detect port automatically"
 msgstr "自動偵測連接埠"
 
@@ -1142,15 +1143,15 @@ msgstr "開啟系統終端機..."
 msgid "Details"
 msgstr "詳細"
 
-#: thonny/plugins/pip_gui.py:395
+#: thonny/plugins/pip_gui.py:413
 msgid "Install from requirements file"
 msgstr "從 requirements 檔案來安裝"
 
-#: thonny/plugins/pip_gui.py:407
+#: thonny/plugins/pip_gui.py:425
 msgid "Install from local file"
 msgstr "從本地檔案安裝"
 
-#: thonny/plugins/pip_gui.py:1200
+#: thonny/plugins/pip_gui.py:1263
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
 msgstr "這是管理 Thonny 本身的外掛以及相依模組的交談窗。\n"
@@ -1168,7 +1169,7 @@ msgstr "增加選取行的縮排"
 msgid "Dedent selected lines"
 msgstr "減少選取行的縮排"
 
-#: thonny/workbench.py:1481
+#: thonny/workbench.py:1487
 msgid "Switch to\n"
 "regular\n"
 "mode"
@@ -1183,16 +1184,16 @@ msgstr "請確定 MicroPython 已安裝到你的 micro:bit 上"
 msgid "Don't forget that main.py only works without embedded main script."
 msgstr "不要忘記 main.py 只有在沒有內嵌到主要腳本時才會有效"
 
-#: thonny/misc_utils.py:177
+#: thonny/misc_utils.py:178
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
 msgstr "找不到磁碟機 '%s' 。你想要自己找出位置嗎？\n"
 ""
 
-#: thonny/misc_utils.py:180
+#: thonny/misc_utils.py:181
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
 msgstr "發現多個 '%s' 磁碟機。你想要自己選擇嗎？"
 
-#: thonny/misc_utils.py:196
+#: thonny/misc_utils.py:197
 msgid "Can't find suitable disk"
 msgstr "找不到合適的磁碟機"
 
@@ -1248,11 +1249,11 @@ msgstr "已變更"
 msgid "Deleting %s"
 msgstr "刪除 %s"
 
-#: thonny/editors.py:262
+#: thonny/editors.py:264
 msgid "Loading"
 msgstr "載入"
 
-#: thonny/editors.py:395
+#: thonny/editors.py:397
 msgid "Saving"
 msgstr "保存"
 
@@ -1292,11 +1293,11 @@ msgstr "以系統預設的應用程式開啟"
 msgid "Configure %s files"
 msgstr "設定 %s 檔"
 
-#: thonny/base_file_browser.py:701
+#: thonny/base_file_browser.py:702
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
 msgstr "在 Thonny 的檔案檢視中按兩下 %s 檔時要進行哪個動作？"
 
-#: thonny/base_file_browser.py:1258 thonny/editors.py:986 thonny/editors.py:988
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
 msgid "Deleting"
 msgstr "正在刪除"
 
@@ -1304,23 +1305,23 @@ msgstr "正在刪除"
 msgid "Creating directory"
 msgstr "建立資料夾"
 
-#: thonny/editors.py:260
+#: thonny/editors.py:262
 msgid "Loading %s"
 msgstr "載入 %s"
 
-#: thonny/editors.py:390
+#: thonny/editors.py:392
 msgid "Saving to %s"
 msgstr "儲存到 %s"
 
-#: thonny/editors.py:728 thonny/editors.py:730
+#: thonny/editors.py:730 thonny/editors.py:732
 msgid "Save All files"
 msgstr "儲存所有檔案"
 
-#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:880
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
 msgid "Configure interpreter..."
 msgstr "設定直譯器"
 
-#: thonny/workbench.py:1591
+#: thonny/workbench.py:1597
 msgid "Device"
 msgstr "設備"
 
@@ -1346,47 +1347,47 @@ msgid "Enter your password for\n"
 "{}"
 msgstr "鍵入 {} 的密碼"
 
-#: thonny/plugins/object_inspector.py:486
+#: thonny/plugins/object_inspector.py:487
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
 msgstr "以上是此浮點數的近似值, 實際儲存的數值是 %s, 約為 %s"
 
-#: thonny/plugins/pip_gui.py:682
+#: thonny/plugins/pip_gui.py:696
 msgid "Search results"
 msgstr "搜尋結果"
 
-#: thonny/plugins/pip_gui.py:683
+#: thonny/plugins/pip_gui.py:697
 msgid "Searching"
 msgstr "搜尋中"
 
-#: thonny/plugins/pip_gui.py:787 thonny/plugins/pip_gui.py:876
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
 msgid "Installing '%s'"
 msgstr "安裝 '%s'"
 
-#: thonny/plugins/pip_gui.py:793
+#: thonny/plugins/pip_gui.py:807
 msgid "Upgrading '%s'"
 msgstr "更新 '%s'"
 
-#: thonny/plugins/pip_gui.py:800
+#: thonny/plugins/pip_gui.py:814
 msgid "Uninstalling '%s'"
 msgstr "解除安裝 '%s'"
 
-#: thonny/plugins/pip_gui.py:814
+#: thonny/plugins/pip_gui.py:828
 msgid "Installing"
 msgstr "安裝中"
 
-#: thonny/plugins/pip_gui.py:1562
+#: thonny/plugins/pip_gui.py:1625
 msgid "Package manager is not available for this interpreter"
 msgstr "此直譯器無法使用套件管理員"
 
-#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1576
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
 msgid "Not supported"
 msgstr "不支援"
 
-#: thonny/plugins/micropython/pip_gui.py:142 thonny/plugins/pip_gui.py:1581
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
 msgid "Not available"
 msgstr "無法使用"
 
-#: thonny/plugins/pip_gui.py:1582
+#: thonny/plugins/pip_gui.py:1658
 msgid "You need to stop your program before launching the package manager."
 msgstr "你需要先停止執行程式才能開啟套件管理員"
 
@@ -1394,11 +1395,11 @@ msgstr "你需要先停止執行程式才能開啟套件管理員"
 msgid "Open evaluated values in Object inspector"
 msgstr "在物件檢視器中開啟計算項目"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:234
+#: thonny/plugins/cpython_frontend/cp_front.py:240
 msgid "Python executable"
 msgstr "Python 可執行檔"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:258
+#: thonny/plugins/cpython_frontend/cp_front.py:265
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
@@ -1408,7 +1409,7 @@ msgstr "注意！使用檔案選擇按鈕可能無法正常選用虛擬環境中
 msgid "Remote Python 3 (SSH)"
 msgstr "遠端的 Python 3(SSH)"
 
-#: thonny/plugins/micropython/mp_front.py:313
+#: thonny/plugins/micropython/mp_front.py:300
 msgid "Not connected"
 msgstr "未連線"
 
@@ -1420,11 +1421,11 @@ msgstr "MicroPython (本機)"
 msgid "MicroPython (SSH)"
 msgstr " MicroPython (SSH) "
 
-#: thonny/plugins/micropython/pip_gui.py:144
+#: thonny/plugins/micropython/pip_gui.py:145
 msgid "no absolute lib directory in sys.path"
 msgstr "在 sys.path 中沒有程式庫的絕對路徑"
 
-#: thonny/plugins/pip_gui.py:71
+#: thonny/plugins/pip_gui.py:86
 msgid "Search on PyPI"
 msgstr "在 PyPI 中搜尋"
 
@@ -1512,23 +1513,23 @@ msgstr "值"
 msgid "Save password"
 msgstr "儲存密碼"
 
-#: thonny/plugins/debugger.py:557
+#: thonny/plugins/debugger.py:559
 msgid "Function call at %s"
 msgstr "在 %s 的函式叫用"
 
-#: thonny/plugins/debugger.py:1006
+#: thonny/plugins/debugger.py:1008
 msgid "Local variables"
 msgstr "區域變數"
 
-#: thonny/plugins/debugger.py:1038
+#: thonny/plugins/debugger.py:1040
 msgid "Function"
 msgstr "函式"
 
-#: thonny/plugins/debugger.py:1039
+#: thonny/plugins/debugger.py:1041
 msgid "Location"
 msgstr "位置"
 
-#: thonny/plugins/debugger.py:1115
+#: thonny/plugins/debugger.py:1117
 msgid "If last command raised an exception then this view will show the stacktrace."
 msgstr "如果上個指令引發異常, 此檢視畫面會顯示堆疊追蹤資訊"
 
@@ -1562,15 +1563,15 @@ msgid "Back to\n"
 msgstr "回到\n"
 "%s"
 
-#: thonny/plugins/micropython/mp_front.py:453
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port or WebREPL"
 msgstr "選擇連接埠或是 WebREPL"
 
-#: thonny/plugins/micropython/mp_front.py:599
+#: thonny/plugins/micropython/mp_front.py:586
 msgid "Password"
 msgstr "密碼"
 
-#: thonny/plugins/debugger.py:964
+#: thonny/plugins/debugger.py:966
 msgid "Source code"
 msgstr "原始碼"
 
@@ -1614,7 +1615,7 @@ msgstr "找到衝突的資料夾"
 msgid "File already exists"
 msgstr "檔案已經存在"
 
-#: thonny/base_file_browser.py:1212
+#: thonny/base_file_browser.py:1213
 msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
 msgstr "如果這是文字檔, 可以用滑鼠右鍵按一下後選取 '設定 ... 檔案' 以便在 Thonny 中開啟"
 
@@ -1622,67 +1623,67 @@ msgstr "如果這是文字檔, 可以用滑鼠右鍵按一下後選取 '設定 .
 msgid "Python files"
 msgstr "Python 檔案"
 
-#: thonny/editors.py:123 thonny/editors.py:189
+#: thonny/editors.py:125 thonny/editors.py:191
 msgid "<untitled>"
 msgstr "未命名"
 
-#: thonny/editors.py:150
+#: thonny/editors.py:152
 msgid "File is gone"
 msgstr "檔案不見了"
 
-#: thonny/editors.py:153
+#: thonny/editors.py:155
 msgid "Do you want to also close the editor?"
 msgstr "要同時關閉編輯器嗎？"
 
-#: thonny/editors.py:169
+#: thonny/editors.py:171
 msgid "External modification"
 msgstr "外部的修改"
 
-#: thonny/editors.py:172
+#: thonny/editors.py:175
 msgid "Do you want to discard current editor content and reload the file from disk?"
 msgstr "你要丟棄目前編輯內容從磁碟重新載入檔案嗎？"
 
-#: thonny/editors.py:588
+#: thonny/editors.py:590
 msgid "Python files usually have .py extension."
 msgstr "Python 檔通常會以 .py 為附檔名"
 
-#: thonny/editors.py:590
+#: thonny/editors.py:592
 msgid "Did you mean '%s'?"
 msgstr "你是指 %s 嗎？"
 
-#: thonny/editors.py:759
+#: thonny/editors.py:761
 msgid "Move / rename..."
 msgstr "移動/重新命名..."
 
-#: thonny/editors.py:768
+#: thonny/editors.py:770
 msgid "Go to line..."
 msgstr "到指定行..."
 
-#: thonny/editors.py:1010
+#: thonny/editors.py:1012
 msgid "Line number"
 msgstr "行號"
 
-#: thonny/editors.py:1156
+#: thonny/editors.py:1158
 msgid "Do you want to save files before closing?"
 msgstr "關閉之前要儲存檔案嗎？"
 
-#: thonny/editors.py:1158
+#: thonny/editors.py:1160
 msgid "Do you want to save file before closing?"
 msgstr "關閉之前要儲存檔案嗎？"
 
-#: thonny/editors.py:1161
+#: thonny/editors.py:1163
 msgid "Save On Close"
 msgstr "關閉時儲存"
 
-#: thonny/misc_utils.py:539
+#: thonny/misc_utils.py:587
 msgid "Command not available"
 msgstr "無法執行指令"
 
-#: thonny/misc_utils.py:540
+#: thonny/misc_utils.py:588
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr "透過 Flatpak 執行 Thonny 實無法執行這個指令"
 
-#: thonny/workbench.py:700 thonny/workbench.py:799
+#: thonny/workbench.py:706 thonny/workbench.py:805
 msgid "Support Ukraine"
 msgstr "聲援烏克蘭"
 
@@ -1714,7 +1715,7 @@ msgstr "在編輯器中使用 Tab 鍵要求自動補全"
 msgid "Request completions with Tab-key in Shell"
 msgstr "在互動環境中使用 Tab 鍵要求自動補全"
 
-#: thonny/editors.py:213 thonny/plugins/goto_definition.py:58
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
 msgid "Problem"
 msgstr "問題"
 
@@ -1726,27 +1727,27 @@ msgstr "無法找到定義"
 msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
 msgstr "在啟動新的程序  (執行、除錯、停止/除新啟動...) 前清除互動環境窗格"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:196
+#: thonny/plugins/cpython_frontend/cp_front.py:202
 msgid "Thonny's Python"
 msgstr "Thonny 的 Python"
 
-#: thonny/plugins/micropython/mp_front.py:496
+#: thonny/plugins/micropython/mp_front.py:483
 msgid "Interrupt working program on connect"
 msgstr "連線時中斷目前程式"
 
-#: thonny/plugins/micropython/mp_front.py:504
+#: thonny/plugins/micropython/mp_front.py:491
 msgid "Synchronize device's real time clock"
 msgstr "為裝置的 RTC 同步時間"
 
-#: thonny/plugins/micropython/mp_front.py:510
+#: thonny/plugins/micropython/mp_front.py:497
 msgid "Use local time in real time clock"
 msgstr "在 RTC 中使用本地時間"
 
-#: thonny/plugins/micropython/mp_front.py:516
+#: thonny/plugins/micropython/mp_front.py:503
 msgid "Restart interpreter before running a script"
 msgstr "執行腳本前重啟直譯器"
 
-#: thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/micropython/pip_gui.py:28
 msgid "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
 msgstr "這並不是 MicroPython/CircuitPython 的套件。\n"
@@ -1772,31 +1773,31 @@ msgstr "使用預設的外部程式開啟"
 msgid "Opening remote files in external app is not supported."
 msgstr "不支援使用外部程式開啟遠端檔案。"
 
-#: thonny/base_file_browser.py:1217
+#: thonny/base_file_browser.py:1218
 msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
 msgstr "如果要使用外部程式開啟檔案, 請先下載到本地資料夾後再開啟！"
 
-#: thonny/editors.py:151
+#: thonny/editors.py:153
 msgid "Looks like '%s' was deleted or moved."
 msgstr "%s 似乎已經刪除或是移到他處。"
 
-#: thonny/editors.py:170
+#: thonny/editors.py:172
 msgid "Looks like '%s' was modified outside of the editor."
 msgstr "'%s' 在編輯器外被修改了"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:256
+#: thonny/plugins/cpython_frontend/cp_front.py:262
 msgid "NB! Thonny only supports Python %s and later"
 msgstr "注意！Thonny 只支援 Python %s 及更新的版本"
 
-#: thonny/editors.py:1010
+#: thonny/editors.py:1012
 msgid "Go to line"
 msgstr "到指定行"
 
-#: thonny/workbench.py:703
+#: thonny/workbench.py:709
 msgid "Support"
 msgstr "支援"
 
-#: thonny/editors.py:399 thonny/editors.py:414
+#: thonny/editors.py:401 thonny/editors.py:416
 msgid "Could not save"
 msgstr "無法儲存"
 
@@ -1804,17 +1805,17 @@ msgstr "無法儲存"
 msgid "Warning"
 msgstr "警告"
 
-#: thonny/plugins/general_config_page.py:136
+#: thonny/plugins/general_config_page.py:137
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
 msgstr "如果為環境變數加上引號, 引號也會成為變數值的一部份。\n"
 "你確定要這樣做嗎？"
 
-#: thonny/workbench.py:870
+#: thonny/workbench.py:876
 msgid "Install MicroPython"
 msgstr "安裝 MicroPython"
 
-#: thonny/workbench.py:874
+#: thonny/workbench.py:880
 msgid "Install CircuitPython"
 msgstr "安裝 CircuitPython"
 
@@ -1830,7 +1831,7 @@ msgstr "設定儲存的 shebang 腳本為可執行檔"
 msgid "Activate virtual environment"
 msgstr "啟用虛擬環境"
 
-#: thonny/plugins/micropython/pip_gui.py:119 thonny/plugins/pip_gui.py:426
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
 msgid "Target"
 msgstr "目的地"
 
@@ -1855,7 +1856,7 @@ msgid "TODO"
 msgstr "代辦事項"
 
 #: thonny/plugins/circuitpython/cirpy_front.py:113
-#: thonny/plugins/micropython/mp_front.py:550
+#: thonny/plugins/micropython/mp_front.py:537
 msgid "Install or update %s"
 msgstr "安裝或是更新 %s"
 
@@ -1863,15 +1864,15 @@ msgstr "安裝或是更新 %s"
 msgid "Local Python 3"
 msgstr "本地端的 Python 3"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:266
+#: thonny/plugins/cpython_frontend/cp_front.py:273
 msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
 msgstr "你也可以透過檔案窗格, 在虛擬環境資料夾或是其中的 'pyvenv.cfg' 檔案上按滑鼠右鍵顯示的功能表啟用既有的虛擬環境"
 
-#: thonny/plugins/ev3/__init__.py:72
+#: thonny/plugins/ev3/__init__.py:73
 msgid "Preparations (skip the VS Code part)"
 msgstr "準備 (略過 VS Code 的部分)"
 
-#: thonny/plugins/ev3/__init__.py:78
+#: thonny/plugins/ev3/__init__.py:79
 msgid "Default password"
 msgstr "預設密碼"
 
@@ -1883,15 +1884,15 @@ msgstr "資訊"
 msgid "For debugging the program must be saved first."
 msgstr "程式必須先存檔才能除錯。"
 
-#: thonny/editors.py:213
+#: thonny/editors.py:215
 msgid "%s doesn't look like a text file"
 msgstr "%s 似乎不是文字檔"
 
-#: thonny/editors.py:219
+#: thonny/editors.py:221
 msgid "Problem loading file"
 msgstr "載入檔案遇到問題"
 
-#: thonny/editors.py:220
+#: thonny/editors.py:223
 msgid "This file seems to have problems with encoding.\n"
 "\n"
 "Make sure it is in UTF-8 or contains proper encoding hint."
@@ -1899,11 +1900,11 @@ msgstr "此檔案編碼有問題。\n"
 "\n"
 "請確認使用 UTF-8 編碼或是加入正確的編碼指示。"
 
-#: thonny/editors.py:295
+#: thonny/editors.py:297
 msgid "File is open"
 msgstr "檔案已經開啟"
 
-#: thonny/editors.py:296
+#: thonny/editors.py:299
 msgid "This file is already open in Thonny.\n"
 "\n"
 "If you want to save with this name,\n"
@@ -1912,44 +1913,44 @@ msgstr "此檔案已經在 Thonny 中開啟。\n"
 "\n"
 "如果要以此名稱存檔, 請先關閉編輯中的同名檔案！"
 
-#: thonny/editors.py:349
+#: thonny/editors.py:351
 msgid "Permission Error"
 msgstr "權限錯誤"
 
-#: thonny/editors.py:350
+#: thonny/editors.py:352
 msgid "Looks like this file or folder is not writable."
 msgstr "無法寫入此檔案或資料夾。"
 
-#: thonny/editors.py:414
+#: thonny/editors.py:416
 msgid "Back-end is not ready"
 msgstr "後端尚未就緒"
 
-#: thonny/editors.py:419
+#: thonny/editors.py:421
 msgid "Where to save to?"
 msgstr "存檔位置？"
 
-#: thonny/editors.py:490
+#: thonny/editors.py:492
 msgid "Potential problem"
 msgstr "潛在問題"
 
-#: thonny/editors.py:491
+#: thonny/editors.py:494
 msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
 msgstr "如果將腳本存成 '%s', 就無法匯入名稱為 '%s' 的程式庫模組"
 
-#: thonny/editors.py:497
+#: thonny/editors.py:499
 msgid "Do you still want to use this name for your script?"
 msgstr "仍然要為腳本使用此檔名？"
 
-#: thonny/editors.py:1053
+#: thonny/editors.py:1055
 msgid "Got permission error when trying to load\n"
 "%s"
 msgstr "儲存 %s 時發生權限錯誤"
 
-#: thonny/editors.py:1055
+#: thonny/editors.py:1057
 msgid "Try opening it with File => Open."
 msgstr "請試看看用『檔案/開啟』來開檔。"
 
-#: thonny/editors.py:1057
+#: thonny/editors.py:1059
 msgid "Permission error"
 msgstr "權限錯誤"
 
@@ -1957,7 +1958,7 @@ msgstr "權限錯誤"
 msgid "Allow running unnamed programs"
 msgstr "允許執行尚未命名的程式"
 
-#: thonny/plugins/pip_gui.py:600
+#: thonny/plugins/pip_gui.py:620
 msgid "License"
 msgstr "授權"
 
@@ -1965,7 +1966,15 @@ msgstr "授權"
 msgid "Warn if a user module shadows a library module"
 msgstr "在使用者自己的模組會遮蓋掉程式庫模組時發出警告"
 
-#: thonny/plugins/micropython/pip_gui.py:65
+#: thonny/plugins/micropython/pip_gui.py:66
 msgid "Search micropython-lib and PyPI"
 msgstr "搜尋 micropython-lib 與 PyPI"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid "The packages of this interpreter can be managed via your system package manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
+msgstr ""
 

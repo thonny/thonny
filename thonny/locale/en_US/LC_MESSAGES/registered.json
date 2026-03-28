@@ -1,3 +1,25 @@
 {
-    "Made in\nUniversity of Tartu, Estonia,\nwith the help from\nopen-source community,\nRaspberry Pi Foundation\nand Cybernetica AS": "Made at the\nUniversity of Tartu, Estonia,\nwith help from the\nopen-source community,\nRaspberry Pi Foundation\nand Cybernetica AS"
+    "About Thonny": "About Thonny",
+    "Assistant": "Assistant",
+    "Decrease font size": "Decrease font size",
+    "Edit": "Edit",
+    "Exit": "Exit",
+    "File": "File",
+    "Focus editor": "Focus editor",
+    "Focus shell": "Focus shell",
+    "Full screen": "Full screen",
+    "Help": "Help",
+    "Made in\nUniversity of Tartu, Estonia,\nwith the help from\nopen-source community,\nRaspberry Pi Foundation\nand Cybernetica AS": "Made at the\nUniversity of Tartu, Estonia,\nwith help from the\nopen-source community,\nRaspberry Pi Foundation\nand Cybernetica AS",
+    "Maximize view": "Maximize view",
+    "Open Assistant automatically when it has warnings for your code": "Open Assistant automatically when it has warnings for your code",
+    "Open Assistant automatically when program crashes with an exception": "Open Assistant automatically when program crashes with an exception",
+    "Perform MyPy checks": "Perform MyPy checks",
+    "Perform selected Pylint checks": "Perform selected Pylint checks",
+    "Program arguments": "Program arguments",
+    "Report problems": "Report problems",
+    "Run": "Run",
+    "This program comes with\nABSOLUTELY NO WARRANTY!\nIt is free software, and you are welcome to\nredistribute it under certain conditions, see\nhttps://opensource.org/licenses/MIT\nfor details": "This program comes with\nABSOLUTELY NO WARRANTY!\nIt is free software, and you are welcome to\nredistribute it under certain conditions, see\nhttps://opensource.org/licenses/MIT\nfor details",
+    "Tools": "Tools",
+    "Version history": "Version history",
+    "View": "View"
 }

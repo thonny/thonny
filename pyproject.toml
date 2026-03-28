@@ -71,6 +71,9 @@ dev = [
     "black>=24.8.0",
     "isort>=5.13.2",
     "pip",
+    "babel",
+    "polib",
+    "pyperclip"
 ]
 
 [tool.uv.build-backend]

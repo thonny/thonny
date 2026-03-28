@@ -1,23 +1,23 @@
 # Translations template for PROJECT.
-# Copyright (C) 2023 ORGANIZATION
+# Copyright (C) 2026 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-06-02 12:43+0300\n"
+"POT-Creation-Date: 2026-03-27 23:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.18.0\n"
 
-#: thonny/assistance.py:981 thonny/plugins/assistant_config_page.py:74
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
 msgid "Assistant"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgstr ""
 msgid "Open in Thonny's text editor"
 msgstr ""
 
-#: thonny/base_file_browser.py:701
+#: thonny/base_file_browser.py:702
 #, python-format
 msgid ""
 "What to do with a %s file when you double-click it in Thonny's file "
@@ -115,17 +115,17 @@ msgid "New directory"
 msgstr ""
 
 #: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
-#: thonny/ui_utils.py:2339
+#: thonny/ui_utils.py:2349
 msgid "Cut"
 msgstr ""
 
 #: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
-#: thonny/ui_utils.py:2340
+#: thonny/ui_utils.py:2350
 msgid "Copy"
 msgstr ""
 
 #: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
-#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2341
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
 msgid "Paste"
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 msgid "File already exists"
 msgstr ""
 
-#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1576
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
 msgid "Not supported"
 msgstr ""
 
@@ -232,19 +232,19 @@ msgstr ""
 msgid "Opening remote files in external app is not supported."
 msgstr ""
 
-#: thonny/base_file_browser.py:1212
+#: thonny/base_file_browser.py:1213
 msgid ""
 "If it is a text file, then you can configure it to open in Thonny by "
 "right-clicking it and selecting 'Configure ... files'."
 msgstr ""
 
-#: thonny/base_file_browser.py:1217
+#: thonny/base_file_browser.py:1218
 msgid ""
 "If the file needs to be opened in external app, then download it to a "
 "local directory and open it from there!"
 msgstr ""
 
-#: thonny/base_file_browser.py:1258 thonny/editors.py:986 thonny/editors.py:988
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
 msgid "Deleting"
 msgstr ""
 
@@ -268,13 +268,13 @@ msgstr ""
 
 #: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
 #: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
-#: thonny/ui_utils.py:157 thonny/ui_utils.py:1828 thonny/workdlg.py:256
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
 msgid "OK"
 msgstr ""
 
 #: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
-#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1338
-#: thonny/ui_utils.py:160 thonny/ui_utils.py:1745 thonny/ui_utils.py:1831
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
 #: thonny/workdlg.py:205 thonny/workdlg.py:259
 msgid "Cancel"
 msgstr ""
@@ -309,77 +309,77 @@ msgstr ""
 msgid "Python files"
 msgstr ""
 
-#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:296
-#: thonny/plugins/pip_gui.py:848 thonny/plugins/pip_gui.py:861
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
 msgid "all files"
 msgstr ""
 
-#: thonny/editors.py:123 thonny/editors.py:189
+#: thonny/editors.py:125 thonny/editors.py:191
 msgid "<untitled>"
 msgstr ""
 
-#: thonny/editors.py:150
+#: thonny/editors.py:152
 msgid "File is gone"
 msgstr ""
 
-#: thonny/editors.py:151
+#: thonny/editors.py:153
 #, python-format
 msgid "Looks like '%s' was deleted or moved."
 msgstr ""
 
-#: thonny/editors.py:153
+#: thonny/editors.py:155
 msgid "Do you want to also close the editor?"
 msgstr ""
 
-#: thonny/editors.py:169
+#: thonny/editors.py:171
 msgid "External modification"
 msgstr ""
 
-#: thonny/editors.py:170
+#: thonny/editors.py:172
 #, python-format
 msgid "Looks like '%s' was modified outside of the editor."
 msgstr ""
 
-#: thonny/editors.py:172
+#: thonny/editors.py:175
 msgid ""
 "Do you want to discard current editor content and reload the file from "
 "disk?"
 msgstr ""
 
-#: thonny/editors.py:213 thonny/plugins/goto_definition.py:58
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
 msgid "Problem"
 msgstr ""
 
-#: thonny/editors.py:213
+#: thonny/editors.py:215
 #, python-format
 msgid "%s doesn't look like a text file"
 msgstr ""
 
-#: thonny/editors.py:219
+#: thonny/editors.py:221
 msgid "Problem loading file"
 msgstr ""
 
-#: thonny/editors.py:220
+#: thonny/editors.py:223
 msgid ""
 "This file seems to have problems with encoding.\n"
 "\n"
 "Make sure it is in UTF-8 or contains proper encoding hint."
 msgstr ""
 
-#: thonny/editors.py:260
+#: thonny/editors.py:262
 #, python-format
 msgid "Loading %s"
 msgstr ""
 
-#: thonny/editors.py:262
+#: thonny/editors.py:264
 msgid "Loading"
 msgstr ""
 
-#: thonny/editors.py:295
+#: thonny/editors.py:297
 msgid "File is open"
 msgstr ""
 
-#: thonny/editors.py:296
+#: thonny/editors.py:299
 msgid ""
 "This file is already open in Thonny.\n"
 "\n"
@@ -387,145 +387,145 @@ msgid ""
 "close the existing editor first!"
 msgstr ""
 
-#: thonny/editors.py:349
+#: thonny/editors.py:351
 msgid "Permission Error"
 msgstr ""
 
-#: thonny/editors.py:350
+#: thonny/editors.py:352
 msgid "Looks like this file or folder is not writable."
 msgstr ""
 
-#: thonny/editors.py:390
+#: thonny/editors.py:392
 #, python-format
 msgid "Saving to %s"
 msgstr ""
 
-#: thonny/editors.py:395
+#: thonny/editors.py:397
 msgid "Saving"
 msgstr ""
 
-#: thonny/editors.py:399 thonny/editors.py:414
+#: thonny/editors.py:401 thonny/editors.py:416
 msgid "Could not save"
 msgstr ""
 
-#: thonny/editors.py:414
+#: thonny/editors.py:416
 msgid "Back-end is not ready"
 msgstr ""
 
-#: thonny/editors.py:419
+#: thonny/editors.py:421
 msgid "Where to save to?"
 msgstr ""
 
-#: thonny/editors.py:490
+#: thonny/editors.py:492
 msgid "Potential problem"
 msgstr ""
 
-#: thonny/editors.py:491
+#: thonny/editors.py:494
 #, python-format
 msgid ""
 "If you name your script '%s', you won't be able to import the library "
 "module named '%s'"
 msgstr ""
 
-#: thonny/editors.py:497
+#: thonny/editors.py:499
 msgid "Do you still want to use this name for your script?"
 msgstr ""
 
-#: thonny/editors.py:587 thonny/plugins/micropython/pip_gui.py:25
-#: thonny/plugins/pip_gui.py:1034
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
 msgid "Confirmation"
 msgstr ""
 
-#: thonny/editors.py:588
+#: thonny/editors.py:590
 msgid "Python files usually have .py extension."
 msgstr ""
 
-#: thonny/editors.py:590
+#: thonny/editors.py:592
 #, python-format
 msgid "Did you mean '%s'?"
 msgstr ""
 
-#: thonny/editors.py:658 thonny/editors.py:660
+#: thonny/editors.py:660 thonny/editors.py:662
 msgid "New"
 msgstr ""
 
-#: thonny/editors.py:671
+#: thonny/editors.py:673
 msgid "Open..."
 msgstr ""
 
-#: thonny/editors.py:673
+#: thonny/editors.py:675
 msgid "Load"
 msgstr ""
 
-#: thonny/editors.py:682
+#: thonny/editors.py:684
 msgid "Recent files"
 msgstr ""
 
-#: thonny/editors.py:693 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:496
-#: thonny/ui_utils.py:1884 thonny/workdlg.py:203
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
 msgid "Close"
 msgstr ""
 
-#: thonny/editors.py:704 thonny/ui_utils.py:498
+#: thonny/editors.py:706 thonny/ui_utils.py:499
 msgid "Close all"
 msgstr ""
 
-#: thonny/editors.py:714 thonny/editors.py:716
+#: thonny/editors.py:716 thonny/editors.py:718
 msgid "Save"
 msgstr ""
 
-#: thonny/editors.py:728 thonny/editors.py:730
+#: thonny/editors.py:730 thonny/editors.py:732
 msgid "Save All files"
 msgstr ""
 
-#: thonny/editors.py:739
+#: thonny/editors.py:741
 msgid "Save as..."
 msgstr ""
 
-#: thonny/editors.py:750
+#: thonny/editors.py:752
 msgid "Save copy..."
 msgstr ""
 
-#: thonny/editors.py:759
+#: thonny/editors.py:761
 msgid "Move / rename..."
 msgstr ""
 
-#: thonny/editors.py:768
+#: thonny/editors.py:770
 msgid "Go to line..."
 msgstr ""
 
-#: thonny/editors.py:1010
+#: thonny/editors.py:1012
 msgid "Go to line"
 msgstr ""
 
-#: thonny/editors.py:1010
+#: thonny/editors.py:1012
 msgid "Line number"
 msgstr ""
 
-#: thonny/editors.py:1053
+#: thonny/editors.py:1055
 #, python-format
 msgid ""
 "Got permission error when trying to load\n"
 "%s"
 msgstr ""
 
-#: thonny/editors.py:1055
+#: thonny/editors.py:1057
 msgid "Try opening it with File => Open."
 msgstr ""
 
-#: thonny/editors.py:1057
+#: thonny/editors.py:1059
 msgid "Permission error"
 msgstr ""
 
-#: thonny/editors.py:1156
+#: thonny/editors.py:1158
 msgid "Do you want to save files before closing?"
 msgstr ""
 
-#: thonny/editors.py:1158
+#: thonny/editors.py:1160
 msgid "Do you want to save file before closing?"
 msgstr ""
 
-#: thonny/editors.py:1161
+#: thonny/editors.py:1163
 msgid "Save On Close"
 msgstr ""
 
@@ -540,25 +540,25 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: thonny/misc_utils.py:177
+#: thonny/misc_utils.py:178
 #, python-format
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
 msgstr ""
 
-#: thonny/misc_utils.py:180
+#: thonny/misc_utils.py:181
 #, python-format
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
 msgstr ""
 
-#: thonny/misc_utils.py:196
+#: thonny/misc_utils.py:197
 msgid "Can't find suitable disk"
 msgstr ""
 
-#: thonny/misc_utils.py:539
+#: thonny/misc_utils.py:587
 msgid "Command not available"
 msgstr ""
 
-#: thonny/misc_utils.py:540
+#: thonny/misc_utils.py:588
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr ""
 
@@ -566,7 +566,7 @@ msgstr ""
 msgid "Run current script"
 msgstr ""
 
-#: thonny/running.py:161 thonny/workbench.py:378
+#: thonny/running.py:161 thonny/workbench.py:384
 msgid "Run"
 msgstr ""
 
@@ -615,49 +615,49 @@ msgstr ""
 msgid "Plotter"
 msgstr ""
 
-#: thonny/shell.py:317
+#: thonny/shell.py:319
 msgid "Clear"
 msgstr ""
 
-#: thonny/shell.py:330
+#: thonny/shell.py:332
 msgid "Show Plotter"
 msgstr ""
 
-#: thonny/shell.py:1660
+#: thonny/shell.py:1671
 msgid ""
 "For performance reasons, Shell avoids showing very long lines in full "
 "(see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
 msgstr ""
 
-#: thonny/shell.py:1671
+#: thonny/shell.py:1681
 msgid "Wrap text (may be slow)"
 msgstr ""
 
-#: thonny/shell.py:1713
+#: thonny/shell.py:1723
 #, python-format
 msgid "Squeezed text (%d characters)"
 msgstr ""
 
-#: thonny/shell.py:1883
+#: thonny/shell.py:1893
 msgid ""
 "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr ""
 
-#: thonny/shell.py:1885
+#: thonny/shell.py:1895
 msgid "See Help for details."
 msgstr ""
 
-#: thonny/ui_utils.py:497
+#: thonny/ui_utils.py:498
 msgid "Close others"
 msgstr ""
 
-#: thonny/ui_utils.py:1734
+#: thonny/ui_utils.py:1738
 msgid "Copying"
 msgstr ""
 
-#: thonny/ui_utils.py:1737
+#: thonny/ui_utils.py:1741
 #, python-format
 msgid ""
 "Copying\n"
@@ -666,127 +666,127 @@ msgid ""
 "  %s"
 msgstr ""
 
-#: thonny/ui_utils.py:1879
+#: thonny/ui_utils.py:1883
 msgid "Copy to clipboard"
 msgstr ""
 
-#: thonny/ui_utils.py:2345
+#: thonny/ui_utils.py:2355
 msgid "Select All"
 msgstr ""
 
-#: thonny/workbench.py:375
+#: thonny/workbench.py:381
 msgid "File"
 msgstr ""
 
-#: thonny/workbench.py:376
+#: thonny/workbench.py:382
 msgid "Edit"
 msgstr ""
 
-#: thonny/workbench.py:377
+#: thonny/workbench.py:383
 msgid "View"
 msgstr ""
 
-#: thonny/workbench.py:379
+#: thonny/workbench.py:385
 msgid "Tools"
 msgstr ""
 
-#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:380
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
 msgid "Help"
 msgstr ""
 
-#: thonny/workbench.py:598
+#: thonny/workbench.py:604
 msgid "Exit"
 msgstr ""
 
-#: thonny/workbench.py:608
+#: thonny/workbench.py:614
 msgid "Options..."
 msgstr ""
 
-#: thonny/workbench.py:615
+#: thonny/workbench.py:621
 msgid "Increase font size"
 msgstr ""
 
-#: thonny/workbench.py:625
+#: thonny/workbench.py:631
 msgid "Decrease font size"
 msgstr ""
 
-#: thonny/workbench.py:637
+#: thonny/workbench.py:643
 msgid "Focus editor"
 msgstr ""
 
-#: thonny/workbench.py:646
+#: thonny/workbench.py:652
 msgid "Focus shell"
 msgstr ""
 
-#: thonny/workbench.py:656
+#: thonny/workbench.py:662
 msgid "Maximize view"
 msgstr ""
 
-#: thonny/workbench.py:668
+#: thonny/workbench.py:674
 msgid "Full screen"
 msgstr ""
 
-#: thonny/workbench.py:679
+#: thonny/workbench.py:685
 msgid "Change font size"
 msgstr ""
 
-#: thonny/workbench.py:680
+#: thonny/workbench.py:686
 msgid "Zoom"
 msgstr ""
 
-#: thonny/workbench.py:689
+#: thonny/workbench.py:695
 msgid "Exit Thonny"
 msgstr ""
 
-#: thonny/workbench.py:692
+#: thonny/workbench.py:698
 msgid "Quit"
 msgstr ""
 
-#: thonny/workbench.py:700 thonny/workbench.py:799
+#: thonny/workbench.py:706 thonny/workbench.py:805
 msgid "Support Ukraine"
 msgstr ""
 
-#: thonny/workbench.py:703
+#: thonny/workbench.py:709
 msgid "Support"
 msgstr ""
 
-#: thonny/workbench.py:870
+#: thonny/workbench.py:876
 msgid "Install MicroPython"
 msgstr ""
 
-#: thonny/workbench.py:874
+#: thonny/workbench.py:880
 msgid "Install CircuitPython"
 msgstr ""
 
-#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:880
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
 msgid "Configure interpreter..."
 msgstr ""
 
-#: thonny/workbench.py:1247 thonny/workbench.py:1255
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
 #, python-format
 msgid "Overwriting theme '%s'"
 msgstr ""
 
-#: thonny/workbench.py:1438
+#: thonny/workbench.py:1444
 msgid "Program arguments:"
 msgstr ""
 
-#: thonny/workbench.py:1467
+#: thonny/workbench.py:1473
 msgid "Program arguments"
 msgstr ""
 
-#: thonny/workbench.py:1481
+#: thonny/workbench.py:1487
 msgid ""
 "Switch to\n"
 "regular\n"
 "mode"
 msgstr ""
 
-#: thonny/workbench.py:1492
+#: thonny/workbench.py:1498
 msgid "Regular mode"
 msgstr ""
 
-#: thonny/workbench.py:1493
+#: thonny/workbench.py:1500
 msgid ""
 "Configuration has been updated. Restart Thonny to start working in "
 "regular mode.\n"
@@ -794,7 +794,7 @@ msgid ""
 "(See 'Tools → Options → General' if you change your mind later.)"
 msgstr ""
 
-#: thonny/workbench.py:1591
+#: thonny/workbench.py:1597
 msgid "Device"
 msgstr ""
 
@@ -810,7 +810,7 @@ msgstr ""
 msgid "About Thonny"
 msgstr ""
 
-#: thonny/plugins/about.py:81
+#: thonny/plugins/about.py:82
 msgid ""
 "Made in\n"
 "University of Tartu, Estonia,\n"
@@ -820,7 +820,7 @@ msgid ""
 "and Cybernetica AS"
 msgstr ""
 
-#: thonny/plugins/about.py:101
+#: thonny/plugins/about.py:102
 msgid ""
 "This program comes with\n"
 "ABSOLUTELY NO WARRANTY!\n"
@@ -883,12 +883,14 @@ msgid "Authentication"
 msgstr ""
 
 #: thonny/plugins/backend_config_page.py:251
+#, python-brace-format
 msgid ""
 "Enter the passphrase of your private key for\n"
 "{}"
 msgstr ""
 
 #: thonny/plugins/backend_config_page.py:254
+#, python-brace-format
 msgid ""
 "Enter your password for\n"
 "{}"
@@ -906,7 +908,7 @@ msgstr ""
 msgid "About Birdseye"
 msgstr ""
 
-#: thonny/plugins/birdseye_frontend.py:56
+#: thonny/plugins/birdseye_frontend.py:57
 msgid ""
 "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
@@ -957,106 +959,106 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
-#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1402
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
 msgid "Run to cursor"
 msgstr ""
 
-#: thonny/plugins/debugger.py:557
+#: thonny/plugins/debugger.py:559
 #, python-format
 msgid "Function call at %s"
 msgstr ""
 
-#: thonny/plugins/debugger.py:964
+#: thonny/plugins/debugger.py:966
 msgid "Source code"
 msgstr ""
 
-#: thonny/plugins/debugger.py:985
+#: thonny/plugins/debugger.py:987
 msgid "Can't close yet"
 msgstr ""
 
-#: thonny/plugins/debugger.py:986
+#: thonny/plugins/debugger.py:988
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1006
+#: thonny/plugins/debugger.py:1008
 msgid "Local variables"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1038
+#: thonny/plugins/debugger.py:1040
 msgid "Function"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1039
+#: thonny/plugins/debugger.py:1041
 msgid "Location"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1115
+#: thonny/plugins/debugger.py:1117
 msgid ""
 "If last command raised an exception then this view will show the "
 "stacktrace."
 msgstr ""
 
-#: thonny/plugins/debugger.py:1284
+#: thonny/plugins/debugger.py:1286
 msgid "Resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1300
+#: thonny/plugins/debugger.py:1302
 msgid "Run / resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1315
+#: thonny/plugins/debugger.py:1317
 msgid "Debug current script"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1317
+#: thonny/plugins/debugger.py:1319
 msgid "Debug"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1328
+#: thonny/plugins/debugger.py:1330
 msgid "Debug current script (nicer)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1340
+#: thonny/plugins/debugger.py:1342
 msgid "Debug current script (faster)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1351
+#: thonny/plugins/debugger.py:1353
 msgid "Step over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1353
+#: thonny/plugins/debugger.py:1355
 msgid "Over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1364
+#: thonny/plugins/debugger.py:1366
 msgid "Step into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1366
+#: thonny/plugins/debugger.py:1368
 msgid "Into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1377
+#: thonny/plugins/debugger.py:1379
 msgid "Step out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1379
+#: thonny/plugins/debugger.py:1381
 msgid "Out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1414
+#: thonny/plugins/debugger.py:1416
 msgid "Step back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1416
+#: thonny/plugins/debugger.py:1418
 msgid "Back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1422
+#: thonny/plugins/debugger.py:1424
 msgid "Stack"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1423
+#: thonny/plugins/debugger.py:1425
 msgid "Exception"
 msgstr ""
 
@@ -1134,7 +1136,7 @@ msgstr ""
 msgid "Export usage logs..."
 msgstr ""
 
-#: thonny/plugins/event_view.py:39
+#: thonny/plugins/event_view.py:38
 msgid "Events"
 msgstr ""
 
@@ -1161,51 +1163,51 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:438
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
 msgid "Find & Replace"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:66
+#: thonny/plugins/find_replace.py:67
 msgid "Find:"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:90
+#: thonny/plugins/find_replace.py:92
 msgid "Replace with:"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:108
+#: thonny/plugins/find_replace.py:110
 msgid "Case sensitive"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:115
+#: thonny/plugins/find_replace.py:117
 msgid "Up"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:119
+#: thonny/plugins/find_replace.py:121
 msgid "Down"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:128
+#: thonny/plugins/find_replace.py:130
 msgid "Find"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:138
+#: thonny/plugins/find_replace.py:140
 msgid "Replace"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:146
+#: thonny/plugins/find_replace.py:148
 msgid "Replace+Find"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:156
+#: thonny/plugins/find_replace.py:158
 msgid "Replace all"
 msgstr ""
 
-#: thonny/plugins/find_replace.py:254
+#: thonny/plugins/find_replace.py:256
 msgid "Enter string to be replaced."
 msgstr ""
 
-#: thonny/plugins/find_replace.py:339
+#: thonny/plugins/find_replace.py:341
 msgid "The specified text was not found!"
 msgstr ""
 
@@ -1265,7 +1267,7 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:136
+#: thonny/plugins/general_config_page.py:137
 msgid ""
 "If you quote the value of an environment variable, the quotes will be "
 "part of the value.\n"
@@ -1294,7 +1296,7 @@ msgstr ""
 msgid "Heap"
 msgstr ""
 
-#: thonny/plugins/notes.py:35
+#: thonny/plugins/notes.py:36
 msgid ""
 "This box is meant for your working notes -- assignment instructions, code"
 " snippets, whatever.\n"
@@ -1325,7 +1327,7 @@ msgstr ""
 msgid "Next object"
 msgstr ""
 
-#: thonny/plugins/object_inspector.py:486
+#: thonny/plugins/object_inspector.py:487
 #, python-format
 msgid ""
 "The representation above is an approximate value of this float. The exact"
@@ -1356,224 +1358,226 @@ msgstr ""
 msgid "Pygame Zero mode"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:71
+#: thonny/plugins/pip_gui.py:86
 msgid "Search on PyPI"
 msgstr ""
 
 #: thonny/plugins/micropython/base_flashing_dialog.py:398
-#: thonny/plugins/pip_gui.py:74
+#: thonny/plugins/pip_gui.py:89
 msgid "Install"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:77
+#: thonny/plugins/pip_gui.py:92
 msgid "Upgrade"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:80
+#: thonny/plugins/pip_gui.py:95
 msgid "Uninstall"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:142
+#: thonny/plugins/pip_gui.py:160
 msgid "INSTALL"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:367
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
 msgid "Browse the packages"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:370
+#: thonny/plugins/pip_gui.py:389
 msgid ""
 "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or "
 "uninstalling."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:378
+#: thonny/plugins/pip_gui.py:396
 msgid "Packages' directory"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:382
+#: thonny/plugins/pip_gui.py:400
 msgid "Install from PyPI"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:385
+#: thonny/plugins/pip_gui.py:404
 msgid ""
 "If you don't know where to get the package from, then most likely you'll "
 "want to search the Python Package Index. Start by entering the name of "
 "the package in the search box above and pressing ENTER."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:395
+#: thonny/plugins/pip_gui.py:413
 msgid "Install from requirements file"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:397
+#: thonny/plugins/pip_gui.py:415
 msgid "Click "
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
 msgid "here"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:402
+#: thonny/plugins/pip_gui.py:420
 msgid "to locate requirements.txt file and install the packages specified in it."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:407
+#: thonny/plugins/pip_gui.py:425
 msgid "Install from local file"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:408
+#: thonny/plugins/pip_gui.py:426
 msgid "Click"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:413
+#: thonny/plugins/pip_gui.py:432
 msgid ""
 "to locate and install the package file (usually with .whl, .tar.gz or "
 ".zip extension)."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:420
+#: thonny/plugins/pip_gui.py:438
 msgid "Upgrade or uninstall"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:422
+#: thonny/plugins/pip_gui.py:440
 msgid "Start by selecting the package from the left."
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:119 thonny/plugins/pip_gui.py:426
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
 msgid "Target"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:430
+#: thonny/plugins/pip_gui.py:449
 msgid ""
 "This dialog lists all available packages, but allows upgrading and "
 "uninstalling only packages from"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:440
+#: thonny/plugins/pip_gui.py:459
 msgid ""
 "New packages will be also installed into this directory. Other locations "
 "must be managed by alternative means."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:493
+#: thonny/plugins/pip_gui.py:511
 msgid "Installed version:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:495
+#: thonny/plugins/pip_gui.py:513
 msgid "Installed to:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:570
+#: thonny/plugins/pip_gui.py:590
 msgid "Could not find the package from PyPI."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:573
+#: thonny/plugins/pip_gui.py:593
 msgid "Please check your spelling!"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:577
+#: thonny/plugins/pip_gui.py:597
 msgid "Could not find the package info from PyPI."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:579 thonny/plugins/pip_gui.py:1408
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
 msgid "Error code:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:592
+#: thonny/plugins/pip_gui.py:612
 msgid "Latest stable version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:594
+#: thonny/plugins/pip_gui.py:614
 msgid "Latest version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:596
+#: thonny/plugins/pip_gui.py:616
 msgid "Summary"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:598
+#: thonny/plugins/pip_gui.py:618
 msgid "Author"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:600
+#: thonny/plugins/pip_gui.py:620
 msgid "License"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:602
+#: thonny/plugins/pip_gui.py:622
 msgid "Homepage"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:604
+#: thonny/plugins/pip_gui.py:624
 msgid "Bugtracker"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:606
+#: thonny/plugins/pip_gui.py:626
 msgid "Documentation"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:608
+#: thonny/plugins/pip_gui.py:628
 msgid "PyPI page"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:648
+#: thonny/plugins/pip_gui.py:668
 msgid "Requires"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:682
+#: thonny/plugins/pip_gui.py:696
 msgid "Search results"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:683
+#: thonny/plugins/pip_gui.py:697
 msgid "Searching"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:748
+#: thonny/plugins/pip_gui.py:762
 msgid "Can't find package name from the list:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:787 thonny/plugins/pip_gui.py:876
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
 #, python-format
 msgid "Installing '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:793
+#: thonny/plugins/pip_gui.py:807
 #, python-format
 msgid "Upgrading '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:800
+#: thonny/plugins/pip_gui.py:814
 #, python-format
 msgid "Uninstalling '%s'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:802
+#: thonny/plugins/pip_gui.py:816
 msgid "Really uninstall?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:803
+#: thonny/plugins/pip_gui.py:818
+#, python-brace-format
 msgid "Package '{}' is required for installing and uninstalling other packages."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:807
+#: thonny/plugins/pip_gui.py:821
 msgid "Are you sure you want to uninstall it?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:814
+#: thonny/plugins/pip_gui.py:828
 msgid "Installing"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:848
+#: thonny/plugins/pip_gui.py:862
 msgid "Package"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:960
+#: thonny/plugins/pip_gui.py:974
 #, python-format
 msgid "Manage packages for %s"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1035
+#: thonny/plugins/pip_gui.py:1114
 #, python-format
 msgid ""
 "Looks like you are installing a Thonny-related package.\n"
@@ -1583,83 +1587,83 @@ msgid ""
 "Are you sure you want to install %s for the back-end?"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1141
+#: thonny/plugins/pip_gui.py:1204
 msgid ""
 "NB! There may be another version available which is compatible with "
 "current Thonny version. Click on '...' button to choose the version to "
 "install."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1149
+#: thonny/plugins/pip_gui.py:1211
 msgid "Thonny plugin without requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1165
+#: thonny/plugins/pip_gui.py:1227
 msgid "Unsuitable requirements"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1166
+#: thonny/plugins/pip_gui.py:1228
 msgid "This package requires different Thonny version:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1170
+#: thonny/plugins/pip_gui.py:1232
 msgid "If you still want it, then please install it from the command line."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1200
+#: thonny/plugins/pip_gui.py:1263
 msgid ""
 "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools "
 "→ Manage packages...'"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1207
+#: thonny/plugins/pip_gui.py:1270
 msgid ""
 "NB! You need to restart Thonny after installing / upgrading / "
 "uninstalling a plug-in."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1217
+#: thonny/plugins/pip_gui.py:1279
 msgid "Thonny plug-ins"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1253
+#: thonny/plugins/pip_gui.py:1321
 msgid "Advanced install / upgrade / downgrade"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1262
+#: thonny/plugins/pip_gui.py:1330
 msgid "Desired version"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1321
+#: thonny/plugins/pip_gui.py:1389
 msgid "Upgrade dependencies"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1406
+#: thonny/plugins/pip_gui.py:1474
 msgid "Requires:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1410
+#: thonny/plugins/pip_gui.py:1478
 msgid "Error:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1562
+#: thonny/plugins/pip_gui.py:1625
 msgid "Package manager is not available for this interpreter"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:142 thonny/plugins/pip_gui.py:1581
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
 msgid "Not available"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1582
+#: thonny/plugins/pip_gui.py:1658
 msgid "You need to stop your program before launching the package manager."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1601
+#: thonny/plugins/pip_gui.py:1677
 msgid "Manage packages..."
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:1607
+#: thonny/plugins/pip_gui.py:1683
 msgid "Manage plug-ins..."
 msgstr ""
 
@@ -1695,7 +1699,7 @@ msgstr ""
 msgid "Open and close Stack view automatically"
 msgstr ""
 
-#: thonny/plugins/run_debug_config_page.py:43
+#: thonny/plugins/run_debug_config_page.py:44
 msgid ""
 "Opens the Stack view on first call and closes it when program returns to "
 "main frame."
@@ -1769,7 +1773,7 @@ msgstr ""
 msgid "Keep terminal window open after Python process ends"
 msgstr ""
 
-#: thonny/plugins/terminal_config_page.py:31
+#: thonny/plugins/terminal_config_page.py:32
 msgid ""
 "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
@@ -1874,7 +1878,7 @@ msgid "CircuitPython (generic)"
 msgstr ""
 
 #: thonny/plugins/circuitpython/cirpy_front.py:113
-#: thonny/plugins/micropython/mp_front.py:550
+#: thonny/plugins/micropython/mp_front.py:537
 #, python-format
 msgid "Install or update %s"
 msgstr ""
@@ -1883,20 +1887,20 @@ msgstr ""
 msgid "Local Python 3"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:196
+#: thonny/plugins/cpython_frontend/cp_front.py:202
 msgid "Thonny's Python"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:234
+#: thonny/plugins/cpython_frontend/cp_front.py:240
 msgid "Python executable"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:256
+#: thonny/plugins/cpython_frontend/cp_front.py:262
 #, python-format
 msgid "NB! Thonny only supports Python %s and later"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:258
+#: thonny/plugins/cpython_frontend/cp_front.py:265
 msgid ""
 "NB! File selection button may not work properly when selecting "
 "executables\n"
@@ -1905,44 +1909,54 @@ msgid ""
 "of the interpreter (or enter the path directly to the box)!"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:266
+#: thonny/plugins/cpython_frontend/cp_front.py:273
 msgid ""
 "You can activate an existing virtual environment also via the right-click"
 " context menu in the file navagation when selecting a virtual environment"
 " folder, or the 'pyveng.cfg' file inside."
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:295
+#: thonny/plugins/cpython_frontend/cp_front.py:301
 msgid "Python interpreters"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:324
+#: thonny/plugins/cpython_frontend/cp_front.py:330
 msgid "Select empty directory for new virtual environment"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:331
+#: thonny/plugins/cpython_frontend/cp_front.py:337
 msgid "Bad directory"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:332
+#: thonny/plugins/cpython_frontend/cp_front.py:338
 msgid ""
 "Selected directory is not empty.\n"
 "Select another or cancel."
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:349
+#: thonny/plugins/cpython_frontend/cp_front.py:355
 msgid "Creating virtual environment"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid ""
+"The packages of this interpreter can be managed via your system package "
+"manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
 msgstr ""
 
 #: thonny/plugins/cpython_ssh/__init__.py:17
 msgid "Remote Python 3 (SSH)"
 msgstr ""
 
-#: thonny/plugins/ev3/__init__.py:72
+#: thonny/plugins/ev3/__init__.py:73
 msgid "Preparations (skip the VS Code part)"
 msgstr ""
 
-#: thonny/plugins/ev3/__init__.py:78
+#: thonny/plugins/ev3/__init__.py:79
 msgid "Default password"
 msgstr ""
 
@@ -1974,73 +1988,73 @@ msgstr ""
 msgid "MicroPython (SSH)"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:303
+#: thonny/plugins/micropython/mp_front.py:290
 msgid "CircuitPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:307
+#: thonny/plugins/micropython/mp_front.py:294
 msgid "MicroPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:313
+#: thonny/plugins/micropython/mp_front.py:300
 msgid "Not connected"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:453
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port or WebREPL"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:453
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:458
+#: thonny/plugins/micropython/mp_front.py:445
 msgid "Try to detect port automatically"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:496
+#: thonny/plugins/micropython/mp_front.py:483
 msgid "Interrupt working program on connect"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:504
+#: thonny/plugins/micropython/mp_front.py:491
 msgid "Synchronize device's real time clock"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:510
+#: thonny/plugins/micropython/mp_front.py:497
 msgid "Use local time in real time clock"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:516
+#: thonny/plugins/micropython/mp_front.py:503
 msgid "Restart interpreter before running a script"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:558
+#: thonny/plugins/micropython/mp_front.py:545
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:561
+#: thonny/plugins/micropython/mp_front.py:548
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:563
+#: thonny/plugins/micropython/mp_front.py:550
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:599
+#: thonny/plugins/micropython/mp_front.py:586
 msgid "Password"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/micropython/pip_gui.py:28
 msgid ""
 "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:65
+#: thonny/plugins/micropython/pip_gui.py:66
 msgid "Search micropython-lib and PyPI"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:144
+#: thonny/plugins/micropython/pip_gui.py:145
 msgid "no absolute lib directory in sys.path"
 msgstr ""
 

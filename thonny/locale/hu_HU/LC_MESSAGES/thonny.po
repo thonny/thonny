@@ -7,63 +7,63 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: hu\n"
 
-#: thonny/workbench.py:361
+#: thonny/workbench.py:381
 msgid "File"
 msgstr "Fájl"
 
-#: thonny/workbench.py:362
+#: thonny/workbench.py:382
 msgid "Edit"
 msgstr "Szerkesztés"
 
-#: thonny/workbench.py:363
+#: thonny/workbench.py:383
 msgid "View"
 msgstr "Nézet"
 
-#: thonny/running.py:116 thonny/workbench.py:364
+#: thonny/running.py:161 thonny/workbench.py:384
 msgid "Run"
 msgstr "Futtatás"
 
-#: thonny/workbench.py:365
+#: thonny/workbench.py:385
 msgid "Tools"
 msgstr "Eszközök"
 
-#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:366
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
 msgid "Help"
 msgstr "Súgó"
 
-#: thonny/workbench.py:583
+#: thonny/workbench.py:604
 msgid "Exit"
 msgstr "Kilépés"
 
-#: thonny/workbench.py:610
+#: thonny/workbench.py:631
 msgid "Decrease font size"
 msgstr "Betűméret csökkentése"
 
-#: thonny/workbench.py:622
+#: thonny/workbench.py:643
 msgid "Focus editor"
 msgstr "Kurzort a kódszerkesztőbe"
 
-#: thonny/workbench.py:631
+#: thonny/workbench.py:652
 msgid "Focus shell"
 msgstr "Kurzort a parancsértelmezőbe"
 
-#: thonny/workbench.py:642
+#: thonny/workbench.py:662
 msgid "Maximize view"
 msgstr "Nézet maximalizálása"
 
-#: thonny/workbench.py:654
+#: thonny/workbench.py:674
 msgid "Full screen"
 msgstr "Teljes képernyős nézet"
 
-#: thonny/workbench.py:1457
+#: thonny/workbench.py:1473
 msgid "Program arguments"
 msgstr "Program argumentumok"
 
-#: thonny/plugins/about.py:21 thonny/plugins/about.py:140
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
 msgid "About Thonny"
 msgstr "A Thonny névjegye"
 
-#: thonny/plugins/about.py:66
+#: thonny/plugins/about.py:82
 msgid "Made in\n"
 "University of Tartu, Estonia,\n"
 "with the help from\n"
@@ -72,7 +72,7 @@ msgid "Made in\n"
 "and Cybernetica AS"
 msgstr "Készítette: Tartu-i Egyetem (Észtország), a nyílt forráskód közösség, a Raspberry Pi Alapítvány és a Cybernetica AS segítségével"
 
-#: thonny/plugins/about.py:86
+#: thonny/plugins/about.py:102
 msgid "This program comes with\n"
 "ABSOLUTELY NO WARRANTY!\n"
 "It is free software, and you are welcome to\n"
@@ -81,11 +81,11 @@ msgid "This program comes with\n"
 "for details"
 msgstr "Ez a program SEMMIRE SEM VÁLLAL GARANCIÁT! Ingyenes szoftver, amely bizonyos feltételek betartása mellett szabadon terjeszthető, a részleteket ld. itt: https://opensource.org/licenses/MIT"
 
-#: thonny/plugins/about.py:129
+#: thonny/plugins/about.py:142
 msgid "Version history"
 msgstr "Verziótörténet"
 
-#: thonny/plugins/about.py:136
+#: thonny/plugins/about.py:149
 msgid "Report problems"
 msgstr "Probléma bejelentése"
 
@@ -109,15 +109,15 @@ msgstr "MyPy ellenőrzések végrehajtása"
 msgid "Disabled checks (one id per line)"
 msgstr "Letiltott ellenőrzések (soronként egy azonosító)"
 
-#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:74
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
 msgid "Assistant"
 msgstr "Asszisztens"
 
-#: thonny/plugins/autocomplete.py:512
+#: thonny/plugins/autocomplete.py:529
 msgid "Auto-complete"
 msgstr "Automatikus kódkiegészítés"
 
-#: thonny/plugins/backend_config_page.py:337
+#: thonny/plugins/backend_config_page.py:335
 msgid "Interpreter"
 msgstr "Értelmező"
 
@@ -125,7 +125,7 @@ msgstr "Értelmező"
 msgid "About Birdseye"
 msgstr "A Birdseye névjegye"
 
-#: thonny/plugins/birdseye_frontend.py:56
+#: thonny/plugins/birdseye_frontend.py:57
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
@@ -137,15 +137,15 @@ msgstr "A Birdseye egy Python hibakereső, melyet külön kell telepíteni.\n"
 msgid "Debug current script (birdseye)"
 msgstr "Hibakeresés az aktuális szkriptben (Birdseye)"
 
-#: thonny/plugins/commenting_indenting.py:172
+#: thonny/plugins/commenting_indenting.py:171
 msgid "Toggle comment"
 msgstr "Megjegyzés be/ki"
 
-#: thonny/plugins/commenting_indenting.py:182
+#: thonny/plugins/commenting_indenting.py:181
 msgid "Comment out"
 msgstr "Megjegyzés be"
 
-#: thonny/plugins/commenting_indenting.py:192
+#: thonny/plugins/commenting_indenting.py:191
 msgid "Uncomment"
 msgstr "Megjegyzés ki"
 
@@ -157,18 +157,18 @@ msgstr "Visszavonás"
 msgid "Redo"
 msgstr "Ismétlés"
 
-#: thonny/base_file_browser.py:721 thonny/plugins/common_editing_commands.py:49
-#: thonny/ui_utils.py:2294
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2349
 msgid "Cut"
 msgstr "Kivágás"
 
-#: thonny/base_file_browser.py:722 thonny/plugins/common_editing_commands.py:61
-#: thonny/ui_utils.py:2295
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2350
 msgid "Copy"
 msgstr "Másolás"
 
-#: thonny/base_file_browser.py:724 thonny/base_file_browser.py:730
-#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2296
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
 msgid "Paste"
 msgstr "Beillesztés"
 
@@ -176,15 +176,15 @@ msgstr "Beillesztés"
 msgid "Select all"
 msgstr "Összes kijelölése"
 
-#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
 msgid "Run to cursor"
 msgstr "Futtatás kurzorig"
 
-#: thonny/plugins/debugger.py:982
+#: thonny/plugins/debugger.py:987
 msgid "Can't close yet"
 msgstr "Nem lehet még bezárni"
 
-#: thonny/plugins/debugger.py:983
+#: thonny/plugins/debugger.py:988
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr "A \"Stop\" állítsa le a hibakeresést"
 
@@ -229,59 +229,59 @@ msgstr "Kódszerkesztő"
 msgid "Export usage logs..."
 msgstr "Használati naplók exportálása..."
 
-#: thonny/plugins/event_view.py:39
+#: thonny/plugins/event_view.py:38
 msgid "Events"
 msgstr "Események"
 
-#: thonny/plugins/files.py:606
+#: thonny/plugins/files.py:609
 msgid "Files"
 msgstr "Fájlok"
 
-#: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:430
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
 msgid "Find & Replace"
 msgstr "Keresés & Csere"
 
-#: thonny/plugins/find_replace.py:66
+#: thonny/plugins/find_replace.py:67
 msgid "Find:"
 msgstr "Keresd ezt:"
 
-#: thonny/plugins/find_replace.py:87
+#: thonny/plugins/find_replace.py:92
 msgid "Replace with:"
 msgstr "Cseréld erre:"
 
-#: thonny/plugins/find_replace.py:105
+#: thonny/plugins/find_replace.py:110
 msgid "Case sensitive"
 msgstr "Kis-nagybetű érzékeny"
 
-#: thonny/plugins/find_replace.py:112
+#: thonny/plugins/find_replace.py:117
 msgid "Up"
 msgstr "Fel"
 
-#: thonny/plugins/find_replace.py:116
+#: thonny/plugins/find_replace.py:121
 msgid "Down"
 msgstr "Le"
 
-#: thonny/plugins/find_replace.py:125
+#: thonny/plugins/find_replace.py:130
 msgid "Find"
 msgstr "Keresés"
 
-#: thonny/plugins/find_replace.py:135
+#: thonny/plugins/find_replace.py:140
 msgid "Replace"
 msgstr "Csere"
 
-#: thonny/plugins/find_replace.py:143
+#: thonny/plugins/find_replace.py:148
 msgid "Replace+Find"
 msgstr "Csere + Keresés"
 
-#: thonny/plugins/find_replace.py:153
+#: thonny/plugins/find_replace.py:158
 msgid "Replace all"
 msgstr "Összes cseréje"
 
-#: thonny/plugins/find_replace.py:249
+#: thonny/plugins/find_replace.py:256
 msgid "Enter string to be replaced."
 msgstr "Add meg a cserélendő szöveget."
 
-#: thonny/plugins/find_replace.py:333
+#: thonny/plugins/find_replace.py:341
 msgid "The specified text was not found!"
 msgstr "A megadott szöveg nem található!"
 
@@ -314,7 +314,7 @@ msgstr "Kupac"
 msgid "Language"
 msgstr "Nyelv"
 
-#: thonny/plugins/notes.py:35
+#: thonny/plugins/notes.py:36
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
 "\n"
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
@@ -338,7 +338,7 @@ msgstr "Előző objektum"
 msgid "Next object"
 msgstr "Következő objektum"
 
-#: thonny/plugins/object_inspector.py:733
+#: thonny/plugins/object_inspector.py:732
 msgid "Object inspector"
 msgstr "Objektumvizsgáló"
 
@@ -350,77 +350,77 @@ msgstr "Vázlat"
 msgid "Pygame Zero mode"
 msgstr "Pygame Zero mód"
 
-#: thonny/plugins/pip_gui.py:79
+#: thonny/plugins/pip_gui.py:95
 msgid "Uninstall"
 msgstr "Eltávolítás"
 
-#: thonny/editors.py:667 thonny/plugins/pip_gui.py:251 thonny/ui_utils.py:491
-#: thonny/ui_utils.py:1871 thonny/workdlg.py:162
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
 msgid "Close"
 msgstr "Bezárás"
 
-#: thonny/plugins/pip_gui.py:397
+#: thonny/plugins/pip_gui.py:415
 msgid "Click "
 msgstr "Klikkelj "
 
-#: thonny/plugins/pip_gui.py:398 thonny/plugins/pip_gui.py:409
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
 msgid "here"
 msgstr "ide"
 
-#: thonny/plugins/pip_gui.py:76
+#: thonny/plugins/pip_gui.py:92
 msgid "Upgrade"
 msgstr "Frissítés"
 
-#: thonny/plugins/esp/__init__.py:349
-#: thonny/plugins/micropython/uf2dialog.py:348 thonny/plugins/pip_gui.py:73
+#: thonny/plugins/micropython/base_flashing_dialog.py:398
+#: thonny/plugins/pip_gui.py:89
 msgid "Install"
 msgstr "Telepítés"
 
-#: thonny/plugins/pip_gui.py:535
+#: thonny/plugins/pip_gui.py:590
 msgid "Could not find the package from PyPI."
 msgstr "Nem található a csomag a PyPI-on."
 
-#: thonny/plugins/pip_gui.py:557
+#: thonny/plugins/pip_gui.py:612
 msgid "Latest stable version"
 msgstr "Legfrissebb stabil verzió"
 
-#: thonny/plugins/pip_gui.py:559
+#: thonny/plugins/pip_gui.py:614
 msgid "Latest version"
 msgstr "Legfrissebb verzió"
 
-#: thonny/plugins/pip_gui.py:561
+#: thonny/plugins/pip_gui.py:616
 msgid "Summary"
 msgstr "Összefoglalás"
 
-#: thonny/plugins/pip_gui.py:563
+#: thonny/plugins/pip_gui.py:618
 msgid "Author"
 msgstr "Szerző"
 
-#: thonny/plugins/pip_gui.py:565
+#: thonny/plugins/pip_gui.py:622
 msgid "Homepage"
 msgstr "Honlap"
 
-#: thonny/plugins/pip_gui.py:567
+#: thonny/plugins/pip_gui.py:624
 msgid "Bugtracker"
 msgstr "Hibakövetés"
 
-#: thonny/plugins/pip_gui.py:569
+#: thonny/plugins/pip_gui.py:626
 msgid "Documentation"
 msgstr "Dokumentáció"
 
-#: thonny/plugins/pip_gui.py:571
+#: thonny/plugins/pip_gui.py:628
 msgid "PyPI page"
 msgstr "PyPI oldal"
 
-#: thonny/plugins/pip_gui.py:611
+#: thonny/plugins/pip_gui.py:668
 msgid "Requires"
 msgstr "Előfeltételek"
 
-#: thonny/plugins/pip_gui.py:743
+#: thonny/plugins/pip_gui.py:816
 msgid "Really uninstall?"
 msgstr "Tényleg eltávolítod?"
 
-#: thonny/plugins/pip_gui.py:748
+#: thonny/plugins/pip_gui.py:821
 msgid "Are you sure you want to uninstall it?"
 msgstr "Biztos vagy benne, hogy el akarod távolítani?"
 
@@ -435,64 +435,64 @@ msgstr "Vissza az\n"
 msgid "Variables"
 msgstr "Változók"
 
-#: thonny/base_file_browser.py:1558
+#: thonny/base_file_browser.py:1576
 msgid "This computer"
 msgstr "Ez a számítógép"
 
-#: thonny/base_file_browser.py:641
+#: thonny/base_file_browser.py:648
 msgid "Refresh"
 msgstr "Frissítés"
 
-#: thonny/base_file_browser.py:650
+#: thonny/base_file_browser.py:657
 msgid "Focus into"
 msgstr "Kurzor ide"
 
-#: thonny/base_file_browser.py:1393 thonny/base_file_browser.py:1405
-#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+#: thonny/plugins/autocomplete.py:303 thonny/plugins/highlight_names.py:86
 msgid "Error"
 msgstr "Hiba"
 
-#: thonny/base_file_browser.py:1393 thonny/base_file_browser.py:1405
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
 msgid "You need to select a file!"
 msgstr "Válassz ki egy fájlt!"
 
-#: thonny/base_file_browser.py:1409
+#: thonny/base_file_browser.py:1427
 msgid "Overwrite?"
 msgstr "Felülírjam?"
 
-#: thonny/base_file_browser.py:1409
+#: thonny/base_file_browser.py:1427
 msgid "Do you want to overwrite '%s' ?"
 msgstr "Felül akarod írni ezt: '%s'?"
 
-#: thonny/editors.py:632 thonny/editors.py:634
+#: thonny/editors.py:660 thonny/editors.py:662
 msgid "New"
 msgstr "Új"
 
-#: thonny/editors.py:645
+#: thonny/editors.py:673
 msgid "Open..."
 msgstr "Megnyitás..."
 
-#: thonny/editors.py:647
+#: thonny/editors.py:675
 msgid "Load"
 msgstr "Betöltés"
 
-#: thonny/editors.py:656
+#: thonny/editors.py:684
 msgid "Recent files"
 msgstr "Legutóbbi fájlok"
 
-#: thonny/editors.py:678 thonny/ui_utils.py:493
+#: thonny/editors.py:706 thonny/ui_utils.py:499
 msgid "Close all"
 msgstr "Összes bezárása"
 
-#: thonny/editors.py:688 thonny/editors.py:690
+#: thonny/editors.py:716 thonny/editors.py:718
 msgid "Save"
 msgstr "Mentés"
 
-#: thonny/editors.py:713
+#: thonny/editors.py:741
 msgid "Save as..."
 msgstr "Mentés másként..."
 
-#: thonny/editors.py:724
+#: thonny/editors.py:752
 msgid "Save copy..."
 msgstr "Másolat mentése..."
 
@@ -500,113 +500,113 @@ msgstr "Másolat mentése..."
 msgid "Thonny options"
 msgstr "Thonny beállítasai"
 
-#: thonny/running.py:115
+#: thonny/running.py:160
 msgid "Run current script"
 msgstr "Aktuális szkript futtatása"
 
-#: thonny/running.py:146
+#: thonny/running.py:191
 msgid "Run current script in terminal"
 msgstr "Aktuális szkript futtatása terminálban"
 
-#: thonny/running.py:159
+#: thonny/running.py:204
 msgid "Stop/Restart backend"
 msgstr "Feldolgozó leállítása/újraindítása"
 
-#: thonny/running.py:160
+#: thonny/running.py:205
 msgid "Stop"
 msgstr "Leállítás"
 
-#: thonny/running.py:171
+#: thonny/running.py:216
 msgid "Interrupt execution"
 msgstr "Végrehajtás megszakítása"
 
-#: thonny/running.py:184
+#: thonny/running.py:229
 msgid "Send EOF / Soft reboot"
 msgstr "EOF küldése / \"Soft\" újraindítás"
 
-#: thonny/running.py:195
+#: thonny/running.py:240
 msgid "Disconnect"
 msgstr "Lekapcsolódás"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:268
+#: thonny/plugins/cpython_frontend/cp_front.py:301
 msgid "Python interpreters"
 msgstr "Python értelmezők"
 
-#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:269
-#: thonny/plugins/pip_gui.py:789 thonny/plugins/pip_gui.py:802
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
 msgid "all files"
 msgstr "minden fájl"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:297
+#: thonny/plugins/cpython_frontend/cp_front.py:330
 msgid "Select empty directory for new virtual environment"
 msgstr "Válassz egy üres könyvtárat az új virtuális környezet számára"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:304
+#: thonny/plugins/cpython_frontend/cp_front.py:337
 msgid "Bad directory"
 msgstr "Rossz könyvtár"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:305
+#: thonny/plugins/cpython_frontend/cp_front.py:338
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
 msgstr "A kiválasztott könyvtár nem üres.\n"
 "Válassz másikat."
 
-#: thonny/plugins/cpython_frontend/cp_front.py:322
+#: thonny/plugins/cpython_frontend/cp_front.py:355
 msgid "Creating virtual environment"
 msgstr "Virtuális környezet létrehozása"
 
-#: thonny/shell.py:100
+#: thonny/shell.py:101
 msgid "Clear shell"
 msgstr "Parancsértelmező törlése"
 
-#: thonny/shell.py:174
+#: thonny/shell.py:185
 msgid "Plotter"
 msgstr "Grafikon"
 
-#: thonny/shell.py:306
+#: thonny/shell.py:319
 msgid "Clear"
 msgstr "Törlés"
 
-#: thonny/shell.py:319
+#: thonny/shell.py:332
 msgid "Show Plotter"
 msgstr "Grafikon megjelenítése"
 
-#: thonny/shell.py:1648
+#: thonny/shell.py:1671
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
 msgstr "A jobb teljesítmény érdekében a parancsértelmező rövidítve mutatja a nagyon hosszú sorokat (ld. Eszközök → Beállítások → Parancsértelmező).\n"
 "Itt megnézheted a teljes szöveget."
 
-#: thonny/shell.py:1659
+#: thonny/shell.py:1681
 msgid "Wrap text (may be slow)"
 msgstr "Hosszú sorok tördelése (lassú lehet)"
 
-#: thonny/ui_utils.py:1866
+#: thonny/ui_utils.py:1883
 msgid "Copy to clipboard"
 msgstr "Vágólapra másolás"
 
-#: thonny/shell.py:1701
+#: thonny/shell.py:1723
 msgid "Squeezed text (%d characters)"
 msgstr "Rövidített szöveg (%d karakter)"
 
-#: thonny/shell.py:1871
+#: thonny/shell.py:1893
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr "A Grafikon megjeleníti a parancsértelmezőbe írt számok sorozatát."
 
-#: thonny/shell.py:1873
+#: thonny/shell.py:1895
 msgid "See Help for details."
 msgstr "A részleteket ld. a súgóban."
 
-#: thonny/ui_utils.py:492
+#: thonny/ui_utils.py:498
 msgid "Close others"
 msgstr "Többi bezárása"
 
-#: thonny/ui_utils.py:1722
+#: thonny/ui_utils.py:1738
 msgid "Copying"
 msgstr "Másolás"
 
-#: thonny/ui_utils.py:1725
+#: thonny/ui_utils.py:1741
 msgid "Copying\n"
 "  %s\n"
 "to\n"
@@ -616,65 +616,65 @@ msgstr "Másolás:\n"
 "ide:\n"
 "  %s"
 
-#: thonny/base_file_browser.py:1364 thonny/config_ui.py:42 thonny/export.py:28
-#: thonny/plugins/backend_config_page.py:290 thonny/plugins/pip_gui.py:1256
-#: thonny/ui_utils.py:157 thonny/ui_utils.py:1733 thonny/ui_utils.py:1818
-#: thonny/workdlg.py:164 thonny/workdlg.py:209
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
+#: thonny/workdlg.py:205 thonny/workdlg.py:259
 msgid "Cancel"
 msgstr "Mégsem"
 
-#: thonny/base_file_browser.py:1355 thonny/config_ui.py:41 thonny/export.py:25
-#: thonny/plugins/about.py:100 thonny/plugins/backend_config_page.py:285
-#: thonny/ui_utils.py:154 thonny/ui_utils.py:1815 thonny/workdlg.py:206
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
 msgid "OK"
 msgstr "OK"
 
-#: thonny/ui_utils.py:2300
+#: thonny/ui_utils.py:2355
 msgid "Select All"
 msgstr "Összes kiválasztása"
 
-#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:155
-#: thonny/workbench.py:162
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:164
 msgid "Shell"
 msgstr "Parancsértelmező"
 
-#: thonny/workbench.py:593
+#: thonny/workbench.py:614
 msgid "Options..."
 msgstr "Beállítások..."
 
-#: thonny/workbench.py:600
+#: thonny/workbench.py:621
 msgid "Increase font size"
 msgstr "Betűméret növelése"
 
-#: thonny/workbench.py:665
+#: thonny/workbench.py:685
 msgid "Change font size"
 msgstr "Betűméret megváltoztatása"
 
-#: thonny/workbench.py:666
+#: thonny/workbench.py:686
 msgid "Zoom"
 msgstr "Nagyítás"
 
-#: thonny/workbench.py:675
+#: thonny/workbench.py:695
 msgid "Exit Thonny"
 msgstr "Kilépés a Thonny-ból"
 
-#: thonny/workbench.py:678
+#: thonny/workbench.py:698
 msgid "Quit"
 msgstr "Kilépés"
 
-#: thonny/workbench.py:1236 thonny/workbench.py:1244
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
 msgid "Overwriting theme '%s'"
 msgstr "Téma felülírása: '%s'"
 
-#: thonny/workbench.py:1428
+#: thonny/workbench.py:1444
 msgid "Program arguments:"
 msgstr "Program argumentumok:"
 
-#: thonny/workbench.py:1482
+#: thonny/workbench.py:1498
 msgid "Regular mode"
 msgstr "Normál mód"
 
-#: thonny/workbench.py:1483
+#: thonny/workbench.py:1500
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
@@ -682,71 +682,71 @@ msgstr "A beállítások megváltoztak. Indítsd újra a Thonny-t a Normál mód
 "\n"
 "(Ha meggondolnád magad: Eszközök → Beállítások → Általános)"
 
-#: thonny/plugins/ast_view.py:212
+#: thonny/plugins/ast_view.py:211
 msgid "Program tree"
 msgstr "Program fa"
 
-#: thonny/plugins/debugger.py:1283
+#: thonny/plugins/debugger.py:1286
 msgid "Resume"
 msgstr "Folytatás"
 
-#: thonny/plugins/debugger.py:1299
+#: thonny/plugins/debugger.py:1302
 msgid "Run / resume"
 msgstr "Futtatás / Folytatás"
 
-#: thonny/plugins/debugger.py:1314
+#: thonny/plugins/debugger.py:1317
 msgid "Debug current script"
 msgstr "Hibakeresés az aktuális szkriptben"
 
-#: thonny/plugins/debugger.py:1316
+#: thonny/plugins/debugger.py:1319
 msgid "Debug"
 msgstr "Hibakeresés"
 
-#: thonny/plugins/debugger.py:1327
+#: thonny/plugins/debugger.py:1330
 msgid "Debug current script (nicer)"
 msgstr "Hibakeresés az aktuális szkriptben (szebb)"
 
-#: thonny/plugins/debugger.py:1339
+#: thonny/plugins/debugger.py:1342
 msgid "Debug current script (faster)"
 msgstr "Hibakeresés az aktuális szkriptben (gyorsabb)"
 
-#: thonny/plugins/debugger.py:1350
+#: thonny/plugins/debugger.py:1353
 msgid "Step over"
 msgstr "Átlépés"
 
-#: thonny/plugins/debugger.py:1352
+#: thonny/plugins/debugger.py:1355
 msgid "Over"
 msgstr "Át"
 
-#: thonny/plugins/debugger.py:1363
+#: thonny/plugins/debugger.py:1366
 msgid "Step into"
 msgstr "Belépés"
 
-#: thonny/plugins/debugger.py:1365
+#: thonny/plugins/debugger.py:1368
 msgid "Into"
 msgstr "Be"
 
-#: thonny/plugins/debugger.py:1376
+#: thonny/plugins/debugger.py:1379
 msgid "Step out"
 msgstr "Kilépés"
 
-#: thonny/plugins/debugger.py:1378
+#: thonny/plugins/debugger.py:1381
 msgid "Out"
 msgstr "Ki"
 
-#: thonny/plugins/debugger.py:1413
+#: thonny/plugins/debugger.py:1416
 msgid "Step back"
 msgstr "Visszalépés"
 
-#: thonny/plugins/debugger.py:1415
+#: thonny/plugins/debugger.py:1418
 msgid "Back"
 msgstr "Vissza"
 
-#: thonny/plugins/debugger.py:1421
+#: thonny/plugins/debugger.py:1424
 msgid "Stack"
 msgstr "Verem"
 
-#: thonny/plugins/debugger.py:1422
+#: thonny/plugins/debugger.py:1425
 msgid "Exception"
 msgstr "Kivétel"
 
@@ -774,113 +774,102 @@ msgstr "Figyelem! Indítsd újra a Thonny-t, ha megváltoztatod ezeket a beáll�
 msgid "General"
 msgstr "Általános"
 
-#: thonny/plugins/pip_gui.py:142
+#: thonny/plugins/pip_gui.py:160
 msgid "INSTALL"
 msgstr "TELEPÍTÉS"
 
-#: thonny/plugins/pip_gui.py:367
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
 msgid "Browse the packages"
 msgstr "Csomagok böngészése"
 
-#: thonny/plugins/pip_gui.py:370
+#: thonny/plugins/pip_gui.py:389
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
 msgstr "Az aktuális értelmezővel itt csak böngészni lehet a csomagokat. Használd az Eszközök → Rendszer parancsértelmező megnyitása... menüt telepítéshez, frissítéshez és eltávolításhoz."
 
-#: thonny/plugins/pip_gui.py:378
+#: thonny/plugins/pip_gui.py:396
 msgid "Packages' directory"
 msgstr "Csomagok könyvtára"
 
-#: thonny/plugins/pip_gui.py:382
+#: thonny/plugins/pip_gui.py:400
 msgid "Install from PyPI"
 msgstr "Telepítés PyPI-ról"
 
-#: thonny/plugins/pip_gui.py:385
+#: thonny/plugins/pip_gui.py:404
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
 msgstr "Ismeretlen forrású csomagokat érdemes a Python Package Indexen (PyPI-on) keresni. Ehhez írd be a csomag nevét a keresőmezőbe és nyomd le az ENTER-t."
 
-#: thonny/plugins/pip_gui.py:402
+#: thonny/plugins/pip_gui.py:420
 msgid "to locate requirements.txt file and install the packages specified in it."
 msgstr "előfeltételek fájl (requirements.txt) megkereséséhez és a benne felsorolt csomagok telepítéséhez."
 
-#: thonny/plugins/pip_gui.py:408
+#: thonny/plugins/pip_gui.py:426
 msgid "Click"
 msgstr "Klikkelj"
 
-#: thonny/plugins/pip_gui.py:413
+#: thonny/plugins/pip_gui.py:432
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
 msgstr "csomagfájl (*.whl, *.tar.gz, *.zip) megkereséséhez és a csomag telepítéséhez."
 
-#: thonny/plugins/pip_gui.py:420
+#: thonny/plugins/pip_gui.py:438
 msgid "Upgrade or uninstall"
 msgstr "Frissítés vagy eltávolítás"
 
-#: thonny/plugins/pip_gui.py:422
+#: thonny/plugins/pip_gui.py:440
 msgid "Start by selecting the package from the left."
 msgstr "Először válaszd ki a csomagot a bal oldalon."
 
-#: thonny/plugins/pip_gui.py:410
-msgid "Target:"
-msgstr "Cél:"
-
-#: thonny/plugins/pip_gui.py:414
-msgid "virtual environment"
-msgstr "virtuális környezet"
-
-#: thonny/plugins/pip_gui.py:412
-msgid "user site packages"
-msgstr "felhasználói csomagok"
-
-#: thonny/plugins/pip_gui.py:430
+#: thonny/plugins/pip_gui.py:449
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
 msgstr "Ez az ablak felsorolja az összes elérhető csomagot, de csak innen enged frissíteni és eltávolítani csomagokat:"
 
-#: thonny/plugins/pip_gui.py:440
+#: thonny/plugins/pip_gui.py:459
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
 msgstr "Az új csomagok is ebbe a könyvtárba lesznek telepítve. Egyéb könyvtárakat más módon kell kezelni."
 
-#: thonny/plugins/pip_gui.py:485
+#: thonny/plugins/pip_gui.py:511
 msgid "Installed version:"
 msgstr "Telepített verzió:"
 
-#: thonny/plugins/pip_gui.py:487
+#: thonny/plugins/pip_gui.py:513
 msgid "Installed to:"
 msgstr "Telepítve ide:"
 
-#: thonny/plugins/pip_gui.py:538
+#: thonny/plugins/pip_gui.py:593
 msgid "Please check your spelling!"
 msgstr "Kérlek ellenőrizd a helyesírást!"
 
-#: thonny/plugins/pip_gui.py:542
+#: thonny/plugins/pip_gui.py:597
 msgid "Could not find the package info from PyPI."
 msgstr "Nem található csomaginformáció a PyPI-on."
 
-#: thonny/plugins/pip_gui.py:544 thonny/plugins/pip_gui.py:1326
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
 msgid "Error code:"
 msgstr "Hibakód:"
 
-#: thonny/plugins/pip_gui.py:689
+#: thonny/plugins/pip_gui.py:762
 msgid "Can't find package name from the list:"
 msgstr "A csomagnév nem található a listában:"
 
-#: thonny/plugins/pip_gui.py:744
+#: thonny/plugins/pip_gui.py:818
 msgid "Package '{}' is required for installing and uninstalling other packages."
 msgstr "A '{}' csomagra szükség van más csomagok telepítéséhez ill. eltávolításához."
 
-#: thonny/plugins/pip_gui.py:789
+#: thonny/plugins/pip_gui.py:862
 msgid "Package"
 msgstr "Csomag"
 
-#: thonny/plugins/pip_gui.py:902
+#: thonny/plugins/pip_gui.py:974
 msgid "Manage packages for %s"
 msgstr "Csomagok kezelése ehhez: %s"
 
-#: thonny/editors.py:571 thonny/plugins/micropython/pip_gui.py:23
-#: thonny/plugins/pip_gui.py:953
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
 msgid "Confirmation"
 msgstr "Megerősítés"
 
-#: thonny/plugins/pip_gui.py:954
+#: thonny/plugins/pip_gui.py:1114
 msgid "Looks like you are installing a Thonny-related package.\n"
 "If you meant to install a Thonny plugin, then you should\n"
 "choose 'Tools → Manage plugins...' instead\n"
@@ -891,111 +880,111 @@ msgstr "Úgy tűnik, egy Thonny-val kapcsolatos csomagot telepítesz.\n"
 "\n"
 "Biztosan fel szeretnéd telepíteni ezt a feldolgozó számára: %s?"
 
-#: thonny/plugins/pip_gui.py:1059
+#: thonny/plugins/pip_gui.py:1204
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
 msgstr "Figyelem! Lehet, hogy van egy másik, az aktuális Thonny-val kompatibilis verzió. Klikkelj a '...' gombra a telepítendő verzió kiválasztásához."
 
-#: thonny/plugins/pip_gui.py:1067
+#: thonny/plugins/pip_gui.py:1211
 msgid "Thonny plugin without requirements"
 msgstr "Előfeltételek nélküli Thonny bővítmény"
 
-#: thonny/plugins/pip_gui.py:1083
+#: thonny/plugins/pip_gui.py:1227
 msgid "Unsuitable requirements"
 msgstr "Nem megfelelő előfeltételek"
 
-#: thonny/plugins/pip_gui.py:1084
+#: thonny/plugins/pip_gui.py:1228
 msgid "This package requires different Thonny version:"
 msgstr "Ez a csomag eltérő Thonny verziót igényel:"
 
-#: thonny/plugins/pip_gui.py:1088
+#: thonny/plugins/pip_gui.py:1232
 msgid "If you still want it, then please install it from the command line."
 msgstr "Ha valóban ezt szeretnéd, akkor telepítsd parancssorból."
 
-#: thonny/plugins/pip_gui.py:1125
+#: thonny/plugins/pip_gui.py:1270
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
 msgstr "Figyelem! Indítsd újra a Thonny-t bővítmények telepítése / frissítése / eltávolítása után."
 
-#: thonny/plugins/pip_gui.py:1135
+#: thonny/plugins/pip_gui.py:1279
 msgid "Thonny plug-ins"
 msgstr "Thonny bővítmények"
 
-#: thonny/plugins/pip_gui.py:1171
+#: thonny/plugins/pip_gui.py:1321
 msgid "Advanced install / upgrade / downgrade"
 msgstr "Haladó telepítés / frissítés / visszaléptetés"
 
-#: thonny/plugins/pip_gui.py:1180
+#: thonny/plugins/pip_gui.py:1330
 msgid "Desired version"
 msgstr "Kívánt verzió"
 
-#: thonny/plugins/pip_gui.py:1239
+#: thonny/plugins/pip_gui.py:1389
 msgid "Upgrade dependencies"
 msgstr "Függőségek frissítése"
 
-#: thonny/plugins/pip_gui.py:1324
+#: thonny/plugins/pip_gui.py:1474
 msgid "Requires:"
 msgstr "Előfeltételek:"
 
-#: thonny/plugins/pip_gui.py:1328
+#: thonny/plugins/pip_gui.py:1478
 msgid "Error:"
 msgstr "Hiba:"
 
-#: thonny/plugins/pip_gui.py:1541
+#: thonny/plugins/pip_gui.py:1677
 msgid "Manage packages..."
 msgstr "Csomagok kezelése..."
 
-#: thonny/plugins/pip_gui.py:1547
+#: thonny/plugins/pip_gui.py:1683
 msgid "Manage plug-ins..."
 msgstr "Bővítmények kezelése..."
 
-#: thonny/plugins/replayer.py:365
+#: thonny/plugins/replayer.py:364
 msgid "Open replayer..."
 msgstr "Újrajátszás megnyitása..."
 
-#: thonny/plugins/run_debug_config_page.py:14
+#: thonny/plugins/run_debug_config_page.py:21
 msgid "Change working directory to script directory on Run / Debug"
 msgstr "Munkakönyvtár módosítása a szkript könyvtárára Futtatás / Hibakeresés esetén"
 
-#: thonny/plugins/run_debug_config_page.py:22
+#: thonny/plugins/run_debug_config_page.py:35
 msgid "Show function calls (frames) in separate windows"
 msgstr "Függvényhívások (keretek) mutatása külön ablakban"
 
-#: thonny/plugins/run_debug_config_page.py:23
+#: thonny/plugins/run_debug_config_page.py:36
 msgid "Uncheck if you want more traditional experience."
 msgstr "Ne legyen kijelölve, ha hagyományosabb élményre vágysz."
 
-#: thonny/plugins/run_debug_config_page.py:29
+#: thonny/plugins/run_debug_config_page.py:42
 msgid "Open and close Stack view automatically"
 msgstr "Verem nézet automatikus nyitása és zárása"
 
-#: thonny/plugins/run_debug_config_page.py:30
+#: thonny/plugins/run_debug_config_page.py:44
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
 msgstr "Verem nézet nyitása az első függvényhívásnál és bezárása az utolsónál"
 
-#: thonny/plugins/run_debug_config_page.py:39
+#: thonny/plugins/run_debug_config_page.py:52
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
 msgstr "Könyvtárakba lépés engedélyezése (fő szkriptkönyvtáron kívüliekbe)"
 
-#: thonny/plugins/run_debug_config_page.py:40
+#: thonny/plugins/run_debug_config_page.py:53
 msgid "May make debugging slower."
 msgstr "Lassíthatja a hibakeresést."
 
-#: thonny/plugins/run_debug_config_page.py:45
+#: thonny/plugins/run_debug_config_page.py:58
 msgid "Preferred debugger"
 msgstr "Preferált hibakereső"
 
-#: thonny/plugins/run_debug_config_page.py:57
+#: thonny/plugins/run_debug_config_page.py:70
 msgid "(used when clicking Debug toolbar button)"
 msgstr "(a Hibakeresés gombra klikkeléskor használjuk)"
 
-#: thonny/plugins/run_debug_config_page.py:62
+#: thonny/plugins/run_debug_config_page.py:75
 msgid "Birdseye port"
 msgstr "Birdseye port"
 
-#: thonny/plugins/run_debug_config_page.py:66
+#: thonny/plugins/run_debug_config_page.py:79
 msgid "(restart Thonny after changing this)"
 msgstr "(indítsd újra a Thonny-t ha megváltoztattad)"
 
-#: thonny/plugins/run_debug_config_page.py:74
+#: thonny/plugins/run_debug_config_page.py:87
 msgid "Run & Debug"
 msgstr "Futtatás & Hibakeresés"
 
@@ -1031,7 +1020,7 @@ msgstr "Aktiváld a Python REPL-t miután lefutott a program"
 msgid "Keep terminal window open after Python process ends"
 msgstr "Hagyd nyitva a terminált a Python folyamat kilépése után"
 
-#: thonny/plugins/terminal_config_page.py:31
+#: thonny/plugins/terminal_config_page.py:32
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
 msgstr "Figyelem! A parancsértelmező beállításainál engedélyezned kell az automatikus bezárást (Beállítások → Parancsértelmező)"
@@ -1040,51 +1029,51 @@ msgstr "Figyelem! A parancsértelmező beállításainál engedélyezned kell az
 msgid "Terminal"
 msgstr "Terminál"
 
-#: thonny/plugins/theme_and_font_config_page.py:40
+#: thonny/plugins/theme_and_font_config_page.py:39
 msgid "UI theme"
 msgstr "UI téma"
 
-#: thonny/plugins/theme_and_font_config_page.py:53
+#: thonny/plugins/theme_and_font_config_page.py:52
 msgid "Syntax theme"
 msgstr "Szintaxis téma"
 
-#: thonny/plugins/theme_and_font_config_page.py:85
+#: thonny/plugins/theme_and_font_config_page.py:84
 msgid "Editor font"
 msgstr "Kódszerkesztő betűtípus"
 
-#: thonny/plugins/theme_and_font_config_page.py:108
+#: thonny/plugins/theme_and_font_config_page.py:107
 msgid "IO font"
 msgstr "IO betűtípus"
 
-#: thonny/plugins/theme_and_font_config_page.py:133
+#: thonny/plugins/theme_and_font_config_page.py:132
 msgid "Preview"
 msgstr "Előnézet"
 
-#: thonny/plugins/theme_and_font_config_page.py:151
+#: thonny/plugins/theme_and_font_config_page.py:150
 msgid "This is a comment"
 msgstr "Ez egy megjegyzés"
 
-#: thonny/plugins/theme_and_font_config_page.py:154
+#: thonny/plugins/theme_and_font_config_page.py:153
 msgid "The answer is"
 msgstr "A válasz"
 
-#: thonny/plugins/theme_and_font_config_page.py:158
+#: thonny/plugins/theme_and_font_config_page.py:157
 msgid "unclosed_string"
 msgstr "lezaratlan_sztring"
 
-#: thonny/plugins/theme_and_font_config_page.py:160
+#: thonny/plugins/theme_and_font_config_page.py:159
 msgid "blah, blah"
 msgstr "blabla"
 
-#: thonny/plugins/theme_and_font_config_page.py:184
+#: thonny/plugins/theme_and_font_config_page.py:183
 msgid "NB! Some style elements change only after restarting Thonny!"
 msgstr "Figyelem! Egyes stíluselemek csak a Thonny újraindítása után változnak meg!"
 
-#: thonny/plugins/theme_and_font_config_page.py:223
+#: thonny/plugins/theme_and_font_config_page.py:222
 msgid "Enter an integer"
 msgstr "Írj be egy egész számot"
 
-#: thonny/plugins/theme_and_font_config_page.py:236
+#: thonny/plugins/theme_and_font_config_page.py:235
 msgid "Theme & Font"
 msgstr "Téma & Betűtípus"
 
@@ -1104,35 +1093,35 @@ msgstr "Kezdőlap"
 msgid "Help contents"
 msgstr "Súgó tartalom"
 
-#: thonny/plugins/micropython/mp_front.py:300
+#: thonny/plugins/micropython/mp_front.py:290
 msgid "CircuitPython device"
 msgstr "CircuitPython eszköz"
 
-#: thonny/plugins/micropython/mp_front.py:304
+#: thonny/plugins/micropython/mp_front.py:294
 msgid "MicroPython device"
 msgstr "MicroPython eszköz"
 
-#: thonny/plugins/micropython/mp_front.py:541
+#: thonny/plugins/micropython/mp_front.py:545
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr "Csatlakoztasd az eszközödet a számítógéphez és válaszd ki a megfelelő portot:"
 
-#: thonny/plugins/micropython/mp_front.py:544
+#: thonny/plugins/micropython/mp_front.py:548
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr "keresd meg az eszközöd nevét (\"USB Serial\" vagy \"UART\")"
 
-#: thonny/plugins/micropython/mp_front.py:546
+#: thonny/plugins/micropython/mp_front.py:550
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr "Ha nem találod, akkor lehet, hogy először egy megfelelő USB meghajtót kell telepítened."
 
-#: thonny/plugins/micropython/mp_front.py:439
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port"
 msgstr "Port"
 
-#: thonny/plugins/micropython/mp_front.py:449
+#: thonny/plugins/micropython/mp_front.py:445
 msgid "Try to detect port automatically"
 msgstr "Automatikus portkeresés"
 
-#: thonny/plugins/micropython/__init__.py:25
+#: thonny/plugins/micropython/__init__.py:24
 msgid "MicroPython (generic)"
 msgstr "MicroPython (általános)"
 
@@ -1144,19 +1133,19 @@ msgstr "Nyomtatás..."
 msgid "Open system shell..."
 msgstr "Terminál megnyitása..."
 
-#: thonny/plugins/backend_config_page.py:110
+#: thonny/plugins/backend_config_page.py:109
 msgid "Details"
 msgstr "Részletek"
 
-#: thonny/plugins/pip_gui.py:395
+#: thonny/plugins/pip_gui.py:413
 msgid "Install from requirements file"
 msgstr "Telepítés előfeltétel fájlból"
 
-#: thonny/plugins/pip_gui.py:407
+#: thonny/plugins/pip_gui.py:425
 msgid "Install from local file"
 msgstr "Telepítés lokális fájlból"
 
-#: thonny/plugins/pip_gui.py:1118
+#: thonny/plugins/pip_gui.py:1263
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
 msgstr "Ez az ablak a Thonny bővítmények és függőségeik kezelésére szolgál.\n"
@@ -1166,15 +1155,15 @@ msgstr "Ez az ablak a Thonny bővítmények és függőségeik kezelésére szol
 msgid "CircuitPython (generic)"
 msgstr "CircuitPython (általános)"
 
-#: thonny/plugins/commenting_indenting.py:143
+#: thonny/plugins/commenting_indenting.py:142
 msgid "Indent selected lines"
 msgstr "Behúzás növelése"
 
-#: thonny/plugins/commenting_indenting.py:153
+#: thonny/plugins/commenting_indenting.py:152
 msgid "Dedent selected lines"
 msgstr "Behúzás csökkentése"
 
-#: thonny/workbench.py:1471
+#: thonny/workbench.py:1487
 msgid "Switch to\n"
 "regular\n"
 "mode"
@@ -1182,87 +1171,83 @@ msgstr "Váltás\n"
 "Normál\n"
 "módba"
 
-#: thonny/plugins/microbit/__init__.py:58
+#: thonny/plugins/microbit/__init__.py:62
 msgid "Make sure MicroPython has been installed to your micro:bit."
 msgstr "Ellenőrizd, hogy a MicroPython telepítve van a micro:bit eszközödre."
 
-#: thonny/plugins/microbit/__init__.py:60
+#: thonny/plugins/microbit/__init__.py:64
 msgid "Don't forget that main.py only works without embedded main script."
 msgstr "Ne feledd, hogy a main.py csak beágyazott beágyazott fő szkript nélkül működik."
 
-#: thonny/plugins/micropython/uf2dialog.py:44
-msgid "please wait"
-msgstr "kérlek várj"
-
-#: thonny/misc_utils.py:151
+#: thonny/misc_utils.py:178
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
 msgstr "Nem található a '%s' lemez. Meg szeretnéd keresni?"
 
-#: thonny/misc_utils.py:154
+#: thonny/misc_utils.py:181
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
 msgstr "Több '%s' lemez is található. Szeretnél egyet választani?"
 
-#: thonny/misc_utils.py:170
+#: thonny/misc_utils.py:197
 msgid "Can't find suitable disk"
 msgstr "Nem található megfelelő lemez"
 
-#: thonny/base_file_browser.py:287
+#: thonny/base_file_browser.py:294
 msgid "%d items"
 msgstr "%d tétel"
 
-#: thonny/base_file_browser.py:736
+#: thonny/base_file_browser.py:743
 msgid "Move to Trash"
 msgstr "Kukába helyezés"
 
-#: thonny/base_file_browser.py:739
+#: thonny/base_file_browser.py:746
 msgid "Delete"
 msgstr "Törlés"
 
-#: thonny/base_file_browser.py:718 thonny/base_file_browser.py:869
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
 msgid "New directory"
 msgstr "Új könyvtár"
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:749
 msgid "Properties"
 msgstr "Tulajdonságok"
 
-#: thonny/base_file_browser.py:744
+#: thonny/base_file_browser.py:751
 msgid "Storage space"
 msgstr "Tárhely"
 
-#: thonny/base_file_browser.py:754
+#: thonny/base_file_browser.py:761
 msgid "Path"
 msgstr "Elérési út"
 
-#: thonny/base_file_browser.py:756
+#: thonny/base_file_browser.py:763
 msgid "Directory properties"
 msgstr "Könyvtár tulajdonságai"
 
-#: thonny/base_file_browser.py:758
+#: thonny/base_file_browser.py:765
 msgid "File properties"
 msgstr "Fájl tulajdonságai"
 
-#: thonny/base_file_browser.py:760
+#: thonny/base_file_browser.py:767
 msgid "bytes"
 msgstr "bájt"
 
-#: thonny/base_file_browser.py:763
+#: thonny/base_file_browser.py:770
 msgid "Size"
 msgstr "Méret"
 
-#: thonny/base_file_browser.py:93 thonny/base_file_browser.py:774
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
 msgid "Modified"
 msgstr "Módosítva"
 
-#: thonny/base_file_browser.py:833
+#: thonny/base_file_browser.py:842
 msgid "Deleting %s"
 msgstr "Törlés: %s"
 
-#: thonny/editors.py:253
+#: thonny/editors.py:264
 msgid "Loading"
 msgstr "Betöltés"
 
-#: thonny/editors.py:382
+#: thonny/editors.py:397
 msgid "Saving"
 msgstr "Mentés"
 
@@ -1270,89 +1255,89 @@ msgstr "Mentés"
 msgid "Upload to %s"
 msgstr "Feltöltés ide: %s"
 
-#: thonny/plugins/files.py:417
+#: thonny/plugins/files.py:420
 msgid "Downloading %s to %s"
 msgstr "Letöltés: %s ide: %s"
 
-#: thonny/plugins/files.py:323
+#: thonny/plugins/files.py:326
 msgid "Download to %s"
 msgstr "Letöltés ide: %s"
 
-#: thonny/base_file_browser.py:643
+#: thonny/base_file_browser.py:650
 msgid "Open in system file manager"
 msgstr "Megnyitás a rendszer fájlkezelőjében"
 
-#: thonny/base_file_browser.py:671
+#: thonny/base_file_browser.py:678
 msgid "Hide hidden files"
 msgstr "Rejtett fájlok elrejtése"
 
-#: thonny/base_file_browser.py:671
+#: thonny/base_file_browser.py:678
 msgid "Show hidden files"
 msgstr "Rejtett fájlok megjelenítése"
 
-#: thonny/base_file_browser.py:654
+#: thonny/base_file_browser.py:661
 msgid "Open in Thonny"
 msgstr "Megnyitás Thonny-val"
 
-#: thonny/base_file_browser.py:685
+#: thonny/base_file_browser.py:692
 msgid "Open in system default app"
 msgstr "Megnyitás a rendszerben beállított programmal"
 
-#: thonny/base_file_browser.py:666 thonny/base_file_browser.py:693
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
 msgid "Configure %s files"
 msgstr "%s fájl beállítása"
 
-#: thonny/base_file_browser.py:694
+#: thonny/base_file_browser.py:702
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
 msgstr "Mi történjen egy %s fájllal, ha duplán ráklikkelsz a Thonny fájlkezelőjében?"
 
-#: thonny/base_file_browser.py:1240 thonny/editors.py:953 thonny/editors.py:955
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
 msgid "Deleting"
 msgstr "Törlés"
 
-#: thonny/base_file_browser.py:1247
+#: thonny/base_file_browser.py:1265
 msgid "Creating directory"
 msgstr "Könyvtár készítése"
 
-#: thonny/editors.py:251
+#: thonny/editors.py:262
 msgid "Loading %s"
 msgstr "Betöltés: %s"
 
-#: thonny/editors.py:377
+#: thonny/editors.py:392
 msgid "Saving to %s"
 msgstr "Mentés ide: %s"
 
-#: thonny/editors.py:702 thonny/editors.py:704
+#: thonny/editors.py:730 thonny/editors.py:732
 msgid "Save All files"
 msgstr "Összes fájl mentése"
 
-#: thonny/plugins/backend_config_page.py:340 thonny/workbench.py:869
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
 msgid "Configure interpreter..."
 msgstr "Értelmező beállítása..."
 
-#: thonny/workbench.py:1581
+#: thonny/workbench.py:1597
 msgid "Device"
 msgstr "Eszköz"
 
-#: thonny/workdlg.py:193
+#: thonny/workdlg.py:234
 msgid "Cancelling"
 msgstr "Leállítás"
 
-#: thonny/workdlg.py:220
+#: thonny/workdlg.py:270
 msgid "Starting"
 msgstr "Indítás"
 
-#: thonny/plugins/backend_config_page.py:251
+#: thonny/plugins/backend_config_page.py:249
 msgid "Authentication"
 msgstr "Azonosítás"
 
-#: thonny/plugins/backend_config_page.py:253
+#: thonny/plugins/backend_config_page.py:251
 msgid "Enter the passphrase of your private key for\n"
 "{}"
 msgstr "Írd be a privát kulcs jelszavát ehhez:\n"
 "{}"
 
-#: thonny/plugins/backend_config_page.py:256
+#: thonny/plugins/backend_config_page.py:254
 msgid "Enter your password for\n"
 "{}"
 msgstr "Írd be a jelszót ehhez:\n"
@@ -1362,43 +1347,43 @@ msgstr "Írd be a jelszót ehhez:\n"
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
 msgstr "A fenti ennek a számnak csupán közelítő értéke. A pontos tárolt érték %s, ami körülbelül %s"
 
-#: thonny/plugins/pip_gui.py:645
+#: thonny/plugins/pip_gui.py:696
 msgid "Search results"
 msgstr "Keresési eredmények"
 
-#: thonny/plugins/pip_gui.py:646
+#: thonny/plugins/pip_gui.py:697
 msgid "Searching"
 msgstr "Keresés"
 
-#: thonny/plugins/pip_gui.py:728 thonny/plugins/pip_gui.py:817
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
 msgid "Installing '%s'"
 msgstr "Telepítés: '%s'"
 
-#: thonny/plugins/pip_gui.py:734
+#: thonny/plugins/pip_gui.py:807
 msgid "Upgrading '%s'"
 msgstr "Frissítés: '%s'"
 
-#: thonny/plugins/pip_gui.py:741
+#: thonny/plugins/pip_gui.py:814
 msgid "Uninstalling '%s'"
 msgstr "Eltávolítás: '%s'"
 
-#: thonny/plugins/pip_gui.py:755
+#: thonny/plugins/pip_gui.py:828
 msgid "Installing"
 msgstr "Telepítés"
 
-#: thonny/plugins/pip_gui.py:1502
+#: thonny/plugins/pip_gui.py:1625
 msgid "Package manager is not available for this interpreter"
 msgstr "Nincs csomagkezelő ehhez az értelmezőhöz"
 
-#: thonny/base_file_browser.py:1191 thonny/plugins/pip_gui.py:1516
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
 msgid "Not supported"
 msgstr "Nem támogatott"
 
-#: thonny/plugins/micropython/pip_gui.py:100 thonny/plugins/pip_gui.py:1521
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
 msgid "Not available"
 msgstr "Nem elérhető"
 
-#: thonny/plugins/pip_gui.py:1522
+#: thonny/plugins/pip_gui.py:1658
 msgid "You need to stop your program before launching the package manager."
 msgstr "Állítsd le a programod, mielőtt elindítod a csomagkezelőt."
 
@@ -1406,11 +1391,11 @@ msgstr "Állítsd le a programod, mielőtt elindítod a csomagkezelőt."
 msgid "Open evaluated values in Object inspector"
 msgstr "Nyisd meg a értékeket az Objektumvizsgálóban"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:208
+#: thonny/plugins/cpython_frontend/cp_front.py:240
 msgid "Python executable"
 msgstr "Python program"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:231
+#: thonny/plugins/cpython_frontend/cp_front.py:265
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
@@ -1420,88 +1405,51 @@ msgstr "Figyelem! A fájlválasztó gomb nem mindig működik amikor egy virtuá
 msgid "Remote Python 3 (SSH)"
 msgstr "Távoli Python 3 (SSH)"
 
-#: thonny/plugins/micropython/mp_front.py:310
+#: thonny/plugins/micropython/mp_front.py:300
 msgid "Not connected"
 msgstr "Nincs kapcsolat"
 
-#: thonny/plugins/micropython/mp_front.py:515
-msgid "Advanced options"
-msgstr "Haladó beállítások"
-
-#: thonny/plugins/micropython/mp_front.py:547
-msgid "Install or update firmware"
-msgstr "Firmware telepítése vagy frissítése"
-
-#: thonny/plugins/micropython/__init__.py:36
+#: thonny/plugins/micropython/__init__.py:35
 msgid "MicroPython (local)"
 msgstr "MicroPython (helyi)"
 
-#: thonny/plugins/micropython/__init__.py:47
+#: thonny/plugins/micropython/__init__.py:46
 msgid "MicroPython (SSH)"
 msgstr "MicroPython (SSH)"
 
-#: thonny/plugins/micropython/pip_gui.py:77
-msgid "Scope"
-msgstr "Hatókör"
-
-#: thonny/plugins/micropython/pip_gui.py:90
-msgid "This dialog lists top-level modules from following directories:\n"
-""
-msgstr "Ez az ablak az alábbi könyvtárak felsőszintű moduljait mutatja:"
-
-#: thonny/plugins/micropython/pip_gui.py:99
-msgid "New packages will be installed to"
-msgstr "Az új csomagok telepítési helye:"
-
-#: thonny/plugins/micropython/pip_gui.py:102
+#: thonny/plugins/micropython/pip_gui.py:145
 msgid "no absolute lib directory in sys.path"
 msgstr "nincs abszolút lib könyvtár a sys.path-ban"
 
-#: thonny/plugins/micropython/uf2dialog.py:39
-msgid "Version to be installed"
-msgstr "Telepítendő verzió"
-
-#: thonny/plugins/micropython/uf2dialog.py:47
-msgid "Target device location"
-msgstr "Céleszköz helye"
-
-#: thonny/plugins/micropython/uf2dialog.py:58
-msgid "Target device model"
-msgstr "Céleszköz típusa"
-
-#: thonny/plugins/micropython/uf2dialog.py:146
-msgid "Please wait"
-msgstr "Kérlek várj"
-
-#: thonny/plugins/pip_gui.py:70
+#: thonny/plugins/pip_gui.py:86
 msgid "Search on PyPI"
 msgstr "Keresés a PyPI-on"
 
-#: thonny/base_file_browser.py:686
+#: thonny/base_file_browser.py:693
 msgid "Open in Thonny's text editor"
 msgstr "Megnyitás a Thonny szerkesztőjében"
 
-#: thonny/base_file_browser.py:339
+#: thonny/base_file_browser.py:346
 msgid "Storage space on this drive or filesystem"
 msgstr "Tárhely ezen a lemezen vagy fájlrendszerben"
 
-#: thonny/base_file_browser.py:340
+#: thonny/base_file_browser.py:347
 msgid "total space"
 msgstr "teljes tárhely"
 
-#: thonny/base_file_browser.py:342
+#: thonny/base_file_browser.py:349
 msgid "used space"
 msgstr "használt tárhely"
 
-#: thonny/base_file_browser.py:343
+#: thonny/base_file_browser.py:350
 msgid "free space"
 msgstr "szabad tárhely"
 
-#: thonny/base_file_browser.py:350
+#: thonny/base_file_browser.py:357
 msgid "Storage info"
 msgstr "Tárhely infó"
 
-#: thonny/plugins/commenting_indenting.py:163
+#: thonny/plugins/commenting_indenting.py:162
 msgid "Replace tabs with spaces"
 msgstr "TAB-ok helyettesítése szóközökkel"
 
@@ -1513,72 +1461,72 @@ msgstr "TAB-ok kiemelése"
 msgid "Indent with tab characters (not recommended for Python)"
 msgstr "Behúzás TAB-bal (nem javasolt Pythonban)"
 
-#: thonny/base_file_browser.py:91 thonny/memory.py:63
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
 msgid "Name"
 msgstr "Név"
 
-#: thonny/base_file_browser.py:95
+#: thonny/base_file_browser.py:96
 msgid "Size (bytes)"
 msgstr "Méret (bájtok)"
 
-#: thonny/base_file_browser.py:870
+#: thonny/base_file_browser.py:879
 msgid "Enter name for new directory under\n"
 "%s"
 msgstr "Írd be az új alkönyvtár nevét. Ide kerül:\n"
 "%s"
 
-#: thonny/base_file_browser.py:893
+#: thonny/base_file_browser.py:902
 msgid "Nothing selected"
 msgstr "Nincs semmi kiválasztva"
 
-#: thonny/base_file_browser.py:893
+#: thonny/base_file_browser.py:902
 msgid "Select an item and try again!"
 msgstr "Válassz egyet és próbáld újra!"
 
-#: thonny/base_file_browser.py:1311
+#: thonny/base_file_browser.py:1329
 msgid "Open from %s"
 msgstr "Megnyitás innen: %s"
 
-#: thonny/base_file_browser.py:1314
+#: thonny/base_file_browser.py:1332
 msgid "Save to %s"
 msgstr "Mentés ide: %s"
 
-#: thonny/base_file_browser.py:1333
+#: thonny/base_file_browser.py:1351
 msgid "File name:"
 msgstr "Fájlnév:"
 
-#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
-#: thonny/plugins/object_inspector.py:618
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:617
 msgid "Value ID"
 msgstr "Érték ID"
 
 #: thonny/memory.py:65 thonny/plugins/heap.py:23
-#: thonny/plugins/object_inspector.py:540
-#: thonny/plugins/object_inspector.py:619
+#: thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
 msgid "Value"
 msgstr "Érték"
 
-#: thonny/plugins/backend_config_page.py:274
+#: thonny/plugins/backend_config_page.py:272
 msgid "Save password"
 msgstr "Jelszó mentése"
 
-#: thonny/plugins/debugger.py:553
+#: thonny/plugins/debugger.py:559
 msgid "Function call at %s"
 msgstr "Függvényhívás: %s"
 
-#: thonny/plugins/debugger.py:1003
+#: thonny/plugins/debugger.py:1008
 msgid "Local variables"
 msgstr "Lokális változók"
 
-#: thonny/plugins/debugger.py:1035
+#: thonny/plugins/debugger.py:1040
 msgid "Function"
 msgstr "Függvény"
 
-#: thonny/plugins/debugger.py:1036
+#: thonny/plugins/debugger.py:1041
 msgid "Location"
 msgstr "Hely"
 
-#: thonny/plugins/debugger.py:1112
+#: thonny/plugins/debugger.py:1117
 msgid "If last command raised an exception then this view will show the stacktrace."
 msgstr "Ha egy parancs kivételt vált ki, ez a nézet mutatja a hívási vermet."
 
@@ -1594,15 +1542,15 @@ msgstr "Adat"
 msgid "Attributes"
 msgstr "Jellemzők"
 
-#: thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:537
 msgid "Index"
 msgstr "Index"
 
-#: thonny/plugins/object_inspector.py:616
+#: thonny/plugins/object_inspector.py:615
 msgid "Key ID"
 msgstr "Kulcs ID"
 
-#: thonny/plugins/object_inspector.py:617
+#: thonny/plugins/object_inspector.py:616
 msgid "Key"
 msgstr "Kulcs"
 
@@ -1612,15 +1560,15 @@ msgid "Back to\n"
 msgstr "Vissza ide:\n"
 "%s"
 
-#: thonny/plugins/micropython/mp_front.py:439
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port or WebREPL"
 msgstr "Port vagy WebREPL"
 
-#: thonny/plugins/micropython/mp_front.py:583
+#: thonny/plugins/micropython/mp_front.py:586
 msgid "Password"
 msgstr "Jelszó"
 
-#: thonny/plugins/debugger.py:961
+#: thonny/plugins/debugger.py:966
 msgid "Source code"
 msgstr "Forráskód"
 
@@ -1636,117 +1584,117 @@ msgstr "Válaszd ki ezt, ha a fájlkezelő ablakok a főablak mögött jelennek 
 msgid "Environment variables (one KEY=VALUE per line)"
 msgstr "Környezeti változók (soronként egy KULCS=ÉRTÉK legyen)"
 
-#: thonny/base_file_browser.py:715
+#: thonny/base_file_browser.py:722
 msgid "New file"
-msgstr ""
+msgstr "Új fájl"
 
-#: thonny/base_file_browser.py:733
+#: thonny/base_file_browser.py:740
 msgid "Rename"
-msgstr ""
+msgstr "Átnevezés"
 
-#: thonny/base_file_browser.py:919
+#: thonny/base_file_browser.py:928
 msgid "Rename '%s'"
-msgstr ""
+msgstr "'%s' átnevezése"
 
-#: thonny/base_file_browser.py:919
+#: thonny/base_file_browser.py:928
 msgid "Enter new name"
-msgstr ""
+msgstr "Írd be az új nevet"
 
-#: thonny/base_file_browser.py:1007
+#: thonny/base_file_browser.py:1016
 msgid "Paste failed"
-msgstr ""
+msgstr "Beillesztés nem sikerült"
 
-#: thonny/base_file_browser.py:1007
+#: thonny/base_file_browser.py:1016
 msgid "There are conflicting folders"
 msgstr ""
 
-#: thonny/base_file_browser.py:1129
+#: thonny/base_file_browser.py:1144
 msgid "File already exists"
-msgstr ""
+msgstr "Már létezik a fájl"
 
-#: thonny/base_file_browser.py:1194
+#: thonny/base_file_browser.py:1213
 msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
 msgstr ""
 
-#: thonny/editors.py:35
+#: thonny/editors.py:38
 msgid "Python files"
-msgstr ""
+msgstr "Python fájlok"
 
-#: thonny/editors.py:119 thonny/editors.py:182
+#: thonny/editors.py:125 thonny/editors.py:191
 msgid "<untitled>"
 msgstr ""
 
-#: thonny/editors.py:146
+#: thonny/editors.py:152
 msgid "File is gone"
-msgstr ""
+msgstr "A fájl nem létezik"
 
-#: thonny/editors.py:149
+#: thonny/editors.py:155
 msgid "Do you want to also close the editor?"
-msgstr ""
+msgstr "Be akarod zárni a szerkesztőt is?"
 
-#: thonny/editors.py:165
+#: thonny/editors.py:171
 msgid "External modification"
-msgstr ""
+msgstr "Külső módosítás"
 
-#: thonny/editors.py:168
+#: thonny/editors.py:175
 msgid "Do you want to discard current editor content and reload the file from disk?"
 msgstr ""
 
-#: thonny/editors.py:572
+#: thonny/editors.py:590
 msgid "Python files usually have .py extension."
-msgstr ""
+msgstr "A Python fájloknak általában .py fájlnévkiterjesztése van."
 
-#: thonny/editors.py:574
+#: thonny/editors.py:592
 msgid "Did you mean '%s'?"
 msgstr ""
 
-#: thonny/editors.py:733
+#: thonny/editors.py:761
 msgid "Move / rename..."
-msgstr ""
+msgstr "Mozgatás / átnevezés..."
 
-#: thonny/editors.py:742
+#: thonny/editors.py:770
 msgid "Go to line..."
 msgstr ""
 
-#: thonny/editors.py:977
+#: thonny/editors.py:1012
 msgid "Line number"
 msgstr ""
 
-#: thonny/editors.py:1123
+#: thonny/editors.py:1158
 msgid "Do you want to save files before closing?"
-msgstr ""
+msgstr "El akarod menteni a fájlokat bezárás előtt?"
 
-#: thonny/editors.py:1125
+#: thonny/editors.py:1160
 msgid "Do you want to save file before closing?"
-msgstr ""
+msgstr "El akarod menteni a fájlt bezárás előtt?"
 
-#: thonny/editors.py:1128
+#: thonny/editors.py:1163
 msgid "Save On Close"
-msgstr ""
+msgstr "Mentés bezáráskor"
 
-#: thonny/misc_utils.py:513
+#: thonny/misc_utils.py:587
 msgid "Command not available"
-msgstr ""
+msgstr "Parancs nem érhető el"
 
-#: thonny/misc_utils.py:514
+#: thonny/misc_utils.py:588
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr ""
 
-#: thonny/workbench.py:686 thonny/workbench.py:786
+#: thonny/workbench.py:706 thonny/workbench.py:805
 msgid "Support Ukraine"
-msgstr ""
+msgstr "Támogasd Ukrajnát"
 
-#: thonny/plugins/backend_config_page.py:91
+#: thonny/plugins/backend_config_page.py:90
 msgid "Which kind of interpreter should Thonny use for running your code?"
-msgstr ""
+msgstr "Melyik értlemezőt használja a Thonny a kódod futtatásához?"
 
 #: thonny/plugins/calltip.py:159
 msgid "Show parameter info"
-msgstr ""
+msgstr "Paraméterinformáció mutatása"
 
 #: thonny/plugins/editor_config_page.py:41
 msgid "Automatically show parameter info after typing '('"
-msgstr ""
+msgstr "Paramétirnfó automtaikus mutatása '(' írása után"
 
 #: thonny/plugins/editor_config_page.py:47
 msgid "Automatically propose completions while typing"
@@ -1764,88 +1712,89 @@ msgstr ""
 msgid "Request completions with Tab-key in Shell"
 msgstr ""
 
-#: thonny/plugins/goto_definition.py:58
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
 msgid "Problem"
-msgstr ""
+msgstr "Probléma"
 
 #: thonny/plugins/goto_definition.py:58
 msgid "Could not find definition"
-msgstr ""
+msgstr "Nem található definíció"
 
 #: thonny/plugins/shell_config_page.py:17
 msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
 msgstr ""
 
-#: thonny/plugins/cpython_frontend/cp_front.py:170
+#: thonny/plugins/cpython_frontend/cp_front.py:202
 msgid "Thonny's Python"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:487
+#: thonny/plugins/micropython/mp_front.py:483
 msgid "Interrupt working program on connect"
 msgstr ""
 
-#: thonny/plugins/micropython/mp_front.py:494
+#: thonny/plugins/micropython/mp_front.py:491
 msgid "Synchronize device's real time clock"
-msgstr ""
+msgstr "Eszköz valós idejű órájával szinkronizálás"
 
-#: thonny/plugins/micropython/mp_front.py:500
+#: thonny/plugins/micropython/mp_front.py:497
 msgid "Use local time in real time clock"
-msgstr ""
+msgstr "Helyi idő használata a valós idejű órában"
 
-#: thonny/plugins/micropython/mp_front.py:506
+#: thonny/plugins/micropython/mp_front.py:503
 msgid "Restart interpreter before running a script"
-msgstr ""
+msgstr "Értelmező újraindítása szkript futtatása előtt"
 
-#: thonny/plugins/micropython/pip_gui.py:24
+#: thonny/plugins/micropython/pip_gui.py:28
 msgid "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
-msgstr ""
+msgstr "Ez nem néz ki MicroPython / CircuitPyton csomagnak. \n"
+"Biztos hogy telepíteni akarod?"
 
-#: thonny/base_file_browser.py:844
+#: thonny/base_file_browser.py:853
 msgid "Moving to Trash"
-msgstr ""
+msgstr "Mozgatás a kukába"
 
-#: thonny/base_file_browser.py:845
+#: thonny/base_file_browser.py:854
 msgid "Move %s to Trash?"
 msgstr ""
 
-#: thonny/base_file_browser.py:852
+#: thonny/base_file_browser.py:861
 msgid "Moving %s to Trash"
-msgstr ""
+msgstr "%s mozgatása a kukába"
 
-#: thonny/base_file_browser.py:659
+#: thonny/base_file_browser.py:666
 msgid "Open in default external app"
-msgstr ""
+msgstr "Megnyitás alapértelmezett külső alkalmazásban"
 
-#: thonny/base_file_browser.py:1192
+#: thonny/base_file_browser.py:1210
 msgid "Opening remote files in external app is not supported."
-msgstr ""
+msgstr "Távoli fájl megnyitása külső alkalmazásban nem támogatott."
 
-#: thonny/base_file_browser.py:1199
+#: thonny/base_file_browser.py:1218
 msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
-msgstr ""
+msgstr "Ha a fájlt meg kell nyitni egy külső alkalmazásban, akkor töltsd le egy helyi mappába és nyisd meg onnan!"
 
-#: thonny/editors.py:147
+#: thonny/editors.py:153
 msgid "Looks like '%s' was deleted or moved."
-msgstr ""
+msgstr "Úgy látszik, '%s' el lett távolítva vagy más helyre került."
 
-#: thonny/editors.py:166
+#: thonny/editors.py:172
 msgid "Looks like '%s' was modified outside of the editor."
-msgstr ""
+msgstr "Úgy látszik, '%s' a szerkesztőn kívül módosítva lett."
 
-#: thonny/plugins/cpython_frontend/cp_front.py:229
+#: thonny/plugins/cpython_frontend/cp_front.py:262
 msgid "NB! Thonny only supports Python %s and later"
 msgstr ""
 
-#: thonny/editors.py:977
+#: thonny/editors.py:1012
 msgid "Go to line"
-msgstr ""
+msgstr "Ugrás sorhoz"
 
-#: thonny/workbench.py:689
+#: thonny/workbench.py:709
 msgid "Support"
 msgstr ""
 
-#: thonny/editors.py:386 thonny/editors.py:401
+#: thonny/editors.py:401 thonny/editors.py:416
 msgid "Could not save"
 msgstr ""
 
@@ -1853,20 +1802,20 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:136
+#: thonny/plugins/general_config_page.py:137
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
 msgstr ""
 
-#: thonny/workbench.py:859
+#: thonny/workbench.py:876
 msgid "Install MicroPython"
 msgstr ""
 
-#: thonny/workbench.py:863
+#: thonny/workbench.py:880
 msgid "Install CircuitPython"
 msgstr ""
 
-#: thonny/plugins/backend_config_page.py:212
+#: thonny/plugins/backend_config_page.py:210
 msgid "Make uploaded shebang scripts executable"
 msgstr ""
 
@@ -1878,7 +1827,7 @@ msgstr ""
 msgid "Activate virtual environment"
 msgstr ""
 
-#: thonny/plugins/micropython/pip_gui.py:77 thonny/plugins/pip_gui.py:426
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
 msgid "Target"
 msgstr ""
 
@@ -1886,11 +1835,11 @@ msgstr ""
 msgid "Visualize current script at Python Tutor"
 msgstr ""
 
-#: thonny/plugins/todo_view.py:42
+#: thonny/plugins/todo_view.py:43
 msgid "Line"
 msgstr ""
 
-#: thonny/plugins/todo_view.py:43
+#: thonny/plugins/todo_view.py:44
 msgid "Info"
 msgstr ""
 
@@ -1902,24 +1851,125 @@ msgstr ""
 msgid "TODO"
 msgstr ""
 
-#: thonny/plugins/circuitpython/cirpy_front.py:98
-#: thonny/plugins/micropython/mp_front.py:530
+#: thonny/plugins/circuitpython/cirpy_front.py:113
+#: thonny/plugins/micropython/mp_front.py:537
 msgid "Install or update %s"
-msgstr ""
+msgstr "%s telepítése vagy frissítése"
 
 #: thonny/plugins/cpython_frontend/__init__.py:24
 msgid "Local Python 3"
-msgstr ""
+msgstr "Helyi Python 3"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:239
+#: thonny/plugins/cpython_frontend/cp_front.py:273
 msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
 msgstr ""
 
-#: thonny/plugins/ev3/__init__.py:72
+#: thonny/plugins/ev3/__init__.py:73
 msgid "Preparations (skip the VS Code part)"
 msgstr ""
 
-#: thonny/plugins/ev3/__init__.py:78
+#: thonny/plugins/ev3/__init__.py:79
 msgid "Default password"
+msgstr "Alapértelmezett jelszó"
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr "Információ"
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr ""
+
+#: thonny/editors.py:215
+msgid "%s doesn't look like a text file"
+msgstr "%s nem néz ki szöveges fájlnak"
+
+#: thonny/editors.py:221
+msgid "Problem loading file"
+msgstr "Hiba a fájl betöltése közben"
+
+#: thonny/editors.py:223
+msgid "This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr ""
+
+#: thonny/editors.py:297
+msgid "File is open"
+msgstr "A fájl nyitva van"
+
+#: thonny/editors.py:299
+msgid "This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr "Ez a fájl már meg van nyitva a Thonnyban. \n"
+"\n"
+"Ha el akarod menteni ezzel a névvel, először zárd be a \n"
+"megnyitott szerkesztőt!"
+
+#: thonny/editors.py:351
+msgid "Permission Error"
+msgstr "Engedélyhiba"
+
+#: thonny/editors.py:352
+msgid "Looks like this file or folder is not writable."
+msgstr "Úgy tűnik, ez a fájl vagy mappa nem írható."
+
+#: thonny/editors.py:416
+msgid "Back-end is not ready"
+msgstr ""
+
+#: thonny/editors.py:421
+msgid "Where to save to?"
+msgstr "Hova mentsem?"
+
+#: thonny/editors.py:492
+msgid "Potential problem"
+msgstr "Lehetséges probléma"
+
+#: thonny/editors.py:494
+msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
+msgstr "Ha '%s'-nak/-nek nevezed a szkriptet, nem fogod tudni a '%s' nevű könyvtári modult importálni"
+
+#: thonny/editors.py:499
+msgid "Do you still want to use this name for your script?"
+msgstr "Még mindig ezt a nevet akarod használni a szkriptedhez?"
+
+#: thonny/editors.py:1055
+msgid "Got permission error when trying to load\n"
+"%s"
+msgstr ""
+
+#: thonny/editors.py:1057
+msgid "Try opening it with File => Open."
+msgstr ""
+
+#: thonny/editors.py:1059
+msgid "Permission error"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:620
+msgid "License"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:66
+msgid "Search micropython-lib and PyPI"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid "The packages of this interpreter can be managed via your system package manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
 msgstr ""
 

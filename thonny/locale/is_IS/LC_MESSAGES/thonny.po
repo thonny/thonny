@@ -1,0 +1,1997 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: is\n"
+
+#: thonny/workbench.py:381
+msgid "File"
+msgstr "Skrá"
+
+#: thonny/workbench.py:382
+msgid "Edit"
+msgstr "Breyta"
+
+#: thonny/workbench.py:383
+msgid "View"
+msgstr "Skoða"
+
+#: thonny/running.py:161 thonny/workbench.py:384
+msgid "Run"
+msgstr "Keyra"
+
+#: thonny/workbench.py:385
+msgid "Tools"
+msgstr "Tól"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
+msgid "Help"
+msgstr "Hjálp"
+
+#: thonny/workbench.py:604
+msgid "Exit"
+msgstr "Hætta"
+
+#: thonny/workbench.py:631
+msgid "Decrease font size"
+msgstr "Minnka leturstærð"
+
+#: thonny/workbench.py:643
+msgid "Focus editor"
+msgstr "Skipta yfir í ritglugga"
+
+#: thonny/workbench.py:652
+msgid "Focus shell"
+msgstr "Skipta yfir í skipanaglugga"
+
+#: thonny/workbench.py:662
+msgid "Maximize view"
+msgstr "Fullstækka"
+
+#: thonny/workbench.py:674
+msgid "Full screen"
+msgstr "Fylla skjá"
+
+#: thonny/workbench.py:1473
+msgid "Program arguments"
+msgstr "Frumbreytur forrits"
+
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
+msgid "About Thonny"
+msgstr "Um Thonny"
+
+#: thonny/plugins/about.py:82
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "Þróað og smíðað innan veggja\n"
+"Háskólans í Tartu, Eistlandi,\n"
+"í samvinnu við\n"
+"samfélag opins hugbúnaðar,\n"
+"Raspberry Pi Foundation\n"
+"og Cybernetica AS"
+
+#: thonny/plugins/about.py:102
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "ENGIN ÁBYRGÐ FYLGIR \n"
+"þessari útgáfu hugbúnaðarins!\n"
+"Um er að ræða frjálsan hugbúnað, og þér er heimilt\n"
+"að dreifa honum á ný samkvæmt tilteknum skilyrðum. \n"
+"Nánar er kveðið á um það í leyfisskilmálum, sjá \n"
+"https://opensource.org/licenses/MIT"
+
+#: thonny/plugins/about.py:142
+msgid "Version history"
+msgstr "Útgáfuferill"
+
+#: thonny/plugins/about.py:149
+msgid "Report problems"
+msgstr "Tilkynna vandamál"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "Opna Kóðarýni sjálfkrafa þegar forritið frýs sem felur í sér frábrigði"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "Opna Kóðarýni sjálfkrafa þegar hún ber fram viðvaranir fyrir kóðann þinn"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "Framkvæma valdar Pylint-athuganir"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "Framkvæma Pylint-athuganir"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "Óvirkar athuganir (eitt auðkenni á línu)"
+
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "Kóðarýni"
+
+#: thonny/plugins/autocomplete.py:529
+msgid "Auto-complete"
+msgstr "Sjálfvirk útfylling"
+
+#: thonny/plugins/backend_config_page.py:335
+msgid "Interpreter"
+msgstr "Túlkur"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "Um Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:57
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "Birdseye er kembiforrit fyrir Python sem þarf að setja upp út af fyrir sig.\n"
+"\n"
+"Viltu opna hjálparsíðuna og fá frekari upplýsingar?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "Kemba núverandi skriftu (birdseye)"
+
+#: thonny/plugins/commenting_indenting.py:171
+msgid "Toggle comment"
+msgstr "Víxla athugasemd"
+
+#: thonny/plugins/commenting_indenting.py:181
+msgid "Comment out"
+msgstr "Setja í athugasemd"
+
+#: thonny/plugins/commenting_indenting.py:191
+msgid "Uncomment"
+msgstr "Taka úr athugasemd"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "Afturkalla"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "Endurgera"
+
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2349
+msgid "Cut"
+msgstr "Klippa"
+
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2350
+msgid "Copy"
+msgstr "Afrita"
+
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
+msgid "Paste"
+msgstr "Líma"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "Velja allt"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
+msgid "Run to cursor"
+msgstr "Keyra að bendli"
+
+#: thonny/plugins/debugger.py:987
+msgid "Can't close yet"
+msgstr "Ekki hægt að loka enn"
+
+#: thonny/plugins/debugger.py:988
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "Notaðu „Stöðva“-skipunina til þess að hætta við kembingu"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "Festa notandaglugga"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "Auðkenna samsvarandi nöfn"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "Auðkenna staðværar breytur"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "Auðkenna sviga"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "Auðkenna málskipanarstök"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "Auðkenna núverandi línu (krefst þess að ritillinn sé endurræstur)"
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "Sýna línunúmer"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "Ráðlögð hámarkslengd línu\n"
+"(Stilltu á 0 til að slökkva á spássíulínu)"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "Ritill"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "Flytja út notkunarskrár..."
+
+#: thonny/plugins/event_view.py:38
+msgid "Events"
+msgstr "Atburðir"
+
+#: thonny/plugins/files.py:609
+msgid "Files"
+msgstr "Skrár"
+
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
+msgid "Find & Replace"
+msgstr "Finna og skipta út"
+
+#: thonny/plugins/find_replace.py:67
+msgid "Find:"
+msgstr "Finna:"
+
+#: thonny/plugins/find_replace.py:92
+msgid "Replace with:"
+msgstr "Skipta út fyrir:"
+
+#: thonny/plugins/find_replace.py:110
+msgid "Case sensitive"
+msgstr "Hástafanæmt"
+
+#: thonny/plugins/find_replace.py:117
+msgid "Up"
+msgstr "Upp"
+
+#: thonny/plugins/find_replace.py:121
+msgid "Down"
+msgstr "Niður"
+
+#: thonny/plugins/find_replace.py:130
+msgid "Find"
+msgstr "Finna"
+
+#: thonny/plugins/find_replace.py:140
+msgid "Replace"
+msgstr "Skipta út"
+
+#: thonny/plugins/find_replace.py:148
+msgid "Replace+Find"
+msgstr "Skipta út+finna"
+
+#: thonny/plugins/find_replace.py:158
+msgid "Replace all"
+msgstr "Skipta öllu út"
+
+#: thonny/plugins/find_replace.py:256
+msgid "Enter string to be replaced."
+msgstr "Sláðu inn streng sem á að skipta út."
+
+#: thonny/plugins/find_replace.py:341
+msgid "The specified text was not found!"
+msgstr "Tilgreindur texti fannst ekki!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "Leyfa aðeins eitt Thonny-tilvik"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "Opna allar skrár úr fyrri lotu á ný"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "Slökkva á tilkynningarhljóði"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "Leturstærðarhamur"
+
+#: thonny/plugins/heap.py:37
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "Hrúgahamur er virkur.\n"
+"Lokaðu Hrúgasýn til þess að afvirkja hann."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "Hrúga"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "Tungumál"
+
+#: thonny/plugins/notes.py:36
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "Þessi gluggi er ætlaður til þess að halda utan um glósur þínar -- verkefnalýsingar, kóðabúta o.s.frv.\n"
+"\n"
+"Allt efni mun vistast sjálfkrafa og vera tiltækt næst þegar Thonny er ræst.\n"
+"\n"
+"Hikaðu ekki við að fjarlægja þennan texta til þess að skapa pláss fyrir eigin glósur."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "Glósur"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "Fyrra atriði"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "Næsta atriði"
+
+#: thonny/plugins/object_inspector.py:732
+msgid "Object inspector"
+msgstr "Atriðaskoðun"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "Uppskipting"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "Pygame Zero-hamur"
+
+#: thonny/plugins/pip_gui.py:95
+msgid "Uninstall"
+msgstr "Taka út"
+
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
+msgid "Close"
+msgstr "Loka"
+
+#: thonny/plugins/pip_gui.py:415
+msgid "Click "
+msgstr "Smella "
+
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
+msgid "here"
+msgstr "hér"
+
+#: thonny/plugins/pip_gui.py:92
+msgid "Upgrade"
+msgstr "Uppfæra"
+
+#: thonny/plugins/micropython/base_flashing_dialog.py:398
+#: thonny/plugins/pip_gui.py:89
+msgid "Install"
+msgstr "Setja upp"
+
+#: thonny/plugins/pip_gui.py:590
+msgid "Could not find the package from PyPI."
+msgstr "Gat ekki fundið pakkann frá PyPI."
+
+#: thonny/plugins/pip_gui.py:612
+msgid "Latest stable version"
+msgstr "Nýjasta stöðuga útgáfan"
+
+#: thonny/plugins/pip_gui.py:614
+msgid "Latest version"
+msgstr "Nýjasta útgáfa"
+
+#: thonny/plugins/pip_gui.py:616
+msgid "Summary"
+msgstr "Yfirlit"
+
+#: thonny/plugins/pip_gui.py:618
+msgid "Author"
+msgstr "Höfundur"
+
+#: thonny/plugins/pip_gui.py:622
+msgid "Homepage"
+msgstr "Heimasíða"
+
+#: thonny/plugins/pip_gui.py:624
+msgid "Bugtracker"
+msgstr "Villnaeftirlit"
+
+#: thonny/plugins/pip_gui.py:626
+msgid "Documentation"
+msgstr "Skjalbúnaður"
+
+#: thonny/plugins/pip_gui.py:628
+msgid "PyPI page"
+msgstr "PyPI-síða"
+
+#: thonny/plugins/pip_gui.py:668
+msgid "Requires"
+msgstr "Krefst"
+
+#: thonny/plugins/pip_gui.py:816
+msgid "Really uninstall?"
+msgstr "Virkilega taka út?"
+
+#: thonny/plugins/pip_gui.py:821
+msgid "Are you sure you want to uninstall it?"
+msgstr "Ertu viss um að þú viljir taka það út?"
+
+#: thonny/plugins/variables.py:22
+msgid "Back to\n"
+"current frame"
+msgstr "Aftur í\n"
+"núverandi ramma"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "Breytur"
+
+#: thonny/base_file_browser.py:1576
+msgid "This computer"
+msgstr "Þessi tölva"
+
+#: thonny/base_file_browser.py:648
+msgid "Refresh"
+msgstr "Endurglæða"
+
+#: thonny/base_file_browser.py:657
+msgid "Focus into"
+msgstr "Fara í"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+#: thonny/plugins/autocomplete.py:303 thonny/plugins/highlight_names.py:86
+msgid "Error"
+msgstr "Villa"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+msgid "You need to select a file!"
+msgstr "Þú þarft að velja skrá!"
+
+#: thonny/base_file_browser.py:1427
+msgid "Overwrite?"
+msgstr "Yfirskrifa?"
+
+#: thonny/base_file_browser.py:1427
+msgid "Do you want to overwrite '%s' ?"
+msgstr "Viltu yfirskrifa ‚%s‘ ?"
+
+#: thonny/editors.py:660 thonny/editors.py:662
+msgid "New"
+msgstr "Ný"
+
+#: thonny/editors.py:673
+msgid "Open..."
+msgstr "Opna..."
+
+#: thonny/editors.py:675
+msgid "Load"
+msgstr "Hlaða"
+
+#: thonny/editors.py:684
+msgid "Recent files"
+msgstr "Nýlegar skrár"
+
+#: thonny/editors.py:706 thonny/ui_utils.py:499
+msgid "Close all"
+msgstr "Loka öllum"
+
+#: thonny/editors.py:716 thonny/editors.py:718
+msgid "Save"
+msgstr "Vista"
+
+#: thonny/editors.py:741
+msgid "Save as..."
+msgstr "Vista sem..."
+
+#: thonny/editors.py:752
+msgid "Save copy..."
+msgstr "Vista afrit..."
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "Thonny-valkostir"
+
+#: thonny/running.py:160
+msgid "Run current script"
+msgstr "Keyra núverandi skriftu"
+
+#: thonny/running.py:191
+msgid "Run current script in terminal"
+msgstr "Keyra núverandi skriftu í útstöð"
+
+#: thonny/running.py:204
+msgid "Stop/Restart backend"
+msgstr "Stöðva/Endurræsa baktölvu"
+
+#: thonny/running.py:205
+msgid "Stop"
+msgstr "Stöðva"
+
+#: thonny/running.py:216
+msgid "Interrupt execution"
+msgstr "Rjúfa keyrslu"
+
+#: thonny/running.py:229
+msgid "Send EOF / Soft reboot"
+msgstr "Senda EOF / Minniháttar endurræsing"
+
+#: thonny/running.py:240
+msgid "Disconnect"
+msgstr "Aftengja"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:301
+msgid "Python interpreters"
+msgstr "Python-túlkar"
+
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
+msgid "all files"
+msgstr "allar skrár"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:330
+msgid "Select empty directory for new virtual environment"
+msgstr "Veldu tóma möppu fyrir nýtt sýndarumhverfi"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:337
+msgid "Bad directory"
+msgstr "Ógild mappa"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:338
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "Valin mappa er ekki tóm.\n"
+"Veldu aðra eða hættu við."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:355
+msgid "Creating virtual environment"
+msgstr "Býr til sýndarumhverfi"
+
+#: thonny/shell.py:101
+msgid "Clear shell"
+msgstr "Hreinsa skipanaglugga"
+
+#: thonny/shell.py:185
+msgid "Plotter"
+msgstr "Teiknari"
+
+#: thonny/shell.py:319
+msgid "Clear"
+msgstr "Hreinsa"
+
+#: thonny/shell.py:332
+msgid "Show Plotter"
+msgstr "Sýna Teiknara"
+
+#: thonny/shell.py:1671
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "Til þess að viðhalda góðum afköstum forðast Skipanaglugginn að birta mjög langar línur í fullri lengd (sjá Tól => Valkostir => Skipanagluggi).\n"
+"Hér gefst þér kostur á að vinna beint með brot úr upprunalega textanum."
+
+#: thonny/shell.py:1681
+msgid "Wrap text (may be slow)"
+msgstr "Umvefja texta (gæti reynst hægfara)"
+
+#: thonny/ui_utils.py:1883
+msgid "Copy to clipboard"
+msgstr "Afrita á klippiborð"
+
+#: thonny/shell.py:1723
+msgid "Squeezed text (%d characters)"
+msgstr "Samanþjappaður texti (%d stafir)"
+
+#: thonny/shell.py:1893
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "Teiknari myndgerir hrinu númera\n"
+"sem prentast út í skipanagluggann"
+
+#: thonny/shell.py:1895
+msgid "See Help for details."
+msgstr "Sjá Hjálp fyrir frekari upplýsingar."
+
+#: thonny/ui_utils.py:498
+msgid "Close others"
+msgstr "Loka öðrum"
+
+#: thonny/ui_utils.py:1738
+msgid "Copying"
+msgstr "Afritar"
+
+#: thonny/ui_utils.py:1741
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "Afritar\n"
+"  %s\n"
+"í\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
+#: thonny/workdlg.py:205 thonny/workdlg.py:259
+msgid "Cancel"
+msgstr "Hætta við"
+
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
+msgid "OK"
+msgstr "Í lagi"
+
+#: thonny/ui_utils.py:2355
+msgid "Select All"
+msgstr "Velja allt"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:164
+msgid "Shell"
+msgstr "Skipanagluggi"
+
+#: thonny/workbench.py:614
+msgid "Options..."
+msgstr "Valkostir..."
+
+#: thonny/workbench.py:621
+msgid "Increase font size"
+msgstr "Auka leturstærð"
+
+#: thonny/workbench.py:685
+msgid "Change font size"
+msgstr "Breyta leturstærð"
+
+#: thonny/workbench.py:686
+msgid "Zoom"
+msgstr "Þysjun"
+
+#: thonny/workbench.py:695
+msgid "Exit Thonny"
+msgstr "Hætta Thonny"
+
+#: thonny/workbench.py:698
+msgid "Quit"
+msgstr "Hætta"
+
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
+msgid "Overwriting theme '%s'"
+msgstr "Skrifar yfir þema ‚%s‘"
+
+#: thonny/workbench.py:1444
+msgid "Program arguments:"
+msgstr "Frumbreytur forrits:"
+
+#: thonny/workbench.py:1498
+msgid "Regular mode"
+msgstr "Viðtekinn hamur"
+
+#: thonny/workbench.py:1500
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "Stillingar hafa verið uppfærðar. Endurræstu Thonny til að byrja að vinna í viðteknum ham.\n"
+"\n"
+"(Sjá 'Tól → Valkostir → Kjörstillingar' ef þú skiptir síðar um skoðun.)"
+
+#: thonny/plugins/ast_view.py:211
+msgid "Program tree"
+msgstr "Forritstré"
+
+#: thonny/plugins/debugger.py:1286
+msgid "Resume"
+msgstr "Halda áfram"
+
+#: thonny/plugins/debugger.py:1302
+msgid "Run / resume"
+msgstr "Keyra / halda áfram"
+
+#: thonny/plugins/debugger.py:1317
+msgid "Debug current script"
+msgstr "Kemba núverandi skriftu"
+
+#: thonny/plugins/debugger.py:1319
+msgid "Debug"
+msgstr "Kemba"
+
+#: thonny/plugins/debugger.py:1330
+msgid "Debug current script (nicer)"
+msgstr "Kemba núverandi skriftu (flottara)"
+
+#: thonny/plugins/debugger.py:1342
+msgid "Debug current script (faster)"
+msgstr "Kemba núverandi skriftu (hraðara)"
+
+#: thonny/plugins/debugger.py:1353
+msgid "Step over"
+msgstr "Stíga yfir skref"
+
+#: thonny/plugins/debugger.py:1355
+msgid "Over"
+msgstr "Stíga yfir"
+
+#: thonny/plugins/debugger.py:1366
+msgid "Step into"
+msgstr "Stíga í skref"
+
+#: thonny/plugins/debugger.py:1368
+msgid "Into"
+msgstr "Stíga í"
+
+#: thonny/plugins/debugger.py:1379
+msgid "Step out"
+msgstr "Stíga úr skrefi"
+
+#: thonny/plugins/debugger.py:1381
+msgid "Out"
+msgstr "Stíga úr"
+
+#: thonny/plugins/debugger.py:1416
+msgid "Step back"
+msgstr "Stíga skref aftur á bak"
+
+#: thonny/plugins/debugger.py:1418
+msgid "Back"
+msgstr "Aftur á bak"
+
+#: thonny/plugins/debugger.py:1424
+msgid "Stack"
+msgstr "Stafli"
+
+#: thonny/plugins/debugger.py:1425
+msgid "Exception"
+msgstr "Frábrigði"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "Skrá notkunartilvik forrits"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "Kembihamur (veitir ýtarlegri greiningarkladda)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "Viðmótshamur"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "Viðmótsstækkunarstuðull"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "ATH! Endurræstu Thonny eftir að þessum stillingum hefur verið breytt!"
+
+#: thonny/plugins/general_config_page.py:148
+msgid "General"
+msgstr "Kjörstillingar"
+
+#: thonny/plugins/pip_gui.py:160
+msgid "INSTALL"
+msgstr "SETJA UPP"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
+msgid "Browse the packages"
+msgstr "Skoða pakkana"
+
+#: thonny/plugins/pip_gui.py:389
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "Með núverandi túlki er aðeins hægt að skoða pakkana hér.\n"
+"Notaðu 'Tól → Opna skipanakvaðningu...' til þess að setja upp, uppfæra eða taka út."
+
+#: thonny/plugins/pip_gui.py:396
+msgid "Packages' directory"
+msgstr "Mappa pakkanna"
+
+#: thonny/plugins/pip_gui.py:400
+msgid "Install from PyPI"
+msgstr "Setja upp frá PyPI"
+
+#: thonny/plugins/pip_gui.py:404
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "Ef þú veist ekki hvaðan þú átt að fá pakkann, þá viltu líklega leita í Python-pakkaatriðaskránni. Byrjaðu á því að slá inn nafn pakkans í leitarstikuna hér að ofan og ýttu á ENTER-lykilinn."
+
+#: thonny/plugins/pip_gui.py:420
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "til þess að staðgreina requirements.txt skrá og setja upp pakkana sem tilgreindir eru í henni."
+
+#: thonny/plugins/pip_gui.py:426
+msgid "Click"
+msgstr "Smelltu"
+
+#: thonny/plugins/pip_gui.py:432
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "til þess að staðgreina og setja upp pakkaskrána (yfirleitt með .whl, .tar.gz eða .zip endinguna)."
+
+#: thonny/plugins/pip_gui.py:438
+msgid "Upgrade or uninstall"
+msgstr "Uppfæra eða taka út"
+
+#: thonny/plugins/pip_gui.py:440
+msgid "Start by selecting the package from the left."
+msgstr "Byrjaðu á að velja pakkann vinstra megin."
+
+#: thonny/plugins/pip_gui.py:449
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "Þessi samtalsgluggi sýnir alla tiltæka pakka, en leyfir aðeins að uppfæra og taka pakka út úr"
+
+#: thonny/plugins/pip_gui.py:459
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "Nýir pakkar verða einnig settir upp í þessa möppu. Öðrum geymslustöðum verður að stjórna með öðrum hætti."
+
+#: thonny/plugins/pip_gui.py:511
+msgid "Installed version:"
+msgstr "Uppsett útgáfa:"
+
+#: thonny/plugins/pip_gui.py:513
+msgid "Installed to:"
+msgstr "Uppsett í:"
+
+#: thonny/plugins/pip_gui.py:593
+msgid "Please check your spelling!"
+msgstr "Vinsamlegast gættu að réttri stafsetningu!"
+
+#: thonny/plugins/pip_gui.py:597
+msgid "Could not find the package info from PyPI."
+msgstr "Gat ekki fundið upplýsingar um pakkann frá PyPI."
+
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
+msgid "Error code:"
+msgstr "Villukóði:"
+
+#: thonny/plugins/pip_gui.py:762
+msgid "Can't find package name from the list:"
+msgstr "Ekki tókst að finna heiti pakkans af listanum:"
+
+#: thonny/plugins/pip_gui.py:818
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "Pakkinn '{}' er nauðsynlegur til þess að setja upp og taka út aðra pakka."
+
+#: thonny/plugins/pip_gui.py:862
+msgid "Package"
+msgstr "Pakki"
+
+#: thonny/plugins/pip_gui.py:974
+msgid "Manage packages for %s"
+msgstr "Stjórna pökkum fyrir %s"
+
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
+msgid "Confirmation"
+msgstr "Staðfesting"
+
+#: thonny/plugins/pip_gui.py:1114
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "Það virðist sem þú sért að setja upp pakka sem tengist Thonny. \n"
+"Ef þú hafðir í hyggju að setja inn Thonny-viðbót, \n"
+"ber þér að velja 'Tól → Stjórna viðbótum...' í staðinn\n"
+"\n"
+"Ertu viss um að þú viljir setja upp %s fyrir baktölvuna?"
+
+#: thonny/plugins/pip_gui.py:1204
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "ATH! Það gæti verið önnur útgáfa í boði sem er samhæf við núverandi útgáfu af Thonny. Smelltu á ‚...‘-hnappinn til að velja útgáfuna sem á að setja upp."
+
+#: thonny/plugins/pip_gui.py:1211
+msgid "Thonny plugin without requirements"
+msgstr "Thonny-viðbót án krafna"
+
+#: thonny/plugins/pip_gui.py:1227
+msgid "Unsuitable requirements"
+msgstr "Óhentugar kröfur"
+
+#: thonny/plugins/pip_gui.py:1228
+msgid "This package requires different Thonny version:"
+msgstr "Þessi pakki krefst annarrar útgáfu af Thonny:"
+
+#: thonny/plugins/pip_gui.py:1232
+msgid "If you still want it, then please install it from the command line."
+msgstr "Ef þú vilt það enn, þá skaltu setja það upp með skipanalínunni."
+
+#: thonny/plugins/pip_gui.py:1270
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "ATH! Þú þarft að endurræsa Thonny eftir að hafa sett upp / uppfært / tekið út viðbót."
+
+#: thonny/plugins/pip_gui.py:1279
+msgid "Thonny plug-ins"
+msgstr "Thonny-viðbætur"
+
+#: thonny/plugins/pip_gui.py:1321
+msgid "Advanced install / upgrade / downgrade"
+msgstr "Ýtarleg uppsetning / uppfærsla / niðurfærsla"
+
+#: thonny/plugins/pip_gui.py:1330
+msgid "Desired version"
+msgstr "Tilætluð útgáfa"
+
+#: thonny/plugins/pip_gui.py:1389
+msgid "Upgrade dependencies"
+msgstr "Uppfæra ákvæði"
+
+#: thonny/plugins/pip_gui.py:1474
+msgid "Requires:"
+msgstr "Krefst:"
+
+#: thonny/plugins/pip_gui.py:1478
+msgid "Error:"
+msgstr "Villa:"
+
+#: thonny/plugins/pip_gui.py:1677
+msgid "Manage packages..."
+msgstr "Stjórna pökkum..."
+
+#: thonny/plugins/pip_gui.py:1683
+msgid "Manage plug-ins..."
+msgstr "Stjórna viðbótum..."
+
+#: thonny/plugins/replayer.py:364
+msgid "Open replayer..."
+msgstr "Opna endurinningu"
+
+#: thonny/plugins/run_debug_config_page.py:21
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "Breyta vinnumöppu í skriftamöppu við Keyra / Kemba"
+
+#: thonny/plugins/run_debug_config_page.py:35
+msgid "Show function calls (frames) in separate windows"
+msgstr "Sýna köll á fall (ramma) í aðskildum gluggum"
+
+#: thonny/plugins/run_debug_config_page.py:36
+msgid "Uncheck if you want more traditional experience."
+msgstr "Afhakaðu ef þú vilt venjubundnari upplifun."
+
+#: thonny/plugins/run_debug_config_page.py:42
+msgid "Open and close Stack view automatically"
+msgstr "Opna og loka Staflasýn sjálfkrafa"
+
+#: thonny/plugins/run_debug_config_page.py:44
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "Opnar Staflasýnina við fyrsta kall og lokar henni þegar forritið skilar sér aftur í aðalramma viðmótsins."
+
+#: thonny/plugins/run_debug_config_page.py:52
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "Leyfa að fara inn í forritasöfn (þ.e. fyrir utan meginskriftumöppuna)"
+
+#: thonny/plugins/run_debug_config_page.py:53
+msgid "May make debugging slower."
+msgstr "Getur hægt á kembingu."
+
+#: thonny/plugins/run_debug_config_page.py:58
+msgid "Preferred debugger"
+msgstr "Tilætlað kembiforrit"
+
+#: thonny/plugins/run_debug_config_page.py:70
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(notað þegar smellt er á Kembahnappinn á tólastikunni)"
+
+#: thonny/plugins/run_debug_config_page.py:75
+msgid "Birdseye port"
+msgstr "Birdseye-tengi"
+
+#: thonny/plugins/run_debug_config_page.py:79
+msgid "(restart Thonny after changing this)"
+msgstr "(endurræstu Thonny eftir að breyta þessu)"
+
+#: thonny/plugins/run_debug_config_page.py:87
+msgid "Run & Debug"
+msgstr "Keyra og Kemba"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "Útstöðvarherming"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "styður helstu ANSI-liti og stíla"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "Hámarksfjöldi lína til að halda upp á."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "ATH! Stór gildi geta valdið lélegri afköstum!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "Hámarkslengd línubrota áður en samanþjappað er"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "Keyrir núverandi skriftu í útstöð"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "Birta Python REPL þegar forritinu lýkur"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "Halda útstöðvarglugga opnum eftir að Python-ferlinu lýkur"
+
+#: thonny/plugins/terminal_config_page.py:32
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "ATH! Sjálfkrafa lokun þarf að vera virkjuð í Útistöðvarstillingum\n"
+"(Forstillingar → Skipanagluggi → Þegar skipanaglugga er hætt)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "Útstöð"
+
+#: thonny/plugins/theme_and_font_config_page.py:39
+msgid "UI theme"
+msgstr "Viðmótsþema"
+
+#: thonny/plugins/theme_and_font_config_page.py:52
+msgid "Syntax theme"
+msgstr "Málskipanarþema"
+
+#: thonny/plugins/theme_and_font_config_page.py:84
+msgid "Editor font"
+msgstr "Leturgerð ritils"
+
+#: thonny/plugins/theme_and_font_config_page.py:107
+msgid "IO font"
+msgstr "IO-leturgerð"
+
+#: thonny/plugins/theme_and_font_config_page.py:132
+msgid "Preview"
+msgstr "Forskoða"
+
+#: thonny/plugins/theme_and_font_config_page.py:150
+msgid "This is a comment"
+msgstr "Þetta er athugasemd"
+
+#: thonny/plugins/theme_and_font_config_page.py:153
+msgid "The answer is"
+msgstr "Svarið er"
+
+#: thonny/plugins/theme_and_font_config_page.py:157
+msgid "unclosed_string"
+msgstr "olokadur_strengur"
+
+#: thonny/plugins/theme_and_font_config_page.py:159
+msgid "blah, blah"
+msgstr "bla, bla"
+
+#: thonny/plugins/theme_and_font_config_page.py:183
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "ATH! Sum stílstök breytast einungis eftir að hafa endurræst Thonny!"
+
+#: thonny/plugins/theme_and_font_config_page.py:222
+msgid "Enter an integer"
+msgstr "Sláðu inn heiltölu"
+
+#: thonny/plugins/theme_and_font_config_page.py:235
+msgid "Theme & Font"
+msgstr "Þema og leturgerð"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "Opna forritsmöppu Thonny..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "Opna gagnamöppu Thonny..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "Heim"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "Hjálparefni"
+
+#: thonny/plugins/micropython/mp_front.py:290
+msgid "CircuitPython device"
+msgstr "CircuitPython-tæki"
+
+#: thonny/plugins/micropython/mp_front.py:294
+msgid "MicroPython device"
+msgstr "MicroPython-tæki"
+
+#: thonny/plugins/micropython/mp_front.py:545
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "Tengdu tækið þitt við tölvuna og veldu samsvarandi tengi hér að neðan"
+
+#: thonny/plugins/micropython/mp_front.py:548
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "leitaðu að nafni tækisins, „USB Serial“ eða „UART“"
+
+#: thonny/plugins/micropython/mp_front.py:550
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "Ef þú finnur það ekki gætirðu þurft að setja upp viðeigandi USB-rekil fyrst."
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port"
+msgstr "Tengi"
+
+#: thonny/plugins/micropython/mp_front.py:445
+msgid "Try to detect port automatically"
+msgstr "Reyna að greina tengi sjálfkrafa"
+
+#: thonny/plugins/micropython/__init__.py:24
+msgid "MicroPython (generic)"
+msgstr "MicroPython (almennt)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "Prenta..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "Opna skipanakvaðningu..."
+
+#: thonny/plugins/backend_config_page.py:109
+msgid "Details"
+msgstr "Nánar"
+
+#: thonny/plugins/pip_gui.py:413
+msgid "Install from requirements file"
+msgstr "Setja upp úr requirements-skrá"
+
+#: thonny/plugins/pip_gui.py:425
+msgid "Install from local file"
+msgstr "Setja upp úr staðværri skrá"
+
+#: thonny/plugins/pip_gui.py:1263
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "Þessi samtalsgluggi er ætlaður til að stýra viðbótum Thonny og ákvæðum þeirra.\n"
+"'Tól → Stjórna pökkum...'"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "CircuitPython (almennt)"
+
+#: thonny/plugins/commenting_indenting.py:142
+msgid "Indent selected lines"
+msgstr "Draga inn valdar línur"
+
+#: thonny/plugins/commenting_indenting.py:152
+msgid "Dedent selected lines"
+msgstr "Draga út valdar línur"
+
+#: thonny/workbench.py:1487
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "Skipta yfir í\n"
+"viðtekinn \n"
+"ham"
+
+#: thonny/plugins/microbit/__init__.py:62
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Gakktu úr skugga um að MicroPython hafi verið sett upp á micro:bit þitt."
+
+#: thonny/plugins/microbit/__init__.py:64
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Ekki gleyma því að main.py virkar einungis án fastrar aðalskriftu. "
+
+#: thonny/misc_utils.py:178
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "Ekki tókst að finna diskinn ‚%s‘. Viltu staðgreina hann handvirkt?"
+
+#: thonny/misc_utils.py:181
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "Fann nokkra ‚%s‘ diska. Viltu velja einn þeirra handvirkt?"
+
+#: thonny/misc_utils.py:197
+msgid "Can't find suitable disk"
+msgstr "Ekki finnst hentugur diskur"
+
+#: thonny/base_file_browser.py:294
+msgid "%d items"
+msgstr "%d atriði"
+
+#: thonny/base_file_browser.py:743
+msgid "Move to Trash"
+msgstr "Færa í ruslið"
+
+#: thonny/base_file_browser.py:746
+msgid "Delete"
+msgstr "Eyða"
+
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
+msgid "New directory"
+msgstr "Ný mappa"
+
+#: thonny/base_file_browser.py:749
+msgid "Properties"
+msgstr "Eiginleikar"
+
+#: thonny/base_file_browser.py:751
+msgid "Storage space"
+msgstr "Geymslupláss"
+
+#: thonny/base_file_browser.py:761
+msgid "Path"
+msgstr "Slóð"
+
+#: thonny/base_file_browser.py:763
+msgid "Directory properties"
+msgstr "Möppueiginleikar"
+
+#: thonny/base_file_browser.py:765
+msgid "File properties"
+msgstr "Skráareiginleikar"
+
+#: thonny/base_file_browser.py:767
+msgid "bytes"
+msgstr "bæti"
+
+#: thonny/base_file_browser.py:770
+msgid "Size"
+msgstr "Stærð"
+
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
+msgid "Modified"
+msgstr "Breytt"
+
+#: thonny/base_file_browser.py:842
+msgid "Deleting %s"
+msgstr "Eyðir %s"
+
+#: thonny/editors.py:264
+msgid "Loading"
+msgstr "Hleður"
+
+#: thonny/editors.py:397
+msgid "Saving"
+msgstr "Vistar"
+
+#: thonny/plugins/files.py:219
+msgid "Upload to %s"
+msgstr "Hlaða upp í %s"
+
+#: thonny/plugins/files.py:420
+msgid "Downloading %s to %s"
+msgstr "Hleður niður %s í %s"
+
+#: thonny/plugins/files.py:326
+msgid "Download to %s"
+msgstr "Hlaða niður í %s"
+
+#: thonny/base_file_browser.py:650
+msgid "Open in system file manager"
+msgstr "Opna í skráavafra stýrikerfis"
+
+#: thonny/base_file_browser.py:678
+msgid "Hide hidden files"
+msgstr "Fela faldar skrár"
+
+#: thonny/base_file_browser.py:678
+msgid "Show hidden files"
+msgstr "Sýna faldar skrár"
+
+#: thonny/base_file_browser.py:661
+msgid "Open in Thonny"
+msgstr "Opna í Thonny"
+
+#: thonny/base_file_browser.py:692
+msgid "Open in system default app"
+msgstr "Opna í sjálfgefnu forriti stýrikerfisins"
+
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
+msgid "Configure %s files"
+msgstr "Stilla %s skrár"
+
+#: thonny/base_file_browser.py:702
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "Hver er tilætluð aðgerð þegar tvísmellt er á skrá af gerðinni '%s' í skráavafra Thonny?"
+
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
+msgid "Deleting"
+msgstr "Eyðir"
+
+#: thonny/base_file_browser.py:1265
+msgid "Creating directory"
+msgstr "Býr til möppu"
+
+#: thonny/editors.py:262
+msgid "Loading %s"
+msgstr "Hleður %s"
+
+#: thonny/editors.py:392
+msgid "Saving to %s"
+msgstr "Vistar í %s"
+
+#: thonny/editors.py:730 thonny/editors.py:732
+msgid "Save All files"
+msgstr "Vista allar skrár"
+
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
+msgid "Configure interpreter..."
+msgstr "Stilla túlk..."
+
+#: thonny/workbench.py:1597
+msgid "Device"
+msgstr "Tæki"
+
+#: thonny/workdlg.py:234
+msgid "Cancelling"
+msgstr "Hættir við"
+
+#: thonny/workdlg.py:270
+msgid "Starting"
+msgstr "Byrjar"
+
+#: thonny/plugins/backend_config_page.py:249
+msgid "Authentication"
+msgstr "Auðkenning"
+
+#: thonny/plugins/backend_config_page.py:251
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "Sláðu inn aðgangssetningu einkalykils þíns fyrir\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:254
+msgid "Enter your password for\n"
+"{}"
+msgstr "Sláðu inn lykilorðið þitt fyrir\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr "Framsetningin hér að ofan er nálgun á gildi þessarar kommutölu. Nákvæmlega geymt gildi er %s, sem er u.þ.b. %s."
+
+#: thonny/plugins/pip_gui.py:696
+msgid "Search results"
+msgstr "Leitarniðurstöður"
+
+#: thonny/plugins/pip_gui.py:697
+msgid "Searching"
+msgstr "Leitar"
+
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
+msgid "Installing '%s'"
+msgstr "Setur upp ‚%s‘"
+
+#: thonny/plugins/pip_gui.py:807
+msgid "Upgrading '%s'"
+msgstr "Uppfærir ‚%s‘"
+
+#: thonny/plugins/pip_gui.py:814
+msgid "Uninstalling '%s'"
+msgstr "Tekur út ‚%s‘"
+
+#: thonny/plugins/pip_gui.py:828
+msgid "Installing"
+msgstr "Setur upp"
+
+#: thonny/plugins/pip_gui.py:1625
+msgid "Package manager is not available for this interpreter"
+msgstr "Pakkastjórnun er ekki í boði fyrir þennan túlk"
+
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
+msgid "Not supported"
+msgstr "Ekki stutt"
+
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
+msgid "Not available"
+msgstr "Ekki tiltækt"
+
+#: thonny/plugins/pip_gui.py:1658
+msgid "You need to stop your program before launching the package manager."
+msgstr "Þú þarft að stöðva forritið áður en þú ræsir pakkastjórnunina."
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "Opna útreiknuð gildi í Atriðaskoðun"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:240
+msgid "Python executable"
+msgstr "Python-keyrsluforrit"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:265
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr "ATH! Skráarvalshnappurinn virkar mögulega ekki rétt þegar keyrsluforrit (exe) eru valin\n"
+"úr sýndarumhverfi. Í þessu tilfelli skaltu velja ‚activate‘-skriftuna í staðinn\n"
+"fyrir túlkinn (eða sláðu inn slóðina beint inn í reitinn)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "Remote Python 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:300
+msgid "Not connected"
+msgstr "Ekki tengt"
+
+#: thonny/plugins/micropython/__init__.py:35
+msgid "MicroPython (local)"
+msgstr "MicroPython (staðbundið)"
+
+#: thonny/plugins/micropython/__init__.py:46
+msgid "MicroPython (SSH)"
+msgstr "MicroPython (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:145
+msgid "no absolute lib directory in sys.path"
+msgstr "engin algild slóð að lib möppu fannst í sys.path"
+
+#: thonny/plugins/pip_gui.py:86
+msgid "Search on PyPI"
+msgstr "Leita á PyPI"
+
+#: thonny/base_file_browser.py:693
+msgid "Open in Thonny's text editor"
+msgstr "Opna í textaritli Thonny"
+
+#: thonny/base_file_browser.py:346
+msgid "Storage space on this drive or filesystem"
+msgstr "Geymslupláss á þessu drifi eða skráakerfi"
+
+#: thonny/base_file_browser.py:347
+msgid "total space"
+msgstr "samanlagt pláss"
+
+#: thonny/base_file_browser.py:349
+msgid "used space"
+msgstr "notað pláss"
+
+#: thonny/base_file_browser.py:350
+msgid "free space"
+msgstr "laust pláss"
+
+#: thonny/base_file_browser.py:357
+msgid "Storage info"
+msgstr "Geymsluupplýsingar"
+
+#: thonny/plugins/commenting_indenting.py:162
+msgid "Replace tabs with spaces"
+msgstr "Skipta út dálkstöfum fyrir bil"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "Auðkenna dálkstafi"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "Draga inn með dálkstöfum (ekki mælt með fyrir Python)"
+
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
+msgid "Name"
+msgstr "Heiti"
+
+#: thonny/base_file_browser.py:96
+msgid "Size (bytes)"
+msgstr "Stærð (bæti)"
+
+#: thonny/base_file_browser.py:879
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr "Sláðu inn heiti fyrir nýja möppu undir\n"
+"%s"
+
+#: thonny/base_file_browser.py:902
+msgid "Nothing selected"
+msgstr "Ekkert valið"
+
+#: thonny/base_file_browser.py:902
+msgid "Select an item and try again!"
+msgstr "Veldu atriði og reyndu aftur!"
+
+#: thonny/base_file_browser.py:1329
+msgid "Open from %s"
+msgstr "Opna frá %s"
+
+#: thonny/base_file_browser.py:1332
+msgid "Save to %s"
+msgstr "Vista í %s"
+
+#: thonny/base_file_browser.py:1351
+msgid "File name:"
+msgstr "Skráarheiti:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:617
+msgid "Value ID"
+msgstr "Auðkenni gildis"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value"
+msgstr "Gildi"
+
+#: thonny/plugins/backend_config_page.py:272
+msgid "Save password"
+msgstr "Vista lykilorð"
+
+#: thonny/plugins/debugger.py:559
+msgid "Function call at %s"
+msgstr "Kall á fall hjá %s"
+
+#: thonny/plugins/debugger.py:1008
+msgid "Local variables"
+msgstr "Staðværar breytur"
+
+#: thonny/plugins/debugger.py:1040
+msgid "Function"
+msgstr "Fall"
+
+#: thonny/plugins/debugger.py:1041
+msgid "Location"
+msgstr "Staðsetning"
+
+#: thonny/plugins/debugger.py:1117
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "Ef síðasta skipunin olli fráviki þá mun þessi sýn leiða í ljós rekjanlega staflann."
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "Auðkenni"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "Gögn"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "Eigindi"
+
+#: thonny/plugins/object_inspector.py:537
+msgid "Index"
+msgstr "Vísir"
+
+#: thonny/plugins/object_inspector.py:615
+msgid "Key ID"
+msgstr "Auðkenni lykils"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key"
+msgstr "Lykill"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "Aftur í\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port or WebREPL"
+msgstr "Tengi eða WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:586
+msgid "Password"
+msgstr "Lykilorð"
+
+#: thonny/plugins/debugger.py:966
+msgid "Source code"
+msgstr "Frumkóði"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Nota skráavafraglugga Tk í stað Zenity"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "Veldu ef skráavafragluggarnir enda ávallt á bak við aðalgluggann"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "Umhverfisbreytur (eitt LYKILL=GILDI á línu)"
+
+#: thonny/base_file_browser.py:722
+msgid "New file"
+msgstr "Ný skrá"
+
+#: thonny/base_file_browser.py:740
+msgid "Rename"
+msgstr "Endurnefna"
+
+#: thonny/base_file_browser.py:928
+msgid "Rename '%s'"
+msgstr "Endurnefna ‚%s‘"
+
+#: thonny/base_file_browser.py:928
+msgid "Enter new name"
+msgstr "Sláðu inn nýtt heiti"
+
+#: thonny/base_file_browser.py:1016
+msgid "Paste failed"
+msgstr "Límun mistókst"
+
+#: thonny/base_file_browser.py:1016
+msgid "There are conflicting folders"
+msgstr "Það eru möppur sem stangast á"
+
+#: thonny/base_file_browser.py:1144
+msgid "File already exists"
+msgstr "Skráin er þegar til staðar"
+
+#: thonny/base_file_browser.py:1213
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr "Ef um er að ræða textaskrá getur þú stillt hana til að opnast í Thonny með því að hægrismella á hana og velja 'Stilla ... skrár'."
+
+#: thonny/editors.py:38
+msgid "Python files"
+msgstr "Python-skrár"
+
+#: thonny/editors.py:125 thonny/editors.py:191
+msgid "<untitled>"
+msgstr "<án titils>"
+
+#: thonny/editors.py:152
+msgid "File is gone"
+msgstr "Skráin er horfin"
+
+#: thonny/editors.py:155
+msgid "Do you want to also close the editor?"
+msgstr "Viltu einnig loka ritlinum?"
+
+#: thonny/editors.py:171
+msgid "External modification"
+msgstr "Utanaðkomandi breyting"
+
+#: thonny/editors.py:175
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr "Viltu fleygja núverandi efni ritilsins og endurhlaða skránni af diski?"
+
+#: thonny/editors.py:590
+msgid "Python files usually have .py extension."
+msgstr "Python-skrár hafa vanalega .py endinguna."
+
+#: thonny/editors.py:592
+msgid "Did you mean '%s'?"
+msgstr "Áttirðu við ‚%s‘?"
+
+#: thonny/editors.py:761
+msgid "Move / rename..."
+msgstr "Færa / endurnefna"
+
+#: thonny/editors.py:770
+msgid "Go to line..."
+msgstr "Fara til línu..."
+
+#: thonny/editors.py:1012
+msgid "Line number"
+msgstr "Línunúmer"
+
+#: thonny/editors.py:1158
+msgid "Do you want to save files before closing?"
+msgstr "Viltu vista skrár áður en þú lokar?"
+
+#: thonny/editors.py:1160
+msgid "Do you want to save file before closing?"
+msgstr "Viltu vista skrá áður en þú lokar?"
+
+#: thonny/editors.py:1163
+msgid "Save On Close"
+msgstr "Vista við lokun"
+
+#: thonny/misc_utils.py:587
+msgid "Command not available"
+msgstr "Skipun ekki í boði"
+
+#: thonny/misc_utils.py:588
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "Þessi skipun er ekki í boði ef Thonny er keyrt í gegnum Flatpak"
+
+#: thonny/workbench.py:706 thonny/workbench.py:805
+msgid "Support Ukraine"
+msgstr "Styðja Úkraínu"
+
+#: thonny/plugins/backend_config_page.py:90
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "Hvers konar túlk ætti Thonny að nota til að keyra kóðann þinn?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "Sýna upplýsingar um færibreytur"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "Sýna sjálfkrafa upplýsingar um færibreytur eftir að hafa slegið inn ‚(‘"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "Stinga sjálfkrafa upp á útfyllingum meðan slegið er inn"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "Sýna sjálfkrafa skjalfærslur fyrir útfyllingar"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "Kalla fram útfyllingar með dálkalykli (Tab) í ritlunum"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "Kalla fram útfyllingar með dálkalykli (Tab) í skipanaglugganum"
+
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "Vandamál"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "Ekki tókst að finna skilgreiningu"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "Hreinsa skipanaglugga áður en nýtt ferli er hafið (Keyra, Kemba, Stöðva/Endurræsa, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:202
+msgid "Thonny's Python"
+msgstr "Python Thonny"
+
+#: thonny/plugins/micropython/mp_front.py:483
+msgid "Interrupt working program on connect"
+msgstr "Rjúfa keyrandi forrit við tengingu"
+
+#: thonny/plugins/micropython/mp_front.py:491
+msgid "Synchronize device's real time clock"
+msgstr "Samstilla rauntímaklukku tækisins"
+
+#: thonny/plugins/micropython/mp_front.py:497
+msgid "Use local time in real time clock"
+msgstr "Nota staðartíma í rauntímaklukku"
+
+#: thonny/plugins/micropython/mp_front.py:503
+msgid "Restart interpreter before running a script"
+msgstr "Endurræsa túlk áður en skrifta er keyrð"
+
+#: thonny/plugins/micropython/pip_gui.py:28
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr "Þetta virðist ekki vera MicroPython/CircuitPython pakki.\n"
+"Ertu viss um að þú viljir setja það upp?"
+
+#: thonny/base_file_browser.py:853
+msgid "Moving to Trash"
+msgstr "Færir í ruslið"
+
+#: thonny/base_file_browser.py:854
+msgid "Move %s to Trash?"
+msgstr "Færa %s í ruslið?"
+
+#: thonny/base_file_browser.py:861
+msgid "Moving %s to Trash"
+msgstr "Færir %s í ruslið"
+
+#: thonny/base_file_browser.py:666
+msgid "Open in default external app"
+msgstr "Opna í sjálfgefnu utanaðkomandi forriti"
+
+#: thonny/base_file_browser.py:1210
+msgid "Opening remote files in external app is not supported."
+msgstr "Ekki er í boði að opna fjartengdar skrár í utanaðkomandi forriti."
+
+#: thonny/base_file_browser.py:1218
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "Ef brýnt er að opna skrána í utanaðkomandi forriti, þá skaltu hlaða henni niður í staðværa möppu og opna hana þaðan!"
+
+#: thonny/editors.py:153
+msgid "Looks like '%s' was deleted or moved."
+msgstr "Lítur út fyrir að ‚%s‘ hafi verið eytt eða fært."
+
+#: thonny/editors.py:172
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "Lítur út fyrir að ‚%s‘ hafi verið breytt utan ritilsins."
+
+#: thonny/plugins/cpython_frontend/cp_front.py:262
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "ATH! Thonny styður eingöngu Python %s og nýrri útgáfur"
+
+#: thonny/editors.py:1012
+msgid "Go to line"
+msgstr "Fara til línu"
+
+#: thonny/workbench.py:709
+msgid "Support"
+msgstr "Styðja"
+
+#: thonny/editors.py:401 thonny/editors.py:416
+msgid "Could not save"
+msgstr "Ekki tókst að vista"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "Varúð"
+
+#: thonny/plugins/general_config_page.py:137
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr "Ef þú setur gildi umhverfisbreytu innan gæsalappa, verða gæsalappirnar hluti af gildinu sjálfu.\n"
+"Ætlaðirðu þér þetta?"
+
+#: thonny/workbench.py:876
+msgid "Install MicroPython"
+msgstr "Setja upp MicroPython"
+
+#: thonny/workbench.py:880
+msgid "Install CircuitPython"
+msgstr "Setja upp CircuitPython"
+
+#: thonny/plugins/backend_config_page.py:210
+msgid "Make uploaded shebang scripts executable"
+msgstr "Gera upphlaðnar shebang-skriftur keyranlegar"
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr "Gera vistaðar shebang-skriftur keyranlegar"
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr "Virkja sýndarumhverfi"
+
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
+msgid "Target"
+msgstr "Skotspónn"
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr "Framkalla núverandi skriftu í Python Tutor"
+
+#: thonny/plugins/todo_view.py:43
+msgid "Line"
+msgstr "Lína"
+
+#: thonny/plugins/todo_view.py:44
+msgid "Info"
+msgstr "Upplýsingar"
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr "Engin lína merkt með #todo fannst"
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr "Gátlisti"
+
+#: thonny/plugins/circuitpython/cirpy_front.py:113
+#: thonny/plugins/micropython/mp_front.py:537
+msgid "Install or update %s"
+msgstr "Setja upp eða uppfæra %s"
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr "Staðvært Python 3"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:273
+msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr "Þú getur virkjað núverandi sýndarumhverfi einnig með hægrismella-efnisvalmyndinni í skráavafranum þegar þú velur sýndarumhverfismöppu, eða ‚pyveng.cfg‘-skrána þar inni."
+
+#: thonny/plugins/ev3/__init__.py:73
+msgid "Preparations (skip the VS Code part)"
+msgstr "Viðbúnaður (slepptu VS Code-hlutanum)"
+
+#: thonny/plugins/ev3/__init__.py:79
+msgid "Default password"
+msgstr "Sjálfgefið lykilorð"
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr "Upplýsingar"
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr "Til þess að kemba þarf fyrst að vista forritið."
+
+#: thonny/editors.py:215
+msgid "%s doesn't look like a text file"
+msgstr "%s virðist ekki vera textaskrá"
+
+#: thonny/editors.py:221
+msgid "Problem loading file"
+msgstr "Vandamál við að hlaða skrá"
+
+#: thonny/editors.py:223
+msgid "This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr "Þessi skrá virðist eiga í vandræðum með kóðun.\n"
+"\n"
+"Gakktu úr skugga um að hún noti UTF-8 eða innihaldi rétta vísbendingu um kóðun."
+
+#: thonny/editors.py:297
+msgid "File is open"
+msgstr "Skráin er opin"
+
+#: thonny/editors.py:299
+msgid "This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr "Þessi skrá er þegar opin í Thonny.\n"
+"\n"
+"Ef þú vilt vista undir þessu nafni,\n"
+"skaltu fyrst loka núverandi ritlinum!"
+
+#: thonny/editors.py:351
+msgid "Permission Error"
+msgstr "Heimildarvilla"
+
+#: thonny/editors.py:352
+msgid "Looks like this file or folder is not writable."
+msgstr "Svo virðist sem þessi skrá eða mappa sé ekki skrifanleg."
+
+#: thonny/editors.py:416
+msgid "Back-end is not ready"
+msgstr "Baktölvan er ekki tilbúin"
+
+#: thonny/editors.py:421
+msgid "Where to save to?"
+msgstr "Vista hvar?"
+
+#: thonny/editors.py:492
+msgid "Potential problem"
+msgstr "Hugsanlegt vandamál"
+
+#: thonny/editors.py:494
+msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
+msgstr "Ef þú nefnir skriftuna þína ‚%s‘, geturðu ekki flutt inn forritasafnið að nafni ‚%s‘"
+
+#: thonny/editors.py:499
+msgid "Do you still want to use this name for your script?"
+msgstr "Viltu samt áfram nota þetta heiti fyrir skriftuna þína?"
+
+#: thonny/editors.py:1055
+msgid "Got permission error when trying to load\n"
+"%s"
+msgstr "Heimildarvilla kom upp þegar reynt var að hlaða\n"
+"%s"
+
+#: thonny/editors.py:1057
+msgid "Try opening it with File => Open."
+msgstr "Prófaðu að opna skrána í gegnum Skrá => Opna."
+
+#: thonny/editors.py:1059
+msgid "Permission error"
+msgstr "Heimildarvilla"
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr "Leyfa keyrslu ónafngreindra forrita"
+
+#: thonny/plugins/pip_gui.py:620
+msgid "License"
+msgstr "Leyfi"
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr "Vara við ef notandaeining tekur forgang fram yfir einingu úr forritasafni"
+
+#: thonny/plugins/micropython/pip_gui.py:66
+msgid "Search micropython-lib and PyPI"
+msgstr "Leita í micropython-lib og PyPI"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid "The packages of this interpreter can be managed via your system package manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
+msgstr ""
+

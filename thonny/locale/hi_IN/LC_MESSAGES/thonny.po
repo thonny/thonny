@@ -1,0 +1,1989 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: hi\n"
+
+#: thonny/workbench.py:381
+msgid "File"
+msgstr "फ़ाइल"
+
+#: thonny/workbench.py:382
+msgid "Edit"
+msgstr "एडिट"
+
+#: thonny/workbench.py:383
+msgid "View"
+msgstr "व्यू"
+
+#: thonny/running.py:161 thonny/workbench.py:384
+msgid "Run"
+msgstr "रन"
+
+#: thonny/workbench.py:385
+msgid "Tools"
+msgstr "टूल्स"
+
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
+msgid "Help"
+msgstr "हेल्प"
+
+#: thonny/workbench.py:604
+msgid "Exit"
+msgstr "एग्जिट"
+
+#: thonny/workbench.py:631
+msgid "Decrease font size"
+msgstr "देक्रेयस फॉण्ट साइज"
+
+#: thonny/workbench.py:643
+msgid "Focus editor"
+msgstr "फोकस एडीटर"
+
+#: thonny/workbench.py:652
+msgid "Focus shell"
+msgstr "फोकस शेल"
+
+#: thonny/workbench.py:662
+msgid "Maximize view"
+msgstr "माक्सिमीज़े व्यू"
+
+#: thonny/workbench.py:674
+msgid "Full screen"
+msgstr "फुल स्क्रीन"
+
+#: thonny/workbench.py:1473
+msgid "Program arguments"
+msgstr "प्रोग्राम आर्गुमेंटस"
+
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
+msgid "About Thonny"
+msgstr "अबाउट थोनी"
+
+#: thonny/plugins/about.py:82
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "मेड इन\n"
+"यूनिवर्सिटी ऑफ तारतू, एस्तोनिया,\n"
+"वित द हेल्प फ्रॉम\n"
+"ओपन-सौर्स कम्युनिटी,\n"
+"रास्पबेरी पई फाउंडेशन\n"
+"एंड साइबरनेटिकआ एस"
+
+#: thonny/plugins/about.py:102
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "दिस प्रोग्राम कमस वित\n"
+"अब्सोल्युटली नो वारंटी!\n"
+"इट इस फ्री सॉफ्टवेर, एंड यू आर वेलकम टू\n"
+"रेडिस्ट्रिब्यूट इट अंडर सर्टेन कंडीशन्स, सी\n"
+"https://opensource.org/licenses/MIT\n"
+"फॉर डिटेल्स"
+
+#: thonny/plugins/about.py:142
+msgid "Version history"
+msgstr "वर्शन हिस्ट्री"
+
+#: thonny/plugins/about.py:149
+msgid "Report problems"
+msgstr "रिपोर्ट प्रॉब्लम"
+
+#: thonny/plugins/assistant_config_page.py:16
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "ओपन असिस्टेंट ऑटोमेटिकली व्हेन प्रोग्राम क्रैशस वित ऑन एक्सेप्शन"
+
+#: thonny/plugins/assistant_config_page.py:23
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "ओपन असिस्टेंट ऑटोमेटिकली व्हेन इट हास् वार्निंगस फॉर योर कोड"
+
+#: thonny/plugins/assistant_config_page.py:30
+msgid "Perform selected Pylint checks"
+msgstr "परफॉर्म सिलेक्टेड पाइलिंट चेकस"
+
+#: thonny/plugins/assistant_config_page.py:34
+msgid "Perform MyPy checks"
+msgstr "परफॉर्म मायपाइ चेकस"
+
+#: thonny/plugins/assistant_config_page.py:36
+msgid "Disabled checks (one id per line)"
+msgstr "डिसेबल्ड चेकस (वन आईडी पर लाइन)"
+
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
+msgid "Assistant"
+msgstr "असिस्टेंट"
+
+#: thonny/plugins/autocomplete.py:529
+msgid "Auto-complete"
+msgstr "ऑटो-कम्पलीट"
+
+#: thonny/plugins/backend_config_page.py:335
+msgid "Interpreter"
+msgstr "इंटरप्रेटर"
+
+#: thonny/plugins/birdseye_frontend.py:55
+msgid "About Birdseye"
+msgstr "अबाउट  बर्ड्सआई"
+
+#: thonny/plugins/birdseye_frontend.py:57
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "बर्ड्सआई इस अ पाइथन डिबग्गर व्हिच नीडस टू बी इन्स्टॉल्ड सेपरतेली.\n"
+"\n"
+"दू यू वांट टू ओपन हेल्प पेज एंड लर्न मोर?"
+
+#: thonny/plugins/birdseye_frontend.py:84
+msgid "Debug current script (birdseye)"
+msgstr "डिबग करंट स्क्रिप्ट (बर्ड्सआई)"
+
+#: thonny/plugins/commenting_indenting.py:171
+msgid "Toggle comment"
+msgstr "टॉगल कमेंट"
+
+#: thonny/plugins/commenting_indenting.py:181
+msgid "Comment out"
+msgstr "कमेंट आउट"
+
+#: thonny/plugins/commenting_indenting.py:191
+msgid "Uncomment"
+msgstr "उनकमेंट"
+
+#: thonny/plugins/common_editing_commands.py:21
+msgid "Undo"
+msgstr "अनडू"
+
+#: thonny/plugins/common_editing_commands.py:33
+msgid "Redo"
+msgstr "रीडू"
+
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2349
+msgid "Cut"
+msgstr "कट"
+
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2350
+msgid "Copy"
+msgstr "कॉपी"
+
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
+msgid "Paste"
+msgstr "पेस्ट"
+
+#: thonny/plugins/common_editing_commands.py:85 thonny/plugins/debugger.py:152
+msgid "Select all"
+msgstr "सेलेक्ट आल"
+
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
+msgid "Run to cursor"
+msgstr "रन तो कर्सर"
+
+#: thonny/plugins/debugger.py:987
+msgid "Can't close yet"
+msgstr "कैंट क्लोज येत"
+
+#: thonny/plugins/debugger.py:988
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "यूज़ \"स्टाप\" कमांड इफ यू वांट तो कैंसिल डिबगिंग"
+
+#: thonny/plugins/dock_user_windows_frontend.py:28
+msgid "Dock user windows"
+msgstr "डाक यूजर विंडोज़"
+
+#: thonny/plugins/editor_config_page.py:20
+msgid "Highlight matching names"
+msgstr "हाईलाइट मैचिंग नेमस"
+
+#: thonny/plugins/editor_config_page.py:26
+msgid "Highlight local variables"
+msgstr "हाईलाइट लोकल वेरिएबलस"
+
+#: thonny/plugins/editor_config_page.py:31
+msgid "Highlight parentheses"
+msgstr "हाईलाइट परेन्थेसेस"
+
+#: thonny/plugins/editor_config_page.py:32
+msgid "Highlight syntax elements"
+msgstr "हाईलाइट सिंटेक्स एलिमेंटस"
+
+#: thonny/plugins/editor_config_page.py:36
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "हाईलाइट करंट लाइन "
+
+#: thonny/plugins/editor_config_page.py:73
+msgid "Show line numbers"
+msgstr "शो लाइन नंबर्स"
+
+#: thonny/plugins/editor_config_page.py:76
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "रेकमेंडेड मैक्सिमम लाइन लेंथ"
+
+#: thonny/plugins/editor_config_page.py:104
+msgid "Editor"
+msgstr "एडिटर"
+
+#: thonny/plugins/event_logging.py:207
+msgid "Export usage logs..."
+msgstr "एक्सपोर्ट यूसेज लोग्स..."
+
+#: thonny/plugins/event_view.py:38
+msgid "Events"
+msgstr "इवेंट्स"
+
+#: thonny/plugins/files.py:609
+msgid "Files"
+msgstr "फाइलस"
+
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
+msgid "Find & Replace"
+msgstr "फाइंड एंड रिप्लेस"
+
+#: thonny/plugins/find_replace.py:67
+msgid "Find:"
+msgstr "फाइंड:"
+
+#: thonny/plugins/find_replace.py:92
+msgid "Replace with:"
+msgstr "रिप्लेस विथ:"
+
+#: thonny/plugins/find_replace.py:110
+msgid "Case sensitive"
+msgstr "केस सेंसिटिव"
+
+#: thonny/plugins/find_replace.py:117
+msgid "Up"
+msgstr "अप"
+
+#: thonny/plugins/find_replace.py:121
+msgid "Down"
+msgstr "डाउन"
+
+#: thonny/plugins/find_replace.py:130
+msgid "Find"
+msgstr "फाइंड"
+
+#: thonny/plugins/find_replace.py:140
+msgid "Replace"
+msgstr "रिप्लेस"
+
+#: thonny/plugins/find_replace.py:148
+msgid "Replace+Find"
+msgstr "रिप्लेस+फाइंड"
+
+#: thonny/plugins/find_replace.py:158
+msgid "Replace all"
+msgstr "रिप्लेस आल"
+
+#: thonny/plugins/find_replace.py:256
+msgid "Enter string to be replaced."
+msgstr "एंटर स्ट्रिंग टू बे रिप्लेसड."
+
+#: thonny/plugins/find_replace.py:341
+msgid "The specified text was not found!"
+msgstr "तहे स्पेसिफ़िएड टेक्स्ट वस नोट फाउंड!"
+
+#: thonny/plugins/general_config_page.py:15
+msgid "Allow only single Thonny instance"
+msgstr "अल्लोव ओनली सिंगल थोनी इंस्टांस"
+
+#: thonny/plugins/general_config_page.py:22
+msgid "Reopen all files from previous session"
+msgstr "रीओपं आल फाइलस फ्रॉम प्रीवियस सेशन"
+
+#: thonny/plugins/general_config_page.py:37
+msgid "Disable notification sound"
+msgstr "डिसएबल नोटिफिकेशन साउंड"
+
+#: thonny/plugins/general_config_page.py:86
+msgid "Font scaling mode"
+msgstr "फॉण्ट स्केलिंग मोड"
+
+#: thonny/plugins/heap.py:37
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "हीप मोड इस ऑन.\n"
+"क्लोज हीप व्यू टू टर्न इट ऑफ."
+
+#: thonny/plugins/heap.py:86
+msgid "Heap"
+msgstr "हीप"
+
+#: thonny/plugins/general_config_page.py:53
+msgid "Language"
+msgstr "लैंग्वेज"
+
+#: thonny/plugins/notes.py:36
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "दिस बॉक्स इस मेण्ट फॉर योर वर्किंग नोटस -- असाइनमेंट इंस्ट्रुक्शन्स, कोड सनीपतस, व्हाटवेर.\n"
+"\n"
+"एवरीथिंग विल बि सेव्ड ऑटोमेटिकली एंड लोडेड व्हेन यू ओपन थोनी नेक्स्ट टाइम.\n"
+"\n"
+"फील फ्री टू डिलीट दिस टेक्स्ट टू मेक रुम फॉर योर ओन नोटस."
+
+#: thonny/plugins/notes.py:63
+msgid "Notes"
+msgstr "नोटस"
+
+#: thonny/plugins/object_inspector.py:116
+msgid "Previous object"
+msgstr "प्रीवियस ऑबजेक्ट"
+
+#: thonny/plugins/object_inspector.py:119
+msgid "Next object"
+msgstr "नेक्स्ट ऑबजेक्ट"
+
+#: thonny/plugins/object_inspector.py:732
+msgid "Object inspector"
+msgstr "ऑबजेक्ट इंस्पेक्टर"
+
+#: thonny/plugins/outline.py:148
+msgid "Outline"
+msgstr "आउटलाइन"
+
+#: thonny/plugins/pgzero_frontend.py:27
+msgid "Pygame Zero mode"
+msgstr "प्यगेम जीरो मोड"
+
+#: thonny/plugins/pip_gui.py:95
+msgid "Uninstall"
+msgstr "अनइन्सटॉल"
+
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
+msgid "Close"
+msgstr "क्लोज"
+
+#: thonny/plugins/pip_gui.py:415
+msgid "Click "
+msgstr "क्लिक"
+
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
+msgid "here"
+msgstr "हियर"
+
+#: thonny/plugins/pip_gui.py:92
+msgid "Upgrade"
+msgstr "अपग्रेड"
+
+#: thonny/plugins/micropython/base_flashing_dialog.py:398
+#: thonny/plugins/pip_gui.py:89
+msgid "Install"
+msgstr "इनस्टॉल"
+
+#: thonny/plugins/pip_gui.py:590
+msgid "Could not find the package from PyPI."
+msgstr "कुड नॉट फाइंड पैकेज फ्रॉम पयपय."
+
+#: thonny/plugins/pip_gui.py:612
+msgid "Latest stable version"
+msgstr "लेटेस्ट स्टेबल वर्शन"
+
+#: thonny/plugins/pip_gui.py:614
+msgid "Latest version"
+msgstr "लेटेस्ट वर्शन"
+
+#: thonny/plugins/pip_gui.py:616
+msgid "Summary"
+msgstr "समरी"
+
+#: thonny/plugins/pip_gui.py:618
+msgid "Author"
+msgstr "ऑथर"
+
+#: thonny/plugins/pip_gui.py:622
+msgid "Homepage"
+msgstr "होमपेज"
+
+#: thonny/plugins/pip_gui.py:624
+msgid "Bugtracker"
+msgstr "बगट्रैकर"
+
+#: thonny/plugins/pip_gui.py:626
+msgid "Documentation"
+msgstr "डॉक्यूमेंटेशन"
+
+#: thonny/plugins/pip_gui.py:628
+msgid "PyPI page"
+msgstr "पयपय पेज"
+
+#: thonny/plugins/pip_gui.py:668
+msgid "Requires"
+msgstr "रेक्विरेस"
+
+#: thonny/plugins/pip_gui.py:816
+msgid "Really uninstall?"
+msgstr "रियली अनइन्सटॉल"
+
+#: thonny/plugins/pip_gui.py:821
+msgid "Are you sure you want to uninstall it?"
+msgstr "अरे यू सुर यू वांट टू अनइन्सटॉल"
+
+#: thonny/plugins/variables.py:22
+msgid "Back to\n"
+"current frame"
+msgstr "बेक टू करंट फ्रेम"
+
+#: thonny/plugins/variables.py:80 thonny/plugins/variables.py:82
+#: thonny/plugins/variables.py:145
+msgid "Variables"
+msgstr "वेरिएबलस"
+
+#: thonny/base_file_browser.py:1576
+msgid "This computer"
+msgstr "तीस कंप्यूटर"
+
+#: thonny/base_file_browser.py:648
+msgid "Refresh"
+msgstr "रिफ्रेश"
+
+#: thonny/base_file_browser.py:657
+msgid "Focus into"
+msgstr "फोकस इंटो"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+#: thonny/plugins/autocomplete.py:303 thonny/plugins/highlight_names.py:86
+msgid "Error"
+msgstr "एरर"
+
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+msgid "You need to select a file!"
+msgstr "यू नीड टू सिलेक्ट अ फाइल!"
+
+#: thonny/base_file_browser.py:1427
+msgid "Overwrite?"
+msgstr "ओवरराईट?"
+
+#: thonny/base_file_browser.py:1427
+msgid "Do you want to overwrite '%s' ?"
+msgstr "दो यू वांट टू ओवरराईट '%s' ?"
+
+#: thonny/editors.py:660 thonny/editors.py:662
+msgid "New"
+msgstr "न्यू"
+
+#: thonny/editors.py:673
+msgid "Open..."
+msgstr "ओपन..."
+
+#: thonny/editors.py:675
+msgid "Load"
+msgstr "लोड"
+
+#: thonny/editors.py:684
+msgid "Recent files"
+msgstr "रीसेंट फाइलस"
+
+#: thonny/editors.py:706 thonny/ui_utils.py:499
+msgid "Close all"
+msgstr "क्लोज आल"
+
+#: thonny/editors.py:716 thonny/editors.py:718
+msgid "Save"
+msgstr "सेव"
+
+#: thonny/editors.py:741
+msgid "Save as..."
+msgstr "सेव एस..."
+
+#: thonny/editors.py:752
+msgid "Save copy..."
+msgstr "सेव कॉपी..."
+
+#: thonny/config_ui.py:18
+msgid "Thonny options"
+msgstr "थोनी ऑप्शनस"
+
+#: thonny/running.py:160
+msgid "Run current script"
+msgstr "रन करंट स्क्रिपट"
+
+#: thonny/running.py:191
+msgid "Run current script in terminal"
+msgstr "रन करंट स्क्रिपट इन टर्मिनल"
+
+#: thonny/running.py:204
+msgid "Stop/Restart backend"
+msgstr "स्टॉप/रीस्टार्ट बैकएंड"
+
+#: thonny/running.py:205
+msgid "Stop"
+msgstr "स्टॉप"
+
+#: thonny/running.py:216
+msgid "Interrupt execution"
+msgstr "इंटरप्ट एक्सेक्यूशन"
+
+#: thonny/running.py:229
+msgid "Send EOF / Soft reboot"
+msgstr "सेंड इऊफ / सॉफ्ट रिबूट"
+
+#: thonny/running.py:240
+msgid "Disconnect"
+msgstr "डिसकनेक्ट"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:301
+msgid "Python interpreters"
+msgstr "पाइथन इंटरप्रेटरस"
+
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
+msgid "all files"
+msgstr "आल फाइलस"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:330
+msgid "Select empty directory for new virtual environment"
+msgstr "सिलेक्ट एम्प्टी डायरेक्टरी फोर न्यू वर्चुअल एनविरोन्मेंट"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:337
+msgid "Bad directory"
+msgstr "बाद डायरेक्टरी"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:338
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "सिलेक्टेड डायरेक्टरी इस नॉट एम्प्टी.\n"
+"सिलेक्ट अनोत्तर आर कैंसिल"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:355
+msgid "Creating virtual environment"
+msgstr "क्रिएटींग वर्चुअल एनवायरनमेंट"
+
+#: thonny/shell.py:101
+msgid "Clear shell"
+msgstr "क्लियर शैल"
+
+#: thonny/shell.py:185
+msgid "Plotter"
+msgstr "प्लॉटर"
+
+#: thonny/shell.py:319
+msgid "Clear"
+msgstr "क्लियर"
+
+#: thonny/shell.py:332
+msgid "Show Plotter"
+msgstr "शो प्लॉटर"
+
+#: thonny/shell.py:1671
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "फॉर परफॉरमेंस रीज़नस, शैल अवोइडस शोइंग वेरी लॉन्ग लाइनस इन फुल्ल (सी टूल्स  => ऑप्शनस => शैल).\n"
+"हियर यू कैन इंटरेक्ट वित दी ओरिजिनल टेक्स्ट फ्रेगमेंट."
+
+#: thonny/shell.py:1681
+msgid "Wrap text (may be slow)"
+msgstr "व्रैप टेक्स्ट (मई बी स्लो)"
+
+#: thonny/ui_utils.py:1883
+msgid "Copy to clipboard"
+msgstr "कॉपी टू क्लिपबोर्ड"
+
+#: thonny/shell.py:1723
+msgid "Squeezed text (%d characters)"
+msgstr "स्क़ुईज़ीड टेक्स्ट (%d करैक्टरस)"
+
+#: thonny/shell.py:1893
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr "प्लॉटर विसुअलिज़ेस सीरीज ऑफ़ नंबर्स प्रिंटड टू थे शैल."
+
+#: thonny/shell.py:1895
+msgid "See Help for details."
+msgstr "सी हेल्प फोर डिटेल्स."
+
+#: thonny/ui_utils.py:498
+msgid "Close others"
+msgstr "क्लोज ओथेरस"
+
+#: thonny/ui_utils.py:1738
+msgid "Copying"
+msgstr "कोपयिन्ग"
+
+#: thonny/ui_utils.py:1741
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "कोपयिन्ग\n"
+"  %s\n"
+"टू\n"
+"  %s"
+
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
+#: thonny/workdlg.py:205 thonny/workdlg.py:259
+msgid "Cancel"
+msgstr "कैंसिल"
+
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
+msgid "OK"
+msgstr "ओके"
+
+#: thonny/ui_utils.py:2355
+msgid "Select All"
+msgstr "सिलेक्ट आल"
+
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:164
+msgid "Shell"
+msgstr "शैल"
+
+#: thonny/workbench.py:614
+msgid "Options..."
+msgstr "ऑप्शनस..."
+
+#: thonny/workbench.py:621
+msgid "Increase font size"
+msgstr "इनक्रीस फॉण्ट साइज"
+
+#: thonny/workbench.py:685
+msgid "Change font size"
+msgstr "चेंज फॉण्ट साइज"
+
+#: thonny/workbench.py:686
+msgid "Zoom"
+msgstr "ज़ूम"
+
+#: thonny/workbench.py:695
+msgid "Exit Thonny"
+msgstr "एग्जिट थोनी"
+
+#: thonny/workbench.py:698
+msgid "Quit"
+msgstr "क़ुइट"
+
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
+msgid "Overwriting theme '%s'"
+msgstr "ओवरराईटींग थीम '%s'"
+
+#: thonny/workbench.py:1444
+msgid "Program arguments:"
+msgstr "प्रोग्राम आर्गुमेंटस"
+
+#: thonny/workbench.py:1498
+msgid "Regular mode"
+msgstr "रेगुलर मोड"
+
+#: thonny/workbench.py:1500
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "कॉन्फ़िगरेशन हास् बिन अपडेटेड. रीस्टार्ट थोनी टू स्टार्ट वर्किंग इन रेगूलर मोड.\n"
+"\n"
+"(सी 'टूलस → ऑप्शनस → जेनरल' इफ यू चेंज योर माइंड लेटर.)"
+
+#: thonny/plugins/ast_view.py:211
+msgid "Program tree"
+msgstr "प्रोग्राम ट्री"
+
+#: thonny/plugins/debugger.py:1286
+msgid "Resume"
+msgstr "रिज्यूम"
+
+#: thonny/plugins/debugger.py:1302
+msgid "Run / resume"
+msgstr "रन / रिज्यूम"
+
+#: thonny/plugins/debugger.py:1317
+msgid "Debug current script"
+msgstr "डिबग करंट स्क्रिप्ट"
+
+#: thonny/plugins/debugger.py:1319
+msgid "Debug"
+msgstr "डिबग"
+
+#: thonny/plugins/debugger.py:1330
+msgid "Debug current script (nicer)"
+msgstr "डिबग करंट स्क्रिप्ट (नाइसर)"
+
+#: thonny/plugins/debugger.py:1342
+msgid "Debug current script (faster)"
+msgstr "डिबग करंट स्क्रिप्ट (फास्टर)"
+
+#: thonny/plugins/debugger.py:1353
+msgid "Step over"
+msgstr "स्टेप ओवर"
+
+#: thonny/plugins/debugger.py:1355
+msgid "Over"
+msgstr "ओवर"
+
+#: thonny/plugins/debugger.py:1366
+msgid "Step into"
+msgstr "स्टेप ईंटो"
+
+#: thonny/plugins/debugger.py:1368
+msgid "Into"
+msgstr "ईंटो"
+
+#: thonny/plugins/debugger.py:1379
+msgid "Step out"
+msgstr "स्टेप आउट"
+
+#: thonny/plugins/debugger.py:1381
+msgid "Out"
+msgstr "आउट"
+
+#: thonny/plugins/debugger.py:1416
+msgid "Step back"
+msgstr "स्टेप बैक"
+
+#: thonny/plugins/debugger.py:1418
+msgid "Back"
+msgstr "बैक"
+
+#: thonny/plugins/debugger.py:1424
+msgid "Stack"
+msgstr "स्टाक"
+
+#: thonny/plugins/debugger.py:1425
+msgid "Exception"
+msgstr "एक्सेप्शन"
+
+#: thonny/plugins/general_config_page.py:18
+msgid "Log program usage events"
+msgstr "लोग प्रोग्राम यूसेज इवेंट्स"
+
+#: thonny/plugins/general_config_page.py:43
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "डिबग मोड (प्रोवाइडस् मोरे डिटेल्ड डायग्नोस्टिक लोगस)"
+
+#: thonny/plugins/general_config_page.py:67
+msgid "UI mode"
+msgstr "यूइं मोड"
+
+#: thonny/plugins/general_config_page.py:80
+msgid "UI scaling factor"
+msgstr "यूइं स्केलिंग फैक्टर"
+
+#: thonny/plugins/general_config_page.py:114
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "NB! रीस्टार्ट थोनी आफ्टर चेंजिंग दिस ऑप्शनस!"
+
+#: thonny/plugins/general_config_page.py:148
+msgid "General"
+msgstr "जनरल"
+
+#: thonny/plugins/pip_gui.py:160
+msgid "INSTALL"
+msgstr "इनस्टॉल"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
+msgid "Browse the packages"
+msgstr "ब्राउज दी पैकेजस"
+
+#: thonny/plugins/pip_gui.py:389
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr "वित करंट इंटरप्रेटर यू कान ओनली ब्राउज दी पैकेजस हियर.\n"
+"यूज 'टूलस → ओपन सिस्टम शैल...' फोर इंस्टॉलिंग, अपग्रेडईंग और अनइन्सटॉलईंग."
+
+#: thonny/plugins/pip_gui.py:396
+msgid "Packages' directory"
+msgstr "पैकेजस डायरेक्टरी"
+
+#: thonny/plugins/pip_gui.py:400
+msgid "Install from PyPI"
+msgstr "इनस्टॉल फ्रॉम पयपय"
+
+#: thonny/plugins/pip_gui.py:404
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr "इफ यू डोंट नो व्हेर टू गेत दी पैकेज फ्रॉम, देन मोस्ट लाईकली यूल्ल वांट टू सर्च दी पाइथन पैकेज इंडेक्स. स्टार्ट बाय एंटरिंग दी नेम ऑफ़ दी पैकेज इन दी सर्च बॉक्स अबोव एंड प्रेसिंग एंटर."
+
+#: thonny/plugins/pip_gui.py:420
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr "टू लोकेट requirements.txt फाइल एंड इनस्टॉल दी पैकेजस स्पेसिफ़िएड इन इट."
+
+#: thonny/plugins/pip_gui.py:426
+msgid "Click"
+msgstr "क्लिक"
+
+#: thonny/plugins/pip_gui.py:432
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr "टू लोकेट एंड इनस्टॉल दी पैकेज फाइल (यूजल्ली वित .whl, .tar.gz or .zip एक्सटेंशन)."
+
+#: thonny/plugins/pip_gui.py:438
+msgid "Upgrade or uninstall"
+msgstr "अपग्रेड या अनइन्सटॉल"
+
+#: thonny/plugins/pip_gui.py:440
+msgid "Start by selecting the package from the left."
+msgstr "स्टार्ट बय सिलेक्टींग दी पैकेज फ्रॉम दी लेफ्ट"
+
+#: thonny/plugins/pip_gui.py:449
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "यह संवाद सभी उपलब्ध पैकेजों को सूचीबद्ध करता है, लेकिन केवल पैकेजों को अपग्रेड करने और अनइंस्टॉल करने की अनुमति देता है"
+
+#: thonny/plugins/pip_gui.py:459
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "नए पैकेज भी इसी निर्देशिका में स्थापित किए जाएँगे। अन्य स्थानों को वैकल्पिक तरीकों से प्रबंधित किया जाना चाहिए।"
+
+#: thonny/plugins/pip_gui.py:511
+msgid "Installed version:"
+msgstr "इनस्टॉलड वर्शन:"
+
+#: thonny/plugins/pip_gui.py:513
+msgid "Installed to:"
+msgstr "इनस्टॉलड टू:"
+
+#: thonny/plugins/pip_gui.py:593
+msgid "Please check your spelling!"
+msgstr "प्लीज चेक योर स्पेलिंग!"
+
+#: thonny/plugins/pip_gui.py:597
+msgid "Could not find the package info from PyPI."
+msgstr "कुड नॉट फाइंड दी पैकेज इंफो फ्रॉम पयपय"
+
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
+msgid "Error code:"
+msgstr "एरर कोड:"
+
+#: thonny/plugins/pip_gui.py:762
+msgid "Can't find package name from the list:"
+msgstr "कैंट फाइंड पैकेज नेम फ्रॉम दी लिस्ट:"
+
+#: thonny/plugins/pip_gui.py:818
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr "पैकेज '{}' इस रिक्वायर्ड फॉर इंस्टॉलिंग एंड अनइंस्टालींग ऑथर पैकेजस."
+
+#: thonny/plugins/pip_gui.py:862
+msgid "Package"
+msgstr "पैकेज"
+
+#: thonny/plugins/pip_gui.py:974
+msgid "Manage packages for %s"
+msgstr "मैनेज पैकेजस फॉर %s"
+
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
+msgid "Confirmation"
+msgstr "कन्फर्मेशन"
+
+#: thonny/plugins/pip_gui.py:1114
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr "ऐसा लगता है कि आप Thonny से संबंधित पैकेज इंस्टॉल कर रहे हैं।\n"
+"यदि आप Thonny प्लगइन इंस्टॉल करना चाहते हैं, तो आपको\n"
+"इसके बजाय 'टूल → प्लगइन प्रबंधित करें...' चुनना चाहिए\n"
+"\n"
+"क्या आप वाकई बैक-एंड के लिए %s इंस्टॉल करना चाहते हैं?"
+
+#: thonny/plugins/pip_gui.py:1204
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr "ध्यान दें! हो सकता है कि कोई दूसरा संस्करण उपलब्ध हो जो Thonny के मौजूदा संस्करण के साथ संगत हो। इंस्टॉल करने के लिए संस्करण चुनने के लिए '...' बटन पर क्लिक करें।"
+
+#: thonny/plugins/pip_gui.py:1211
+msgid "Thonny plugin without requirements"
+msgstr "थोनी प्लगइन विथौत रेक्विरेमेंटस"
+
+#: thonny/plugins/pip_gui.py:1227
+msgid "Unsuitable requirements"
+msgstr "अनसूटेबल रेक्विरेमेंटस"
+
+#: thonny/plugins/pip_gui.py:1228
+msgid "This package requires different Thonny version:"
+msgstr "ढीस पैकेज रेक्विरेस डिफरेंट थोनी वर्शन:"
+
+#: thonny/plugins/pip_gui.py:1232
+msgid "If you still want it, then please install it from the command line."
+msgstr "इफ यू स्टिल वांट इट, देन प्लीज इनस्टॉल इट फ्रॉम द कमांड लाइन."
+
+#: thonny/plugins/pip_gui.py:1270
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "नभ! यू नीड टू रीस्टार्ट थोनी आफ्टर इंस्टॉलिंग / अपग्रेडईंग / अनइन्सटॉलईंग अ प्लग-इन. "
+
+#: thonny/plugins/pip_gui.py:1279
+msgid "Thonny plug-ins"
+msgstr "थोनी प्लगइनस"
+
+#: thonny/plugins/pip_gui.py:1321
+msgid "Advanced install / upgrade / downgrade"
+msgstr "एडवांस्ड इंस्टॉल / अपग्रेड / दोवनग्राड"
+
+#: thonny/plugins/pip_gui.py:1330
+msgid "Desired version"
+msgstr "देसिरेद वर्शन"
+
+#: thonny/plugins/pip_gui.py:1389
+msgid "Upgrade dependencies"
+msgstr "अपग्रेड डिपेंडेंसिस"
+
+#: thonny/plugins/pip_gui.py:1474
+msgid "Requires:"
+msgstr "रेक्विरेस:"
+
+#: thonny/plugins/pip_gui.py:1478
+msgid "Error:"
+msgstr "एरर:"
+
+#: thonny/plugins/pip_gui.py:1677
+msgid "Manage packages..."
+msgstr "मैनेज पैकेजस..."
+
+#: thonny/plugins/pip_gui.py:1683
+msgid "Manage plug-ins..."
+msgstr "मैनेज प्लगइनस..."
+
+#: thonny/plugins/replayer.py:364
+msgid "Open replayer..."
+msgstr "ओपन रीप्लेयर..."
+
+#: thonny/plugins/run_debug_config_page.py:21
+msgid "Change working directory to script directory on Run / Debug"
+msgstr "रन/डीबग पर कार्यशील निर्देशिका को स्क्रिप्ट निर्देशिका में बदलें"
+
+#: thonny/plugins/run_debug_config_page.py:35
+msgid "Show function calls (frames) in separate windows"
+msgstr "फ़ंक्शन कॉल (फ़्रेम) को अलग-अलग विंडो में दिखाएँ"
+
+#: thonny/plugins/run_debug_config_page.py:36
+msgid "Uncheck if you want more traditional experience."
+msgstr "यदि आप अधिक पारंपरिक अनुभव चाहते हैं तो अनचेक करें।"
+
+#: thonny/plugins/run_debug_config_page.py:42
+msgid "Open and close Stack view automatically"
+msgstr "स्टैक दृश्य को स्वचालित रूप से खोलें और बंद करें"
+
+#: thonny/plugins/run_debug_config_page.py:44
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr "पहली कॉल पर स्टैक दृश्य खोलता है और प्रोग्राम के मुख्य फ्रेम पर वापस आने पर इसे बंद कर देता है।"
+
+#: thonny/plugins/run_debug_config_page.py:52
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr "लाइब्रेरीज़ में प्रवेश की अनुमति दें (अर्थात मुख्य स्क्रिप्ट निर्देशिका के बाहर)"
+
+#: thonny/plugins/run_debug_config_page.py:53
+msgid "May make debugging slower."
+msgstr "डिबगिंग धीमी हो सकती है."
+
+#: thonny/plugins/run_debug_config_page.py:58
+msgid "Preferred debugger"
+msgstr "पसंदीदा डिबगर"
+
+#: thonny/plugins/run_debug_config_page.py:70
+msgid "(used when clicking Debug toolbar button)"
+msgstr "(डीबग टूलबार बटन पर क्लिक करते समय उपयोग किया जाता है)"
+
+#: thonny/plugins/run_debug_config_page.py:75
+msgid "Birdseye port"
+msgstr "बर्ड्सआई बंदरगाह"
+
+#: thonny/plugins/run_debug_config_page.py:79
+msgid "(restart Thonny after changing this)"
+msgstr "(इसे बदलने के बाद Thonny को पुनः आरंभ करें)"
+
+#: thonny/plugins/run_debug_config_page.py:87
+msgid "Run & Debug"
+msgstr "रन & डिबग"
+
+#: thonny/plugins/shell_config_page.py:26
+msgid "Terminal emulation"
+msgstr "टर्मिनल अनुकरण"
+
+#: thonny/plugins/shell_config_page.py:28
+msgid "supports basic ANSI-colors and styles"
+msgstr "बुनियादी ANSI-रंगों और शैलियों का समर्थन करता है"
+
+#: thonny/plugins/shell_config_page.py:40
+msgid "Maximum number of lines to keep."
+msgstr "रखने के लिए पंक्तियों की अधिकतम संख्या."
+
+#: thonny/plugins/shell_config_page.py:42
+msgid "NB! Large values may cause poor performance!"
+msgstr "ध्यान दें! बड़े मान खराब प्रदर्शन का कारण बन सकते हैं!"
+
+#: thonny/plugins/shell_config_page.py:58
+msgid "Maximum length of line fragments before squeezing"
+msgstr "निचोड़ने से पहले रेखा टुकड़ों की अधिकतम लंबाई"
+
+#: thonny/plugins/terminal_config_page.py:12
+msgid "Running current script in terminal"
+msgstr "टर्मिनल में वर्तमान स्क्रिप्ट चलाना"
+
+#: thonny/plugins/terminal_config_page.py:17
+msgid "Present Python REPL after program ends"
+msgstr "प्रोग्राम समाप्त होने के बाद Python REPL प्रस्तुत करें"
+
+#: thonny/plugins/terminal_config_page.py:24
+msgid "Keep terminal window open after Python process ends"
+msgstr "पायथन प्रक्रिया समाप्त होने के बाद टर्मिनल विंडो को खुला रखें"
+
+#: thonny/plugins/terminal_config_page.py:32
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr "ध्यान दें! टर्मिनल की सेटिंग में स्वचालित समापन सक्षम होना चाहिए\n"
+"(प्रोफाइल → शेल → जब शेल बाहर निकलता है)"
+
+#: thonny/plugins/terminal_config_page.py:41
+msgid "Terminal"
+msgstr "टर्मिनल"
+
+#: thonny/plugins/theme_and_font_config_page.py:39
+msgid "UI theme"
+msgstr "यूआई थीम"
+
+#: thonny/plugins/theme_and_font_config_page.py:52
+msgid "Syntax theme"
+msgstr "सिंटेक्स थीम"
+
+#: thonny/plugins/theme_and_font_config_page.py:84
+msgid "Editor font"
+msgstr "एडिटर फॉण्ट"
+
+#: thonny/plugins/theme_and_font_config_page.py:107
+msgid "IO font"
+msgstr "आईओ फॉण्ट"
+
+#: thonny/plugins/theme_and_font_config_page.py:132
+msgid "Preview"
+msgstr "प्रीव्यू"
+
+#: thonny/plugins/theme_and_font_config_page.py:150
+msgid "This is a comment"
+msgstr "दिस इस अ कमेंट"
+
+#: thonny/plugins/theme_and_font_config_page.py:153
+msgid "The answer is"
+msgstr "दि आंसर इस"
+
+#: thonny/plugins/theme_and_font_config_page.py:157
+msgid "unclosed_string"
+msgstr "एनँक्लोसेड_स्ट्रिंग"
+
+#: thonny/plugins/theme_and_font_config_page.py:159
+msgid "blah, blah"
+msgstr "ब्लाह, ब्लाह"
+
+#: thonny/plugins/theme_and_font_config_page.py:183
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "नभ! सम स्टाइल एलिमेंटस चेंज ओन्ली आफ्टर रीस्टार्टईंग थोनी!"
+
+#: thonny/plugins/theme_and_font_config_page.py:222
+msgid "Enter an integer"
+msgstr "एंटर आन इन्टिजर"
+
+#: thonny/plugins/theme_and_font_config_page.py:235
+msgid "Theme & Font"
+msgstr "थीम & फॉण्ट"
+
+#: thonny/plugins/thonny_folders.py:19
+msgid "Open Thonny program folder..."
+msgstr "ओपन थोनी प्रोग्राम फोल्डर..."
+
+#: thonny/plugins/thonny_folders.py:24
+msgid "Open Thonny data folder..."
+msgstr "ओपन थोनी डाटा फोल्डर..."
+
+#: thonny/plugins/help/__init__.py:70
+msgid "Home"
+msgstr "होम"
+
+#: thonny/plugins/help/__init__.py:81
+msgid "Help contents"
+msgstr "हेल्प कंटेंट्स"
+
+#: thonny/plugins/micropython/mp_front.py:290
+msgid "CircuitPython device"
+msgstr "सर्किटपायथन डिवाइस"
+
+#: thonny/plugins/micropython/mp_front.py:294
+msgid "MicroPython device"
+msgstr "माइक्रोपाइथन डिवाइस"
+
+#: thonny/plugins/micropython/mp_front.py:545
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr "अपने डिवाइस को कंप्यूटर से कनेक्ट करें और नीचे संबंधित पोर्ट का चयन करें"
+
+#: thonny/plugins/micropython/mp_front.py:548
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr "अपने डिवाइस का नाम, \"USB Serial\" या \"UART\" देखें"
+
+#: thonny/plugins/micropython/mp_front.py:550
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr "यदि आपको यह नहीं मिल रहा है, तो आपको पहले उचित USB ड्राइवर स्थापित करना होगा।"
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port"
+msgstr "पोर्ट"
+
+#: thonny/plugins/micropython/mp_front.py:445
+msgid "Try to detect port automatically"
+msgstr "पोर्ट को स्वचालित रूप से पहचानने का प्रयास करें"
+
+#: thonny/plugins/micropython/__init__.py:24
+msgid "MicroPython (generic)"
+msgstr "माइक्रोपाइथन (सामान्य)"
+
+#: thonny/plugins/printing/__init__.py:98
+msgid "Print..."
+msgstr "प्रिंट..."
+
+#: thonny/plugins/system_shell/__init__.py:63
+msgid "Open system shell..."
+msgstr "ओपन सिस्टम शेल..."
+
+#: thonny/plugins/backend_config_page.py:109
+msgid "Details"
+msgstr "डिटेल्स"
+
+#: thonny/plugins/pip_gui.py:413
+msgid "Install from requirements file"
+msgstr "इनस्टॉल फ्रॉम रेक्विरेमेंन्टस फाइल"
+
+#: thonny/plugins/pip_gui.py:425
+msgid "Install from local file"
+msgstr "इनस्टॉल फ्रॉम लोकल फाइल"
+
+#: thonny/plugins/pip_gui.py:1263
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr "यह डायलॉग Thonny प्लग-इन और उनकी निर्भरताओं को प्रबंधित करने के लिए है।\n"
+"यदि आप अपने स्वयं के प्रोग्राम के लिए पैकेज इंस्टॉल करना चाहते हैं तो 'टूल → पैकेज प्रबंधित करें...' चुनें"
+
+#: thonny/plugins/circuitpython/__init__.py:10
+msgid "CircuitPython (generic)"
+msgstr "सर्किटपाइथन (सामान्य)"
+
+#: thonny/plugins/commenting_indenting.py:142
+msgid "Indent selected lines"
+msgstr "इंडेंट सिलेक्टेड लाइनस"
+
+#: thonny/plugins/commenting_indenting.py:152
+msgid "Dedent selected lines"
+msgstr "डंडेंट सिलेक्टेड लाइनस"
+
+#: thonny/workbench.py:1487
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "स्विच टू\n"
+"रेगुलर\n"
+"मोड"
+
+#: thonny/plugins/microbit/__init__.py:62
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "सुनिश्चित करें कि आपके माइक्रो:बिट में माइक्रोपाइथन स्थापित किया गया है।"
+
+#: thonny/plugins/microbit/__init__.py:64
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "यह मत भूलिए कि main.py केवल एम्बेडेड मुख्य स्क्रिप्ट के बिना ही काम करता है।"
+
+#: thonny/misc_utils.py:178
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "डिस्क '%s' नहीं मिल सका। क्या आप इसे स्वयं ढूँढना चाहते हैं?"
+
+#: thonny/misc_utils.py:181
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "कई '%s' डिस्क मिले। क्या आप स्वयं कोई एक चुनना चाहते हैं?"
+
+#: thonny/misc_utils.py:197
+msgid "Can't find suitable disk"
+msgstr "उपयुक्त डिस्क नहीं मिल पा रही है"
+
+#: thonny/base_file_browser.py:294
+msgid "%d items"
+msgstr "%d आइटमस"
+
+#: thonny/base_file_browser.py:743
+msgid "Move to Trash"
+msgstr "मूव टू ट्रैश"
+
+#: thonny/base_file_browser.py:746
+msgid "Delete"
+msgstr "डिलीट"
+
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
+msgid "New directory"
+msgstr "न्यू डायरेक्टरी"
+
+#: thonny/base_file_browser.py:749
+msgid "Properties"
+msgstr "प्रॉपर्टीस"
+
+#: thonny/base_file_browser.py:751
+msgid "Storage space"
+msgstr "स्टोरेज स्पेस"
+
+#: thonny/base_file_browser.py:761
+msgid "Path"
+msgstr "पाथ"
+
+#: thonny/base_file_browser.py:763
+msgid "Directory properties"
+msgstr "डायरेक्टरी प्रॉपर्टीस"
+
+#: thonny/base_file_browser.py:765
+msgid "File properties"
+msgstr "फाइल प्रॉपर्टीस"
+
+#: thonny/base_file_browser.py:767
+msgid "bytes"
+msgstr "बाइटस"
+
+#: thonny/base_file_browser.py:770
+msgid "Size"
+msgstr "साइज"
+
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
+msgid "Modified"
+msgstr "मॉडिफाइड"
+
+#: thonny/base_file_browser.py:842
+msgid "Deleting %s"
+msgstr "डिलीटंग %s"
+
+#: thonny/editors.py:264
+msgid "Loading"
+msgstr "लोडिंग"
+
+#: thonny/editors.py:397
+msgid "Saving"
+msgstr "सेविंग"
+
+#: thonny/plugins/files.py:219
+msgid "Upload to %s"
+msgstr "अपलोड टू %s"
+
+#: thonny/plugins/files.py:420
+msgid "Downloading %s to %s"
+msgstr "डाउनलोडइंग %s to %s"
+
+#: thonny/plugins/files.py:326
+msgid "Download to %s"
+msgstr "डाउनलोड to %s"
+
+#: thonny/base_file_browser.py:650
+msgid "Open in system file manager"
+msgstr "ओपन इन सिस्टम फाइल मेनेजर"
+
+#: thonny/base_file_browser.py:678
+msgid "Hide hidden files"
+msgstr "हाईड हिडन फाइलस"
+
+#: thonny/base_file_browser.py:678
+msgid "Show hidden files"
+msgstr "शो हिडन फाइलस"
+
+#: thonny/base_file_browser.py:661
+msgid "Open in Thonny"
+msgstr "ओपन इन थोनी"
+
+#: thonny/base_file_browser.py:692
+msgid "Open in system default app"
+msgstr "ओपन इन सिस्टम डिफ़ॉल्ट अप्प"
+
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
+msgid "Configure %s files"
+msgstr "कॉन्फ़िगर %s फाइलस"
+
+#: thonny/base_file_browser.py:702
+msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
+msgstr "जब आप Thonny के फ़ाइल ब्राउज़र में %s फ़ाइल पर डबल क्लिक करते हैं तो उसके साथ क्या करना है?"
+
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
+msgid "Deleting"
+msgstr "डिलीटइंग"
+
+#: thonny/base_file_browser.py:1265
+msgid "Creating directory"
+msgstr "निर्देशिका बनाना"
+
+#: thonny/editors.py:262
+msgid "Loading %s"
+msgstr "%s लोड हो रहा है"
+
+#: thonny/editors.py:392
+msgid "Saving to %s"
+msgstr "%s में सहेजा जा रहा है"
+
+#: thonny/editors.py:730 thonny/editors.py:732
+msgid "Save All files"
+msgstr "सेव आल फाइलस"
+
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
+msgid "Configure interpreter..."
+msgstr "दुभाषिया कॉन्फ़िगर करें..."
+
+#: thonny/workbench.py:1597
+msgid "Device"
+msgstr "डिवाइस"
+
+#: thonny/workdlg.py:234
+msgid "Cancelling"
+msgstr "रद्द कर रहा है"
+
+#: thonny/workdlg.py:270
+msgid "Starting"
+msgstr "शुरुआत"
+
+#: thonny/plugins/backend_config_page.py:249
+msgid "Authentication"
+msgstr "ऑथेंटिकेशन"
+
+#: thonny/plugins/backend_config_page.py:251
+msgid "Enter the passphrase of your private key for\n"
+"{}"
+msgstr "एंटर दी पासफ़्रेज़ ऑफ योर प्राइवेट की फोर\n"
+"{}"
+
+#: thonny/plugins/backend_config_page.py:254
+msgid "Enter your password for\n"
+"{}"
+msgstr "एंटर योर पासवर्ड फोर\n"
+"{}"
+
+#: thonny/plugins/object_inspector.py:487
+msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
+msgstr "ऊपर दिया गया चित्रण इस फ़्लोट का अनुमानित मान है। सटीक संग्रहित मान %s है जो लगभग %s है"
+
+#: thonny/plugins/pip_gui.py:696
+msgid "Search results"
+msgstr "सर्च रिजल्टस"
+
+#: thonny/plugins/pip_gui.py:697
+msgid "Searching"
+msgstr "खोज"
+
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
+msgid "Installing '%s'"
+msgstr "'%s' स्थापित किया जा रहा है"
+
+#: thonny/plugins/pip_gui.py:807
+msgid "Upgrading '%s'"
+msgstr "'%s' को अपग्रेड किया जा रहा है"
+
+#: thonny/plugins/pip_gui.py:814
+msgid "Uninstalling '%s'"
+msgstr "'%s' की स्थापना रद्द की जा रही है"
+
+#: thonny/plugins/pip_gui.py:828
+msgid "Installing"
+msgstr "स्थापित कर रहा है"
+
+#: thonny/plugins/pip_gui.py:1625
+msgid "Package manager is not available for this interpreter"
+msgstr "इस इंटरप्रेटर के लिए पैकेज प्रबंधक उपलब्ध नहीं है"
+
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
+msgid "Not supported"
+msgstr "समर्थित नहीं"
+
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
+msgid "Not available"
+msgstr "नॉट अवेलेबल "
+
+#: thonny/plugins/pip_gui.py:1658
+msgid "You need to stop your program before launching the package manager."
+msgstr "पैकेज मैनेजर लॉन्च करने से पहले आपको अपना प्रोग्राम रोकना होगा।"
+
+#: thonny/plugins/shell_config_page.py:73
+msgid "Open evaluated values in Object inspector"
+msgstr "ऑब्जेक्ट इंस्पेक्टर में मूल्यांकित मान खोलें"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:240
+msgid "Python executable"
+msgstr "पाइथन एक्सेक्यूटेबले"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:265
+msgid "NB! File selection button may not work properly when selecting executables\n"
+"from a virtual environment. In this case choose the 'activate' script instead\n"
+"of the interpreter (or enter the path directly to the box)!"
+msgstr "NB! वर्चुअल वातावरण से निष्पादन योग्य फ़ाइलों का चयन करते समय फ़ाइल चयन बटन ठीक से काम नहीं कर सकता है। इस मामले में इंटरप्रेटर के बजाय 'सक्रिय करें' स्क्रिप्ट चुनें (या सीधे बॉक्स में पथ दर्ज करें)!"
+
+#: thonny/plugins/cpython_ssh/__init__.py:17
+msgid "Remote Python 3 (SSH)"
+msgstr "रिमोट पाइथन 3 (SSH)"
+
+#: thonny/plugins/micropython/mp_front.py:300
+msgid "Not connected"
+msgstr "नॉट कनेक्टेड "
+
+#: thonny/plugins/micropython/__init__.py:35
+msgid "MicroPython (local)"
+msgstr "माइक्रोपाइथन (स्थानीय)"
+
+#: thonny/plugins/micropython/__init__.py:46
+msgid "MicroPython (SSH)"
+msgstr "माइक्रोपाइथन (SSH)"
+
+#: thonny/plugins/micropython/pip_gui.py:145
+msgid "no absolute lib directory in sys.path"
+msgstr "sys.path में कोई पूर्ण lib निर्देशिका नहीं है"
+
+#: thonny/plugins/pip_gui.py:86
+msgid "Search on PyPI"
+msgstr "PyPI पर खोजें"
+
+#: thonny/base_file_browser.py:693
+msgid "Open in Thonny's text editor"
+msgstr "Thonny के टेक्स्ट एडिटर में खोलें"
+
+#: thonny/base_file_browser.py:346
+msgid "Storage space on this drive or filesystem"
+msgstr "इस ड्राइव या फ़ाइल सिस्टम पर संग्रहण स्थान"
+
+#: thonny/base_file_browser.py:347
+msgid "total space"
+msgstr "टोटल स्पेस"
+
+#: thonny/base_file_browser.py:349
+msgid "used space"
+msgstr "यूज्ड स्पेस"
+
+#: thonny/base_file_browser.py:350
+msgid "free space"
+msgstr "फ्री स्पेस"
+
+#: thonny/base_file_browser.py:357
+msgid "Storage info"
+msgstr "स्टोरेज इन्फो"
+
+#: thonny/plugins/commenting_indenting.py:162
+msgid "Replace tabs with spaces"
+msgstr "रिप्लेस ताबस वित स्पेसस"
+
+#: thonny/plugins/editor_config_page.py:33
+msgid "Highlight tab characters"
+msgstr "हाईलाइट ताब करैक्टरस"
+
+#: thonny/plugins/editor_config_page.py:68
+msgid "Indent with tab characters (not recommended for Python)"
+msgstr "टैब वर्णों के साथ इंडेंट करें (पाइथन के लिए अनुशंसित नहीं)"
+
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
+msgid "Name"
+msgstr "नेम"
+
+#: thonny/base_file_browser.py:96
+msgid "Size (bytes)"
+msgstr "साइज (बाइट्स)"
+
+#: thonny/base_file_browser.py:879
+msgid "Enter name for new directory under\n"
+"%s"
+msgstr "%s के अंतर्गत नई निर्देशिका के लिए नाम दर्ज करें"
+
+#: thonny/base_file_browser.py:902
+msgid "Nothing selected"
+msgstr "नथिंग सिलेक्टेड "
+
+#: thonny/base_file_browser.py:902
+msgid "Select an item and try again!"
+msgstr "एक आइटम का चयन करें और पुनः प्रयास करें!"
+
+#: thonny/base_file_browser.py:1329
+msgid "Open from %s"
+msgstr "ओपन फ्रॉम %s"
+
+#: thonny/base_file_browser.py:1332
+msgid "Save to %s"
+msgstr "सेव टू %s"
+
+#: thonny/base_file_browser.py:1351
+msgid "File name:"
+msgstr "फाइल नेम:"
+
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:617
+msgid "Value ID"
+msgstr "वैल्यू आईडी"
+
+#: thonny/memory.py:65 thonny/plugins/heap.py:23
+#: thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
+msgid "Value"
+msgstr "वैल्यू"
+
+#: thonny/plugins/backend_config_page.py:272
+msgid "Save password"
+msgstr "सेव पासवर्ड"
+
+#: thonny/plugins/debugger.py:559
+msgid "Function call at %s"
+msgstr "%s पर फ़ंक्शन कॉल"
+
+#: thonny/plugins/debugger.py:1008
+msgid "Local variables"
+msgstr "लोकल वेरिएबलस"
+
+#: thonny/plugins/debugger.py:1040
+msgid "Function"
+msgstr "फंक्शन"
+
+#: thonny/plugins/debugger.py:1041
+msgid "Location"
+msgstr "लोकेशन"
+
+#: thonny/plugins/debugger.py:1117
+msgid "If last command raised an exception then this view will show the stacktrace."
+msgstr "यदि अंतिम कमांड ने कोई अपवाद उठाया तो यह दृश्य स्टैकट्रेस दिखाएगा।"
+
+#: thonny/plugins/heap.py:22
+msgid "ID"
+msgstr "आईडी"
+
+#: thonny/plugins/object_inspector.py:92
+msgid "Data"
+msgstr "डाटा"
+
+#: thonny/plugins/object_inspector.py:93
+msgid "Attributes"
+msgstr "एट्रिब्यूटस"
+
+#: thonny/plugins/object_inspector.py:537
+msgid "Index"
+msgstr "इंडेक्स"
+
+#: thonny/plugins/object_inspector.py:615
+msgid "Key ID"
+msgstr "की आईडी"
+
+#: thonny/plugins/object_inspector.py:616
+msgid "Key"
+msgstr "की"
+
+#: thonny/plugins/variables.py:39
+msgid "Back to\n"
+"%s"
+msgstr "बैक टू\n"
+"%s"
+
+#: thonny/plugins/micropython/mp_front.py:440
+msgid "Port or WebREPL"
+msgstr "पोर्ट या WebREPL"
+
+#: thonny/plugins/micropython/mp_front.py:586
+msgid "Password"
+msgstr "पासवर्ड"
+
+#: thonny/plugins/debugger.py:966
+msgid "Source code"
+msgstr "सोर्स कोड"
+
+#: thonny/plugins/general_config_page.py:29
+msgid "Use Tk file dialogs instead of Zenity"
+msgstr "Zenity के स्थान पर Tk फ़ाइल संवाद का उपयोग करें"
+
+#: thonny/plugins/general_config_page.py:30
+msgid "Select if the file dialogs end up behind the main window"
+msgstr "यदि फ़ाइल संवाद मुख्य विंडो के पीछे समाप्त हो जाए तो चयन करें"
+
+#: thonny/plugins/general_config_page.py:97
+msgid "Environment variables (one KEY=VALUE per line)"
+msgstr "पर्यावरण चर (प्रति पंक्ति एक KEY=VALUE)"
+
+#: thonny/base_file_browser.py:722
+msgid "New file"
+msgstr "न्यू फाइल"
+
+#: thonny/base_file_browser.py:740
+msgid "Rename"
+msgstr "रीनेम"
+
+#: thonny/base_file_browser.py:928
+msgid "Rename '%s'"
+msgstr "रीनेम '%s'"
+
+#: thonny/base_file_browser.py:928
+msgid "Enter new name"
+msgstr "एंटर न्यू नेम"
+
+#: thonny/base_file_browser.py:1016
+msgid "Paste failed"
+msgstr "पेस्ट फेल्ड"
+
+#: thonny/base_file_browser.py:1016
+msgid "There are conflicting folders"
+msgstr "देअर आर कंफलिक्टिंग फोल्डरस"
+
+#: thonny/base_file_browser.py:1144
+msgid "File already exists"
+msgstr "फाइल आलरेडी एक्सिस्टस"
+
+#: thonny/base_file_browser.py:1213
+msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
+msgstr "यदि यह एक टेक्स्ट फ़ाइल है, तो आप इसे राइट-क्लिक करके और 'कॉन्फ़िगर ... फ़ाइलें' का चयन करके Thonny में खोलने के लिए कॉन्फ़िगर कर सकते हैं।"
+
+#: thonny/editors.py:38
+msgid "Python files"
+msgstr "पाइथन फाइलस"
+
+#: thonny/editors.py:125 thonny/editors.py:191
+msgid "<untitled>"
+msgstr "<अनटाइटल्ड>"
+
+#: thonny/editors.py:152
+msgid "File is gone"
+msgstr "फाइल इस गॉन"
+
+#: thonny/editors.py:155
+msgid "Do you want to also close the editor?"
+msgstr "क्या आप संपादक को भी बंद करना चाहते हैं?"
+
+#: thonny/editors.py:171
+msgid "External modification"
+msgstr "एक्सटर्नल मॉडिफिकेशन"
+
+#: thonny/editors.py:175
+msgid "Do you want to discard current editor content and reload the file from disk?"
+msgstr "क्या आप वर्तमान संपादक सामग्री को हटाना चाहते हैं और फ़ाइल को डिस्क से पुनः लोड करना चाहते हैं?"
+
+#: thonny/editors.py:590
+msgid "Python files usually have .py extension."
+msgstr "पाइथन फाइलस यूजुअली हैव .py एक्सटेंशन"
+
+#: thonny/editors.py:592
+msgid "Did you mean '%s'?"
+msgstr "डीड यू मीन '%s'?"
+
+#: thonny/editors.py:761
+msgid "Move / rename..."
+msgstr "मूव / रीनेम..."
+
+#: thonny/editors.py:770
+msgid "Go to line..."
+msgstr "गो टू लाइन..."
+
+#: thonny/editors.py:1012
+msgid "Line number"
+msgstr "लाइन नंबर"
+
+#: thonny/editors.py:1158
+msgid "Do you want to save files before closing?"
+msgstr "दो यू वांट टू सेव फाइलस बिफोर क्लोजिंग?"
+
+#: thonny/editors.py:1160
+msgid "Do you want to save file before closing?"
+msgstr "दो यू वांट टू सेव फाइल बिफोर क्लोजिंग?"
+
+#: thonny/editors.py:1163
+msgid "Save On Close"
+msgstr "सेव ऑन क्लोज"
+
+#: thonny/misc_utils.py:587
+msgid "Command not available"
+msgstr "कमांड नॉट अवेलेबल"
+
+#: thonny/misc_utils.py:588
+msgid "This command is not available if Thonny is run via Flatpak"
+msgstr "दिस कमांड इस नॉट अवेलेबल इफ थोनी इस रन वाया फ्लैटपैक"
+
+#: thonny/workbench.py:706 thonny/workbench.py:805
+msgid "Support Ukraine"
+msgstr "सपोर्ट यूक्रेन"
+
+#: thonny/plugins/backend_config_page.py:90
+msgid "Which kind of interpreter should Thonny use for running your code?"
+msgstr "थॉनी को आपके कोड को चलाने के लिए किस प्रकार के इंटरप्रेटर का उपयोग करना चाहिए?"
+
+#: thonny/plugins/calltip.py:159
+msgid "Show parameter info"
+msgstr "शो पारामीटर इन्फो"
+
+#: thonny/plugins/editor_config_page.py:41
+msgid "Automatically show parameter info after typing '('"
+msgstr "ऑटोमेटिकली शो पारामीटर इन्फो आफ्टर टाइपिंग '('"
+
+#: thonny/plugins/editor_config_page.py:47
+msgid "Automatically propose completions while typing"
+msgstr "ऑटोमेटिकली प्रोपोज़ कम्पलीशनस व्हिले टाइपिंग"
+
+#: thonny/plugins/editor_config_page.py:52
+msgid "Automatically show documentation for completions"
+msgstr "ऑटोमेटिकली शो डॉक्यूमेंटेशन फोर कम्पलीशनस"
+
+#: thonny/plugins/editor_config_page.py:57
+msgid "Request completions with Tab-key in editors"
+msgstr "संपादकों में टैब-कुंजी के साथ पूर्णता का अनुरोध करें"
+
+#: thonny/plugins/editor_config_page.py:62
+msgid "Request completions with Tab-key in Shell"
+msgstr "शेल में टैब-कुंजी के साथ अनुरोध पूर्णता"
+
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
+msgid "Problem"
+msgstr "प्रॉब्लम"
+
+#: thonny/plugins/goto_definition.py:58
+msgid "Could not find definition"
+msgstr "परिभाषा नहीं मिल सकी"
+
+#: thonny/plugins/shell_config_page.py:17
+msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
+msgstr "नई प्रक्रिया शुरू करने से पहले शेल साफ़ करें (रन, डीबग, स्टॉप/रीस्टार्ट, ...)"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:202
+msgid "Thonny's Python"
+msgstr "थोनीस पाइथन"
+
+#: thonny/plugins/micropython/mp_front.py:483
+msgid "Interrupt working program on connect"
+msgstr "कनेक्ट होने पर कार्य कर रहे प्रोग्राम में बाधा"
+
+#: thonny/plugins/micropython/mp_front.py:491
+msgid "Synchronize device's real time clock"
+msgstr "डिवाइस की वास्तविक समय घड़ी को सिंक्रनाइज़ करें"
+
+#: thonny/plugins/micropython/mp_front.py:497
+msgid "Use local time in real time clock"
+msgstr "वास्तविक समय घड़ी में स्थानीय समय का उपयोग करें"
+
+#: thonny/plugins/micropython/mp_front.py:503
+msgid "Restart interpreter before running a script"
+msgstr "स्क्रिप्ट चलाने से पहले इंटरप्रेटर को पुनः आरंभ करें"
+
+#: thonny/plugins/micropython/pip_gui.py:28
+msgid "This doesn't look like MicroPython/CircuitPython package.\n"
+"Are you sure you want to install it?"
+msgstr "यह माइक्रोपाइथन/सर्किटपाइथन पैकेज जैसा नहीं दिखता। क्या आप वाकई इसे इंस्टॉल करना चाहते हैं?"
+
+#: thonny/base_file_browser.py:853
+msgid "Moving to Trash"
+msgstr "मूविंग टू ट्रैश"
+
+#: thonny/base_file_browser.py:854
+msgid "Move %s to Trash?"
+msgstr "मूव %s टू ट्रैश?"
+
+#: thonny/base_file_browser.py:861
+msgid "Moving %s to Trash"
+msgstr "मूविंग %s टू ट्रैश"
+
+#: thonny/base_file_browser.py:666
+msgid "Open in default external app"
+msgstr "ओपन इन डिफ़ॉल्ट एक्सटर्नल एप्प"
+
+#: thonny/base_file_browser.py:1210
+msgid "Opening remote files in external app is not supported."
+msgstr "बाहरी ऐप में दूरस्थ फ़ाइलें खोलना समर्थित नहीं है."
+
+#: thonny/base_file_browser.py:1218
+msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
+msgstr "यदि फ़ाइल को बाहरी ऐप में खोलने की आवश्यकता है, तो उसे स्थानीय निर्देशिका में डाउनलोड करें और वहां से खोलें!"
+
+#: thonny/editors.py:153
+msgid "Looks like '%s' was deleted or moved."
+msgstr "ऐसा लगता है कि '%s' को हटा दिया गया या स्थानांतरित कर दिया गया."
+
+#: thonny/editors.py:172
+msgid "Looks like '%s' was modified outside of the editor."
+msgstr "ऐसा लगता है कि '%s' को संपादक के बाहर संशोधित किया गया था।"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:262
+msgid "NB! Thonny only supports Python %s and later"
+msgstr "ध्यान दें! Thonny केवल Python %s और उसके बाद के संस्करणों का समर्थन करता है"
+
+#: thonny/editors.py:1012
+msgid "Go to line"
+msgstr "गो टू लाइन"
+
+#: thonny/workbench.py:709
+msgid "Support"
+msgstr "सपोर्ट"
+
+#: thonny/editors.py:401 thonny/editors.py:416
+msgid "Could not save"
+msgstr "कुड नॉट सेव"
+
+#: thonny/plugins/general_config_page.py:135
+msgid "Warning"
+msgstr "वार्निंग"
+
+#: thonny/plugins/general_config_page.py:137
+msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
+"Did you intend this?"
+msgstr "यदि आप किसी पर्यावरण चर का मान उद्धृत करते हैं, तो उद्धरण मान का हिस्सा होंगे। क्या आपका इरादा ऐसा था?"
+
+#: thonny/workbench.py:876
+msgid "Install MicroPython"
+msgstr "इनस्टॉल माइक्रोपाइथन"
+
+#: thonny/workbench.py:880
+msgid "Install CircuitPython"
+msgstr "इनस्टॉल सर्किटपाइथन"
+
+#: thonny/plugins/backend_config_page.py:210
+msgid "Make uploaded shebang scripts executable"
+msgstr "अपलोड की गई शेबैंग स्क्रिप्ट को निष्पादन योग्य बनाएं"
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr "सहेजे गए शेबैंग स्क्रिप्ट को निष्पादन योग्य बनाएं"
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr "वर्चुअल वातावरण सक्रिय करें"
+
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
+msgid "Target"
+msgstr "टारगेट"
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr "पायथन ट्यूटर पर वर्तमान स्क्रिप्ट को विज़ुअलाइज़ करें"
+
+#: thonny/plugins/todo_view.py:43
+msgid "Line"
+msgstr "लाइन"
+
+#: thonny/plugins/todo_view.py:44
+msgid "Info"
+msgstr "इन्फो"
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr "नो लाइन मार्केड विथ #टोडौ फाउंड"
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr "टोडौ"
+
+#: thonny/plugins/circuitpython/cirpy_front.py:113
+#: thonny/plugins/micropython/mp_front.py:537
+msgid "Install or update %s"
+msgstr "इनस्टॉल और अपडेट %s"
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr "लोकल पाइथन 3"
+
+#: thonny/plugins/cpython_frontend/cp_front.py:273
+msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr "आप वर्चुअल वातावरण फ़ोल्डर, या उसके अंदर 'pyveng.cfg' फ़ाइल का चयन करते समय फ़ाइल नेविगेशन में राइट-क्लिक संदर्भ मेनू के माध्यम से भी मौजूदा वर्चुअल वातावरण को सक्रिय कर सकते हैं।"
+
+#: thonny/plugins/ev3/__init__.py:73
+msgid "Preparations (skip the VS Code part)"
+msgstr "तैयारियां (वीएस कोड वाला भाग छोड़ें)"
+
+#: thonny/plugins/ev3/__init__.py:79
+msgid "Default password"
+msgstr "डिफ़ॉल्ट पासवर्ड"
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr "इनफार्मेशन"
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr "फॉर डिबगिंग दी प्रोग्राम मस्ट बी सेव्ड फर्स्ट."
+
+#: thonny/editors.py:215
+msgid "%s doesn't look like a text file"
+msgstr "%s एक टेक्स्ट फ़ाइल की तरह नहीं दिखता"
+
+#: thonny/editors.py:221
+msgid "Problem loading file"
+msgstr "फ़ाइल लोड करने में समस्या"
+
+#: thonny/editors.py:223
+msgid "This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr "इस फ़ाइल में एन्कोडिंग की समस्या है।\n"
+"\n"
+"सुनिश्चित करें कि यह UTF-8 में है या इसमें उचित एन्कोडिंग संकेत है।"
+
+#: thonny/editors.py:297
+msgid "File is open"
+msgstr "फ़ाइल खुली है"
+
+#: thonny/editors.py:299
+msgid "This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr "यह फ़ाइल Thonny में पहले से ही खुली हुई है।\n"
+"\n"
+"यदि आप इस नाम से सहेजना चाहते हैं, तो\n"
+"पहले मौजूदा संपादक को बंद करें!"
+
+#: thonny/editors.py:351
+msgid "Permission Error"
+msgstr "अनुमति त्रुटि"
+
+#: thonny/editors.py:352
+msgid "Looks like this file or folder is not writable."
+msgstr "ऐसा लगता है कि यह फ़ाइल या फ़ोल्डर लिखने योग्य नहीं है."
+
+#: thonny/editors.py:416
+msgid "Back-end is not ready"
+msgstr "बैक-एंड तैयार नहीं है"
+
+#: thonny/editors.py:421
+msgid "Where to save to?"
+msgstr "कहां बचाएं?"
+
+#: thonny/editors.py:492
+msgid "Potential problem"
+msgstr "संभावित समस्या"
+
+#: thonny/editors.py:494
+msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
+msgstr "यदि आप अपनी स्क्रिप्ट का नाम '%s' रखते हैं, तो आप '%s' नामक लाइब्रेरी मॉड्यूल को आयात नहीं कर पाएंगे"
+
+#: thonny/editors.py:499
+msgid "Do you still want to use this name for your script?"
+msgstr "क्या आप अभी भी अपनी स्क्रिप्ट के लिए इस नाम का उपयोग करना चाहते हैं?"
+
+#: thonny/editors.py:1055
+msgid "Got permission error when trying to load\n"
+"%s"
+msgstr "लोड करने का प्रयास करते समय अनुमति त्रुटि मिली\n"
+"%s"
+
+#: thonny/editors.py:1057
+msgid "Try opening it with File => Open."
+msgstr "इसे फ़ाइल => खोलें से खोलने का प्रयास करें।"
+
+#: thonny/editors.py:1059
+msgid "Permission error"
+msgstr "अनुमति त्रुटि"
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr "अनाम प्रोग्राम चलाने की अनुमति दें"
+
+#: thonny/plugins/pip_gui.py:620
+msgid "License"
+msgstr "लाइसेंस"
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr "यदि कोई उपयोगकर्ता मॉड्यूल लाइब्रेरी मॉड्यूल को छायांकित करता है तो चेतावनी दें"
+
+#: thonny/plugins/micropython/pip_gui.py:66
+msgid "Search micropython-lib and PyPI"
+msgstr "माइक्रोपाइथन-लिब और PyPI खोजें"
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid "The packages of this interpreter can be managed via your system package manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
+msgstr ""
+

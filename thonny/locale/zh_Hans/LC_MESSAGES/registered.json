@@ -21,7 +21,7 @@
     "Automatically show documentation for completions": "显示自动完成提示文档",
     "Automatically show parameter info after typing '('": "'(' 后自动显示参数信息",
     "Back": "步回",
-    "Back to\n%s": "返回 %s\n%s",
+    "Back to\n%s": "返回\n%s",
     "Back to\ncurrent frame": "返回\n当前帧",
     "Back-end is not ready": "后端未就绪",
     "Bad directory": "无效的文件夹",

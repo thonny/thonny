@@ -248,7 +248,6 @@
     "Summary": "Oppsummering",
     "Switch to\nregular\nmode": "Slå over til standardmodus",
     "Syntax theme": "Tema syntax",
-    "Target:": "Mål:",
     "Terminal": "Terminal",
     "Terminal emulation": "Emulerer terminal",
     "The answer is": "Svaret er",
@@ -293,11 +292,8 @@
     "bytes": "bytes",
     "here": "her",
     "look for your device name, \"USB Serial\" or \"UART\"": "sjå etter din eining kalla \"USB Serial\" eller \"UART\"",
-    "please wait": "venlegst vent",
     "supports basic ANSI-colors and styles": "støtte grunnleggende ANSI-farger og stiler",
     "to locate and install the package file (usually with .whl, .tar.gz or .zip extension).": "for å finne og installere pakkefilen (vanligvis med .whl-, .tar.gz- eller .zip-utvidelse).",
     "to locate requirements.txt file and install the packages specified in it.": "for å finne kravet.txt-filen og installere pakkene som er spesifisert i den.",
-    "unclosed_string": "ikkje_avslutta_streng",
-    "user site packages": "brukers egne pakker",
-    "virtual environment": "viruelt miljø"
+    "unclosed_string": "ikkje_avslutta_streng"
 }

@@ -7,63 +7,63 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: ta\n"
 
-#: thonny/workbench.py:361
+#: thonny/workbench.py:381
 msgid "File"
 msgstr "கோப்பு"
 
-#: thonny/workbench.py:362
+#: thonny/workbench.py:382
 msgid "Edit"
 msgstr "தொகு"
 
-#: thonny/workbench.py:363
+#: thonny/workbench.py:383
 msgid "View"
 msgstr "காட்சி"
 
-#: thonny/running.py:115 thonny/workbench.py:364
+#: thonny/running.py:161 thonny/workbench.py:384
 msgid "Run"
 msgstr "இயக்கு"
 
-#: thonny/workbench.py:365
+#: thonny/workbench.py:385
 msgid "Tools"
 msgstr "கருவிகள்"
 
-#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:366
+#: thonny/plugins/help/__init__.py:80 thonny/workbench.py:386
 msgid "Help"
 msgstr "உதவி"
 
-#: thonny/workbench.py:583
+#: thonny/workbench.py:604
 msgid "Exit"
 msgstr "வெளியேறு"
 
-#: thonny/workbench.py:610
+#: thonny/workbench.py:631
 msgid "Decrease font size"
 msgstr "எழுத்துரு அளவைக் குறை"
 
-#: thonny/workbench.py:622
+#: thonny/workbench.py:643
 msgid "Focus editor"
 msgstr "திருத்தி கவனம்"
 
-#: thonny/workbench.py:631
+#: thonny/workbench.py:652
 msgid "Focus shell"
 msgstr "ஓடு கவனம்"
 
-#: thonny/workbench.py:642
+#: thonny/workbench.py:662
 msgid "Maximize view"
 msgstr "காட்சி பெரிதாக்கு"
 
-#: thonny/workbench.py:654
+#: thonny/workbench.py:674
 msgid "Full screen"
 msgstr "முழு திரை"
 
-#: thonny/workbench.py:1437
+#: thonny/workbench.py:1473
 msgid "Program arguments"
 msgstr "நிரல் வாதங்கள்"
 
-#: thonny/plugins/about.py:28 thonny/plugins/about.py:163
+#: thonny/plugins/about.py:24 thonny/plugins/about.py:153
 msgid "About Thonny"
 msgstr "தோனி பற்றி"
 
-#: thonny/plugins/about.py:81
+#: thonny/plugins/about.py:82
 msgid "Made in\n"
 "University of Tartu, Estonia,\n"
 "with the help from\n"
@@ -77,7 +77,7 @@ msgstr "திறந்த மூல சமூகம், \n"
 "டார்டு பல்கலைக்கழகத்தில் \n"
 "உருவாக்கப்பட்டது"
 
-#: thonny/plugins/about.py:107
+#: thonny/plugins/about.py:102
 msgid "This program comes with\n"
 "ABSOLUTELY NO WARRANTY!\n"
 "It is free software, and you are welcome to\n"
@@ -91,11 +91,11 @@ msgstr "இந்த திட்டம் எந்த \n"
 "செய்ய உங்களை வரவேற்கிறோம், விவரங்களுக்கு \n"
 "https://opensource.org/licenses/MIT ஐப் பார்க்கவும்"
 
-#: thonny/plugins/about.py:152
+#: thonny/plugins/about.py:142
 msgid "Version history"
 msgstr "பதிப்பு வரலாறு"
 
-#: thonny/plugins/about.py:159
+#: thonny/plugins/about.py:149
 msgid "Report problems"
 msgstr "சிக்கல்களைப் புகாரளிக்கவும்"
 
@@ -119,15 +119,15 @@ msgstr "மைபை சோதனைகளைச் செய்"
 msgid "Disabled checks (one id per line)"
 msgstr "முடக்கப்பட்ட சரிபார்ப்புகள் (ஒரு வரிக்கு ஒரு அடையாளம்)"
 
-#: thonny/assistance.py:985 thonny/plugins/assistant_config_page.py:73
+#: thonny/assistance.py:983 thonny/plugins/assistant_config_page.py:74
 msgid "Assistant"
 msgstr "உதவியாளர்"
 
-#: thonny/plugins/autocomplete.py:512
+#: thonny/plugins/autocomplete.py:529
 msgid "Auto-complete"
 msgstr "தானாக நிறைவு"
 
-#: thonny/plugins/backend_config_page.py:320
+#: thonny/plugins/backend_config_page.py:335
 msgid "Interpreter"
 msgstr "மொழிபெயர்ப்பாளர்"
 
@@ -135,7 +135,7 @@ msgstr "மொழிபெயர்ப்பாளர்"
 msgid "About Birdseye"
 msgstr "பறவைக்கண் பற்றி"
 
-#: thonny/plugins/birdseye_frontend.py:56
+#: thonny/plugins/birdseye_frontend.py:57
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
@@ -147,15 +147,15 @@ msgstr "பறவைக்கண் என்பது ஒரு பைதான
 msgid "Debug current script (birdseye)"
 msgstr "தற்போதைய எழுத்துப்படிவத்தை பிழைத்திருத்து (பறவைக்கண்)"
 
-#: thonny/plugins/commenting_indenting.py:172
+#: thonny/plugins/commenting_indenting.py:171
 msgid "Toggle comment"
 msgstr "கருத்தை நிலைமாற்று"
 
-#: thonny/plugins/commenting_indenting.py:182
+#: thonny/plugins/commenting_indenting.py:181
 msgid "Comment out"
 msgstr "கருத்து குறிஇடு"
 
-#: thonny/plugins/commenting_indenting.py:192
+#: thonny/plugins/commenting_indenting.py:191
 msgid "Uncomment"
 msgstr "கருத்து குறிநீக்கு"
 
@@ -167,18 +167,18 @@ msgstr "செய்ததை விடு"
 msgid "Redo"
 msgstr "திரும்ப செய்"
 
-#: thonny/base_file_browser.py:706 thonny/plugins/common_editing_commands.py:49
-#: thonny/ui_utils.py:2255
+#: thonny/base_file_browser.py:728 thonny/plugins/common_editing_commands.py:49
+#: thonny/ui_utils.py:2349
 msgid "Cut"
 msgstr "வெட்டு"
 
-#: thonny/base_file_browser.py:707 thonny/plugins/common_editing_commands.py:61
-#: thonny/ui_utils.py:2256
+#: thonny/base_file_browser.py:729 thonny/plugins/common_editing_commands.py:61
+#: thonny/ui_utils.py:2350
 msgid "Copy"
 msgstr "படிஎடு"
 
-#: thonny/base_file_browser.py:709 thonny/base_file_browser.py:715
-#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2257
+#: thonny/base_file_browser.py:731 thonny/base_file_browser.py:737
+#: thonny/plugins/common_editing_commands.py:73 thonny/ui_utils.py:2351
 msgid "Paste"
 msgstr "ஒட்டு"
 
@@ -186,15 +186,15 @@ msgstr "ஒட்டு"
 msgid "Select all"
 msgstr "அனைத்தையும் தெரிவுசெய்"
 
-#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1401
+#: thonny/plugins/debugger.py:145 thonny/plugins/debugger.py:1404
 msgid "Run to cursor"
 msgstr "சுட்டிக்கு ஓடவும்"
 
-#: thonny/plugins/debugger.py:982
+#: thonny/plugins/debugger.py:987
 msgid "Can't close yet"
 msgstr "இன்னும் மூட முடியவில்லை"
 
-#: thonny/plugins/debugger.py:983
+#: thonny/plugins/debugger.py:988
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr "பிழைத்திருத்தத்தை ரத்து செய்ய விரும்பினால் \"நிறுத்து\" கட்டளையைப் பயன்படுத்தவும்"
 
@@ -232,7 +232,7 @@ msgid "Recommended maximum line length\n"
 msgstr "பரிந்துரைக்கப்பட்ட அதிகபட்ச வரி நீளம்\n"
 "(விளிம்புக் கோட்டை அணைக்க 0 ஆக அமைக்கவும்)"
 
-#: thonny/plugins/editor_config_page.py:97
+#: thonny/plugins/editor_config_page.py:104
 msgid "Editor"
 msgstr "திருத்தி"
 
@@ -240,59 +240,59 @@ msgstr "திருத்தி"
 msgid "Export usage logs..."
 msgstr "பயன்பாட்டு பதிவுகளை ஏற்றுமதி செய்..."
 
-#: thonny/plugins/event_view.py:39
+#: thonny/plugins/event_view.py:38
 msgid "Events"
 msgstr "நிகழ்வுகள்"
 
-#: thonny/plugins/files.py:551
+#: thonny/plugins/files.py:609
 msgid "Files"
 msgstr "கோப்புகள்"
 
-#: thonny/plugins/find_replace.py:57 thonny/plugins/find_replace.py:417
+#: thonny/plugins/find_replace.py:61 thonny/plugins/find_replace.py:440
 msgid "Find & Replace"
 msgstr "கண்டுபிடி & மாற்று"
 
-#: thonny/plugins/find_replace.py:63
+#: thonny/plugins/find_replace.py:67
 msgid "Find:"
 msgstr "கண்டுபிடி"
 
-#: thonny/plugins/find_replace.py:74
+#: thonny/plugins/find_replace.py:92
 msgid "Replace with:"
 msgstr "இதால் மாற்று"
 
-#: thonny/plugins/find_replace.py:92
+#: thonny/plugins/find_replace.py:110
 msgid "Case sensitive"
 msgstr "எழுத்து வடிவுணர்வு"
 
-#: thonny/plugins/find_replace.py:99
+#: thonny/plugins/find_replace.py:117
 msgid "Up"
 msgstr "மேலே"
 
-#: thonny/plugins/find_replace.py:103
+#: thonny/plugins/find_replace.py:121
 msgid "Down"
 msgstr "கீழே"
 
-#: thonny/plugins/find_replace.py:112
+#: thonny/plugins/find_replace.py:130
 msgid "Find"
 msgstr "கண்டுபிடி"
 
-#: thonny/plugins/find_replace.py:122
+#: thonny/plugins/find_replace.py:140
 msgid "Replace"
 msgstr "மாற்று"
 
-#: thonny/plugins/find_replace.py:130
+#: thonny/plugins/find_replace.py:148
 msgid "Replace+Find"
 msgstr "மாற்று+கண்டுபிடி"
 
-#: thonny/plugins/find_replace.py:140
+#: thonny/plugins/find_replace.py:158
 msgid "Replace all"
 msgstr "அனைத்தையும் மாற்று"
 
-#: thonny/plugins/find_replace.py:236
+#: thonny/plugins/find_replace.py:256
 msgid "Enter string to be replaced."
 msgstr "மாற்ற வேண்டிய சரத்தை உள்ளிடவும்."
 
-#: thonny/plugins/find_replace.py:320
+#: thonny/plugins/find_replace.py:341
 msgid "The specified text was not found!"
 msgstr "குறிப்பிட்ட உரை கிடைக்கவில்லை!"
 
@@ -326,7 +326,7 @@ msgstr "குவியல்"
 msgid "Language"
 msgstr "மொழி"
 
-#: thonny/plugins/notes.py:35
+#: thonny/plugins/notes.py:36
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
 "\n"
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
@@ -350,7 +350,7 @@ msgstr "முந்தைய பொருள்"
 msgid "Next object"
 msgstr "அடுத்த பொருள்"
 
-#: thonny/plugins/object_inspector.py:733
+#: thonny/plugins/object_inspector.py:732
 msgid "Object inspector"
 msgstr "பொருள் ஆய்வாளர்"
 
@@ -362,77 +362,77 @@ msgstr "சுருக்க உரை"
 msgid "Pygame Zero mode"
 msgstr "பைவிளையாட்டு சுழியம் பயன்முறை"
 
-#: thonny/plugins/pip_gui.py:79
+#: thonny/plugins/pip_gui.py:95
 msgid "Uninstall"
 msgstr "நிறுவல் நீக்கவும்"
 
-#: thonny/editors.py:663 thonny/plugins/pip_gui.py:235 thonny/ui_utils.py:482
-#: thonny/ui_utils.py:1824 thonny/workdlg.py:162
+#: thonny/editors.py:695 thonny/plugins/pip_gui.py:269 thonny/ui_utils.py:497
+#: thonny/ui_utils.py:1888 thonny/workdlg.py:203
 msgid "Close"
 msgstr "மூடு"
 
-#: thonny/plugins/pip_gui.py:381
+#: thonny/plugins/pip_gui.py:415
 msgid "Click "
 msgstr " சொடுக்கவும்"
 
-#: thonny/plugins/pip_gui.py:382 thonny/plugins/pip_gui.py:393
+#: thonny/plugins/pip_gui.py:416 thonny/plugins/pip_gui.py:427
 msgid "here"
 msgstr "இங்கே"
 
-#: thonny/plugins/pip_gui.py:76
+#: thonny/plugins/pip_gui.py:92
 msgid "Upgrade"
 msgstr "மேம்படுத்தல்"
 
-#: thonny/plugins/esp/__init__.py:347
-#: thonny/plugins/micropython/uf2dialog.py:93 thonny/plugins/pip_gui.py:73
+#: thonny/plugins/micropython/base_flashing_dialog.py:398
+#: thonny/plugins/pip_gui.py:89
 msgid "Install"
 msgstr "நிறுவு"
 
-#: thonny/plugins/pip_gui.py:521
+#: thonny/plugins/pip_gui.py:590
 msgid "Could not find the package from PyPI."
 msgstr "பைபியிலிருந்து தொகுப்பைக் கண்டுபிடிக்க முடியவில்லை."
 
-#: thonny/plugins/pip_gui.py:543
+#: thonny/plugins/pip_gui.py:612
 msgid "Latest stable version"
 msgstr "சமீபத்திய நிலையான பதிப்பு"
 
-#: thonny/plugins/pip_gui.py:545
+#: thonny/plugins/pip_gui.py:614
 msgid "Latest version"
 msgstr "சமீபத்திய பதிப்பு"
 
-#: thonny/plugins/pip_gui.py:547
+#: thonny/plugins/pip_gui.py:616
 msgid "Summary"
 msgstr "சுருக்கம்"
 
-#: thonny/plugins/pip_gui.py:549
+#: thonny/plugins/pip_gui.py:618
 msgid "Author"
 msgstr "நூலாசிரியர்"
 
-#: thonny/plugins/pip_gui.py:551
+#: thonny/plugins/pip_gui.py:622
 msgid "Homepage"
 msgstr "முகப்புப்பக்கம்"
 
-#: thonny/plugins/pip_gui.py:553
+#: thonny/plugins/pip_gui.py:624
 msgid "Bugtracker"
 msgstr "பிழை கண்காணிப்பான்"
 
-#: thonny/plugins/pip_gui.py:555
+#: thonny/plugins/pip_gui.py:626
 msgid "Documentation"
 msgstr "ஆவணப்படுத்தல்"
 
-#: thonny/plugins/pip_gui.py:557
+#: thonny/plugins/pip_gui.py:628
 msgid "PyPI page"
 msgstr "பைபி பக்கம்"
 
-#: thonny/plugins/pip_gui.py:597
+#: thonny/plugins/pip_gui.py:668
 msgid "Requires"
 msgstr "தேவைப்படுகிறது"
 
-#: thonny/plugins/pip_gui.py:729
+#: thonny/plugins/pip_gui.py:816
 msgid "Really uninstall?"
 msgstr "நிறுவல் நீக்கவா?"
 
-#: thonny/plugins/pip_gui.py:734
+#: thonny/plugins/pip_gui.py:821
 msgid "Are you sure you want to uninstall it?"
 msgstr "அதை நிச்சயமாக நிறுவல் நீக்க வேண்டுமா?"
 
@@ -446,179 +446,179 @@ msgstr "தற்போதைய சட்டகத்திற்குத் �
 msgid "Variables"
 msgstr "மாறிகள்"
 
-#: thonny/base_file_browser.py:1512
+#: thonny/base_file_browser.py:1576
 msgid "This computer"
 msgstr "இந்த கணினி"
 
-#: thonny/base_file_browser.py:627
+#: thonny/base_file_browser.py:648
 msgid "Refresh"
 msgstr "புதுப்பிப்பு"
 
-#: thonny/base_file_browser.py:640
+#: thonny/base_file_browser.py:657
 msgid "Focus into"
 msgstr "இதில் கவனம்"
 
-#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
-#: thonny/plugins/autocomplete.py:300 thonny/plugins/highlight_names.py:87
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
+#: thonny/plugins/autocomplete.py:303 thonny/plugins/highlight_names.py:86
 msgid "Error"
 msgstr "பிழை"
 
-#: thonny/base_file_browser.py:1347 thonny/base_file_browser.py:1359
+#: thonny/base_file_browser.py:1411 thonny/base_file_browser.py:1423
 msgid "You need to select a file!"
 msgstr "நீங்கள் ஒரு கோப்பைத் தேர்ந்தெடுக்க வேண்டும்!"
 
-#: thonny/base_file_browser.py:1363
+#: thonny/base_file_browser.py:1427
 msgid "Overwrite?"
 msgstr "மேலெழுதவா?"
 
-#: thonny/base_file_browser.py:1363
+#: thonny/base_file_browser.py:1427
 msgid "Do you want to overwrite '%s' ?"
 msgstr "நீங்கள் '%s' ஐ மேலெழுத விரும்புகிறீர்களா?"
 
-#: thonny/editors.py:628 thonny/editors.py:630
+#: thonny/editors.py:660 thonny/editors.py:662
 msgid "New"
 msgstr "புதிய"
 
-#: thonny/editors.py:641
+#: thonny/editors.py:673
 msgid "Open..."
 msgstr "திற..."
 
-#: thonny/editors.py:643
+#: thonny/editors.py:675
 msgid "Load"
 msgstr "ஏற்று"
 
-#: thonny/editors.py:652
+#: thonny/editors.py:684
 msgid "Recent files"
 msgstr "சமீபத்திய கோப்புகள்"
 
-#: thonny/editors.py:674 thonny/ui_utils.py:484
+#: thonny/editors.py:706 thonny/ui_utils.py:499
 msgid "Close all"
 msgstr "அனைத்தும் மூடு"
 
-#: thonny/editors.py:684 thonny/editors.py:686
+#: thonny/editors.py:716 thonny/editors.py:718
 msgid "Save"
 msgstr "சேமி"
 
-#: thonny/editors.py:709
+#: thonny/editors.py:741
 msgid "Save as..."
 msgstr "எனச் சேமி.."
 
-#: thonny/editors.py:720
+#: thonny/editors.py:752
 msgid "Save copy..."
 msgstr "நகல் சேமி..."
 
-#: thonny/config_ui.py:21
+#: thonny/config_ui.py:18
 msgid "Thonny options"
 msgstr "தோனி விருப்பங்கள்"
 
-#: thonny/running.py:114
+#: thonny/running.py:160
 msgid "Run current script"
 msgstr "தற்போதைய எழுத்துப்படிவத்தை இயக்கவும்"
 
-#: thonny/running.py:145
+#: thonny/running.py:191
 msgid "Run current script in terminal"
 msgstr "முனையத்தில் தற்போதைய எழுத்துப்படிவத்தை இயக்கவும்"
 
-#: thonny/running.py:158
+#: thonny/running.py:204
 msgid "Stop/Restart backend"
 msgstr "பின்தளத்தில் நிறுத்து/மறுதொடக்கம்"
 
-#: thonny/running.py:159
+#: thonny/running.py:205
 msgid "Stop"
 msgstr "நிறுத்து"
 
-#: thonny/running.py:170
+#: thonny/running.py:216
 msgid "Interrupt execution"
 msgstr "இயக்கத்தை குறுக்கீடு"
 
-#: thonny/running.py:183
+#: thonny/running.py:229
 #, fuzzy
 msgid "Send EOF / Soft reboot"
 msgstr "EOF / மென்மையான மறுதொடக்கத்தை அனுப்பவும்"
 
-#: thonny/running.py:194
+#: thonny/running.py:240
 msgid "Disconnect"
 msgstr "துண்டிக்கவும்"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:256
+#: thonny/plugins/cpython_frontend/cp_front.py:301
 msgid "Python interpreters"
 msgstr "பைதான் மொழிபெயர்ப்பாளர்கள்"
 
-#: thonny/editors.py:36 thonny/plugins/cpython_frontend/cp_front.py:257
-#: thonny/plugins/pip_gui.py:775 thonny/plugins/pip_gui.py:788
+#: thonny/editors.py:39 thonny/plugins/cpython_frontend/cp_front.py:302
+#: thonny/plugins/pip_gui.py:862 thonny/plugins/pip_gui.py:875
 msgid "all files"
 msgstr "அனைத்து கோப்புகள்"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:285
+#: thonny/plugins/cpython_frontend/cp_front.py:330
 msgid "Select empty directory for new virtual environment"
 msgstr "புதிய மெய்நிகர் சூழலுக்கு வெற்று கோப்பகத்தைத் தேர்ந்தெடுக்கவும்"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:292
+#: thonny/plugins/cpython_frontend/cp_front.py:337
 msgid "Bad directory"
 msgstr "மோசமான அடைவு"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:293
+#: thonny/plugins/cpython_frontend/cp_front.py:338
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
 msgstr "தேர்ந்தெடுக்கப்பட்ட கோப்பகம் காலியாக இல்லை.\n"
 "இன்னொன்றைத் தேர்ந்தெடுக்கவும் அல்லது ரத்து செய்யவும்."
 
-#: thonny/plugins/cpython_frontend/cp_front.py:310
+#: thonny/plugins/cpython_frontend/cp_front.py:355
 msgid "Creating virtual environment"
 msgstr "மெய்நிகர் சூழலை உருவாக்குதல்"
 
-#: thonny/shell.py:98
+#: thonny/shell.py:101
 msgid "Clear shell"
 msgstr "ஓடு வழுநீக்கு"
 
-#: thonny/shell.py:154
+#: thonny/shell.py:185
 msgid "Plotter"
 msgstr "வரைவி"
 
-#: thonny/shell.py:286
+#: thonny/shell.py:319
 msgid "Clear"
 msgstr "தெளிவு"
 
-#: thonny/shell.py:299
+#: thonny/shell.py:332
 msgid "Show Plotter"
 msgstr "வரைவி காட்டு"
 
-#: thonny/shell.py:1610
+#: thonny/shell.py:1671
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
 msgstr "செயல்திறன் காரணங்களுக்காக, ஓடு மிக நீண்ட வரிகளை முழுமையாகக் காட்டுவதைத் தவிர்க்கிறது (கருவிகள் => விருப்பங்கள் => ஓடு பார்க்கவும்).\n"
 "இங்கே நீங்கள் அசல் உரை துண்டுடன் தொடர்பு கொள்ளலாம்."
 
-#: thonny/shell.py:1621
+#: thonny/shell.py:1681
 msgid "Wrap text (may be slow)"
 msgstr "மடக்கு உரை (மெதுவாக இருக்கலாம்)"
 
-#: thonny/ui_utils.py:1819
+#: thonny/ui_utils.py:1883
 msgid "Copy to clipboard"
 msgstr "இடைநிலைப் பலகைக்கு நகலெடுக்கவும்"
 
-#: thonny/shell.py:1663
+#: thonny/shell.py:1723
 msgid "Squeezed text (%d characters)"
 msgstr "அழுத்தப்பட்ட உரை (%d எழுத்துகள்)"
 
-#: thonny/shell.py:1833
+#: thonny/shell.py:1893
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr "ஓடில் அச்சிடப்பட்ட எண்களின் வரிசையை வரைவி காட்சிப்படுத்துகிறது."
 
-#: thonny/shell.py:1835
+#: thonny/shell.py:1895
 msgid "See Help for details."
 msgstr "விவரங்களுக்கு உதவியைப் பார்க்கவும்."
 
-#: thonny/ui_utils.py:483
+#: thonny/ui_utils.py:498
 msgid "Close others"
 msgstr "மற்றவைளை மூடு"
 
-#: thonny/ui_utils.py:1675
+#: thonny/ui_utils.py:1738
 msgid "Copying"
 msgstr "நகலெடுக்கிறது"
 
-#: thonny/ui_utils.py:1678
+#: thonny/ui_utils.py:1741
 msgid "Copying\n"
 "  %s\n"
 "to\n"
@@ -628,64 +628,65 @@ msgstr "நகலெடுக்கிறது\n"
 "இதற்கு\n"
 "  %s"
 
-#: thonny/base_file_browser.py:1324 thonny/config_ui.py:38 thonny/export.py:28
-#: thonny/plugins/backend_config_page.py:273 thonny/plugins/pip_gui.py:1210
-#: thonny/ui_utils.py:148 thonny/ui_utils.py:1686 thonny/ui_utils.py:1771
-#: thonny/workdlg.py:164 thonny/workdlg.py:209
+#: thonny/base_file_browser.py:1382 thonny/config_ui.py:42 thonny/export.py:28
+#: thonny/plugins/backend_config_page.py:288 thonny/plugins/pip_gui.py:1406
+#: thonny/ui_utils.py:161 thonny/ui_utils.py:1749 thonny/ui_utils.py:1835
+#: thonny/workdlg.py:205 thonny/workdlg.py:259
 msgid "Cancel"
 msgstr "ரத்து செய்"
 
-#: thonny/base_file_browser.py:1321 thonny/config_ui.py:37 thonny/export.py:25
-#: thonny/plugins/about.py:120 thonny/plugins/backend_config_page.py:268
-#: thonny/ui_utils.py:145 thonny/ui_utils.py:1768 thonny/workdlg.py:206
+#: thonny/base_file_browser.py:1373 thonny/config_ui.py:41 thonny/export.py:25
+#: thonny/plugins/about.py:115 thonny/plugins/backend_config_page.py:283
+#: thonny/ui_utils.py:158 thonny/ui_utils.py:1832 thonny/workdlg.py:256
 msgid "OK"
 msgstr "சரி"
 
-#: thonny/ui_utils.py:2261
+#: thonny/ui_utils.py:2355
 msgid "Select All"
 msgstr "அனைத்தையும் தேர்ந்தெடு"
 
-#: thonny/plugins/shell_config_page.py:82 thonny/workbench.py:162
+#: thonny/plugins/shell_config_page.py:82 thonny/shell.py:149
+#: thonny/workbench.py:164
 msgid "Shell"
 msgstr "ஓடு"
 
-#: thonny/workbench.py:593
+#: thonny/workbench.py:614
 msgid "Options..."
 msgstr "விருப்பங்கள்..."
 
-#: thonny/workbench.py:600
+#: thonny/workbench.py:621
 msgid "Increase font size"
 msgstr "எழுத்துரு அளவை அதிகரிக்கவும்"
 
-#: thonny/workbench.py:665
+#: thonny/workbench.py:685
 msgid "Change font size"
 msgstr "எழுத்துரு அளவை மாற்றவும்"
 
-#: thonny/workbench.py:666
+#: thonny/workbench.py:686
 msgid "Zoom"
 msgstr "பெரிதாக்கு"
 
-#: thonny/workbench.py:675
+#: thonny/workbench.py:695
 msgid "Exit Thonny"
 msgstr "தோனியிலிருந்து வெளியேறு"
 
-#: thonny/workbench.py:678
+#: thonny/workbench.py:698
 msgid "Quit"
 msgstr "விலகு"
 
-#: thonny/workbench.py:1216 thonny/workbench.py:1224
+#: thonny/workbench.py:1253 thonny/workbench.py:1261
 msgid "Overwriting theme '%s'"
 msgstr "'%s' கருப்பொருள் மேலெழுதும்"
 
-#: thonny/workbench.py:1408
+#: thonny/workbench.py:1444
 msgid "Program arguments:"
 msgstr "நிரல் வாதங்கள்:"
 
-#: thonny/workbench.py:1462
+#: thonny/workbench.py:1498
 msgid "Regular mode"
 msgstr "வழக்கமான முறை"
 
-#: thonny/workbench.py:1463
+#: thonny/workbench.py:1500
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
@@ -693,71 +694,71 @@ msgstr "உள்ளமைவு புதுப்பிக்கப்பட�
 "\n"
 "(உங்கள் எண்ணத்தை மாற்றினால், 'கருவிகள் → விருப்பங்கள் → பொது' என்பதைப் பார்க்கவும்.)"
 
-#: thonny/plugins/ast_view.py:212
+#: thonny/plugins/ast_view.py:211
 msgid "Program tree"
 msgstr "நிரல் மரம்"
 
-#: thonny/plugins/debugger.py:1283
+#: thonny/plugins/debugger.py:1286
 msgid "Resume"
 msgstr "தொடரவும்"
 
-#: thonny/plugins/debugger.py:1299
+#: thonny/plugins/debugger.py:1302
 msgid "Run / resume"
 msgstr "இயக்கவும் / தொடரவும்"
 
-#: thonny/plugins/debugger.py:1314
+#: thonny/plugins/debugger.py:1317
 msgid "Debug current script"
 msgstr "தற்போதைய எழுத்துப்படிவத்தை பிழைத்திருத்தவும்"
 
-#: thonny/plugins/debugger.py:1316
+#: thonny/plugins/debugger.py:1319
 msgid "Debug"
 msgstr "பிழைத்திருத்தம்"
 
-#: thonny/plugins/debugger.py:1327
+#: thonny/plugins/debugger.py:1330
 msgid "Debug current script (nicer)"
 msgstr "தற்போதைய எழுத்துப்படிவத்தை பிழைத்திருத்தவும் (மென்மையாக)"
 
-#: thonny/plugins/debugger.py:1339
+#: thonny/plugins/debugger.py:1342
 msgid "Debug current script (faster)"
 msgstr "தற்போதைய எழுத்துப்படிவத்தை பிழைத்திருத்தவும் (வேகமாக)"
 
-#: thonny/plugins/debugger.py:1350
+#: thonny/plugins/debugger.py:1353
 msgid "Step over"
 msgstr "மேலே ஒருபடி"
 
-#: thonny/plugins/debugger.py:1352
+#: thonny/plugins/debugger.py:1355
 msgid "Over"
 msgstr "முடிந்துவிட்டது"
 
-#: thonny/plugins/debugger.py:1363
+#: thonny/plugins/debugger.py:1366
 msgid "Step into"
 msgstr "உள்ளே ஒருபடி"
 
-#: thonny/plugins/debugger.py:1365
+#: thonny/plugins/debugger.py:1368
 msgid "Into"
 msgstr "உள்ளே"
 
-#: thonny/plugins/debugger.py:1376
+#: thonny/plugins/debugger.py:1379
 msgid "Step out"
 msgstr "வெளியேறு"
 
-#: thonny/plugins/debugger.py:1378
+#: thonny/plugins/debugger.py:1381
 msgid "Out"
 msgstr "வெளியே"
 
-#: thonny/plugins/debugger.py:1413
+#: thonny/plugins/debugger.py:1416
 msgid "Step back"
 msgstr "ஒருபடி பின்னே"
 
-#: thonny/plugins/debugger.py:1415
+#: thonny/plugins/debugger.py:1418
 msgid "Back"
 msgstr "பின்னே"
 
-#: thonny/plugins/debugger.py:1421
+#: thonny/plugins/debugger.py:1424
 msgid "Stack"
 msgstr "அடுக்கு"
 
-#: thonny/plugins/debugger.py:1422
+#: thonny/plugins/debugger.py:1425
 msgid "Exception"
 msgstr "விதிவிலக்கு"
 
@@ -777,122 +778,111 @@ msgstr "பயனர்இடைமுகம் பயன்முறை"
 msgid "UI scaling factor"
 msgstr "பயனர்இடைமுகம் அளவிடுதல் காரணி"
 
-#: thonny/plugins/general_config_page.py:108
+#: thonny/plugins/general_config_page.py:114
 msgid "NB! Restart Thonny after changing these options!"
 msgstr "அறிவிப்பு! இந்த விருப்பங்களை மாற்றிய பின் தோனியை மீண்டும் தொடங்கவும்!"
 
-#: thonny/plugins/general_config_page.py:142
+#: thonny/plugins/general_config_page.py:148
 msgid "General"
 msgstr "பொது"
 
-#: thonny/plugins/pip_gui.py:129
+#: thonny/plugins/pip_gui.py:160
 msgid "INSTALL"
 msgstr "நிறுவு"
 
-#: thonny/plugins/pip_gui.py:351
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:47
+#: thonny/plugins/pip_gui.py:385
 msgid "Browse the packages"
 msgstr "தொகுப்புகளை உலாவவும்"
 
-#: thonny/plugins/pip_gui.py:354
+#: thonny/plugins/pip_gui.py:389
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
 msgstr "தற்போதைய மொழிபெயர்ப்பாளருடன் நீங்கள் இங்குள்ள தொகுப்புகளை மட்டுமே உலாவ முடியும். நிறுவுதல், மேம்படுத்துதல் அல்லது நிறுவல் நீக்குதல் ஆகியவற்றுக்கு\n"
 "'கருவிகள் → திறந்த கணினி ஓடு...' ஐப் பயன்படுத்தவும்."
 
-#: thonny/plugins/pip_gui.py:362
+#: thonny/plugins/pip_gui.py:396
 msgid "Packages' directory"
 msgstr "தொகுப்புகளின் அடைவு"
 
-#: thonny/plugins/pip_gui.py:366
+#: thonny/plugins/pip_gui.py:400
 msgid "Install from PyPI"
 msgstr "பைபி இலிருந்து நிறுவவும்"
 
-#: thonny/plugins/pip_gui.py:369
+#: thonny/plugins/pip_gui.py:404
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
 msgstr "தொகுப்பை எங்கிருந்து பெறுவது என்று உங்களுக்குத் தெரியாவிட்டால், பெரும்பாலும் நீங்கள் பைதான் தொகுப்பு அட்டவணையைத் தேட வேண்டும். மேலே உள்ள தேடல் பெட்டியில் தொகுப்பின் பெயரை உள்ளிட்டு திரும்பும் விசையை அழுத்துவதன் மூலம் தொடங்கவும்."
 
-#: thonny/plugins/pip_gui.py:386
+#: thonny/plugins/pip_gui.py:420
 msgid "to locate requirements.txt file and install the packages specified in it."
 msgstr "தேவைகள்.உரை கோப்பைக் கண்டறிந்து அதில் குறிப்பிடப்பட்டுள்ள தொகுப்புகளை நிறுவவும்."
 
-#: thonny/plugins/pip_gui.py:392
+#: thonny/plugins/pip_gui.py:426
 msgid "Click"
 msgstr "சொடுக்கவும்"
 
-#: thonny/plugins/pip_gui.py:397
+#: thonny/plugins/pip_gui.py:432
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
 msgstr "தொகுப்பு கோப்பைக் கண்டுபிடித்து நிறுவ (பொதுவாக .whl, .tar.gz அல்லது .zip நீட்டிப்புடன்)."
 
-#: thonny/plugins/pip_gui.py:404
+#: thonny/plugins/pip_gui.py:438
 msgid "Upgrade or uninstall"
 msgstr "மேம்படுத்தவும் அல்லது நிறுவல் நீக்கவும்"
 
-#: thonny/plugins/pip_gui.py:406
+#: thonny/plugins/pip_gui.py:440
 msgid "Start by selecting the package from the left."
 msgstr "இடதுபுறத்தில் இருந்து தொகுப்பைத் தேர்ந்தெடுப்பதன் மூலம் தொடங்கவும்."
 
-#: thonny/plugins/pip_gui.py:410
-msgid "Target:"
-msgstr "இலக்கு:"
-
-#: thonny/plugins/pip_gui.py:414
-msgid "virtual environment"
-msgstr "மெய்நிகர் சூழல்"
-
-#: thonny/plugins/pip_gui.py:412
-msgid "user site packages"
-msgstr "பயனர் தள தொகுப்புகள்"
-
-#: thonny/plugins/pip_gui.py:418
+#: thonny/plugins/pip_gui.py:449
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
 msgstr "இந்த உரையாடல் கிடைக்கக்கூடிய அனைத்து தொகுப்புகளையும் பட்டியலிடுகிறது, ஆனால் இதிலிருந்து தொகுப்புகளை மட்டும் மேம்படுத்தவும் மற்றும் நிறுவல் நீக்கவும் அனுமதிக்கிறது"
 
-#: thonny/plugins/pip_gui.py:428
+#: thonny/plugins/pip_gui.py:459
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
 msgstr "இந்த கோப்பகத்தில் புதிய தொகுப்புகளும் நிறுவப்படும். மற்ற இடங்கள் மாற்று வழிகளில் நிர்வகிக்கப்பட வேண்டும்."
 
-#: thonny/plugins/pip_gui.py:471
+#: thonny/plugins/pip_gui.py:511
 msgid "Installed version:"
 msgstr "நிறுவப்பட்ட பதிப்பு:"
 
-#: thonny/plugins/pip_gui.py:473
+#: thonny/plugins/pip_gui.py:513
 msgid "Installed to:"
 msgstr "இங்கு நிறுவப்பட்டது:"
 
-#: thonny/plugins/pip_gui.py:524
+#: thonny/plugins/pip_gui.py:593
 msgid "Please check your spelling!"
 msgstr "உங்கள் எழுத்துப்பிழையைச் சரிபார்க்கவும்!"
 
-#: thonny/plugins/pip_gui.py:528
+#: thonny/plugins/pip_gui.py:597
 msgid "Could not find the package info from PyPI."
 msgstr "பைபி இலிருந்து தொகுப்புத் தகவலைக் கண்டுபிடிக்க முடியவில்லை."
 
-#: thonny/plugins/pip_gui.py:530 thonny/plugins/pip_gui.py:1271
+#: thonny/plugins/pip_gui.py:599 thonny/plugins/pip_gui.py:1476
 msgid "Error code:"
 msgstr "பிழை குறியீடு:"
 
-#: thonny/plugins/pip_gui.py:675
+#: thonny/plugins/pip_gui.py:762
 msgid "Can't find package name from the list:"
 msgstr "பட்டியலிலிருந்து தொகுப்பின் பெயரைக் கண்டுபிடிக்க முடியவில்லை:"
 
-#: thonny/plugins/pip_gui.py:730
+#: thonny/plugins/pip_gui.py:818
 msgid "Package '{}' is required for installing and uninstalling other packages."
 msgstr "மற்ற தொகுப்புகளை நிறுவுவதற்கும் நீக்குவதற்கும் '{}' தொகுப்பு தேவை."
 
-#: thonny/plugins/pip_gui.py:775
+#: thonny/plugins/pip_gui.py:862
 msgid "Package"
 msgstr "தொகுப்பு"
 
-#: thonny/plugins/pip_gui.py:885
+#: thonny/plugins/pip_gui.py:974
 msgid "Manage packages for %s"
 msgstr "%sக்கான தொகுப்புகளை நிர்வகிக்கவும்"
 
-#: thonny/editors.py:571 thonny/plugins/micropython/pip_gui.py:23
-#: thonny/plugins/pip_gui.py:936
+#: thonny/editors.py:589 thonny/plugins/micropython/pip_gui.py:26
+#: thonny/plugins/pip_gui.py:1112
 msgid "Confirmation"
 msgstr "உறுதிப்படுத்தல்"
 
-#: thonny/plugins/pip_gui.py:937
+#: thonny/plugins/pip_gui.py:1114
 msgid "Looks like you are installing a Thonny-related package.\n"
 "If you meant to install a Thonny plugin, then you should\n"
 "choose 'Tools → Manage plugins...' instead\n"
@@ -903,111 +893,111 @@ msgstr "நீங்கள் தோனி தொடர்பான தொகு
 "\n"
 "பின்-இறுதியில் %s ஐ நிச்சயமாக நிறுவ விரும்புகிறீர்களா?"
 
-#: thonny/plugins/pip_gui.py:1042
+#: thonny/plugins/pip_gui.py:1204
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
 msgstr "அறிவிப்பு! தற்போதைய தோனி பதிப்பிற்கு இணங்கக்கூடிய மற்றொரு பதிப்பு இருக்கலாம். நிறுவ வேண்டிய பதிப்பைத் தேர்வுசெய்ய '...' பொத்தானைக் சொடுக்கவும்."
 
-#: thonny/plugins/pip_gui.py:1050
+#: thonny/plugins/pip_gui.py:1211
 msgid "Thonny plugin without requirements"
 msgstr "தேவைகள் இல்லாமல் தோனி சொருகி"
 
-#: thonny/plugins/pip_gui.py:1066
+#: thonny/plugins/pip_gui.py:1227
 msgid "Unsuitable requirements"
 msgstr "பொருத்தமற்ற தேவைகள்"
 
-#: thonny/plugins/pip_gui.py:1067
+#: thonny/plugins/pip_gui.py:1228
 msgid "This package requires different Thonny version:"
 msgstr "இந்த தொகுப்புக்கு வேறுபட்ட தோனி பதிப்பு தேவை:"
 
-#: thonny/plugins/pip_gui.py:1071
+#: thonny/plugins/pip_gui.py:1232
 msgid "If you still want it, then please install it from the command line."
 msgstr "நீங்கள் இன்னும் அதை விரும்பினால், கட்டளை வரியிலிருந்து அதை நிறுவவும்."
 
-#: thonny/plugins/pip_gui.py:1108
+#: thonny/plugins/pip_gui.py:1270
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
 msgstr "அறிவிப்பு! செருகுநிரலை நிறுவிய / மேம்படுத்திய / நிறுவல் நீக்கிய பிறகு, தோனியை மறுதொடக்கம் செய்ய வேண்டும்."
 
-#: thonny/plugins/pip_gui.py:1118
+#: thonny/plugins/pip_gui.py:1279
 msgid "Thonny plug-ins"
 msgstr "தோனி செருகுநிரல்கள்"
 
-#: thonny/plugins/pip_gui.py:1154
+#: thonny/plugins/pip_gui.py:1321
 msgid "Advanced install / upgrade / downgrade"
 msgstr "மேம்பட்ட நிறுவல் / மேம்படுத்தல் / தரமிறக்குதல்"
 
-#: thonny/plugins/pip_gui.py:1163
+#: thonny/plugins/pip_gui.py:1330
 msgid "Desired version"
 msgstr "விரும்பிய பதிப்பு"
 
-#: thonny/plugins/pip_gui.py:1201
+#: thonny/plugins/pip_gui.py:1389
 msgid "Upgrade dependencies"
 msgstr "சார்புகளை மேம்படுத்தவும்"
 
-#: thonny/plugins/pip_gui.py:1269
+#: thonny/plugins/pip_gui.py:1474
 msgid "Requires:"
 msgstr "தேவை:"
 
-#: thonny/plugins/pip_gui.py:1273
+#: thonny/plugins/pip_gui.py:1478
 msgid "Error:"
 msgstr "பிழை:"
 
-#: thonny/plugins/pip_gui.py:1486
+#: thonny/plugins/pip_gui.py:1677
 msgid "Manage packages..."
 msgstr "தொகுப்புகளை நிர்வகி..."
 
-#: thonny/plugins/pip_gui.py:1492
+#: thonny/plugins/pip_gui.py:1683
 msgid "Manage plug-ins..."
 msgstr "செருகுநிரல்களை நிர்வகி..."
 
-#: thonny/plugins/replayer.py:365
+#: thonny/plugins/replayer.py:364
 msgid "Open replayer..."
 msgstr "மறுஇயக்கியை திற..."
 
-#: thonny/plugins/run_debug_config_page.py:14
+#: thonny/plugins/run_debug_config_page.py:21
 msgid "Change working directory to script directory on Run / Debug"
 msgstr "இயக்கவும் / பிழைத்திருத்தத்தில் வேலை செய்யும் கோப்பகத்தை எழுத்துப்படிவ கோப்பகமாக மாற்றவும்"
 
-#: thonny/plugins/run_debug_config_page.py:22
+#: thonny/plugins/run_debug_config_page.py:35
 msgid "Show function calls (frames) in separate windows"
 msgstr "செயல்பாட்டு அழைப்புகளை (சட்டங்கள்) தனி சாளரங்களில் காட்டு"
 
-#: thonny/plugins/run_debug_config_page.py:23
+#: thonny/plugins/run_debug_config_page.py:36
 msgid "Uncheck if you want more traditional experience."
 msgstr "மேலும் பாரம்பரிய அனுபவத்தை நீங்கள் விரும்பினால், இதைத் தேர்வுநீக்கவும்."
 
-#: thonny/plugins/run_debug_config_page.py:29
+#: thonny/plugins/run_debug_config_page.py:42
 msgid "Open and close Stack view automatically"
 msgstr "அடுக்கு காட்சியை தானாகவே திறந்து மூடவும்"
 
-#: thonny/plugins/run_debug_config_page.py:30
+#: thonny/plugins/run_debug_config_page.py:44
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
 msgstr "முதல் அழைப்பில் அடுக்கு காட்சியைத் திறந்து, நிரல் பிரதான சட்டத்திற்குத் திரும்பும்போது அதை மூடுகிறது."
 
-#: thonny/plugins/run_debug_config_page.py:39
+#: thonny/plugins/run_debug_config_page.py:52
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
 msgstr "நூலகங்களுக்குள் நுழைய அனுமதிக்கவும் (அதாவது முதன்மை எழுத்துப்படிவ கோப்பகத்திற்கு வெளியே)"
 
-#: thonny/plugins/run_debug_config_page.py:40
+#: thonny/plugins/run_debug_config_page.py:53
 msgid "May make debugging slower."
 msgstr "பிழைத்திருத்தம் மெதுவாக செயல்படலாம்."
 
-#: thonny/plugins/run_debug_config_page.py:45
+#: thonny/plugins/run_debug_config_page.py:58
 msgid "Preferred debugger"
 msgstr "விருப்பமான பிழைத்திருத்தி"
 
-#: thonny/plugins/run_debug_config_page.py:57
+#: thonny/plugins/run_debug_config_page.py:70
 msgid "(used when clicking Debug toolbar button)"
 msgstr "(பிழைத்திருத்த கருவிப்பட்டி பொத்தானை சொடுக்கும்போது பயன்படுத்தப்படுகிறது)"
 
-#: thonny/plugins/run_debug_config_page.py:62
+#: thonny/plugins/run_debug_config_page.py:75
 msgid "Birdseye port"
 msgstr "பறவைக்கண் துறைமுகம்"
 
-#: thonny/plugins/run_debug_config_page.py:66
+#: thonny/plugins/run_debug_config_page.py:79
 msgid "(restart Thonny after changing this)"
 msgstr "(இதை மாற்றிய பின் தோனியை மீண்டும் தொடங்கவும்)"
 
-#: thonny/plugins/run_debug_config_page.py:74
+#: thonny/plugins/run_debug_config_page.py:87
 msgid "Run & Debug"
 msgstr "இயக்கவும் & பிழைத்திருத்தவும்"
 
@@ -1043,7 +1033,7 @@ msgstr "நிரல் முடிந்ததும் பைதான் ப
 msgid "Keep terminal window open after Python process ends"
 msgstr "பைதான் செயல்முறை முடிந்ததும் முனையத்தில் சாளரத்தைத் திறந்து வைக்கவும்"
 
-#: thonny/plugins/terminal_config_page.py:31
+#: thonny/plugins/terminal_config_page.py:32
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
 msgstr "அறிவிப்பு! முனையத்தின் அமைப்புகளில் தானியங்கி மூடுதலை இயக்க வேண்டும்\n"
@@ -1053,51 +1043,51 @@ msgstr "அறிவிப்பு! முனையத்தின் அமை
 msgid "Terminal"
 msgstr "முனையம்"
 
-#: thonny/plugins/theme_and_font_config_page.py:40
+#: thonny/plugins/theme_and_font_config_page.py:39
 msgid "UI theme"
 msgstr "பயனர்இடைமுகம்  கருப்பொருள்"
 
-#: thonny/plugins/theme_and_font_config_page.py:53
+#: thonny/plugins/theme_and_font_config_page.py:52
 msgid "Syntax theme"
 msgstr "தொடரியல் கருப்பொருள்"
 
-#: thonny/plugins/theme_and_font_config_page.py:85
+#: thonny/plugins/theme_and_font_config_page.py:84
 msgid "Editor font"
 msgstr "திருத்தி எழுத்துரு"
 
-#: thonny/plugins/theme_and_font_config_page.py:108
+#: thonny/plugins/theme_and_font_config_page.py:107
 msgid "IO font"
 msgstr "உள்ளீடு வெளியீடு எழுத்துரு"
 
-#: thonny/plugins/theme_and_font_config_page.py:133
+#: thonny/plugins/theme_and_font_config_page.py:132
 msgid "Preview"
 msgstr "முன்னோட்டம்"
 
-#: thonny/plugins/theme_and_font_config_page.py:145
+#: thonny/plugins/theme_and_font_config_page.py:150
 msgid "This is a comment"
 msgstr "இது ஒரு கருத்து"
 
-#: thonny/plugins/theme_and_font_config_page.py:148
+#: thonny/plugins/theme_and_font_config_page.py:153
 msgid "The answer is"
 msgstr "விடை என்னவென்றால்"
 
-#: thonny/plugins/theme_and_font_config_page.py:152
+#: thonny/plugins/theme_and_font_config_page.py:157
 msgid "unclosed_string"
 msgstr "மூடப்படாத_சரம்"
 
-#: thonny/plugins/theme_and_font_config_page.py:154
+#: thonny/plugins/theme_and_font_config_page.py:159
 msgid "blah, blah"
 msgstr "வாழ்க, தமிழ்"
 
-#: thonny/plugins/theme_and_font_config_page.py:177
+#: thonny/plugins/theme_and_font_config_page.py:183
 msgid "NB! Some style elements change only after restarting Thonny!"
 msgstr "அறிவிப்பு! தோனியை மறுதொடக்கம் செய்த பிறகுதான் சில பாணி கூறுகள் மாறும்!"
 
-#: thonny/plugins/theme_and_font_config_page.py:216
+#: thonny/plugins/theme_and_font_config_page.py:222
 msgid "Enter an integer"
 msgstr "ஒரு முழு எண்ணை உள்ளிடவும்"
 
-#: thonny/plugins/theme_and_font_config_page.py:229
+#: thonny/plugins/theme_and_font_config_page.py:235
 msgid "Theme & Font"
 msgstr "கருப்பொருள் & எழுத்துரு"
 
@@ -1117,37 +1107,37 @@ msgstr "வீடு"
 msgid "Help contents"
 msgstr "உதவி உள்ளடக்கங்கள்"
 
-#: thonny/plugins/micropython/mp_front.py:318
+#: thonny/plugins/micropython/mp_front.py:290
 msgid "CircuitPython device"
 msgstr "சுற்றமைப்புபைதான் சாதனம்"
 
-#: thonny/plugins/micropython/mp_front.py:322
+#: thonny/plugins/micropython/mp_front.py:294
 msgid "MicroPython device"
 msgstr "நுண்பைதான் சாதனம்"
 
-#: thonny/plugins/micropython/mp_front.py:563
+#: thonny/plugins/micropython/mp_front.py:545
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr "உங்கள் சாதனத்தை கணினியுடன் இணைத்து, கீழே தொடர்புடைய துறைமுகத்தை தேர்ந்தெடுக்கவும்"
 
-#: thonny/plugins/micropython/mp_front.py:566
+#: thonny/plugins/micropython/mp_front.py:548
 #, fuzzy
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr "உங்கள் சாதனத்தின் பெயரைப் பார்க்கவும், \"USB தொடர்\" அல்லது \"UART\""
 
-#: thonny/plugins/micropython/mp_front.py:568
+#: thonny/plugins/micropython/mp_front.py:550
 #, fuzzy
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr "நீங்கள் அதை கண்டுபிடிக்க முடியவில்லை என்றால், நீங்கள் முதலில் சரியான USB இயக்கி நிறுவ வேண்டும்."
 
-#: thonny/plugins/micropython/mp_front.py:464
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port"
 msgstr "துறைமுகம்"
 
-#: thonny/plugins/micropython/mp_front.py:474
+#: thonny/plugins/micropython/mp_front.py:445
 msgid "Try to detect port automatically"
 msgstr "துறைமுகத்தை தானாக கண்டறிய முயற்சிக்கவும்"
 
-#: thonny/plugins/micropython/__init__.py:25
+#: thonny/plugins/micropython/__init__.py:24
 msgid "MicroPython (generic)"
 msgstr "நுண்பைதான் (பொதுவானது)"
 
@@ -1159,19 +1149,19 @@ msgstr "அச்சு..."
 msgid "Open system shell..."
 msgstr "முறைமை ஓட்டைத் திற..."
 
-#: thonny/plugins/backend_config_page.py:103
+#: thonny/plugins/backend_config_page.py:109
 msgid "Details"
 msgstr "விவரங்கள்"
 
-#: thonny/plugins/pip_gui.py:379
+#: thonny/plugins/pip_gui.py:413
 msgid "Install from requirements file"
 msgstr "தேவைகள் கோப்பிலிருந்து நிறுவவும்"
 
-#: thonny/plugins/pip_gui.py:391
+#: thonny/plugins/pip_gui.py:425
 msgid "Install from local file"
 msgstr "உள்ளூர் கோப்பிலிருந்து நிறுவவும்"
 
-#: thonny/plugins/pip_gui.py:1101
+#: thonny/plugins/pip_gui.py:1263
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
 msgstr "இந்த உரையாடல் தோனி செருகுநிரல்களையும் அவற்றின் சார்புகளையும் நிர்வகிப்பதற்கானது.\n"
@@ -1181,95 +1171,91 @@ msgstr "இந்த உரையாடல் தோனி செருகுந
 msgid "CircuitPython (generic)"
 msgstr "சுற்றமைப்புபைதான் (பொதுவானது)"
 
-#: thonny/plugins/commenting_indenting.py:143
+#: thonny/plugins/commenting_indenting.py:142
 msgid "Indent selected lines"
 msgstr "தேர்ந்தெடுக்கப்பட்ட வரிகளை உள்தள்ளவும்"
 
-#: thonny/plugins/commenting_indenting.py:153
+#: thonny/plugins/commenting_indenting.py:152
 msgid "Dedent selected lines"
 msgstr "தேர்ந்தெடுக்கப்பட்ட வரிகளை வெளிதள்ளவும்"
 
-#: thonny/workbench.py:1451
+#: thonny/workbench.py:1487
 msgid "Switch to\n"
 "regular\n"
 "mode"
 msgstr "வழக்கமான பயன்முறைக்கு மாறவும்"
 
-#: thonny/plugins/microbit/__init__.py:57
+#: thonny/plugins/microbit/__init__.py:62
 #, fuzzy
 msgid "Make sure MicroPython has been installed to your micro:bit."
 msgstr "உங்கள் நுண்:பிட்டில் நுண்பைதான் நிறுவப்பட்டுள்ளதா என்பதை உறுதிப்படுத்தவும்."
 
-#: thonny/plugins/microbit/__init__.py:59
+#: thonny/plugins/microbit/__init__.py:64
 #, fuzzy
 msgid "Don't forget that main.py only works without embedded main script."
 msgstr "முக்கிய எழுத்துப்படிவத்தை உட்பொதிக்கப்படாமல் main.py மட்டுமே வேலை செய்யும் என்பதை மறந்துவிடாதீர்கள்."
 
-#: thonny/plugins/micropython/uf2dialog.py:44
-msgid "please wait"
-msgstr "தயவுசெய்து காத்திருங்கள்"
-
-#: thonny/misc_utils.py:151
+#: thonny/misc_utils.py:178
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
 msgstr "'%s' வட்டு கண்டுபிடிக்க முடியவில்லை. அதை நீங்களே கண்டுபிடிக்க விரும்புகிறீர்களா?"
 
-#: thonny/misc_utils.py:154
+#: thonny/misc_utils.py:181
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
 msgstr "பல '%s' வட்டுகள் உள்ளன. நீங்களே ஒன்றைத் தேர்ந்தெடுக்க விரும்புகிறீர்களா?"
 
-#: thonny/misc_utils.py:170
+#: thonny/misc_utils.py:197
 msgid "Can't find suitable disk"
 msgstr "பொருத்தமான வட்டைக் கண்டுபிடிக்க முடியவில்லை"
 
-#: thonny/base_file_browser.py:282
+#: thonny/base_file_browser.py:294
 msgid "%d items"
 msgstr "%d உருப்படிகள்"
 
-#: thonny/base_file_browser.py:721
+#: thonny/base_file_browser.py:743
 msgid "Move to Trash"
 msgstr "குப்பைக்கு நகர்த்தவும்"
 
-#: thonny/base_file_browser.py:724
+#: thonny/base_file_browser.py:746
 msgid "Delete"
 msgstr "அழி"
 
-#: thonny/base_file_browser.py:703 thonny/base_file_browser.py:854
+#: thonny/base_file_browser.py:725 thonny/base_file_browser.py:878
 msgid "New directory"
 msgstr "புதிய அடைவு"
 
-#: thonny/base_file_browser.py:727
+#: thonny/base_file_browser.py:749
 msgid "Properties"
 msgstr "பண்புகள்"
 
-#: thonny/base_file_browser.py:729
+#: thonny/base_file_browser.py:751
 msgid "Storage space"
 msgstr "சேமிப்பு கிடங்கு"
 
-#: thonny/base_file_browser.py:739
+#: thonny/base_file_browser.py:761
 msgid "Path"
 msgstr "பாதை"
 
-#: thonny/base_file_browser.py:741
+#: thonny/base_file_browser.py:763
 msgid "Directory properties"
 msgstr "அடைவு பண்புகள்"
 
-#: thonny/base_file_browser.py:743
+#: thonny/base_file_browser.py:765
 msgid "File properties"
 msgstr "கோப்பு பண்புகள்"
 
-#: thonny/base_file_browser.py:745
+#: thonny/base_file_browser.py:767
 msgid "bytes"
 msgstr "பைட்டுகள்"
 
-#: thonny/base_file_browser.py:748
+#: thonny/base_file_browser.py:770
 msgid "Size"
 msgstr "அளவு"
 
-#: thonny/base_file_browser.py:92 thonny/base_file_browser.py:759
+#: thonny/base_file_browser.py:94 thonny/base_file_browser.py:781
 msgid "Modified"
 msgstr "மாற்றப்பட்டது"
 
-#: thonny/base_file_browser.py:818
+#: thonny/base_file_browser.py:842
 msgid "Deleting %s"
 msgstr "%s ஐ நீக்குகிறது"
 
@@ -1277,55 +1263,55 @@ msgstr "%s ஐ நீக்குகிறது"
 msgid "Loading"
 msgstr "ஏற்றுகிறது"
 
-#: thonny/editors.py:382
+#: thonny/editors.py:397
 msgid "Saving"
 msgstr "சேமிப்பு"
 
-#: thonny/plugins/files.py:216
+#: thonny/plugins/files.py:219
 msgid "Upload to %s"
 msgstr "%s க்கு பதிவேற்றவும்"
 
-#: thonny/plugins/files.py:362
+#: thonny/plugins/files.py:420
 msgid "Downloading %s to %s"
 msgstr "%s இல்இருந்து %s இதற்கு பதிவிறக்குகிறது"
 
-#: thonny/plugins/files.py:275
+#: thonny/plugins/files.py:326
 msgid "Download to %s"
 msgstr "%s க்கு பதிவிறக்கவும்"
 
-#: thonny/base_file_browser.py:629
+#: thonny/base_file_browser.py:650
 msgid "Open in system file manager"
 msgstr "கணினி கோப்பு மேலாளரில் திறக்கவும்"
 
-#: thonny/base_file_browser.py:634
+#: thonny/base_file_browser.py:678
 msgid "Hide hidden files"
 msgstr "மறைக்கப்பட்ட கோப்புகளை மறைக்கவும்"
 
-#: thonny/base_file_browser.py:634
+#: thonny/base_file_browser.py:678
 msgid "Show hidden files"
 msgstr "மறைக்கப்பட்ட கோப்புகளைக் காட்டு"
 
-#: thonny/base_file_browser.py:644
+#: thonny/base_file_browser.py:661
 msgid "Open in Thonny"
 msgstr "தோனியில் திறக்கவும்"
 
-#: thonny/base_file_browser.py:670
+#: thonny/base_file_browser.py:692
 msgid "Open in system default app"
 msgstr "கணினி இயல்புநிலை பயன்பாட்டில் திறக்கவும்"
 
-#: thonny/base_file_browser.py:656 thonny/base_file_browser.py:678
+#: thonny/base_file_browser.py:673 thonny/base_file_browser.py:700
 msgid "Configure %s files"
 msgstr "%s கோப்புகளை உள்ளமைக்கவும்"
 
-#: thonny/base_file_browser.py:679
+#: thonny/base_file_browser.py:702
 msgid "What to do with a %s file when you double-click it in Thonny's file browser?"
 msgstr "தோனியின் கோப்பு உலாவியில் %s கோப்பை இருமுறை சொடுகம் செய்தால் அதை என்ன செய்வது?"
 
-#: thonny/base_file_browser.py:1225 thonny/editors.py:949 thonny/editors.py:951
+#: thonny/base_file_browser.py:1258 thonny/editors.py:988 thonny/editors.py:990
 msgid "Deleting"
 msgstr "நீக்குகிறது"
 
-#: thonny/base_file_browser.py:1232
+#: thonny/base_file_browser.py:1265
 msgid "Creating directory"
 msgstr "கோப்பகத்தை உருவாக்குகிறது"
 
@@ -1333,41 +1319,41 @@ msgstr "கோப்பகத்தை உருவாக்குகிறத�
 msgid "Loading %s"
 msgstr "%sஐ ஏற்றுகிறது"
 
-#: thonny/editors.py:380
+#: thonny/editors.py:392
 msgid "Saving to %s"
 msgstr "%s இல் சேமிக்கிறது"
 
-#: thonny/editors.py:698 thonny/editors.py:700
+#: thonny/editors.py:730 thonny/editors.py:732
 msgid "Save All files"
 msgstr "அனைத்து கோப்புகளையும் சேமிக்கவும்"
 
-#: thonny/plugins/backend_config_page.py:323 thonny/workbench.py:849
+#: thonny/plugins/backend_config_page.py:338 thonny/workbench.py:886
 msgid "Configure interpreter..."
 msgstr "மொழிபெயர்ப்பாளரை உள்ளமைக்கவும்..."
 
-#: thonny/workbench.py:1561
+#: thonny/workbench.py:1597
 msgid "Device"
 msgstr "சாதனம்"
 
-#: thonny/workdlg.py:193
+#: thonny/workdlg.py:234
 msgid "Cancelling"
 msgstr "ரத்து செய்கிறது"
 
-#: thonny/workdlg.py:220
+#: thonny/workdlg.py:270
 msgid "Starting"
 msgstr "தொடங்குகிறது"
 
-#: thonny/plugins/backend_config_page.py:234
+#: thonny/plugins/backend_config_page.py:249
 msgid "Authentication"
 msgstr "அங்கீகாரம்"
 
-#: thonny/plugins/backend_config_page.py:236
+#: thonny/plugins/backend_config_page.py:251
 msgid "Enter the passphrase of your private key for\n"
 "{}"
 msgstr "இதற்கான உங்கள் தனிப்பட்ட விசையின் கடவுச்சொற்றொடரை உள்ளிடவும்\n"
 "{}"
 
-#: thonny/plugins/backend_config_page.py:239
+#: thonny/plugins/backend_config_page.py:254
 msgid "Enter your password for\n"
 "{}"
 msgstr "இதற்கான உங்கள் கடவுச்சொல்லை உள்ளிடவும்\n"
@@ -1377,43 +1363,43 @@ msgstr "இதற்கான உங்கள் கடவுச்சொல்�
 msgid "The representation above is an approximate value of this float. The exact stored value is %s which is about %s"
 msgstr "மேலே உள்ள பிரதிநிதித்துவம் இந்த மிதவையின் தோராயமான மதிப்பாகும். சரியாக சேமிக்கப்பட்ட மதிப்பு %s ஆகும், இது சுமார் %s ஆகும்"
 
-#: thonny/plugins/pip_gui.py:631
+#: thonny/plugins/pip_gui.py:696
 msgid "Search results"
 msgstr "தேடல் முடிவுகள்"
 
-#: thonny/plugins/pip_gui.py:632
+#: thonny/plugins/pip_gui.py:697
 msgid "Searching"
 msgstr "தேடுகிறது"
 
-#: thonny/plugins/pip_gui.py:714 thonny/plugins/pip_gui.py:803
+#: thonny/plugins/pip_gui.py:801 thonny/plugins/pip_gui.py:890
 msgid "Installing '%s'"
 msgstr "'%s' ஐ நிறுவுகிறது"
 
-#: thonny/plugins/pip_gui.py:720
+#: thonny/plugins/pip_gui.py:807
 msgid "Upgrading '%s'"
 msgstr "'%s' ஐ மேம்படுத்துகிறது"
 
-#: thonny/plugins/pip_gui.py:727
+#: thonny/plugins/pip_gui.py:814
 msgid "Uninstalling '%s'"
 msgstr "'%s' ஐ நிறுவல் நீக்குகிறது"
 
-#: thonny/plugins/pip_gui.py:741
+#: thonny/plugins/pip_gui.py:828
 msgid "Installing"
 msgstr "நிறுவுதல்"
 
-#: thonny/plugins/pip_gui.py:1447
+#: thonny/plugins/pip_gui.py:1625
 msgid "Package manager is not available for this interpreter"
 msgstr "இந்த மொழிபெயர்ப்பாளருக்கு தொகுப்பு மேலாளர் கிடைக்கவில்லை"
 
-#: thonny/base_file_browser.py:1176 thonny/plugins/pip_gui.py:1461
+#: thonny/base_file_browser.py:1209 thonny/plugins/pip_gui.py:1652
 msgid "Not supported"
 msgstr "ஆதரிக்கப்படவில்லை"
 
-#: thonny/plugins/micropython/pip_gui.py:117 thonny/plugins/pip_gui.py:1466
+#: thonny/plugins/micropython/pip_gui.py:143 thonny/plugins/pip_gui.py:1657
 msgid "Not available"
 msgstr "கிடைக்கவில்லை"
 
-#: thonny/plugins/pip_gui.py:1467
+#: thonny/plugins/pip_gui.py:1658
 msgid "You need to stop your program before launching the package manager."
 msgstr "தொகுப்பு மேலாளரைத் தொடங்குவதற்கு முன் உங்கள் நிரலை நிறுத்த வேண்டும்."
 
@@ -1421,103 +1407,66 @@ msgstr "தொகுப்பு மேலாளரைத் தொடங்க�
 msgid "Open evaluated values in Object inspector"
 msgstr "பொருள் ஆய்வாளரில் மதிப்பிடப்பட்ட மதிப்புகளைத் திறக்கவும்"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:207
+#: thonny/plugins/cpython_frontend/cp_front.py:240
 msgid "Python executable"
 msgstr "பைதான் இயங்கக்கூடியது"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:230
+#: thonny/plugins/cpython_frontend/cp_front.py:265
 msgid "NB! File selection button may not work properly when selecting executables\n"
 "from a virtual environment. In this case choose the 'activate' script instead\n"
 "of the interpreter (or enter the path directly to the box)!"
 msgstr "அறிவிப்பு! மெய்நிகர் சூழலில் இருந்து இயங்கக்கூடியவற்றைத் தேர்ந்தெடுக்கும்போது கோப்புத் தேர்வு பொத்தான் சரியாக வேலை செய்யாமல் போகலாம். இந்த வழக்கில் மொழிபெயர்ப்பாளருக்குப் பதிலாக 'செயல்படுத்து' எழுத்துப்படிவத்தைத் தேர்ந்தெடுக்கவும் (அல்லது பெட்டியில் நேரடியாக பாதையை உள்ளிடவும்)!"
 
-#: thonny/plugins/cpython_ssh/__init__.py:16
+#: thonny/plugins/cpython_ssh/__init__.py:17
 msgid "Remote Python 3 (SSH)"
 msgstr "தொலை பைதான் 3 (பாதுகாப்பானஓடு)"
 
-#: thonny/plugins/micropython/mp_front.py:328
+#: thonny/plugins/micropython/mp_front.py:300
 msgid "Not connected"
 msgstr "இணைக்கப்படவில்லை"
 
-#: thonny/plugins/micropython/mp_front.py:540
-msgid "Advanced options"
-msgstr "மேம்பட்ட விருப்பங்கள்"
-
-#: thonny/plugins/micropython/mp_front.py:547
-msgid "Install or update firmware"
-msgstr "நிலைபொருளை நிறுவவும் அல்லது புதுப்பிக்கவும்"
-
-#: thonny/plugins/micropython/__init__.py:36
+#: thonny/plugins/micropython/__init__.py:35
 msgid "MicroPython (local)"
 msgstr "நுண்பைதான் (உள்ளூர்)"
 
-#: thonny/plugins/micropython/__init__.py:47
+#: thonny/plugins/micropython/__init__.py:46
 msgid "MicroPython (SSH)"
 msgstr "நுண்பைதான் (பாதுகாப்பானஓடு)"
 
-#: thonny/plugins/micropython/pip_gui.py:77
-msgid "Scope"
-msgstr "வீச்சு"
-
-#: thonny/plugins/micropython/pip_gui.py:90
-msgid "This dialog lists top-level modules from following directories:\n"
-""
-msgstr "இந்த உரையாடல் பின்வரும் கோப்பகங்களிலிருந்து உயர்மட்ட தொகுதிகளை பட்டியலிடுகிறது:"
-
-#: thonny/plugins/micropython/pip_gui.py:99
-msgid "New packages will be installed to"
-msgstr "புதிய தொகுப்புகள் நிறுவப்படும்"
-
-#: thonny/plugins/micropython/pip_gui.py:119
+#: thonny/plugins/micropython/pip_gui.py:145
 #, fuzzy
 msgid "no absolute lib directory in sys.path"
 msgstr "sys.path இல் முழுமையான lib அடைவு இல்லை"
 
-#: thonny/plugins/micropython/uf2dialog.py:39
-msgid "Version to be installed"
-msgstr "பதிப்பு நிறுவப்பட வேண்டும்"
-
-#: thonny/plugins/micropython/uf2dialog.py:47
-msgid "Target device location"
-msgstr "இலக்கு சாதன இருப்பிடம்"
-
-#: thonny/plugins/micropython/uf2dialog.py:58
-msgid "Target device model"
-msgstr "இலக்கு சாதன மாதிரி"
-
-#: thonny/plugins/micropython/uf2dialog.py:146
-msgid "Please wait"
-msgstr "தயவுசெய்து காத்திருக்கவும்"
-
-#: thonny/plugins/pip_gui.py:70
+#: thonny/plugins/pip_gui.py:86
 msgid "Search on PyPI"
 msgstr "பைபியில் தேடவும்"
 
-#: thonny/base_file_browser.py:671
+#: thonny/base_file_browser.py:693
 msgid "Open in Thonny's text editor"
 msgstr "தோனியின் திருத்தியில் திறக்கவும்"
 
-#: thonny/base_file_browser.py:334
+#: thonny/base_file_browser.py:346
 msgid "Storage space on this drive or filesystem"
 msgstr "இந்த இயக்கி அல்லது கோப்பு முறைமையில் சேமிப்பிடம்"
 
-#: thonny/base_file_browser.py:335
+#: thonny/base_file_browser.py:347
 msgid "total space"
 msgstr "மொத்த இடம்"
 
-#: thonny/base_file_browser.py:337
+#: thonny/base_file_browser.py:349
 msgid "used space"
 msgstr "பயன்படுத்திய இடம்"
 
-#: thonny/base_file_browser.py:338
+#: thonny/base_file_browser.py:350
 msgid "free space"
 msgstr "வெற்று இடம்"
 
-#: thonny/base_file_browser.py:345
+#: thonny/base_file_browser.py:357
 msgid "Storage info"
 msgstr "சேமிப்பு தகவல்"
 
-#: thonny/plugins/commenting_indenting.py:163
+#: thonny/plugins/commenting_indenting.py:162
 msgid "Replace tabs with spaces"
 msgstr "தாவல்களை இடைவெளிகளுடன் மாற்றவும்"
 
@@ -1529,72 +1478,72 @@ msgstr "தாவல் எழுத்துக்களை முன்னி�
 msgid "Indent with tab characters (not recommended for Python)"
 msgstr "தாவல் எழுத்துக்களுடன் உள்தள்ளல் (பைத்தானுக்கு பரிந்துரைக்கப்படவில்லை)"
 
-#: thonny/base_file_browser.py:90 thonny/memory.py:63
+#: thonny/base_file_browser.py:92 thonny/memory.py:63
 msgid "Name"
 msgstr "பெயர்"
 
-#: thonny/base_file_browser.py:94
+#: thonny/base_file_browser.py:96
 msgid "Size (bytes)"
 msgstr "அளவு (பைட்டுகள்)"
 
-#: thonny/base_file_browser.py:855
+#: thonny/base_file_browser.py:879
 msgid "Enter name for new directory under\n"
 "%s"
 msgstr "கீழ் புதிய கோப்பகத்திற்கான பெயரை உள்ளிடவும்\n"
 "%s"
 
-#: thonny/base_file_browser.py:878
+#: thonny/base_file_browser.py:902
 msgid "Nothing selected"
 msgstr "எதுவும் தேர்ந்தெடுக்கப்படவில்லை"
 
-#: thonny/base_file_browser.py:878
+#: thonny/base_file_browser.py:902
 msgid "Select an item and try again!"
 msgstr "ஒரு பொருளைத் தேர்ந்தெடுத்து மீண்டும் முயலவும்!"
 
-#: thonny/base_file_browser.py:1296
+#: thonny/base_file_browser.py:1329
 msgid "Open from %s"
 msgstr "%s இலிருந்து திறக்கவும்"
 
-#: thonny/base_file_browser.py:1299
+#: thonny/base_file_browser.py:1332
 msgid "Save to %s"
 msgstr "%s இல் சேமிக்கவும்"
 
-#: thonny/base_file_browser.py:1311
+#: thonny/base_file_browser.py:1351
 msgid "File name:"
 msgstr "கோப்பு பெயர்:"
 
-#: thonny/memory.py:64 thonny/plugins/object_inspector.py:539
-#: thonny/plugins/object_inspector.py:618
+#: thonny/memory.py:64 thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:617
 msgid "Value ID"
 msgstr "மதிப்பு அடையாளம்"
 
 #: thonny/memory.py:65 thonny/plugins/heap.py:23
-#: thonny/plugins/object_inspector.py:540
-#: thonny/plugins/object_inspector.py:619
+#: thonny/plugins/object_inspector.py:539
+#: thonny/plugins/object_inspector.py:618
 msgid "Value"
 msgstr "மதிப்பு"
 
-#: thonny/plugins/backend_config_page.py:257
+#: thonny/plugins/backend_config_page.py:272
 msgid "Save password"
 msgstr "கடவுச்சொல்லை சேமிக்கவும்"
 
-#: thonny/plugins/debugger.py:553
+#: thonny/plugins/debugger.py:559
 msgid "Function call at %s"
 msgstr "%s இல் செயல்பாட்டு அழைப்பு"
 
-#: thonny/plugins/debugger.py:1003
+#: thonny/plugins/debugger.py:1008
 msgid "Local variables"
 msgstr "உள்ளூர் மாறிகள்"
 
-#: thonny/plugins/debugger.py:1035
+#: thonny/plugins/debugger.py:1040
 msgid "Function"
 msgstr "செயல்பாடு"
 
-#: thonny/plugins/debugger.py:1036
+#: thonny/plugins/debugger.py:1041
 msgid "Location"
 msgstr "இடம்"
 
-#: thonny/plugins/debugger.py:1112
+#: thonny/plugins/debugger.py:1117
 msgid "If last command raised an exception then this view will show the stacktrace."
 msgstr "கடைசி கட்டளை ஒரு விதிவிலக்கை எழுப்பினால், இந்தக் காட்சி அடுக்குதடம் காண்பிக்கும்."
 
@@ -1610,15 +1559,15 @@ msgstr "தகவல்கள்"
 msgid "Attributes"
 msgstr "பண்புக்கூறுகள்"
 
-#: thonny/plugins/object_inspector.py:538
+#: thonny/plugins/object_inspector.py:537
 msgid "Index"
 msgstr "குறியீட்டு"
 
-#: thonny/plugins/object_inspector.py:616
+#: thonny/plugins/object_inspector.py:615
 msgid "Key ID"
 msgstr "முக்கிய அடையாளம்"
 
-#: thonny/plugins/object_inspector.py:617
+#: thonny/plugins/object_inspector.py:616
 msgid "Key"
 msgstr "முக்கிய"
 
@@ -1628,15 +1577,15 @@ msgid "Back to\n"
 msgstr "மீண்டும்\n"
 "%s"
 
-#: thonny/plugins/micropython/mp_front.py:464
+#: thonny/plugins/micropython/mp_front.py:440
 msgid "Port or WebREPL"
 msgstr "துறைமுகம் அல்லது வலைபடி-மதிப்பீடு-அச்சு-சுழற்சி"
 
-#: thonny/plugins/micropython/mp_front.py:605
+#: thonny/plugins/micropython/mp_front.py:586
 msgid "Password"
 msgstr "கடவுச்சொல்"
 
-#: thonny/plugins/debugger.py:961
+#: thonny/plugins/debugger.py:966
 msgid "Source code"
 msgstr "மூல குறியீடு"
 
@@ -1653,107 +1602,107 @@ msgstr "கோப்பு உரையாடல்கள் பிரதான 
 msgid "Environment variables (one KEY=VALUE per line)"
 msgstr "சுற்றுச்சூழல் மாறிகள் (ஒரு வரிக்கு ஒரு திறவுகோல் = மதிப்பு)"
 
-#: thonny/base_file_browser.py:700
+#: thonny/base_file_browser.py:722
 msgid "New file"
 msgstr "புதிய கோப்பு"
 
-#: thonny/base_file_browser.py:718
+#: thonny/base_file_browser.py:740
 msgid "Rename"
 msgstr "மறுபெயரிடவும்"
 
-#: thonny/base_file_browser.py:904
+#: thonny/base_file_browser.py:928
 msgid "Rename '%s'"
 msgstr "'%s' மறுபெயரிடவும்"
 
-#: thonny/base_file_browser.py:904
+#: thonny/base_file_browser.py:928
 msgid "Enter new name"
 msgstr "புதிய பெயரை உள்ளிடவும்"
 
-#: thonny/base_file_browser.py:992
+#: thonny/base_file_browser.py:1016
 msgid "Paste failed"
 msgstr "ஒட்ட முடியவில்லை"
 
-#: thonny/base_file_browser.py:992
+#: thonny/base_file_browser.py:1016
 msgid "There are conflicting folders"
 msgstr "முரண்பட்ட கோப்புறைகள் உள்ளன"
 
-#: thonny/base_file_browser.py:1114
+#: thonny/base_file_browser.py:1144
 msgid "File already exists"
 msgstr "கோப்பு ஏற்கனவே உள்ளது"
 
-#: thonny/base_file_browser.py:1179
+#: thonny/base_file_browser.py:1213
 msgid "If it is a text file, then you can configure it to open in Thonny by right-clicking it and selecting 'Configure ... files'."
 msgstr "இது ஒரு உரைக் கோப்பாக இருந்தால், அதை வலது சொடுக்கு செய்து 'உள்ளமை... கோப்புகள்' என்பதைத் தேர்ந்தெடுப்பதன் மூலம் தோனியில் திறக்கும்படி கட்டமைக்கலாம்."
 
-#: thonny/editors.py:35
+#: thonny/editors.py:38
 msgid "Python files"
 msgstr "பைதான் கோப்புகள்"
 
-#: thonny/editors.py:120 thonny/editors.py:193
+#: thonny/editors.py:125 thonny/editors.py:191
 msgid "<untitled>"
 msgstr "<பெயரிடப்படாத>"
 
-#: thonny/editors.py:155
+#: thonny/editors.py:152
 msgid "File is gone"
 msgstr "கோப்பு போய்விட்டது"
 
-#: thonny/editors.py:158
+#: thonny/editors.py:155
 msgid "Do you want to also close the editor?"
 msgstr "திருத்தியும் மூட வேண்டுமா?"
 
-#: thonny/editors.py:170
+#: thonny/editors.py:171
 msgid "External modification"
 msgstr "வெளிப்புற மாற்றம்"
 
-#: thonny/editors.py:173
+#: thonny/editors.py:175
 msgid "Do you want to discard current editor content and reload the file from disk?"
 msgstr "தற்போதைய திருத்தி உள்ளடக்கத்தை நிராகரித்து, வட்டில் இருந்து கோப்பை மீண்டும் ஏற்ற விரும்புகிறீர்களா?"
 
-#: thonny/editors.py:572
+#: thonny/editors.py:590
 msgid "Python files usually have .py extension."
 msgstr "பைதான் கோப்புகளில் பொதுவாக .py நீட்டிப்பு இருக்கும்."
 
-#: thonny/editors.py:574
+#: thonny/editors.py:592
 msgid "Did you mean '%s'?"
 msgstr "'%s' என்று சொன்னீர்களா?"
 
-#: thonny/editors.py:729
+#: thonny/editors.py:761
 msgid "Move / rename..."
 msgstr "நகர்த்த / மறுபெயரிடவும்..."
 
-#: thonny/editors.py:738
+#: thonny/editors.py:770
 msgid "Go to line..."
 msgstr "வரிக்குச் செல்லவும்..."
 
-#: thonny/editors.py:973
+#: thonny/editors.py:1012
 msgid "Line number"
 msgstr "வரி எண்"
 
-#: thonny/editors.py:1119
+#: thonny/editors.py:1158
 msgid "Do you want to save files before closing?"
 msgstr "கோப்புகளை மூடுவதற்கு முன் சேமிக்க விரும்புகிறீர்களா?"
 
-#: thonny/editors.py:1121
+#: thonny/editors.py:1160
 msgid "Do you want to save file before closing?"
 msgstr "மூடுவதற்கு முன் கோப்பைச் சேமிக்க விரும்புகிறீர்களா?"
 
-#: thonny/editors.py:1124
+#: thonny/editors.py:1163
 msgid "Save On Close"
 msgstr "மூடும்போது சேமிக்கவும்"
 
-#: thonny/misc_utils.py:513
+#: thonny/misc_utils.py:587
 msgid "Command not available"
 msgstr "கட்டளை கிடைக்கவில்லை"
 
-#: thonny/misc_utils.py:514
+#: thonny/misc_utils.py:588
 msgid "This command is not available if Thonny is run via Flatpak"
 msgstr "தோனியை தட்டையான தொகுப்பு வழியாக இயக்கினால் இந்த கட்டளை கிடைக்காது"
 
-#: thonny/workbench.py:686 thonny/workbench.py:784
+#: thonny/workbench.py:706 thonny/workbench.py:805
 msgid "Support Ukraine"
 msgstr "உக்ரைனை ஆதரிக்கவும்"
 
-#: thonny/plugins/backend_config_page.py:84
+#: thonny/plugins/backend_config_page.py:90
 msgid "Which kind of interpreter should Thonny use for running your code?"
 msgstr "உங்கள் குறியீட்டை இயக்குவதற்கு தோனி எந்த வகையான மொழிபெயர்ப்பாளரைப் பயன்படுத்த வேண்டும்?"
 
@@ -1781,7 +1730,7 @@ msgstr "திருத்திகளில் தாவல்விசை ம�
 msgid "Request completions with Tab-key in Shell"
 msgstr "ஓட்டில் தாவல்விசை மூலம் நிறைவுகளைக் கோரவும்"
 
-#: thonny/plugins/goto_definition.py:58
+#: thonny/editors.py:215 thonny/plugins/goto_definition.py:58
 msgid "Problem"
 msgstr "பிரச்சனை"
 
@@ -1793,86 +1742,249 @@ msgstr "வரையறையை கண்டுபிடிக்க முட�
 msgid "Clear Shell before starting new process (Run, Debug, Stop/Restart, ...)"
 msgstr "புதிய செயல்முறையைத் தொடங்கும் முன் ஓட்டில் உள்ளவற்றை அழிக்கவும் (இயக்கு, பிழைத்திருத்தம், நிறுத்து/மறுதொடக்கம், ...)"
 
-#: thonny/plugins/cpython_frontend/cp_front.py:169
+#: thonny/plugins/cpython_frontend/cp_front.py:202
 msgid "Thonny's Python"
 msgstr "தோனியின் பைதான்"
 
-#: thonny/plugins/micropython/mp_front.py:512
+#: thonny/plugins/micropython/mp_front.py:483
 msgid "Interrupt working program on connect"
 msgstr "இணைப்பில் வேலை செய்யும் திட்டத்தை குறுக்கிடவும்"
 
-#: thonny/plugins/micropython/mp_front.py:519
+#: thonny/plugins/micropython/mp_front.py:491
 msgid "Synchronize device's real time clock"
 msgstr "சாதனத்தின் நிகழ் நேர கடிகாரத்தை ஒத்திசைக்கவும்"
 
-#: thonny/plugins/micropython/mp_front.py:525
+#: thonny/plugins/micropython/mp_front.py:497
 msgid "Use local time in real time clock"
 msgstr "உள்ளூர் நேரத்தை நிகழ் நேர கடிகாரத்தில் பயன்படுத்தவும்"
 
-#: thonny/plugins/micropython/mp_front.py:531
+#: thonny/plugins/micropython/mp_front.py:503
 msgid "Restart interpreter before running a script"
 msgstr "எழுத்துப்படிவத்தை இயக்கும் முன் மொழிபெயர்ப்பாளரை மறுதொடக்கம் செய்யவும்"
 
-#: thonny/plugins/micropython/pip_gui.py:24
+#: thonny/plugins/micropython/pip_gui.py:28
 msgid "This doesn't look like MicroPython/CircuitPython package.\n"
 "Are you sure you want to install it?"
 msgstr "இது நுண்பைதான்/சுற்றமைப்புபைதான் தொகுப்பு போல் இல்லை.\n"
 "நிச்சயமாக இதை நிறுவ விரும்புகிறீர்களா?"
 
-#: thonny/base_file_browser.py:829
+#: thonny/base_file_browser.py:853
 msgid "Moving to Trash"
 msgstr "குப்பைக்கு நகர்கிறது"
 
-#: thonny/base_file_browser.py:830
+#: thonny/base_file_browser.py:854
 msgid "Move %s to Trash?"
 msgstr "%sஐ குப்பைக்கு நகர்த்தவா?"
 
-#: thonny/base_file_browser.py:837
+#: thonny/base_file_browser.py:861
 msgid "Moving %s to Trash"
 msgstr "%sஐ குப்பைக்கு நகர்த்துகிறது"
 
-#: thonny/base_file_browser.py:649
+#: thonny/base_file_browser.py:666
 msgid "Open in default external app"
 msgstr "இயல்புநிலை வெளிப்புற பயன்பாட்டில் திறக்கவும்"
 
-#: thonny/base_file_browser.py:1177
+#: thonny/base_file_browser.py:1210
 msgid "Opening remote files in external app is not supported."
 msgstr "வெளிப்புற பயன்பாட்டில் தொலை கோப்புகளைத் திறப்பது ஆதரிக்கப்படவில்லை."
 
-#: thonny/base_file_browser.py:1184
+#: thonny/base_file_browser.py:1218
 msgid "If the file needs to be opened in external app, then download it to a local directory and open it from there!"
 msgstr "வெளிப்புற பயன்பாட்டில் கோப்பைத் திறக்க வேண்டும் என்றால், அதை உள்ளூர் கோப்பகத்தில் பதிவிறக்கம் செய்து அங்கிருந்து திறக்கவும்!"
 
-#: thonny/editors.py:156
+#: thonny/editors.py:153
 msgid "Looks like '%s' was deleted or moved."
 msgstr "'%s' நீக்கப்பட்டது அல்லது நகர்த்தப்பட்டது போல் தெரிகிறது."
 
-#: thonny/editors.py:171
+#: thonny/editors.py:172
 msgid "Looks like '%s' was modified outside of the editor."
 msgstr "திருத்திக்கு வெளியே '%s' மாற்றப்பட்டது போல் தெரிகிறது."
 
-#: thonny/plugins/cpython_frontend/cp_front.py:228
+#: thonny/plugins/cpython_frontend/cp_front.py:262
 msgid "NB! Thonny only supports Python %s and later"
 msgstr "அறிவிப்பு! தோனி பைதான் %s மற்றும் அதற்குப் பிறகு மட்டுமே ஆதரிக்கிறது"
 
-#: thonny/editors.py:973
+#: thonny/editors.py:1012
 msgid "Go to line"
 msgstr "வரிக்குச் செல்லவும்"
 
-#: thonny/workbench.py:689
+#: thonny/workbench.py:709
 msgid "Support"
 msgstr "ஆதரவு"
 
-#: thonny/editors.py:386 thonny/editors.py:401
+#: thonny/editors.py:401 thonny/editors.py:416
 msgid "Could not save"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:129
+#: thonny/plugins/general_config_page.py:135
 msgid "Warning"
 msgstr ""
 
-#: thonny/plugins/general_config_page.py:130
+#: thonny/plugins/general_config_page.py:137
 msgid "If you quote the value of an environment variable, the quotes will be part of the value.\n"
 "Did you intend this?"
+msgstr ""
+
+#: thonny/workbench.py:876
+msgid "Install MicroPython"
+msgstr ""
+
+#: thonny/workbench.py:880
+msgid "Install CircuitPython"
+msgstr ""
+
+#: thonny/plugins/backend_config_page.py:210
+msgid "Make uploaded shebang scripts executable"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:91
+msgid "Make saved shebang scripts executable"
+msgstr ""
+
+#: thonny/plugins/files.py:224
+msgid "Activate virtual environment"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:120 thonny/plugins/pip_gui.py:444
+msgid "Target"
+msgstr ""
+
+#: thonny/plugins/pythontutor.py:41
+msgid "Visualize current script at Python Tutor"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:43
+msgid "Line"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:44
+msgid "Info"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:121
+msgid "No line marked with #todo found"
+msgstr ""
+
+#: thonny/plugins/todo_view.py:141
+msgid "TODO"
+msgstr ""
+
+#: thonny/plugins/circuitpython/cirpy_front.py:113
+#: thonny/plugins/micropython/mp_front.py:537
+msgid "Install or update %s"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/__init__.py:24
+msgid "Local Python 3"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_front.py:273
+msgid "You can activate an existing virtual environment also via the right-click context menu in the file navagation when selecting a virtual environment folder, or the 'pyveng.cfg' file inside."
+msgstr ""
+
+#: thonny/plugins/ev3/__init__.py:73
+msgid "Preparations (skip the VS Code part)"
+msgstr ""
+
+#: thonny/plugins/ev3/__init__.py:79
+msgid "Default password"
+msgstr ""
+
+#: thonny/running.py:392
+msgid "Information"
+msgstr ""
+
+#: thonny/running.py:393
+msgid "For debugging the program must be saved first."
+msgstr ""
+
+#: thonny/editors.py:215
+msgid "%s doesn't look like a text file"
+msgstr ""
+
+#: thonny/editors.py:221
+msgid "Problem loading file"
+msgstr ""
+
+#: thonny/editors.py:223
+msgid "This file seems to have problems with encoding.\n"
+"\n"
+"Make sure it is in UTF-8 or contains proper encoding hint."
+msgstr ""
+
+#: thonny/editors.py:297
+msgid "File is open"
+msgstr ""
+
+#: thonny/editors.py:299
+msgid "This file is already open in Thonny.\n"
+"\n"
+"If you want to save with this name,\n"
+"close the existing editor first!"
+msgstr ""
+
+#: thonny/editors.py:351
+msgid "Permission Error"
+msgstr ""
+
+#: thonny/editors.py:352
+msgid "Looks like this file or folder is not writable."
+msgstr ""
+
+#: thonny/editors.py:416
+msgid "Back-end is not ready"
+msgstr ""
+
+#: thonny/editors.py:421
+msgid "Where to save to?"
+msgstr ""
+
+#: thonny/editors.py:492
+msgid "Potential problem"
+msgstr ""
+
+#: thonny/editors.py:494
+msgid "If you name your script '%s', you won't be able to import the library module named '%s'"
+msgstr ""
+
+#: thonny/editors.py:499
+msgid "Do you still want to use this name for your script?"
+msgstr ""
+
+#: thonny/editors.py:1055
+msgid "Got permission error when trying to load\n"
+"%s"
+msgstr ""
+
+#: thonny/editors.py:1057
+msgid "Try opening it with File => Open."
+msgstr ""
+
+#: thonny/editors.py:1059
+msgid "Permission error"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:14
+msgid "Allow running unnamed programs"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:620
+msgid "License"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Warn if a user module shadows a library module"
+msgstr ""
+
+#: thonny/plugins/micropython/pip_gui.py:66
+msgid "Search micropython-lib and PyPI"
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:51
+msgid "The packages of this interpreter can be managed via your system package manager."
+msgstr ""
+
+#: thonny/plugins/cpython_frontend/cp_pip_gui.py:57
+msgid "For pip-installing a package, you need to use a virtual environment."
 msgstr ""
 
