@@ -1,13 +1,13 @@
 jedi==0.19.*
 pyserial==3.5
-pylint==3.2.*
-docutils==0.21.*
-mypy==1.11.*
-asttokens==2.4.*
-Send2Trash==1.8.*
-esptool==4.8.*
-paramiko==3.4.*
-websockets==13.0.*
+pylint==4.0.*
+docutils==0.22.*
+mypy==1.19.*
+asttokens==3.0.*
+Send2Trash==2.1.*
+esptool==5.2.*
+paramiko==4.*
+websockets==16.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
 dbus-next==0.2.*; sys_platform == "linux"
 adafruit_board_toolkit==1.1.*; sys_platform == "win32" or sys_platform == "darwin"
