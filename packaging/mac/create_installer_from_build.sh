@@ -33,6 +33,7 @@ pkgbuild \
 echo "Creating product archive"
 PRODUCT_ARCHIVE=dist/${PROD_PKG_PREFIX}-${VERSION}.pkg
 rm -f $PRODUCT_ARCHIVE
+mkdir -p dist
 productbuild \
 	--identifier "org.thonny.Thonny.product" \
 	--version $VERSION \

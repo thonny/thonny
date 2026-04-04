@@ -25,6 +25,17 @@ codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	$(find build/Thonny.app -type f -name "*python.o")
 
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tcl.Framework/Versions/8.6/Tcl
+
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tk.Framework/Versions/8.6/Tk
+
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tcl.Framework
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tk.Framework
+
 #spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
 #spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Python
 #spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/bin/python3.14
@@ -78,7 +89,7 @@ codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 #spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python
 
 
-#echo "7 - Thonny" 
+echo "7 - Thonny"
 codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app

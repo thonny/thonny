@@ -26,9 +26,21 @@
 						<key>RootRelativeBundlePath</key>
 						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Resources/Python.app</string>
 					</dict>
+					<dict>
+						<key>BundleOverwriteAction</key>
+						<string>upgrade</string>
+						<key>RootRelativeBundlePath</key>
+						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tk.framework</string>
+					</dict>
+					<dict>
+						<key>BundleOverwriteAction</key>
+						<string>upgrade</string>
+						<key>RootRelativeBundlePath</key>
+						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tcl.framework</string>
+					</dict>
 				</array>
 				<key>RootRelativeBundlePath</key>
-				<string>Thonny.app/Contents/Frameworks/Python.framework</string>
+				<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14</string>
 			</dict>
 		</array>
 		<key>RootRelativeBundlePath</key>
