@@ -59,6 +59,7 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
     shift_is_pressed,
+    get_tk_version_str,
 )
 
 logger = getLogger(__name__)
@@ -1857,7 +1858,11 @@ class Workbench(tk.Tk):
         else:
             self._scaling_factor = float(scaling)
 
-        MAC_SCALING_MODIFIER = 1.7
+        if get_tk_version_str().startswith("8."):
+            MAC_SCALING_MODIFIER = 1.7
+        else:
+            MAC_SCALING_MODIFIER = 1.0
+
         if running_on_mac_os():
             self._scaling_factor *= MAC_SCALING_MODIFIER
 
