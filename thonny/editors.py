@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import os.path
 import re
 import time
@@ -356,6 +357,15 @@ class Editor(BaseEditor):
         return True
 
     def _load_local_file(self, path, keep_undo=False):
+        
+        if os.path.isdir(path):
+            messagebox.showerror(
+                tr("Problem"),
+                tr("'%s' is a directory and cannot be opened as a file.") % path,
+                master=self,
+                )
+            return False
+        
         if os.path.exists(path):
             with open(path, "rb") as fp:
                 source = fp.read()
