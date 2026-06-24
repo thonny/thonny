@@ -379,13 +379,65 @@ class EnhancedText(TweakableText):
         self.tag_remove("sel", "1.0", tk.END)
         self.tag_add("sel", "%s.0" % first_line, "%s.end" % last_line)
 
+    @staticmethod
+    def char_group(c):
+        # group 1 = whitespaces, group 2 = symbols, group 3 = alphanum
+        group2_chars = '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
+        if c.isspace():
+            return 1
+        if c in group2_chars:
+            return 2
+        return 3
+
     def delete_word_left(self, event):
-        self.event_generate("<Meta-Delete>")
+        # Get current cursor position
+        cursor_index = self.index(tk.INSERT)
+        line_start_index = self.index(cursor_index + " linestart")
+
+        # get the current line and search from the end
+        line = self.get(line_start_index, tk.INSERT)
+        cur_index = len(line) - 1
+
+        # step at least one whitespace (including newline)
+        if len(line) == 0 or line[cur_index].isspace():
+            cur_index -= 1
+
+        last_char_group = None
+        for cur_char in reversed(line[:cur_index + 1]):
+            cur_char_group = self.char_group(cur_char)
+            if last_char_group and (last_char_group != cur_char_group):
+                break
+            last_char_group = cur_char_group
+            cur_index -= 1
+
+        start_index = self.index(line_start_index + f" + {cur_index + 1} chars")
+        self.delete(start_index, cursor_index)
         self.edit_separator()
         return "break"
 
     def delete_word_right(self, event):
-        self.event_generate("<Meta-d>")
+        # Get current cursor position
+        cursor_index = self.index(tk.INSERT)
+        line_end_index = self.index(cursor_index + " lineend")
+
+        # get the current line and search from the end
+        line = self.get(tk.INSERT, line_end_index)
+        cur_index = 0
+
+        # step at least one whitespace (including newline)
+        if len(line) == 0 or line[cur_index].isspace():
+            cur_index += 1
+
+        last_char_group = None
+        for cur_char in line[cur_index:]:
+            cur_char_group = self.char_group(cur_char)
+            if last_char_group and (last_char_group != cur_char_group):
+                break
+            last_char_group = cur_char_group
+            cur_index += 1
+
+        end_index = self.index(cursor_index + f" + {cur_index} chars")
+        self.delete(cursor_index, end_index)
         self.edit_separator()
         return "break"
 
