@@ -1841,9 +1841,12 @@ def open_path_in_system_file_manager(path):
         # -R doesn't allow showing hidden folders
         subprocess.Popen(["open", path])
     elif running_on_linux():
-        subprocess.Popen(["xdg-open", path])
+        try:
+            subprocess.Popen(["xdg-open", path])
+        except Exception as e:
+            logger.warning("Could not open path %s with xdg-open: %s", path, e)
     else:
-        assert running_on_windows()
+        logger.warning("Opening paths in system file manager is not supported on this platform.")
         subprocess.Popen(["explorer", path])
 
 
