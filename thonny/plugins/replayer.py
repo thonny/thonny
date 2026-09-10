@@ -26,7 +26,7 @@ from thonny.misc_utils import (
     uri_to_long_title,
 )
 from thonny.plugins.event_logging import EventsInputOutputFileError, format_time_range
-from thonny.shell import BaseShellText
+from thonny.shell import BaseShellText, SHELL_PROMPT
 from thonny.tktextext import TextFrame, TweakableText
 from thonny.ui_utils import (
     CustomToolbutton,
@@ -396,7 +396,7 @@ class Replayer(tk.Toplevel):
                 event = self.events[i]
                 if (
                     event["sequence"] == "TextInsert"
-                    and event["text"] == ">>> "
+                    and event["text"] in (">>> ", SHELL_PROMPT)
                     and "prompt" in event["tags"]
                 ):
                     self.events.insert(

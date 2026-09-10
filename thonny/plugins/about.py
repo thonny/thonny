@@ -21,6 +21,14 @@ class AboutDialog(CommonDialogEx):
     def __init__(self, master):
         super().__init__(master)
 
+        background = "#344652"
+        style = ttk.Style(self)
+        style.configure("About.TFrame", background=background)
+        style.configure("About.TLabel", background=background, foreground="white")
+        style.configure("About.Url.TLabel", background=background, foreground="#CFE9FF")
+        self.configure(background=background)
+        self.main_frame.configure(style="About.TFrame")
+
         self.title(tr("About Thonny"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
 
@@ -28,11 +36,15 @@ class AboutDialog(CommonDialogEx):
         heading_font = default_heading_font.copy()
         heading_font.configure(size=int(default_heading_font["size"] * 1.7), weight="bold")
         heading_label = ttk.Label(
-            self.main_frame, text="Thonny " + thonny.get_version(), font=heading_font
+            self.main_frame,
+            text="Thonny " + thonny.get_version(),
+            font=heading_font,
+            style="About.TLabel",
         )
         heading_label.grid(pady=(self.get_large_padding(), self.get_small_padding()))
 
         url_label = create_url_label(self.main_frame, "https://thonny.org", justify=tk.CENTER)
+        url_label.configure(style="About.Url.TLabel")
         url_label.grid()
 
         if sys.platform == "linux":
@@ -72,6 +84,7 @@ class AboutDialog(CommonDialogEx):
             + "\n"
             + "Tk "
             + ui_utils.get_tk_version_str(),
+            style="About.TLabel",
         )
         platform_label.grid(pady=self.get_medium_padding())
 
@@ -88,6 +101,7 @@ class AboutDialog(CommonDialogEx):
             ),
             justify=tk.CENTER,
         )
+        credits_label.configure(style="About.Url.TLabel")
         credits_label.grid()
 
         default_font = tkinter.font.nametofont("TkDefaultFont")
@@ -108,6 +122,7 @@ class AboutDialog(CommonDialogEx):
             ),
             justify=tk.CENTER,
             font=license_font,
+            style="About.TLabel",
         )
         license_label.grid(pady=self.get_medium_padding())
 
@@ -150,7 +165,7 @@ def load_plugin() -> None:
         lambda: open_url("https://github.com/thonny/thonny/issues"),
         group=60,
     )
-    get_workbench().add_command("about", "help", tr("About Thonny"), open_about, group=61)
+    get_workbench().add_command("about", "help", tr("About Taqwa"), open_about, group=61)
 
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)
