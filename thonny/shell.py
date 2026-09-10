@@ -71,6 +71,9 @@ OBJECT_INFO_END_REGEX = re.compile(OBJECT_INFO_END_REGEX_STR)
 
 logger = getLogger(__name__)
 
+# The prompt displayed for top-level Python commands in Thonny's Shell.
+SHELL_PROMPT = "Q>> "
+
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
@@ -412,7 +415,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         io_vert_spacing = 10
         io_indent = 16 + x_padding
         self.io_indent = io_indent
-        code_indent = prompt_font.measure(">>> ") + x_padding
+        code_indent = prompt_font.measure(SHELL_PROMPT) + x_padding
 
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure(
@@ -954,7 +957,7 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         if "io" in prev_line_tags or "value" in prev_line_tags:
             prompt_tags += ("after_io_or_value",)
 
-        self._insert_text_directly(">>> ", prompt_tags)
+        self._insert_text_directly(SHELL_PROMPT, prompt_tags)
         self.edit_reset()
 
     def _ensure_visible(self):
