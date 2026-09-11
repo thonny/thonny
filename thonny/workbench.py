@@ -2997,7 +2997,7 @@ class Workbench(tk.Tk):
         if self._is_portable:
             title_text = "Portable Thonny"
         else:
-            title_text = "Thonny"
+            title_text = "ThonnyCole"
 
         profile = self.get_profile()
         if profile != "default":

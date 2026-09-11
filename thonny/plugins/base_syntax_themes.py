@@ -4,7 +4,7 @@ from thonny.workbench import SyntaxThemeSettings
 
 def default_light() -> SyntaxThemeSettings:
     default_fg = "black"
-    default_bg = "#fdfdfd"
+    default_bg = "#0d942f"
     light_fg = "DarkGray"
     string_fg = "DarkGreen"
     open_string_bg = "#c3f9d3"

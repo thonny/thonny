@@ -21,7 +21,7 @@ class AboutDialog(CommonDialogEx):
     def __init__(self, master):
         super().__init__(master)
 
-        self.title(tr("About Thonny"))
+        self.title(tr("About Cole Thonny"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
 
         default_heading_font = tkinter.font.nametofont("TkHeadingFont")
@@ -150,7 +150,7 @@ def load_plugin() -> None:
         lambda: open_url("https://github.com/thonny/thonny/issues"),
         group=60,
     )
-    get_workbench().add_command("about", "help", tr("About Thonny"), open_about, group=61)
+    get_workbench().add_command("about", "help", tr("About Cole Thonny"), open_about, group=61)
 
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)
