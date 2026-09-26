@@ -386,18 +386,44 @@ class Editor(BaseEditor):
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
 
-        response = get_runner().send_command_and_wait(
-            InlineCommand(
-                "read_file", path=remote_path, description=tr("Loading %s") % remote_path
-            ),
-            dialog_title=tr("Loading"),
-        )
+        response = None
+        retries = 0
+        max_retries = 5
+
+        while response is None and retries < max_retries:
+            response = get_runner().send_command_and_wait(
+                InlineCommand(
+                    "read_file", path=remote_path, description=tr("Loading %s") % remote_path
+                ),
+                dialog_title=tr("Loading"),
+            )
+
+            if response is None:
+                retries += 1
+                if retries < max_retries:
+                    logger.warning(
+                        "Read file command returned None (pacing issue?), retrying (%d/%d)...",
+                        retries, max_retries  
+                    )
+
+                    for _ in range(3):
+                        self.update()
+                        time.sleep(0.1)
+
+        if response is None:
+            messagebox.showerror(
+                tr("Problem loading file"),
+                tr("Could not read file from the device. The serial connection may be unstable or too fast."),
+                master=self
+            )
+            self._code_view.text.set_read_only(Fasle)
+            return False
 
         if response.get("error"):
             # TODO: make it softer
             raise RuntimeError(response["error"])
 
-        content = response["content_bytes"]
+        content = response.get["content_bytes", b""]
         self._code_view.text.set_read_only(False)
         if not self._code_view.set_content_as_bytes(content):
             return False
