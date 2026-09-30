@@ -1500,7 +1500,11 @@ def remove_line_numbers(s):
 # Copied and adapted from tkinter.simpledialog of Python 3.10.2
 def _place_window(w, parent=None, width=None, height=None):
     w.wm_withdraw()  # Remain invisible while we figure out the geometry
-    w.update_idletasks()  # Actualize geometry information
+    
+    if w._windowingsystem == "aqua":
+        w.update()
+    else:
+        w.update_idletasks()  # Actualize geometry information
 
     minwidth = width or w.winfo_reqwidth()
     minheight = height or w.winfo_reqheight()
@@ -2195,13 +2199,24 @@ def show_dialog(
         dlg.set_initial_focus()
 
     if modal:
-        dlg.wait_window(dlg)
-        dlg.grab_release()
-        master.winfo_toplevel().lift()
-        master.winfo_toplevel().focus_force()
-        master.winfo_toplevel().grab_set()
-        if running_on_mac_os():
-            master.winfo_toplevel().grab_release()
+        try:
+            dlg.wait_window(dlg)
+        except TclError as e:
+            logger.warning("Dialog wait interrupted: %s", e)
+        finally:
+            try:
+                dlg.grab_release()
+            except TclError:
+                pass
+
+        try:
+            master.winfo_toplevel().lift()
+            master.winfo_toplevel().focus_force()
+            master.winfo_toplevel().grab_set()
+            if running_on_mac_os():
+                master.winfo_toplevel().grab_release()
+        except TclError:
+            pass
 
         if old_focused_widget is not None:
             try:
