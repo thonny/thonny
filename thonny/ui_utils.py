@@ -2150,6 +2150,13 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
+def call_outside_menu_callback(widget: tk.Misc, func: Callable[[], None]) -> None:
+    if running_on_mac_os():
+        widget.after(1, func)
+    else:
+        func()
+
+
 def show_dialog(
     dlg, master=None, width=None, height=None, left=None, top=None, modal=True, transient=True
 ):

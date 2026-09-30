@@ -100,6 +100,7 @@ from thonny.ui_utils import (
     set_windows_titlebar_darkness,
     shift_is_pressed,
     get_tk_version_str,
+    call_outside_menu_callback,
 )
 
 VIEW_LOCATION_CODES = ["nw", "w", "sw", "s", "se", "e", "ne"]
@@ -855,7 +856,10 @@ class Workbench(tk.Tk):
         )
 
         self.add_command("show_options", "tools", tr("Options..."), self.show_options, group=180)
-        self.createcommand("::tk::mac::ShowPreferences", self.show_options)
+        self.createcommand(
+            "::tk::mac::ShowPreferences",
+            lambda: call_outside_menu_callback(self, self.show_options),
+        )
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
         self.add_command(
@@ -1442,7 +1446,7 @@ class Workbench(tk.Tk):
                     var = self.get_variable(flag_name)
                     var.set(not var.get())
 
-                dispatch(None)
+                call_outside_menu_callback(self, lambda: dispatch(None))
 
             if _image and lookup_style_option("OPTIONS", "icons_in_menus", True):
                 menu_image = _image  # type: Optional[tk.PhotoImage]

@@ -12,7 +12,13 @@ import thonny
 from thonny import get_workbench, ui_utils
 from thonny.common import get_python_version_string
 from thonny.languages import tr
-from thonny.ui_utils import CommonDialog, CommonDialogEx, create_url_label, get_hyperlink_cursor
+from thonny.ui_utils import (
+    CommonDialog,
+    CommonDialogEx,
+    create_url_label,
+    get_hyperlink_cursor,
+    call_outside_menu_callback,
+)
 
 logger = getLogger(__name__)
 
@@ -153,4 +159,6 @@ def load_plugin() -> None:
     get_workbench().add_command("about", "help", tr("About Thonny"), open_about, group=61)
 
     # For Mac
-    get_workbench().createcommand("tkAboutDialog", open_about)
+    get_workbench().createcommand(
+        "tkAboutDialog", lambda: call_outside_menu_callback(get_workbench(), open_about)
+    )
