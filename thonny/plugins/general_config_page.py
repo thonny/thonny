@@ -71,12 +71,15 @@ class GeneralConfigurationPage(ConfigurationPage):
             width=10,
         )
 
-        add_option_combobox(
+        add_option_checkbox(
             self,
-            "general.font_scaling_mode",
-            tr("Font scaling mode"),
-            choices=["default", "extra", "automatic"],
-            width=10,
+            "general.debug_mode",
+            tr("Debug mode (provides more detailed diagnostic logs)"),
+        )
+        add_option_checkbox(
+            self,
+            "edit.auto_close_brackets",
+            tr("Automatically close brackets, parentheses and quotes"),
         )
 
         add_vertical_separator(self)
