@@ -12,9 +12,9 @@ from update_variants_common import (
 
 base_url = "https://micropython.org/download/"
 
-UNSTABLE_VERSION = r"\d{8}-v1.29.0-preview\.\d+\.[a-z0-9]{10}"
-PREV_RELEVANT_VERSION = "1.27.0"
-PREV_RELEVANT_VERSION_IN_URL = "20251209-v1.27.0"
+UNSTABLE_VERSION = r"\d{8}-v1.30.0-preview\.\d+\.[a-z0-9]{10}"
+PREV_RELEVANT_VERSION = "1.28.0"
+PREV_RELEVANT_VERSION_IN_URL = "20260406-v1.28.0"
 
 
 class IndexParser(HTMLParser):
@@ -50,7 +50,7 @@ class IndexParser(HTMLParser):
 
 all_variants = []
 
-mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c2, esp32c3, esp32c5, esp32c6, esp32p4, rp2040, rp2350, samd21, samd51, nrf51, nrf52"
+mcu_list = "esp8266, esp32, esp32s2, esp32s3, esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4, rp2040, rp2350, samd21, samd51, nrf51, nrf52"
 
 for mcu in map(str.strip, mcu_list.split(",")):
     print("Fetching mcu", mcu, end="... ")
@@ -106,168 +106,11 @@ for i, variant in enumerate(all_variants):
         add_download_link_if_exists(variant["downloads"], prev_major_url, PREV_RELEVANT_VERSION)
 
 ########################################################
-badger_variants = [
-    {
-        "_id": "pimoroni-badger2040",
-        "model": "Badger 2040",
-    },
-    {
-        "_id": "pimoroni-badger2040-with-badger-os",
-        "model": "Badger 2040",
-        "title": "Badger 2040 (with Pimoroni libraries and Badger OS)",
-        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/pimoroni-badger2040-v{version}-micropython-with-badger-os.uf2",
-    },
-    {
-        "_id": "pimoroni-badger2040w",
-        "model": "Badger 2040 W",
-    },
-    {
-        "_id": "pimoroni-badger2040w-with-examples",
-        "model": "Badger 2040 W",
-        "title": "Badger 2040 W (with Pimoroni libraries and Badger OS)",
-        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/pimoroni-badger2040w-v{version}-micropython-with-badger-os.uf2",
-    },
-]
+import json
+with open("pimoroni-variants.json", encoding="utf-8") as f:
+    pimoroni_variants = json.load(f)
 
-print(f"Updating {len(badger_variants)} Badger variants")
-
-add_defaults_and_downloads_to_variants(
-    {
-        "vendor": "Pimoroni",
-        "family": "rp2",
-        "info_url": "https://github.com/pimoroni/badger2040/releases",
-        "_download_url_pattern": "https://github.com/pimoroni/badger2040/releases/download/v{version}/{id}-v{version}-micropython.uf2",
-    },
-    ["0.0.5", "0.0.4"],
-    badger_variants,
-)
-
-for variant in badger_variants:
-    if "title" not in variant:
-        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
-
-
-all_variants += badger_variants
-
-########################################################
-pimo2350_variants = [
-    {
-        "_id": "rpi_pico2",
-        "vendor": "Raspberry Pi",
-        "model": "Pico 2",
-    },
-    {
-        "_id": "rpi_pico2b",
-        "vendor": "Raspberry Pi",
-        "model": "Pico 2 (b)",
-    },
-    {
-        "_id": "rpi_pico2_w",
-        "vendor": "Raspberry Pi",
-        "model": "Pico 2 W",
-    },
-    {
-        "_id": "pimoroni_pico_plus2",
-        "model": "Pico Plus 2",
-    },
-    {
-        "_id": "pimoroni_plasma2350",
-        "model": "Plasma 2350",
-    },
-    {
-        "_id": "pimoroni_tiny2350",
-        "model": "Tiny 2350",
-    },
-]
-
-print(f"Updating {len(pimo2350_variants)} Pimoroni 2350")
-
-add_defaults_and_downloads_to_variants(
-    {
-        "vendor": "Pimoroni",
-        "family": "rp2",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases",
-        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v{version}/{id}-v{version}-micropython.uf2",
-    },
-    ["1.26.1"],
-    pimo2350_variants,
-)
-
-for variant in pimo2350_variants:
-    if "title" not in variant:
-        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
-
-
-all_variants += pimo2350_variants
-
-########################################################
-pimoroni_variants = [
-    {
-        "_id": "pico",
-        "vendor": "Raspberry Pi",
-        "model": "Pico",
-    },
-    {
-        "_id": "pico_ppp",
-        "vendor": "Raspberry Pi",
-        "model": "Pico",
-        "title": "Pico (with Pimoroni libraries and PPP)",
-    },
-    {
-        "_id": "pico_usb",
-        "vendor": "Raspberry Pi",
-        "model": "Pico",
-        "title": "Pico (with Pimoroni libraries and USB)",
-    },
-    {
-        "_id": "picolipo_16mb",
-        "model": "Pimoroni Pico LiPo (16MB)",
-    },
-    {
-        "_id": "picolipo_4mb",
-        "model": "Pimoroni Pico LiPo (4MB)",
-    },
-    {
-        "_id": "picow",
-        "vendor": "Raspberry Pi",
-        "model": "Pico W",
-    },
-    {
-        "_id": "enviro",
-        "model": "Enviro",
-    },
-    {
-        "_id": "inky_frame",
-        "model": "Inky Frame",
-    },
-    {
-        "_id": "tiny2040_8mb",
-        "model": "Tiny 2040",
-    },
-    {
-        "_id": "tufty2040",
-        "model": "Tufty 2040",
-    },
-]
-
-print(f"Updating {len(pimoroni_variants)} Pimoroni variants")
-
-add_defaults_and_downloads_to_variants(
-    {
-        "vendor": "Pimoroni",
-        "family": "rp2",
-        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
-        "_download_url_pattern": "https://github.com/pimoroni/pimoroni-pico/releases/download/v{version}/{id}-v{version}-pimoroni-micropython.uf2",
-    },
-    ["1.27.0", "1.25.0"],
-    pimoroni_variants,
-)
-
-for variant in pimoroni_variants:
-    if "title" not in variant:
-        variant["title"] = f"{variant['model']} (with Pimoroni libraries)"
-
-
+print(f"Appending {len(pimoroni_variants)} pimoroni variants")
 all_variants += pimoroni_variants
 
 ########################################################
@@ -405,7 +248,7 @@ save_variants(
 save_variants(
     all_variants,
     ["bin"],
-    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c2", "esp32c3", "esp32c5", "esp32c6", "esp32p4"},
+    {"esp8266", "esp32", "esp32s2", "esp32s3", "esp32c2", "esp32c3", "esp32c5", "esp32c6", "esp32h2", "esp32p4"},
     "micropython-variants-esptool.json",
     latest_prerelease_regex=UNSTABLE_VERSION,
 )

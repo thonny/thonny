@@ -168,9 +168,9 @@ def save_variants(
         if variant["vendor"] == "Raspberry Pi":
             if "Pimoroni" not in variant.get("title", ""):
                 variant["popular"] = True
-            if variant["model"] == "Pico":
+            if variant["model"] == "Pico" and "Pico H" not in title:
                 variant["title"] = title.replace("Pico", "Pico / Pico H")
-            elif variant["model"] == "Pico W":
+            elif variant["model"] == "Pico W" and "Pico WH" not in title:
                 variant["title"] = title.replace("Pico W", "Pico W / Pico WH")
 
         variant_with_ordered_keys = {}
