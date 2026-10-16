@@ -2050,7 +2050,7 @@ class _ZenityDialogProvider:
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
         )
         if result.returncode == 0:
-            return result.stdout.strip()
+            return result.stdout.removesuffix("\n")
         else:
             logger.warning(
                 "Zenity returned code %r and stderr %r", result.returncode, result.stderr
