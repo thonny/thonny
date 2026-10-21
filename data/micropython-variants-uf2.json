@@ -450,10 +450,6 @@
             {
                 "version": "0.0.5",
                 "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040-v0.0.5-micropython-with-badger-os.uf2"
-            },
-            {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -467,10 +463,6 @@
             {
                 "version": "0.0.5",
                 "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040-v0.0.5-micropython.uf2"
-            },
-            {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040-v0.0.4-micropython.uf2"
             }
         ]
     },
@@ -484,10 +476,6 @@
             {
                 "version": "0.0.5",
                 "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040w-v0.0.5-micropython-with-badger-os.uf2"
-            },
-            {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython-with-badger-os.uf2"
             }
         ]
     },
@@ -501,10 +489,6 @@
             {
                 "version": "0.0.5",
                 "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.5/pimoroni-badger2040w-v0.0.5-micropython.uf2"
-            },
-            {
-                "version": "0.0.4",
-                "url": "https://github.com/pimoroni/badger2040/releases/download/v0.0.4/pimoroni-badger2040w-v0.0.4-micropython.uf2"
             }
         ]
     },
@@ -595,6 +579,32 @@
     },
     {
         "vendor": "Pimoroni",
+        "model": "Pimoroni Explorer fs",
+        "family": "rp2",
+        "title": "Explorer (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/explorer/releases",
+        "downloads": [
+            {
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/explorer/releases/download/v0.0.4/explorer-v0.0.4-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pimoroni Explorer",
+        "family": "rp2",
+        "title": "Explorer (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/explorer/releases",
+        "downloads": [
+            {
+                "version": "0.0.4",
+                "url": "https://github.com/pimoroni/explorer/releases/download/v0.0.4/explorer-v0.0.4-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
         "model": "Inky Frame with Pico 2 W",
         "family": "rp2",
         "title": "Inky Frame with Pico 2 W (with Pimoroni libraries)",
@@ -624,6 +634,316 @@
             {
                 "version": "1.27.0",
                 "url": "https://github.com/pimoroni/inky-frame/releases/download/v1.27.0/pico_w_inky-v1.27.0-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75 fs",
+        "family": "rp2",
+        "title": "Interstate 75 (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75_rp2040-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75",
+        "family": "rp2",
+        "title": "Interstate 75 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75_rp2040-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75 W (RP2350) fs",
+        "family": "rp2",
+        "title": "Interstate 75 W (RP2350) (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75w_rp2350-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75 W (RP2350)",
+        "family": "rp2",
+        "title": "Interstate 75 W (RP2350) (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75w_rp2350-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75 W fs",
+        "family": "rp2",
+        "title": "Interstate 75 W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75w_rp2040-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Interstate 75 W",
+        "family": "rp2",
+        "title": "Interstate 75 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/interstate75/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/interstate75/releases/download/v0.0.5/i75w_rp2040-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Inventor 2040 W fs",
+        "family": "rp2",
+        "title": "Inventor 2040 W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/inventor/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/inventor/releases/download/v1.26.1/inventor_2040_w-v1.26.1-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Inventor 2040 W",
+        "family": "rp2",
+        "title": "Inventor 2040 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/inventor/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/inventor/releases/download/v1.26.1/inventor_2040_w-v1.26.1-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Inventor 2350 W fs",
+        "family": "rp2",
+        "title": "Inventor 2350 W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/inventor/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/inventor/releases/download/v1.26.1/inventor_2350_w-v1.26.1-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Inventor 2350 W",
+        "family": "rp2",
+        "title": "Inventor 2350 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/inventor/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/inventor/releases/download/v1.26.1/inventor_2350_w-v1.26.1-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2040 fs",
+        "family": "rp2",
+        "title": "PGA2040 (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2040-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2040",
+        "family": "rp2",
+        "title": "PGA2040 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2040-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2350 fs",
+        "family": "rp2",
+        "title": "PGA2350 (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2350-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2350",
+        "family": "rp2",
+        "title": "PGA2350 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2350-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2350 PSRAM fs",
+        "family": "rp2",
+        "title": "PGA2350 with PSRAM (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2350-psram-v0.0.5-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PGA2350 PSRAM",
+        "family": "rp2",
+        "title": "PGA2350 with PSRAM (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pga/releases",
+        "downloads": [
+            {
+                "version": "0.0.5",
+                "url": "https://github.com/pimoroni/pga/releases/download/v0.0.5/pga2350-psram-v0.0.5-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Cosmic fs",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Cosmic (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_cosmic-v1.29.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_cosmic-v1.24.3-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Cosmic",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Cosmic (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_cosmic-v1.29.0-micropython.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_cosmic-v1.24.3-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Galactic fs",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Galactic (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_galactic-v1.29.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_galactic-v1.24.3-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Galactic",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Galactic (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_galactic-v1.29.0-micropython.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_galactic-v1.24.3-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Stellar fs",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Stellar (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_stellar-v1.29.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_stellar-v1.24.3-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pico 2 W Unicorn Stellar",
+        "family": "rp2",
+        "title": "Pico 2 W Unicorn Stellar (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/unicorn/releases",
+        "downloads": [
+            {
+                "version": "1.29.0",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.29.0/pico2_w_stellar-v1.29.0-micropython.uf2"
+            },
+            {
+                "version": "1.24.3",
+                "url": "https://github.com/pimoroni/unicorn/releases/download/v1.24.3/pico2_w_stellar-v1.24.3-micropython.uf2"
             }
         ]
     },
@@ -679,6 +999,74 @@
     },
     {
         "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo 2 fs",
+        "family": "rp2",
+        "title": "Pico LiPo 2 (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/pico-lipo/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v1.26.1/pimoroni_pico_lipo2-v1.26.1-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "0.0.3",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v0.0.3/pimoroni_pico_lipo2-v0.0.3-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo 2",
+        "family": "rp2",
+        "title": "Pico LiPo 2 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pico-lipo/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v1.26.1/pimoroni_pico_lipo2-v1.26.1-micropython.uf2"
+            },
+            {
+                "version": "0.0.3",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v0.0.3/pimoroni_pico_lipo2-v0.0.3-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo 2 XL W fs",
+        "family": "rp2",
+        "title": "Pico LiPo 2 XL W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/pico-lipo/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v1.26.1/pimoroni_pico_lipo2xl_w-v1.26.1-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "0.0.3",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v0.0.3/pimoroni_pico_lipo2xl_w-v0.0.3-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Pimoroni Pico LiPo 2 XL W",
+        "family": "rp2",
+        "title": "Pico LiPo 2 XL W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pico-lipo/releases",
+        "downloads": [
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v1.26.1/pimoroni_pico_lipo2xl_w-v1.26.1-micropython.uf2"
+            },
+            {
+                "version": "0.0.3",
+                "url": "https://github.com/pimoroni/pico-lipo/releases/download/v0.0.3/pimoroni_pico_lipo2xl_w-v0.0.3-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
         "model": "Pico Plus 2",
         "family": "rp2",
         "title": "Pico Plus 2 (with Pimoroni libraries)",
@@ -696,6 +1084,117 @@
     },
     {
         "vendor": "Pimoroni",
+        "model": "Pico Plus 2 W",
+        "family": "rp2",
+        "title": "Pico Plus 2 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
+        "downloads": [
+            {
+                "version": "1.29.0-2",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.29.0-2/pico_plus2-v1.29.0-2-pimoroni-micropython.uf2"
+            },
+            {
+                "version": "1.26.1",
+                "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v1.26.1/pimoroni_pico_plus2-v1.26.1-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PicoSystem examples",
+        "family": "rp2",
+        "title": "PicoSystem (with Pimoroni libraries and examples)",
+        "info_url": "https://github.com/pimoroni/picosystem/releases",
+        "downloads": [
+            {
+                "version": "2.0.0",
+                "url": "https://github.com/pimoroni/picosystem/releases/download/v2.0.0/pimoroni-picosystem-v2.0.0-micropython-with-examples.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/picosystem/releases/download/v1.0.0/pimoroni-picosystem-v1.0.0-micropython-with-examples.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PicoSystem",
+        "family": "rp2",
+        "title": "PicoSystem (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/picosystem/releases",
+        "downloads": [
+            {
+                "version": "2.0.0",
+                "url": "https://github.com/pimoroni/picosystem/releases/download/v2.0.0/pimoroni-picosystem-v2.0.0-micropython.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/picosystem/releases/download/v1.0.0/pimoroni-picosystem-v1.0.0-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PicoVision",
+        "family": "rp2",
+        "title": "PicoVision (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/picovision/releases",
+        "downloads": [
+            {
+                "version": "1.0.2",
+                "url": "https://github.com/pimoroni/picovision/releases/download/v1.0.2/pimoroni-picovision-v1.0.2-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "PicoVision widescreen",
+        "family": "rp2",
+        "title": "PicoVision widescreen (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/picovision/releases",
+        "downloads": [
+            {
+                "version": "1.0.2",
+                "url": "https://github.com/pimoroni/picovision/releases/download/v1.0.2/pimoroni-picovision-widescreen-v1.0.2-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma 2040 fs",
+        "family": "rp2",
+        "title": "Plasma 2040 (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_2040-v1.1.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_2040-v1.0.0-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma 2040",
+        "family": "rp2",
+        "title": "Plasma 2040 (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_2040-v1.1.0-micropython.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_2040-v1.0.0-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
         "model": "Plasma 2350",
         "family": "rp2",
         "title": "Plasma 2350 (with Pimoroni libraries)",
@@ -708,6 +1207,74 @@
             {
                 "version": "1.26.1",
                 "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v1.26.1/pimoroni_plasma2350-v1.26.1-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma 2350 W fs",
+        "family": "rp2",
+        "title": "Plasma 2350 W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_2350_w-v1.1.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_2350_w-v1.0.0-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma 2350 W",
+        "family": "rp2",
+        "title": "Plasma 2350 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_2350_w-v1.1.0-micropython.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_2350_w-v1.0.0-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma Stick 2040 W fs",
+        "family": "rp2",
+        "title": "Plasma Stick 2040 W (with Pimoroni libraries and files)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_stick_2040_w-v1.1.0-micropython-with-filesystem.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_stick_2040_w-v1.0.0-micropython-with-filesystem.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Plasma Stick 2040 W",
+        "family": "rp2",
+        "title": "Plasma Stick 2040 W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/plasma/releases",
+        "downloads": [
+            {
+                "version": "1.1.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.1.0/plasma_stick_2040_w-v1.1.0-micropython.uf2"
+            },
+            {
+                "version": "1.0.0",
+                "url": "https://github.com/pimoroni/plasma/releases/download/v1.0.0/plasma_stick_2040_w-v1.0.0-micropython.uf2"
             }
         ]
     },
@@ -776,6 +1343,74 @@
             {
                 "version": "1.26.1",
                 "url": "https://github.com/pimoroni/pimoroni-pico-rp2350/releases/download/v1.26.1/pimoroni_tiny2350-v1.26.1-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Tiny FX examples",
+        "family": "rp2",
+        "title": "Tiny FX (with Pimoroni libraries and examples)",
+        "info_url": "https://github.com/pimoroni/picofx/releases",
+        "downloads": [
+            {
+                "version": "1.1.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.1.1/tiny_fx-v1.1.1-pimoroni-micropython-with-libs-and-examples.uf2"
+            },
+            {
+                "version": "1.0.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.0.1/tiny_fx-v1.0.1-pimoroni-micropython-with-libs-and-examples.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Tiny FX",
+        "family": "rp2",
+        "title": "Tiny FX (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/picofx/releases",
+        "downloads": [
+            {
+                "version": "1.1.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.1.1/tiny_fx-v1.1.1-pimoroni-micropython.uf2"
+            },
+            {
+                "version": "1.0.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.0.1/tiny_fx-v1.0.1-pimoroni-micropython.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Tiny FX W examples",
+        "family": "rp2",
+        "title": "Tiny FX W (with Pimoroni libraries and examples)",
+        "info_url": "https://github.com/pimoroni/picofx/releases",
+        "downloads": [
+            {
+                "version": "1.1.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.1.1/tiny_fx_w-v1.1.1-pimoroni-micropython-with-libs-and-examples.uf2"
+            },
+            {
+                "version": "1.0.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.0.1/tiny_fx_w-v1.0.1-pimoroni-micropython-with-libs-and-examples.uf2"
+            }
+        ]
+    },
+    {
+        "vendor": "Pimoroni",
+        "model": "Tiny FX W",
+        "family": "rp2",
+        "title": "Tiny FX W (with Pimoroni libraries)",
+        "info_url": "https://github.com/pimoroni/picofx/releases",
+        "downloads": [
+            {
+                "version": "1.1.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.1.1/tiny_fx_w-v1.1.1-pimoroni-micropython.uf2"
+            },
+            {
+                "version": "1.0.1",
+                "url": "https://github.com/pimoroni/picofx/releases/download/1.0.1/tiny_fx_w-v1.0.1-pimoroni-micropython.uf2"
             }
         ]
     },
@@ -990,8 +1625,8 @@
         "info_url": "https://github.com/pimoroni/pimoroni-pico/releases",
         "downloads": [
             {
-                "version": "1.29.0",
-                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.29.0/pico-v1.29.0-pimoroni-micropython.uf2"
+                "version": "1.29.0-2",
+                "url": "https://github.com/pimoroni/pimoroni-pico/releases/download/v1.29.0-2/pico-v1.29.0-2-pimoroni-micropython.uf2"
             },
             {
                 "version": "1.27.0",
