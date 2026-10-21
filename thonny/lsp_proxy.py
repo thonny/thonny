@@ -15,6 +15,8 @@ from enum import Enum
 from logging import getLogger
 from queue import Queue
 
+from thonny.misc_utils import get_project_venv_interpreters
+
 if sys.version_info >= (3, 10):
     from types import NoneType, UnionType
 else:
@@ -35,7 +37,7 @@ from typing import (
     get_type_hints,
 )
 
-from thonny import get_thonny_user_dir, get_workbench, lsp_types
+from thonny import get_thonny_user_dir, get_workbench, lsp_types, get_runner
 from thonny.lsp_types import (
     DidChangeConfigurationParams,
     ErrorCodes,
@@ -107,6 +109,41 @@ class LanguageServerProxy(ABC):
 
     @abstractmethod
     def _create_server_process(self) -> subprocess.Popen[bytes]: ...
+
+    def _folder_may_contain_stubs_beyond_typeshed(self, path) -> bool:
+        for name in os.listdir(path):
+            if name not in [
+                "bin",
+                "board_definitions",
+                "circuitpython_setboard",
+                "stdlib",
+                "stubs",
+            ] and not name.endswith(".dist-info"):
+                return True
+
+        return False
+
+    def _get_python_path_for_server(self) -> Optional[str]:
+        proxy = get_runner().get_backend_proxy()
+        if proxy is None:
+            return None
+
+        if (
+            proxy.interpreter_is_cpython_compatible()
+            and proxy.has_local_interpreter()
+            and proxy.get_target_executable()
+        ):
+            return proxy.get_target_executable()
+        else:
+            project_path = get_workbench().get_local_project_path()
+            logger.info("Detected project path: %s", project_path)
+            if project_path is not None:
+                # The project may be currently in SSH mode, but still having a local dev-venv in project directory
+                venv_interpreters = get_project_venv_interpreters(project_path)
+                if venv_interpreters:
+                    return venv_interpreters[0]
+
+        return None
 
     def _handle_initialize_response(self, response: LspResponse[InitializeResult]):
         result = response.get_result_or_raise()

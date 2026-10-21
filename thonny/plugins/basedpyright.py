@@ -4,7 +4,7 @@ import subprocess
 import sys
 import typing
 from logging import getLogger
-from typing import Dict
+from typing import Dict, Optional
 
 from thonny import get_runner, get_workbench
 from thonny.common import UserError
@@ -33,26 +33,10 @@ class BasedpyrightProxy(LanguageServerProxy):
             },
         }
 
-        project_path = get_workbench().get_local_project_path()
-        logger.info("Detected project path: %s", project_path)
-        if project_path is not None:
-            base_path = project_path
-        else:
-            base_path = get_workbench().get_local_cwd()
+        python_path = self._get_python_path_for_server()
 
-        typings_path = os.path.join(base_path, "typings")
-
-        if (
-            proxy.interpreter_is_cpython_compatible()
-            and proxy.has_local_interpreter()
-            and proxy.get_target_executable()
-        ):
-            result["python"]["pythonPath"] = proxy.get_target_executable()
-        elif project_path is not None:
-            # may have a dev-venv in project directory
-            venv_interpreters = get_project_venv_interpreters(project_path)
-            if venv_interpreters:
-                result["python"]["pythonPath"] = venv_interpreters[0]
+        if python_path is not None:
+            result["python"]["pythonPath"] = python_path
 
         if not proxy.interpreter_is_cpython_compatible() or not proxy.has_local_interpreter():
             # MicroPython stdlib and frozen modules have only stubs, so the modules won't have source
@@ -70,19 +54,6 @@ class BasedpyrightProxy(LanguageServerProxy):
 
         logger.info("Using following basedpyright configuration: %r", result)
         return result
-
-    def _folder_may_contain_stubs_beyond_typeshed(self, path) -> bool:
-        for name in os.listdir(path):
-            if name not in [
-                "bin",
-                "board_definitions",
-                "circuitpython_setboard",
-                "stdlib",
-                "stubs",
-            ] and not name.endswith(".dist-info"):
-                return True
-
-        return False
 
     def _create_server_process(self) -> subprocess.Popen[bytes]:
         server_path = shutil.which("basedpyright-langserver")

@@ -417,6 +417,12 @@ class CodeActionKind(Enum):
     - Make method static
     - Move method to base class
     - ... """
+    RefactorDelete = "refactor.delete"
+    """ Used by Pyrefly
+    """
+    RefactorMove = "refactor.move"
+    """ Used by Pyrefly
+    """
     Source = "source"
     """ Base kind for source actions: `source`
 
@@ -432,6 +438,7 @@ class CodeActionKind(Enum):
     @since 3.15.0 """
 
     SourceFixAllRuff = "source.fixAll.ruff"
+    SourceFixAllPyrefly = "source.fixAll.pyrefly"
     NotebookSourceFixAllRuff = "notebook.source.fixAll.ruff"
     SourceOrganizeImportsRuff = "source.organizeImports.ruff"
     NotebookSourceOrganizeImportsRuff = "notebook.source.organizeImports.ruff"

@@ -590,12 +590,11 @@ provides-extras = ["ssh", "unix"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "isort" },
     { name = "paramiko" },
     { name = "ptyprocess" },
     { name = "pyrefly", specifier = ">=0.29.0" },
     { name = "pytest", specifier = ">=8.4.1" },
-    { name = "ruff", specifier = ">=0.12.9" },
+    { name = "ruff", specifier = ">=0.16.0" },
     { name = "syrupy" },
     { name = "ty", specifier = ">=0.0.1a19" },
     { name = "types-pyserial" },

@@ -21,5 +21,5 @@ class RuffProxy(LanguageServerProxy):
         return {"python"}
 
 
-def load_plugin():
+def _load_plugin():
     get_workbench().add_language_server_proxy_class(RuffProxy)

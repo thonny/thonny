@@ -518,7 +518,10 @@ class Workbench(tk.Tk):
                     locale=self.get_option("general.language"),
                     workspaceFolders=[
                         WorkspaceFolder(
-                            uri=pathlib.Path(self.get_local_cwd()).as_uri(), name="localws"
+                            uri=pathlib.Path(
+                                self.get_local_project_path() or self.get_local_cwd()
+                            ).as_uri(),
+                            name="localws",
                         ),
                     ],
                     trace=TraceValues.Verbose if self.in_debug_mode() else TraceValues.Messages,
@@ -1368,7 +1371,9 @@ class Workbench(tk.Tk):
         def dispatch(event=None):
             if not tester or tester():
                 denied = False
+                logger.debug(f"Before executing command {command_id}")
                 handler()
+                logger.debug(f"Before completing command {command_id}")
             else:
                 denied = True
                 logger.debug("Command '" + command_id + "' execution denied")
