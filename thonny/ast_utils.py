@@ -130,15 +130,6 @@ def get_last_child(node, skip_incorrect=True):
         else:
             return ok_node(node.lower)
 
-    elif isinstance(node, ast.ExtSlice):
-        # [:,:]
-        for dim in reversed(node.dims):
-            result = get_last_child(dim, skip_incorrect)
-            assert result is None or isinstance(result, ast.expr)
-            if result is not None:
-                return result
-        return None
-
     elif isinstance(node, ast.Subscript):
         result = get_last_child(node.slice, skip_incorrect)
         if result is not None:

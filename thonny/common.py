@@ -121,7 +121,7 @@ class Record:
     def __eq__(self, other):
         # pylint: disable=unidiomatic-typecheck
 
-        if type(self) is type(other):
+        if type(self) is not type(other):
             return False
 
         if len(self.__dict__) != len(other.__dict__):
