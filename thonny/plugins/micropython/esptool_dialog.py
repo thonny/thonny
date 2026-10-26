@@ -225,7 +225,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         target = self._target_combo.get_selected_value()
         proxy = get_runner().get_backend_proxy()
         port_was_used_in_thonny = (
-            isinstance(proxy, BareMetalMicroPythonProxy) and proxy._port == target.port.device
+            isinstance(proxy, BareMetalMicroPythonProxy) and target is not None and proxy._port == target.port.device
         )
         if port_was_used_in_thonny and self._work_needs_disconnect():
             logger.info("Disconnecting")
