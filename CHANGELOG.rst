@@ -9,7 +9,7 @@ Version history
 * Because of Tk upgrade, several issues involving Unicode characters, especially emojis, got fixed (eg. find/replace in #3925)
 * Fix Plugin manager crashes with NameError: name 'req' is not defined in Thonny 5.0.0, #3932
 * Make installing ESP MicroPython local images working again, #3903
-* Upgrade serveral dependencies
+* Upgrade several dependencies in bundles.
 
 5.0.0 (2026-04-22)
 ====================
