@@ -44,6 +44,7 @@ classifiers = [
     "Topic :: Text Editors",
 ]
 dependencies = [
+    "packaging",
     "jedi>=0.18.1",
     "setuptools>=45.2",
     "pyserial>=3.4",

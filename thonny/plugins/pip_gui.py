@@ -17,6 +17,7 @@ from tkinter.messagebox import showerror
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import thonny
+from packaging.requirements import Requirement
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import (
     DistInfo,
@@ -1174,11 +1175,11 @@ class PluginsPipDialog(PipDialog):
         try:
             conflicts = []
             for req_string in req_strings:
+                req = Requirement(req_string)
                 if (
-                    req_string.startswith("thonny")
-                    and not req_string.startswith("thonny-")
-                    and not req_string.startswith("thonny_")
-                    and thonny.get_version() not in req
+                    req.name.lower() == "thonny"
+                    and (req.marker is None or req.marker.evaluate())
+                    and not req.specifier.contains(thonny.get_version(), prereleases=True)
                 ):
                     conflicts.append(req_string)
 
