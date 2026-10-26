@@ -71,7 +71,7 @@ class CompletionsBox(EditorInfoBox):
 
         # Check if user typed an underscore,
         # if not then don't show names starting with '_'
-        """TODO: try both fuzzy and non-fuzzy completions
+        r"""TODO: try both fuzzy and non-fuzzy completions
         source = text.get("insert linestart", tk.INSERT)
         try:
             current_source_chunk = re.split(r"\W", source)[-1]
