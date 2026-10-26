@@ -508,6 +508,7 @@ def copy_to_clipboard(data):
 def _copy_to_windows_clipboard(data):
     # https://github.com/python/cpython/issues/84632#issuecomment-2379692208
     from ctypes import windll
+
     user32 = windll.user32
     user32.OpenClipboard(0)
     user32.GetClipboardData(1)
