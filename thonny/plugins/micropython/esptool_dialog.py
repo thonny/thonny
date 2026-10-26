@@ -323,7 +323,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         elif self._work_mode == "image_info":
             assert source_path
-            command = self._esptool_command + ["image_info", "--version", "2", source_path]
+            command = self._esptool_command + ["image_info", source_path]
             progress_text = "Reading image info"
 
         else:
@@ -446,7 +446,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         f = io.StringIO()
         with redirect_stdout(f):
             try:
-                esptool.main(["image_info", "--version", "2", path])
+                esptool.main(["image_info", path])
             except Exception:
                 logger.exception("Could not infer image family")
                 return None
