@@ -4,11 +4,11 @@ build-backend = "uv_build"
 
 [project]
 name = "thonny"
-version = "5.0.0"
+version = "5.0.1"
 description = "Python IDE for beginners"
 readme = "README.rst"
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 authors = [
     { name = "Aivar Annamaa and others", email = "thonny@googlegroups.com" },
 ]
