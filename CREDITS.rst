@@ -128,6 +128,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Jordan Williams
 * jose1711
 * José Carlos García
+* @K-cermak
 * Karolina Surma (@befeleme)
 * Kaspar Papli
 * Kauri Raba
@@ -150,6 +151,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Michel Coutu
 * Miro Hrončok
 * @mrexodia
+* @mzhboy
 * NathanBnm
 * Nicolas Despres
 * @omani
@@ -165,6 +167,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * @Pran-jal25
 * @r0zh
 * Radim
+* @Rajvira10
 * Ralf Michael Metzing
 * @rauferd
 * @razzius
