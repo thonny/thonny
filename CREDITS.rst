@@ -55,6 +55,7 @@ Source contributors, sponsors, advisors, translators and frequent bug-reporters
 * Alex Hall
 * Alexandre Barrozo do Amaral Villares
 * Algent Albrahimi
+* @Anrg-init
 * Anatoly Techtonik
 * Anders Pamdal
 * Andrea Ferrari
