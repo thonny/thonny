@@ -8,7 +8,7 @@ version = "5.0.0"
 description = "Python IDE for beginners"
 readme = "README.rst"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
     { name = "Aivar Annamaa and others", email = "thonny@googlegroups.com" },
 ]
@@ -73,7 +73,7 @@ dev = [
     "babel",
     "polib",
     "pyperclip",
-    "esptool",
+    "esptool>=5.0",
     "paramiko",
     "websockets",
     "ptyprocess; sys_platform == 'linux' or sys_platform == 'darwin'",

@@ -29,7 +29,7 @@ LOCAL_VARIANT_TITLE = "<local file>"
 
 class ESPFlashingDialog(BaseFlashingDialog):
     def __init__(self, master, firmware_name: str, esptool_command):
-        self._esptool_command = esptool_command
+        self._esptool_command = esptool_command + ["--verbose"]
         self._advanced_widgets = []
         self._work_mode = None
         self._proc = None
@@ -225,7 +225,9 @@ class ESPFlashingDialog(BaseFlashingDialog):
         target = self._target_combo.get_selected_value()
         proxy = get_runner().get_backend_proxy()
         port_was_used_in_thonny = (
-            isinstance(proxy, BareMetalMicroPythonProxy) and target is not None and proxy._port == target.port.device
+            isinstance(proxy, BareMetalMicroPythonProxy)
+            and target is not None
+            and proxy._port == target.port.device
         )
         if port_was_used_in_thonny and self._work_needs_disconnect():
             logger.info("Disconnecting")
@@ -282,10 +284,10 @@ class ESPFlashingDialog(BaseFlashingDialog):
                 command.append("--no-stub")
 
             command += [
-                "write_flash",
-                "--flash_mode",
+                "write-flash",
+                "--flash-mode",
                 work_options["flash_mode"],
-                "--flash_size",
+                "--flash-size",
                 work_options["flash_size"],
             ]
 
@@ -307,7 +309,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
             ]
             if work_options["no_stub"]:
                 command.append("--no-stub")
-            command.append("flash_id")
+            command.append("flash-id")
 
             progress_text = "Querying device info"
 
@@ -320,7 +322,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
 
         elif self._work_mode == "image_info":
             assert source_path
-            command = self._esptool_command + ["image_info", source_path]
+            command = self._esptool_command + ["image-info", source_path]
             progress_text = "Reading image info"
 
         else:
@@ -443,7 +445,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
         f = io.StringIO()
         with redirect_stdout(f):
             try:
-                esptool.main(["image_info", path])
+                esptool.image_info(path)
             except Exception:
                 logger.exception("Could not infer image family")
                 return None
@@ -456,7 +458,7 @@ class ESPFlashingDialog(BaseFlashingDialog):
                 logger.info("Detected family %r", family)
                 return family
 
-        logger.warning("Could not detect image family. image_info output:\n%s", out)
+        logger.warning("Could not detect image family. image-info output:\n%s", out)
         return None
 
     def _check_connection(self, port):

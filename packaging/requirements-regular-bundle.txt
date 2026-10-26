@@ -5,7 +5,7 @@ docutils==0.22.*
 mypy==1.19.*
 asttokens==3.0.*
 Send2Trash==2.1.*
-esptool==5.2.*
+esptool==5.6.*
 paramiko==4.*
 websockets==16.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
