@@ -5,7 +5,7 @@ VERSION=_VERSION_
 
 TARGET=~/apps/thonny
 PYVER="$(python3 -V 2>&1)"
-GOODVER="Python 3\.(9|10|11|12|13|14|15)\.*"
+GOODVER="Python 3\.(10|11|12|13|14|15)\.*"
 if [[ "$PYVER" =~ $GOODVER ]]; then
   PYLOC="$(command -v python3 2>&1)"
   echo "This script will install Thonny into a venv related to your existing $PYVER ($PYLOC)."
