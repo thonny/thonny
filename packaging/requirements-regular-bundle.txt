@@ -6,6 +6,8 @@ mypy==2.4.*
 asttokens==3.0.*
 Send2Trash==2.1.*
 esptool==5.6.*
+# newer cryptography doesn't have wheels for intel macs
+cryptography==48.0.1; sys_platform == "darwin" and platform_machine == "x86_64"
 paramiko==5.*
 websockets==17.*
 ptyprocess==0.7.*; sys_platform == "linux" or sys_platform == "darwin"
