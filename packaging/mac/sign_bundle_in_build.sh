@@ -23,6 +23,14 @@ find build/Thonny.app -type f -name '*stub*.a' \
 find build/Thonny.app -type f -name '*python.o' \
 	-exec codesign -s "$SIGN_ID" --force --timestamp --keychain "$CHAIN" {} +
 
+# Tcl/Tk keep configuration scripts beside their framework binaries, where
+# codesign treats them as nested code. Their upstream signatures are stored in
+# extended attributes and may be lost when copying the Python installation.
+# Sign them explicitly before signing the enclosing frameworks.
+find build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks \
+	-type f -name '*Config.sh' \
+	-exec codesign -s "$SIGN_ID" --force --timestamp --keychain "$CHAIN" {} +
+
 codesign -s "$SIGN_ID" --force --timestamp --keychain "$CHAIN" \
 	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.14/Frameworks/Tcl.framework/Versions/Current/Tcl
 
