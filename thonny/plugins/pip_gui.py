@@ -1240,7 +1240,12 @@ class PluginsPipFrame(PipFrame):
             conflicts = []
             for req_string in req_strings:
                 req = Requirement(req_string)
-                if req.name == "thonny" and thonny.get_version() not in req:
+                if (
+                    req.name.lower() == "thonny"
+                    and (req.marker is None or req.marker.evaluate())
+                    and not req.specifier.contains(thonny.get_version(), prereleases=True)
+
+                ):
                     conflicts.append(req_string)
 
             return conflicts
