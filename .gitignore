@@ -8,7 +8,6 @@
 *.opensdf
 *.tlog
 *.aps
-*.ipdb
 *.dmg
 .flatpak-builder/
 .venv
