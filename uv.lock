@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1072,7 +1072,7 @@ dev = [
     { name = "basedpyright" },
     { name = "black", specifier = ">=24.8.0" },
     { name = "dbus-next", marker = "sys_platform == 'linux'", specifier = "==0.2.*" },
-    { name = "esptool" },
+    { name = "esptool", specifier = ">=5.0" },
     { name = "isort", specifier = ">=5.13.2" },
     { name = "paramiko" },
     { name = "pip" },

@@ -80,7 +80,7 @@ dev = [
     "babel",
     "polib",
     "pyperclip",
-    "esptool",
+    "esptool>=5.0",
     "paramiko",
     "ruff",
     "websockets",
