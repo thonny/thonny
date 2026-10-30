@@ -31,8 +31,6 @@ installer_building.log
 xxl_installer_building.log
 packaging/linux/thonny-flatpak-build-dir/
 packaging/windows/freezing.log
-packaging/setuptools/*.whl
-packaging/setuptools/thonny.egg-info
 packaging/windows/ThonnyRunner35/ThonnyRunner.sdf
 packaging/windows/ThonnyRunner35/ThonnyRunner/Release/ThonnyRunner.res
 packaging/windows/ThonnyRunner35/Release/ThonnyRunner.ipdb
@@ -45,13 +43,10 @@ packaging/windows/ThonnyRunner37/Release/ThonnyRunner.ipdb
 packaging/windows/Python35
 packaging/windows/build
 packaging/windows/Python36
+packaging/windows/pythonny
 packaging/mac/out.txt
 packaging/mac/build
 packaging/mac/*.pkg
-packaging/windows/pythonny
-packaging/setuptools/*.zip
-packaging/setuptools/*.tar.gz
-packaging/setuptools/*.whl
 packaging/mac/freezing.log
 packaging/linux/repo
 thonny.egg-info
