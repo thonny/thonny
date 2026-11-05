@@ -1,11 +1,12 @@
 import dataclasses
 import os
+import pathlib
 import shutil
 import sys
 import time
 from logging import getLogger
 from tkinter import messagebox, ttk
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from packaging.utils import canonicalize_name
 
@@ -19,7 +20,7 @@ from thonny.config_ui import (
     add_vertical_separator,
 )
 from thonny.languages import tr
-from thonny.misc_utils import download_and_parse_json
+from thonny.misc_utils import download_and_parse_json, running_on_windows
 from thonny.plugins.backend_config_page import (
     BaseSshProxyConfigPage,
     TabbedBackendDetailsConfigurationPage,
@@ -33,6 +34,9 @@ from thonny.ui_utils import (
     ems_to_pixels,
     get_last_grid_row,
 )
+
+if TYPE_CHECKING:
+    from serial.tools.list_ports_common import ListPortInfo
 
 logger = getLogger(__name__)
 
@@ -325,7 +329,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         # refresh the ports cache, so that the next uncached request (in BackendRestart handler)
         # is less likely to race with the back-end process trying to open a port and getting a
         # PermissionError (has happened in Windows)
-        list_serial_ports(max_cache_age=0, skip_logging=False)
+        list_serial_ports(max_cache_age=0, skip_logging=False, include_virtual=True)
 
         # also, look up and remember the serial number of the device.
         # Luckily, the port info cache has been just refreshed, so it will be quick
@@ -409,7 +413,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def _detect_potential_ports(cls) -> List[Tuple[str, str]]:
-        all_ports = list_serial_ports()
+        all_ports = list_serial_ports(include_virtual=True)
         """
         for p in all_ports:
             print(vars(p))
@@ -583,7 +587,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
             if port == WEBREPL_PORT_VALUE:
                 return True
             else:
-                for p in list_serial_ports():
+                for p in list_serial_ports(include_virtual=True):
                     if p.device == port:
                         return True
 
@@ -945,7 +949,7 @@ class BareMetalMicroPythonConfigPage(TabbedBackendDetailsConfigurationPage):
 
     def _refresh_ports(self, first_time=False):
         old_port_desc = self._port_desc_variable.get()
-        ports = list_serial_ports(max_cache_age=0, skip_logging=True)
+        ports = list_serial_ports(max_cache_age=0, skip_logging=True, include_virtual=True)
         self._ports_by_desc = {get_serial_port_label(p): p for p in ports}
         self._port_names_by_desc = {get_serial_port_label(p): p.device for p in ports}
 
@@ -1535,7 +1539,9 @@ def get_machine_id_for_conf(backend_name: str, conf: Dict[str, Any]) -> str:
         return "<unknown>"
 
 
-def list_serial_ports(max_cache_age: float = 0.5, skip_logging: bool = False):
+def list_serial_ports(
+    max_cache_age: float = 0.5, skip_logging: bool = False, include_virtual: bool = False
+) -> List[ListPortInfo]:
     global _PORTS_CACHE, _PORTS_CACHE_TIME
 
     cur_time = time.time()
@@ -1543,10 +1549,37 @@ def list_serial_ports(max_cache_age: float = 0.5, skip_logging: bool = False):
         _PORTS_CACHE = _list_serial_ports_uncached(skip_logging=skip_logging)
         _PORTS_CACHE_TIME = cur_time
 
-    return _PORTS_CACHE
+    result = _PORTS_CACHE[:]
+    if include_virtual:
+        result.extend(list_virtual_ports())
+
+    return result
 
 
-def _list_serial_ports_uncached(skip_logging: bool = False):
+def list_virtual_ports() -> List[ListPortInfo]:
+    from serial.tools.list_ports_common import ListPortInfo
+
+    if running_on_windows():
+        return []
+
+    links_folder = os.path.expanduser("~/.minny/virtual-devices/")
+    if not os.path.isdir(links_folder):
+        return []
+
+    result = []
+
+    for name in os.listdir(links_folder):
+        link_path = pathlib.Path(links_folder, name)
+        if link_path.is_symlink():
+            resolved = str(link_path.resolve())
+            info = ListPortInfo(device=resolved, skip_link_detection=True)
+            info.description = "Virtual MicroPython device"
+            result.append(info)
+
+    return result
+
+
+def _list_serial_ports_uncached(skip_logging: bool = False) -> List[ListPortInfo]:
     if not skip_logging:
         logger.info("Listing serial ports")
     # serial.tools.list_ports.comports() can be too slow
@@ -1596,7 +1629,7 @@ def get_uart_adapter_vids_pids():
 
 
 def get_port_info(port):
-    for info in list_serial_ports():
+    for info in list_serial_ports(include_virtual=True):
         if info.device == port:
             return info
     raise RuntimeError("Port %s not found" % port)

@@ -14,7 +14,7 @@ from collections import namedtuple
 from dataclasses import dataclass
 from importlib.metadata import Distribution
 from logging import getLogger
-from typing import Any, Callable, Dict, Iterable, List, Optional  # @UnusedImport
+from typing import Any, Callable, Dict, Iterable, List, Optional, cast  # @UnusedImport
 
 logger = getLogger(__name__)
 
@@ -830,7 +830,7 @@ def export_distributions_info(dists: Iterable[Distribution], assume_pypi: bool) 
             home_page=dist.metadata.get("Home-page", None),
             project_urls=get_project_urls(dist),
             package_url=infer_package_url(dist),
-            classifiers=[value for (key, value) in dist.metadata.items() if key == "Classifier"],
+            classifiers=cast(list[str], dist.metadata.get_all("Classifier")),
             installed_location=str(dist.locate_file("")),
         )
         for dist in dists
