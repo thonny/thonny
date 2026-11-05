@@ -12,6 +12,7 @@ import site
 import sys
 from collections import namedtuple
 from dataclasses import dataclass
+from importlib.metadata import Distribution
 from logging import getLogger
 from typing import Any, Callable, Dict, Iterable, List, Optional  # @UnusedImport
 
@@ -785,7 +786,7 @@ def export_installed_distributions_info() -> List[DistInfo]:
     return export_distributions_info(distributions(), assume_pypi=True)
 
 
-def export_distributions_info(dists: Iterable, assume_pypi: bool) -> List[DistInfo]:
+def export_distributions_info(dists: Iterable[Distribution], assume_pypi: bool) -> List[DistInfo]:
     def get_project_urls(dist):
         result = {}
         for key, value in dist.metadata.items():
@@ -823,10 +824,10 @@ def export_distributions_info(dists: Iterable, assume_pypi: bool) -> List[DistIn
             name=get_dist_name(dist),
             version=dist.version,
             requires=dist.requires or [],
-            summary=dist.metadata["Summary"] or None,
-            author=dist.metadata["Author"] or None,
-            license=dist.metadata["License"] or None,
-            home_page=dist.metadata["Home-page"] or None,
+            summary=dist.metadata.get("Summary", None),
+            author=dist.metadata.get("Author", None),
+            license=dist.metadata.get("License", None),
+            home_page=dist.metadata.get("Home-page", None),
             project_urls=get_project_urls(dist),
             package_url=infer_package_url(dist),
             classifiers=[value for (key, value) in dist.metadata.items() if key == "Classifier"],
