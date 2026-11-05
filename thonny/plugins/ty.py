@@ -37,11 +37,10 @@ class TyProxy(LanguageServerProxy):
             result["ty"]["environment"]["typeshed"] = [user_stubs_path]
 
         # TODO: find out the root
-        #result["ty"]["environment"]["root"] = [user_stubs_path]
+        # result["ty"]["environment"]["root"] = [user_stubs_path]
 
         logger.info("Using following ty configuration: %r", result)
         return result
-
 
     def _create_server_process(self) -> subprocess.Popen[bytes]:
         ty_path = shutil.which("ty")

@@ -1244,7 +1244,6 @@ class PluginsPipFrame(PipFrame):
                     req.name.lower() == "thonny"
                     and (req.marker is None or req.marker.evaluate())
                     and not req.specifier.contains(thonny.get_version(), prereleases=True)
-
                 ):
                     conflicts.append(req_string)
 

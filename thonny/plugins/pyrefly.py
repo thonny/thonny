@@ -23,11 +23,13 @@ class PyreflyProxy(LanguageServerProxy):
 
         # https://pyrefly.org/en/docs/IDE/#customization
         result = {
-            "pythonPath" : "...",
-            "python": {"defaultInterpreterPath" : "..."},
-            "pyrefly": {"typeCheckingMode": "default",
-                        "diagnosticMode" : "openFilesOnly",
-                        "trace" : {"server" : "verbose"}},
+            "pythonPath": "...",
+            "python": {"defaultInterpreterPath": "..."},
+            "pyrefly": {
+                "typeCheckingMode": "default",
+                "diagnosticMode": "openFilesOnly",
+                "trace": {"server": "verbose"},
+            },
         }
 
         project_path = get_workbench().get_local_project_path()
