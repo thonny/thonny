@@ -654,6 +654,7 @@ def load_plugin() -> None:
         ".sh",
         ".bat",
         ".csv",
+        ".ini",
         "metadata",
         "record",
     ]:
