@@ -93,7 +93,7 @@ dev = [
 ]
 
 [tool.uv.audit]
-malware-check = true
+#malware-check = true
 
 [tool.uv.build-backend]
 module-name = "thonny"

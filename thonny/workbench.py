@@ -80,7 +80,7 @@ from thonny.misc_utils import (
     uri_to_legacy_filename,
 )
 from thonny.program_analysis import ProgramAnalyzer
-from thonny.running import BackendProxy, Runner
+from thonny.running import BackendProxy, Runner, construct_cd_command
 from thonny.shell import ShellView
 from thonny.ui_utils import (
     CustomToolbutton,
@@ -238,6 +238,7 @@ class Workbench(tk.Tk):
         self._init_containers()
         assert self._editor_notebook is not None
 
+        self._init_project_switcher()
         self._init_program_arguments_frame()
         self._init_regular_mode_link()  # TODO:
 
@@ -1475,7 +1476,7 @@ class Workbench(tk.Tk):
             )
 
         if include_in_toolbar:
-            toolbar_group = self._get_menu_index(menu) * 100 + group
+            toolbar_group = 1 + self._get_menu_index(menu) * 100 + group
             assert caption is not None
             assert image is not None
             toolbar_image = self.get_image(image, for_toolbar=True)
@@ -1803,6 +1804,97 @@ class Workbench(tk.Tk):
 
         return False
 
+    def _init_project_switcher(self) -> None:
+        self.set_default("file.recent_projects", [])
+        self._project_path_variable = tk.StringVar(self)
+
+        self._project_switcher = CustomToolbutton(
+            self._toolbar,
+            image=self.get_image("folder", for_toolbar=True),
+            compound=tk.LEFT,
+            command=self._post_project_menu,
+            pad=ems_to_pixels(0.25),
+        )
+        self._project_switcher.label.configure(takefocus=True)
+        self._project_switcher.label.bind("<Return>", self._post_project_menu, True)
+        self._project_switcher.label.bind("<space>", self._post_project_menu, True)
+        self._project_switcher.grid(row=0, column=0, padx=(0, ems_to_pixels(1)))
+        menu_conf = {} if running_on_mac_os() else get_style_configuration("Menu")
+        self._project_menu = tk.Menu(
+            self._toolbar, tearoff=False, postcommand=self._update_project_menu, **menu_conf
+        )
+
+        self.bind("LocalWorkingDirectoryChanged", self._update_project_switcher, True)
+        self.bind("WindowFocusIn", self._update_project_switcher, True)
+        self._update_project_switcher()
+
+    def _post_project_menu(self, event=None) -> None:
+        button = self._project_switcher
+        self._project_menu.tk_popup(
+            button.winfo_rootx(), button.winfo_rooty() + button.winfo_height()
+        )
+
+    def _update_project_switcher(self, event=None) -> None:
+        project_path = self.get_local_project_path()
+        label = (
+            (os.path.basename(project_path) or project_path)
+            if project_path
+            else ""  # tr("No project")
+        )
+
+        if len(label) > 24:
+            label = label[:23] + "…"
+        if label:
+            label = " " + label  # + "  " + get_menu_char()
+
+        self._project_switcher.configure(text=label)
+
+        if project_path is None:
+            return
+
+        recent_projects = self.get_option("file.recent_projects")
+        if not recent_projects or recent_projects[0] != project_path:
+            projects = [project_path] + [path for path in recent_projects if path != project_path]
+            self.set_option("file.recent_projects", projects[:10])
+
+    def _update_project_menu(self) -> None:
+        self._update_project_switcher()
+        self._project_path_variable.set(self.get_local_project_path() or "")
+        self._project_menu.delete(0, tk.END)
+        self._project_menu.add_command(
+            label=tr("Open Project Folder..."), command=self._choose_project_folder
+        )
+
+        projects = [
+            path for path in self.get_option("file.recent_projects") if is_local_project_dir(path)
+        ]
+        if projects:
+            self._project_menu.add_separator()
+            for path in sorted(projects):
+                self._project_menu.add_radiobutton(
+                    label=path,
+                    variable=self._project_path_variable,
+                    value=path,
+                    command=lambda path=path: self.request_local_cwd(path),
+                )
+
+    def _choose_project_folder(self) -> None:
+        folder = ui_utils.askdirectory(
+            parent=self,
+            title=tr("Open Project Folder"),
+            initialdir=self.get_local_cwd(),
+            mustexist=True,
+        )
+        if not folder:
+            return
+
+        project_path = self.get_local_project_path(folder)
+        if project_path is None:
+            messagebox.showinfo(tr("Project"), tr("No project found for this folder."), parent=self)
+            return
+
+        self.request_local_cwd(project_path)
+
     def _init_program_arguments_frame(self) -> None:
         self.set_default("view.show_program_arguments", False)
         self.set_default("run.program_arguments", "")
@@ -1950,15 +2042,38 @@ class Workbench(tk.Tk):
         else:
             return normpath_with_actual_case(os.path.expanduser("~"))
 
-    def get_local_project_path(self) -> Optional[str]:
-        dir_path = self.get_local_cwd()
-
-        while dir_path and dir_path[-1] not in ["/", "\\", ":"]:
+    def get_local_project_path(self, dir_path: Optional[str] = None) -> Optional[str]:
+        dir_path = normpath_with_actual_case(dir_path) if dir_path else self.get_local_cwd()
+        while True:
             if is_local_project_dir(dir_path):
                 return dir_path
-            dir_path = os.path.dirname(dir_path)
+            parent = os.path.dirname(dir_path)
+            if parent == dir_path:
+                return None
+            dir_path = parent
 
-        return None
+    def request_local_cwd(self, path: str, *, allow_while_busy: bool = False) -> None:
+        if not os.path.isdir(path):
+            return
+
+        path = normpath_with_actual_case(path)
+        runner = get_runner()
+        proxy = runner.get_backend_proxy()
+        if proxy and proxy.uses_local_filesystem() and proxy.get_cwd() != path:
+            if not allow_while_busy and (
+                not runner.is_waiting_toplevel_command() or get_shell().has_pending_input()
+            ):
+                messagebox.showinfo(
+                    tr("Project"),
+                    tr("Switch projects when the Shell is at an empty prompt."),
+                    parent=self,
+                )
+                return
+            if runner.is_waiting_toplevel_command():
+                get_shell().submit_magic_command(construct_cd_command(path))
+                return
+
+        self.set_local_cwd(path)
 
     def set_local_cwd(self, value: str) -> None:
         if self.get_option("run.working_directory") != value:

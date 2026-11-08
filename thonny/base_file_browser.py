@@ -231,10 +231,10 @@ class BaseFileBrowser(ttk.Frame):
         return None
 
     def request_focus_into(self, path):
-        return self.focus_into(path)
+        return self.present_dir(path)
 
-    def focus_into(self, path):
-        logger.info("focus_into %r", path)
+    def present_dir(self, path):
+        logger.info("present_dir %r", path)
         self.clear_error()
         self.invalidate_cache()
 
@@ -1479,10 +1479,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
         if not get_runner().supports_remote_directories():
             assert path == ""
-            self.focus_into(path)
+            self.present_dir(path)
         elif self.current_focus == path:
             # refreshes
-            self.focus_into(path)
+            self.present_dir(path)
         else:
             self.request_new_focus(path)
 
@@ -1490,7 +1490,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def request_new_focus(self, path):
         # Overridden in active browser
-        self.focus_into(path)
+        self.present_dir(path)
 
     def cmd_refresh_tree(self):
         if not get_runner().ready_for_remote_file_operations(show_message=True):
@@ -1645,7 +1645,7 @@ class FileDialog(CommonDialog, ABC):
             "<<TreeviewSelect>>", self.on_tree_select, True
         )
 
-        self.browser.request_focus_into(initial_dir)
+        self.browser.present_dir(initial_dir)
 
         self.name_entry.focus_set()
 

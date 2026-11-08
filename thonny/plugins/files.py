@@ -29,7 +29,7 @@ from thonny.common import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_mac_os, running_on_windows, sizeof_fmt
-from thonny.running import InlineCommandDialog, construct_cd_command
+from thonny.running import InlineCommandDialog
 from thonny.ui_utils import lookup_style_option
 
 logger = getLogger(__name__)
@@ -135,7 +135,13 @@ class FilesView(tk.PanedWindow):
 class ActiveLocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master):
         super().__init__(master)
-        get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
+        get_workbench().bind("ToplevelResponse", self.check_update_focus, True)
+        get_workbench().bind("LocalWorkingDirectoryChanged", self.check_update_focus, True)
+
+    def destroy(self):
+        get_workbench().unbind("ToplevelResponse", self.check_update_focus)
+        get_workbench().unbind("LocalWorkingDirectoryChanged", self.check_update_focus)
+        super().destroy()
 
     def is_active_browser(self):
         return True
@@ -165,7 +171,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         if path == "":
             if running_on_windows():
                 # list of drives, can't cd
-                self.focus_into(path)
+                self.present_dir(path)
                 return
             else:
                 path = "/"
@@ -173,27 +179,17 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         if not os.path.isdir(path):
             return
 
-        proxy = get_runner().get_backend_proxy()
-        if (
-            proxy
-            and proxy.uses_local_filesystem()
-            and proxy.get_cwd() != path
-            and get_runner().is_waiting_toplevel_command()
-        ):
-            get_shell().submit_magic_command(construct_cd_command(normpath_with_actual_case(path)))
-        else:
-            # it's OK, if it's already focused into this directory
-            # focus again to refresh
-            self.focus_into(path)
-            get_workbench().set_local_cwd(path)
+        path = normpath_with_actual_case(path)
+        if path == get_workbench().get_local_cwd():
+            self.present_dir(path)
 
-    def on_toplevel_response(self, event):
-        self.check_update_focus()
+        # always request the cwd, even if stored one matched, because the actual cwd may not be the same (anymore)
+        get_workbench().request_local_cwd(path, allow_while_busy=True)
 
-    def check_update_focus(self):
+    def check_update_focus(self, event=None):
         cwd = get_workbench().get_local_cwd()
         if cwd != self.current_focus and os.path.isdir(cwd):
-            self.focus_into(cwd)
+            self.present_dir(cwd)
 
     def check_add_upload_command(self):
         target_dir = self.master.get_active_remote_dir()
@@ -317,7 +313,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 logger.info(
                     "Changing focus, current_focus=%r, new_cwd=%r", self.current_focus, new_cwd
                 )
-                self.focus_into(new_cwd)
+                self.present_dir(new_cwd)
 
     def request_new_focus(self, path):
         get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
