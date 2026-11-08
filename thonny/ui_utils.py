@@ -106,6 +106,8 @@ class CustomToolbutton(tk.Frame):
         self.label.bind("<1>", self.on_click, True)
         self.bind("<Enter>", self.on_enter, True)
         self.bind("<Leave>", self.on_leave, True)
+        self.label.bind("<Enter>", self.on_enter, True)
+        self.label.bind("<Leave>", self.on_leave, True)
 
         self._on_theme_changed_binding = self.bind("<<ThemeChanged>>", self.on_theme_changed, True)
 
@@ -1064,6 +1066,10 @@ def create_tooltip(widget, text, **kw):
 
     widget.bind("<Enter>", enter, True)
     widget.bind("<Leave>", leave, True)
+    if isinstance(widget, CustomToolbutton):
+        # The icon and text belong to a child widget with its own pointer events.
+        widget.label.bind("<Enter>", enter, True)
+        widget.label.bind("<Leave>", leave, True)
 
 
 class NoteBox(CommonDialog):
