@@ -413,12 +413,11 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
 
     @classmethod
     def _detect_potential_ports(cls) -> List[Tuple[str, str]]:
-        all_ports = list_serial_ports(include_virtual=True)
-        """
-        for p in all_ports:
-            print(vars(p))
-        """
-        last_backs = {}  # get_workbench().get_option("serial.last_backend_per_vid_pid")
+        all_ports = list_serial_ports()
+        if sys.platform == "darwin":
+            # pySerial sets this HWID prefix when the port has a USB device ancestor.
+            all_ports = [p for p in all_ports if p.hwid.startswith("USB VID:PID=")]
+        all_ports.extend(list_virtual_ports())
         return [(p.device, p.description) for p in all_ports if cls._is_potential_port(p)]
 
     @classmethod
