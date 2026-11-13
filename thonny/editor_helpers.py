@@ -55,7 +55,7 @@ class EditorInfoBox(tk.Toplevel):
         self.wm_transient(get_workbench())
 
         # From IDLE
-        # TODO: self.update_idletasks()  # Need for tk8.6.8 on macOS: #40128.
+        self.update_idletasks()
         self.lift()
 
     def _update_theme(self, event=None):
