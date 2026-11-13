@@ -13,7 +13,7 @@ NB! Some original terms have explicit linebreaks in them -- these are significan
 
 When you are done with your translation, it is recommended to test it. For this you need to export thonny.po and thonny.mo files from POEditor into appropriate subfolder under `thonny/locale` under Thonny program directory. For locating the program directory of installed Thonny, select "Tools => Open Thonny program folder". If you created a new language, then you also need to register it in `thonny/languages.py`.
 
-If you noticed a problem (eg. some button is too narrow for your translation), then open an issue.
+If you noticed a problem (e.g. some button is too narrow for your translation), then open an issue.
 
 **NB! Do test your translations! If you mess up placeholders (omit one, add one too many or use wrong type), then the user will see a crash, not just a broken translation!**
 
