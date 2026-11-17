@@ -852,7 +852,7 @@ def try_get_base_executable(executable: str) -> Optional[str]:
         may_be_venv_exe = True
 
         atts = {}
-        with open(cfg_path) as fp:
+        with open(cfg_path, encoding="utf-8") as fp:
             for line in fp:
                 if "=" not in line:
                     continue
