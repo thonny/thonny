@@ -1957,8 +1957,8 @@ class InlineCommandDialog(WorkDialog):
             # it was a lazy definition
             try:
                 self._cmd = self._cmd()
-            except Exception as e:
-                logger.error("Could not produce command for backend", self._cmd)
+            except Exception:
+                logger.exception("Could not produce command for backend: %s", self._cmd)
                 self.set_action_text("Error!")
                 self.append_text("Could not produce command for backend\n")
                 self.append_text("".join(traceback.format_exc()) + "\n")
