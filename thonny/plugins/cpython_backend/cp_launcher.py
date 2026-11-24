@@ -36,9 +36,10 @@ if __name__ == "__main__":
                 file=sys.stderr,
             )
 
-    if not sys.version_info > (3, 9):
+    # Unfortunately can't import the minimum version from a thonny constant here
+    if not sys.version_info > (3, 11):
         print(
-            "This version of Thonny only supports Python 3.9 and later.\n"
+            "This version of Thonny only supports Python 3.11 and later.\n"
             + "Choose another interpreter from Tools => Options => Interpreter",
             file=sys.stderr,
         )
