@@ -86,7 +86,7 @@ class VenvDialog(SubprocessDialog):
 
         self._name_label = ttk.Label(self.main_frame, text=tr("Environment name"))
         self._name_label.grid(row=5, column=1, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
-        self._name_var = tk.StringVar(self, value="venv")
+        self._name_var = tk.StringVar(self, value=".venv")
         self._name_entry = ttk.Entry(self.main_frame, width=12, textvariable=self._name_var)
         self._name_entry.grid(row=6, column=1, sticky="w", padx=(epadx, 0), pady=(0, ipady))
 
