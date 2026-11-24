@@ -6,7 +6,6 @@ from tkinter import ttk
 from typing import List, Optional
 
 from thonny import get_workbench, ui_utils
-from thonny.backend import delete_stored_ssh_password, get_ssh_password_file_path
 from thonny.config_ui import (
     ConfigurationPage,
     add_option_checkbox,
@@ -14,6 +13,7 @@ from thonny.config_ui import (
     add_option_entry,
     add_vertical_separator,
 )
+from thonny.intermediate_backend import delete_stored_ssh_password, get_ssh_password_file_path
 from thonny.languages import tr
 from thonny.misc_utils import (
     PASSWORD_METHOD,

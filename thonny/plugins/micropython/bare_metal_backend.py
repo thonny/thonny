@@ -15,7 +15,6 @@ if thonny_container not in sys.path:
     sys.path.insert(0, thonny_container)
 
 import thonny
-from thonny.backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.common import (
     INTERNAL_ERROR_STATUS_CODE,
     PROCESS_ACK,
@@ -25,6 +24,7 @@ from thonny.common import (
     execute_system_command,
     serialize_message,
 )
+from thonny.intermediate_backend import UploadDownloadMixin, convert_newlines_if_has_shebang
 from thonny.plugins.micropython.mp_back import MicroPythonBackend
 
 RAW_PASTE_COMMAND = b"\x05A\x01"

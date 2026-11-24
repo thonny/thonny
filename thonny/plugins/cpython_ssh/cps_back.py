@@ -15,13 +15,7 @@ if thonny_container not in sys.path:
 
 
 import thonny
-from thonny.backend import (
-    BaseBackend,
-    RemoteProcess,
-    SshMixin,
-    ensure_posix_directory,
-    interrupt_local_process,
-)
+from thonny.backend import BaseBackend
 from thonny.common import (
     PROCESS_ACK,
     CommandToBackend,
@@ -31,6 +25,7 @@ from thonny.common import (
     MessageFromBackend,
     serialize_message,
 )
+from thonny.intermediate_backend import RemoteProcess, SshMixin, ensure_posix_directory
 
 logger = getLogger("thonny.plugins.cpython_ssh.cps_back")
 
