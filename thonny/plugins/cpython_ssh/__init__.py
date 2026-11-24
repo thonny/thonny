@@ -15,7 +15,7 @@ def load_plugin():
     get_workbench().add_backend(
         "SshCPython",
         SshCPythonProxy,
-        tr("Remote Python 3 (SSH)"),
+        tr("Remote Python (SSH)"),
         SshProxyConfigPage,
         sort_key="15",
     )

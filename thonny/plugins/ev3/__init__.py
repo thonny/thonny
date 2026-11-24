@@ -87,7 +87,7 @@ def load_plugin():
     add_micropython_backend(
         "EV3MicroPython",
         EV3MicroPythonProxy,
-        "MicroPython (EV3)",
+        tr("Remote MicroPython (SSH, EV3)"),
         EV3MicroPythonConfigPage,
         bare_metal=False,
         sort_key="23",

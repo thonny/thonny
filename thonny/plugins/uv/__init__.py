@@ -11,8 +11,7 @@ def load_plugin():
     get_workbench().add_backend(
         backend_name,
         LocalCPythonUvProxy,
-        # tr("Local Python 3") + " (uv)",
-        "Local uv",
+        tr("Local Python") + " + uv",
         LocalCPythonUvConfigurationPage,
         "03",
     )

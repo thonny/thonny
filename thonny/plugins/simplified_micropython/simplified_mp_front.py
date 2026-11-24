@@ -1,13 +1,14 @@
 import sys
+from time import sleep
+from typing import List, Optional, Tuple
+
 from thonny import ui_utils
 from thonny.languages import tr
 from thonny.plugins.micropython.daplink_flasher import DaplinkFlashingDialog
 from thonny.plugins.micropython.mp_front import (
-    BareMetalMicroPythonProxy,
     BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
 )
-from time import sleep
-from typing import List, Optional, Tuple
 
 
 class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):
@@ -34,6 +35,13 @@ class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):
     def get_known_usb_vids_pids(cls):
         return {(0x0D28, 0x0204)}
 
+    @classmethod
+    def _is_potential_port(cls, p):
+        product = (p.product or "").lower()
+        return (p.vid, p.pid) in cls.get_known_usb_vids_pids() or (
+            "micro:bit" in product or "calliope" in product
+        )
+
     def supports_packages(self) -> bool:
         return False
 
@@ -49,6 +57,27 @@ class SimplifiedMicroPythonProxy(BareMetalMicroPythonProxy):
 
 
 class SimplifiedMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
+    def _init_connection_page(self) -> None:
+        super()._init_connection_page()
+        ui_utils.create_url_label(
+            self.connection_page,
+            "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html",
+            text="BBC micro:bit",
+        ).grid(row=1, column=0, columnspan=2, sticky="nw")
+        ui_utils.create_url_label(
+            self.connection_page,
+            "https://github.com/calliope-mini/calliope-mini-micropython",
+            text="Calliope mini",
+        ).grid(row=2, column=0, columnspan=2, sticky="nw")
+
+    def _get_intro_text(self):
+        return (
+            tr("Make sure MicroPython has been installed on your micro:bit or Calliope mini.")
+            + "\n("
+            + tr("Don't forget that main.py only works without embedded main script.")
+            + ")"
+        )
+
     def get_flashing_dialog_kinds(self) -> List[str]:
         return [""]
 

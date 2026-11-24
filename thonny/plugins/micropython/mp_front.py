@@ -1194,9 +1194,23 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
         return {
             # Generic MicroPython Board, see http://pid.codes/org/MicroPython/
             (0x1209, 0xADDA),
+            (0x2E8A, 0x0005),  # Raspberry Pi Pico
+            (0x303A, None),  # Espressif native USB
             (0x0694, 0x0009),  # SPIKE Prime
             (0x0694, 0x0010),  # Robot Inventor
         } | get_uart_adapter_vids_pids()
+
+    @classmethod
+    def _is_potential_port(cls, p):
+        description = p.description.lower()
+        if (
+            (p.vid, p.pid) in cls.get_vids_pids_to_avoid()
+            or "circuitpython" in description
+            or "CircuitPython CDC" in (p.interface or "")
+        ):
+            return False
+
+        return super()._is_potential_port(p) or "m5stack" in description or "esp32" in description
 
     @classmethod
     def get_vids_pids_to_avoid(self):
@@ -1204,9 +1218,23 @@ class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
 
 
 class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
+    def get_flashing_dialog_kinds(self) -> List[str]:
+        return ["UF2", "esptool"]
+
+    def _open_flashing_dialog(self, kind: str) -> Optional[str]:
+        if kind == "UF2":
+            from thonny.plugins.micropython.uf2dialog import show_uf2_installer
+
+            return show_uf2_installer(self, firmware_name="MicroPython")
+        if kind == "esptool":
+            from thonny.plugins.micropython.esptool_dialog import try_launch_esptool_dialog
+
+            return try_launch_esptool_dialog(self.winfo_toplevel(), "MicroPython")
+        raise ValueError(f"Unexpected flashing dialog kind: {kind}")
+
     @property
     def allow_webrepl(self):
-        return False
+        return True
 
 
 class LocalMicroPythonProxy(MicroPythonProxy):

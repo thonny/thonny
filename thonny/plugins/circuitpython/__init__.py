@@ -7,7 +7,7 @@ def load_plugin():
     add_micropython_backend(
         "CircuitPython",
         CircuitPythonProxy,
-        tr("CircuitPython (generic)"),
+        tr("Device CircuitPython"),
         CircuitPythonConfigPage,
         sort_key="50",
     )
