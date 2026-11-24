@@ -52,6 +52,7 @@ dependencies = [
     "asttokens>=2.0",
     "Send2Trash>=1.5",
     "minny",
+    "pinny",
 ]
 
 [project.optional-dependencies]
@@ -115,6 +116,7 @@ source-include = [
 
 [tool.uv.sources]
 minny = { path = "../minny", editable = true }
+pinny = { path = "../pinny", editable = true }
 
 [tool.black]
 line-length = 100

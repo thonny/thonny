@@ -305,7 +305,7 @@ class BareMetalMicroPythonProxy(MicroPythonProxy):
         self._port = get_workbench().get_option(self.backend_name + ".port")
         self._machine_id = None  # will be set later
         if self._port == "auto":
-            # may come from pre-Thonny 5 configuration file
+            # may come from pre-Thonny 6 configuration file
             logger.warning("Ignoring 'auto' port")
             self._port = None
         self._clean_start = clean

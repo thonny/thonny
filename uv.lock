@@ -691,6 +691,20 @@ wheels = [
 ]
 
 [[package]]
+name = "pinny"
+version = "0.1.0"
+source = { editable = "../pinny" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pyrefly", specifier = ">=0.29.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "ruff" },
+]
+
+[[package]]
 name = "pip"
 version = "26.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1018,6 +1032,7 @@ dependencies = [
     { name = "minny" },
     { name = "mypy" },
     { name = "packaging" },
+    { name = "pinny" },
     { name = "pylint" },
     { name = "pyserial" },
     { name = "send2trash" },
@@ -1060,6 +1075,7 @@ requires-dist = [
     { name = "mypy", specifier = ">=0.761" },
     { name = "packaging" },
     { name = "paramiko", marker = "extra == 'ssh'", specifier = ">=2.12.0" },
+    { name = "pinny", editable = "../pinny" },
     { name = "ptyprocess", marker = "extra == 'pty'", specifier = ">=0.7.0" },
     { name = "pylint", specifier = ">=2.4" },
     { name = "pyserial", specifier = ">=3.4" },
