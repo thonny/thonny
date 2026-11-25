@@ -84,9 +84,11 @@ class ESPFlashingDialog(BaseFlashingDialog):
             else "for MicroPython on ESP8266, ESP32-S3, ESP32-C3, ESP32-C6"
         )
         x1000_target_description = "for MicroPython on ESP32 and ESP32-S2"
+        x2000_target_description = "for MicroPython on ESP32-C5 and ESP32-P4"
         address_mapping = {
             f"0x0 ({x0_target_description})": "0x0",
             f"0x1000 ({x1000_target_description})": "0x1000",
+            f"0x2000 ({x2000_target_description})": "0x2000",
         }
         address_label = ttk.Label(self.main_frame, text=f"Target address")
         address_label.grid(row=9, column=1, sticky="e", padx=(epadx, 0), pady=(epady, 0))
@@ -368,6 +370,8 @@ class ESPFlashingDialog(BaseFlashingDialog):
     def _compute_start_address(self, family: str) -> str:
         if self.firmware_name == "MicroPython" and family in ["esp32", "esp32s2"]:
             return "0x1000"
+        elif self.firmware_name == "MicroPython" and family in ["esp32c5", "esp32p4"]:
+            return "0x2000"
         else:
             return "0x0"
 
