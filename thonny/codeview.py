@@ -14,7 +14,7 @@ from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
 from thonny.languages import tr
 from thonny.tktextext import EnhancedText
-from thonny.ui_utils import EnhancedTextWithLogging, ask_string, compute_tab_stops
+from thonny.ui_utils import EnhancedTextWithLogging, ask_string, compute_tab_stops, get_beam_cursor
 
 _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
@@ -134,6 +134,10 @@ class CodeViewText(EnhancedTextWithLogging, SyntaxText):
         self.bindtags(self.bindtags() + ("CodeViewText",))
         tktextext.fixwordbreaks(tk._default_root)
 
+        # Change cursor to text cursor when hovering over the gutter
+        self.bind("<Enter>", self._set_text_cursor, True)
+        self.bind("<Leave>", self._reset_cursor, True)
+
     def on_secondary_click(self, event=None):
         super().on_secondary_click(event)
         self.mark_set("insert", "@%d,%d" % (event.x, event.y))
@@ -149,6 +153,12 @@ class CodeViewText(EnhancedTextWithLogging, SyntaxText):
             pass
 
         menu.tk_popup(event.x_root, event.y_root)
+
+    def _set_text_cursor(self, event=None):
+        self.configure(cursor=get_beam_cursor())
+
+    def _reset_cursor(self, event=None):
+        self.configure(cursor="")
 
 
 class CodeView(tktextext.EnhancedTextFrame):
